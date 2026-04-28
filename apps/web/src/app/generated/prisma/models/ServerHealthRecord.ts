@@ -225,7 +225,7 @@ export type ServerHealthRecordGroupByOutputType = {
   _max: ServerHealthRecordMaxAggregateOutputType | null
 }
 
-type GetServerHealthRecordGroupByPayload<T extends ServerHealthRecordGroupByArgs> = Prisma.PrismaPromise<
+export type GetServerHealthRecordGroupByPayload<T extends ServerHealthRecordGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ServerHealthRecordGroupByOutputType, T['by']> &
       {

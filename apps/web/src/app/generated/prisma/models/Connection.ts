@@ -231,7 +231,7 @@ export type ConnectionGroupByOutputType = {
   _max: ConnectionMaxAggregateOutputType | null
 }
 
-type GetConnectionGroupByPayload<T extends ConnectionGroupByArgs> = Prisma.PrismaPromise<
+export type GetConnectionGroupByPayload<T extends ConnectionGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ConnectionGroupByOutputType, T['by']> &
       {

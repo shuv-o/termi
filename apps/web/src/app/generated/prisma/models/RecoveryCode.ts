@@ -158,7 +158,7 @@ export type RecoveryCodeGroupByOutputType = {
   _max: RecoveryCodeMaxAggregateOutputType | null
 }
 
-type GetRecoveryCodeGroupByPayload<T extends RecoveryCodeGroupByArgs> = Prisma.PrismaPromise<
+export type GetRecoveryCodeGroupByPayload<T extends RecoveryCodeGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<RecoveryCodeGroupByOutputType, T['by']> &
       {

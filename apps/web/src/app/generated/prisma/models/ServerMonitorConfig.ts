@@ -263,7 +263,7 @@ export type ServerMonitorConfigGroupByOutputType = {
   _max: ServerMonitorConfigMaxAggregateOutputType | null
 }
 
-type GetServerMonitorConfigGroupByPayload<T extends ServerMonitorConfigGroupByArgs> = Prisma.PrismaPromise<
+export type GetServerMonitorConfigGroupByPayload<T extends ServerMonitorConfigGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ServerMonitorConfigGroupByOutputType, T['by']> &
       {

@@ -172,7 +172,7 @@ export type EmailOTPGroupByOutputType = {
   _max: EmailOTPMaxAggregateOutputType | null
 }
 
-type GetEmailOTPGroupByPayload<T extends EmailOTPGroupByArgs> = Prisma.PrismaPromise<
+export type GetEmailOTPGroupByPayload<T extends EmailOTPGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<EmailOTPGroupByOutputType, T['by']> &
       {

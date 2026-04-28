@@ -10,6 +10,7 @@ import * as jose from 'jose';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerForConnection } from '@/lib/services';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
+import { validateHost } from '@/lib/security/ssrf';
 import { createHash } from 'crypto';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 
@@ -49,6 +50,12 @@ export async function POST(request: Request) {
         const server = await getServerForConnection(serverId, user.id);
         if (!server) return notFoundResponse('Server not found');
 
+        // Re-validate host at token issuance time (defence-in-depth against tampered DB entries)
+        const hostValidation = await validateHost(server.host);
+        if (!hostValidation.valid) {
+            return errorResponse('Invalid server host configuration', 400);
+        }
+
         const key = getJWEKey();
 
         // Use JWE (encrypted JWT) — payload is AES-256-GCM encrypted
@@ -73,7 +80,7 @@ export async function POST(request: Request) {
 
         // Return gatewayUrl alongside the token so client components can read
         // it at runtime rather than relying on the NEXT_PUBLIC_ build-time bake-in.
-        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'https://gateway.termi.dp.shuvoo.com';
+        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:8080';
 
         return successResponse({ token, gatewayUrl });
     } catch (error) {

@@ -220,7 +220,7 @@ export type ServerGroupGroupByOutputType = {
   _max: ServerGroupMaxAggregateOutputType | null
 }
 
-type GetServerGroupGroupByPayload<T extends ServerGroupGroupByArgs> = Prisma.PrismaPromise<
+export type GetServerGroupGroupByPayload<T extends ServerGroupGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ServerGroupGroupByOutputType, T['by']> &
       {
