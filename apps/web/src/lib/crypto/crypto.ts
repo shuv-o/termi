@@ -248,19 +248,20 @@ export function hashToken(token: string): string {
 }
 
 /**
- * Constant-time string comparison to prevent timing attacks
+ * Constant-time string comparison to prevent timing attacks.
+ * Pads both inputs to equal length before calling timingSafeEqual,
+ * so execution time does not reveal string length.
  */
 export function secureCompare(a: string, b: string): boolean {
-    if (a.length !== b.length) {
-        return false;
-    }
-
-    let result = 0;
-    for (let i = 0; i < a.length; i++) {
-        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-    }
-
-    return result === 0;
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    const len = Math.max(bufA.length, bufB.length);
+    // Pad shorter buffer so timingSafeEqual always runs full length
+    const padA = Buffer.concat([bufA, Buffer.alloc(len - bufA.length)]);
+    const padB = Buffer.concat([bufB, Buffer.alloc(len - bufB.length)]);
+    // Evaluate length equality AFTER the constant-time comparison so length
+    // information is not leaked through early-exit timing
+    return timingSafeEqual(padA, padB) && bufA.length === bufB.length;
 }
 
 /**
