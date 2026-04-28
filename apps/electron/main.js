@@ -156,12 +156,26 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
             ? 'powershell.exe'
             : (process.env.SHELL || '/bin/zsh');
 
+    // Validate and sanitise the working directory supplied by the renderer.
+    // Fall back to the user's home directory if the path is missing, not
+    // absolute, or does not exist on disk.
+    const safeHome = os.homedir();
+    let safeCwd = safeHome;
+    if (cwd) {
+        const resolved = path.resolve(cwd);
+        if (fs.existsSync(resolved)) {
+            safeCwd = resolved;
+        } else {
+            console.warn(`[local-terminal] cwd '${cwd}' does not exist — falling back to home`);
+        }
+    }
+
     try {
         const term = nodePty.spawn(shell, [], {
             name: 'xterm-256color',
             cols: cols || 80,
             rows: rows || 24,
-            cwd: cwd || os.homedir(),
+            cwd: safeCwd,
             env: { ...process.env },
         });
 
@@ -213,6 +227,12 @@ app.whenReady().then(async () => {
     // On Windows: %APPDATA%\Termi\termi.config.json
     if (app.isPackaged) {
         const configPath = path.join(app.getPath('userData'), 'termi.config.json');
+
+        // Restrict permissions to owner-only (rw-------) regardless of umask.
+        // Applied unconditionally: if the file exists, lock it down; if it
+        // doesn't, the chmod is a no-op on a non-existent path (caught silently).
+        try { fs.chmodSync(configPath, 0o600); } catch (_) {}
+
         if (fs.existsSync(configPath)) {
             try {
                 const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
