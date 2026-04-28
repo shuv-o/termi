@@ -151,6 +151,13 @@ function createWindow() {
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
     if (!nodePty) return { success: false, error: 'node-pty not available — run: npm run setup:electron' };
 
+    if (!id || typeof id !== 'string' || id.length > 255) {
+        return { success: false, error: 'Invalid terminal ID' };
+    }
+    if (localPtys.has(id)) {
+        return { success: false, error: 'Terminal already exists with that ID' };
+    }
+
     const shell =
         process.platform === 'win32'
             ? 'powershell.exe'
@@ -228,10 +235,20 @@ app.whenReady().then(async () => {
     if (app.isPackaged) {
         const configPath = path.join(app.getPath('userData'), 'termi.config.json');
 
-        // Restrict permissions to owner-only (rw-------) regardless of umask.
-        // Applied unconditionally: if the file exists, lock it down; if it
-        // doesn't, the chmod is a no-op on a non-existent path (caught silently).
-        try { fs.chmodSync(configPath, 0o600); } catch (_) {}
+        // Restrict config file to owner-only access (defence-in-depth for secrets).
+        // Unix/macOS: chmod 0600 (rw-------).
+        // Windows: use icacls to remove inheritance and grant only the current user full control.
+        if (process.platform !== 'win32') {
+            try { fs.chmodSync(configPath, 0o600); } catch (e) {
+                if (fs.existsSync(configPath)) console.warn('[config] Failed to set permissions:', e.message);
+            }
+        } else {
+            try {
+                const { execSync } = require('child_process');
+                const username = os.userInfo().username;
+                execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, { stdio: 'ignore' });
+            } catch (_) {}
+        }
 
         if (fs.existsSync(configPath)) {
             try {
