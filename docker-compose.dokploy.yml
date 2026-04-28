@@ -14,9 +14,6 @@ services:
         ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://example.com}
         NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-        SESSION_SECRET: ${SESSION_SECRET:-build-time-placeholder-not-used-in-runtime-x}
-        ENCRYPTION_KEY: ${ENCRYPTION_KEY:-build-time-placeholder-not-used-in-runtime-x}
-        GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:-build-time-placeholder-not-used-in-runtime}
     container_name: termi-web
     restart: unless-stopped
     environment:
@@ -24,11 +21,11 @@ services:
       DATABASE_URL: ${DATABASE_URL}
 
       # Session & Encryption
-      SESSION_SECRET: ${SESSION_SECRET:-change-this-to-a-long-random-string}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-generate-with-openssl-rand-base64-32}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set (openssl rand -base64 32)}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set (openssl rand -base64 32)}
 
       # Gateway
-      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:-gateway-secret-change-this}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
       NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL:-wss://gateway.example.com}
 
       # App URL
@@ -90,7 +87,7 @@ services:
       # Gateway Settings
       GATEWAY_PORT: 8080
       GATEWAY_HOST: 0.0.0.0
-      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:-gateway-secret-change-this}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
 
       # Guacd Connection
       GUACD_HOST: guacd

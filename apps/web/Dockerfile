@@ -41,32 +41,27 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate --schema=apps/web/prisma/schema.prisma
 
-# Build-time arguments — passed via docker-compose build.args
+# Build-time arguments — public vars baked into JS bundle must be set here
 ARG NEXT_PUBLIC_GATEWAY_URL
 ARG NEXT_PUBLIC_APP_URL
-ARG SESSION_SECRET=build-time-placeholder-not-used-in-runtime-x
-ARG ENCRYPTION_KEY=build-time-placeholder-not-used-in-runtime-x
-ARG GATEWAY_JWT_SECRET=build-time-placeholder-not-used-in-runtime
 ARG VAPID_PUBLIC_KEY=your-vapid-public-key
 ARG VAPID_PRIVATE_KEY=your-vapid-private-key
 ARG VAPID_SUBJECT=mailto:admin@example.com
 
-# Build application
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-# NEXT_PUBLIC_* vars are baked into the JS bundle — must be set at build time.
 ENV NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
-# Server-side secrets required by env validation at build time only.
-# Real values are injected at runtime via docker-compose environment.
-ENV SESSION_SECRET=${SESSION_SECRET}
-ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
-ENV GATEWAY_JWT_SECRET=${GATEWAY_JWT_SECRET}
-
-# VAPID keys are used at build time to generate the service worker with the public key baked in, and also included in the server bundle for runtime use.
 ENV VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
 ENV VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
 ENV VAPID_SUBJECT=${VAPID_SUBJECT}
+
+# Build-time placeholder values for secrets — real values injected at runtime only.
+# These constants keep Next.js env validation happy during `npm run build` without
+# ever leaking production secrets into the image layer history.
+ENV SESSION_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
+ENV ENCRYPTION_KEY=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
+ENV GATEWAY_JWT_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxx
 
 RUN npm run build --workspace=apps/web
 
