@@ -57,6 +57,11 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             throw new Error('Invalid token payload');
         }
 
+        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc'] as const;
+        if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol as typeof VALID_PROTOCOLS[number])) {
+            throw new Error('Invalid token protocol');
+        }
+
         return payload as unknown as TokenPayload;
     } catch (error) {
         if (error instanceof jose.errors.JWTExpired) {
