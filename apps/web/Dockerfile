@@ -45,7 +45,6 @@ RUN npx prisma generate --schema=apps/web/prisma/schema.prisma
 ARG NEXT_PUBLIC_GATEWAY_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG VAPID_PUBLIC_KEY=your-vapid-public-key
-ARG VAPID_PRIVATE_KEY=your-vapid-private-key
 ARG VAPID_SUBJECT=mailto:admin@example.com
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -53,7 +52,6 @@ ENV NODE_ENV=production
 ENV NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
-ENV VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
 ENV VAPID_SUBJECT=${VAPID_SUBJECT}
 
 # Build-time placeholder values for secrets — real values injected at runtime only.
@@ -61,7 +59,8 @@ ENV VAPID_SUBJECT=${VAPID_SUBJECT}
 # ever leaking production secrets into the image layer history.
 ENV SESSION_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
 ENV ENCRYPTION_KEY=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
-ENV GATEWAY_JWT_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxx
+ENV GATEWAY_JWT_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
+ENV VAPID_PRIVATE_KEY=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
 
 RUN npm run build --workspace=apps/web
 
