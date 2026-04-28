@@ -15,7 +15,11 @@ import { SCPHandler } from './handlers/scp.js';
 import { GuacamoleHandler } from './handlers/guacamole.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 
-dotenv.config();
+// When running as a workspace script (CWD = apps/gateway), resolve up two levels
+// to the monorepo root .env.  When spawned by Electron (CWD = project root or
+// resources dir), the explicit path won't match but the CWD-based fallback will.
+dotenv.config({ path: '../../.env' });
+dotenv.config(); // fallback: CWD-based (covers Electron dev where CWD = project root)
 
 // ============================================================================
 // CONFIGURATION

@@ -1,8 +1,32 @@
-const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const http = require('http');
 const os = require('os');
+const fs = require('fs');
+
+// ── Environment loading ───────────────────────────────────────────────────────
+
+// Minimal .env parser — avoids a dotenv dependency in the main process.
+function parseEnvFile(content) {
+    for (const raw of content.split('\n')) {
+        const line = raw.trim();
+        if (!line || line.startsWith('#')) continue;
+        const eq = line.indexOf('=');
+        if (eq < 0) continue;
+        const key = line.slice(0, eq).trim();
+        let val = line.slice(eq + 1).trim();
+        if (/^["'][\s\S]*["']$/.test(val)) val = val.slice(1, -1);
+        // Don't override vars already set in the OS environment
+        if (key && !(key in process.env)) process.env[key] = val;
+    }
+}
+
+// Dev: load the monorepo root .env (apps/electron/main.js is two levels below root)
+const rootEnvPath = path.join(__dirname, '../../.env');
+if (fs.existsSync(rootEnvPath)) {
+    try { parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8')); } catch (_) {}
+}
 
 let guacdProcess, gatewayProcess, nextProcess, win;
 
@@ -14,6 +38,9 @@ try {
     nodePty = require('node-pty');
 } catch (e) {
     console.warn('[main] node-pty unavailable — local terminal disabled:', e.message);
+    if (!app.isPackaged) {
+        console.warn('[main] Run "npm run setup:electron" to rebuild node-pty for this Electron version.');
+    }
 }
 
 // tabId → IPty instance
@@ -181,6 +208,42 @@ ipcMain.on('local-terminal:kill', (event, id) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 app.whenReady().then(async () => {
+    // Packaged builds: load termi.config.json from the OS user-data directory.
+    // On macOS: ~/Library/Application Support/Termi/termi.config.json
+    // On Windows: %APPDATA%\Termi\termi.config.json
+    if (app.isPackaged) {
+        const configPath = path.join(app.getPath('userData'), 'termi.config.json');
+        if (fs.existsSync(configPath)) {
+            try {
+                const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                for (const [k, v] of Object.entries(cfg)) {
+                    if (typeof v === 'string' && !(k in process.env)) process.env[k] = v;
+                }
+            } catch (e) {
+                console.error('[config] Failed to parse termi.config.json:', e.message);
+            }
+        }
+
+        const required = ['DATABASE_URL', 'SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
+        const missing = required.filter(k => !process.env[k]);
+        if (missing.length > 0) {
+            dialog.showErrorBox(
+                'Termi — Configuration Required',
+                `Missing required configuration: ${missing.join(', ')}\n\n` +
+                `Create the file:\n${configPath}\n\n` +
+                `with the following JSON:\n` +
+                `{\n` +
+                `  "DATABASE_URL": "postgresql://user:pass@host:5432/termi",\n` +
+                `  "SESSION_SECRET": "<openssl rand -base64 32>",\n` +
+                `  "ENCRYPTION_KEY": "<openssl rand -base64 32>",\n` +
+                `  "GATEWAY_JWT_SECRET": "<openssl rand -base64 32>"\n` +
+                `}`
+            );
+            app.quit();
+            return;
+        }
+    }
+
     const paths = getPaths();
     startGuacd();
     startGateway(paths);

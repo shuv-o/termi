@@ -551,6 +551,7 @@ export default function SessionsWorkspace() {
                                                     <SSHTerminal
                                                         serverId={session.serverId}
                                                         connectionToken={session.token}
+                                                        gatewayUrl={session.gatewayUrl ?? undefined}
                                                         onDisconnect={() => updateSessionStatus(session.tabId, 'disconnected')}
                                                         onError={() => updateSessionStatus(session.tabId, 'error')}
                                                         onKeyHandlerReady={() => updateSessionStatus(session.tabId, 'connected')}

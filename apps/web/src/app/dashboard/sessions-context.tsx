@@ -18,6 +18,7 @@ export interface Session {
     serverId: string;
     serverName: string;
     token: string | null;
+    gatewayUrl: string | null;
     status: SessionStatus;
     showFiles: boolean;
 }
@@ -91,6 +92,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             serverId: 'local',
             serverName: 'Local Terminal',
             token: null,
+            gatewayUrl: null,
             status: 'connecting',
             showFiles: false,
         }]);
@@ -112,7 +114,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             tabId,
             type: 'remote',
             serverId, serverName: name,
-            token: null, status: 'connecting', showFiles: false,
+            token: null, gatewayUrl: null, status: 'connecting', showFiles: false,
         }]);
         setActiveTabId(tabId);
 
@@ -126,7 +128,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             setSessions(prev => prev.map(s => {
                 if (s.tabId !== tabId) return s;
                 return data.success
-                    ? { ...s, token: data.data.token }
+                    ? { ...s, token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null }
                     : { ...s, status: 'error' };
             }));
         } catch {
@@ -150,7 +152,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             setSessions(prev => prev.map(s => {
                 if (s.tabId !== tabId) return s;
                 return data.success
-                    ? { ...s, token: data.data.token, status: 'connecting' }
+                    ? { ...s, token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null, status: 'connecting' }
                     : { ...s, status: 'error' };
             }));
         } catch {
