@@ -178,6 +178,16 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
+    // Verify protocol in URL matches protocol in token to prevent token reuse across protocols
+    if (tokenPayload.protocol !== protocol) {
+        ws.send(JSON.stringify({
+            type: 'error',
+            message: 'Protocol mismatch'
+        }));
+        ws.close(4003, 'Forbidden');
+        return;
+    }
+
     // Create connection metadata
     const meta: ConnectionMeta = {
         userId: tokenPayload.userId,
