@@ -37,8 +37,10 @@ export function assertDatabaseSslInProduction(url?: string): void {
     }
 }
 
-// Run at module load — fails fast before any query is made
-assertDatabaseSslInProduction();
+// Guard: skip during test runs (Vitest sets VITEST=true automatically)
+if (process.env.NODE_ENV === 'production' && process.env.VITEST !== 'true') {
+    assertDatabaseSslInProduction();
+}
 
 // ============================================================================
 // CLIENT SINGLETON

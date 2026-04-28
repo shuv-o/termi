@@ -85,4 +85,15 @@ describe('assertDatabaseSslInProduction', () => {
         // @ts-ignore
         process.env.NODE_ENV = original;
     });
+
+    it('throws in production when DATABASE_URL is empty string', () => {
+        const original = process.env.NODE_ENV;
+        // @ts-ignore
+        process.env.NODE_ENV = 'production';
+        expect(() =>
+            assertDatabaseSslInProduction('')
+        ).toThrow(/sslmode=require/);
+        // @ts-ignore
+        process.env.NODE_ENV = original;
+    });
 });
