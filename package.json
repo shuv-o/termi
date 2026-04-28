@@ -5,6 +5,7 @@
   "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
   "license": "MIT",
   "author": "Termi Contributors",
+  "main": "apps/electron/main.js",
   "workspaces": [
     "apps/*"
   ],
@@ -20,11 +21,23 @@
     "db:migrate": "npm run db:migrate --workspace=apps/web",
     "db:generate": "npm run db:generate --workspace=apps/web",
     "db:seed": "npm run db:seed --workspace=apps/web",
-    "db:studio": "npm run db:studio --workspace=apps/web"
+    "db:studio": "npm run db:studio --workspace=apps/web",
+    "setup:electron": "electron-rebuild -f -w node-pty",
+    "electron:dev": "npm run build:web-standalone && npm run build:gateway-bundle && electron .",
+    "build:web-standalone": "npm run build --workspace=apps/web && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/public apps/web/.next/standalone/apps/web/public",
+    "build:gateway-bundle": "esbuild apps/gateway/src/index.ts --bundle --platform=node --target=node20 --format=cjs --external:ssh2 --outfile=apps/electron/gateway.cjs",
+    "build:electron": "npm run build:web-standalone && npm run build:gateway-bundle && electron-builder"
+  },
+  "dependencies": {
+    "node-pty": "^1.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "typescript": "^5.9.3"
+    "esbuild": "^0.27.4",
+    "typescript": "^5.9.3",
+    "electron": "41.3.0",
+    "electron-builder": "26.8.1",
+    "@electron/rebuild": "^4.0.0"
   },
   "engines": {
     "node": ">=22.0.0"

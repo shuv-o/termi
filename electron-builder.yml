@@ -1,0 +1,35 @@
+appId: com.shuvo.termi
+productName: Termi
+directories:
+  output: dist
+
+# Only the Electron entry points go into the asar.
+# The Next.js standalone server and bundled gateway are placed as extraResources
+# so they can be spawned as child processes (asar-packed files cannot be spawned).
+files:
+  - apps/electron/main.js
+  - apps/electron/preload.js
+  - node_modules/node-pty/**/*
+
+# node-pty ships a native addon (.node file) that cannot be loaded from inside
+# an asar archive — unpack it to the filesystem alongside the asar.
+asarUnpack:
+  - node_modules/node-pty/**/*
+
+extraResources:
+  # Next.js standalone output — already contains public/ and .next/static/
+  - from: apps/web/.next/standalone
+    to: web-standalone
+  # Gateway bundled to CJS by the build:gateway-bundle script
+  - from: apps/electron/gateway.cjs
+    to: gateway.cjs
+
+mac:
+  target: dmg
+  category: public.app-category.developer-tools
+
+win:
+  target: nsis
+
+linux:
+  target: AppImage

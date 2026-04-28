@@ -5,12 +5,13 @@ import dynamic from 'next/dynamic';
 import {
     Plus, X, ArrowLeftRight, Terminal, FolderOpen,
     RotateCcw, Loader2, AlertCircle, ArrowRight, ArrowLeft,
-    Check, Server,
+    Check, Server, Laptop,
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
 import { useSessionsContext, type SessionStatus } from './sessions-context';
 
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
+const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
 
 // ============================================================================
 // TYPES
@@ -170,12 +171,17 @@ function StatusDot({ status }: { status: SessionStatus }) {
 export default function SessionsWorkspace() {
     const {
         sessions, activeTabId, setActiveTabId,
-        addSession, removeSession, reconnectSession,
+        addSession, addLocalSession, removeSession, reconnectSession,
         toggleFiles, updateSessionStatus,
     } = useSessionsContext();
 
     const [showPicker, setShowPicker] = useState(false);
     const [mode, setMode] = useState<'terminal' | 'transfer'>('terminal');
+    const [isElectron, setIsElectron] = useState(false);
+
+    useEffect(() => {
+        setIsElectron(Boolean(window.electronAPI?.isElectron));
+    }, []);
 
     // Transfer panel state
     const [allServers, setAllServers] = useState<ServerItem[]>([]);
@@ -269,6 +275,9 @@ export default function SessionsWorkspace() {
                             onClick={() => switchTab(session.tabId)}
                         >
                             <StatusDot status={session.status} />
+                            {session.type === 'local' && (
+                                <Laptop className="w-3 h-3 text-violet-400 shrink-0" />
+                            )}
                             <span className="text-sm font-medium max-w-[120px] truncate">
                                 {session.serverName}
                             </span>
@@ -287,10 +296,19 @@ export default function SessionsWorkspace() {
                     <button
                         onClick={() => setShowPicker(true)}
                         className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-                        title="Open new session"
+                        title="Open new server session"
                     >
                         <Plus className="w-4 h-4" />
                     </button>
+                    {isElectron && (
+                        <button
+                            onClick={() => { addLocalSession(); setMode('terminal'); }}
+                            className="p-1.5 rounded-lg hover:bg-slate-700 text-violet-400 hover:text-violet-300 transition-colors"
+                            title="Open local terminal"
+                        >
+                            <Laptop className="w-4 h-4" />
+                        </button>
+                    )}
                     <div className="w-px h-5 bg-slate-700 mx-1" />
                     <button
                         onClick={() => setMode(m => m === 'transfer' ? 'terminal' : 'transfer')}
@@ -418,11 +436,18 @@ export default function SessionsWorkspace() {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-semibold text-white mb-1">No active sessions</h2>
-                                    <p className="text-sm text-slate-400">Open a server to start a terminal session</p>
+                                    <p className="text-sm text-slate-400">Open a server or start a local terminal</p>
                                 </div>
-                                <button onClick={() => setShowPicker(true)} className="btn btn-primary gap-2">
-                                    <Plus className="w-4 h-4" /> Open Server
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => setShowPicker(true)} className="btn btn-primary gap-2">
+                                        <Plus className="w-4 h-4" /> Open Server
+                                    </button>
+                                    {isElectron && (
+                                        <button onClick={() => addLocalSession()} className="btn btn-secondary gap-2">
+                                            <Laptop className="w-4 h-4" /> Local Terminal
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <div className="relative h-full">
@@ -438,26 +463,33 @@ export default function SessionsWorkspace() {
                                         {/* Per-tab toolbar */}
                                         <div className="shrink-0 flex items-center justify-between gap-2">
                                             <div className="flex items-center gap-2 text-sm text-slate-400">
-                                                <Terminal className="w-4 h-4" />
+                                                {session.type === 'local'
+                                                    ? <Laptop className="w-4 h-4 text-violet-400" />
+                                                    : <Terminal className="w-4 h-4" />
+                                                }
                                                 <span>{session.serverName}</span>
                                                 <StatusDot status={session.status} />
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() => toggleFiles(session.tabId)}
-                                                    className={`btn btn-sm gap-1.5 ${session.showFiles ? 'btn-primary' : 'btn-ghost'}`}
-                                                    title="Toggle file manager"
-                                                >
-                                                    <FolderOpen className="w-3.5 h-3.5" />
-                                                    <span className="hidden sm:inline text-xs">Files</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => reconnectSession(session.tabId, session.serverId)}
-                                                    className="btn btn-ghost btn-icon btn-sm"
-                                                    title="Reconnect"
-                                                >
-                                                    <RotateCcw className="w-3.5 h-3.5" />
-                                                </button>
+                                                {session.type !== 'local' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => toggleFiles(session.tabId)}
+                                                            className={`btn btn-sm gap-1.5 ${session.showFiles ? 'btn-primary' : 'btn-ghost'}`}
+                                                            title="Toggle file manager"
+                                                        >
+                                                            <FolderOpen className="w-3.5 h-3.5" />
+                                                            <span className="hidden sm:inline text-xs">Files</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => reconnectSession(session.tabId, session.serverId)}
+                                                            className="btn btn-ghost btn-icon btn-sm"
+                                                            title="Reconnect"
+                                                        >
+                                                            <RotateCcw className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button
                                                     onClick={() => removeSession(session.tabId)}
                                                     className="btn btn-ghost btn-icon btn-sm text-red-400 hover:text-red-300"
@@ -471,7 +503,13 @@ export default function SessionsWorkspace() {
                                         {/* Terminal + optional file panel */}
                                         <div className="flex flex-1 min-h-0 gap-3">
                                             <div className="flex-1 min-w-0 min-h-0">
-                                                {session.status === 'error' || (!session.token && session.status !== 'connecting') ? (
+                                                {session.type === 'local' ? (
+                                                    <LocalTerminal
+                                                        tabId={session.tabId}
+                                                        onReady={() => updateSessionStatus(session.tabId, 'connected')}
+                                                        onExit={() => updateSessionStatus(session.tabId, 'disconnected')}
+                                                    />
+                                                ) : session.status === 'error' || (!session.token && session.status !== 'connecting') ? (
                                                     <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-900 rounded-xl border border-slate-700">
                                                         <AlertCircle className="w-8 h-8 text-red-400" />
                                                         <p className="text-sm text-red-400">Failed to connect</p>
@@ -500,7 +538,7 @@ export default function SessionsWorkspace() {
                                                 )}
                                             </div>
 
-                                            {session.showFiles && (
+                                            {session.showFiles && session.type !== 'local' && (
                                                 <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-slate-700 overflow-hidden">
                                                     <FileManagerPanel
                                                         serverId={session.serverId}

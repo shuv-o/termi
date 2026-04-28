@@ -14,6 +14,7 @@ export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error
 
 export interface Session {
     tabId: string;
+    type: 'remote' | 'local';
     serverId: string;
     serverName: string;
     token: string | null;
@@ -26,6 +27,7 @@ interface SessionsContextValue {
     activeTabId: string | null;
     setActiveTabId: (tabId: string) => void;
     addSession: (serverId: string, serverName?: string) => Promise<void>;
+    addLocalSession: () => void;
     removeSession: (tabId: string) => void;
     reconnectSession: (tabId: string, serverId: string) => Promise<void>;
     toggleFiles: (tabId: string) => void;
@@ -51,6 +53,7 @@ export function useSessionsContext() {
 interface PersistedSession { serverId: string; serverName: string; }
 interface PersistedState { sessions: PersistedSession[]; activeServerId: string | null; }
 type SessionsProvider_AddSession = (serverId: string, serverName?: string) => Promise<void>;
+type SessionsProvider_AddLocalSession = () => void;
 
 export function SessionsProvider({ children }: { children: ReactNode }) {
     const uid = useId();
@@ -58,24 +61,41 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
 
     // ── Persist sessions to sessionStorage (survives refresh, cleared on tab close) ──
+    // Local terminal sessions are excluded: their PTY processes die on refresh.
 
     useEffect(() => {
+        const remote = sessions.filter(s => s.type !== 'local');
         const state: PersistedState = {
-            sessions: sessions.map(s => ({ serverId: s.serverId, serverName: s.serverName })),
-            activeServerId: sessions.find(s => s.tabId === activeTabId)?.serverId ?? null,
+            sessions: remote.map(s => ({ serverId: s.serverId, serverName: s.serverName })),
+            activeServerId: remote.find(s => s.tabId === activeTabId)?.serverId ?? null,
         };
         try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* quota */ }
     }, [sessions, activeTabId]);
 
     // ── Restore sessions on mount (after a refresh) ──
 
-    // addSession is defined below; we use a ref so the restore effect can call it
-    // without listing it as a dependency (it's stable but ESLint can't prove it).
+    // addSession / addLocalSession are defined below; refs let the restore effect call
+    // them without listing them as dependencies (stable but ESLint can't prove it).
     const addSessionRef = useRef<SessionsProvider_AddSession | null>(null);
+    const addLocalSessionRef = useRef<SessionsProvider_AddLocalSession | null>(null);
 
     const updateSessionStatus = useCallback((tabId: string, status: SessionStatus) => {
         setSessions(prev => prev.map(s => s.tabId === tabId ? { ...s, status } : s));
     }, []);
+
+    const addLocalSession: SessionsProvider_AddLocalSession = useCallback(() => {
+        const tabId = `${uid}-local-${Date.now()}`;
+        setSessions(prev => [...prev, {
+            tabId,
+            type: 'local',
+            serverId: 'local',
+            serverName: 'Local Terminal',
+            token: null,
+            status: 'connecting',
+            showFiles: false,
+        }]);
+        setActiveTabId(tabId);
+    }, [uid]);
 
     const addSession: SessionsProvider_AddSession = useCallback(async (serverId: string, serverName?: string) => {
         const tabId = `${uid}-${Date.now()}`;
@@ -89,7 +109,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }
 
         setSessions(prev => [...prev, {
-            tabId, serverId, serverName: name,
+            tabId,
+            type: 'remote',
+            serverId, serverName: name,
             token: null, status: 'connecting', showFiles: false,
         }]);
         setActiveTabId(tabId);
@@ -155,8 +177,8 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         ));
     }, []);
 
-    // Keep the ref in sync so the restore effect can call addSession
     addSessionRef.current = addSession;
+    addLocalSessionRef.current = addLocalSession;
 
     // Run once on mount: restore any sessions saved before the last refresh
     useEffect(() => {
@@ -179,7 +201,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     return (
         <SessionsContext.Provider value={{
             sessions, activeTabId, setActiveTabId,
-            addSession, removeSession, reconnectSession,
+            addSession, addLocalSession, removeSession, reconnectSession,
             toggleFiles, updateSessionStatus,
         }}>
             {children}
