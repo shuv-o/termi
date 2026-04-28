@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
+import { Button } from '@/components/ui/button';
 
 const PasskeyRevealModal = dynamic(
     () => import('@/components/auth/PasskeyRevealModal'),
@@ -117,23 +118,22 @@ export default function SSHConnectionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-                <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     if (error || !connectionToken) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
-                <p className="text-red-400 mb-4">{error || 'Connection failed'}</p>
-                <Link href="/dashboard" className="btn btn-primary">
-                    Back to Dashboard
-                </Link>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+                <p className="text-destructive">{error || 'Connection failed'}</p>
+                <Button asChild>
+                    <Link href="/dashboard">Back to Dashboard</Link>
+                </Button>
             </div>
         );
     }
 
-    // keyboard is ~120px tall (2 key rows + padding); shrink container so xterm reflows above it
     const kbHeight = 120;
 
     return (
@@ -149,70 +149,79 @@ export default function SSHConnectionPage() {
             {/* ── Header ── */}
             <div className="flex items-center justify-between gap-4 mb-4 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
-                    <Link href="/dashboard" className="btn btn-ghost btn-icon shrink-0">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
+                    <Button variant="ghost" size="icon" asChild className="shrink-0 h-8 w-8">
+                        <Link href="/dashboard">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                    </Button>
                     <div className="min-w-0">
                         <h1 className="font-medium truncate">{server?.name}</h1>
-                        <span className="text-sm text-dark-400">SSH Terminal</span>
+                        <span className="text-sm text-muted-foreground">SSH Terminal</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
-                    {/* Copy password */}
                     {server?.hasPassword && (
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setRevealField('password')}
-                            className="btn btn-ghost btn-icon"
                             title="Copy password (passkey required)"
                         >
                             <KeyRound className="w-4 h-4" />
-                        </button>
+                        </Button>
                     )}
 
-                    {/* Files toggle */}
-                    <button
+                    <Button
+                        variant={showFiles ? 'default' : 'ghost'}
+                        size="sm"
                         onClick={() => setShowFiles(f => !f)}
-                        className={`btn btn-sm gap-1.5 ${showFiles ? 'btn-primary' : 'btn-ghost'}`}
+                        className="gap-1.5"
                         title={showFiles ? 'Hide file manager' : 'Open file manager'}
                     >
                         <FolderOpen className="w-4 h-4" />
                         <span className="hidden sm:inline text-xs">Files</span>
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => window.location.reload()}
-                        className="btn btn-ghost btn-icon"
                         title="Reconnect"
                     >
                         <RotateCcw className="w-4 h-4" />
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={toggleFullscreen}
-                        className="btn btn-ghost btn-icon hidden sm:flex"
+                        className="hidden sm:flex"
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
                         {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                    </button>
+                    </Button>
 
                     {isMobile && (
-                        <button
+                        <Button
+                            variant={showKeyboard ? 'default' : 'ghost'}
+                            size="icon"
                             onClick={() => setShowKeyboard(!showKeyboard)}
-                            className={`btn btn-icon ${showKeyboard ? 'btn-primary' : 'btn-ghost'}`}
                             title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
                         >
                             <Keyboard className="w-4 h-4" />
-                        </button>
+                        </Button>
                     )}
 
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => router.push('/dashboard')}
-                        className="btn btn-ghost btn-icon text-red-400 hover:text-red-300"
+                        className="text-destructive hover:text-destructive"
                         title="Disconnect"
                     >
                         <X className="w-4 h-4" />
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -233,16 +242,14 @@ export default function SSHConnectionPage() {
                 {/* File manager panel — desktop: side panel | mobile: full overlay */}
                 {showFiles && (
                     <>
-                        {/* Desktop side panel */}
-                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-slate-700 overflow-hidden">
+                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-border overflow-hidden">
                             <FileManagerPanel
                                 serverId={serverId}
                                 onClose={() => setShowFiles(false)}
                             />
                         </div>
 
-                        {/* Mobile full overlay */}
-                        <div className="md:hidden absolute inset-0 z-20 rounded-xl overflow-hidden border border-slate-700">
+                        <div className="md:hidden absolute inset-0 z-20 rounded-xl overflow-hidden border border-border">
                             <FileManagerPanel
                                 serverId={serverId}
                                 onClose={() => setShowFiles(false)}

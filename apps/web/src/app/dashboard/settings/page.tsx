@@ -3,30 +3,15 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 import {
-    Shield,
-    Key,
-    Loader2,
-    Check,
-    AlertTriangle,
-    Eye,
-    EyeOff,
-    Mail,
-    Smartphone,
-    Copy,
-    CheckCircle,
-    Info,
-    Fingerprint,
-    Plus,
-    Trash2,
-    X,
-    Lock,
-    AlertCircle,
-    MonitorSmartphone,
-    Clock,
-    BellRing,
-    Bell,
-    BellOff,
+    Shield, Key, Loader2, Check, AlertTriangle,
+    Eye, EyeOff, Mail, Smartphone, Copy, CheckCircle,
+    Info, Fingerprint, Plus, Trash2, X, Lock,
+    AlertCircle, MonitorSmartphone, Clock, BellRing, Bell, BellOff,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -102,18 +87,18 @@ function SectionCard({ icon, iconBg, title, description, children }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className="card p-6">
+        <Card className="p-6">
             <div className="flex items-start gap-4 mb-5">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}>
                     {icon}
                 </div>
                 <div>
                     <h2 className="text-base font-semibold">{title}</h2>
-                    <p className="text-sm text-slate-400 mt-0.5">{description}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
                 </div>
             </div>
             {children}
-        </div>
+        </Card>
     );
 }
 
@@ -137,43 +122,45 @@ function PasskeyRow({ passkey, onDelete }: { passkey: Passkey; onDelete: (id: st
     const created = new Date(passkey.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
     return (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
-            <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-                <Fingerprint className="w-4 h-4 text-sky-400" />
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Fingerprint className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{passkey.name}</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="w-3 h-3" /> Added {created}
                     </span>
                     {isMultiDevice && (
-                        <span className="badge badge-primary text-xs">Synced</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-medium">Synced</span>
                     )}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">Last used: {lastUsed}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Last used: {lastUsed}</p>
             </div>
             {confirming ? (
                 <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-red-400">Remove?</span>
+                    <span className="text-xs text-destructive">Remove?</span>
                     <button
                         onClick={() => setConfirming(false)}
-                        className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded"
+                        className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded"
                     >
                         Cancel
                     </button>
-                    <button
+                    <Button
+                        variant="destructive"
+                        size="sm"
                         onClick={handleDelete}
                         disabled={deleting}
-                        className="btn btn-danger btn-sm text-xs py-1 px-2"
+                        className="text-xs py-1 px-2 h-auto"
                     >
                         {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Remove'}
-                    </button>
+                    </Button>
                 </div>
             ) : (
                 <button
                     onClick={() => setConfirming(true)}
-                    className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0"
                     title="Remove passkey"
                 >
                     <Trash2 className="w-4 h-4" />
@@ -202,7 +189,6 @@ export default function SettingsPage() {
         setToasts((prev) => prev.filter((t) => t.id !== id));
     }, []);
 
-    // ── TOTP state ──────────────────────────────────────────────────────────
     const [setup2FA, setSetup2FA] = useState(false);
     const [qrCode, setQrCode] = useState('');
     const [secret, setSecret] = useState('');
@@ -211,20 +197,16 @@ export default function SettingsPage() {
     const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-    // ── Email OTP state ─────────────────────────────────────────────────────
     const [enablingEmailOTP, setEnablingEmailOTP] = useState(false);
 
-    // ── Disable 2FA state ────────────────────────────────────────────────────
     const [showDisable, setShowDisable] = useState(false);
     const [disablePassword, setDisablePassword] = useState('');
     const [disabling2FA, setDisabling2FA] = useState(false);
 
-    // ── Password state ───────────────────────────────────────────────────────
     const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
     const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
     const [changingPassword, setChangingPassword] = useState(false);
 
-    // ── Passkey state ────────────────────────────────────────────────────────
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
     const [loadingPasskeys, setLoadingPasskeys] = useState(false);
     const [addingPasskey, setAddingPasskey] = useState(false);
@@ -232,28 +214,22 @@ export default function SettingsPage() {
     const [showAddPasskey, setShowAddPasskey] = useState(false);
     const [passkeyError, setPasskeyError] = useState('');
 
-    // ── Push notification state ──────────────────────────────────────────────
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
     const [pushSubscribed, setPushSubscribed] = useState(false);
     const [enablingPush, setEnablingPush] = useState(false);
-
-    // ── Load user + passkeys + push state ───────────────────────────────────
 
     useEffect(() => {
         async function init() {
             try {
                 const res = await fetch('/api/auth/me');
                 const data = await res.json();
-                if (data.success) {
-                    setUser(data.data.user);
-                }
+                if (data.success) setUser(data.data.user);
             } catch { /* ignore */ }
             finally { setLoading(false); }
         }
         void init();
         void loadPasskeys();
 
-        // Check current push permission + subscription state
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setPushPermission(Notification.permission);
         }
@@ -277,8 +253,6 @@ export default function SettingsPage() {
         finally { setLoadingPasskeys(false); }
     }, []);
 
-    // ── Push Notifications ───────────────────────────────────────────────────
-
     const handleEnablePush = async () => {
         setEnablingPush(true);
         try {
@@ -287,7 +261,6 @@ export default function SettingsPage() {
                 return;
             }
 
-            // Request permission
             const permission = await Notification.requestPermission();
             setPushPermission(permission);
             if (permission !== 'granted') {
@@ -295,7 +268,6 @@ export default function SettingsPage() {
                 return;
             }
 
-            // Get VAPID public key
             const keyRes = await fetch('/api/push/vapid-public-key');
             const keyData = await keyRes.json();
             if (!keyData.success) {
@@ -303,11 +275,9 @@ export default function SettingsPage() {
                 return;
             }
 
-            // Convert VAPID key
             const vapidKey = keyData.data.publicKey;
             const applicationServerKey = urlBase64ToUint8Array(vapidKey).buffer as ArrayBuffer;
 
-            // Subscribe
             const reg = await navigator.serviceWorker.ready;
             const subscription = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
@@ -319,7 +289,6 @@ export default function SettingsPage() {
                 keys: { p256dh: string; auth: string };
             };
 
-            // Save to server
             const res = await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -372,8 +341,6 @@ export default function SettingsPage() {
         return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
     }
 
-    // ── TOTP ─────────────────────────────────────────────────────────────────
-
     const handleSetupTOTP = async () => {
         try {
             const res = await fetch('/api/auth/2fa');
@@ -410,8 +377,6 @@ export default function SettingsPage() {
         finally { setEnabling2FA(false); }
     };
 
-    // ── Email OTP ─────────────────────────────────────────────────────────────
-
     const handleEnableEmailOTP = async () => {
         setEnablingEmailOTP(true);
         try {
@@ -426,8 +391,6 @@ export default function SettingsPage() {
         } catch { addToast('error', 'Failed to enable email OTP'); }
         finally { setEnablingEmailOTP(false); }
     };
-
-    // ── Disable 2FA ───────────────────────────────────────────────────────────
 
     const handleDisable2FA = async () => {
         setDisabling2FA(true);
@@ -449,8 +412,6 @@ export default function SettingsPage() {
         } catch { addToast('error', 'Failed to disable 2FA'); }
         finally { setDisabling2FA(false); }
     };
-
-    // ── Password ──────────────────────────────────────────────────────────────
 
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -480,20 +441,16 @@ export default function SettingsPage() {
         finally { setChangingPassword(false); }
     };
 
-    // ── Passkeys ──────────────────────────────────────────────────────────────
-
     const handleAddPasskey = async () => {
         setAddingPasskey(true);
         setPasskeyError('');
         try {
-            // 1. Get registration options
             const optRes = await fetch('/api/auth/passkey/register-options');
             const optData = await optRes.json();
             if (!optRes.ok || !optData.success) {
                 throw new Error(optData.error || 'Failed to get registration options');
             }
 
-            // 2. Browser passkey creation prompt
             let registration;
             try {
                 registration = await startRegistration({ optionsJSON: optData.data });
@@ -507,7 +464,6 @@ export default function SettingsPage() {
                 throw new Error('Passkey creation failed');
             }
 
-            // 3. Verify and store
             const regRes = await fetch('/api/auth/passkey/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -551,20 +507,16 @@ export default function SettingsPage() {
         } catch { addToast('error', 'Failed to remove passkey'); }
     };
 
-    // ── Copy code ─────────────────────────────────────────────────────────────
-
     const copyCode = async (code: string) => {
         await navigator.clipboard.writeText(code);
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(null), 2000);
     };
 
-    // ─────────────────────────────────────────────────────────────────────────
-
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-7 h-7 animate-spin text-sky-500" />
+                <Loader2 className="w-7 h-7 animate-spin text-primary" />
             </div>
         );
     }
@@ -576,12 +528,11 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto pb-12">
             <div className="mb-8">
                 <h1 className="text-2xl font-bold">Settings</h1>
-                <p className="text-slate-400 text-sm mt-1">Manage your account security and preferences</p>
+                <p className="text-muted-foreground text-sm mt-1">Manage your account security and preferences</p>
             </div>
 
             <ToastList toasts={toasts} onDismiss={dismissToast} />
 
-            {/* Email verification banner */}
             {user && !user.isVerified && (
                 <div className="mb-6 flex items-start gap-3 px-4 py-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-sm">
                     <Info className="w-4 h-4 shrink-0 mt-0.5" />
@@ -589,77 +540,76 @@ export default function SettingsPage() {
                 </div>
             )}
 
-            {/* ── Account Info ──────────────────────────────────────────────── */}
-            <div className="card p-6 mb-4">
-                <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Account</h2>
+            {/* ── Account Info ── */}
+            <Card className="p-6 mb-4">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Account</h2>
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2 border-b border-slate-700/50">
-                        <span className="text-sm text-slate-400">Email</span>
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Email</span>
                         <span className="text-sm flex items-center gap-2">
                             {user?.email}
                             {user?.isVerified && <CheckCircle className="w-4 h-4 text-green-400" />}
                         </span>
                     </div>
-                    <div className="flex items-center justify-between py-2 border-b border-slate-700/50">
-                        <span className="text-sm text-slate-400">Two-Factor Auth</span>
-                        <span className={`text-sm font-medium ${has2FA ? 'text-green-400' : 'text-slate-500'}`}>
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Two-Factor Auth</span>
+                        <span className={`text-sm font-medium ${has2FA ? 'text-green-400' : 'text-muted-foreground'}`}>
                             {user?.twoFactorMethod === 'TOTP' ? 'Authenticator App'
                                 : user?.twoFactorMethod === 'EMAIL' ? 'Email OTP'
                                     : 'Disabled'}
                         </span>
                     </div>
-                    <div className="flex items-center justify-between py-2 border-b border-slate-700/50">
-                        <span className="text-sm text-slate-400">Passkeys</span>
-                        <span className={`text-sm font-medium ${user?.passkeyEnabled ? 'text-green-400' : 'text-slate-500'}`}>
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Passkeys</span>
+                        <span className={`text-sm font-medium ${user?.passkeyEnabled ? 'text-green-400' : 'text-muted-foreground'}`}>
                             {user?.passkeyEnabled ? `${passkeys.length} registered` : 'None'}
                         </span>
                     </div>
                     <div className="flex items-center justify-between py-2">
-                        <span className="text-sm text-slate-400">Master Key</span>
-                        <span className={`text-sm font-medium ${user?.hasMasterKey ? 'text-green-400' : 'text-slate-500'}`}>
+                        <span className="text-sm text-muted-foreground">Master Key</span>
+                        <span className={`text-sm font-medium ${user?.hasMasterKey ? 'text-green-400' : 'text-muted-foreground'}`}>
                             {user?.hasMasterKey ? 'Configured' : 'Not set'}
                         </span>
                     </div>
                 </div>
-            </div>
+            </Card>
 
-            {/* ── Recovery Codes (shown once after TOTP enable) ─────────────── */}
+            {/* ── Recovery Codes ── */}
             {recoveryCodes.length > 0 && (
-                <div className="card p-6 mb-4 border border-yellow-500/30">
+                <Card className="p-6 mb-4 border-yellow-500/30">
                     <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="w-5 h-5 text-yellow-400" />
                         <h2 className="font-semibold text-yellow-400">Save your recovery codes</h2>
                     </div>
-                    <p className="text-slate-400 text-sm mb-4">
+                    <p className="text-muted-foreground text-sm mb-4">
                         Store these codes securely. Each can only be used once and will not be shown again.
                     </p>
                     <div className="grid grid-cols-2 gap-2 mb-4">
                         {recoveryCodes.map((code) => (
-                            <div key={code} className="flex items-center justify-between bg-slate-900 rounded-lg px-3 py-2 font-mono text-sm border border-slate-700">
+                            <div key={code} className="flex items-center justify-between bg-background rounded-lg px-3 py-2 font-mono text-sm border border-border">
                                 <span className="tracking-wider">{code}</span>
-                                <button onClick={() => copyCode(code)} className="text-slate-400 hover:text-white ml-2 transition-colors">
+                                <button onClick={() => copyCode(code)} className="text-muted-foreground hover:text-foreground ml-2 transition-colors">
                                     {copiedCode === code ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
                                 </button>
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setRecoveryCodes([])} className="btn btn-secondary btn-sm">
+                    <Button variant="secondary" size="sm" onClick={() => setRecoveryCodes([])}>
                         I&apos;ve saved my recovery codes
-                    </button>
-                </div>
+                    </Button>
+                </Card>
             )}
 
-            {/* ── Passkeys ──────────────────────────────────────────────────── */}
+            {/* ── Passkeys ── */}
             <div className="mb-4">
                 <SectionCard
-                    icon={<Fingerprint className="w-5 h-5 text-sky-400" />}
-                    iconBg="bg-sky-500/15"
+                    icon={<Fingerprint className="w-5 h-5 text-primary" />}
+                    iconBg="bg-primary/15"
                     title="Passkeys"
                     description="Sign in with biometrics or a security key — no password required."
                 >
-                    {/* Passkey list */}
                     {loadingPasskeys ? (
-                        <div className="flex items-center gap-2 text-sm text-slate-400 py-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
                             <Loader2 className="w-4 h-4 animate-spin" /> Loading passkeys…
                         </div>
                     ) : passkeys.length > 0 ? (
@@ -669,71 +619,72 @@ export default function SettingsPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="mb-4 flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 text-sm text-slate-400">
+                        <div className="mb-4 flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50 text-sm text-muted-foreground">
                             <MonitorSmartphone className="w-4 h-4 shrink-0" />
                             No passkeys registered. Add one to enable passwordless sign-in.
                         </div>
                     )}
 
-                    {/* Add passkey form */}
                     {showAddPasskey ? (
-                        <div className="space-y-3 p-4 rounded-lg bg-slate-900/50 border border-slate-700/50">
+                        <div className="space-y-3 p-4 rounded-lg bg-background/50 border border-border/50">
                             <p className="text-sm font-medium">Name this passkey</p>
-                            <p className="text-xs text-slate-400">Give it a name to identify the device (e.g., &quot;MacBook Touch ID&quot;, &quot;iPhone Face ID&quot;).</p>
-                            <input
+                            <p className="text-xs text-muted-foreground">Give it a name to identify the device (e.g., &quot;MacBook Touch ID&quot;, &quot;iPhone Face ID&quot;).</p>
+                            <Input
                                 type="text"
                                 value={newPasskeyName}
                                 onChange={(e) => setNewPasskeyName(e.target.value)}
                                 placeholder="My Passkey"
-                                className="input text-sm"
+                                className="bg-secondary border-border text-sm"
                                 maxLength={64}
                                 disabled={addingPasskey}
                             />
                             {passkeyError && (
-                                <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-300">
+                                <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
                                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                                     {passkeyError}
                                 </div>
                             )}
                             <div className="flex gap-2">
-                                <button
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={() => { setShowAddPasskey(false); setNewPasskeyName(''); setPasskeyError(''); }}
-                                    className="btn btn-secondary btn-sm"
                                     disabled={addingPasskey}
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    size="sm"
                                     onClick={handleAddPasskey}
                                     disabled={addingPasskey}
-                                    className="btn btn-primary btn-sm flex-1"
+                                    className="flex-1"
                                 >
                                     {addingPasskey ? (
                                         <><Loader2 className="w-4 h-4 animate-spin" /> Creating…</>
                                     ) : (
                                         <><Fingerprint className="w-4 h-4" /> Create Passkey</>
                                     )}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : (
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => { setShowAddPasskey(true); setPasskeyError(''); }}
-                            className="btn btn-secondary btn-sm"
                         >
                             <Plus className="w-4 h-4" />
                             Add Passkey
-                        </button>
+                        </Button>
                     )}
 
-                    {/* Browser support note */}
-                    <p className="text-xs text-slate-500 mt-3">
+                    <p className="text-xs text-muted-foreground/60 mt-3">
                         Passkeys require a device with biometrics or a hardware security key, and a supported browser (Chrome 108+, Safari 16+, Firefox 119+).
                     </p>
                 </SectionCard>
             </div>
 
-            {/* ── Two-Factor Authentication ─────────────────────────────────── */}
+            {/* ── Two-Factor Authentication ── */}
             <div className="mb-4">
                 <SectionCard
                     icon={<Shield className="w-5 h-5 text-violet-400" />}
@@ -743,43 +694,35 @@ export default function SettingsPage() {
                 >
                     {!has2FA && !setup2FA && (
                         <div className="space-y-3">
-                            <p className="text-sm text-slate-400">Choose a 2FA method to add an extra layer of security:</p>
+                            <p className="text-sm text-muted-foreground">Choose a 2FA method to add an extra layer of security:</p>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <button
-                                    onClick={handleSetupTOTP}
-                                    className="btn btn-secondary flex items-center gap-2 justify-center"
-                                >
+                                <Button variant="secondary" onClick={handleSetupTOTP} className="gap-2">
                                     <Smartphone className="w-4 h-4" />
                                     Authenticator App
-                                </button>
-                                <button
-                                    onClick={handleEnableEmailOTP}
-                                    disabled={enablingEmailOTP}
-                                    className="btn btn-secondary flex items-center gap-2 justify-center"
-                                >
+                                </Button>
+                                <Button variant="secondary" onClick={handleEnableEmailOTP} disabled={enablingEmailOTP} className="gap-2">
                                     {enablingEmailOTP ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                                     Email OTP
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
 
-                    {/* TOTP setup flow */}
                     {setup2FA && (
                         <div className="space-y-4">
-                            <div className="p-4 bg-slate-900 rounded-lg text-center border border-slate-700">
+                            <div className="p-4 bg-background rounded-lg text-center border border-border">
                                 {qrCode && <img src={qrCode} alt="2FA QR Code" className="mx-auto mb-4 rounded" />}
-                                <p className="text-sm text-slate-400 mb-2">Scan with Google Authenticator, Authy, or similar</p>
-                                <p className="text-xs text-slate-500 mb-2">Or enter manually:</p>
-                                <code className="text-xs text-slate-300 bg-slate-800 px-3 py-1.5 rounded-lg break-all border border-slate-700">{secret}</code>
+                                <p className="text-sm text-muted-foreground mb-2">Scan with Google Authenticator, Authy, or similar</p>
+                                <p className="text-xs text-muted-foreground/60 mb-2">Or enter manually:</p>
+                                <code className="text-xs text-foreground/80 bg-secondary px-3 py-1.5 rounded-lg break-all border border-border">{secret}</code>
                             </div>
-                            <div>
-                                <label className="label">Enter the 6-digit code to confirm</label>
-                                <input
+                            <div className="space-y-1.5">
+                                <Label>Enter the 6-digit code to confirm</Label>
+                                <Input
                                     type="text"
                                     value={verifyCode}
                                     onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    className="input text-center text-2xl tracking-[0.5em] font-mono"
+                                    className="bg-secondary border-border text-center text-2xl tracking-[0.5em] font-mono"
                                     placeholder="000000"
                                     maxLength={6}
                                     inputMode="numeric"
@@ -787,19 +730,18 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={() => setSetup2FA(false)} className="btn btn-secondary">Cancel</button>
-                                <button
+                                <Button variant="secondary" onClick={() => setSetup2FA(false)}>Cancel</Button>
+                                <Button
                                     onClick={handleEnableTOTP}
                                     disabled={verifyCode.length !== 6 || enabling2FA}
-                                    className="btn btn-primary flex-1"
+                                    className="flex-1"
                                 >
                                     {enabling2FA ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify & Enable'}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
 
-                    {/* Active 2FA */}
                     {has2FA && !showDisable && (
                         <div>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-sm text-green-300 mb-4">
@@ -808,48 +750,48 @@ export default function SettingsPage() {
                                     ? 'Authenticator app is active. Keep your recovery codes safe.'
                                     : 'Email OTP is active. A code is sent to your email on each login.'}
                             </div>
-                            <button onClick={() => setShowDisable(true)} className="btn btn-danger btn-sm">
+                            <Button variant="destructive" size="sm" onClick={() => setShowDisable(true)}>
                                 Disable 2FA
-                            </button>
+                            </Button>
                         </div>
                     )}
 
-                    {/* Disable 2FA confirm */}
                     {showDisable && (
                         <div className="space-y-4">
-                            <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-300">
+                            <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
                                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                                 Disabling 2FA will reduce your account security. Confirm your password to continue.
                             </div>
-                            <div>
-                                <label className="label">Confirm Password</label>
-                                <input
+                            <div className="space-y-1.5">
+                                <Label>Confirm Password</Label>
+                                <Input
                                     type="password"
                                     value={disablePassword}
                                     onChange={(e) => setDisablePassword(e.target.value)}
-                                    className="input"
+                                    className="bg-secondary border-border"
                                     placeholder="Enter your current password"
                                 />
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={() => { setShowDisable(false); setDisablePassword(''); }} className="btn btn-secondary">
+                                <Button variant="secondary" onClick={() => { setShowDisable(false); setDisablePassword(''); }}>
                                     Cancel
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="destructive"
                                     onClick={handleDisable2FA}
                                     disabled={!disablePassword || disabling2FA}
-                                    className="btn btn-danger flex-1"
+                                    className="flex-1"
                                 >
                                     {disabling2FA ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Disable 2FA'}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
                 </SectionCard>
             </div>
 
-            {/* ── Change Password ───────────────────────────────────────────── */}
-            <div className="mb-4">
+            {/* ── Change Password + Push Notifications ── */}
+            <div className="mb-4 space-y-4">
                 <SectionCard
                     icon={<Lock className="w-5 h-5 text-amber-400" />}
                     iconBg="bg-amber-500/15"
@@ -857,82 +799,83 @@ export default function SettingsPage() {
                     description="Update your account password. Use a strong, unique password."
                 >
                     <form onSubmit={handleChangePassword} method="POST" action="#" className="space-y-4">
-                        <div>
-                            <label className="label">Current Password</label>
+                        <div className="space-y-1.5">
+                            <Label>Current Password</Label>
                             <div className="relative">
-                                <input
+                                <Input
                                     type={showPasswords.current ? 'text' : 'password'}
                                     value={passwordForm.current}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                                    className="input pr-10"
+                                    className="bg-secondary border-border pr-10"
                                     autoComplete="current-password"
                                     required
                                 />
-                                <button
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => setShowPasswords((s) => ({ ...s, current: !s.current }))}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                                 >
                                     {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
+                                </Button>
                             </div>
                         </div>
-                        <div>
-                            <label className="label">New Password</label>
+                        <div className="space-y-1.5">
+                            <Label>New Password</Label>
                             <div className="relative">
-                                <input
+                                <Input
                                     type={showPasswords.new ? 'text' : 'password'}
                                     value={passwordForm.new}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                                    className="input pr-10"
+                                    className="bg-secondary border-border pr-10"
                                     autoComplete="new-password"
                                     required
                                     minLength={8}
                                 />
-                                <button
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => setShowPasswords((s) => ({ ...s, new: !s.new }))}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                                 >
                                     {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
+                                </Button>
                             </div>
                         </div>
-                        <div>
-                            <label className="label">Confirm New Password</label>
+                        <div className="space-y-1.5">
+                            <Label>Confirm New Password</Label>
                             <div className="relative">
-                                <input
+                                <Input
                                     type={showPasswords.confirm ? 'text' : 'password'}
                                     value={passwordForm.confirm}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                                    className={`input pr-10 ${passwordForm.confirm && !passwordsMatch ? 'input-error' : ''}`}
+                                    className={`bg-secondary pr-10 ${passwordForm.confirm && !passwordsMatch ? 'border-destructive' : 'border-border'}`}
                                     autoComplete="new-password"
                                     required
                                 />
-                                <button
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => setShowPasswords((s) => ({ ...s, confirm: !s.confirm }))}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                                 >
                                     {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
+                                </Button>
                             </div>
                             {passwordForm.confirm && !passwordsMatch && (
-                                <p className="error-text">Passwords do not match</p>
+                                <p className="text-sm text-destructive">Passwords do not match</p>
                             )}
                         </div>
-                        <button
-                            type="submit"
-                            disabled={changingPassword || !passwordsMatch}
-                            className="btn btn-primary"
-                        >
+                        <Button type="submit" disabled={changingPassword || !passwordsMatch} className="gap-2">
                             {changingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
                             {changingPassword ? 'Changing…' : 'Change Password'}
-                        </button>
+                        </Button>
                     </form>
                 </SectionCard>
 
-                {/* ── Push Notifications ── */}
                 <SectionCard
                     icon={<BellRing className="w-5 h-5 text-amber-400" />}
                     iconBg="bg-amber-500/15"
@@ -940,14 +883,13 @@ export default function SettingsPage() {
                     description="Receive browser push notifications for server alerts on this device"
                 >
                     <div className="space-y-4">
-                        {/* Status indicator */}
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
                             {pushSubscribed ? (
                                 <>
                                     <Bell className="w-5 h-5 text-emerald-400 shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-emerald-400">Notifications active</p>
-                                        <p className="text-xs text-slate-500 mt-0.5">This device will receive server alert notifications</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">This device will receive server alert notifications</p>
                                     </div>
                                 </>
                             ) : pushPermission === 'denied' ? (
@@ -955,43 +897,35 @@ export default function SettingsPage() {
                                     <BellOff className="w-5 h-5 text-red-400 shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-red-400">Notifications blocked</p>
-                                        <p className="text-xs text-slate-500 mt-0.5">
+                                        <p className="text-xs text-muted-foreground mt-0.5">
                                             Your browser has blocked notifications. Enable them in your browser settings then reload.
                                         </p>
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <BellOff className="w-5 h-5 text-slate-500 shrink-0" />
+                                    <BellOff className="w-5 h-5 text-muted-foreground shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">Notifications off</p>
-                                        <p className="text-xs text-slate-500 mt-0.5">Enable to get server down/up alerts on this device</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">Enable to get server down/up alerts on this device</p>
                                     </div>
                                 </>
                             )}
                         </div>
 
                         {pushSubscribed ? (
-                            <button
-                                onClick={handleDisablePush}
-                                disabled={enablingPush}
-                                className="btn btn-secondary"
-                            >
+                            <Button variant="secondary" onClick={handleDisablePush} disabled={enablingPush} className="gap-2">
                                 {enablingPush ? <Loader2 className="w-4 h-4 animate-spin" /> : <BellOff className="w-4 h-4" />}
                                 Disable for this device
-                            </button>
+                            </Button>
                         ) : (
-                            <button
-                                onClick={handleEnablePush}
-                                disabled={enablingPush || pushPermission === 'denied'}
-                                className="btn btn-primary"
-                            >
+                            <Button onClick={handleEnablePush} disabled={enablingPush || pushPermission === 'denied'} className="gap-2">
                                 {enablingPush ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
                                 {enablingPush ? 'Enabling…' : 'Enable for this device'}
-                            </button>
+                            </Button>
                         )}
 
-                        <p className="text-xs text-slate-600">
+                        <p className="text-xs text-muted-foreground/40">
                             Notifications are per-device. Enable on each device where you want alerts.
                             Configure alert rules per server in the server details page.
                         </p>

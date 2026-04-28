@@ -108,7 +108,7 @@ export default async function RootLayout({
                 <meta name="msapplication-TileColor" content="#0f172a" />
                 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
             </head>
-            <body className="min-h-screen bg-dark-950 text-white antialiased">
+            <body className="min-h-screen bg-background text-white antialiased">
                 {children}
                 <script
                     type="application/ld+json"

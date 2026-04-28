@@ -9,6 +9,27 @@ import {
     Layers, Tag, Globe, Lock, Search,
     ChevronRight,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 // ============================================================================
 // TYPES
@@ -41,16 +62,8 @@ interface GroupDetail extends Group {
 // ============================================================================
 
 const PRESET_COLORS = [
-    '#0ea5e9', // sky
-    '#8b5cf6', // violet
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#ec4899', // pink
-    '#14b8a6', // teal
-    '#6366f1', // indigo
-    '#f97316', // orange
-    '#84cc16', // lime
+    '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444',
+    '#ec4899', '#14b8a6', '#6366f1', '#f97316', '#84cc16',
 ];
 
 const PRESET_ICONS = [
@@ -110,7 +123,6 @@ function GroupModal({
     const [error, setError] = useState('');
     const nameRef = useRef<HTMLInputElement>(null);
 
-    // Sync form when initial changes (edit mode)
     useEffect(() => {
         setForm(initial);
         setError('');
@@ -121,8 +133,6 @@ function GroupModal({
             setTimeout(() => nameRef.current?.focus(), 50);
         }
     }, [open]);
-
-    if (!open) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,26 +152,19 @@ function GroupModal({
     const update = (fields: Partial<GroupFormData>) => setForm(f => ({ ...f, ...fields }));
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-                    <h2 className="text-lg font-semibold">
-                        {mode === 'create' ? 'Create Group' : 'Edit Group'}
-                    </h2>
-                    <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+        <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+            <DialogContent className="bg-card border-border max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{mode === 'create' ? 'Create Group' : 'Edit Group'}</DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} method="POST" action="#" className="p-6 space-y-5">
-                    {/* Name */}
-                    <div>
-                        <label className="label">Name <span className="text-red-400">*</span></label>
-                        <input
+                <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-5 pt-1">
+                    <div className="space-y-1.5">
+                        <Label>Name <span className="text-red-400">*</span></Label>
+                        <Input
                             ref={nameRef}
                             type="text"
-                            className="input"
+                            className="bg-secondary border-border"
                             placeholder="e.g. Production Servers"
                             maxLength={50}
                             value={form.name}
@@ -169,11 +172,10 @@ function GroupModal({
                         />
                     </div>
 
-                    {/* Description */}
-                    <div>
-                        <label className="label">Description <span className="text-slate-500 font-normal">(optional)</span></label>
-                        <textarea
-                            className="input resize-none"
+                    <div className="space-y-1.5">
+                        <Label>Description <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                        <Textarea
+                            className="bg-secondary border-border resize-none"
                             rows={2}
                             placeholder="Brief description of this group..."
                             maxLength={200}
@@ -182,9 +184,8 @@ function GroupModal({
                         />
                     </div>
 
-                    {/* Color */}
-                    <div>
-                        <label className="label">Color <span className="text-slate-500 font-normal">(optional)</span></label>
+                    <div className="space-y-1.5">
+                        <Label>Color <span className="text-muted-foreground font-normal">(optional)</span></Label>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {PRESET_COLORS.map(c => (
                                 <button
@@ -193,15 +194,14 @@ function GroupModal({
                                     onClick={() => update({ color: form.color === c ? '' : c })}
                                     className={`w-7 h-7 rounded-full transition-all duration-150 ${
                                         form.color === c
-                                            ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-white scale-110'
+                                            ? 'ring-2 ring-offset-2 ring-offset-card ring-white scale-110'
                                             : 'hover:scale-105'
                                     }`}
                                     style={{ backgroundColor: c }}
                                     title={c}
                                 />
                             ))}
-                            {/* Custom color */}
-                            <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-600 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center text-slate-500 hover:text-white" title="Custom color">
+                            <label className="w-7 h-7 rounded-full border-2 border-dashed border-border hover:border-muted-foreground transition-colors cursor-pointer flex items-center justify-center text-muted-foreground hover:text-foreground" title="Custom color">
                                 <Plus className="w-3.5 h-3.5" />
                                 <input
                                     type="color"
@@ -212,19 +212,18 @@ function GroupModal({
                             </label>
                         </div>
                         {form.color && (
-                            <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+                            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: form.color }} />
                                 <span>{form.color}</span>
-                                <button type="button" onClick={() => update({ color: '' })} className="text-slate-500 hover:text-slate-300">
+                                <button type="button" onClick={() => update({ color: '' })} className="text-muted-foreground hover:text-foreground">
                                     <X className="w-3 h-3" />
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    {/* Icon */}
-                    <div>
-                        <label className="label">Icon <span className="text-slate-500 font-normal">(optional)</span></label>
+                    <div className="space-y-1.5">
+                        <Label>Icon <span className="text-muted-foreground font-normal">(optional)</span></Label>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {PRESET_ICONS.map(({ value, label, icon: Icon }) => (
                                 <button
@@ -234,8 +233,8 @@ function GroupModal({
                                     onClick={() => update({ icon: form.icon === value ? '' : value })}
                                     className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-150 ${
                                         form.icon === value
-                                            ? 'bg-sky-500/20 border-sky-500/60 text-sky-400'
-                                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                                            ? 'bg-primary/20 border-primary/60 text-primary'
+                                            : 'bg-secondary border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
                                     }`}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -244,87 +243,25 @@ function GroupModal({
                         </div>
                     </div>
 
-                    {/* Error */}
                     {error && (
-                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
                             <AlertTriangle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
 
-                    {/* Actions */}
                     <div className="flex gap-3 pt-1">
-                        <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
+                        <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
                             Cancel
-                        </button>
-                        <button type="submit" disabled={saving} className="btn btn-primary flex-1">
+                        </Button>
+                        <Button type="submit" disabled={saving} className="flex-1">
                             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             {mode === 'create' ? 'Create Group' : 'Save Changes'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
-            </div>
-        </div>
-    );
-}
-
-// ============================================================================
-// DELETE CONFIRM MODAL
-// ============================================================================
-
-function DeleteModal({
-    open,
-    group,
-    onClose,
-    onConfirm,
-}: {
-    open: boolean;
-    group: Group | null;
-    onClose: () => void;
-    onConfirm: () => Promise<void>;
-}) {
-    const [deleting, setDeleting] = useState(false);
-
-    if (!open || !group) return null;
-
-    const handleConfirm = async () => {
-        setDeleting(true);
-        try {
-            await onConfirm();
-            onClose();
-        } finally {
-            setDeleting(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="w-full max-w-sm bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl p-6">
-                <div className="flex items-start gap-4 mb-5">
-                    <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
-                        <AlertTriangle className="w-5 h-5 text-red-400" />
-                    </div>
-                    <div>
-                        <h2 className="text-base font-semibold mb-1">Delete Group</h2>
-                        <p className="text-sm text-slate-400">
-                            Are you sure you want to delete <span className="text-white font-medium">&ldquo;{group.name}&rdquo;</span>?
-                            {group._count.servers > 0 && (
-                                <> The {group._count.servers} server{group._count.servers !== 1 ? 's' : ''} in this group will be ungrouped.</>
-                            )}
-                        </p>
-                    </div>
-                </div>
-                <div className="flex gap-3">
-                    <button onClick={onClose} className="btn btn-secondary flex-1" disabled={deleting}>
-                        Cancel
-                    </button>
-                    <button onClick={handleConfirm} disabled={deleting} className="btn btn-danger flex-1">
-                        {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                        Delete
-                    </button>
-                </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -359,19 +296,16 @@ function GroupCard({
     const IconComp = getIconComponent(group.icon);
 
     return (
-        <div className="card card-hover transition-all duration-200">
-            {/* Main row */}
+        <Card className="transition-all duration-200 hover:shadow-md">
             <div
                 className="flex items-center gap-4 p-4 cursor-pointer select-none"
                 onClick={onToggle}
             >
-                {/* Color bar */}
                 <div
                     className="w-1 self-stretch rounded-full shrink-0"
                     style={{ backgroundColor: group.color || '#475569', minHeight: '2rem' }}
                 />
 
-                {/* Icon */}
                 <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                     style={{
@@ -385,27 +319,24 @@ function GroupCard({
                     />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-white truncate">{group.name}</span>
-                        <span className="badge bg-slate-700/80 text-slate-300 text-xs">
+                        <span className="font-semibold text-foreground truncate">{group.name}</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground text-xs">
                             {group._count.servers} {group._count.servers === 1 ? 'server' : 'servers'}
                         </span>
                     </div>
                     {group.description && (
-                        <p className="text-sm text-slate-400 truncate mt-0.5">{group.description}</p>
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">{group.description}</p>
                     )}
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    {/* Reorder */}
                     <button
                         disabled={isFirst}
                         onClick={onMoveUp}
                         title="Move up"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                         <ChevronUp className="w-4 h-4" />
                     </button>
@@ -413,79 +344,74 @@ function GroupCard({
                         disabled={isLast}
                         onClick={onMoveDown}
                         title="Move down"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                         <ChevronDown className="w-4 h-4" />
                     </button>
-                    <div className="w-px h-5 bg-slate-700 mx-1" />
+                    <div className="w-px h-5 bg-border mx-1" />
                     <button
                         onClick={onEdit}
                         title="Edit group"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     >
                         <Pencil className="w-4 h-4" />
                     </button>
                     <button
                         onClick={onDelete}
                         title="Delete group"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
-
-                    {/* Expand chevron */}
-                    <div className="w-px h-5 bg-slate-700 mx-1" />
-                    <div
-                        className={`p-1.5 rounded-lg text-slate-400 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
-                    >
+                    <div className="w-px h-5 bg-border mx-1" />
+                    <div className={`p-1.5 rounded-lg text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}>
                         <ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
             </div>
 
-            {/* Expanded – server list */}
             {expanded && (
-                <div className="border-t border-slate-700/60">
+                <div className="border-t border-border/60">
                     {loadingDetail && (
-                        <div className="flex items-center justify-center py-6 text-slate-400 text-sm gap-2">
+                        <div className="flex items-center justify-center py-6 text-muted-foreground text-sm gap-2">
                             <Loader2 className="w-4 h-4 animate-spin" />
                             Loading servers…
                         </div>
                     )}
                     {!loadingDetail && detail && detail.servers.length === 0 && (
-                        <div className="px-6 py-5 text-center text-sm text-slate-500">
+                        <div className="px-6 py-5 text-center text-sm text-muted-foreground">
                             <FolderClosed className="w-8 h-8 mx-auto mb-2 opacity-40" />
                             No servers in this group yet.
                             <Link
                                 href="/dashboard/servers/new"
-                                className="block mt-2 text-sky-400 hover:text-sky-300 transition-colors"
+                                className="block mt-2 text-primary hover:text-primary/80 transition-colors"
                             >
                                 Add a server
                             </Link>
                         </div>
                     )}
                     {!loadingDetail && detail && detail.servers.length > 0 && (
-                        <div className="divide-y divide-slate-700/40">
+                        <div className="divide-y divide-border/40">
                             {detail.servers.map(srv => (
                                 <Link
                                     key={srv.id}
                                     href={`/dashboard/servers/${srv.id}`}
-                                    className="flex items-center gap-3 px-6 py-3 hover:bg-slate-800/50 transition-colors group"
+                                    className="flex items-center gap-3 px-6 py-3 hover:bg-accent/50 transition-colors group"
                                 >
-                                    <span className={`badge ${protocolColors[srv.protocol] || ''} text-xs shrink-0`}>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${protocolColors[srv.protocol] || ''}`}>
                                         {srv.protocol}
                                     </span>
-                                    <span className="text-sm text-slate-200 truncate flex-1 group-hover:text-white transition-colors">
+                                    <span className="text-sm text-foreground/80 truncate flex-1 group-hover:text-foreground transition-colors">
                                         {srv.name}
                                     </span>
-                                    <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" />
+                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
                                 </Link>
                             ))}
                         </div>
                     )}
                 </div>
             )}
-        </div>
+        </Card>
     );
 }
 
@@ -501,21 +427,18 @@ export default function GroupsPage() {
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
-    // Modal state
     const [showCreate, setShowCreate] = useState(false);
     const [editTarget, setEditTarget] = useState<Group | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Group | null>(null);
 
-    // Notification
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
     const showToast = useCallback((type: 'success' | 'error', msg: string) => {
         setToast({ type, msg });
         setTimeout(() => setToast(null), 3500);
     }, []);
-
-    // ── Load groups ───────────────────────────────────────────────────────
 
     const loadGroups = useCallback(async () => {
         try {
@@ -531,15 +454,13 @@ export default function GroupsPage() {
 
     useEffect(() => { loadGroups(); }, [loadGroups]);
 
-    // ── Load group detail when expanding ─────────────────────────────────
-
     const handleToggle = useCallback(async (groupId: string) => {
         if (expandedId === groupId) {
             setExpandedId(null);
             return;
         }
         setExpandedId(groupId);
-        if (details[groupId]) return; // already loaded
+        if (details[groupId]) return;
 
         try {
             const res = await fetch(`/api/groups/${groupId}`);
@@ -551,8 +472,6 @@ export default function GroupsPage() {
             /* silent */
         }
     }, [expandedId, details]);
-
-    // ── Create ────────────────────────────────────────────────────────────
 
     const handleCreate = async (form: GroupFormData) => {
         const res = await fetch('/api/groups', {
@@ -571,8 +490,6 @@ export default function GroupsPage() {
         showToast('success', `Group "${form.name.trim()}" created`);
     };
 
-    // ── Edit ──────────────────────────────────────────────────────────────
-
     const handleEdit = async (form: GroupFormData) => {
         if (!editTarget) return;
         const res = await fetch(`/api/groups/${editTarget.id}`, {
@@ -587,35 +504,29 @@ export default function GroupsPage() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to update group');
-        setGroups(prev =>
-            prev.map(g =>
-                g.id === editTarget.id
-                    ? { ...g, ...data.data.group }
-                    : g
-            )
-        );
-        // Invalidate cached detail
-        setDetails(prev => {
-            const next = { ...prev };
-            delete next[editTarget.id];
-            return next;
-        });
+        setGroups(prev => prev.map(g => g.id === editTarget.id ? { ...g, ...data.data.group } : g));
+        setDetails(prev => { const next = { ...prev }; delete next[editTarget.id]; return next; });
         showToast('success', 'Group updated');
     };
 
-    // ── Delete ────────────────────────────────────────────────────────────
-
-    const handleDelete = async () => {
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.preventDefault();
         if (!deleteTarget) return;
-        const res = await fetch(`/api/groups/${deleteTarget.id}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Failed to delete group');
-        setGroups(prev => prev.filter(g => g.id !== deleteTarget.id));
-        if (expandedId === deleteTarget.id) setExpandedId(null);
-        showToast('success', `Group "${deleteTarget.name}" deleted`);
+        setDeleting(true);
+        try {
+            const res = await fetch(`/api/groups/${deleteTarget.id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed to delete group');
+            setGroups(prev => prev.filter(g => g.id !== deleteTarget.id));
+            if (expandedId === deleteTarget.id) setExpandedId(null);
+            showToast('success', `Group "${deleteTarget.name}" deleted`);
+            setDeleteTarget(null);
+        } catch {
+            showToast('error', 'Failed to delete group');
+        } finally {
+            setDeleting(false);
+        }
     };
-
-    // ── Reorder ───────────────────────────────────────────────────────────
 
     const handleMove = useCallback(async (groupId: string, direction: 'up' | 'down') => {
         const idx = groups.findIndex(g => g.id === groupId);
@@ -634,30 +545,24 @@ export default function GroupsPage() {
                 body: JSON.stringify({ groupIds: next.map(g => g.id) }),
             });
         } catch {
-            // Revert on error
             setGroups(groups);
             showToast('error', 'Failed to reorder groups');
         }
     }, [groups, showToast]);
-
-    // ── Filtered view ─────────────────────────────────────────────────────
 
     const filtered = groups.filter(g =>
         !search || g.name.toLowerCase().includes(search.toLowerCase()) ||
         (g.description?.toLowerCase().includes(search.toLowerCase()))
     );
 
-    // ── Render ────────────────────────────────────────────────────────────
-
     return (
         <div className="max-w-3xl mx-auto">
-            {/* Toast */}
             {toast && (
                 <div
                     className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl text-sm font-medium transition-all duration-300 ${
                         toast.type === 'success'
                             ? 'bg-green-500/10 border-green-500/30 text-green-300'
-                            : 'bg-red-500/10 border-red-500/30 text-red-300'
+                            : 'bg-destructive/10 border-destructive/30 text-destructive'
                     }`}
                 >
                     {toast.type === 'success'
@@ -667,30 +572,25 @@ export default function GroupsPage() {
                 </div>
             )}
 
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl font-bold">Groups</h1>
-                    <p className="text-slate-400 text-sm mt-0.5">
+                    <p className="text-muted-foreground text-sm mt-0.5">
                         Organise your servers into groups
                     </p>
                 </div>
-                <button
-                    onClick={() => setShowCreate(true)}
-                    className="btn btn-primary shrink-0"
-                >
+                <Button onClick={() => setShowCreate(true)} className="shrink-0">
                     <Plus className="w-4 h-4" />
                     Create Group
-                </button>
+                </Button>
             </div>
 
-            {/* Search */}
             {groups.length > 3 && (
                 <div className="relative mb-5">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
                         type="text"
-                        className="input pl-9"
+                        className="bg-secondary border-border pl-9"
                         placeholder="Search groups…"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
@@ -698,43 +598,37 @@ export default function GroupsPage() {
                 </div>
             )}
 
-            {/* Content */}
             {loading ? (
-                <div className="flex items-center justify-center py-20 text-slate-400 gap-3">
+                <div className="flex items-center justify-center py-20 text-muted-foreground gap-3">
                     <Loader2 className="w-6 h-6 animate-spin" />
                     <span>Loading groups…</span>
                 </div>
             ) : groups.length === 0 ? (
-                /* ── Empty state ── */
-                <div className="card p-10 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                        <FolderOpen className="w-8 h-8 text-slate-500" />
+                <Card className="p-10 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
+                        <FolderOpen className="w-8 h-8 text-muted-foreground" />
                     </div>
                     <h2 className="text-lg font-semibold mb-2">No groups yet</h2>
-                    <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">
+                    <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
                         Groups help you organise servers by environment, project, or team.
                     </p>
-                    <button
-                        onClick={() => setShowCreate(true)}
-                        className="btn btn-primary mx-auto"
-                    >
+                    <Button onClick={() => setShowCreate(true)} className="mx-auto">
                         <Plus className="w-4 h-4" />
                         Create your first group
-                    </button>
-                </div>
+                    </Button>
+                </Card>
             ) : filtered.length === 0 ? (
-                <div className="card p-8 text-center text-slate-400">
+                <Card className="p-8 text-center text-muted-foreground">
                     <Search className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     <p className="text-sm">No groups match &ldquo;{search}&rdquo;</p>
                     <button
                         onClick={() => setSearch('')}
-                        className="mt-3 text-sky-400 hover:text-sky-300 text-sm transition-colors"
+                        className="mt-3 text-primary hover:text-primary/80 text-sm transition-colors"
                     >
                         Clear search
                     </button>
-                </div>
+                </Card>
             ) : (
-                /* ── Group list ── */
                 <div className="space-y-3">
                     {filtered.map((group, idx) => (
                         <GroupCard
@@ -752,8 +646,7 @@ export default function GroupsPage() {
                         />
                     ))}
 
-                    {/* Summary */}
-                    <p className="text-xs text-slate-600 text-center pt-2">
+                    <p className="text-xs text-muted-foreground/40 text-center pt-2">
                         {groups.length} group{groups.length !== 1 ? 's' : ''}
                         {' · '}
                         {groups.reduce((s, g) => s + g._count.servers, 0)} server{groups.reduce((s, g) => s + g._count.servers, 0) !== 1 ? 's' : ''} total
@@ -761,7 +654,6 @@ export default function GroupsPage() {
                 </div>
             )}
 
-            {/* Modals */}
             <GroupModal
                 open={showCreate}
                 mode="create"
@@ -785,13 +677,39 @@ export default function GroupsPage() {
                 onClose={() => setEditTarget(null)}
                 onSave={handleEdit}
             />
-            <DeleteModal
-                open={!!deleteTarget}
-                group={deleteTarget}
-                onClose={() => setDeleteTarget(null)}
-                onConfirm={handleDelete}
-            />
+
+            <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && !deleting && setDeleteTarget(null)}>
+                <AlertDialogContent className="bg-card border-border">
+                    <AlertDialogHeader>
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                            </div>
+                            <div>
+                                <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                                <AlertDialogDescription className="mt-1">
+                                    Are you sure you want to delete{' '}
+                                    <span className="text-foreground font-medium">&ldquo;{deleteTarget?.name}&rdquo;</span>?
+                                    {deleteTarget && deleteTarget._count.servers > 0 && (
+                                        <> The {deleteTarget._count.servers} server{deleteTarget._count.servers !== 1 ? 's' : ''} in this group will be ungrouped.</>
+                                    )}
+                                </AlertDialogDescription>
+                            </div>
+                        </div>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
-

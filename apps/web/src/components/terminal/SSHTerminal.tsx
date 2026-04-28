@@ -235,7 +235,7 @@ export default function SSHTerminal({
                                 : 'bg-red-500'
                         }`}
                 />
-                <span className="text-xs text-dark-400 capitalize">{status}</span>
+                <span className="text-xs text-muted-foreground capitalize">{status}</span>
             </div>
 
             {/* Terminal */}

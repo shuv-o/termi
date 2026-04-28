@@ -12,8 +12,8 @@ import {
     X,
     Monitor,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-// Dynamically import GuacamoleDisplay to avoid SSR issues
 const GuacamoleDisplay = dynamic(
     () => import('@/components/terminal/GuacamoleDisplay'),
     { ssr: false }
@@ -36,7 +36,6 @@ export default function RDPConnectionPage() {
     useEffect(() => {
         async function initConnection() {
             try {
-                // Fetch server details
                 const serverResponse = await fetch(`/api/servers/${serverId}`);
                 const serverData = await serverResponse.json();
 
@@ -48,14 +47,10 @@ export default function RDPConnectionPage() {
 
                 setServer(serverData.data.server);
 
-                // Get connection token
                 const tokenResponse = await fetch(`/api/connection/token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        serverId,
-                        protocol: 'rdp',
-                    }),
+                    body: JSON.stringify({ serverId, protocol: 'rdp' }),
                 });
 
                 const tokenData = await tokenResponse.json();
@@ -93,7 +88,6 @@ export default function RDPConnectionPage() {
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
-
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
@@ -101,18 +95,18 @@ export default function RDPConnectionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-                <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     if (error || !connectionToken) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
-                <p className="text-red-400 mb-4">{error || 'Connection failed'}</p>
-                <Link href="/dashboard" className="btn btn-primary">
-                    Back to Dashboard
-                </Link>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+                <p className="text-destructive">{error || 'Connection failed'}</p>
+                <Button asChild>
+                    <Link href="/dashboard">Back to Dashboard</Link>
+                </Button>
             </div>
         );
     }
@@ -122,65 +116,64 @@ export default function RDPConnectionPage() {
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                    <Link href="/dashboard" className="btn btn-ghost btn-icon">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
+                    <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+                        <Link href="/dashboard">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                    </Button>
                     <div>
                         <div className="flex items-center gap-2">
                             <Monitor className="w-5 h-5 text-purple-400" />
                             <h1 className="font-medium">{server?.name}</h1>
                         </div>
-                        <span className="text-sm text-dark-400">Remote Desktop (RDP)</span>
+                        <span className="text-sm text-muted-foreground">Remote Desktop (RDP)</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => window.location.reload()}
-                        className="btn btn-ghost btn-icon"
                         title="Reconnect"
                     >
                         <RotateCcw className="w-4 h-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={toggleFullscreen}
-                        className="btn btn-ghost btn-icon hidden sm:flex"
+                        className="hidden sm:flex"
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
-                        {isFullscreen ? (
-                            <Minimize2 className="w-4 h-4" />
-                        ) : (
-                            <Maximize2 className="w-4 h-4" />
-                        )}
-                    </button>
-                    <button
+                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => router.push('/dashboard')}
-                        className="btn btn-ghost btn-icon text-red-400 hover:text-red-300"
+                        className="text-destructive hover:text-destructive"
                         title="Disconnect"
                     >
                         <X className="w-4 h-4" />
-                    </button>
+                    </Button>
                 </div>
             </div>
 
             {/* Display */}
-            <div className="flex-1 min-h-0 bg-dark-800 rounded-lg overflow-hidden">
+            <div className="flex-1 min-h-0 bg-card rounded-lg overflow-hidden">
                 <GuacamoleDisplay
                     serverId={serverId}
                     connectionToken={connectionToken}
                     protocol="rdp"
                     gatewayUrl={gatewayUrl ?? undefined}
-                    onDisconnect={() => {
-                        console.log('RDP disconnected');
-                    }}
-                    onError={(err) => {
-                        console.error('RDP error:', err);
-                    }}
+                    onDisconnect={() => { console.log('RDP disconnected'); }}
+                    onError={(err) => { console.error('RDP error:', err); }}
                 />
             </div>
 
             {/* Info */}
-            <div className="mt-4 text-xs text-dark-400 text-center">
+            <div className="mt-4 text-xs text-muted-foreground text-center">
                 <p>Use your mouse and keyboard to interact with the remote desktop.</p>
                 <p className="mt-1">Right-click is supported. Press ESC to release focus.</p>
             </div>

@@ -5,12 +5,16 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     ArrowLeft, Terminal, FolderOpen, Monitor, Pencil,
-    Loader2, Activity, Wifi, WifiOff, Bell, BellOff,
+    Loader2, Activity, Wifi, WifiOff, Bell,
     CheckCircle2, AlertTriangle, Clock, Cpu, MemoryStick,
-    HardDrive, ToggleLeft, ToggleRight, Mail, BellRing,
+    HardDrive, Mail, BellRing,
     RefreshCw, Tv, Zap, Play, Server,
 } from 'lucide-react';
 import MetricSparkline from '@/components/monitoring/MetricSparkline';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // ============================================================================
 // TYPES
@@ -177,58 +181,12 @@ function ScoreBadge({ score }: { score: number }) {
     );
 }
 
-
-function MetricCard({
-    label,
-    value,
-    icon: Icon,
-    color,
-    data,
-    unit = '%',
-    alertAt,
-}: {
-    label: string;
-    value: number | null | undefined;
-    icon: React.ElementType;
-    color: string;
-    data: (number | null | undefined)[];
-    unit?: string;
-    alertAt?: number;
-}) {
-    const displayValue = value != null ? `${Math.round(value)}${unit}` : '—';
-    const isAlert = alertAt != null && value != null && value >= alertAt;
-
+function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
-        <div className="card p-4">
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <Icon className={`w-4 h-4 ${color}`} />
-                    <span className="text-xs font-medium text-slate-400">{label}</span>
-                </div>
-                <span className={`text-lg font-bold tabular-nums ${isAlert ? 'text-red-400' : 'text-white'}`}>
-                    {displayValue}
-                </span>
-            </div>
-            <MetricSparkline
-                data={data}
-                color={isAlert ? '#ef4444' : color.replace('text-', '#').replace('-400', '')}
-                height={44}
-                alertThreshold={alertAt}
-            />
-        </div>
-    );
-}
-
-function StatPill({
-    label,
-    value,
-    sub,
-}: { label: string; value: string; sub?: string }) {
-    return (
-        <div className="flex flex-col gap-0.5 px-3 py-2 rounded-lg bg-slate-800/60 border border-slate-700/50">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">{label}</span>
-            <span className="text-sm font-semibold text-white">{value}</span>
-            {sub && <span className="text-[10px] text-slate-500">{sub}</span>}
+        <div className="flex flex-col gap-0.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
+            <span className="text-sm font-semibold text-foreground">{value}</span>
+            {sub && <span className="text-[10px] text-muted-foreground">{sub}</span>}
         </div>
     );
 }
@@ -257,13 +215,11 @@ export default function ServerDetailsPage() {
     const [saving, setSaving] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Benchmark state
     const [benchRunning, setBenchRunning] = useState(false);
     const [benchPhase, setBenchPhase] = useState<BenchmarkPhase | null>(null);
     const [benchMessage, setBenchMessage] = useState('');
     const [benchResults, setBenchResults] = useState<BenchmarkResults | null>(null);
 
-    // Local form state for monitor config
     const [form, setForm] = useState({
         enabled: false,
         checkIntervalMinutes: 5 as 1 | 5 | 10 | 15 | 30 | 60,
@@ -271,8 +227,6 @@ export default function ServerDetailsPage() {
         alertPush: true,
         failureThreshold: 3,
     });
-
-    // ── Load Data ──────────────────────────────────────────────────────────
 
     const loadAll = useCallback(async () => {
         try {
@@ -326,8 +280,6 @@ export default function ServerDetailsPage() {
         }
     };
 
-    // ── Benchmark ──────────────────────────────────────────────────────────
-
     const handleRunBenchmark = async () => {
         setBenchRunning(true);
         setBenchResults(null);
@@ -369,8 +321,6 @@ export default function ServerDetailsPage() {
         }
     };
 
-    // ── Save Monitor Config ────────────────────────────────────────────────
-
     const handleSaveMonitor = async () => {
         setSaving(true);
         try {
@@ -388,8 +338,6 @@ export default function ServerDetailsPage() {
         }
     };
 
-    // ── Derived Data ───────────────────────────────────────────────────────
-
     const latencies = healthRecords.map(r => r.reachable ? (r.latencyMs ?? null) : null);
     const cpus = healthRecords.map(r => r.cpuPercent);
     const rams = healthRecords.map(r => r.ramPercent);
@@ -403,12 +351,10 @@ export default function ServerDetailsPage() {
 
     const isSSH = server?.protocol === 'SSH';
 
-    // ── Render ─────────────────────────────────────────────────────────────
-
     if (loading) {
         return (
             <div className="flex items-center justify-center h-48">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
         );
     }
@@ -424,9 +370,11 @@ export default function ServerDetailsPage() {
 
             {/* ── Header ── */}
             <div className="flex items-center gap-3">
-                <Link href="/dashboard" className="btn btn-ghost btn-icon btn-sm">
-                    <ArrowLeft className="w-4 h-4" />
-                </Link>
+                <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+                    <Link href="/dashboard">
+                        <ArrowLeft className="w-4 h-4" />
+                    </Link>
+                </Button>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5">
                         <h1 className="text-xl font-semibold truncate">{server.name}</h1>
@@ -443,30 +391,32 @@ export default function ServerDetailsPage() {
                         )}
                     </div>
                     {server.description && (
-                        <p className="text-sm text-slate-400 mt-0.5 truncate">{server.description}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5 truncate">{server.description}</p>
                     )}
                 </div>
-                <Link href={`/dashboard/servers/${id}/edit`} className="btn btn-secondary btn-sm gap-1.5">
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit
-                </Link>
+                <Button variant="secondary" size="sm" asChild className="gap-1.5">
+                    <Link href={`/dashboard/servers/${id}/edit`}>
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit
+                    </Link>
+                </Button>
             </div>
 
             {/* ── Server Info + Quick Stats ── */}
-            <div className="card p-4">
+            <Card className="p-4">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${protoColor}`}>
                         <ProtoIcon className="w-3.5 h-3.5" />
                         {server.protocol}
                     </div>
-                    <span className="font-mono text-sm text-slate-300">{server.host}:{server.port}</span>
+                    <span className="font-mono text-sm text-foreground/80">{server.host}:{server.port}</span>
                     {server.group && (
-                        <span className="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300">
+                        <span className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
                             {server.group.name}
                         </span>
                     )}
                     {server.tags.map(t => (
-                        <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">{t}</span>
+                        <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground">{t}</span>
                     ))}
                 </div>
 
@@ -494,58 +444,56 @@ export default function ServerDetailsPage() {
                     )}
                 </div>
 
-                {/* Connect buttons */}
-                <div className="flex gap-2 mt-4 pt-4 border-t border-slate-700/50">
-                    <Link
-                        href={`/dashboard/connect/${id}/${server.protocol.toLowerCase()}`}
-                        className="btn btn-primary btn-sm gap-1.5"
-                    >
-                        <ProtoIcon className="w-3.5 h-3.5" />
-                        Connect via {server.protocol}
-                    </Link>
+                <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
+                    <Button size="sm" asChild className="gap-1.5">
+                        <Link href={`/dashboard/connect/${id}/${server.protocol.toLowerCase()}`}>
+                            <ProtoIcon className="w-3.5 h-3.5" />
+                            Connect via {server.protocol}
+                        </Link>
+                    </Button>
                 </div>
-            </div>
+            </Card>
 
             {/* ── Monitoring Graphs ── */}
             <div>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-sky-400" />
+                    <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" />
                         Health History
-                        <span className="text-[10px] text-slate-500 font-normal">({healthRecords.length} records)</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">({healthRecords.length} records)</span>
                     </h2>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={refreshHistory}
                         disabled={refreshing}
-                        className="btn btn-ghost btn-icon btn-sm"
+                        className="h-8 w-8"
                         title="Refresh"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                    </button>
+                    </Button>
                 </div>
 
                 {healthRecords.length === 0 ? (
-                    <div className="card p-8 text-center">
-                        <Activity className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500">No health data yet</p>
-                        <p className="text-xs text-slate-600 mt-1">Enable monitoring below to start collecting data</p>
-                    </div>
+                    <Card className="p-8 text-center">
+                        <Activity className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">No health data yet</p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">Enable monitoring below to start collecting data</p>
+                    </Card>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {/* Latency */}
-                        <div className="card p-4">
+                        <Card className="p-4">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <Wifi className="w-4 h-4 text-sky-400" />
-                                    <span className="text-xs font-medium text-slate-400">Latency</span>
+                                    <Wifi className="w-4 h-4 text-primary" />
+                                    <span className="text-xs font-medium text-muted-foreground">Latency</span>
                                 </div>
-                                <span className="text-lg font-bold tabular-nums text-white">
+                                <span className="text-lg font-bold tabular-nums text-foreground">
                                     {lastRecord?.latencyMs != null ? `${lastRecord.latencyMs}ms` : '—'}
                                 </span>
                             </div>
                             <MetricSparkline data={latencies} color="#38bdf8" height={44} />
-                            {/* Uptime bar */}
-                            <div className="mt-3 pt-3 border-t border-slate-700/50">
+                            <div className="mt-3 pt-3 border-t border-border/50">
                                 <div className="flex gap-0.5 h-3 rounded overflow-hidden">
                                     {healthRecords.slice(-40).map((r, i) => (
                                         <div
@@ -555,58 +503,55 @@ export default function ServerDetailsPage() {
                                         />
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-slate-500 mt-1">
+                                <p className="text-[10px] text-muted-foreground mt-1">
                                     Uptime: {upCount}/{healthRecords.length} checks
                                 </p>
                             </div>
-                        </div>
+                        </Card>
 
-                        {/* CPU — only for SSH */}
                         {isSSH && (
-                            <div className="card p-4">
+                            <Card className="p-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <Cpu className="w-4 h-4 text-violet-400" />
-                                        <span className="text-xs font-medium text-slate-400">CPU</span>
+                                        <span className="text-xs font-medium text-muted-foreground">CPU</span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.cpuPercent ?? 0) >= 90 ? 'text-red-400' : 'text-white'}`}>
+                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.cpuPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
                                         {lastRecord?.cpuPercent != null ? `${Math.round(lastRecord.cpuPercent)}%` : '—'}
                                     </span>
                                 </div>
                                 <MetricSparkline data={cpus} color="#a78bfa" height={44} alertThreshold={90} />
-                            </div>
+                            </Card>
                         )}
 
-                        {/* RAM — only for SSH */}
                         {isSSH && (
-                            <div className="card p-4">
+                            <Card className="p-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <MemoryStick className="w-4 h-4 text-amber-400" />
-                                        <span className="text-xs font-medium text-slate-400">RAM</span>
+                                        <span className="text-xs font-medium text-muted-foreground">RAM</span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.ramPercent ?? 0) >= 90 ? 'text-red-400' : 'text-white'}`}>
+                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.ramPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
                                         {lastRecord?.ramPercent != null ? `${Math.round(lastRecord.ramPercent)}%` : '—'}
                                     </span>
                                 </div>
                                 <MetricSparkline data={rams} color="#fbbf24" height={44} alertThreshold={90} />
-                            </div>
+                            </Card>
                         )}
 
-                        {/* Disk — only for SSH */}
                         {isSSH && (
-                            <div className="card p-4">
+                            <Card className="p-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <HardDrive className="w-4 h-4 text-rose-400" />
-                                        <span className="text-xs font-medium text-slate-400">Disk</span>
+                                        <span className="text-xs font-medium text-muted-foreground">Disk</span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.diskPercent ?? 0) >= 90 ? 'text-red-400' : 'text-white'}`}>
+                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.diskPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
                                         {lastRecord?.diskPercent != null ? `${Math.round(lastRecord.diskPercent)}%` : '—'}
                                     </span>
                                 </div>
                                 <MetricSparkline data={disks} color="#fb7185" height={44} alertThreshold={90} />
-                            </div>
+                            </Card>
                         )}
                     </div>
                 )}
@@ -614,42 +559,34 @@ export default function ServerDetailsPage() {
 
             {/* ── Monitor Configuration ── */}
             <div>
-                <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2 mb-3">
+                <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
                     <Bell className="w-4 h-4 text-amber-400" />
                     Monitoring & Alerts
                 </h2>
 
-                <div className="card divide-y divide-slate-700/50">
-
+                <Card className="divide-y divide-border/50">
                     {/* Enable toggle */}
                     <div className="p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium">Enable Monitoring</p>
-                            <p className="text-xs text-slate-500 mt-0.5">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 Periodically check if this server is reachable
                             </p>
                         </div>
-                        <button
-                            onClick={() => setForm(f => ({ ...f, enabled: !f.enabled }))}
-                            className="shrink-0"
-                        >
-                            {form.enabled
-                                ? <ToggleRight className="w-9 h-9 text-sky-400" />
-                                : <ToggleLeft className="w-9 h-9 text-slate-600" />
-                            }
-                        </button>
+                        <Switch
+                            checked={form.enabled}
+                            onCheckedChange={(checked) => setForm(f => ({ ...f, enabled: checked }))}
+                        />
                     </div>
 
                     {/* Check interval */}
                     <div className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <div>
-                                <p className="text-sm font-medium flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                                    Check Interval
-                                </p>
-                                <p className="text-xs text-slate-500 mt-0.5">How often to ping the server</p>
-                            </div>
+                        <div className="mb-2">
+                            <p className="text-sm font-medium flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                Check Interval
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">How often to ping the server</p>
                         </div>
                         <div className="flex flex-wrap gap-1.5 mt-2">
                             {INTERVALS.map(opt => (
@@ -659,10 +596,10 @@ export default function ServerDetailsPage() {
                                     disabled={!form.enabled}
                                     className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                                         form.checkIntervalMinutes === opt.value && form.enabled
-                                            ? 'bg-sky-500/15 border-sky-500/40 text-sky-400'
+                                            ? 'bg-primary/15 border-primary/40 text-primary'
                                             : !form.enabled
-                                            ? 'border-slate-700 text-slate-700 cursor-not-allowed'
-                                            : 'border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                                            ? 'border-border text-muted-foreground/30 cursor-not-allowed'
+                                            : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
                                     }`}
                                 >
                                     {opt.label}
@@ -678,7 +615,7 @@ export default function ServerDetailsPage() {
                                 <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                                 Failure Threshold
                             </p>
-                            <p className="text-xs text-slate-500 mt-0.5">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 Alert after this many consecutive failed checks
                             </p>
                         </div>
@@ -692,11 +629,11 @@ export default function ServerDetailsPage() {
                                 onChange={e => setForm(f => ({ ...f, failureThreshold: parseInt(e.target.value) }))}
                                 className="flex-1 accent-sky-500 disabled:opacity-40"
                             />
-                            <span className="text-sm font-bold text-white w-8 text-center tabular-nums">
+                            <span className="text-sm font-bold text-foreground w-8 text-center tabular-nums">
                                 {form.failureThreshold}×
                             </span>
                         </div>
-                        <p className="text-xs text-slate-600 mt-1">
+                        <p className="text-xs text-muted-foreground/40 mt-1">
                             Alert fires after {form.failureThreshold} consecutive failure{form.failureThreshold !== 1 ? 's' : ''}
                             {form.enabled && form.checkIntervalMinutes
                                 ? ` (~${form.failureThreshold * form.checkIntervalMinutes} min downtime)`
@@ -706,61 +643,57 @@ export default function ServerDetailsPage() {
 
                     {/* Alert channels */}
                     <div className="p-4 space-y-3">
-                        <p className="text-sm font-medium text-slate-300">Alert Channels</p>
+                        <p className="text-sm font-medium text-foreground/80">Alert Channels</p>
 
-                        <label className={`flex items-center justify-between cursor-pointer rounded-lg px-3 py-2.5 border transition-colors ${
+                        <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
                             form.alertEmail && form.enabled
-                                ? 'bg-sky-500/8 border-sky-500/30'
-                                : 'border-slate-700/60 bg-transparent'
-                        } ${!form.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                ? 'bg-primary/8 border-primary/30'
+                                : 'border-border/60 bg-transparent'
+                        } ${!form.enabled ? 'opacity-50' : ''}`}>
                             <div className="flex items-center gap-2.5">
-                                <Mail className="w-4 h-4 text-slate-400" />
+                                <Mail className="w-4 h-4 text-muted-foreground" />
                                 <div>
                                     <p className="text-sm font-medium">Email</p>
-                                    <p className="text-xs text-slate-500">Send alert to your account email</p>
+                                    <p className="text-xs text-muted-foreground">Send alert to your account email</p>
                                 </div>
                             </div>
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={form.alertEmail}
                                 disabled={!form.enabled}
-                                onChange={e => setForm(f => ({ ...f, alertEmail: e.target.checked }))}
-                                className="w-4 h-4 accent-sky-500"
+                                onCheckedChange={(c) => setForm(f => ({ ...f, alertEmail: !!c }))}
                             />
-                        </label>
+                        </div>
 
-                        <label className={`flex items-center justify-between cursor-pointer rounded-lg px-3 py-2.5 border transition-colors ${
+                        <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
                             form.alertPush && form.enabled
-                                ? 'bg-sky-500/8 border-sky-500/30'
-                                : 'border-slate-700/60 bg-transparent'
-                        } ${!form.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                ? 'bg-primary/8 border-primary/30'
+                                : 'border-border/60 bg-transparent'
+                        } ${!form.enabled ? 'opacity-50' : ''}`}>
                             <div className="flex items-center gap-2.5">
-                                <BellRing className="w-4 h-4 text-slate-400" />
+                                <BellRing className="w-4 h-4 text-muted-foreground" />
                                 <div>
                                     <p className="text-sm font-medium">Push Notification</p>
-                                    <p className="text-xs text-slate-500">Browser / mobile push alert</p>
+                                    <p className="text-xs text-muted-foreground">Browser / mobile push alert</p>
                                 </div>
                             </div>
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={form.alertPush}
                                 disabled={!form.enabled}
-                                onChange={e => setForm(f => ({ ...f, alertPush: e.target.checked }))}
-                                className="w-4 h-4 accent-sky-500"
+                                onCheckedChange={(c) => setForm(f => ({ ...f, alertPush: !!c }))}
                             />
-                        </label>
+                        </div>
                     </div>
 
                     {/* Current state indicator */}
                     {monitorConfig?.enabled && (
-                        <div className="px-4 py-3 bg-slate-800/40">
+                        <div className="px-4 py-3 bg-secondary/40">
                             <div className="flex items-center gap-3 text-xs">
                                 {monitorConfig.alertSent ? (
                                     <>
                                         <WifiOff className="w-4 h-4 text-red-400 shrink-0" />
                                         <div>
                                             <span className="text-red-400 font-medium">Server is currently DOWN</span>
-                                            <span className="text-slate-500 ml-1.5">— alert was sent</span>
+                                            <span className="text-muted-foreground ml-1.5">— alert was sent</span>
                                         </div>
                                     </>
                                 ) : monitorConfig.consecutiveFailures > 0 ? (
@@ -778,7 +711,7 @@ export default function ServerDetailsPage() {
                                     </>
                                 )}
                                 {monitorConfig.lastCheckedAt && (
-                                    <span className="ml-auto text-slate-600">
+                                    <span className="ml-auto text-muted-foreground/40">
                                         Last checked {formatRelativeTime(monitorConfig.lastCheckedAt)}
                                     </span>
                                 )}
@@ -788,46 +721,43 @@ export default function ServerDetailsPage() {
 
                     {/* Save button */}
                     <div className="p-4">
-                        <button
-                            onClick={handleSaveMonitor}
-                            disabled={saving}
-                            className="btn btn-primary w-full"
-                        >
+                        <Button onClick={handleSaveMonitor} disabled={saving} className="w-full">
                             {saving
                                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
                                 : <><Bell className="w-4 h-4" /> Save Monitoring Settings</>
                             }
-                        </button>
+                        </Button>
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* ── Hardware Benchmark ── */}
             {isSSH && (
                 <div>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
                             <Zap className="w-4 h-4 text-yellow-400" />
                             Hardware Benchmark
                         </h2>
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={handleRunBenchmark}
                             disabled={benchRunning}
-                            className="btn btn-secondary btn-sm gap-1.5"
+                            className="gap-1.5"
                         >
                             {benchRunning
                                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Running…</>
                                 : <><Play className="w-3.5 h-3.5" /> Run Benchmark</>
                             }
-                        </button>
+                        </Button>
                     </div>
 
-                    {/* Progress bar */}
                     {benchRunning && (
-                        <div className="card p-4 mb-3">
+                        <Card className="p-4 mb-3">
                             <div className="flex items-center gap-3 mb-3">
                                 <Loader2 className="w-4 h-4 animate-spin text-yellow-400 shrink-0" />
-                                <p className="text-sm text-white">{benchMessage}</p>
+                                <p className="text-sm text-foreground">{benchMessage}</p>
                             </div>
                             <div className="flex gap-1">
                                 {BENCHMARK_PHASES.map((p, i) => {
@@ -839,48 +769,42 @@ export default function ServerDetailsPage() {
                                             <div className={`h-1 w-full rounded-full transition-colors ${
                                                 done   ? 'bg-yellow-400' :
                                                 active ? 'bg-yellow-400/60 animate-pulse' :
-                                                         'bg-slate-700'
+                                                         'bg-secondary'
                                             }`} />
-                                            <span className={`text-[9px] hidden sm:block ${active ? 'text-yellow-400' : done ? 'text-slate-400' : 'text-slate-600'}`}>
+                                            <span className={`text-[9px] hidden sm:block ${active ? 'text-yellow-400' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
                                                 {p.label}
                                             </span>
                                         </div>
                                     );
                                 })}
                             </div>
-                        </div>
+                        </Card>
                     )}
 
-                    {/* Error state */}
                     {!benchRunning && benchPhase === 'error' && (
-                        <div className="card p-4 flex items-center gap-3 mb-3 border border-red-500/20 bg-red-500/5">
-                            <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                            <p className="text-sm text-red-300">{benchMessage}</p>
-                        </div>
+                        <Card className="p-4 flex items-center gap-3 mb-3 border-destructive/20 bg-destructive/5">
+                            <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                            <p className="text-sm text-destructive/80">{benchMessage}</p>
+                        </Card>
                     )}
 
-                    {/* Results */}
                     {benchResults && (
                         <div className="space-y-3">
-
-                            {/* Overall score */}
                             {benchResults.scores && (
-                                <div className="card p-4">
+                                <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-4">
                                         <Zap className="w-4 h-4 text-yellow-400" />
-                                        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Benchmark Score</span>
-                                        <span className="text-[10px] text-slate-500 ml-auto">scored vs. high-end server reference</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Benchmark Score</span>
+                                        <span className="text-[10px] text-muted-foreground ml-auto">scored vs. high-end server reference</span>
                                     </div>
-                                    {/* Overall big score */}
                                     <div className="flex items-center justify-center mb-4">
                                         <div className={`flex flex-col items-center px-8 py-4 rounded-2xl border-2 ${scoreBg(benchResults.scores.overall)}`}>
                                             <span className={`text-5xl font-black tabular-nums ${scoreColor(benchResults.scores.overall)}`}>
                                                 {benchResults.scores.overall}
                                             </span>
-                                            <span className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Overall</span>
+                                            <span className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Overall</span>
                                         </div>
                                     </div>
-                                    {/* Per-category scores */}
                                     <div className="grid grid-cols-4 gap-2">
                                         {([
                                             { label: 'CPU',     score: benchResults.scores.cpu },
@@ -888,12 +812,11 @@ export default function ServerDetailsPage() {
                                             { label: 'Disk',    score: benchResults.scores.disk },
                                             { label: 'Network', score: benchResults.scores.network },
                                         ] as const).map(({ label, score }) => (
-                                            <div key={label} className="flex flex-col items-center gap-1.5 rounded-lg bg-slate-800/60 border border-slate-700/50 py-3">
+                                            <div key={label} className="flex flex-col items-center gap-1.5 rounded-lg bg-secondary/60 border border-border/50 py-3">
                                                 <span className={`text-xl font-bold tabular-nums ${scoreColor(score)}`}>{score}</span>
-                                                <span className="text-[10px] text-slate-500 uppercase tracking-wide">{label}</span>
-                                                {/* Mini bar */}
+                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
                                                 <div className="w-full px-3">
-                                                    <div className="h-1 rounded-full bg-slate-700">
+                                                    <div className="h-1 rounded-full bg-secondary">
                                                         <div
                                                             className={`h-full rounded-full transition-all ${score >= 800 ? 'bg-emerald-400' : score >= 600 ? 'bg-yellow-400' : score >= 400 ? 'bg-amber-400' : 'bg-red-400'}`}
                                                             style={{ width: `${score / 10}%` }}
@@ -903,26 +826,25 @@ export default function ServerDetailsPage() {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </Card>
                             )}
 
-                            {/* Hardware info */}
                             {benchResults.hardware && (
-                                <div className="card p-4">
+                                <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <Server className="w-4 h-4 text-slate-400" />
-                                        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Hardware</span>
+                                        <Server className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Hardware</span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2 flex-1 min-w-[200px]">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">CPU</p>
-                                            <p className="text-sm font-semibold text-white truncate">{benchResults.hardware.cpuModel}</p>
-                                            <p className="text-[11px] text-slate-500 mt-0.5">
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 flex-1 min-w-[200px]">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">CPU</p>
+                                            <p className="text-sm font-semibold text-foreground truncate">{benchResults.hardware.cpuModel}</p>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5">
                                                 {benchResults.hardware.cpuCores}C / {benchResults.hardware.cpuThreads}T
                                                 {' · '}{benchResults.hardware.arch}
                                             </p>
                                             {(benchResults.hardware.cpuFreqMhz || benchResults.hardware.cpuBaseFreqMhz) && (
-                                                <p className="text-[11px] text-slate-400 mt-0.5">
+                                                <p className="text-[11px] text-muted-foreground/70 mt-0.5">
                                                     {benchResults.hardware.cpuBaseFreqMhz
                                                         ? `${(benchResults.hardware.cpuBaseFreqMhz / 1000).toFixed(2)} GHz base`
                                                         : ''}
@@ -933,51 +855,50 @@ export default function ServerDetailsPage() {
                                                 </p>
                                             )}
                                         </div>
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2 min-w-[100px]">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">RAM</p>
-                                            <p className="text-sm font-semibold text-white">{formatBytes(benchResults.hardware.ramTotalBytes)}</p>
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 min-w-[100px]">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">RAM</p>
+                                            <p className="text-sm font-semibold text-foreground">{formatBytes(benchResults.hardware.ramTotalBytes)}</p>
                                         </div>
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2 min-w-[130px]">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Disk</p>
-                                            <p className="text-sm font-semibold text-white">{formatBytes(benchResults.hardware.diskTotalBytes)}</p>
-                                            <p className="text-[11px] text-slate-500 mt-0.5">{formatBytes(benchResults.hardware.diskUsedBytes)} used</p>
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 min-w-[130px]">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Disk</p>
+                                            <p className="text-sm font-semibold text-foreground">{formatBytes(benchResults.hardware.diskTotalBytes)}</p>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5">{formatBytes(benchResults.hardware.diskUsedBytes)} used</p>
                                         </div>
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2 flex-1 min-w-[120px]">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">OS</p>
-                                            <p className="text-sm font-semibold text-white truncate">{benchResults.hardware.os}</p>
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 flex-1 min-w-[120px]">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">OS</p>
+                                            <p className="text-sm font-semibold text-foreground truncate">{benchResults.hardware.os}</p>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             )}
 
-                            {/* CPU performance */}
                             {benchResults.cpu && (
-                                <div className="card p-4">
+                                <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
                                         <Cpu className="w-4 h-4 text-violet-400" />
-                                        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">CPU Performance</span>
-                                        <span className="text-[10px] text-slate-500 ml-1">SHA-256</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">CPU Performance</span>
+                                        <span className="text-[10px] text-muted-foreground ml-1">SHA-256</span>
                                         <div className="ml-auto">
                                             <ScoreBadge score={benchResults.cpu.score} />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Single-Core</p>
-                                            <p className="text-lg font-bold tabular-nums text-white">
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Single-Core</p>
+                                            <p className="text-lg font-bold tabular-nums text-foreground">
                                                 {benchResults.cpu.singleCoreMBps.toLocaleString()}
-                                                <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>
+                                                <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>
                                             </p>
-                                            <p className="text-[10px] text-slate-600 mt-0.5">1 thread</p>
+                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">1 thread</p>
                                         </div>
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Multi-Core</p>
-                                            <p className="text-lg font-bold tabular-nums text-white">
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Multi-Core</p>
+                                            <p className="text-lg font-bold tabular-nums text-foreground">
                                                 {benchResults.cpu.multiCoreMBps.toLocaleString()}
-                                                <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>
+                                                <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>
                                             </p>
                                             {benchResults.hardware && (
-                                                <p className="text-[10px] text-slate-600 mt-0.5">
+                                                <p className="text-[10px] text-muted-foreground/40 mt-0.5">
                                                     {benchResults.hardware.cpuThreads} threads
                                                     {benchResults.cpu.singleCoreMBps > 0
                                                         ? ` · ${(benchResults.cpu.multiCoreMBps / benchResults.cpu.singleCoreMBps).toFixed(1)}× scaling`
@@ -986,119 +907,115 @@ export default function ServerDetailsPage() {
                                             )}
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             )}
 
-                            {/* RAM & Disk */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {benchResults.ram && (
-                                    <div className="card p-4">
+                                    <Card className="p-4">
                                         <div className="flex items-center gap-2 mb-3">
                                             <MemoryStick className="w-4 h-4 text-amber-400" />
-                                            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">RAM Bandwidth</span>
+                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">RAM Bandwidth</span>
                                             <div className="ml-auto">
                                                 <ScoreBadge score={benchResults.ram.score} />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Write</p>
-                                                <p className="text-base font-bold tabular-nums text-white">
+                                            <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Write</p>
+                                                <p className="text-base font-bold tabular-nums text-foreground">
                                                     {benchResults.ram.writeMBps > 0 ? benchResults.ram.writeMBps.toLocaleString() : '—'}
-                                                    {benchResults.ram.writeMBps > 0 && <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>}
+                                                    {benchResults.ram.writeMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
                                                 </p>
                                             </div>
-                                            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Read</p>
-                                                <p className="text-base font-bold tabular-nums text-white">
+                                            <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Read</p>
+                                                <p className="text-base font-bold tabular-nums text-foreground">
                                                     {benchResults.ram.readMBps > 0 ? benchResults.ram.readMBps.toLocaleString() : '—'}
-                                                    {benchResults.ram.readMBps > 0 && <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>}
+                                                    {benchResults.ram.readMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Card>
                                 )}
                                 {benchResults.disk && (
-                                    <div className="card p-4">
+                                    <Card className="p-4">
                                         <div className="flex items-center gap-2 mb-3">
                                             <HardDrive className="w-4 h-4 text-rose-400" />
-                                            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Disk Speed</span>
+                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Disk Speed</span>
                                             <div className="ml-auto">
                                                 <ScoreBadge score={benchResults.disk.score} />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Write</p>
-                                                <p className="text-base font-bold tabular-nums text-white">
+                                            <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Write</p>
+                                                <p className="text-base font-bold tabular-nums text-foreground">
                                                     {benchResults.disk.writeMBps > 0 ? benchResults.disk.writeMBps.toLocaleString() : '—'}
-                                                    {benchResults.disk.writeMBps > 0 && <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>}
+                                                    {benchResults.disk.writeMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
                                                 </p>
                                             </div>
-                                            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Read</p>
-                                                <p className="text-base font-bold tabular-nums text-white">
+                                            <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Read</p>
+                                                <p className="text-base font-bold tabular-nums text-foreground">
                                                     {benchResults.disk.readMBps > 0 ? benchResults.disk.readMBps.toLocaleString() : '—'}
-                                                    {benchResults.disk.readMBps > 0 && <span className="text-xs font-normal text-slate-400 ml-1">MB/s</span>}
+                                                    {benchResults.disk.readMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Card>
                                 )}
                             </div>
 
-                            {/* Network */}
                             {benchResults.network && (
-                                <div className="card p-4">
+                                <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <Wifi className="w-4 h-4 text-sky-400" />
-                                        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Network</span>
+                                        <Wifi className="w-4 h-4 text-primary" />
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Network</span>
                                         <div className="ml-auto">
                                             <ScoreBadge score={benchResults.network.score} />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Latency (ping 1.1.1.1)</p>
-                                            <p className="text-base font-bold tabular-nums text-white">
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Latency (ping 1.1.1.1)</p>
+                                            <p className="text-base font-bold tabular-nums text-foreground">
                                                 {benchResults.network.pingMs != null
-                                                    ? <>{benchResults.network.pingMs.toFixed(1)}<span className="text-xs font-normal text-slate-400 ml-1">ms</span></>
-                                                    : <span className="text-slate-500">Unreachable</span>
+                                                    ? <>{benchResults.network.pingMs.toFixed(1)}<span className="text-xs font-normal text-muted-foreground ml-1">ms</span></>
+                                                    : <span className="text-muted-foreground">Unreachable</span>
                                                 }
                                             </p>
                                         </div>
-                                        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 px-3 py-2">
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Loopback Bandwidth</p>
-                                            <p className="text-base font-bold tabular-nums text-white">
+                                        <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Loopback Bandwidth</p>
+                                            <p className="text-base font-bold tabular-nums text-foreground">
                                                 {benchResults.network.loopbackMBps != null
-                                                    ? <>{benchResults.network.loopbackMBps.toLocaleString()}<span className="text-xs font-normal text-slate-400 ml-1">MB/s</span></>
-                                                    : <span className="text-slate-500">N/A</span>
+                                                    ? <>{benchResults.network.loopbackMBps.toLocaleString()}<span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span></>
+                                                    : <span className="text-muted-foreground">N/A</span>
                                                 }
                                             </p>
-                                            <p className="text-[10px] text-slate-600 mt-0.5">OS kernel socket speed</p>
+                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">OS kernel socket speed</p>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             )}
 
-                            {/* Footer */}
                             {benchResults.durationMs && (
-                                <p className="text-[11px] text-slate-600 text-right">
+                                <p className="text-[11px] text-muted-foreground/40 text-right">
                                     Completed in {(benchResults.durationMs / 1000).toFixed(1)}s · 256 MB test blocks · no software installed
                                 </p>
                             )}
                         </div>
                     )}
 
-                    {/* Empty state */}
                     {!benchRunning && !benchResults && benchPhase !== 'error' && (
-                        <div className="card p-8 text-center">
-                            <Zap className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                            <p className="text-sm text-slate-500">No benchmark data</p>
-                            <p className="text-xs text-slate-600 mt-1">
+                        <Card className="p-8 text-center">
+                            <Zap className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">No benchmark data</p>
+                            <p className="text-xs text-muted-foreground/60 mt-1">
                                 Measures CPU single/multi-core, RAM, disk, and network — agentlessly via SSH
                             </p>
-                        </div>
+                        </Card>
                     )}
                 </div>
             )}

@@ -190,7 +190,7 @@ export default function GuacamoleDisplay({
             {isConnecting && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
                     <div className="text-center">
-                        <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                         <p className="text-white">
                             Connecting to {protocol.toUpperCase()}...
                         </p>

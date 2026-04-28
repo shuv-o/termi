@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Terminal, Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -18,7 +23,6 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Password requirements
     const passwordRequirements = [
         { label: 'At least 8 characters', met: formData.password.length >= 8 },
         { label: 'Uppercase letter', met: /[A-Z]/.test(formData.password) },
@@ -67,7 +71,6 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Registration successful, redirect to login
             router.push('/login?registered=true');
         } catch {
             setError('An error occurred. Please try again.');
@@ -76,187 +79,163 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950">
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary-500/5 rounded-full blur-3xl" />
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
                 <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="card p-8">
-                    {/* Logo */}
-                    <div className="flex items-center justify-center gap-3 mb-8">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-                            <Terminal className="w-7 h-7 text-white" />
-                        </div>
-                        <span className="text-2xl font-bold gradient-text">Termi</span>
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
-                    <p className="text-dark-400 text-center mb-8">
-                        Start managing your servers securely
-                    </p>
-
-                    <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-5">
-                        <div>
-                            <label htmlFor="email" className="label">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={formData.email}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, email: e.target.value })
-                                }
-                                className="input"
-                                placeholder="you@example.com"
-                                required
-                                autoComplete="email"
-                            />
+                <Card className="bg-card border-border">
+                    <CardContent className="p-8">
+                        <div className="flex items-center justify-center gap-3 mb-8">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
+                                <Terminal className="w-7 h-7 text-white" />
+                            </div>
+                            <span className="text-2xl font-bold gradient-text">Termi</span>
                         </div>
 
-                        <div>
-                            <label htmlFor="password" className="label">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    value={formData.password}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, password: e.target.value })
-                                    }
-                                    className="input pr-12"
+                        <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
+                        <p className="text-muted-foreground text-center mb-8">
+                            Start managing your servers securely
+                        </p>
+
+                        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-5">
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email Address</Label>
+                                <Input
+                                    type="email"
+                                    id="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="bg-secondary border-border"
+                                    placeholder="you@example.com"
+                                    required
+                                    autoComplete="email"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        className="bg-secondary border-border pr-12"
+                                        placeholder="••••••••"
+                                        required
+                                        autoComplete="new-password"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </Button>
+                                </div>
+
+                                {formData.password && (
+                                    <div className="mt-3 space-y-1">
+                                        {passwordRequirements.map((req, i) => (
+                                            <div
+                                                key={i}
+                                                className={`flex items-center gap-2 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}
+                                            >
+                                                {req.met ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                                {req.label}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <Input
+                                    type="password"
+                                    id="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    className={`bg-secondary border-border ${
+                                        formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''
+                                    }`}
                                     placeholder="••••••••"
                                     required
                                     autoComplete="new-password"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="w-5 h-5" />
-                                    ) : (
-                                        <Eye className="w-5 h-5" />
-                                    )}
-                                </button>
+                                {formData.confirmPassword && !passwordsMatch && (
+                                    <p className="text-sm text-destructive">Passwords do not match</p>
+                                )}
                             </div>
 
-                            {/* Password requirements */}
-                            {formData.password && (
-                                <div className="mt-3 space-y-1">
-                                    {passwordRequirements.map((req, i) => (
-                                        <div
-                                            key={i}
-                                            className={`flex items-center gap-2 text-xs ${req.met ? 'text-green-400' : 'text-dark-500'
-                                                }`}
-                                        >
-                                            {req.met ? (
-                                                <Check className="w-3 h-3" />
-                                            ) : (
-                                                <X className="w-3 h-3" />
-                                            )}
-                                            {req.label}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="confirmPassword" className="label">
-                                Confirm Password
-                            </label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, confirmPassword: e.target.value })
-                                }
-                                className={`input ${formData.confirmPassword &&
-                                    (passwordsMatch ? '' : 'input-error')
-                                    }`}
-                                placeholder="••••••••"
-                                required
-                                autoComplete="new-password"
-                            />
-                            {formData.confirmPassword && !passwordsMatch && (
-                                <p className="error-text">Passwords do not match</p>
-                            )}
-                        </div>
-
-                        {/* Master Key Option */}
-                        <div className="p-4 rounded-lg bg-dark-900/50 border border-dark-700">
-                            <label className="flex items-start gap-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.useMasterKey}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, useMasterKey: e.target.checked })
-                                    }
-                                    className="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-800 text-primary-500 focus:ring-primary-500"
-                                />
-                                <div>
-                                    <span className="font-medium">Use Master Key</span>
-                                    <p className="text-xs text-dark-400 mt-1">
-                                        Add an extra layer of encryption. You&apos;ll need this key
-                                        to access your credentials.
-                                    </p>
-                                </div>
-                            </label>
-
-                            {formData.useMasterKey && (
-                                <div className="mt-3">
-                                    <input
-                                        type="password"
-                                        value={formData.masterKey}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, masterKey: e.target.value })
+                            <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                                <div className="flex items-start gap-3">
+                                    <Checkbox
+                                        id="useMasterKey"
+                                        checked={formData.useMasterKey}
+                                        onCheckedChange={(checked) =>
+                                            setFormData({ ...formData, useMasterKey: !!checked })
                                         }
-                                        className="input"
-                                        placeholder="Enter master key (min 8 characters)"
-                                        minLength={8}
-                                        required={formData.useMasterKey}
+                                        className="mt-1"
                                     />
-                                    <p className="text-xs text-yellow-500 mt-2">
-                                        ⚠️ If you lose this key, you will not be able to recover
-                                        your credentials.
-                                    </p>
+                                    <div>
+                                        <Label htmlFor="useMasterKey" className="font-medium cursor-pointer">
+                                            Use Master Key
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            Add an extra layer of encryption. You&apos;ll need this key
+                                            to access your credentials.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {formData.useMasterKey && (
+                                    <div className="mt-3">
+                                        <Input
+                                            type="password"
+                                            value={formData.masterKey}
+                                            onChange={(e) => setFormData({ ...formData, masterKey: e.target.value })}
+                                            className="bg-secondary border-border"
+                                            placeholder="Enter master key (min 8 characters)"
+                                            minLength={8}
+                                            required={formData.useMasterKey}
+                                        />
+                                        <p className="text-xs text-yellow-500 mt-2">
+                                            ⚠️ If you lose this key, you will not be able to recover
+                                            your credentials.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {error && (
+                                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                    {error}
                                 </div>
                             )}
+
+                            <Button
+                                type="submit"
+                                disabled={loading || !allRequirementsMet || !passwordsMatch}
+                                className="w-full"
+                            >
+                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
+                            </Button>
+                        </form>
+
+                        <div className="mt-6 text-center text-sm text-muted-foreground">
+                            Already have an account?{' '}
+                            <Link href="/login" className="text-primary hover:text-primary/80">
+                                Sign in
+                            </Link>
                         </div>
-
-                        {error && (
-                            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading || !allRequirementsMet || !passwordsMatch}
-                            className="btn btn-primary w-full"
-                        >
-                            {loading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                'Create Account'
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center text-sm text-dark-400">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-primary-400 hover:text-primary-300">
-                            Sign in
-                        </Link>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

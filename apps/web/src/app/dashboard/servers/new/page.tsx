@@ -26,6 +26,12 @@ import {
     Upload,
     FileKey,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Group {
     id: string;
@@ -202,14 +208,15 @@ export default function NewServerPage() {
 
     return (
         <div className="max-w-5xl mx-auto">
-            {/* Header */}
             <div className="flex items-center gap-3 mb-5">
-                <Link href="/dashboard" className="btn btn-ghost btn-icon btn-sm">
-                    <ArrowLeft className="w-4 h-4" />
-                </Link>
+                <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+                    <Link href="/dashboard">
+                        <ArrowLeft className="w-4 h-4" />
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-xl font-semibold">Add Server</h1>
-                    <p className="text-slate-400 text-sm">Configure a new connection</p>
+                    <p className="text-muted-foreground text-sm">Configure a new connection</p>
                 </div>
             </div>
 
@@ -220,75 +227,81 @@ export default function NewServerPage() {
                     <div className="lg:col-span-3 space-y-3">
 
                         {/* Protocol selector */}
-                        <div className="card p-4">
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Protocol</p>
-                            <div className="grid grid-cols-4 gap-2">
-                                {protocols.map((p) => {
-                                    const isActive = form.protocol === p.value;
-                                    const c = protoColors[p.value];
-                                    const Icon = p.icon;
-                                    return (
-                                        <button
-                                            key={p.value}
-                                            type="button"
-                                            onClick={() => handleProtocolChange(p.value)}
-                                            className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 ${
-                                                isActive
-                                                    ? `${c.pill} ${c.ring} ring-1`
-                                                    : 'border-slate-700 text-slate-500 hover:border-slate-600 hover:text-slate-300 hover:bg-slate-700/30'
-                                            }`}
-                                        >
-                                            <Icon className="w-4 h-4" />
-                                            <span className="text-xs font-semibold">{p.label}</span>
-                                            <span className="text-[10px] opacity-60 hidden sm:block leading-none">{p.desc}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                        <Card>
+                            <CardContent className="p-4">
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Protocol</p>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {protocols.map((p) => {
+                                        const isActive = form.protocol === p.value;
+                                        const c = protoColors[p.value];
+                                        const Icon = p.icon;
+                                        return (
+                                            <button
+                                                key={p.value}
+                                                type="button"
+                                                onClick={() => handleProtocolChange(p.value)}
+                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 ${
+                                                    isActive
+                                                        ? `${c.pill} ${c.ring} ring-1`
+                                                        : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground hover:bg-accent/30'
+                                                }`}
+                                            >
+                                                <Icon className="w-4 h-4" />
+                                                <span className="text-xs font-semibold">{p.label}</span>
+                                                <span className="text-[10px] opacity-60 hidden sm:block leading-none">{p.desc}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </CardContent>
+                        </Card>
 
                         {/* Identity + Connection — combined card */}
-                        <div className="card divide-y divide-slate-700/50">
+                        <Card className="divide-y divide-border">
                             {/* Name + Group */}
                             <div className="p-4 grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="label text-xs">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">
                                         Name <span className="text-red-400">*</span>
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="text"
                                         value={form.name}
                                         onChange={(e) => update({ name: e.target.value })}
-                                        className="input text-sm py-2"
+                                        className="bg-secondary border-border text-sm h-9"
                                         placeholder="Production Web"
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="label text-xs">
-                                        Group <span className="text-slate-600">(optional)</span>
-                                    </label>
-                                    <select
-                                        value={form.groupId}
-                                        onChange={(e) => update({ groupId: e.target.value })}
-                                        className="input text-sm py-2"
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">
+                                        Group <span className="text-muted-foreground/50">(optional)</span>
+                                    </Label>
+                                    <Select
+                                        value={form.groupId || 'none'}
+                                        onValueChange={(v) => update({ groupId: v === 'none' ? '' : v })}
                                     >
-                                        <option value="">No group</option>
-                                        {groups.map((g) => (
-                                            <option key={g.id} value={g.id}>{g.name}</option>
-                                        ))}
-                                    </select>
+                                        <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                                            <SelectValue placeholder="No group" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-card border-border">
+                                            <SelectItem value="none">No group</SelectItem>
+                                            {groups.map((g) => (
+                                                <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
                             {/* Host + Port + Username */}
                             <div className="p-4 space-y-3">
                                 <div className="grid grid-cols-3 gap-3">
-                                    <div className="col-span-2">
-                                        <label className="label text-xs">
+                                    <div className="col-span-2 space-y-1.5">
+                                        <Label className="text-xs">
                                             Host / IP <span className="text-red-400">*</span>
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             value={form.host}
                                             onChange={(e) => {
@@ -296,14 +309,14 @@ export default function NewServerPage() {
                                                 setTestStatus('idle');
                                                 setTestResult(null);
                                             }}
-                                            className="input text-sm py-2 font-mono"
+                                            className="bg-secondary border-border text-sm h-9 font-mono"
                                             placeholder="192.168.1.100"
                                             required
                                         />
                                     </div>
-                                    <div>
-                                        <label className="label text-xs">Port</label>
-                                        <input
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">Port</Label>
+                                        <Input
                                             type="number"
                                             value={form.port}
                                             onChange={(e) => {
@@ -311,239 +324,250 @@ export default function NewServerPage() {
                                                 setTestStatus('idle');
                                                 setTestResult(null);
                                             }}
-                                            className="input text-sm py-2 font-mono"
+                                            className="bg-secondary border-border text-sm h-9 font-mono"
                                             min={1}
                                             max={65535}
                                             required
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="label text-xs">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">
                                         Username <span className="text-red-400">*</span>
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="text"
                                         value={form.username}
                                         onChange={(e) => update({ username: e.target.value })}
-                                        className="input text-sm py-2"
+                                        className="bg-secondary border-border text-sm h-9"
                                         placeholder="root"
                                         required
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </Card>
 
                         {/* Authentication */}
-                        <div className="card p-4 space-y-3">
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Authentication</p>
+                        <Card>
+                            <CardContent className="p-4 space-y-3">
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Authentication</p>
 
-                            {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
-                                <div className="flex gap-1 p-1 bg-slate-900/60 rounded-lg w-fit border border-slate-700/50">
-                                    {(['password', 'key'] as const).map((method) => (
-                                        <button
-                                            key={method}
-                                            type="button"
-                                            onClick={() => update({ authMethod: method })}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                                form.authMethod === method
-                                                    ? 'bg-sky-500 text-white shadow-sm'
-                                                    : 'text-slate-400 hover:text-white'
-                                            }`}
-                                        >
-                                            {method === 'password'
-                                                ? <Lock className="w-3 h-3" />
-                                                : <Key className="w-3 h-3" />
-                                            }
-                                            {method === 'password' ? 'Password' : 'SSH Key'}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-
-                            {form.authMethod === 'password' && (
-                                <div className="relative">
-                                    <label className="label text-xs">Password</label>
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={form.password}
-                                        onChange={(e) => update({ password: e.target.value })}
-                                        className="input text-sm py-2 pr-10"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 bottom-2.5 text-slate-500 hover:text-white transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                            )}
-
-                            {form.authMethod === 'key' && (
-                                <div className="space-y-3">
-                                    {/* Paste vs Upload sub-toggle */}
-                                    <div className="flex gap-1 p-1 bg-slate-900/60 rounded-lg w-fit border border-slate-700/50">
-                                        {(['paste', 'file'] as const).map((m) => (
+                                {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
+                                    <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
+                                        {(['password', 'key'] as const).map((method) => (
                                             <button
-                                                key={m}
+                                                key={method}
                                                 type="button"
-                                                onClick={() => {
-                                                    setKeyInputMethod(m);
-                                                    if (m === 'paste') { setKeyFileName(null); update({ privateKey: '' }); }
-                                                }}
+                                                onClick={() => update({ authMethod: method })}
                                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                                    keyInputMethod === m
-                                                        ? 'bg-slate-600 text-white shadow-sm'
-                                                        : 'text-slate-400 hover:text-white'
+                                                    form.authMethod === method
+                                                        ? 'bg-primary text-primary-foreground shadow-sm'
+                                                        : 'text-muted-foreground hover:text-foreground'
                                                 }`}
                                             >
-                                                {m === 'paste'
-                                                    ? <Key className="w-3 h-3" />
-                                                    : <Upload className="w-3 h-3" />
+                                                {method === 'password'
+                                                    ? <Lock className="w-3 h-3" />
+                                                    : <Key className="w-3 h-3" />
                                                 }
-                                                {m === 'paste' ? 'Paste Key' : 'Upload File'}
+                                                {method === 'password' ? 'Password' : 'SSH Key'}
                                             </button>
                                         ))}
                                     </div>
+                                )}
 
-                                    {keyInputMethod === 'paste' ? (
-                                        <div>
-                                            <label className="label text-xs">Private Key</label>
-                                            <textarea
-                                                value={form.privateKey}
-                                                onChange={(e) => update({ privateKey: e.target.value })}
-                                                className="input text-xs py-2 font-mono min-h-[110px] resize-none leading-relaxed"
-                                                placeholder={"-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"}
+                                {form.authMethod === 'password' && (
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">Password</Label>
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={form.password}
+                                                onChange={(e) => update({ password: e.target.value })}
+                                                className="bg-secondary border-border text-sm h-9 pr-10"
+                                                placeholder="••••••••"
                                             />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </Button>
                                         </div>
-                                    ) : (
-                                        <div>
-                                            <label className="label text-xs">Key File (.pem, .ppk)</label>
-                                            <label className={`flex flex-col items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed cursor-pointer transition-colors py-6 px-4 ${
-                                                keyFileName
-                                                    ? 'border-green-500/40 bg-green-500/5 hover:bg-green-500/8'
-                                                    : 'border-slate-700 bg-slate-900/40 hover:border-slate-500 hover:bg-slate-700/20'
-                                            }`}>
-                                                <input
-                                                    type="file"
-                                                    accept=".pem,.ppk,application/x-pem-file"
-                                                    className="sr-only"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        setKeyFileName(file.name);
-                                                        const reader = new FileReader();
-                                                        reader.onload = (ev) => {
-                                                            update({ privateKey: (ev.target?.result as string) ?? '' });
-                                                        };
-                                                        reader.readAsText(file);
-                                                    }}
-                                                />
-                                                {keyFileName ? (
-                                                    <>
-                                                        <FileKey className="w-5 h-5 text-green-400" />
-                                                        <span className="text-xs font-medium text-green-400 text-center break-all">{keyFileName}</span>
-                                                        <span className="text-[10px] text-slate-500">Click to replace</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Upload className="w-5 h-5 text-slate-500" />
-                                                        <span className="text-xs text-slate-400 text-center">
-                                                            Click to select a <span className="font-mono">.pem</span> or <span className="font-mono">.ppk</span> file
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </label>
-                                        </div>
-                                    )}
-
-                                    <div className="relative">
-                                        <label className="label text-xs">
-                                            Passphrase <span className="text-slate-600">(if encrypted)</span>
-                                        </label>
-                                        <input
-                                            type={showPassphrase ? 'text' : 'password'}
-                                            value={form.passphrase}
-                                            onChange={(e) => update({ passphrase: e.target.value })}
-                                            className="input text-sm py-2 pr-10"
-                                            placeholder="••••••••"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassphrase(!showPassphrase)}
-                                            className="absolute right-3 bottom-2.5 text-slate-500 hover:text-white transition-colors"
-                                        >
-                                            {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+
+                                {form.authMethod === 'key' && (
+                                    <div className="space-y-3">
+                                        <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
+                                            {(['paste', 'file'] as const).map((m) => (
+                                                <button
+                                                    key={m}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setKeyInputMethod(m);
+                                                        if (m === 'paste') { setKeyFileName(null); update({ privateKey: '' }); }
+                                                    }}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                                        keyInputMethod === m
+                                                            ? 'bg-secondary text-foreground shadow-sm'
+                                                            : 'text-muted-foreground hover:text-foreground'
+                                                    }`}
+                                                >
+                                                    {m === 'paste'
+                                                        ? <Key className="w-3 h-3" />
+                                                        : <Upload className="w-3 h-3" />
+                                                    }
+                                                    {m === 'paste' ? 'Paste Key' : 'Upload File'}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {keyInputMethod === 'paste' ? (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">Private Key</Label>
+                                                <Textarea
+                                                    value={form.privateKey}
+                                                    onChange={(e) => update({ privateKey: e.target.value })}
+                                                    className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
+                                                    placeholder={"-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">Key File (.pem, .ppk)</Label>
+                                                <label className={`flex flex-col items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed cursor-pointer transition-colors py-6 px-4 ${
+                                                    keyFileName
+                                                        ? 'border-green-500/40 bg-green-500/5 hover:bg-green-500/8'
+                                                        : 'border-border bg-secondary/40 hover:border-border/80 hover:bg-accent/20'
+                                                }`}>
+                                                    <input
+                                                        type="file"
+                                                        accept=".pem,.ppk,application/x-pem-file"
+                                                        className="sr-only"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (!file) return;
+                                                            setKeyFileName(file.name);
+                                                            const reader = new FileReader();
+                                                            reader.onload = (ev) => {
+                                                                update({ privateKey: (ev.target?.result as string) ?? '' });
+                                                            };
+                                                            reader.readAsText(file);
+                                                        }}
+                                                    />
+                                                    {keyFileName ? (
+                                                        <>
+                                                            <FileKey className="w-5 h-5 text-green-400" />
+                                                            <span className="text-xs font-medium text-green-400 text-center break-all">{keyFileName}</span>
+                                                            <span className="text-[10px] text-muted-foreground">Click to replace</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Upload className="w-5 h-5 text-muted-foreground" />
+                                                            <span className="text-xs text-muted-foreground text-center">
+                                                                Click to select a <span className="font-mono">.pem</span> or <span className="font-mono">.ppk</span> file
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs">
+                                                Passphrase <span className="text-muted-foreground/50">(if encrypted)</span>
+                                            </Label>
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassphrase ? 'text' : 'password'}
+                                                    value={form.passphrase}
+                                                    onChange={(e) => update({ passphrase: e.target.value })}
+                                                    className="bg-secondary border-border text-sm h-9 pr-10"
+                                                    placeholder="••••••••"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => setShowPassphrase(!showPassphrase)}
+                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
                         {/* Advanced — collapsible */}
-                        <div className="card overflow-visible">
+                        <Card className="overflow-visible">
                             <button
                                 type="button"
                                 onClick={() => setShowAdvanced(!showAdvanced)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-slate-700/20 transition-colors"
+                                className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors rounded-xl"
                             >
-                                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                                     Advanced
                                 </span>
                                 {showAdvanced
-                                    ? <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
-                                    : <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                                    ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                                    : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                                 }
                             </button>
 
                             {showAdvanced && (
-                                <div className="px-4 pb-4 border-t border-slate-700/50 space-y-3 pt-3">
-                                    <div>
-                                        <label className="label text-xs">Description</label>
-                                        <input
+                                <div className="px-4 pb-4 border-t border-border space-y-3 pt-3">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">Description</Label>
+                                        <Input
                                             type="text"
                                             value={form.description}
                                             onChange={(e) => update({ description: e.target.value })}
-                                            className="input text-sm py-2"
+                                            className="bg-secondary border-border text-sm h-9"
                                             placeholder="Production web server"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="label text-xs">Tags</label>
-                                        <div className="flex gap-2 mb-2">
-                                            <input
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">Tags</Label>
+                                        <div className="flex gap-2">
+                                            <Input
                                                 type="text"
                                                 value={tagInput}
                                                 onChange={(e) => setTagInput(e.target.value)}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') { e.preventDefault(); addTag(); }
                                                 }}
-                                                className="input text-sm py-2 flex-1"
+                                                className="bg-secondary border-border text-sm h-9 flex-1"
                                                 placeholder="production, linux, aws…"
                                             />
-                                            <button
+                                            <Button
                                                 type="button"
+                                                variant="secondary"
+                                                size="sm"
                                                 onClick={addTag}
-                                                className="btn btn-secondary btn-sm px-3"
+                                                className="px-3"
                                             >
                                                 <Plus className="w-3.5 h-3.5" />
-                                            </button>
+                                            </Button>
                                         </div>
                                         {form.tags.length > 0 && (
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="flex flex-wrap gap-1.5 mt-2">
                                                 {form.tags.map((tag) => (
                                                     <span
                                                         key={tag}
-                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-700 text-slate-300 text-xs"
+                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs"
                                                     >
                                                         {tag}
                                                         <button
                                                             type="button"
                                                             onClick={() => update({ tags: form.tags.filter((t) => t !== tag) })}
-                                                            className="text-slate-500 hover:text-red-400 transition-colors"
+                                                            className="text-muted-foreground hover:text-destructive transition-colors"
                                                         >
                                                             <X className="w-3 h-3" />
                                                         </button>
@@ -553,176 +577,174 @@ export default function NewServerPage() {
                                         )}
                                     </div>
 
-                                    <div>
-                                        <label className="label text-xs">Notes</label>
-                                        <textarea
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">Notes</Label>
+                                        <Textarea
                                             value={form.notes}
                                             onChange={(e) => update({ notes: e.target.value })}
-                                            className="input text-sm py-2 min-h-[72px] resize-none"
+                                            className="bg-secondary border-border text-sm min-h-[72px] resize-none"
                                             placeholder="Additional notes…"
                                         />
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </Card>
                     </div>
 
                     {/* ── RIGHT: Preview + Test + Actions ── */}
                     <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-4 self-start">
 
                         {/* Live preview card */}
-                        <div className="card p-4">
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Preview</p>
-                            <div className="bg-slate-900/60 rounded-lg p-3.5 border border-slate-700/60">
-                                <div className="flex items-start gap-3">
-                                    <div className={`p-2 rounded-lg border shrink-0 ${colors.pill}`}>
-                                        <ProtoIcon className="w-4 h-4" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="font-medium text-sm truncate">
-                                            {form.name || (
-                                                <span className="text-slate-500 font-normal italic">Untitled Server</span>
+                        <Card>
+                            <CardContent className="p-4">
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Preview</p>
+                                <div className="bg-background/60 rounded-lg p-3.5 border border-border/60">
+                                    <div className="flex items-start gap-3">
+                                        <div className={`p-2 rounded-lg border shrink-0 ${colors.pill}`}>
+                                            <ProtoIcon className="w-4 h-4" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium text-sm truncate">
+                                                {form.name || (
+                                                    <span className="text-muted-foreground font-normal italic">Untitled Server</span>
+                                                )}
+                                            </p>
+                                            {form.description && (
+                                                <p className="text-[11px] text-muted-foreground truncate mt-0.5">{form.description}</p>
                                             )}
-                                        </p>
-                                        {form.description && (
-                                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{form.description}</p>
-                                        )}
-                                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.badge}`}>
-                                                {form.protocol}
-                                            </span>
-                                            {selectedGroup && (
-                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-700 text-slate-300">
-                                                    {selectedGroup.name}
+                                            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.badge}`}>
+                                                    {form.protocol}
                                                 </span>
-                                            )}
+                                                {selectedGroup && (
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground">
+                                                        {selectedGroup.name}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {(form.host || form.username) && (
-                                    <div className="mt-3 pt-3 border-t border-slate-700/60 space-y-1.5">
-                                        {form.host && (
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                <Globe className="w-3 h-3 shrink-0 text-slate-500" />
-                                                <span className="font-mono truncate text-slate-300">
-                                                    {form.host}:{form.port}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {form.username && (
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                {form.authMethod === 'key'
-                                                    ? <Key className="w-3 h-3 shrink-0 text-slate-500" />
-                                                    : <Lock className="w-3 h-3 shrink-0 text-slate-500" />
-                                                }
-                                                <span className="font-mono truncate text-slate-300">{form.username}</span>
-                                                <span className="text-slate-600 text-[10px]">
-                                                    ({form.authMethod === 'key' ? 'key' : 'password'})
-                                                </span>
-                                            </div>
-                                        )}
-                                        {form.tags.length > 0 && (
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                                <Tag className="w-3 h-3 text-slate-600 shrink-0" />
-                                                {form.tags.map((t) => (
-                                                    <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-400">
-                                                        {t}
+                                    {(form.host || form.username) && (
+                                        <div className="mt-3 pt-3 border-t border-border/60 space-y-1.5">
+                                            {form.host && (
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <Globe className="w-3 h-3 shrink-0 text-muted-foreground/60" />
+                                                    <span className="font-mono truncate text-foreground/80">
+                                                        {form.host}:{form.port}
                                                     </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                                                </div>
+                                            )}
+                                            {form.username && (
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    {form.authMethod === 'key'
+                                                        ? <Key className="w-3 h-3 shrink-0 text-muted-foreground/60" />
+                                                        : <Lock className="w-3 h-3 shrink-0 text-muted-foreground/60" />
+                                                    }
+                                                    <span className="font-mono truncate text-foreground/80">{form.username}</span>
+                                                    <span className="text-muted-foreground/40 text-[10px]">
+                                                        ({form.authMethod === 'key' ? 'key' : 'password'})
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {form.tags.length > 0 && (
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <Tag className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                                                    {form.tags.map((t) => (
+                                                        <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground">
+                                                            {t}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
 
                         {/* Test connection */}
-                        <div className="card p-4">
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                                {isSSHProto ? 'Authentication Test' : 'Connectivity'}
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={handleTest}
-                                disabled={!canTest || testStatus === 'testing'}
-                                className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border text-sm font-medium transition-all duration-200 ${
-                                    !canTest
-                                        ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-transparent'
-                                        : testStatus === 'success'
-                                            ? 'border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/15'
-                                            : testStatus === 'failed'
-                                                ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
-                                                : 'border-sky-500/30 bg-sky-500/8 text-sky-400 hover:bg-sky-500/15'
-                                }`}
-                            >
-                                {testStatus === 'testing' ? (
-                                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing…</>
-                                ) : testStatus === 'success' ? (
-                                    <><CheckCircle2 className="w-3.5 h-3.5" /> Test Again</>
-                                ) : testStatus === 'failed' ? (
-                                    <><AlertCircle className="w-3.5 h-3.5" /> Retry</>
-                                ) : (
-                                    <><Activity className="w-3.5 h-3.5" />
-                                        {isSSHProto ? 'Test Authentication' : 'Test Connection'}</>
-                                )}
-                            </button>
-
-                            {!canTest && (
-                                <p className="text-[11px] text-slate-600 mt-2 text-center">
-                                    {isSSHProto
-                                        ? 'Enter host, username & credentials first'
-                                        : 'Enter host & port first'}
+                        <Card>
+                            <CardContent className="p-4">
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                    {isSSHProto ? 'Authentication Test' : 'Connectivity'}
                                 </p>
-                            )}
 
-                            {testStatus === 'success' && testResult?.latency !== undefined && (
-                                <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-green-500/8 border border-green-500/20">
-                                    <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
-                                    <div>
-                                        <p className="text-xs font-medium text-green-400">
-                                            {isSSHProto ? 'Authentication successful' : 'Port reachable'}
-                                        </p>
-                                        <p className="text-[11px] text-green-500/60">Latency: {testResult.latency}ms</p>
+                                <button
+                                    type="button"
+                                    onClick={handleTest}
+                                    disabled={!canTest || testStatus === 'testing'}
+                                    className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                                        !canTest
+                                            ? 'border-border text-muted-foreground/40 cursor-not-allowed bg-transparent'
+                                            : testStatus === 'success'
+                                                ? 'border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/15'
+                                                : testStatus === 'failed'
+                                                    ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
+                                                    : 'border-primary/30 bg-primary/8 text-primary hover:bg-primary/15'
+                                    }`}
+                                >
+                                    {testStatus === 'testing' ? (
+                                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing…</>
+                                    ) : testStatus === 'success' ? (
+                                        <><CheckCircle2 className="w-3.5 h-3.5" /> Test Again</>
+                                    ) : testStatus === 'failed' ? (
+                                        <><AlertCircle className="w-3.5 h-3.5" /> Retry</>
+                                    ) : (
+                                        <><Activity className="w-3.5 h-3.5" />
+                                            {isSSHProto ? 'Test Authentication' : 'Test Connection'}</>
+                                    )}
+                                </button>
+
+                                {!canTest && (
+                                    <p className="text-[11px] text-muted-foreground/40 mt-2 text-center">
+                                        {isSSHProto
+                                            ? 'Enter host, username & credentials first'
+                                            : 'Enter host & port first'}
+                                    </p>
+                                )}
+
+                                {testStatus === 'success' && testResult?.latency !== undefined && (
+                                    <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-green-500/8 border border-green-500/20">
+                                        <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                                        <div>
+                                            <p className="text-xs font-medium text-green-400">
+                                                {isSSHProto ? 'Authentication successful' : 'Port reachable'}
+                                            </p>
+                                            <p className="text-[11px] text-green-500/60">Latency: {testResult.latency}ms</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {testStatus === 'failed' && testResult?.error && (
-                                <div className="mt-3 flex items-start gap-2.5 p-2.5 rounded-lg bg-red-500/8 border border-red-500/20">
-                                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs font-medium text-red-400">
-                                            {isSSHProto ? 'Authentication failed' : 'Unreachable'}
-                                        </p>
-                                        <p className="text-[11px] text-red-400/60 break-words">{testResult.error}</p>
+                                {testStatus === 'failed' && testResult?.error && (
+                                    <div className="mt-3 flex items-start gap-2.5 p-2.5 rounded-lg bg-destructive/8 border border-destructive/20">
+                                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-xs font-medium text-destructive">
+                                                {isSSHProto ? 'Authentication failed' : 'Unreachable'}
+                                            </p>
+                                            <p className="text-[11px] text-destructive/60 break-words">{testResult.error}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                        {/* Error */}
                         {error && (
-                            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
                                 <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                                 {error}
                             </div>
                         )}
 
-                        {/* Actions */}
                         <div className="flex flex-col gap-2">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn btn-primary w-full"
-                            >
+                            <Button type="submit" disabled={loading} className="w-full">
                                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {loading ? 'Creating…' : 'Create Server'}
-                            </button>
-                            <Link href="/dashboard" className="btn btn-secondary w-full justify-center">
-                                Cancel
-                            </Link>
+                            </Button>
+                            <Button variant="secondary" asChild className="w-full">
+                                <Link href="/dashboard">Cancel</Link>
+                            </Button>
                         </div>
                     </div>
                 </div>

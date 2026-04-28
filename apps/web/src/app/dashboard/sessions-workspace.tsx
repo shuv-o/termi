@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
 import { useSessionsContext, type SessionStatus } from './sessions-context';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
@@ -57,63 +62,67 @@ function ServerPicker({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[70vh]">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 shrink-0">
-                    <h3 className="font-semibold text-white">Open Server</h3>
-                    <button onClick={onClose} className="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white">
+            <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[70vh]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+                    <h3 className="font-semibold">Open Server</h3>
+                    <button onClick={onClose} className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
                 <div className="p-4 shrink-0">
-                    <input
+                    <Input
                         autoFocus
                         type="text"
                         placeholder="Search servers…"
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        className="input text-sm"
+                        className="bg-secondary border-border text-sm"
                     />
                 </div>
                 <div className="flex-1 overflow-y-auto px-2 pb-4">
                     {loading ? (
                         <div className="flex justify-center py-8">
-                            <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         </div>
                     ) : sshServers.length === 0 && otherServers.length === 0 ? (
-                        <p className="text-center text-sm text-slate-500 py-8">No servers found</p>
+                        <p className="text-center text-sm text-muted-foreground py-8">No servers found</p>
                     ) : (
                         <>
                             {sshServers.map(s => (
                                 <button
                                     key={s.id}
                                     onClick={() => onPick(s)}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700 text-left transition-colors group"
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary text-left transition-colors group"
                                 >
                                     <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
                                         <Terminal className="w-4 h-4 text-green-400" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm text-white truncate">{s.name}</p>
+                                        <p className="font-medium text-sm truncate">{s.name}</p>
                                         {s.description && (
-                                            <p className="text-xs text-slate-400 truncate">{s.description}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{s.description}</p>
                                         )}
                                     </div>
-                                    <span className="text-xs text-green-400 badge bg-green-500/10 shrink-0">{s.protocol}</span>
+                                    <span className="inline-flex items-center text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md shrink-0">
+                                        {s.protocol}
+                                    </span>
                                 </button>
                             ))}
                             {otherServers.map(s => (
                                 <button
                                     key={s.id}
                                     onClick={() => onPick(s)}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700 text-left transition-colors opacity-60"
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary text-left transition-colors opacity-60"
                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center shrink-0">
-                                        <Server className="w-4 h-4 text-slate-400" />
+                                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                                        <Server className="w-4 h-4 text-muted-foreground" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm text-white truncate">{s.name}</p>
+                                        <p className="font-medium text-sm truncate">{s.name}</p>
                                     </div>
-                                    <span className="text-xs text-slate-400 badge bg-slate-700 shrink-0">{s.protocol}</span>
+                                    <span className="inline-flex items-center text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-md shrink-0">
+                                        {s.protocol}
+                                    </span>
                                 </button>
                             ))}
                         </>
@@ -135,17 +144,18 @@ function TransferPanelHeader({
     setServerId: (id: string) => void; servers: ServerItem[];
 }) {
     return (
-        <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-slate-800 border-b border-slate-700">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide w-10 shrink-0">{label}</span>
-            <select
-                value={serverId}
-                onChange={e => setServerId(e.target.value)}
-                className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:border-sky-500"
-            >
-                {servers.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-            </select>
+        <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-card border-b border-border">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide w-10 shrink-0">{label}</span>
+            <Select value={serverId} onValueChange={setServerId}>
+                <SelectTrigger className="flex-1 bg-secondary border-border text-sm h-8">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                    {servers.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
     );
 }
@@ -257,10 +267,10 @@ export default function SessionsWorkspace() {
         <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
 
             {/* ── Tab bar ── */}
-            <div className="shrink-0 flex items-center gap-0 border-b border-slate-700 bg-slate-900/60 overflow-x-auto no-scrollbar">
+            <div className="shrink-0 flex items-center gap-0 border-b border-border bg-card/60 overflow-x-auto no-scrollbar">
                 <div className="flex items-end gap-0 flex-1 min-w-0 overflow-x-auto no-scrollbar">
                     {sessions.length === 0 && (
-                        <span className="px-4 py-3 text-sm text-slate-600 italic">
+                        <span className="px-4 py-3 text-sm text-muted-foreground italic">
                             No sessions — click + to open a server
                         </span>
                     )}
@@ -269,8 +279,8 @@ export default function SessionsWorkspace() {
                             key={session.tabId}
                             className={`group flex items-center gap-2 px-3 py-2.5 border-b-2 cursor-pointer select-none shrink-0 transition-colors
                                 ${activeTabId === session.tabId && mode === 'terminal'
-                                    ? 'border-sky-500 bg-slate-800 text-white'
-                                    : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/50'
+                                    ? 'border-primary bg-secondary text-foreground'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                                 }`}
                             onClick={() => switchTab(session.tabId)}
                         >
@@ -283,7 +293,7 @@ export default function SessionsWorkspace() {
                             </span>
                             <button
                                 onClick={e => { e.stopPropagation(); removeSession(session.tabId); }}
-                                className="p-0.5 rounded hover:bg-slate-600 text-slate-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                 title="Close tab"
                             >
                                 <X className="w-3 h-3" />
@@ -293,35 +303,37 @@ export default function SessionsWorkspace() {
                 </div>
 
                 <div className="flex items-center gap-1 px-2 shrink-0">
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setShowPicker(true)}
-                        className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                        className="h-8 w-8"
                         title="Open new server session"
                     >
                         <Plus className="w-4 h-4" />
-                    </button>
+                    </Button>
                     {isElectron && (
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => { addLocalSession(); setMode('terminal'); }}
-                            className="p-1.5 rounded-lg hover:bg-slate-700 text-violet-400 hover:text-violet-300 transition-colors"
+                            className="h-8 w-8 text-violet-400 hover:text-violet-300"
                             title="Open local terminal"
                         >
                             <Laptop className="w-4 h-4" />
-                        </button>
+                        </Button>
                     )}
-                    <div className="w-px h-5 bg-slate-700 mx-1" />
-                    <button
+                    <div className="w-px h-5 bg-border mx-1" />
+                    <Button
+                        variant={mode === 'transfer' ? 'secondary' : 'ghost'}
+                        size="sm"
                         onClick={() => setMode(m => m === 'transfer' ? 'terminal' : 'transfer')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors
-                            ${mode === 'transfer'
-                                ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-700'
-                            }`}
+                        className={`gap-1.5 text-xs ${mode === 'transfer' ? 'border border-primary/30' : ''}`}
                         title="Toggle transfer mode"
                     >
                         <ArrowLeftRight className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Transfer</span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -331,7 +343,7 @@ export default function SessionsWorkspace() {
                 {/* Transfer mode */}
                 {mode === 'transfer' && (
                     <div className="flex h-full gap-0">
-                        <div className="flex-1 min-w-0 flex flex-col rounded-xl border border-slate-700 overflow-hidden">
+                        <div className="flex-1 min-w-0 flex flex-col rounded-xl border border-border overflow-hidden">
                             {sshServers.length > 0 && (
                                 <TransferPanelHeader
                                     label="From" serverId={leftServerId}
@@ -347,7 +359,7 @@ export default function SessionsWorkspace() {
                                     />
                                 </div>
                             ) : (
-                                <div className="flex-1 flex items-center justify-center text-slate-600">
+                                <div className="flex-1 flex items-center justify-center text-muted-foreground">
                                     <p className="text-sm">No SSH servers available</p>
                                 </div>
                             )}
@@ -359,13 +371,13 @@ export default function SessionsWorkspace() {
                                 <button
                                     onClick={() => doTransfer('lr')}
                                     disabled={transferring || leftSelected.filter(e => e.type !== 'dir').length === 0}
-                                    className="p-2 rounded-lg bg-sky-500/20 border border-sky-500/30 text-sky-400 hover:bg-sky-500/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    className="p-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     title="Copy selected → right"
                                 >
                                     {transferring ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                                 </button>
                                 {leftSelected.filter(e => e.type !== 'dir').length > 0 && (
-                                    <span className="text-[10px] text-sky-400 font-medium">
+                                    <span className="text-[10px] text-primary font-medium">
                                         {leftSelected.filter(e => e.type !== 'dir').length}
                                     </span>
                                 )}
@@ -374,26 +386,26 @@ export default function SessionsWorkspace() {
                                 <button
                                     onClick={() => doTransfer('rl')}
                                     disabled={transferring || rightSelected.filter(e => e.type !== 'dir').length === 0}
-                                    className="p-2 rounded-lg bg-sky-500/20 border border-sky-500/30 text-sky-400 hover:bg-sky-500/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    className="p-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     title="Copy selected ← left"
                                 >
                                     {transferring ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
                                 </button>
                                 {rightSelected.filter(e => e.type !== 'dir').length > 0 && (
-                                    <span className="text-[10px] text-sky-400 font-medium">
+                                    <span className="text-[10px] text-primary font-medium">
                                         {rightSelected.filter(e => e.type !== 'dir').length}
                                     </span>
                                 )}
                             </div>
                             {transferLog.length > 0 && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-3 space-y-1 max-h-40 overflow-y-auto">
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-64 bg-card border border-border rounded-xl shadow-xl p-3 space-y-1 max-h-40 overflow-y-auto">
                                     {transferLog.map((entry, i) => (
                                         <div key={i} className="flex items-start gap-1.5">
                                             {entry.ok
                                                 ? <Check className="w-3 h-3 text-green-400 shrink-0 mt-0.5" />
                                                 : <AlertCircle className="w-3 h-3 text-red-400 shrink-0 mt-0.5" />
                                             }
-                                            <span className={`text-[11px] break-all ${entry.ok ? 'text-slate-300' : 'text-red-400'}`}>
+                                            <span className={`text-[11px] break-all ${entry.ok ? 'text-muted-foreground' : 'text-red-400'}`}>
                                                 {entry.msg}
                                             </span>
                                         </div>
@@ -402,7 +414,7 @@ export default function SessionsWorkspace() {
                             )}
                         </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col rounded-xl border border-slate-700 overflow-hidden">
+                        <div className="flex-1 min-w-0 flex flex-col rounded-xl border border-border overflow-hidden">
                             {sshServers.length > 0 && (
                                 <TransferPanelHeader
                                     label="To" serverId={rightServerId}
@@ -418,7 +430,7 @@ export default function SessionsWorkspace() {
                                     />
                                 </div>
                             ) : (
-                                <div className="flex-1 flex items-center justify-center text-slate-600">
+                                <div className="flex-1 flex items-center justify-center text-muted-foreground">
                                     <p className="text-sm">No SSH servers available</p>
                                 </div>
                             )}
@@ -431,21 +443,21 @@ export default function SessionsWorkspace() {
                     <>
                         {sessions.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                                    <Terminal className="w-7 h-7 text-slate-500" />
+                                <div className="w-16 h-16 rounded-2xl bg-secondary border border-border flex items-center justify-center">
+                                    <Terminal className="w-7 h-7 text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-semibold text-white mb-1">No active sessions</h2>
-                                    <p className="text-sm text-slate-400">Open a server or start a local terminal</p>
+                                    <h2 className="text-lg font-semibold mb-1">No active sessions</h2>
+                                    <p className="text-sm text-muted-foreground">Open a server or start a local terminal</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => setShowPicker(true)} className="btn btn-primary gap-2">
+                                    <Button onClick={() => setShowPicker(true)} className="gap-2">
                                         <Plus className="w-4 h-4" /> Open Server
-                                    </button>
+                                    </Button>
                                     {isElectron && (
-                                        <button onClick={() => addLocalSession()} className="btn btn-secondary gap-2">
+                                        <Button variant="secondary" onClick={() => addLocalSession()} className="gap-2">
                                             <Laptop className="w-4 h-4" /> Local Terminal
-                                        </button>
+                                        </Button>
                                     )}
                                 </div>
                             </div>
@@ -462,7 +474,7 @@ export default function SessionsWorkspace() {
                                     >
                                         {/* Per-tab toolbar */}
                                         <div className="shrink-0 flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-2 text-sm text-slate-400">
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                 {session.type === 'local'
                                                     ? <Laptop className="w-4 h-4 text-violet-400" />
                                                     : <Terminal className="w-4 h-4" />
@@ -473,30 +485,36 @@ export default function SessionsWorkspace() {
                                             <div className="flex items-center gap-1">
                                                 {session.type !== 'local' && (
                                                     <>
-                                                        <button
+                                                        <Button
+                                                            variant={session.showFiles ? 'default' : 'ghost'}
+                                                            size="sm"
                                                             onClick={() => toggleFiles(session.tabId)}
-                                                            className={`btn btn-sm gap-1.5 ${session.showFiles ? 'btn-primary' : 'btn-ghost'}`}
+                                                            className="gap-1.5 h-8"
                                                             title="Toggle file manager"
                                                         >
                                                             <FolderOpen className="w-3.5 h-3.5" />
                                                             <span className="hidden sm:inline text-xs">Files</span>
-                                                        </button>
-                                                        <button
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
                                                             onClick={() => reconnectSession(session.tabId, session.serverId)}
-                                                            className="btn btn-ghost btn-icon btn-sm"
+                                                            className="h-8 w-8"
                                                             title="Reconnect"
                                                         >
                                                             <RotateCcw className="w-3.5 h-3.5" />
-                                                        </button>
+                                                        </Button>
                                                     </>
                                                 )}
-                                                <button
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => removeSession(session.tabId)}
-                                                    className="btn btn-ghost btn-icon btn-sm text-red-400 hover:text-red-300"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive"
                                                     title="Close session"
                                                 >
                                                     <X className="w-3.5 h-3.5" />
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
 
@@ -510,19 +528,21 @@ export default function SessionsWorkspace() {
                                                         onExit={() => updateSessionStatus(session.tabId, 'disconnected')}
                                                     />
                                                 ) : session.status === 'error' || (!session.token && session.status !== 'connecting') ? (
-                                                    <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-900 rounded-xl border border-slate-700">
-                                                        <AlertCircle className="w-8 h-8 text-red-400" />
-                                                        <p className="text-sm text-red-400">Failed to connect</p>
-                                                        <button
+                                                    <div className="flex flex-col items-center justify-center h-full gap-3 bg-card rounded-xl border border-border">
+                                                        <AlertCircle className="w-8 h-8 text-destructive" />
+                                                        <p className="text-sm text-destructive">Failed to connect</p>
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="sm"
                                                             onClick={() => reconnectSession(session.tabId, session.serverId)}
-                                                            className="btn btn-secondary btn-sm gap-1.5"
+                                                            className="gap-1.5"
                                                         >
                                                             <RotateCcw className="w-3.5 h-3.5" /> Retry
-                                                        </button>
+                                                        </Button>
                                                     </div>
                                                 ) : !session.token ? (
-                                                    <div className="flex items-center justify-center h-full bg-slate-900 rounded-xl border border-slate-700">
-                                                        <div className="flex items-center gap-2 text-slate-400">
+                                                    <div className="flex items-center justify-center h-full bg-card rounded-xl border border-border">
+                                                        <div className="flex items-center gap-2 text-muted-foreground">
                                                             <Loader2 className="w-5 h-5 animate-spin" />
                                                             <span className="text-sm">Connecting…</span>
                                                         </div>
@@ -539,7 +559,7 @@ export default function SessionsWorkspace() {
                                             </div>
 
                                             {session.showFiles && session.type !== 'local' && (
-                                                <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-slate-700 overflow-hidden">
+                                                <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-border overflow-hidden">
                                                     <FileManagerPanel
                                                         serverId={session.serverId}
                                                         onClose={() => toggleFiles(session.tabId)}
@@ -566,4 +586,3 @@ export default function SessionsWorkspace() {
         </div>
     );
 }
-

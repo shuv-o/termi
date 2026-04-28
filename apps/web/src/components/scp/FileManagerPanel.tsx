@@ -8,6 +8,11 @@ import {
     X, Check, AlertCircle, Loader2, Eye, EyeOff,
     ChevronUp, MoreVertical, CheckSquare,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 // ============================================================================
 // TYPES
@@ -185,7 +190,7 @@ function SheetAction({
 }
 
 // ============================================================================
-// MODAL  (desktop)
+// MODAL  (desktop) — uses shadcn Dialog
 // ============================================================================
 
 function Modal({
@@ -198,20 +203,14 @@ function Modal({
     onClose: () => void;
 }) {
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 rounded-xl p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-                    <h3 className="font-semibold text-sm text-white">{title}</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
-                <div className="p-4">{children}</div>
-            </div>
-        </div>
+        <Dialog open onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="bg-card border-border max-w-sm">
+                <DialogHeader>
+                    <DialogTitle className="text-sm">{title}</DialogTitle>
+                </DialogHeader>
+                {children}
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -600,9 +599,9 @@ export default function FileManagerPanel({
                     <div className="flex flex-col items-center justify-center h-full gap-3 p-6 text-center">
                         <AlertCircle className="w-6 h-6 text-red-400" />
                         <p className="text-sm text-red-400">{error}</p>
-                        <button onClick={() => loadDir(currentPath)} className="btn btn-secondary btn-sm">
+                        <Button variant="secondary" size="sm" onClick={() => loadDir(currentPath)}>
                             Retry
-                        </button>
+                        </Button>
                     </div>
                 ) : (
                     <div className="py-0.5">
@@ -623,8 +622,8 @@ export default function FileManagerPanel({
                         {loading ? (
                             Array.from({ length: 8 }).map((_, i) => (
                                 <div key={i} className={`flex items-center gap-2.5 px-3 ${isMobile ? 'py-3.5' : 'py-2'}`}>
-                                    <div className="w-4 h-4 skeleton rounded shrink-0" />
-                                    <div className={`h-4 skeleton rounded ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`} />
+                                    <Skeleton className="w-4 h-4 rounded shrink-0" />
+                                    <Skeleton className={`h-4 rounded ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`} />
                                 </div>
                             ))
                         ) : visible.length === 0 ? (
@@ -689,13 +688,11 @@ export default function FileManagerPanel({
                                     onDoubleClick={() => entry.type === 'dir' && loadDir(entry.path)}
                                 >
                                     {/* Checkbox */}
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         checked={selected.has(entry.path)}
-                                        onChange={() => toggle(entry.path)}
+                                        onCheckedChange={() => toggle(entry.path)}
                                         onClick={e => e.stopPropagation()}
-                                        className="rounded border-slate-600 bg-slate-800 accent-sky-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                                        style={selected.has(entry.path) ? { opacity: 1 } : {}}
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 data-[state=checked]:opacity-100"
                                     />
 
                                     <EntryIcon entry={entry} />
@@ -749,13 +746,15 @@ export default function FileManagerPanel({
                     <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-slate-300`}>
                         {selected.size} selected
                     </span>
-                    <button
+                    <Button
+                        variant="destructive"
+                        size={isMobile ? 'default' : 'sm'}
                         onClick={() => setDeleteTarget(entries.filter(e => selected.has(e.path)))}
-                        className={`btn btn-danger gap-1 ${isMobile ? '' : 'btn-sm'}`}
+                        className="gap-1"
                     >
                         <Trash2 className="w-3.5 h-3.5" />
                         Delete
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -868,27 +867,26 @@ export default function FileManagerPanel({
             {showNewFolder && (
                 <Modal title="New Folder" onClose={() => { setShowNewFolder(false); setFolderName(''); }}>
                     <div className="space-y-3">
-                        <input
+                        <Input
                             autoFocus
-                            type="text"
                             value={folderName}
                             onChange={e => setFolderName(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && createFolder()}
                             placeholder="folder-name"
-                            className="input text-sm"
+                            className="bg-secondary border-border text-sm"
                         />
                         <div className="flex gap-2 justify-end">
-                            <button onClick={() => { setShowNewFolder(false); setFolderName(''); }} className="btn btn-secondary btn-sm">
+                            <Button variant="secondary" size="sm" onClick={() => { setShowNewFolder(false); setFolderName(''); }}>
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                size="sm"
                                 onClick={createFolder}
                                 disabled={!folderName.trim() || folderLoading}
-                                className="btn btn-primary btn-sm"
                             >
                                 {folderLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FolderPlus className="w-3.5 h-3.5" />}
                                 Create
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </Modal>
@@ -897,26 +895,25 @@ export default function FileManagerPanel({
             {renaming && (
                 <Modal title="Rename" onClose={() => setRenaming(null)}>
                     <div className="space-y-3">
-                        <input
+                        <Input
                             autoFocus
-                            type="text"
                             value={renameVal}
                             onChange={e => setRenameVal(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && doRename()}
-                            className="input text-sm"
+                            className="bg-secondary border-border text-sm"
                         />
                         <div className="flex gap-2 justify-end">
-                            <button onClick={() => setRenaming(null)} className="btn btn-secondary btn-sm">
+                            <Button variant="secondary" size="sm" onClick={() => setRenaming(null)}>
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                size="sm"
                                 onClick={doRename}
                                 disabled={!renameVal.trim() || renameVal === renaming.name || renameLoading}
-                                className="btn btn-primary btn-sm"
                             >
                                 {renameLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                                 Rename
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </Modal>
@@ -925,8 +922,8 @@ export default function FileManagerPanel({
             {deleteTarget && (
                 <Modal title="Confirm Delete" onClose={() => setDeleteTarget(null)}>
                     <div className="space-y-3">
-                        <div className="flex gap-2.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                        <div className="flex gap-2.5 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                            <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
                             <p className="text-xs text-slate-300">
                                 Delete {deleteTarget.length === 1 ? `"${deleteTarget[0].name}"` : `${deleteTarget.length} items`}?
                                 {deleteTarget.some(e => e.type === 'dir') && ' Directories will be removed recursively.'}
@@ -934,13 +931,13 @@ export default function FileManagerPanel({
                             </p>
                         </div>
                         <div className="flex gap-2 justify-end">
-                            <button onClick={() => setDeleteTarget(null)} className="btn btn-secondary btn-sm">
+                            <Button variant="secondary" size="sm" onClick={() => setDeleteTarget(null)}>
                                 Cancel
-                            </button>
-                            <button onClick={doDelete} disabled={deleteLoading} className="btn btn-danger btn-sm">
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={doDelete} disabled={deleteLoading}>
                                 {deleteLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                 Delete
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </Modal>
