@@ -338,6 +338,9 @@ enum AuditAction {
   PASSKEY_REGISTERED
   PASSKEY_REMOVED
   PASSKEY_USED
+
+  // OAuth events
+  USER_OAUTH_LINKED
 }
 
 // ============================================================================

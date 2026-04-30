@@ -4,3 +4,4 @@ export * from './auth';
 export * from './email-otp';
 export * from './email-verification';
 export * from './passkey';
+export * from './google-oauth';
