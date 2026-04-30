@@ -8,6 +8,7 @@
  */
 
 import { Google, generateCodeVerifier, generateState } from 'arctic';
+import { OAuthProvider } from '@/app/generated/prisma/client';
 import { prisma } from '@/lib/db';
 
 function getGoogleClient(): Google {
@@ -107,7 +108,7 @@ export async function findOrCreateGoogleUser(
     // Case B: existing OAuthAccount
     const existingOAuth = await prisma.oAuthAccount.findUnique({
         where: {
-            provider_providerAccountId: { provider: 'GOOGLE', providerAccountId: sub },
+            provider_providerAccountId: { provider: OAuthProvider.GOOGLE, providerAccountId: sub },
         },
         include: { user: { select: { id: true, email: true, masterKeyHash: true } } },
     });
@@ -129,22 +130,23 @@ export async function findOrCreateGoogleUser(
 
     if (existingUser) {
         // Link Google account to existing user
-        await prisma.oAuthAccount.create({
-            data: {
-                userId: existingUser.id,
-                provider: 'GOOGLE',
-                providerAccountId: sub,
-                email: email.toLowerCase(),
-            },
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                userId: existingUser.id,
-                action: 'USER_OAUTH_LINKED',
-                details: { provider: 'GOOGLE' },
-            },
-        });
+        await prisma.$transaction([
+            prisma.oAuthAccount.create({
+                data: {
+                    userId: existingUser.id,
+                    provider: OAuthProvider.GOOGLE,
+                    providerAccountId: sub,
+                    email: email.toLowerCase(),
+                },
+            }),
+            prisma.auditLog.create({
+                data: {
+                    userId: existingUser.id,
+                    action: 'USER_OAUTH_LINKED',
+                    details: { provider: 'GOOGLE' },
+                },
+            }),
+        ]);
 
         return {
             userId: existingUser.id,
@@ -155,28 +157,32 @@ export async function findOrCreateGoogleUser(
     }
 
     // Case A: brand new user
-    const newUser = await prisma.user.create({
-        data: {
-            email: email.toLowerCase(),
-            passwordHash: null, // Google-only user
-            isVerified: true,   // Google emails are pre-verified
-            oauthAccounts: {
-                create: {
-                    provider: 'GOOGLE',
-                    providerAccountId: sub,
-                    email: email.toLowerCase(),
+    const newUser = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+            data: {
+                email: email.toLowerCase(),
+                passwordHash: null, // Google-only user
+                isVerified: googleInfo.emailVerified,
+                oauthAccounts: {
+                    create: {
+                        provider: OAuthProvider.GOOGLE,
+                        providerAccountId: sub,
+                        email: email.toLowerCase(),
+                    },
                 },
             },
-        },
-        select: { id: true, email: true },
-    });
+            select: { id: true, email: true },
+        });
 
-    await prisma.auditLog.create({
-        data: {
-            userId: newUser.id,
-            action: 'USER_REGISTER',
-            details: { authMethod: 'google' },
-        },
+        await tx.auditLog.create({
+            data: {
+                userId: user.id,
+                action: 'USER_REGISTER',
+                details: { authMethod: 'google' },
+            },
+        });
+
+        return user;
     });
 
     return {
