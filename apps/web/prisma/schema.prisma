@@ -14,7 +14,7 @@ datasource db {
 model User {
   id           String @id @default(cuid())
   email        String @unique
-  passwordHash String // scrypt hash
+  passwordHash String? // scrypt hash — null for OAuth-only users
 
   // TOTP 2FA
   totpSecret  String? // Encrypted TOTP secret
@@ -29,6 +29,10 @@ model User {
   // Optional master key for additional encryption layer
   masterKeyHash String?
   masterKeySalt String?
+
+  // Password reset (email/password users only)
+  passwordResetToken     String?
+  passwordResetExpiresAt DateTime?
 
   // Account status
   isActive   Boolean @default(true)
@@ -60,6 +64,7 @@ model User {
   passkeys          Passkey[]
   pushSubscriptions PushSubscription[]
   monitorConfigs    ServerMonitorConfig[]
+  oauthAccounts     OAuthAccount[]
 
   @@index([email])
 }
@@ -226,6 +231,24 @@ model AuditLog {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+// ============================================================================
+// OAUTH ACCOUNTS
+// ============================================================================
+
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String   // e.g., "GOOGLE"
+  providerAccountId String   // Provider's user ID (Google `sub`)
+  email             String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 // ============================================================================

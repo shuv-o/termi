@@ -390,6 +390,7 @@ export const ModelName = {
   Server: 'Server',
   Connection: 'Connection',
   AuditLog: 'AuditLog',
+  OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
   PushSubscription: 'PushSubscription',
   ServerMonitorConfig: 'ServerMonitorConfig',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "auditLog" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -856,6 +857,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AuditLogCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    OAuthAccount: {
+      payload: Prisma.$OAuthAccountPayload<ExtArgs>
+      fields: Prisma.OAuthAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OAuthAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OAuthAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.OAuthAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OAuthAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        findMany: {
+          args: Prisma.OAuthAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>[]
+        }
+        create: {
+          args: Prisma.OAuthAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        createMany: {
+          args: Prisma.OAuthAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OAuthAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.OAuthAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        update: {
+          args: Prisma.OAuthAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.OAuthAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OAuthAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OAuthAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.OAuthAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OAuthAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.OAuthAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOAuthAccount>
+        }
+        groupBy: {
+          args: Prisma.OAuthAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OAuthAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OAuthAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OAuthAccountCountAggregateOutputType> | number
         }
       }
     }
@@ -1352,6 +1427,8 @@ export const UserScalarFieldEnum = {
   twoFactorMethod: 'twoFactorMethod',
   masterKeyHash: 'masterKeyHash',
   masterKeySalt: 'masterKeySalt',
+  passwordResetToken: 'passwordResetToken',
+  passwordResetExpiresAt: 'passwordResetExpiresAt',
   isActive: 'isActive',
   isVerified: 'isVerified',
   emailVerificationToken: 'emailVerificationToken',
@@ -1458,6 +1535,18 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const OAuthAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type OAuthAccountScalarFieldEnum = (typeof OAuthAccountScalarFieldEnum)[keyof typeof OAuthAccountScalarFieldEnum]
 
 
 export const PasskeyScalarFieldEnum = {
@@ -1857,6 +1946,7 @@ export type GlobalOmitConfig = {
   server?: Prisma.ServerOmit
   connection?: Prisma.ConnectionOmit
   auditLog?: Prisma.AuditLogOmit
+  oAuthAccount?: Prisma.OAuthAccountOmit
   passkey?: Prisma.PasskeyOmit
   pushSubscription?: Prisma.PushSubscriptionOmit
   serverMonitorConfig?: Prisma.ServerMonitorConfigOmit

@@ -72,6 +72,11 @@ export type Connection = Prisma.ConnectionModel
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
+ * Model OAuthAccount
+ * 
+ */
+export type OAuthAccount = Prisma.OAuthAccountModel
+/**
  * Model Passkey
  * 
  */

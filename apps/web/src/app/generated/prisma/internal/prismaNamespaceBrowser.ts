@@ -57,6 +57,7 @@ export const ModelName = {
   Server: 'Server',
   Connection: 'Connection',
   AuditLog: 'AuditLog',
+  OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
   PushSubscription: 'PushSubscription',
   ServerMonitorConfig: 'ServerMonitorConfig',
@@ -91,6 +92,8 @@ export const UserScalarFieldEnum = {
   twoFactorMethod: 'twoFactorMethod',
   masterKeyHash: 'masterKeyHash',
   masterKeySalt: 'masterKeySalt',
+  passwordResetToken: 'passwordResetToken',
+  passwordResetExpiresAt: 'passwordResetExpiresAt',
   isActive: 'isActive',
   isVerified: 'isVerified',
   emailVerificationToken: 'emailVerificationToken',
@@ -197,6 +200,18 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const OAuthAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type OAuthAccountScalarFieldEnum = (typeof OAuthAccountScalarFieldEnum)[keyof typeof OAuthAccountScalarFieldEnum]
 
 
 export const PasskeyScalarFieldEnum = {
