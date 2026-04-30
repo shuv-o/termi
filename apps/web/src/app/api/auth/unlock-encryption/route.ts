@@ -4,7 +4,7 @@ import { validateBody, successResponse, errorResponse, unauthorizedResponse } fr
 import { getSession } from '@/lib/auth/session';
 
 const schema = z.object({
-    passphrase: z.string().min(1),
+    passphrase: z.string().min(8, 'Passphrase must be at least 8 characters'),
 });
 
 export async function POST(request: Request) {
