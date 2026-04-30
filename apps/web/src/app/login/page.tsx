@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
     Eye, EyeOff, Loader2, Mail, Smartphone,
     KeyRound, RefreshCw, CheckCircle, Fingerprint, X, ShieldCheck,
+    Terminal, Shield, Zap, Globe,
 } from 'lucide-react';
 import {
     startRegistration,
@@ -15,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import TerminalLogo from "@/components/common/Logo";
 
@@ -31,6 +32,13 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 type TwoFactorMethod = 'TOTP' | 'EMAIL' | null;
+
+const features = [
+    { icon: Terminal, text: 'Manage SSH servers from one place' },
+    { icon: Shield,   text: 'End-to-end encrypted credentials' },
+    { icon: Zap,      text: 'Instant terminal sessions' },
+    { icon: Globe,    text: 'Access from anywhere, securely' },
+];
 
 export default function LoginPage() {
     const router = useRouter();
@@ -185,23 +193,17 @@ export default function LoginPage() {
         finally { setResendLoading(false); }
     };
 
-    const PageShell = ({ children }: { children: React.ReactNode }) => (
+    // ── Shared page wrapper ───────────────────────────────────────────────────
+
+    const PageShell = ({ children, fullWidth = false }: { children: React.ReactNode; fullWidth?: boolean }) => (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
                 <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
             </div>
-            <div className="relative w-full max-w-md">
-                <Card className="bg-card border-border">
-                    <CardContent className="p-8">
-                        {/* Logo */}
-                        <div className="flex items-center justify-center gap-3 mb-8">
-                            <TerminalLogo width={48} height={48} className="rounded-xl" />
-                            <span className="text-2xl font-bold gradient-text">Termi</span>
-                        </div>
-
-                        {children}
-                    </CardContent>
+            <div className={cn('relative w-full', fullWidth ? 'max-w-3xl' : 'max-w-lg')}>
+                <Card className="bg-card border-border overflow-hidden">
+                    {children}
                 </Card>
             </div>
         </div>
@@ -212,274 +214,287 @@ export default function LoginPage() {
     if (showPasskeySetup) {
         return (
             <PageShell>
-                <div className="flex justify-center mb-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                        <Fingerprint className="w-7 h-7 text-primary" />
+                <div className="p-8">
+                    <div className="flex justify-center mb-4">
+                        <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                            <Fingerprint className="w-7 h-7 text-primary" />
+                        </div>
                     </div>
-                </div>
-
-                <h1 className="text-2xl font-bold text-center mb-2">Set up a Passkey</h1>
-                <p className="text-muted-foreground text-center mb-6 text-sm">
-                    Use Face ID, Touch ID, or your device PIN to sign in faster and more securely.
-                </p>
-
-                <div className="flex gap-3 p-3 rounded-lg bg-muted/30 border border-border mb-5 text-sm text-muted-foreground">
-                    <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <span>Passkeys are phishing-resistant cryptographic keys — no password needed.</span>
-                </div>
-
-                <div className="space-y-2 mb-5">
-                    <Label htmlFor="passkeyName">Passkey name <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                    <Input
-                        id="passkeyName"
-                        value={passkeySetupName}
-                        onChange={(e) => setPasskeySetupName(e.target.value)}
-                        className="bg-secondary border-border"
-                        placeholder="e.g. MacBook Pro, iPhone 15"
-                        maxLength={64}
-                    />
-                </div>
-
-                {passkeySetupError && (
-                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm mb-4">
-                        {passkeySetupError}
+                    <h1 className="text-2xl font-bold text-center mb-2">Set up a Passkey</h1>
+                    <p className="text-muted-foreground text-center mb-5 text-sm">
+                        Use Face ID, Touch ID, or your device PIN to sign in faster and more securely.
+                    </p>
+                    <div className="flex gap-3 p-3 rounded-lg bg-muted/30 border border-border mb-5 text-sm text-muted-foreground">
+                        <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span>Passkeys are phishing-resistant cryptographic keys — no password needed.</span>
                     </div>
-                )}
-
-                <Button onClick={handlePasskeySetup} disabled={passkeySetupLoading} className="w-full mb-3">
-                    {passkeySetupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
-                    {passkeySetupLoading ? 'Setting up…' : 'Create Passkey'}
-                </Button>
-
-                <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full text-muted-foreground">
-                    <X className="w-4 h-4" /> Skip for now
-                </Button>
+                    <div className="space-y-2 mb-5">
+                        <Label htmlFor="passkeyName">Passkey name <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                        <Input
+                            id="passkeyName"
+                            value={passkeySetupName}
+                            onChange={(e) => setPasskeySetupName(e.target.value)}
+                            className="bg-secondary border-border"
+                            placeholder="e.g. MacBook Pro, iPhone 15"
+                            maxLength={64}
+                        />
+                    </div>
+                    {passkeySetupError && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm mb-4">
+                            {passkeySetupError}
+                        </div>
+                    )}
+                    <Button onClick={handlePasskeySetup} disabled={passkeySetupLoading} className="w-full mb-3">
+                        {passkeySetupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
+                        {passkeySetupLoading ? 'Setting up…' : 'Create Passkey'}
+                    </Button>
+                    <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full text-muted-foreground">
+                        <X className="w-4 h-4" /> Skip for now
+                    </Button>
+                </div>
             </PageShell>
         );
     }
 
-    // ── Main login UI ─────────────────────────────────────────────────────────
+    // ── Main login UI — two-column layout ─────────────────────────────────────
 
     return (
-        <PageShell>
-            {/* Info banner (email verified, etc.) */}
-            {info && !requires2FA && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
-                    <CheckCircle className="w-4 h-4 shrink-0" />
-                    {info}
+        <PageShell fullWidth>
+            <div className="flex min-h-0">
+                {/* ── Left brand panel ── */}
+                <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-gradient-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
+                    <div>
+                        <div className="flex items-center gap-3 mb-8">
+                            <TerminalLogo width={40} height={40} className="rounded-xl" />
+                            <span className="text-xl font-bold gradient-text">Termi</span>
+                        </div>
+                        <h2 className="text-2xl font-bold leading-snug mb-2">
+                            Your servers,<br />always within reach.
+                        </h2>
+                        <p className="text-sm text-muted-foreground mb-8">
+                            A secure, modern SSH manager built for developers and teams.
+                        </p>
+                        <ul className="space-y-3">
+                            {features.map(({ icon: Icon, text }) => (
+                                <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                    <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+                                        <Icon className="w-3.5 h-3.5 text-primary" />
+                                    </span>
+                                    {text}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <p className="text-xs text-muted-foreground/50 mt-8">© {new Date().getFullYear()} Termi. All rights reserved.</p>
                 </div>
-            )}
 
-            {!requires2FA ? (
-                <>
-                    <h1 className="text-2xl font-bold text-center mb-2">Welcome back</h1>
-                    <p className="text-muted-foreground text-center mb-8">Sign in to your account to continue</p>
-
-                    {/* Google Sign-In */}
-                    <div className="mb-6">
-                        <a
-                            href="/api/auth/google/authorize"
-                            className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium"
-                        >
-                            <GoogleIcon className="w-5 h-5" />
-                            Continue with Google
-                        </a>
+                {/* ── Right form panel ── */}
+                <div className="flex-1 p-8 flex flex-col justify-center">
+                    {/* Mobile logo (hidden on md+) */}
+                    <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
+                        <TerminalLogo width={40} height={40} className="rounded-xl" />
+                        <span className="text-xl font-bold gradient-text">Termi</span>
                     </div>
 
-                    <div className="relative mb-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-border" />
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                            <span className="bg-card px-2 text-muted-foreground">or sign in with email</span>
-                        </div>
-                    </div>
-
-                    <form ref={formRef} onSubmit={handleSubmit} method="POST" className="space-y-5">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input
-                                type="email"
-                                id="email"
-                                name="username"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="bg-secondary border-border"
-                                placeholder="you@example.com"
-                                required
-                                autoComplete="username email"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative">
-                                <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="bg-secondary border-border pr-12"
-                                    placeholder="••••••••"
-                                    required
-                                    autoComplete="current-password"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </Button>
-                            </div>
-                        </div>
-
-                        {error && (
-                            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <Button type="submit" disabled={loading} className="w-full">
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
-                        </Button>
-
-                        <div className="text-center">
-                            <Link
-                                href="/forgot-password"
-                                className="text-xs text-muted-foreground hover:text-foreground underline"
-                            >
-                                Forgot your password?
-                            </Link>
-                        </div>
-                    </form>
-
-                    {/* Passkey sign-in */}
-                    {webAuthnSupported && (
-                        <>
-                            <div className="my-5 flex items-center gap-3">
-                                <div className="flex-1 h-px bg-border" />
-                                <span className="text-xs text-muted-foreground">or</span>
-                                <div className="flex-1 h-px bg-border" />
-                            </div>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handlePasskeySignIn}
-                                disabled={passkeyLoading}
-                                className="w-full bg-secondary border-border hover:bg-secondary/80"
-                            >
-                                {passkeyLoading
-                                    ? <Loader2 className="w-4 h-4 animate-spin" />
-                                    : <Fingerprint className="w-4 h-4 text-primary" />}
-                                {passkeyLoading ? 'Waiting for passkey…' : 'Sign in with Passkey'}
-                            </Button>
-                        </>
-                    )}
-                </>
-            ) : (
-                <>
-                    <div className="flex justify-center mb-4">
-                        {twoFactorMethod === 'EMAIL'
-                            ? <Mail className="w-8 h-8 text-primary" />
-                            : <Smartphone className="w-8 h-8 text-primary" />}
-                    </div>
-                    <h1 className="text-2xl font-bold text-center mb-2">Two-Factor Authentication</h1>
-                    <p className="text-muted-foreground text-center mb-6 text-sm">
-                        {isRecoveryMode
-                            ? 'Enter one of your recovery codes (format: XXXX-XXXX)'
-                            : twoFactorMethod === 'EMAIL'
-                                ? 'Enter the 6-digit code sent to your email'
-                                : 'Enter the 6-digit code from your authenticator app'}
-                    </p>
-
-                    {info && !isRecoveryMode && (
-                        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm mb-4">
+                    {/* Info banner */}
+                    {info && !requires2FA && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-5">
+                            <CheckCircle className="w-4 h-4 shrink-0" />
                             {info}
                         </div>
                     )}
 
-                    <form onSubmit={handleVerify} method="POST" className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="code">{isRecoveryMode ? 'Recovery Code' : 'Verification Code'}</Label>
-                            <Input
-                                type="text"
-                                id="code"
-                                value={code}
-                                onChange={(e) => {
-                                    const v = e.target.value;
-                                    setCode(isRecoveryMode ? v.toUpperCase().slice(0, 9) : v.replace(/\D/g, '').slice(0, 6));
-                                }}
-                                className="bg-secondary border-border text-center text-2xl tracking-[0.5em] font-mono"
-                                placeholder={isRecoveryMode ? 'XXXX-XXXX' : '000000'}
-                                required
-                                autoComplete="one-time-code"
-                                inputMode={isRecoveryMode ? 'text' : 'numeric'}
-                                maxLength={isRecoveryMode ? 9 : 6}
-                                autoFocus
-                            />
-                        </div>
+                    {!requires2FA ? (
+                        <>
+                            <h1 className="text-2xl font-bold mb-1">Welcome back</h1>
+                            <p className="text-muted-foreground text-sm mb-6">Sign in to your account to continue</p>
 
-                        {error && (
-                            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                                {error}
+                            {/* Google Sign-In */}
+                            <a
+                                href="/api/auth/google/authorize"
+                                className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium mb-5"
+                            >
+                                <GoogleIcon className="w-5 h-5" />
+                                Continue with Google
+                            </a>
+
+                            <div className="relative mb-5">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-border" />
+                                </div>
+                                <div className="relative flex justify-center text-xs">
+                                    <span className="bg-card px-2 text-muted-foreground">or sign in with email</span>
+                                </div>
                             </div>
-                        )}
 
-                        <Button
-                            type="submit"
-                            disabled={loading || (isRecoveryMode ? code.length < 8 : code.length !== 6)}
-                            className="w-full"
-                        >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify'}
-                        </Button>
+                            <form ref={formRef} onSubmit={handleSubmit} method="POST" className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="email">Email Address</Label>
+                                    <Input
+                                        type="email" id="email" name="username"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="bg-secondary border-border"
+                                        placeholder="you@example.com"
+                                        required autoComplete="username email"
+                                    />
+                                </div>
 
-                        {twoFactorMethod === 'EMAIL' && !isRecoveryMode && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleResendEmail}
-                                disabled={resendLoading || resendCooldown > 0}
-                                className="w-full bg-secondary border-border"
-                            >
-                                <RefreshCw className={cn('w-4 h-4', resendLoading && 'animate-spin')} />
-                                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
-                            </Button>
-                        )}
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="password">Password</Label>
+                                        <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground underline">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+                                    <div className="relative">
+                                        <Input
+                                            type={showPassword ? 'text' : 'password'}
+                                            id="password" name="password"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="bg-secondary border-border pr-12"
+                                            placeholder="••••••••"
+                                            required autoComplete="current-password"
+                                        />
+                                        <Button
+                                            type="button" variant="ghost" size="icon"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </Button>
+                                    </div>
+                                </div>
 
-                        {twoFactorMethod === 'TOTP' && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => { setIsRecoveryMode(!isRecoveryMode); setCode(''); setError(''); }}
-                                className="w-full bg-secondary border-border"
-                            >
-                                <KeyRound className="w-4 h-4" />
-                                {isRecoveryMode ? 'Use authenticator app instead' : 'Use a recovery code'}
-                            </Button>
-                        )}
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                        {error}
+                                    </div>
+                                )}
 
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => { setRequires2FA(false); setCode(''); setError(''); setInfo(''); setIsRecoveryMode(false); }}
-                            className="w-full text-muted-foreground"
-                        >
-                            Back to Login
-                        </Button>
-                    </form>
-                </>
-            )}
+                                <Button type="submit" disabled={loading} className="w-full">
+                                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
+                                </Button>
+                            </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-primary hover:text-primary/80">
-                    Sign up
-                </Link>
+                            {/* Passkey sign-in */}
+                            {webAuthnSupported && (
+                                <>
+                                    <div className="my-4 flex items-center gap-3">
+                                        <div className="flex-1 h-px bg-border" />
+                                        <span className="text-xs text-muted-foreground">or</span>
+                                        <div className="flex-1 h-px bg-border" />
+                                    </div>
+                                    <Button
+                                        type="button" variant="outline"
+                                        onClick={handlePasskeySignIn}
+                                        disabled={passkeyLoading}
+                                        className="w-full bg-secondary border-border hover:bg-secondary/80"
+                                    >
+                                        {passkeyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4 text-primary" />}
+                                        {passkeyLoading ? 'Waiting for passkey…' : 'Sign in with Passkey'}
+                                    </Button>
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-center mb-4">
+                                {twoFactorMethod === 'EMAIL'
+                                    ? <Mail className="w-8 h-8 text-primary" />
+                                    : <Smartphone className="w-8 h-8 text-primary" />}
+                            </div>
+                            <h1 className="text-xl font-bold text-center mb-1">Two-Factor Authentication</h1>
+                            <p className="text-muted-foreground text-center mb-5 text-sm">
+                                {isRecoveryMode
+                                    ? 'Enter one of your recovery codes (format: XXXX-XXXX)'
+                                    : twoFactorMethod === 'EMAIL'
+                                        ? 'Enter the 6-digit code sent to your email'
+                                        : 'Enter the 6-digit code from your authenticator app'}
+                            </p>
+
+                            {info && !isRecoveryMode && (
+                                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm mb-4">
+                                    {info}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleVerify} method="POST" className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="code">{isRecoveryMode ? 'Recovery Code' : 'Verification Code'}</Label>
+                                    <Input
+                                        type="text" id="code"
+                                        value={code}
+                                        onChange={(e) => {
+                                            const v = e.target.value;
+                                            setCode(isRecoveryMode ? v.toUpperCase().slice(0, 9) : v.replace(/\D/g, '').slice(0, 6));
+                                        }}
+                                        className="bg-secondary border-border text-center text-2xl tracking-[0.5em] font-mono"
+                                        placeholder={isRecoveryMode ? 'XXXX-XXXX' : '000000'}
+                                        required
+                                        autoComplete="one-time-code"
+                                        inputMode={isRecoveryMode ? 'text' : 'numeric'}
+                                        maxLength={isRecoveryMode ? 9 : 6}
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading || (isRecoveryMode ? code.length < 8 : code.length !== 6)}
+                                    className="w-full"
+                                >
+                                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify'}
+                                </Button>
+
+                                {twoFactorMethod === 'EMAIL' && !isRecoveryMode && (
+                                    <Button
+                                        type="button" variant="outline"
+                                        onClick={handleResendEmail}
+                                        disabled={resendLoading || resendCooldown > 0}
+                                        className="w-full bg-secondary border-border"
+                                    >
+                                        <RefreshCw className={cn('w-4 h-4', resendLoading && 'animate-spin')} />
+                                        {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                                    </Button>
+                                )}
+
+                                {twoFactorMethod === 'TOTP' && (
+                                    <Button
+                                        type="button" variant="outline"
+                                        onClick={() => { setIsRecoveryMode(!isRecoveryMode); setCode(''); setError(''); }}
+                                        className="w-full bg-secondary border-border"
+                                    >
+                                        <KeyRound className="w-4 h-4" />
+                                        {isRecoveryMode ? 'Use authenticator app instead' : 'Use a recovery code'}
+                                    </Button>
+                                )}
+
+                                <Button
+                                    type="button" variant="ghost"
+                                    onClick={() => { setRequires2FA(false); setCode(''); setError(''); setInfo(''); setIsRecoveryMode(false); }}
+                                    className="w-full text-muted-foreground"
+                                >
+                                    Back to Login
+                                </Button>
+                            </form>
+                        </>
+                    )}
+
+                    <p className="mt-6 text-center text-sm text-muted-foreground">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/register" className="text-primary hover:text-primary/80">
+                            Sign up
+                        </Link>
+                    </p>
+                </div>
             </div>
         </PageShell>
     );

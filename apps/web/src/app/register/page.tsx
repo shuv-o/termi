@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, X, Terminal, Shield, Zap, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import TerminalLogo from '@/components/common/Logo';
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -21,64 +21,44 @@ function GoogleIcon({ className }: { className?: string }) {
     );
 }
 
+const features = [
+    { icon: Terminal, text: 'Manage SSH servers from one place' },
+    { icon: Shield,   text: 'End-to-end encrypted credentials' },
+    { icon: Zap,      text: 'Instant terminal sessions' },
+    { icon: Globe,    text: 'Access from anywhere, securely' },
+];
+
 export default function RegisterPage() {
     const router = useRouter();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        confirmPassword: '',
-    });
+    const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const passwordRequirements = [
         { label: 'At least 8 characters', met: formData.password.length >= 8 },
-        { label: 'Uppercase letter', met: /[A-Z]/.test(formData.password) },
-        { label: 'Lowercase letter', met: /[a-z]/.test(formData.password) },
-        { label: 'Number', met: /\d/.test(formData.password) },
+        { label: 'Uppercase letter',       met: /[A-Z]/.test(formData.password) },
+        { label: 'Lowercase letter',       met: /[a-z]/.test(formData.password) },
+        { label: 'Number',                 met: /\d/.test(formData.password) },
     ];
 
-    const passwordsMatch =
-        formData.password === formData.confirmPassword &&
-        formData.confirmPassword.length > 0;
-
+    const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
     const allRequirementsMet = passwordRequirements.every((req) => req.met);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-
-        if (!allRequirementsMet) {
-            setError('Please meet all password requirements');
-            return;
-        }
-
-        if (!passwordsMatch) {
-            setError('Passwords do not match');
-            return;
-        }
-
+        if (!allRequirementsMet) { setError('Please meet all password requirements'); return; }
+        if (!passwordsMatch) { setError('Passwords do not match'); return; }
         setLoading(true);
-
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password,
-                }),
+                body: JSON.stringify({ email: formData.email, password: formData.password }),
             });
-
             const data = await response.json();
-
-            if (!data.success) {
-                setError(data.error || 'Registration failed');
-                setLoading(false);
-                return;
-            }
-
+            if (!data.success) { setError(data.error || 'Registration failed'); setLoading(false); return; }
             router.push('/login?registered=true');
         } catch {
             setError('An error occurred. Please try again.');
@@ -93,136 +73,150 @@ export default function RegisterPage() {
                 <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="relative w-full max-w-md">
-                <Card className="bg-card border-border">
-                    <CardContent className="p-8">
-                        <div className="flex items-center justify-center gap-3 mb-8">
-                            <TerminalLogo width={48} height={48} className="rounded-xl" />
-                            <span className="text-2xl font-bold gradient-text">Termi</span>
+            <div className="relative w-full max-w-3xl">
+                <Card className="bg-card border-border overflow-hidden">
+                    <div className="flex min-h-0">
+                        {/* ── Left brand panel ── */}
+                        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-gradient-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
+                            <div>
+                                <div className="flex items-center gap-3 mb-8">
+                                    <TerminalLogo width={40} height={40} className="rounded-xl" />
+                                    <span className="text-xl font-bold gradient-text">Termi</span>
+                                </div>
+                                <h2 className="text-2xl font-bold leading-snug mb-2">
+                                    Start managing<br />servers smarter.
+                                </h2>
+                                <p className="text-sm text-muted-foreground mb-8">
+                                    Join developers who trust Termi for secure, instant server access.
+                                </p>
+                                <ul className="space-y-3">
+                                    {features.map(({ icon: Icon, text }) => (
+                                        <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+                                                <Icon className="w-3.5 h-3.5 text-primary" />
+                                            </span>
+                                            {text}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <p className="text-xs text-muted-foreground/50 mt-8">© {new Date().getFullYear()} Termi. All rights reserved.</p>
                         </div>
 
-                        <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
-                        <p className="text-muted-foreground text-center mb-8">
-                            Start managing your servers securely
-                        </p>
+                        {/* ── Right form panel ── */}
+                        <div className="flex-1 p-8 flex flex-col justify-center">
+                            {/* Mobile logo */}
+                            <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
+                                <TerminalLogo width={40} height={40} className="rounded-xl" />
+                                <span className="text-xl font-bold gradient-text">Termi</span>
+                            </div>
 
-                        <div className="mb-6">
+                            <h1 className="text-2xl font-bold mb-1">Create Account</h1>
+                            <p className="text-muted-foreground text-sm mb-6">Start managing your servers securely</p>
+
+                            {/* Google Sign-Up */}
                             <a
                                 href="/api/auth/google/authorize"
-                                className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium"
+                                className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium mb-5"
                             >
                                 <GoogleIcon className="w-5 h-5" />
                                 Continue with Google
                             </a>
-                        </div>
-                        <div className="relative mb-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-border" />
-                            </div>
-                            <div className="relative flex justify-center text-xs">
-                                <span className="bg-card px-2 text-muted-foreground">or register with email</span>
-                            </div>
-                        </div>
 
-                        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-5">
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input
-                                    type="email"
-                                    id="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="bg-secondary border-border"
-                                    placeholder="you@example.com"
-                                    required
-                                    autoComplete="email"
-                                />
+                            <div className="relative mb-5">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-border" />
+                                </div>
+                                <div className="relative flex justify-center text-xs">
+                                    <span className="bg-card px-2 text-muted-foreground">or register with email</span>
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
+                            <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="email">Email Address</Label>
                                     <Input
-                                        type={showPassword ? 'text' : 'password'}
-                                        id="password"
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        className="bg-secondary border-border pr-12"
-                                        placeholder="••••••••"
-                                        required
-                                        autoComplete="new-password"
+                                        type="email" id="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="bg-secondary border-border"
+                                        placeholder="you@example.com"
+                                        required autoComplete="email"
                                     />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </Button>
                                 </div>
 
-                                {formData.password && (
-                                    <div className="mt-3 space-y-1">
-                                        {passwordRequirements.map((req, i) => (
-                                            <div
-                                                key={i}
-                                                className={`flex items-center gap-2 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}
-                                            >
-                                                {req.met ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                                                {req.label}
-                                            </div>
-                                        ))}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="relative">
+                                        <Input
+                                            type={showPassword ? 'text' : 'password'}
+                                            id="password"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="bg-secondary border-border pr-12"
+                                            placeholder="••••••••"
+                                            required autoComplete="new-password"
+                                        />
+                                        <Button
+                                            type="button" variant="ghost" size="icon"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </Button>
+                                    </div>
+
+                                    {formData.password && (
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+                                            {passwordRequirements.map((req, i) => (
+                                                <div key={i} className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}>
+                                                    {req.met ? <Check className="w-3 h-3 shrink-0" /> : <X className="w-3 h-3 shrink-0" />}
+                                                    {req.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                    <Input
+                                        type="password" id="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        className={`bg-secondary border-border ${formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''}`}
+                                        placeholder="••••••••"
+                                        required autoComplete="new-password"
+                                    />
+                                    {formData.confirmPassword && !passwordsMatch && (
+                                        <p className="text-xs text-destructive">Passwords do not match</p>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs text-sky-300">
+                                    <span className="shrink-0">🔒</span>
+                                    <span>Credentials are encrypted using a key derived from your password. Keep it safe.</span>
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                        {error}
                                     </div>
                                 )}
-                            </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                <Input
-                                    type="password"
-                                    id="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className={`bg-secondary border-border ${
-                                        formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''
-                                    }`}
-                                    placeholder="••••••••"
-                                    required
-                                    autoComplete="new-password"
-                                />
-                                {formData.confirmPassword && !passwordsMatch && (
-                                    <p className="text-sm text-destructive">Passwords do not match</p>
-                                )}
-                            </div>
+                                <Button type="submit" disabled={loading || !allRequirementsMet || !passwordsMatch} className="w-full">
+                                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
+                                </Button>
+                            </form>
 
-                            <div className="bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 text-xs text-sky-300">
-                                🔒 Your server credentials will be automatically encrypted using a key derived from your password. Keep your password safe — losing it means losing access to stored credentials.
-                            </div>
-
-                            {error && (
-                                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                                    {error}
-                                </div>
-                            )}
-
-                            <Button
-                                type="submit"
-                                disabled={loading || !allRequirementsMet || !passwordsMatch}
-                                className="w-full"
-                            >
-                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
-                            </Button>
-                        </form>
-
-                        <div className="mt-6 text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <Link href="/login" className="text-primary hover:text-primary/80">
-                                Sign in
-                            </Link>
+                            <p className="mt-6 text-center text-sm text-muted-foreground">
+                                Already have an account?{' '}
+                                <Link href="/login" className="text-primary hover:text-primary/80">
+                                    Sign in
+                                </Link>
+                            </p>
                         </div>
-                    </CardContent>
+                    </div>
                 </Card>
             </div>
         </div>
