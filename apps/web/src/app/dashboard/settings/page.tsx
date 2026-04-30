@@ -850,9 +850,57 @@ export default function SettingsPage() {
                                 Your server credentials are encrypted with your encryption passphrase.
                                 You enter this each time you sign in with Google.
                             </p>
+
+                            {/* Passphrase Form */}
+                            <form onSubmit={handleChangePassphrase} className="space-y-3">
+                                <p className="text-sm text-muted-foreground">
+                                    {user?.hasMasterKey ? 'Change your encryption passphrase:' : 'Set up your encryption passphrase:'}
+                                </p>
+                                <div className="space-y-2">
+                                    <Input
+                                        type="password"
+                                        placeholder="New passphrase (min 8 characters)"
+                                        value={encryptionPassphrase}
+                                        onChange={(e) => setEncryptionPassphrase(e.target.value)}
+                                        className="bg-secondary border-border"
+                                        required
+                                        minLength={8}
+                                    />
+                                    <Input
+                                        type="password"
+                                        placeholder="Confirm passphrase"
+                                        value={encryptionConfirm}
+                                        onChange={(e) => setEncryptionConfirm(e.target.value)}
+                                        className={`bg-secondary ${encryptionConfirm && encryptionPassphrase !== encryptionConfirm ? 'border-destructive' : 'border-border'}`}
+                                        required
+                                        minLength={8}
+                                    />
+                                    {encryptionConfirm && encryptionPassphrase !== encryptionConfirm && (
+                                        <p className="text-sm text-destructive">Passphrases do not match</p>
+                                    )}
+                                    <Button
+                                        type="submit"
+                                        disabled={encryptionLoading || !encryptionPassphrase || encryptionPassphrase !== encryptionConfirm}
+                                        className="w-full gap-2"
+                                    >
+                                        {encryptionLoading ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Saving…
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Key className="w-4 h-4" />
+                                                {user?.hasMasterKey ? 'Update Passphrase' : 'Set Passphrase'}
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </form>
+
                             {!user.hasMasterKey && (
-                                <Button asChild size="sm">
-                                    <a href="/setup-encryption">Set Up Encryption</a>
+                                <Button asChild size="sm" variant="outline">
+                                    <a href="/setup-encryption">Or use separate setup page</a>
                                 </Button>
                             )}
                             {!showEncryptionResetConfirm && (
