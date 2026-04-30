@@ -23,7 +23,6 @@ const registerSchema = z.object({
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
             'Password must contain uppercase, lowercase, and a number'
         ),
-    masterKey: z.string().min(8).optional(),
 });
 
 export async function POST(request: Request) {
@@ -40,10 +39,10 @@ export async function POST(request: Request) {
         return validation.error;
     }
 
-    const { email, password, masterKey } = validation.data;
+    const { email, password } = validation.data;
 
     try {
-        const result = await registerUser({ email, password, masterKey });
+        const result = await registerUser({ email, password });
 
         if (!result.success) {
             return errorResponse(result.error || 'Registration failed');

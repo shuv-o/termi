@@ -506,6 +506,7 @@ export async function getCurrentUser() {
             isActive: true,
             isVerified: true,
             createdAt: true,
+            passwordHash: true,
         },
     });
 

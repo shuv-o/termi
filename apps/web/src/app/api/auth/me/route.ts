@@ -25,6 +25,7 @@ export async function GET() {
                 passkeyEnabled: user.passkeyEnabled,
                 isVerified: user.isVerified,
                 createdAt: user.createdAt,
+                isGoogleUser: !user.passwordHash,
             },
         });
     } catch (error) {
