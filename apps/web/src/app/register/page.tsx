@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Terminal, Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import TerminalLogo from '@/components/common/Logo';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -89,9 +90,7 @@ export default function RegisterPage() {
                 <Card className="bg-card border-border">
                     <CardContent className="p-8">
                         <div className="flex items-center justify-center gap-3 mb-8">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <Terminal className="w-7 h-7 text-white" />
-                            </div>
+                            <TerminalLogo width={48} height={48} className="rounded-xl" />
                             <span className="text-2xl font-bold gradient-text">Termi</span>
                         </div>
 

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Terminal,
     Server,
     FolderOpen,
     Settings,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react';
 import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
+import TerminalLogo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -99,9 +99,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border">
                         <Link href="/dashboard" className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <Terminal className="w-5 h-5 text-white" />
-                            </div>
+                            <TerminalLogo width={36} height={36} className="rounded-lg" />
                             <span className="text-lg font-bold gradient-text">Termi</span>
                         </Link>
                         <Button
@@ -193,7 +191,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             <Menu className="w-6 h-6" />
                         </Button>
                         <Link href="/dashboard" className="flex items-center gap-2">
-                            <Terminal className="w-6 h-6 text-primary" />
+                            <TerminalLogo width={28} height={28} className="rounded-md" />
                             <span className="font-bold">Termi</span>
                         </Link>
                         <div className="w-10" />

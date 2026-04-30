@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Terminal, Eye, EyeOff, Loader2, Mail, Smartphone,
+    Eye, EyeOff, Loader2, Mail, Smartphone,
     KeyRound, RefreshCw, CheckCircle, Fingerprint, X, ShieldCheck,
 } from 'lucide-react';
 import {
@@ -181,11 +181,10 @@ export default function LoginPage() {
                     <CardContent className="p-8">
                         {/* Logo */}
                         <div className="flex items-center justify-center gap-3 mb-8">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <TerminalLogo className="w-7 h-7 text-white" />
-                            </div>
+                            <TerminalLogo width={48} height={48} className="rounded-xl" />
                             <span className="text-2xl font-bold gradient-text">Termi</span>
                         </div>
+
                         {children}
                     </CardContent>
                 </Card>
