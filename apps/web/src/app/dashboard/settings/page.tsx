@@ -24,6 +24,7 @@ interface User {
     hasMasterKey: boolean;
     passkeyEnabled: boolean;
     isVerified: boolean;
+    isGoogleUser: boolean;
 }
 
 interface Passkey {
@@ -217,6 +218,11 @@ export default function SettingsPage() {
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
     const [pushSubscribed, setPushSubscribed] = useState(false);
     const [enablingPush, setEnablingPush] = useState(false);
+
+    const [encryptionPassphrase, setEncryptionPassphrase] = useState('');
+    const [encryptionConfirm, setEncryptionConfirm] = useState('');
+    const [encryptionLoading, setEncryptionLoading] = useState(false);
+    const [showEncryptionResetConfirm, setShowEncryptionResetConfirm] = useState(false);
 
     useEffect(() => {
         async function init() {
@@ -513,6 +519,32 @@ export default function SettingsPage() {
         setTimeout(() => setCopiedCode(null), 2000);
     };
 
+    const handleChangePassphrase = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (encryptionPassphrase !== encryptionConfirm || encryptionPassphrase.length < 8) return;
+        setEncryptionLoading(true);
+        try {
+            const res = await fetch('/api/auth/setup-encryption', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ passphrase: encryptionPassphrase }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                addToast('success', 'Encryption passphrase updated');
+                setEncryptionPassphrase('');
+                setEncryptionConfirm('');
+                setUser((u) => u ? { ...u, hasMasterKey: true } : u);
+            } else {
+                addToast('error', data.error || 'Failed to update passphrase');
+            }
+        } catch {
+            addToast('error', 'Something went wrong');
+        } finally {
+            setEncryptionLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -788,6 +820,94 @@ export default function SettingsPage() {
                         </div>
                     )}
                 </SectionCard>
+            </div>
+
+            {/* ── Credential Encryption ── */}
+            <div className="mb-4">
+                <Card className="p-6 space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Lock className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <h2 className="font-semibold">Credential Encryption</h2>
+                            <p className="text-xs text-muted-foreground">
+                                How your stored server credentials are protected
+                            </p>
+                        </div>
+                    </div>
+
+                    {user?.isGoogleUser ? (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-sm">
+                                {user.hasMasterKey ? (
+                                    <><Check className="w-4 h-4 text-green-400" /><span className="text-green-400">Encryption passphrase is set</span></>
+                                ) : (
+                                    <><AlertTriangle className="w-4 h-4 text-yellow-400" /><span className="text-yellow-400">Encryption passphrase not set — server connections won't work</span></>
+                                )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Your server credentials are encrypted with your encryption passphrase.
+                                You enter this each time you sign in with Google.
+                            </p>
+                            {!user.hasMasterKey && (
+                                <Button asChild size="sm">
+                                    <a href="/setup-encryption">Set Up Encryption</a>
+                                </Button>
+                            )}
+                            {!showEncryptionResetConfirm && (
+                                <button
+                                    type="button"
+                                    className="text-xs text-muted-foreground underline"
+                                    onClick={() => setShowEncryptionResetConfirm(true)}
+                                >
+                                    Reset encryption passphrase (deletes all server credentials)
+                                </button>
+                            )}
+                            {showEncryptionResetConfirm && (
+                                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
+                                    <p className="text-sm text-red-300 font-medium">
+                                        ⚠️ This will permanently delete all your stored servers and credentials.
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={async () => {
+                                                const res = await fetch('/api/auth/reset-encryption-key', { method: 'POST' });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    window.location.href = '/setup-encryption';
+                                                }
+                                            }}
+                                        >
+                                            Delete Everything & Reset
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setShowEncryptionResetConfirm(false)}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                                <Check className="w-4 h-4 text-green-400" />
+                                <span className="text-green-400">Encryption active — derived from your login password</span>
+                            </div>
+                            <p className="text-xs">
+                                Your server credentials are encrypted with a key derived from your password.
+                                If you change your password, all credentials are automatically re-encrypted.
+                                If you <strong>reset</strong> your password (forgot password), credentials are permanently lost.
+                            </p>
+                        </div>
+                    )}
+                </Card>
             </div>
 
             {/* ── Change Password + Push Notifications ── */}
