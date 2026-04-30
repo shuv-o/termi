@@ -89,7 +89,7 @@ export async function POST(request: Request, { params }: RouteParams) {
             where: { id: user.id },
             select: { passwordHash: true },
         });
-        if (!dbUser) return unauthorizedResponse();
+        if (!dbUser || !dbUser.passwordHash) return unauthorizedResponse();
         authenticated = await verifyPassword(dbUser.passwordHash, authPassword);
     } else if (authCode) {
         const dbUser = await prisma.user.findUnique({
