@@ -208,7 +208,8 @@ export const OAuthAccountScalarFieldEnum = {
   provider: 'provider',
   providerAccountId: 'providerAccountId',
   email: 'email',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type OAuthAccountScalarFieldEnum = (typeof OAuthAccountScalarFieldEnum)[keyof typeof OAuthAccountScalarFieldEnum]
