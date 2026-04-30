@@ -12,6 +12,7 @@ import {
     encryptField,
     generateSecureToken,
     hashToken,
+    secureCompare,
 } from '@/lib/crypto';
 import { createSession, getSession, validateSession } from './session';
 import { verifyTOTP, generateRecoveryCodes, normalizeRecoveryCode } from './totp';
@@ -450,6 +451,10 @@ export async function disable2FA(
         return { success: false, error: 'User not found' };
     }
 
+    if (!user.passwordHash) {
+        return { success: false, error: 'This account uses Google Sign-In and does not have a password.' };
+    }
+
     const passwordValid = await verifyPassword(user.passwordHash, password);
     if (!passwordValid) {
         return { success: false, error: 'Invalid password' };
@@ -542,12 +547,13 @@ export async function changePassword(
 
     // Re-encrypt all server credentials with new masterKey
     const { reEncryptCredentials } = await import('@/lib/crypto/credentials');
-    const servers = await prisma.server.findMany({
-        where: { userId },
-        select: { id: true, host: true, username: true, password: true, privateKey: true, passphrase: true, notes: true },
-    });
 
     await prisma.$transaction(async (tx) => {
+        const servers = await tx.server.findMany({
+            where: { userId },
+            select: { id: true, host: true, username: true, password: true, privateKey: true, passphrase: true, notes: true },
+        });
+
         // Update password + masterKey
         await tx.user.update({
             where: { id: userId },
@@ -577,6 +583,11 @@ export async function changePassword(
                 data: reEncrypted,
             });
         }
+
+        await tx.session.updateMany({
+            where: { userId, isRevoked: false },
+            data: { isRevoked: true, revokedAt: new Date(), revokedReason: 'Password changed' },
+        });
 
         await tx.auditLog.create({
             data: { userId, action: 'USER_PASSWORD_CHANGED' },
@@ -762,7 +773,7 @@ export async function unlockEncryption(
     const derived = deriveMasterKey(passphrase, salt);
     const candidateHash = hashDerivedKey(derived);
 
-    if (candidateHash !== user.masterKeyHash) {
+    if (!secureCompare(candidateHash, user.masterKeyHash!)) {
         return { success: false, error: 'Incorrect passphrase' };
     }
 
