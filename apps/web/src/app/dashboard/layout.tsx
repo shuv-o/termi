@@ -14,6 +14,7 @@ import {
     Search,
     Shield,
     Monitor,
+    Mail,
 } from 'lucide-react';
 import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
@@ -26,6 +27,8 @@ interface User {
     email: string;
     totpEnabled: boolean;
     hasMasterKey: boolean;
+    isVerified: boolean;
+    isGoogleUser: boolean;
 }
 
 const navigation = [
@@ -41,6 +44,8 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [resendingVerification, setResendingVerification] = useState(false);
+    const [verificationSent, setVerificationSent] = useState(false);
 
     const isSessionsPage = pathname === '/dashboard/sessions';
 
@@ -70,6 +75,16 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         router.push('/login');
+    };
+
+    const handleResendVerification = async () => {
+        setResendingVerification(true);
+        try {
+            await fetch('/api/auth/send-verification', { method: 'POST' });
+            setVerificationSent(true);
+        } finally {
+            setResendingVerification(false);
+        }
     };
 
     if (loading) {
@@ -185,6 +200,23 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             </aside>
 
             <div className="lg:pl-64">
+                {/* Email verification banner */}
+                {user && !user.isVerified && !user.isGoogleUser && (
+                    <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2.5 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 text-sm text-yellow-300">
+                            <Mail className="w-4 h-4 shrink-0" />
+                            <span>Please verify your email address to secure your account.</span>
+                        </div>
+                        <button
+                            onClick={handleResendVerification}
+                            disabled={resendingVerification || verificationSent}
+                            className="text-xs font-medium text-yellow-300 hover:text-yellow-200 underline shrink-0 disabled:opacity-50"
+                        >
+                            {verificationSent ? 'Email sent!' : resendingVerification ? 'Sending…' : 'Resend verification'}
+                        </button>
+                    </div>
+                )}
+
                 <header className="sticky top-0 z-30 h-16 bg-card/80 backdrop-blur-lg border-b border-border lg:hidden">
                     <div className="flex items-center justify-between h-full px-4">
                         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
