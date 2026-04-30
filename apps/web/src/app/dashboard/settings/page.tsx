@@ -222,6 +222,7 @@ export default function SettingsPage() {
     const [encryptionPassphrase, setEncryptionPassphrase] = useState('');
     const [encryptionConfirm, setEncryptionConfirm] = useState('');
     const [encryptionLoading, setEncryptionLoading] = useState(false);
+    const [resettingEncryption, setResettingEncryption] = useState(false);
     const [showEncryptionResetConfirm, setShowEncryptionResetConfirm] = useState(false);
 
     useEffect(() => {
@@ -542,6 +543,26 @@ export default function SettingsPage() {
             addToast('error', 'Something went wrong');
         } finally {
             setEncryptionLoading(false);
+        }
+    };
+
+    const handleResetEncryption = async () => {
+        setResettingEncryption(true);
+        try {
+            const res = await fetch('/api/auth/reset-encryption-key', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                addToast('success', 'Encryption key reset successfully.');
+                window.location.href = '/setup-encryption';
+            } else {
+                addToast('error', data.error || 'Failed to reset encryption key. Please try again.');
+                setShowEncryptionResetConfirm(false);
+            }
+        } catch {
+            addToast('error', 'Something went wrong. Please try again.');
+            setShowEncryptionResetConfirm(false);
+        } finally {
+            setResettingEncryption(false);
         }
     };
 
@@ -921,14 +942,10 @@ export default function SettingsPage() {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            onClick={async () => {
-                                                const res = await fetch('/api/auth/reset-encryption-key', { method: 'POST' });
-                                                const data = await res.json();
-                                                if (data.success) {
-                                                    window.location.href = '/setup-encryption';
-                                                }
-                                            }}
+                                            onClick={handleResetEncryption}
+                                            disabled={resettingEncryption}
                                         >
+                                            {resettingEncryption && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                             Delete Everything & Reset
                                         </Button>
                                         <Button
