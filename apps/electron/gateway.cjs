@@ -6430,6 +6430,10 @@ async function validateToken(token) {
     if (!payload.userId || !payload.serverId || !payload.host || !payload.username) {
       throw new Error("Invalid token payload");
     }
+    const VALID_PROTOCOLS = ["ssh", "scp", "rdp", "vnc"];
+    if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol)) {
+      throw new Error("Invalid token protocol");
+    }
     return payload;
   } catch (error) {
     if (error instanceof errors_exports.JWTExpired) {
@@ -6440,6 +6444,7 @@ async function validateToken(token) {
 }
 
 // apps/gateway/src/index.ts
+import_dotenv.default.config({ path: "../../.env" });
 import_dotenv.default.config();
 var PORT = parseInt(process.env.GATEWAY_PORT || "8080", 10);
 var HOST = process.env.GATEWAY_HOST || "0.0.0.0";
@@ -6533,6 +6538,14 @@ wss.on("connection", async (ws, req) => {
     ws.send(JSON.stringify({
       type: "error",
       message: "Server access denied"
+    }));
+    ws.close(4003, "Forbidden");
+    return;
+  }
+  if (tokenPayload.protocol !== protocol) {
+    ws.send(JSON.stringify({
+      type: "error",
+      message: "Protocol mismatch"
     }));
     ws.close(4003, "Forbidden");
     return;

@@ -10,6 +10,12 @@ const nextConfig = {
     // Standalone output for Docker
     output: 'standalone',
 
+    // Allow the Next.js dev server to accept HMR WebSocket connections from
+    // 127.0.0.1 (used by Electron) and localhost.  Without this, the dev server
+    // rejects the WebSocket upgrade with an invalid HTTP response when the page
+    // is loaded inside Electron.
+    allowedDevOrigins: ['127.0.0.1', 'localhost'],
+
     // Environment variables exposed to client
     env: {
         NEXT_PUBLIC_APP_NAME: 'Termi',

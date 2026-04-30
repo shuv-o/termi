@@ -58,8 +58,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    // Run on all routes except static files and Next.js internals
+    // Run on all routes except static files, Next.js internals, and dev-server
+    // WebSocket endpoints (HMR / Turbopack live-reload).  Intercepting WebSocket
+    // upgrade requests with NextResponse.next() + extra headers produces
+    // ERR_INVALID_HTTP_RESPONSE in Electron (and browsers) because the 101
+    // Switching Protocols response becomes malformed.
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).*)',
+        '/((?!_next/static|_next/image|_next/webpack-hmr|_next/on-demand-entries-ping|favicon.ico|icons|manifest.json).*)',
     ],
 };

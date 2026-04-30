@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, dialog, session, Menu } = require('electron');
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const http = require('http');
@@ -27,6 +27,12 @@ const rootEnvPath = path.join(__dirname, '../../.env');
 if (fs.existsSync(rootEnvPath)) {
     try { parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8')); } catch (_) {}
 }
+
+// In development mode the concurrently script already starts both the Next.js
+// dev server (:3000) and the gateway dev server (:8080), so Electron must NOT
+// spawn its own copies.  We detect dev mode by checking !app.isPackaged OR the
+// presence of the ELECTRON_DEV environment variable.
+const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
 let guacdProcess, gatewayProcess, nextProcess, win;
 
@@ -61,6 +67,32 @@ function getPaths() {
         gateway: path.join(__dirname, 'gateway.cjs'),
         nodePath: path.join(__dirname, '../web/.next/standalone/node_modules'),
     };
+}
+
+// In dev mode, poll until the Next.js dev server (port 3000) is accepting
+// connections, then resolve.  Times out after 120 s to give the compiler
+// enough time on a cold start.
+function waitForDevServer(port = 3000, timeoutMs = 120000) {
+    return new Promise((resolve, reject) => {
+        console.log(`[electron-dev] Waiting for Next.js dev server on :${port}…`);
+        const poll = setInterval(() => {
+            const req = http.get(`http://127.0.0.1:${port}`, res => {
+                if (res.statusCode < 500) {
+                    clearInterval(poll);
+                    clearTimeout(timeout);
+                    console.log(`[electron-dev] Next.js dev server is up on :${port}`);
+                    resolve();
+                }
+                res.resume();
+            });
+            req.on('error', () => {}); // not ready yet – keep polling
+        }, 500);
+
+        const timeout = setTimeout(() => {
+            clearInterval(poll);
+            reject(new Error(`Dev server on :${port} did not start within ${timeoutMs / 1000} s`));
+        }, timeoutMs);
+    });
 }
 
 function startGuacd() {
@@ -125,11 +157,73 @@ function startNextServer(paths) {
     });
 }
 
+function buildAppMenu() {
+    const isMac = process.platform === 'darwin';
+    const template = [
+        ...(isMac ? [{
+            label: app.name,
+            submenu: [
+                { role: 'about' },
+                { type: 'separator' },
+                { role: 'services' },
+                { type: 'separator' },
+                { role: 'hide' },
+                { role: 'hideOthers' },
+                { role: 'unhide' },
+                { type: 'separator' },
+                { role: 'quit' },
+            ],
+        }] : []),
+        {
+            label: 'Edit',
+            submenu: [
+                { role: 'undo' },
+                { role: 'redo' },
+                { type: 'separator' },
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                ...(isMac
+                    ? [{ role: 'pasteAndMatchStyle' }, { role: 'delete' }, { role: 'selectAll' }]
+                    : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }]),
+            ],
+        },
+        {
+            label: 'View',
+            submenu: [
+                { role: 'reload' },
+                { role: 'forceReload' },
+                ...(IS_DEV ? [{ role: 'toggleDevTools' }] : []),
+                { type: 'separator' },
+                { role: 'resetZoom' },
+                { role: 'zoomIn' },
+                { role: 'zoomOut' },
+                { type: 'separator' },
+                { role: 'togglefullscreen' },
+            ],
+        },
+        {
+            label: 'Window',
+            submenu: [
+                { role: 'minimize' },
+                { role: 'zoom' },
+                ...(isMac
+                    ? [{ type: 'separator' }, { role: 'front' }]
+                    : [{ role: 'close' }]),
+            ],
+        },
+    ];
+    return Menu.buildFromTemplate(template);
+}
+
 function createWindow() {
+    Menu.setApplicationMenu(buildAppMenu());
+
     win = new BrowserWindow({
         width: 1400,
         height: 900,
         title: 'Termi',
+        icon: path.join(__dirname, '../../build/icon.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -137,7 +231,27 @@ function createWindow() {
         },
     });
 
-    win.loadURL('http://127.0.0.1:8847');
+    // Dev: Next.js dev server on :3000; Production: standalone server on :8847
+    // Use 'localhost' (not '127.0.0.1') in dev so the WebSocket Origin header
+    // matches the gateway's default ALLOWED_ORIGINS ('http://localhost:3000').
+    const appUrl = IS_DEV ? 'http://localhost:3000' : 'http://127.0.0.1:8847';
+    win.loadURL(appUrl);
+
+    // In dev mode open DevTools automatically and configure session for HMR
+    if (IS_DEV) {
+        win.webContents.openDevTools({ mode: 'detach' });
+
+        // Ensure the HMR WebSocket upgrade request carries the correct Origin
+        // header so Next.js allowedDevOrigins accepts it.  Without this, Electron
+        // sometimes omits or sends a null Origin which the dev server refuses.
+        session.defaultSession.webRequest.onBeforeSendHeaders(
+            { urls: ['ws://localhost:3000/_next/*', 'http://localhost:3000/_next/*'] },
+            (details, callback) => {
+                details.requestHeaders['Origin'] = 'http://localhost:3000';
+                callback({ requestHeaders: details.requestHeaders });
+            }
+        );
+    }
 
     // Open external links in default browser rather than a new Electron window
     win.webContents.setWindowOpenHandler(({ url }) => {
@@ -228,6 +342,21 @@ ipcMain.on('local-terminal:kill', (event, id) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Enforce single instance — if a second instance is launched, focus the
+// existing window and quit the new process immediately.
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+    app.quit();
+    process.exit(0);
+}
+
+app.on('second-instance', () => {
+    if (win) {
+        if (win.isMinimized()) win.restore();
+        win.focus();
+    }
+});
+
 app.whenReady().then(async () => {
     // Packaged builds: load termi.config.json from the OS user-data directory.
     // On macOS: ~/Library/Application Support/Termi/termi.config.json
@@ -281,16 +410,37 @@ app.whenReady().then(async () => {
         }
     }
 
-    const paths = getPaths();
-    startGuacd();
-    startGateway(paths);
+    if (IS_DEV) {
+        // ── Development mode ──────────────────────────────────────────────────
+        // The "electron:dev" concurrently script already started:
+        //   • Next.js dev server  → http://127.0.0.1:3000
+        //   • Gateway dev server  → ws://127.0.0.1:8080
+        // We just need to wait until Next.js is ready before opening the window.
+        console.log('[electron-dev] Running in development mode.');
+        console.log('[electron-dev] Expecting Next.js on :3000 and gateway on :8080.');
 
-    try {
-        await startNextServer(paths);
-    } catch (err) {
-        console.error('Failed to start Next.js server:', err.message);
-        app.quit();
-        return;
+        startGuacd();
+
+        try {
+            await waitForDevServer(3000);
+        } catch (err) {
+            console.error('[electron-dev] Could not reach Next.js dev server:', err.message);
+            app.quit();
+            return;
+        }
+    } else {
+        // ── Production / packaged mode ────────────────────────────────────────
+        const paths = getPaths();
+        startGuacd();
+        startGateway(paths);
+
+        try {
+            await startNextServer(paths);
+        } catch (err) {
+            console.error('Failed to start Next.js server:', err.message);
+            app.quit();
+            return;
+        }
     }
 
     createWindow();
@@ -309,8 +459,12 @@ app.on('before-quit', () => {
         try { term.kill(); } catch (_) {}
     }
     localPtys.clear();
-    nextProcess?.kill();
-    gatewayProcess?.kill();
+    // Only kill processes that Electron itself spawned (production mode).
+    // In dev mode, Next.js and the gateway are managed by the concurrently script.
+    if (!IS_DEV) {
+        nextProcess?.kill();
+        gatewayProcess?.kill();
+    }
     guacdProcess?.kill();
     // Best-effort synchronous stop so the named container is released
     try { spawnSync('docker', ['stop', 'guacd-desktop']); } catch (_) {}
