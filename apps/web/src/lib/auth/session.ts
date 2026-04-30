@@ -25,6 +25,11 @@ export interface SessionData {
     lastActivity?: number;
     passkeyChallenge?: string; // Base64URL challenge for WebAuthn registration/auth
     passkeyAuthUserId?: string; // userId resolved during passkey auth options (before assertion verified)
+    // Temporary fields used during Google OAuth dance (cleared after callback)
+    googleOAuthState?: string;
+    googleCodeVerifier?: string;
+    // Temporary masterKey during 2FA pending state
+    tempMasterKey?: string;
 }
 
 // ============================================================================
@@ -296,6 +301,9 @@ export async function destroySession(): Promise<void> {
     session.masterKey = undefined;
     session.passkeyChallenge = undefined;
     session.passkeyAuthUserId = undefined;
+    session.googleOAuthState = undefined;
+    session.googleCodeVerifier = undefined;
+    session.tempMasterKey = undefined;
 
     await session.save();
 }

@@ -103,3 +103,12 @@ export function connectionTokenRateLimit(userId: string): RateLimitResult {
     return rateLimit(`conn-token:${userId}`, 30, 5 * 60 * 1000);
 }
 
+/** 3 forgot-password requests per hour per IP */
+export function forgotPasswordRateLimit(ip: string): RateLimitResult {
+    return rateLimit(`forgot-password:${ip}`, 3, 60 * 60 * 1000);
+}
+
+/** 3 resend-verification requests per hour per user */
+export function sendVerificationRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`send-verification:${userId}`, 3, 60 * 60 * 1000);
+}
