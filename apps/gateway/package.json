@@ -7,7 +7,8 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "lint": "eslint src/"
+        "lint": "eslint src/",
+        "test": "vitest run"
     },
     "dependencies": {
         "ssh2": "^1.17.0",
@@ -21,6 +22,7 @@
         "@types/ws": "^8.18.1",
         "eslint": "^9.39.2",
         "tsx": "^4.21.0",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.17"
     }
 }

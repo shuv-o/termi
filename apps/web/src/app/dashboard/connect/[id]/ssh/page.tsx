@@ -51,6 +51,7 @@ export default function SSHConnectionPage() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
+    const sessionIdRef = useRef(crypto.randomUUID());
 
     const handleDisconnect = useCallback(() => {}, []);
     const handleError = useCallback((err: string) => {
@@ -230,6 +231,7 @@ export default function SSHConnectionPage() {
                 {/* Terminal */}
                 <div className="flex-1 min-w-0 min-h-0">
                     <SSHTerminal
+                        sessionId={sessionIdRef.current}
                         serverId={serverId}
                         connectionToken={connectionToken}
                         gatewayUrl={gatewayUrl ?? undefined}

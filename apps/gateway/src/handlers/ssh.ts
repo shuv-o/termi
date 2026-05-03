@@ -1,26 +1,63 @@
 /**
  * SSH Connection Handler
- * 
- * Proxies WebSocket messages to an SSH connection using ssh2.
+ *
+ * Manages an SSH connection. Output is written to an SSHOutputSink rather than
+ * a WebSocket directly, so the sink can be swapped when a browser reconnects.
+ * WebSocket message routing (data/resize/ping) lives in index.ts.
  */
 
-import { WebSocket } from 'ws';
 import { Client, ClientChannel } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
 
+export interface SSHOutputSink {
+    /** Called with base64-encoded SSH output data. */
+    onData(encoded: string): void;
+    /** Called with structured control messages (shell-ready, disconnected, error, closed). */
+    onMessage(type: string, extra?: Record<string, unknown>): void;
+}
+
 export class SSHHandler {
-    private ws: WebSocket;
     private ssh: Client;
     private stream: ClientChannel | null = null;
     private connected = false;
     private closing = false;
+    private sink: SSHOutputSink;
 
-    constructor(ws: WebSocket, token: TokenPayload) {
-        this.ws = ws;
+    constructor(token: TokenPayload, sink: SSHOutputSink) {
+        this.sink = sink;
         this.ssh = new Client();
-
         this.setupSSH(token);
-        this.setupWebSocket();
+    }
+
+    /** Forward terminal input from browser to the SSH stream. */
+    write(data: Buffer): void {
+        if (this.stream) {
+            this.stream.write(data);
+        }
+    }
+
+    /** Forward terminal resize from browser to the SSH stream. */
+    resize(rows: number, cols: number): void {
+        if (this.stream) {
+            this.stream.setWindow(rows, cols, 0, 0);
+        }
+    }
+
+    public close(): void {
+        if (this.closing) return;
+        this.closing = true;
+        if (this.stream) {
+            this.stream.end();
+            this.stream = null;
+        }
+        if (this.ssh) {
+            this.ssh.end();
+        }
+        this.connected = false;
+    }
+
+    public isConnected(): boolean {
+        return this.connected;
     }
 
     private setupSSH(token: TokenPayload): void {
@@ -29,145 +66,57 @@ export class SSHHandler {
             port: token.port,
             username: token.username,
             readyTimeout: 10000,
-            keepaliveInterval: 15000,  // send SSH keepalive every 15 s
-            keepaliveCountMax: 6,       // allow up to 6 missed keepalives (~90 s) before giving up
+            keepaliveInterval: 15000,
+            keepaliveCountMax: 6,
         };
 
-        // Use password or private key
         if (token.privateKey) {
             config.privateKey = token.privateKey;
-            if (token.passphrase) {
-                config.passphrase = token.passphrase;
-            }
+            if (token.passphrase) config.passphrase = token.passphrase;
         } else if (token.password) {
             config.password = token.password;
         }
 
-        // SSH events
         this.ssh.on('ready', () => {
             this.connected = true;
-
-            this.ssh.shell({
-                term: 'xterm-256color',
-                cols: 80,
-                rows: 24,
-            }, (err, stream) => {
+            this.ssh.shell({ term: 'xterm-256color', cols: 80, rows: 24 }, (err, stream) => {
                 if (err) {
-                    this.sendError('Failed to open shell: ' + err.message);
+                    this.sink.onMessage('error', { message: 'Failed to open shell: ' + err.message });
                     this.close();
                     return;
                 }
-
                 this.stream = stream;
+                this.sink.onMessage('shell-ready');
 
-                this.ws.send(JSON.stringify({ type: 'shell-ready' }));
-
-                // Stream data to WebSocket
                 stream.on('data', (data: Buffer) => {
-                    if (this.ws.readyState === WebSocket.OPEN) {
-                        this.ws.send(JSON.stringify({
-                            type: 'data',
-                            data: data.toString('base64'),
-                        }));
-                    }
-                });
-
-                stream.on('close', () => {
-                    this.ws.send(JSON.stringify({ type: 'closed' }));
-                    this.close();
+                    this.sink.onData(data.toString('base64'));
                 });
 
                 stream.stderr.on('data', (data: Buffer) => {
-                    if (this.ws.readyState === WebSocket.OPEN) {
-                        this.ws.send(JSON.stringify({
-                            type: 'data',
-                            data: data.toString('base64'),
-                        }));
-                    }
+                    this.sink.onData(data.toString('base64'));
+                });
+
+                stream.on('close', () => {
+                    this.sink.onMessage('closed');
+                    this.close();
                 });
             });
         });
 
         this.ssh.on('error', (err) => {
-            this.sendError('SSH error: ' + err.message);
+            this.sink.onMessage('error', { message: 'SSH error: ' + err.message });
             this.close();
         });
 
         this.ssh.on('close', () => {
-            if (this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({ type: 'disconnected' }));
-            }
+            this.sink.onMessage('disconnected');
         });
 
-        // Connect
         try {
             this.ssh.connect(config);
         } catch (error) {
-            this.sendError('Connection failed: ' + (error as Error).message);
+            this.sink.onMessage('error', { message: 'Connection failed: ' + (error as Error).message });
             this.close();
         }
-    }
-
-    private setupWebSocket(): void {
-        this.ws.on('message', (data) => {
-            try {
-                const message = JSON.parse(data.toString());
-                this.handleMessage(message);
-            } catch (error) {
-                console.error('Invalid message:', error);
-            }
-        });
-    }
-
-    private handleMessage(message: { type: string; data?: string; cols?: number; rows?: number }): void {
-        switch (message.type) {
-            case 'data':
-                // Terminal input from browser
-                if (this.stream && message.data) {
-                    const buffer = Buffer.from(message.data, 'base64');
-                    this.stream.write(buffer);
-                }
-                break;
-
-            case 'resize':
-                // Terminal resize
-                if (this.stream && message.cols && message.rows) {
-                    this.stream.setWindow(message.rows, message.cols, 0, 0);
-                }
-                break;
-
-            case 'ping':
-                // Keep-alive ping
-                this.ws.send(JSON.stringify({ type: 'pong' }));
-                break;
-        }
-    }
-
-    private sendError(message: string): void {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({ type: 'error', message }));
-        }
-    }
-
-    public close(): void {
-        if (this.closing) {
-            return;
-        }
-        this.closing = true;
-
-        if (this.stream) {
-            this.stream.end();
-            this.stream = null;
-        }
-
-        if (this.ssh) {
-            this.ssh.end();
-        }
-
-        this.connected = false;
-    }
-
-    public isConnected(): boolean {
-        return this.connected;
     }
 }
