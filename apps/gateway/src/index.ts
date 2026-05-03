@@ -41,6 +41,30 @@ const ALLOWED_ORIGINS: Set<string> = new Set(
 const CONNECTION_TIMEOUT = 300000; // 5 minutes
 
 // ============================================================================
+// SSRF GUARD
+// ============================================================================
+
+function isPrivateHost(host: string): boolean {
+    const h = host.trim().toLowerCase();
+    if (h === 'localhost') return true;
+    if (h === 'metadata.google.internal') return true;
+    if (h === '::1') return true;
+    if (h === '169.254.169.254') return true;
+    if (h.startsWith('127.')) return true;
+    if (h.startsWith('10.')) return true;
+    if (h.startsWith('192.168.')) return true;
+    if (h.startsWith('169.254.')) return true;
+    const parts = h.split('.');
+    if (parts.length === 4 && parts[0] === '172') {
+        const second = parseInt(parts[1], 10);
+        if (second >= 16 && second <= 31) return true;
+    }
+    if (h.startsWith('fe80:')) return true;
+    if (h.startsWith('fc') || h.startsWith('fd')) return true;
+    return false;
+}
+
+// ============================================================================
 // SESSION STORES
 // ============================================================================
 
@@ -202,6 +226,12 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
         } else {
             // ── New session ──
+            if (isPrivateHost(tokenPayload.host)) {
+                ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
+                ws.close(1008, 'SSRF protection');
+                return;
+            }
+
             if (persistentSessions.isAtLimit(tokenPayload.userId)) {
                 const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
                 if (!evicted) {
