@@ -54,6 +54,7 @@ export default function SSHTerminal({
 
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const intentionalCloseRef = useRef(false);
 
     const updateStatus = useCallback((newStatus: typeof status) => {
         statusRef.current = newStatus;
@@ -61,6 +62,7 @@ export default function SSHTerminal({
     }, []);
 
     const connect = useCallback(() => {
+        retryCountRef.current = 0;
         const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
         const wsUrl = `${gatewayBase}/connect?token=${encodeURIComponent(connectionToken)}&protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
@@ -103,7 +105,8 @@ export default function SSHTerminal({
 
                     case 'session-not-found':
                         // Gateway lost the session (restart/expiry) — trigger new session creation
-                        retryCountRef.current = 0;
+                        intentionalCloseRef.current = true;
+                        retryCountRef.current = 0; // reset for future manual reconnects
                         onSessionNotFoundRef.current?.();
                         break;
 
@@ -116,12 +119,14 @@ export default function SSHTerminal({
 
                     case 'replaced':
                         // Another tab claimed this session; treat as a clean disconnect
+                        intentionalCloseRef.current = true;
                         updateStatus('disconnected');
                         onDisconnectRef.current?.();
                         break;
 
                     case 'closed':
                     case 'disconnected':
+                        intentionalCloseRef.current = true;
                         updateStatus('disconnected');
                         terminalInstance.current?.write('\r\n\x1b[33mConnection closed.\x1b[0m\r\n');
                         onDisconnectRef.current?.();
@@ -140,6 +145,10 @@ export default function SSHTerminal({
 
         ws.onclose = () => {
             if (wsRef.current !== ws) return;
+            if (intentionalCloseRef.current) {
+                intentionalCloseRef.current = false;
+                return; // don't retry intentional closes
+            }
             onWebSocketCreatedRef.current?.(null);
             if (retryCountRef.current < MAX_AUTO_RETRIES) {
                 const attempt = retryCountRef.current;
@@ -161,7 +170,9 @@ export default function SSHTerminal({
         ws.onerror = () => {
             if (wsRef.current !== ws) return;
             updateStatus('error');
-            onErrorRef.current?.('WebSocket connection failed');
+            if (retryCountRef.current >= MAX_AUTO_RETRIES) {
+                onErrorRef.current?.('WebSocket connection failed');
+            }
         };
     }, [serverId, connectionToken, sessionId, gatewayUrl, updateStatus]);
 
