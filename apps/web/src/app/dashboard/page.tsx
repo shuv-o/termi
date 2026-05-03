@@ -209,12 +209,13 @@ function StatusIndicator({ metrics, loading }: { metrics: ServerMetrics | null; 
 }
 
 function GridCard({
-    server, m, mLoading,
+    server, m, mLoading, hasSession,
     onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions,
 }: {
     server: ServerItem;
     m: ServerMetrics | null;
     mLoading: boolean;
+    hasSession: boolean;
     onFavorite: () => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -378,8 +379,19 @@ function GridCard({
                     </Button>
                 )}
                 {server.protocol === 'SSH' && (
-                    <Button onClick={onSessions} variant="secondary" size="icon" className="h-7 w-7 shrink-0" title="Open in Sessions tab">
-                        <Layers className="w-3.5 h-3.5" />
+                    <Button
+                        onClick={onSessions}
+                        variant="secondary"
+                        size="icon"
+                        className={`h-7 w-7 shrink-0 transition-colors ${hasSession ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30' : ''}`}
+                        title={hasSession ? 'Session active — open in Sessions' : 'Open in Sessions'}
+                    >
+                        <div className="relative">
+                            <Layers className="w-3.5 h-3.5" />
+                            {hasSession && (
+                                <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            )}
+                        </div>
                     </Button>
                 )}
             </div>
@@ -388,12 +400,13 @@ function GridCard({
 }
 
 function ListRow({
-    server, m, mLoading,
+    server, m, mLoading, hasSession,
     onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions,
 }: {
     server: ServerItem;
     m: ServerMetrics | null;
     mLoading: boolean;
+    hasSession: boolean;
     onFavorite: () => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -502,10 +515,19 @@ function ListRow({
                         variant="secondary"
                         size="icon"
                         onClick={onSessions}
-                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-all"
-                        title="Open in Sessions"
+                        className={`h-7 w-7 transition-all ${
+                            hasSession
+                                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
+                                : 'opacity-0 group-hover:opacity-100'
+                        }`}
+                        title={hasSession ? 'Session active — open in Sessions' : 'Open in Sessions'}
                     >
-                        <Layers className="w-3.5 h-3.5" />
+                        <div className="relative">
+                            <Layers className="w-3.5 h-3.5" />
+                            {hasSession && (
+                                <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            )}
+                        </div>
                     </Button>
                 )}
                 <DropdownMenu>
@@ -689,6 +711,7 @@ export default function DashboardPage() {
         server,
         m: metrics[server.id] ?? null,
         mLoading: metricsLoading[server.id] ?? false,
+        hasSession: sessions.some(s => s.serverId === server.id),
         onFavorite:     () => toggleFavorite(server.id),
         onEdit:         () => router.push(`/dashboard/servers/${server.id}/edit`),
         onDelete:       () => setDeleteConfirm(server),
