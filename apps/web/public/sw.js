@@ -7,7 +7,7 @@
  * - Notification click → focus/open the app
  */
 
-const CACHE_NAME = 'termi-v1';
+const CACHE_NAME = 'termi-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to pre-cache on install
@@ -63,9 +63,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Static assets (/_next/static/, /icons/, /fonts/) — cache-first
+    // Static assets — cache-first, but EXCLUDE /_next/static/chunks/ because
+    // Turbopack reuses chunk filenames across rebuilds (content changes, URL stays
+    // the same). Caching those files permanently would serve stale JS to users.
     if (
-        url.pathname.startsWith('/_next/static/') ||
+        (url.pathname.startsWith('/_next/static/') && !url.pathname.startsWith('/_next/static/chunks/')) ||
         url.pathname.startsWith('/icons/') ||
         url.pathname.startsWith('/fonts/') ||
         url.pathname === '/manifest.json' ||

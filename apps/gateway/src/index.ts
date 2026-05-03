@@ -10,6 +10,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer, IncomingMessage } from 'http';
 import { URL } from 'url';
+import { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 
 import { SSHHandler, type SSHOutputSink } from './handlers/ssh.js';
@@ -117,12 +118,13 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
+    console.log(`[gateway] raw req.url: ${req.url?.slice(0, 300)}`);
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const token         = url.searchParams.get('token');
     const protocol      = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
     const serverId      = url.searchParams.get('serverId');
     const sessionId     = url.searchParams.get('sessionId');   // required for SSH
-    console.log(`[gateway] connection: protocol=${protocol} serverId=${serverId} sessionId=${JSON.stringify(sessionId)} allParams=${url.searchParams.toString().slice(0, 200)}`);
+    console.log(`[gateway] parsed: protocol=${protocol} serverId=${serverId?.slice(0,8)} sessionId=${JSON.stringify(sessionId)} paramKeys=[${[...url.searchParams.keys()].join(',')}]`);
 
 
     if (!token || !protocol || !serverId) {
@@ -161,13 +163,14 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     // ── SSH: persistent sessions ────────────────────────────────────────────
 
     if (protocol === 'ssh') {
+        // If client doesn't send a sessionId (e.g. stale cached JS), generate one.
+        // The session will still work but won't be reattachable by this browser.
+        const resolvedSessionId = sessionId || randomUUID();
         if (!sessionId) {
-            ws.send(JSON.stringify({ type: 'error', message: 'sessionId required for SSH' }));
-            ws.close(4000, 'Bad Request');
-            return;
+            console.warn(`[gateway] SSH connection missing sessionId — generated fallback ${resolvedSessionId}`);
         }
 
-        const existing = persistentSessions.get(sessionId);
+        const existing = persistentSessions.get(resolvedSessionId);
 
         if (existing) {
             // ── Reattach to existing session ──
@@ -209,7 +212,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
             }
 
             const session: PersistentSession = {
-                sessionId,
+                sessionId: resolvedSessionId,
                 userId: tokenPayload.userId,
                 serverId,
                 handler: null as any, // set below after sink is created
@@ -226,7 +229,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
         // ── WS message routing for SSH ──
         ws.on('message', (data) => {
-            const session = persistentSessions.get(sessionId);
+            const session = persistentSessions.get(resolvedSessionId);
             if (!session) return;
 
             try {
@@ -247,7 +250,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
                         ws.send(JSON.stringify({ type: 'pong' }));
                         break;
                     case 'close-session':
-                        persistentSessions.delete(sessionId);
+                        persistentSessions.delete(resolvedSessionId);
                         ws.close(1000, 'Session closed');
                         break;
                 }
@@ -258,7 +261,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
         // ── WS close: detach only (SSH stays alive) ──
         ws.on('close', () => {
-            const session = persistentSessions.get(sessionId);
+            const session = persistentSessions.get(resolvedSessionId);
             if (session && session.attachedWs === ws) {
                 session.attachedWs = null;
             }
