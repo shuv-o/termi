@@ -69,6 +69,7 @@ function createSink(session: PersistentSession): SSHOutputSink {
     return {
         onData(encoded: string) {
             if (session.isClosing) return;
+            session.lastActivityAt = Date.now();
             session.buffer.append(Buffer.from(encoded, 'base64'));
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
                 session.attachedWs.send(JSON.stringify({ type: 'data', data: encoded }));
@@ -216,7 +217,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
                 serverId,
                 handler: null as any, // set below after sink is created
                 buffer: new RingBuffer(),
-                lastKeystrokeAt: Date.now(),
+                lastActivityAt: Date.now(),
                 createdAt: Date.now(),
                 attachedWs: ws,
                 isClosing: false,
@@ -237,7 +238,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
                 switch (message.type) {
                     case 'data':
                         if (message.data) {
-                            session.lastKeystrokeAt = Date.now();
+                            session.lastActivityAt = Date.now();
                             session.handler.write(Buffer.from(message.data, 'base64'));
                         }
                         break;

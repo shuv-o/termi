@@ -8,7 +8,7 @@ export interface PersistentSession {
     serverId: string;
     handler: SSHHandler;
     buffer: RingBuffer;
-    lastKeystrokeAt: number;
+    lastActivityAt: number;
     createdAt: number;
     attachedWs: WebSocket | null;
     isClosing: boolean;
@@ -81,7 +81,7 @@ export class PersistentSessionStore {
     private evictIdleSessions(): void {
         const now = Date.now();
         for (const [id, session] of this.sessions) {
-            if (session.attachedWs === null && now - session.lastKeystrokeAt > this.idleTimeoutMs) {
+            if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
                 console.log(`[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`);
                 this.delete(id);
             }

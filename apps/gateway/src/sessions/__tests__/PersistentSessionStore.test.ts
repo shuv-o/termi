@@ -8,7 +8,7 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         serverId: 'server-1',
         handler: { close: vi.fn(), isConnected: vi.fn().mockReturnValue(true) } as any,
         buffer: { append: vi.fn(), snapshot: vi.fn().mockReturnValue(new Uint8Array(0)), byteLength: 0 } as any,
-        lastKeystrokeAt: Date.now(),
+        lastActivityAt: Date.now(),
         createdAt: Date.now(),
         attachedWs: null,
         isClosing: false,
@@ -93,7 +93,7 @@ describe('PersistentSessionStore', () => {
     });
 
     it('idle check evicts detached sessions past timeout', () => {
-        const session = makeSession({ lastKeystrokeAt: Date.now() - 2000, attachedWs: null });
+        const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: null });
         store.add(session);
         vi.advanceTimersByTime(60_000); // trigger idle check
         expect(store.get('sess-1')).toBeUndefined();
@@ -102,7 +102,7 @@ describe('PersistentSessionStore', () => {
 
     it('idle check does not evict attached sessions', () => {
         const ws = {} as any;
-        const session = makeSession({ lastKeystrokeAt: Date.now() - 2000, attachedWs: ws });
+        const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: ws });
         store.add(session);
         vi.advanceTimersByTime(60_000);
         expect(store.get('sess-1')).toBeDefined();
