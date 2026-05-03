@@ -1,8 +1,10 @@
 /**
  * Termi WebSocket Gateway
- * 
- * This service handles WebSocket connections from the browser and proxies them
- * to the appropriate protocol handler (SSH, SCP, RDP, VNC).
+ *
+ * Handles WebSocket connections and proxies them to SSH.
+ * SSH sessions outlive their WebSocket connections — they are keyed by a
+ * stable sessionId UUID and stay alive until explicitly closed or idle for
+ * 6 hours (detached only).
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
@@ -10,81 +12,76 @@ import { createServer, IncomingMessage } from 'http';
 import { URL } from 'url';
 import dotenv from 'dotenv';
 
-import { SSHHandler } from './handlers/ssh.js';
+import { SSHHandler, type SSHOutputSink } from './handlers/ssh.js';
 import { SCPHandler } from './handlers/scp.js';
 import { GuacamoleHandler } from './handlers/guacamole.js';
 import { validateToken, TokenPayload } from './auth/token.js';
+import { RingBuffer } from './sessions/RingBuffer.js';
+import { PersistentSessionStore, type PersistentSession } from './sessions/PersistentSessionStore.js';
 
-// When running as a workspace script (CWD = apps/gateway), resolve up two levels
-// to the monorepo root .env.  When spawned by Electron (CWD = project root or
-// resources dir), the explicit path won't match but the CWD-based fallback will.
 dotenv.config({ path: '../../.env' });
-dotenv.config(); // fallback: CWD-based (covers Electron dev where CWD = project root)
+dotenv.config();
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
-const PORT = parseInt(process.env.GATEWAY_PORT || '2281', 10);
+const PORT = parseInt(process.env.GATEWAY_PORT || '22081', 10);
 const HOST = process.env.GATEWAY_HOST || '0.0.0.0';
 
-// Allowed origins for WebSocket connections (comma-separated list)
-// e.g. ALLOWED_ORIGINS=https://app.example.com,http://localhost:2280
 const ALLOWED_ORIGINS: Set<string> = new Set(
-    (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:2280')
+    (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080')
         .split(',')
         .map((o) => o.trim().toLowerCase())
         .filter(Boolean)
 );
 
-// Connection limits
-const MAX_CONNECTIONS_PER_USER = 10;
-const CONNECTION_TIMEOUT = 300000; // 5 minutes — covers AWS NAT/NLB idle TCP timeout (~350 s)
+// Idle timeout for non-persistent (RDP/VNC/SCP) connections
+const CONNECTION_TIMEOUT = 300000; // 5 minutes
 
 // ============================================================================
-// TYPES
+// SESSION STORES
 // ============================================================================
 
-interface ConnectionMeta {
+/** Persistent SSH sessions (survive WS disconnect). */
+const persistentSessions = new PersistentSessionStore();
+
+/** Active non-SSH WebSocket connections (for cleanup on error/close). */
+interface NonSshMeta {
     userId: string;
-    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc';
+    protocol: 'scp' | 'rdp' | 'vnc';
     serverId: string;
-    connectedAt: Date;
-    handler?: SSHHandler | SCPHandler | GuacamoleHandler;
+    handler?: SCPHandler | GuacamoleHandler;
 }
+const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
 // ============================================================================
-// CONNECTION TRACKING
+// SSH SINK FACTORY
 // ============================================================================
 
-const connections = new Map<WebSocket, ConnectionMeta>();
-const userConnectionCount = new Map<string, number>();
-
-function addConnection(ws: WebSocket, meta: ConnectionMeta): boolean {
-    const count = userConnectionCount.get(meta.userId) || 0;
-
-    if (count >= MAX_CONNECTIONS_PER_USER) {
-        return false;
-    }
-
-    connections.set(ws, meta);
-    userConnectionCount.set(meta.userId, count + 1);
-    return true;
-}
-
-function removeConnection(ws: WebSocket): void {
-    const meta = connections.get(ws);
-    if (meta) {
-        const count = userConnectionCount.get(meta.userId) || 1;
-        userConnectionCount.set(meta.userId, count - 1);
-
-        // Cleanup handler
-        if (meta.handler) {
-            meta.handler.close();
-        }
-
-        connections.delete(ws);
-    }
+/**
+ * Creates the SSHOutputSink for a PersistentSession.
+ * Data is always appended to the ring buffer.
+ * When the session has an attached WS, data is also forwarded to it.
+ */
+function createSink(session: PersistentSession): SSHOutputSink {
+    return {
+        onData(encoded: string) {
+            session.buffer.append(Buffer.from(encoded, 'base64'));
+            if (session.attachedWs?.readyState === WebSocket.OPEN) {
+                session.attachedWs.send(JSON.stringify({ type: 'data', data: encoded }));
+            }
+        },
+        onMessage(type: string, extra?: Record<string, unknown>) {
+            if (session.attachedWs?.readyState === WebSocket.OPEN) {
+                session.attachedWs.send(JSON.stringify({ type, ...extra }));
+            }
+            // SSH connection dropped — remove session so browser gets session-not-found on next reconnect
+            if (type === 'disconnected' || type === 'closed' || type === 'error') {
+                persistentSessions.delete(session.sessionId);
+            }
+        },
+    };
 }
 
 // ============================================================================
@@ -92,17 +89,16 @@ function removeConnection(ws: WebSocket): void {
 // ============================================================================
 
 const server = createServer((req, res) => {
-    // Health check endpoint
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             status: 'healthy',
-            connections: connections.size,
+            sshSessions: persistentSessions.size,
+            nonSshConnections: nonSshConnections.size,
             uptime: process.uptime(),
         }));
         return;
     }
-
     res.writeHead(404);
     res.end('Not Found');
 });
@@ -111,14 +107,9 @@ const server = createServer((req, res) => {
 // WEBSOCKET SERVER
 // ============================================================================
 
-const wss = new WebSocketServer({
-    server,
-    path: '/connect',
-    maxPayload: 1024 * 1024, // 1MB max payload
-});
+const wss = new WebSocketServer({ server, path: '/connect', maxPayload: 1024 * 1024 });
 
 wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
-    // Reject connections from untrusted origins
     const origin = (req.headers['origin'] || '').toLowerCase();
     if (origin && !ALLOWED_ORIGINS.has(origin)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Origin not allowed' }));
@@ -127,188 +118,215 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     }
 
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
+    const token         = url.searchParams.get('token');
+    const protocol      = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
+    const serverId      = url.searchParams.get('serverId');
+    const sessionId     = url.searchParams.get('sessionId');   // required for SSH
 
-    // Extract connection parameters from query string
-    const token = url.searchParams.get('token');
-    const protocol = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
-    const serverId = url.searchParams.get('serverId');
-    const displayWidth  = parseInt(url.searchParams.get('width')  || '0', 10) || undefined;
-    const displayHeight = parseInt(url.searchParams.get('height') || '0', 10) || undefined;
 
-    // Validate required parameters
     if (!token || !protocol || !serverId) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Missing required parameters'
-        }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Missing required parameters' }));
         ws.close(4000, 'Bad Request');
         return;
     }
 
-    // Validate protocol
     if (!['ssh', 'scp', 'rdp', 'vnc'].includes(protocol)) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Invalid protocol'
-        }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid protocol' }));
         ws.close(4000, 'Bad Request');
         return;
     }
 
-    // Validate token
     let tokenPayload: TokenPayload;
     try {
         tokenPayload = await validateToken(token);
-    } catch (error) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Invalid or expired token'
-        }));
+    } catch {
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid or expired token' }));
         ws.close(4001, 'Unauthorized');
         return;
     }
 
-    // Check server access
     if (tokenPayload.serverId !== serverId) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Server access denied'
-        }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Server access denied' }));
         ws.close(4003, 'Forbidden');
         return;
     }
 
-    // Verify protocol in URL matches protocol in token to prevent token reuse across protocols
     if (tokenPayload.protocol !== protocol) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Protocol mismatch'
-        }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Protocol mismatch' }));
         ws.close(4003, 'Forbidden');
         return;
     }
 
-    // Create connection metadata
-    const meta: ConnectionMeta = {
-        userId: tokenPayload.userId,
-        protocol,
-        serverId,
-        connectedAt: new Date(),
-    };
+    // ── SSH: persistent sessions ────────────────────────────────────────────
 
-    // Check connection limit
-    if (!addConnection(ws, meta)) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Too many connections'
-        }));
-        ws.close(4029, 'Too Many Requests');
-        return;
+    if (protocol === 'ssh') {
+        if (!sessionId) {
+            ws.send(JSON.stringify({ type: 'error', message: 'sessionId required for SSH' }));
+            ws.close(4000, 'Bad Request');
+            return;
+        }
+
+        const existing = persistentSessions.get(sessionId);
+
+        if (existing) {
+            // ── Reattach to existing session ──
+            if (existing.userId !== tokenPayload.userId) {
+                ws.send(JSON.stringify({ type: 'error', message: 'Session access denied' }));
+                ws.close(4003, 'Forbidden');
+                return;
+            }
+
+            // Evict old WS if still open (duplicate tab scenario)
+            if (existing.attachedWs && existing.attachedWs.readyState === WebSocket.OPEN) {
+                existing.attachedWs.send(JSON.stringify({ type: 'replaced' }));
+                existing.attachedWs.close(1000, 'Replaced');
+            }
+
+            existing.attachedWs = ws;
+
+            // Replay buffered output (non-destructive snapshot)
+            const buffered = existing.buffer.snapshot();
+            if (buffered.length > 0) {
+                ws.send(JSON.stringify({
+                    type: 'buffer-replay',
+                    data: Buffer.from(buffered).toString('base64'),
+                }));
+            }
+
+            // Signal ready (shell already open)
+            ws.send(JSON.stringify({ type: 'shell-ready' }));
+
+        } else {
+            // ── New session ──
+            if (persistentSessions.isAtLimit(tokenPayload.userId)) {
+                const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
+                if (!evicted) {
+                    ws.send(JSON.stringify({ type: 'error', message: 'Too many connections' }));
+                    ws.close(4029, 'Too Many Requests');
+                    return;
+                }
+            }
+
+            const session: PersistentSession = {
+                sessionId,
+                userId: tokenPayload.userId,
+                serverId,
+                handler: null as any, // set below after sink is created
+                buffer: new RingBuffer(),
+                lastKeystrokeAt: Date.now(),
+                createdAt: Date.now(),
+                attachedWs: ws,
+            };
+
+            const sink = createSink(session);
+            session.handler = new SSHHandler(tokenPayload, sink);
+            persistentSessions.add(session);
+        }
+
+        // ── WS message routing for SSH ──
+        ws.on('message', (data) => {
+            const session = persistentSessions.get(sessionId);
+            if (!session) return;
+
+            try {
+                const message = JSON.parse(data.toString());
+                switch (message.type) {
+                    case 'data':
+                        if (message.data) {
+                            session.lastKeystrokeAt = Date.now();
+                            session.handler.write(Buffer.from(message.data, 'base64'));
+                        }
+                        break;
+                    case 'resize':
+                        if (message.cols && message.rows) {
+                            session.handler.resize(message.rows, message.cols);
+                        }
+                        break;
+                    case 'ping':
+                        ws.send(JSON.stringify({ type: 'pong' }));
+                        break;
+                    case 'close-session':
+                        persistentSessions.delete(sessionId);
+                        ws.close(1000, 'Session closed');
+                        break;
+                }
+            } catch (err) {
+                console.error('[gateway] Invalid SSH message:', err);
+            }
+        });
+
+        // ── WS close: detach only (SSH stays alive) ──
+        ws.on('close', () => {
+            const session = persistentSessions.get(sessionId);
+            if (session && session.attachedWs === ws) {
+                session.attachedWs = null;
+            }
+        });
+
+        ws.on('error', (err) => {
+            console.error('[gateway] SSH WebSocket error:', err);
+        });
+
+        return; // SSH handled
     }
 
-    // Idle timeout — reset on every client message so active sessions stay alive
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    // ── Non-SSH: SCP / RDP / VNC (unchanged behaviour) ──────────────────────
 
+    const meta: NonSshMeta = {
+        userId: tokenPayload.userId,
+        protocol: protocol as 'scp' | 'rdp' | 'vnc',
+        serverId,
+    };
+    nonSshConnections.set(ws, meta);
+
+    // Idle timeout for non-persistent connections
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const resetTimeout = () => {
         if (timeoutId) clearTimeout(timeoutId);
-        // RDP/VNC sessions may be idle for longer than SSH; give them extra headroom
         const idleLimit = (protocol === 'rdp' || protocol === 'vnc')
-            ? CONNECTION_TIMEOUT * 2   // 10 minutes
-            : CONNECTION_TIMEOUT;      // 5 minutes
+            ? CONNECTION_TIMEOUT * 2
+            : CONNECTION_TIMEOUT;
         timeoutId = setTimeout(() => {
             if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                    type: 'error',
-                    message: 'Connection timeout - no activity',
-                }));
-                ws.close(4408, 'Connection Timeout');
+                ws.send(JSON.stringify({ type: 'error', message: 'Connection timed out due to inactivity' }));
+                ws.close(4008, 'Idle timeout');
             }
         }, idleLimit);
     };
+    resetTimeout();
 
-    resetTimeout(); // Start the initial timer
+    ws.on('message', () => resetTimeout());
 
-    ws.on('message', () => {
-        resetTimeout(); // Reset on every incoming client message
-    });
-
-    // Create appropriate handler
-    try {
-        switch (protocol) {
-            case 'ssh':
-                meta.handler = new SSHHandler(ws, tokenPayload);
-                ws.send(JSON.stringify({ type: 'connected', protocol }));
-                break;
-            case 'scp':
-                meta.handler = new SCPHandler(ws, tokenPayload);
-                ws.send(JSON.stringify({ type: 'connected', protocol }));
-                break;
-            case 'rdp':
-            case 'vnc': {
-                // GuacamoleHandler.connect() sends its own 'connected' message
-                // after the guacd handshake completes — do NOT send one here.
-                // Overlay the display size from query params onto the token payload.
-                const rdpPayload = { ...tokenPayload, displayWidth, displayHeight };
-                meta.handler = new GuacamoleHandler(ws, rdpPayload, protocol);
-                break;
-            }
-        }
-
-    } catch (error) {
-        console.error('Handler creation error:', error);
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Failed to initialize connection'
-        }));
-        ws.close(5000, 'Internal Error');
-        return;
+    if (protocol === 'scp') {
+        meta.handler = new SCPHandler(ws, tokenPayload);
+    } else {
+        meta.handler = new GuacamoleHandler(ws, tokenPayload, protocol as 'rdp' | 'vnc');
     }
 
-    // Handle disconnection
     ws.on('close', () => {
         if (timeoutId) clearTimeout(timeoutId);
-        removeConnection(ws);
-        console.log(`Connection closed: ${protocol}://${serverId}`);
+        meta.handler?.close();
+        nonSshConnections.delete(ws);
     });
 
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        removeConnection(ws);
+    ws.on('error', (err) => {
+        console.error('[gateway] Non-SSH WebSocket error:', err);
+        if (timeoutId) clearTimeout(timeoutId);
+        meta.handler?.close();
+        nonSshConnections.delete(ws);
     });
-
-    console.log(`New ${protocol} connection from user ${tokenPayload.userId} to server ${serverId}`);
 });
 
 // ============================================================================
-// GRACEFUL SHUTDOWN
-// ============================================================================
-
-function shutdown() {
-    console.log('Shutting down gateway...');
-
-    // Close all connections
-    for (const [ws, meta] of connections) {
-        if (meta.handler) {
-            meta.handler.close();
-        }
-        ws.close(1001, 'Server shutting down');
-    }
-
-    wss.close();
-    server.close(() => {
-        console.log('Gateway shut down');
-        process.exit(0);
-    });
-}
-
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-
-// ============================================================================
-// START SERVER
+// START
 // ============================================================================
 
 server.listen(PORT, HOST, () => {
-    console.log(`🚀 Termi Gateway running at ws://${HOST}:${PORT}/connect`);
-    console.log(`   Health check: http://${HOST}:${PORT}/health`);
+    console.log(`[gateway] Listening on ${HOST}:${PORT}`);
+});
+
+process.on('SIGTERM', () => {
+    console.log('[gateway] Shutting down...');
+    persistentSessions.destroy();
+    server.close();
 });

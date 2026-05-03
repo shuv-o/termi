@@ -42,6 +42,10 @@ export class PersistentSessionStore {
         }
     }
 
+    get size(): number {
+        return this.sessions.size;
+    }
+
     countByUser(userId: string): number {
         let n = 0;
         for (const s of this.sessions.values()) {
