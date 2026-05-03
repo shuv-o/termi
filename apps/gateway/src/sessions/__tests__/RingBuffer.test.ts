@@ -5,21 +5,21 @@ describe('RingBuffer', () => {
     it('starts empty', () => {
         const buf = new RingBuffer(100);
         expect(buf.byteLength).toBe(0);
-        expect(buf.flush()).toEqual(new Uint8Array(0));
+        expect(buf.snapshot()).toEqual(new Uint8Array(0));
     });
 
-    it('stores and flushes bytes within capacity', () => {
+    it('stores and snapshots bytes within capacity', () => {
         const buf = new RingBuffer(10);
         buf.append(new Uint8Array([1, 2, 3]));
         expect(buf.byteLength).toBe(3);
-        expect(buf.flush()).toEqual(new Uint8Array([1, 2, 3]));
+        expect(buf.snapshot()).toEqual(new Uint8Array([1, 2, 3]));
     });
 
-    it('flushes multiple appends in order', () => {
+    it('snapshots multiple appends in order', () => {
         const buf = new RingBuffer(10);
         buf.append(new Uint8Array([1, 2]));
         buf.append(new Uint8Array([3, 4]));
-        expect(buf.flush()).toEqual(new Uint8Array([1, 2, 3, 4]));
+        expect(buf.snapshot()).toEqual(new Uint8Array([1, 2, 3, 4]));
     });
 
     it('wraps around and drops oldest bytes when capacity exceeded', () => {
@@ -27,12 +27,27 @@ describe('RingBuffer', () => {
         buf.append(new Uint8Array([1, 2, 3, 4])); // fills buffer
         buf.append(new Uint8Array([5]));           // drops byte 1
         expect(buf.byteLength).toBe(4);
-        expect(buf.flush()).toEqual(new Uint8Array([2, 3, 4, 5]));
+        expect(buf.snapshot()).toEqual(new Uint8Array([2, 3, 4, 5]));
     });
 
     it('handles append larger than capacity', () => {
         const buf = new RingBuffer(3);
         buf.append(new Uint8Array([1, 2, 3, 4, 5])); // only last 3 survive
-        expect(buf.flush()).toEqual(new Uint8Array([3, 4, 5]));
+        expect(buf.snapshot()).toEqual(new Uint8Array([3, 4, 5]));
+    });
+
+    it('snapshot is non-destructive — subsequent calls return same data', () => {
+        const buf = new RingBuffer(10);
+        buf.append(new Uint8Array([1, 2, 3]));
+        expect(buf.snapshot()).toEqual(buf.snapshot());
+        expect(buf.byteLength).toBe(3);
+    });
+
+    it('clear resets the buffer', () => {
+        const buf = new RingBuffer(10);
+        buf.append(new Uint8Array([1, 2, 3]));
+        buf.clear();
+        expect(buf.byteLength).toBe(0);
+        expect(buf.snapshot()).toEqual(new Uint8Array(0));
     });
 });
