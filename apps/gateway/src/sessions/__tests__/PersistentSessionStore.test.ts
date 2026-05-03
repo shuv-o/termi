@@ -117,8 +117,8 @@ describe('PersistentSessionStore', () => {
         });
 
         it('returns false and does not add when at limit', () => {
-            // Fill up to MAX_CONNECTIONS_PER_USER (10)
-            for (let i = 0; i < 10; i++) {
+            // Fill up to MAX_CONNECTIONS_PER_USER (5)
+            for (let i = 0; i < 5; i++) {
                 store.tryAdd(makeSession({ sessionId: `sess-${i}`, userId: 'user-1' }));
             }
             const extra = makeSession({ sessionId: 'sess-extra', userId: 'user-1' });
@@ -129,7 +129,7 @@ describe('PersistentSessionStore', () => {
 
         it('counts only sessions for the same user', () => {
             // Fill up user-1 to limit
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 store.tryAdd(makeSession({ sessionId: `sess-u1-${i}`, userId: 'user-1' }));
             }
             // user-2 should still be able to add

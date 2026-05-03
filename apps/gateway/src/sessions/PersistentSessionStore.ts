@@ -14,7 +14,7 @@ export interface PersistentSession {
     isClosing: boolean;
 }
 
-const MAX_CONNECTIONS_PER_USER = 10;
+const MAX_CONNECTIONS_PER_USER = 5;
 
 export class PersistentSessionStore {
     private readonly sessions = new Map<string, PersistentSession>();
