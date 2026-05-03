@@ -62,7 +62,6 @@ export default function SSHTerminal({
     }, []);
 
     const connect = useCallback(() => {
-        retryCountRef.current = 0;
         const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
         const wsUrl = `${gatewayBase}/connect?token=${encodeURIComponent(connectionToken)}&protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
@@ -147,6 +146,7 @@ export default function SSHTerminal({
             if (wsRef.current !== ws) return;
             if (intentionalCloseRef.current) {
                 intentionalCloseRef.current = false;
+                onWebSocketCreatedRef.current?.(null);
                 return; // don't retry intentional closes
             }
             onWebSocketCreatedRef.current?.(null);
@@ -170,7 +170,7 @@ export default function SSHTerminal({
         ws.onerror = () => {
             if (wsRef.current !== ws) return;
             updateStatus('error');
-            if (retryCountRef.current >= MAX_AUTO_RETRIES) {
+            if (retryCountRef.current >= MAX_AUTO_RETRIES - 1) {
                 onErrorRef.current?.('WebSocket connection failed');
             }
         };
@@ -241,6 +241,7 @@ export default function SSHTerminal({
         window.addEventListener('resize', handleResize);
 
         terminal.write('Connecting to server...\r\n');
+        retryCountRef.current = 0;
         connect();
 
         return () => {
