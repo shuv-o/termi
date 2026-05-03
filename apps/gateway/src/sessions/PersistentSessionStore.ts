@@ -26,7 +26,7 @@ export class PersistentSessionStore {
         this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 60_000);
     }
 
-    add(session: PersistentSession): void {
+    private add(session: PersistentSession): void {
         this.sessions.set(session.sessionId, session);
     }
 

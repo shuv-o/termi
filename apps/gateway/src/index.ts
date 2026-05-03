@@ -58,6 +58,7 @@ function isPrivateHost(host: string): boolean {
     if (h === 'metadata.google.internal') return true;
     if (h === '::1') return true;
     if (h === '168.63.129.16') return true;   // Azure Instance Metadata Service
+    if (h === '0.0.0.0') return true;
     if (h.startsWith('127.')) return true;
     if (h.startsWith('10.')) return true;
     if (h.startsWith('192.168.')) return true;
@@ -410,6 +411,12 @@ function shutdown(signal: string): void {
     isShuttingDown = true;
     console.log(`[gateway] Received ${signal} — shutting down gracefully`);
     persistentSessions.destroy();
+    // Close all active WebSocket connections
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.close(1001, 'Server shutting down');
+        }
+    });
     server.close(() => {
         console.log('[gateway] HTTP server closed');
         process.exit(signal === 'SIGTERM' || signal === 'SIGINT' ? 0 : 1);

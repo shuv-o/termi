@@ -31,7 +31,7 @@ describe('PersistentSessionStore', () => {
 
     it('stores and retrieves sessions', () => {
         const session = makeSession();
-        store.add(session);
+        store.tryAdd(session);
         expect(store.get('sess-1')).toBe(session);
     });
 
@@ -41,7 +41,7 @@ describe('PersistentSessionStore', () => {
 
     it('delete calls handler.close and removes session', () => {
         const session = makeSession();
-        store.add(session);
+        store.tryAdd(session);
         store.delete('sess-1');
         expect(session.handler.close).toHaveBeenCalledOnce();
         expect(session.isClosing).toBe(true);
@@ -60,15 +60,15 @@ describe('PersistentSessionStore', () => {
                 isConnected: vi.fn().mockReturnValue(true),
             } as any,
         });
-        store.add(session);
+        store.tryAdd(session);
         store.delete('sess-1');
         expect(closingAtCallTime).toBe(true); // flag was set BEFORE close() ran
     });
 
     it('countByUser counts attached and detached sessions', () => {
-        store.add(makeSession({ sessionId: 'a', userId: 'user-1', attachedWs: null }));
-        store.add(makeSession({ sessionId: 'b', userId: 'user-1', attachedWs: {} as any }));
-        store.add(makeSession({ sessionId: 'c', userId: 'user-2' }));
+        store.tryAdd(makeSession({ sessionId: 'a', userId: 'user-1', attachedWs: null }));
+        store.tryAdd(makeSession({ sessionId: 'b', userId: 'user-1', attachedWs: {} as any }));
+        store.tryAdd(makeSession({ sessionId: 'c', userId: 'user-2' }));
         expect(store.countByUser('user-1')).toBe(2);
         expect(store.countByUser('user-2')).toBe(1);
     });
@@ -76,8 +76,8 @@ describe('PersistentSessionStore', () => {
     it('evictOldestDetachedForUser removes oldest detached session for user', () => {
         const old = makeSession({ sessionId: 'old', userId: 'user-1', createdAt: 1000, attachedWs: null });
         const newS = makeSession({ sessionId: 'new', userId: 'user-1', createdAt: 2000, attachedWs: null });
-        store.add(old);
-        store.add(newS);
+        store.tryAdd(old);
+        store.tryAdd(newS);
         const evicted = store.evictOldestDetachedForUser('user-1');
         expect(evicted).toBe(true);
         expect(store.get('old')).toBeUndefined();
@@ -86,7 +86,7 @@ describe('PersistentSessionStore', () => {
 
     it('evictOldestDetachedForUser skips attached sessions', () => {
         const attached = makeSession({ sessionId: 'a', userId: 'user-1', createdAt: 1000, attachedWs: {} as any });
-        store.add(attached);
+        store.tryAdd(attached);
         const evicted = store.evictOldestDetachedForUser('user-1');
         expect(evicted).toBe(false);
         expect(store.get('a')).toBeDefined();
@@ -94,7 +94,7 @@ describe('PersistentSessionStore', () => {
 
     it('idle check evicts detached sessions past timeout', () => {
         const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: null });
-        store.add(session);
+        store.tryAdd(session);
         vi.advanceTimersByTime(60_000); // trigger idle check
         expect(store.get('sess-1')).toBeUndefined();
         expect(session.handler.close).toHaveBeenCalledOnce();
@@ -103,7 +103,7 @@ describe('PersistentSessionStore', () => {
     it('idle check does not evict attached sessions', () => {
         const ws = {} as any;
         const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: ws });
-        store.add(session);
+        store.tryAdd(session);
         vi.advanceTimersByTime(60_000);
         expect(store.get('sess-1')).toBeDefined();
     });
