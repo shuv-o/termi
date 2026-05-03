@@ -170,6 +170,7 @@ function StatusDot({ status }: { status: SessionStatus }) {
         connected: 'bg-green-400',
         disconnected: 'bg-slate-500',
         error: 'bg-red-400',
+        detached: 'bg-amber-400 animate-pulse',
     }[status];
     return <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cls}`} />;
 }
@@ -181,8 +182,8 @@ function StatusDot({ status }: { status: SessionStatus }) {
 export default function SessionsWorkspace() {
     const {
         sessions, activeTabId, setActiveTabId,
-        addSession, addLocalSession, removeSession, reconnectSession,
-        toggleFiles, updateSessionStatus,
+        addSession, addLocalSession, removeSession, reconnectSession, renewSession,
+        toggleFiles, updateSessionStatus, setSessionWs,
     } = useSessionsContext();
 
     const [showPicker, setShowPicker] = useState(false);
@@ -283,6 +284,7 @@ export default function SessionsWorkspace() {
                                     : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                                 }`}
                             onClick={() => switchTab(session.tabId)}
+                            title={session.status === 'detached' ? 'Session running in background' : undefined}
                         >
                             <StatusDot status={session.status} />
                             {session.type === 'local' && (
@@ -527,6 +529,13 @@ export default function SessionsWorkspace() {
                                                         onReady={() => updateSessionStatus(session.tabId, 'connected')}
                                                         onExit={() => updateSessionStatus(session.tabId, 'disconnected')}
                                                     />
+                                                ) : session.status === 'detached' ? (
+                                                    <div className="flex items-center justify-center h-full bg-card rounded-xl border border-border">
+                                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                                            <span className="text-sm">Restoring session…</span>
+                                                        </div>
+                                                    </div>
                                                 ) : session.status === 'error' || (!session.token && session.status !== 'connecting') ? (
                                                     <div className="flex flex-col items-center justify-center h-full gap-3 bg-card rounded-xl border border-border">
                                                         <AlertCircle className="w-8 h-8 text-destructive" />
@@ -549,12 +558,15 @@ export default function SessionsWorkspace() {
                                                     </div>
                                                 ) : (
                                                     <SSHTerminal
+                                                        sessionId={session.sessionId}
                                                         serverId={session.serverId}
                                                         connectionToken={session.token}
                                                         gatewayUrl={session.gatewayUrl ?? undefined}
                                                         onDisconnect={() => updateSessionStatus(session.tabId, 'disconnected')}
                                                         onError={() => updateSessionStatus(session.tabId, 'error')}
                                                         onKeyHandlerReady={() => updateSessionStatus(session.tabId, 'connected')}
+                                                        onWebSocketCreated={(ws) => setSessionWs(session.tabId, ws)}
+                                                        onSessionNotFound={() => renewSession(session.tabId, session.serverId)}
                                                     />
                                                 )}
                                             </div>
