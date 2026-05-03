@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development (both services concurrently)
-npm run dev:all          # web on :3000, gateway on :8080
+npm run dev:all          # web on :2280, gateway on :2281
 npm run dev              # web only
 npm run dev:gateway      # gateway only
 
@@ -38,15 +38,15 @@ Termi is an **npm workspaces monorepo** with two independently deployable servic
 
 | App | Package | Port | Role |
 |-----|---------|------|------|
-| `apps/web` | `@termi/web` | 3000 | Next.js 15 App Router PWA + REST API + Prisma ORM |
-| `apps/gateway` | `@termi/gateway` | 8080 | WebSocket gateway – proxies SSH/SCP/RDP/VNC |
+| `apps/web` | `@termi/web` | 2280 | Next.js 15 App Router PWA + REST API + Prisma ORM |
+| `apps/gateway` | `@termi/gateway` | 2281 | WebSocket gateway – proxies SSH/SCP/RDP/VNC |
 
 A third component, **guacd** (Apache Guacamole daemon), must run on port 4822 for RDP/VNC.
 
 ### Connection Flow (Critical Path)
 
 1. Browser calls `POST /api/connection/token` → web server decrypts stored credentials and issues a **5-minute JWE token** (A256GCM, key = SHA-256 of `GATEWAY_JWT_SECRET`).
-2. Browser opens `ws://gateway:8080/connect?token=<jwe>&protocol=<ssh|scp|rdp|vnc>&serverId=<id>`.
+2. Browser opens `ws://gateway:2281/connect?token=<jwe>&protocol=<ssh|scp|rdp|vnc>&serverId=<id>`.
 3. Gateway validates JWE and routes to `SSHHandler`, `SCPHandler`, or `GuacamoleHandler`.
 4. For RDP/VNC, `GuacamoleHandler` connects to guacd on port 4822 and forwards raw Guacamole frames to the browser.
 5. The browser-side bridge (`GatewayTunnel.ts`) wraps `guacamole-common-js` to handle the mixed protocol: gateway sends JSON control frames first (e.g. `{"type":"connected"}`), then switches to raw Guacamole framing — `Guacamole.WebSocketTunnel` cannot handle this directly.

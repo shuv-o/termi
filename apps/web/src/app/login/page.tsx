@@ -40,6 +40,22 @@ const features = [
     { icon: Globe,    text: 'Access from anywhere, securely' },
 ];
 
+function PageShell({ children, fullWidth = false }: { children: React.ReactNode; fullWidth?: boolean }) {
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+            </div>
+            <div className={cn('relative w-full', fullWidth ? 'max-w-3xl' : 'max-w-lg')}>
+                <Card className="bg-card border-border overflow-hidden">
+                    {children}
+                </Card>
+            </div>
+        </div>
+    );
+}
+
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -63,8 +79,12 @@ export default function LoginPage() {
     const [passkeySetupName, setPasskeySetupName] = useState('');
     const [passkeySetupError, setPasskeySetupError] = useState('');
     const [webAuthnSupported, setWebAuthnSupported] = useState(false);
+    const [isElectron, setIsElectron] = useState(false);
 
-    useEffect(() => { setWebAuthnSupported(browserSupportsWebAuthn()); }, []);
+    useEffect(() => {
+        setWebAuthnSupported(browserSupportsWebAuthn());
+        setIsElectron(!!(window as any).electronAPI?.isElectron);
+    }, []);
 
     useEffect(() => {
         if (searchParams.get('verified') === '1') setInfo('Email verified successfully. You can now sign in.');
@@ -101,7 +121,8 @@ export default function LoginPage() {
                 navigator.credentials.store(cred).catch(() => {});
             } catch { /* not supported */ }
         }
-        if (data?.suggestPasskeySetup && webAuthnSupported) setShowPasskeySetup(true);
+        // Don't offer passkey setup in Electron — platform authenticator unavailable
+        if (data?.suggestPasskeySetup && webAuthnSupported && !isElectron) setShowPasskeySetup(true);
         else router.push('/dashboard');
     }
 
@@ -141,14 +162,19 @@ export default function LoginPage() {
 
     const handlePasskeySignIn = async () => {
         setError(''); setPasskeyLoading(true);
+        // Track whether the 30s server timeout fired so we can distinguish it
+        // from an intentional user cancel (both surface as NotAllowedError).
+        let timedOut = false;
+        const timeoutId = setTimeout(() => { timedOut = true; }, 32000);
         try {
             const optRes = await fetch('/api/auth/passkey/authenticate-options', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email || undefined }),
             });
             const optData = await optRes.json();
-            if (!optData.success) { setError(optData.error || 'Failed to start passkey sign-in'); setPasskeyLoading(false); return; }
+            if (!optData.success) { clearTimeout(timeoutId); setError(optData.error || 'Failed to start passkey sign-in'); setPasskeyLoading(false); return; }
             const assertion = await startAuthentication({ optionsJSON: optData.data });
+            clearTimeout(timeoutId);
             const authRes = await fetch('/api/auth/passkey/authenticate', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ response: assertion }),
@@ -157,18 +183,26 @@ export default function LoginPage() {
             if (!authData.success) { setError(authData.error || 'Passkey authentication failed'); setPasskeyLoading(false); return; }
             router.push('/dashboard');
         } catch (err: any) {
-            if (err?.name !== 'NotAllowedError') setError('Passkey sign-in failed. Please try with your password.');
+            clearTimeout(timeoutId);
+            if (timedOut) {
+                setError('Passkey request timed out. Please try again or sign in with your password.');
+            } else if (err?.name !== 'NotAllowedError') {
+                setError('Passkey sign-in failed. Please try with your password.');
+            }
             setPasskeyLoading(false);
         }
     };
 
     const handlePasskeySetup = async () => {
         setPasskeySetupError(''); setPasskeySetupLoading(true);
+        let timedOut = false;
+        const timeoutId = setTimeout(() => { timedOut = true; }, 32000);
         try {
             const optRes = await fetch('/api/auth/passkey/register-options');
             const optData = await optRes.json();
-            if (!optData.success) { setPasskeySetupError(optData.error || 'Failed to start passkey setup'); setPasskeySetupLoading(false); return; }
+            if (!optData.success) { clearTimeout(timeoutId); setPasskeySetupError(optData.error || 'Failed to start passkey setup'); setPasskeySetupLoading(false); return; }
             const registrationResponse = await startRegistration({ optionsJSON: optData.data });
+            clearTimeout(timeoutId);
             const regRes = await fetch('/api/auth/passkey/register', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: passkeySetupName.trim() || 'Passkey', response: registrationResponse }),
@@ -177,7 +211,14 @@ export default function LoginPage() {
             if (!regData.success) { setPasskeySetupError(regData.error || 'Passkey registration failed'); setPasskeySetupLoading(false); return; }
             router.push('/dashboard');
         } catch (err: any) {
-            setPasskeySetupError(err?.name === 'NotAllowedError' ? 'Passkey setup was cancelled.' : 'Passkey setup failed. Please try again or skip.');
+            clearTimeout(timeoutId);
+            if (timedOut) {
+                setPasskeySetupError('Passkey setup timed out. Check for a Touch ID or system dialog on your screen, then try again.');
+            } else if (err?.name === 'NotAllowedError') {
+                setPasskeySetupError('Passkey setup was cancelled.');
+            } else {
+                setPasskeySetupError('Passkey setup failed. Please try again or skip.');
+            }
             setPasskeySetupLoading(false);
         }
     };
@@ -193,21 +234,6 @@ export default function LoginPage() {
         finally { setResendLoading(false); }
     };
 
-    // ── Shared page wrapper ───────────────────────────────────────────────────
-
-    const PageShell = ({ children, fullWidth = false }: { children: React.ReactNode; fullWidth?: boolean }) => (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-            </div>
-            <div className={cn('relative w-full', fullWidth ? 'max-w-3xl' : 'max-w-lg')}>
-                <Card className="bg-card border-border overflow-hidden">
-                    {children}
-                </Card>
-            </div>
-        </div>
-    );
 
     // ── Passkey setup screen ──────────────────────────────────────────────────
 
@@ -246,8 +272,13 @@ export default function LoginPage() {
                     )}
                     <Button onClick={handlePasskeySetup} disabled={passkeySetupLoading} className="w-full mb-3">
                         {passkeySetupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
-                        {passkeySetupLoading ? 'Setting up…' : 'Create Passkey'}
+                        {passkeySetupLoading ? 'Waiting for system dialog…' : 'Create Passkey'}
                     </Button>
+                    {passkeySetupLoading && (
+                        <p className="text-xs text-muted-foreground text-center mb-3">
+                            Look for a Touch ID or passkey prompt on your screen.
+                        </p>
+                    )}
                     <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full text-muted-foreground">
                         <X className="w-4 h-4" /> Skip for now
                     </Button>
@@ -378,8 +409,8 @@ export default function LoginPage() {
                                 </Button>
                             </form>
 
-                            {/* Passkey sign-in */}
-                            {webAuthnSupported && (
+                            {/* Passkey sign-in — hidden in Electron (platform authenticator unavailable) */}
+                            {webAuthnSupported && !isElectron && (
                                 <>
                                     <div className="my-4 flex items-center gap-3">
                                         <div className="flex-1 h-px bg-border" />

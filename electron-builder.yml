@@ -25,9 +25,21 @@ extraResources:
     to: gateway.cjs
 
 mac:
-  target: dmg
+  target:
+    - target: dmg
+      arch: [x64, arm64]
   category: public.app-category.developer-tools
   icon: build/icon.icns
+  # Hardened runtime is required for notarization and for macOS to trust the
+  # app as a WebAuthn/passkey client (Touch ID access).
+  hardenedRuntime: true
+  # Suppress local Gatekeeper check — notarization handles this post-build.
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # Notarize after signing. Reads APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD,
+  # and APPLE_TEAM_ID from environment variables.
+  notarize: true
 
 win:
   target: nsis

@@ -25,13 +25,13 @@ dotenv.config(); // fallback: CWD-based (covers Electron dev where CWD = project
 // CONFIGURATION
 // ============================================================================
 
-const PORT = parseInt(process.env.GATEWAY_PORT || '8080', 10);
+const PORT = parseInt(process.env.GATEWAY_PORT || '2281', 10);
 const HOST = process.env.GATEWAY_HOST || '0.0.0.0';
 
 // Allowed origins for WebSocket connections (comma-separated list)
-// e.g. ALLOWED_ORIGINS=https://app.example.com,http://localhost:3000
+// e.g. ALLOWED_ORIGINS=https://app.example.com,http://localhost:2280
 const ALLOWED_ORIGINS: Set<string> = new Set(
-    (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+    (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:2280')
         .split(',')
         .map((o) => o.trim().toLowerCase())
         .filter(Boolean)

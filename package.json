@@ -23,7 +23,7 @@
     "db:seed": "npm run db:seed --workspace=apps/web",
     "db:studio": "npm run db:studio --workspace=apps/web",
     "setup:electron": "electron-rebuild -f -w node-pty",
-    "electron:dev": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 NEXT_PUBLIC_GATEWAY_URL=ws://127.0.0.1:8080 electron .\"",
+    "electron:dev": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 NEXT_PUBLIC_GATEWAY_URL=ws://127.0.0.1:2281 electron .\"",
     "build:web-standalone": "npm run build --workspace=apps/web && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/public apps/web/.next/standalone/apps/web/public",
     "build:gateway-bundle": "esbuild apps/gateway/src/index.ts --bundle --platform=node --target=node20 --format=cjs --external:ssh2 --outfile=apps/electron/gateway.cjs",
     "build:electron": "npm run build:web-standalone && rm -rf apps/web/.next/standalone/apps/web/.next/node_modules && npm run build:gateway-bundle && electron-builder"

@@ -24,12 +24,22 @@ import { createSession, getSession } from './session';
 // ============================================================================
 
 function getRpDetails() {
+    // In development the Next.js server runs on localhost:2280. Using a remote
+    // domain as rpID causes the browser to reject the WebAuthn request entirely
+    // because rpID must equal (or be a suffix of) the page's effective domain.
+    if (process.env.NODE_ENV === 'development') {
+        return {
+            rpID: 'localhost',
+            rpName: 'Termi',
+            origins: ['http://localhost:2280', 'http://127.0.0.1:2280'],
+        };
+    }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';
     const url = new URL(appUrl);
     return {
         rpID: url.hostname,
         rpName: 'Termi',
-        origin: url.origin,
+        origins: [url.origin],
     };
 }
 
@@ -56,6 +66,7 @@ export async function generatePasskeyRegistrationOptions(userId: string) {
         rpID,
         userName: user.email,
         attestationType: 'none',
+        timeout: 30000,
         excludeCredentials: user.passkeys.map((p) => ({
             id: p.credentialID,
             transports: p.transports as AuthenticatorTransportFuture[],
@@ -89,14 +100,14 @@ export async function verifyPasskeyRegistration(
         return { success: false, error: 'Registration challenge not found or expired' };
     }
 
-    const { rpID, origin } = getRpDetails();
+    const { rpID, origins } = getRpDetails();
 
     let verification;
     try {
         verification = await verifyRegistrationResponse({
             response,
             expectedChallenge: challenge,
-            expectedOrigin: origin,
+            expectedOrigin: origins,
             expectedRPID: rpID,
             requireUserVerification: false,
         });
@@ -176,6 +187,7 @@ export async function generatePasskeyAuthenticationOptions(email?: string) {
 
     const options = await generateAuthenticationOptions({
         rpID,
+        timeout: 30000,
         allowCredentials: allowCredentials.length > 0 ? allowCredentials : undefined,
         userVerification: 'preferred',
     });
@@ -222,14 +234,14 @@ export async function verifyPasskeyAuthentication(
         return { success: false, error: `Account temporarily locked. Try again in ${remaining} minute(s).` };
     }
 
-    const { rpID, origin } = getRpDetails();
+    const { rpID, origins } = getRpDetails();
 
     let verification;
     try {
         verification = await verifyAuthenticationResponse({
             response,
             expectedChallenge: challenge,
-            expectedOrigin: origin,
+            expectedOrigin: origins,
             expectedRPID: rpID,
             credential: {
                 id: passkey.credentialID,

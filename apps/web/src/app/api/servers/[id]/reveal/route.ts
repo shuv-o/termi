@@ -53,9 +53,12 @@ interface RouteParams {
 }
 
 function getRpDetails() {
+    if (process.env.NODE_ENV === 'development') {
+        return { rpID: 'localhost', origins: ['http://localhost:2280', 'http://127.0.0.1:2280'] };
+    }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';
     const url = new URL(appUrl);
-    return { rpID: url.hostname, origin: url.origin };
+    return { rpID: url.hostname, origins: [url.origin] };
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
@@ -132,13 +135,13 @@ export async function POST(request: Request, { params }: RouteParams) {
             return errorResponse('Passkey not found or does not belong to your account', 401);
         }
 
-        const { rpID, origin } = getRpDetails();
+        const { rpID, origins } = getRpDetails();
 
         try {
             const { verified, authenticationInfo } = await verifyAuthenticationResponse({
                 response: passkeyResponse as AuthenticationResponseJSON,
                 expectedChallenge: challenge,
-                expectedOrigin: origin,
+                expectedOrigin: origins,
                 expectedRPID: rpID,
                 credential: {
                     id: passkey.credentialID,

@@ -37,6 +37,6 @@ RUN chown -R gateway:gateway /app
 
 USER gateway
 
-EXPOSE 8080
+EXPOSE 2281
 
 CMD ["node", "dist/index.js"]

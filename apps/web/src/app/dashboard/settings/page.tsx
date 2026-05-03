@@ -214,6 +214,7 @@ export default function SettingsPage() {
     const [newPasskeyName, setNewPasskeyName] = useState('');
     const [showAddPasskey, setShowAddPasskey] = useState(false);
     const [passkeyError, setPasskeyError] = useState('');
+    const [isElectron, setIsElectron] = useState(false);
 
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
     const [pushSubscribed, setPushSubscribed] = useState(false);
@@ -236,6 +237,7 @@ export default function SettingsPage() {
         }
         void init();
         void loadPasskeys();
+        setIsElectron(!!(window as any).electronAPI?.isElectron);
 
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setPushPermission(Notification.permission);
@@ -451,22 +453,28 @@ export default function SettingsPage() {
     const handleAddPasskey = async () => {
         setAddingPasskey(true);
         setPasskeyError('');
+        let timedOut = false;
+        const timeoutId = setTimeout(() => { timedOut = true; }, 32000);
         try {
             const optRes = await fetch('/api/auth/passkey/register-options');
             const optData = await optRes.json();
             if (!optRes.ok || !optData.success) {
+                clearTimeout(timeoutId);
                 throw new Error(optData.error || 'Failed to get registration options');
             }
 
             let registration;
             try {
                 registration = await startRegistration({ optionsJSON: optData.data });
+                clearTimeout(timeoutId);
             } catch (err: unknown) {
+                clearTimeout(timeoutId);
                 if (err instanceof Error) {
+                    if (timedOut) throw new Error('Passkey setup timed out — check for a Touch ID or system dialog on your screen, then try again');
                     if (err.name === 'NotAllowedError') throw new Error('Passkey registration was cancelled or denied');
                     if (err.name === 'InvalidStateError') throw new Error('A passkey for this device is already registered');
                     if (err.name === 'NotSupportedError') throw new Error('Passkeys are not supported on this device or browser');
-                    if (err.name === 'SecurityError') throw new Error('Security error — ensure you are on HTTPS');
+                    if (err.name === 'SecurityError') throw new Error('Security error — ensure you are on a secure origin');
                 }
                 throw new Error('Passkey creation failed');
             }
@@ -678,7 +686,15 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {showAddPasskey ? (
+                    {isElectron ? (
+                        <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/40 border border-border/50 text-sm text-muted-foreground">
+                            <Info className="w-4 h-4 shrink-0 mt-0.5 text-primary/70" />
+                            <span>
+                                Passkeys are not available in the desktop app — macOS requires the app to be signed and notarized to access the platform authenticator.
+                                To add or use passkeys, open Termi in a web browser.
+                            </span>
+                        </div>
+                    ) : showAddPasskey ? (
                         <div className="space-y-3 p-4 rounded-lg bg-background/50 border border-border/50">
                             <p className="text-sm font-medium">Name this passkey</p>
                             <p className="text-xs text-muted-foreground">Give it a name to identify the device (e.g., &quot;MacBook Touch ID&quot;, &quot;iPhone Face ID&quot;).</p>
@@ -713,7 +729,7 @@ export default function SettingsPage() {
                                     className="flex-1"
                                 >
                                     {addingPasskey ? (
-                                        <><Loader2 className="w-4 h-4 animate-spin" /> Creating…</>
+                                        <><Loader2 className="w-4 h-4 animate-spin" /> Waiting for system dialog…</>
                                     ) : (
                                         <><Fingerprint className="w-4 h-4" /> Create Passkey</>
                                     )}
@@ -731,9 +747,11 @@ export default function SettingsPage() {
                         </Button>
                     )}
 
-                    <p className="text-xs text-muted-foreground/60 mt-3">
-                        Passkeys require a device with biometrics or a hardware security key, and a supported browser (Chrome 108+, Safari 16+, Firefox 119+).
-                    </p>
+                    {!isElectron && (
+                        <p className="text-xs text-muted-foreground/60 mt-3">
+                            Passkeys require a device with biometrics or a hardware security key, and a supported browser (Chrome 108+, Safari 16+, Firefox 119+).
+                        </p>
+                    )}
                 </SectionCard>
             </div>
 
