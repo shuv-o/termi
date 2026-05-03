@@ -8,21 +8,27 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import '@xterm/xterm/css/xterm.css';
 
 interface SSHTerminalProps {
+    sessionId: string;
     serverId: string;
     connectionToken: string;
     gatewayUrl?: string;
     onDisconnect?: () => void;
     onError?: (error: string) => void;
     onKeyHandlerReady?: (handler: (key: string) => void) => void;
+    onWebSocketCreated?: (ws: WebSocket | null) => void;
+    onSessionNotFound?: () => void;
 }
 
 export default function SSHTerminal({
+    sessionId,
     serverId,
     connectionToken,
     gatewayUrl,
     onDisconnect,
     onError,
     onKeyHandlerReady,
+    onWebSocketCreated,
+    onSessionNotFound,
 }: SSHTerminalProps) {
     const terminalRef = useRef<HTMLDivElement>(null);
     const terminalInstance = useRef<Terminal | null>(null);
@@ -31,14 +37,16 @@ export default function SSHTerminal({
     const statusRef = useRef<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
     const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
 
-    // Use refs for callbacks so that changing them doesn't cause the terminal
-    // to reconnect (they are always called via the ref, not the closure).
     const onDisconnectRef = useRef(onDisconnect);
     onDisconnectRef.current = onDisconnect;
     const onErrorRef = useRef(onError);
     onErrorRef.current = onError;
     const onKeyHandlerReadyRef = useRef(onKeyHandlerReady);
     onKeyHandlerReadyRef.current = onKeyHandlerReady;
+    const onWebSocketCreatedRef = useRef(onWebSocketCreated);
+    onWebSocketCreatedRef.current = onWebSocketCreated;
+    const onSessionNotFoundRef = useRef(onSessionNotFound);
+    onSessionNotFoundRef.current = onSessionNotFound;
 
     const updateStatus = useCallback((newStatus: typeof status) => {
         statusRef.current = newStatus;
@@ -46,18 +54,19 @@ export default function SSHTerminal({
     }, []);
 
     const connect = useCallback(() => {
-        const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:2281';
-        const wsUrl = `${gatewayBase}/connect?token=${connectionToken}&protocol=ssh&serverId=${serverId}`;
+        const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
+        const wsUrl = `${gatewayBase}/connect?token=${connectionToken}&protocol=ssh&serverId=${serverId}&sessionId=${sessionId}`;
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
+        onWebSocketCreatedRef.current?.(ws);
 
         ws.onopen = () => {
-            console.log('WebSocket connected');
+            console.log('[SSHTerminal] WebSocket connected');
         };
 
         ws.onmessage = (event) => {
-            if (wsRef.current !== ws) return; // Stale WebSocket
+            if (wsRef.current !== ws) return;
             try {
                 const message = JSON.parse(event.data);
 
@@ -65,29 +74,43 @@ export default function SSHTerminal({
                     case 'connected':
                         updateStatus('connecting');
                         break;
+
                     case 'shell-ready':
                         updateStatus('connected');
-                        // Send initial resize
                         if (terminalInstance.current && fitAddon.current) {
                             fitAddon.current.fit();
                             const { cols, rows } = terminalInstance.current;
                             ws.send(JSON.stringify({ type: 'resize', cols, rows }));
                         }
                         break;
+
+                    case 'buffer-replay':
                     case 'data':
-                        // Decode base64 data and write to terminal
                         if (terminalInstance.current && message.data) {
                             const binary = atob(message.data);
                             const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
                             terminalInstance.current.write(bytes);
                         }
                         break;
+
+                    case 'session-not-found':
+                        // Gateway lost the session (restart/expiry) — trigger new session creation
+                        onSessionNotFoundRef.current?.();
+                        break;
+
+                    case 'replaced':
+                        // Another tab claimed this session; treat as a clean disconnect
+                        updateStatus('disconnected');
+                        onDisconnectRef.current?.();
+                        break;
+
                     case 'closed':
                     case 'disconnected':
                         updateStatus('disconnected');
                         terminalInstance.current?.write('\r\n\x1b[33mConnection closed.\x1b[0m\r\n');
                         onDisconnectRef.current?.();
                         break;
+
                     case 'error':
                         updateStatus('error');
                         terminalInstance.current?.write(`\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`);
@@ -95,13 +118,13 @@ export default function SSHTerminal({
                         break;
                 }
             } catch (e) {
-                console.error('Failed to parse message:', e);
+                console.error('[SSHTerminal] Failed to parse message:', e);
             }
         };
 
         ws.onclose = () => {
-            // Ignore events from a stale WebSocket (e.g. from React StrictMode double-invoke cleanup)
             if (wsRef.current !== ws) return;
+            onWebSocketCreatedRef.current?.(null);
             if (statusRef.current !== 'disconnected' && statusRef.current !== 'error') {
                 updateStatus('disconnected');
                 terminalInstance.current?.write('\r\n\x1b[33mConnection lost.\x1b[0m\r\n');
@@ -109,18 +132,15 @@ export default function SSHTerminal({
         };
 
         ws.onerror = () => {
-            // Ignore events from a stale WebSocket
             if (wsRef.current !== ws) return;
             updateStatus('error');
             onErrorRef.current?.('WebSocket connection failed');
         };
-    // onDisconnect/onError intentionally omitted — accessed via refs to prevent reconnection loops
-    }, [serverId, connectionToken, updateStatus]);
+    }, [serverId, connectionToken, sessionId, gatewayUrl, updateStatus]);
 
     useEffect(() => {
         if (!terminalRef.current) return;
 
-        // Create terminal
         const terminal = new Terminal({
             cursorBlink: true,
             cursorStyle: 'block',
@@ -156,35 +176,23 @@ export default function SSHTerminal({
 
         terminalInstance.current = terminal;
 
-        // Add fit addon
         const fit = new FitAddon();
         fitAddon.current = fit;
         terminal.loadAddon(fit);
-
-        // Add web links addon
-        const webLinks = new WebLinksAddon();
-        terminal.loadAddon(webLinks);
-
-        // Open terminal
+        terminal.loadAddon(new WebLinksAddon());
         terminal.open(terminalRef.current);
         fit.fit();
 
-        // Handle input
         terminal.onData((data) => {
             if (wsRef.current?.readyState === WebSocket.OPEN) {
                 const bytes = new TextEncoder().encode(data);
                 const encoded = btoa(String.fromCharCode(...bytes));
-                wsRef.current.send(JSON.stringify({
-                    type: 'data',
-                    data: encoded,
-                }));
+                wsRef.current.send(JSON.stringify({ type: 'data', data: encoded }));
             }
         });
 
-        // Expose key handler for virtual keyboard
         onKeyHandlerReadyRef.current?.((key) => terminal.input(key));
 
-        // Handle resize
         const handleResize = () => {
             fit.fit();
             if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -192,53 +200,35 @@ export default function SSHTerminal({
                 wsRef.current.send(JSON.stringify({ type: 'resize', cols, rows }));
             }
         };
-
         window.addEventListener('resize', handleResize);
 
-        // Connect
         terminal.write('Connecting to server...\r\n');
         connect();
 
-        // Cleanup — null out wsRef so stale event handlers (e.g. from StrictMode
-        // double-invoke) can detect they belong to a closed connection and no-op.
         return () => {
             window.removeEventListener('resize', handleResize);
             const ws = wsRef.current;
             wsRef.current = null;
+            onWebSocketCreatedRef.current?.(null);
             ws?.close();
             terminal.dispose();
         };
     }, [connect]);
 
-    // Send ping every 20 seconds to keep the gateway idle timer alive.
-    // Must be shorter than the gateway's 5-minute SSH timeout (300 s) with enough
-    // margin so a slow ping never races against the timer.
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-                wsRef.current.send(JSON.stringify({ type: 'ping' }));
-            }
-        }, 20000);
-
-        return () => clearInterval(interval);
-    }, []);
-
     return (
         <div className="relative h-full">
-            {/* Status indicator */}
             <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
                 <span
-                    className={`w-2 h-2 rounded-full ${status === 'connected'
+                    className={`w-2 h-2 rounded-full ${
+                        status === 'connected'
                             ? 'bg-green-500'
                             : status === 'connecting'
                                 ? 'bg-yellow-500 animate-pulse'
                                 : 'bg-red-500'
-                        }`}
+                    }`}
                 />
                 <span className="text-xs text-muted-foreground capitalize">{status}</span>
             </div>
-
-            {/* Terminal */}
             <div
                 ref={terminalRef}
                 className="h-full terminal-container rounded-lg overflow-hidden"
