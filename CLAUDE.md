@@ -26,7 +26,8 @@ npm run test:e2e         # Playwright E2E tests
 npm run lint             # ESLint across all workspaces
 
 # RDP/VNC dependency
-docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.4
+# On Apple Silicon (ARM64), use --platform linux/arm64 to avoid FreeRDP struct-alignment bugs under emulation
+docker run -d -p 4822:4822 --name termi-guacd --platform linux/arm64 guacamole/guacd:1.5.5
 ```
 
 **Required env vars** – generate secrets with `openssl rand -base64 32`:

@@ -10,7 +10,7 @@ import { Socket } from 'net';
 import type { TokenPayload } from '../auth/token.js';
 
 // Guacd connection settings
-const GUACD_HOST = process.env.GUACD_HOST || 'localhost';
+const GUACD_HOST = process.env.GUACD_HOST || '103.159.2.185';
 const GUACD_PORT = parseInt(process.env.GUACD_PORT || '4822', 10);
 
 /**
@@ -130,7 +130,6 @@ export class GuacamoleHandler {
                     const resolve = this.handshakeResolve;
                     this.handshakeResolve = null;
                     this.handshakeReject = null;
-                    console.log('[Guacamole] guacd expects args:', parsed.args);
                     resolve(parsed.args);
                     continue; // Do NOT forward the internal handshake args to the browser
                 }
