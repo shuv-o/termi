@@ -53,10 +53,25 @@ export default function SSHConnectionPage() {
     const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
     const sessionIdRef = useRef(crypto.randomUUID());
 
-    const handleDisconnect = useCallback(() => {}, []);
+    const handleDisconnect = useCallback(() => {
+        console.log('[SSHConnectionPage] Terminal disconnected');
+    }, []);
     const handleError = useCallback((err: string) => {
         console.error('Terminal error:', err);
     }, []);
+
+    const renewToken = useCallback(async (): Promise<string> => {
+        const res = await fetch('/api/connection/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serverId, protocol: 'ssh' }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error('Failed to renew connection token');
+        const newToken = data.data.token as string;
+        setConnectionToken(newToken);
+        return newToken;
+    }, [serverId]);
 
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 768);
@@ -68,8 +83,19 @@ export default function SSHConnectionPage() {
     useEffect(() => {
         async function initConnection() {
             try {
-                const serverResponse = await fetch(`/api/servers/${serverId}`);
-                const serverData = await serverResponse.json();
+                const [serverResponse, tokenResponse] = await Promise.all([
+                    fetch(`/api/servers/${serverId}`),
+                    fetch(`/api/connection/token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ serverId, protocol: 'ssh' }),
+                    }),
+                ]);
+
+                const [serverData, tokenData] = await Promise.all([
+                    serverResponse.json(),
+                    tokenResponse.json(),
+                ]);
 
                 if (!serverData.success) {
                     setError('Server not found');
@@ -77,22 +103,13 @@ export default function SSHConnectionPage() {
                     return;
                 }
 
-                setServer(serverData.data.server);
-
-                const tokenResponse = await fetch(`/api/connection/token`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ serverId, protocol: 'ssh' }),
-                });
-
-                const tokenData = await tokenResponse.json();
-
                 if (!tokenData.success) {
                     setError('Failed to get connection token');
                     setLoading(false);
                     return;
                 }
 
+                setServer(serverData.data.server);
                 setConnectionToken(tokenData.data.token);
                 setGatewayUrl(tokenData.data.gatewayUrl ?? null);
                 setLoading(false);
@@ -234,10 +251,12 @@ export default function SSHConnectionPage() {
                         sessionId={sessionIdRef.current}
                         serverId={serverId}
                         connectionToken={connectionToken}
+                        renewToken={renewToken}
                         gatewayUrl={gatewayUrl ?? undefined}
                         onDisconnect={handleDisconnect}
                         onError={handleError}
                         onKeyHandlerReady={(handler) => { terminalKeyHandler.current = handler; }}
+                        onSessionNotFound={() => router.push('/dashboard')}
                     />
                 </div>
 
