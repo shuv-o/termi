@@ -118,13 +118,11 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
-    console.log(`[gateway] raw req.url: ${req.url?.slice(0, 300)}`);
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const token         = url.searchParams.get('token');
     const protocol      = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
     const serverId      = url.searchParams.get('serverId');
     const sessionId     = url.searchParams.get('sessionId');   // required for SSH
-    console.log(`[gateway] parsed: protocol=${protocol} serverId=${serverId?.slice(0,8)} sessionId=${JSON.stringify(sessionId)} paramKeys=[${[...url.searchParams.keys()].join(',')}]`);
 
 
     if (!token || !protocol || !serverId) {
