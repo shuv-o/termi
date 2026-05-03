@@ -813,7 +813,7 @@ function getGoogleClient(): Google {
     if (!clientId || !clientSecret) {
         throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
     }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:2280';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080';
     const redirectURI = `${appUrl}/api/auth/google/callback`;
     return new Google(clientId, clientSecret, redirectURI);
 }
@@ -1414,7 +1414,7 @@ function ResetPasswordForm() {
                 return;
             }
             setSuccess(true);
-            setTimeout(() => router.push('/login?reset=1'), 2280);
+            setTimeout(() => router.push('/login?reset=1'), 22080);
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {

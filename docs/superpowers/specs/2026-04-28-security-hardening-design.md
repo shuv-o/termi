@@ -95,7 +95,7 @@ Also update `.env.example`: show `?sslmode=require` in the example `DATABASE_URL
 
 **Problem:** `|| 'https://gateway.termi.dp.shuvoo.com'` hardcodes internal infrastructure in source code, leaking the production deployment URL and making the fallback misleading.
 
-**Fix:** Change to `|| process.env.GATEWAY_URL || 'ws://localhost:2281'`. Also align `GATEWAY_URL` vs `NEXT_PUBLIC_GATEWAY_URL` usage in `.env.example` with clear comments on which is server-side only.
+**Fix:** Change to `|| process.env.GATEWAY_URL || 'ws://localhost:22081'`. Also align `GATEWAY_URL` vs `NEXT_PUBLIC_GATEWAY_URL` usage in `.env.example` with clear comments on which is server-side only.
 
 ---
 

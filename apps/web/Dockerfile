@@ -86,9 +86,9 @@ RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
-EXPOSE 2280
+EXPOSE 22080
 
-ENV PORT=2280
+ENV PORT=22080
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "apps/web/server.js"]

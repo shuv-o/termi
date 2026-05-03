@@ -24,14 +24,14 @@ import { createSession, getSession } from './session';
 // ============================================================================
 
 function getRpDetails() {
-    // In development the Next.js server runs on localhost:2280. Using a remote
+    // In development the Next.js server runs on localhost:22080. Using a remote
     // domain as rpID causes the browser to reject the WebAuthn request entirely
     // because rpID must equal (or be a suffix of) the page's effective domain.
     if (process.env.NODE_ENV === 'development') {
         return {
             rpID: 'localhost',
             rpName: 'Termi',
-            origins: ['http://localhost:2280', 'http://127.0.0.1:2280'],
+            origins: ['http://localhost:22080', 'http://127.0.0.1:22080'],
         };
     }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';

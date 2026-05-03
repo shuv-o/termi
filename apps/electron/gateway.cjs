@@ -3283,7 +3283,7 @@ var require_websocket_server = __commonJS({
        *     pending connections
        * @param {Boolean} [options.clientTracking=true] Specifies whether or not to
        *     track clients
-       * @param {Number} [options.closeTimeout=22800] Duration in milliseconds to
+       * @param {Number} [options.closeTimeout=220800] Duration in milliseconds to
        *     wait for the closing handshake to finish after `websocket.close()` is
        *     called
        * @param {Function} [options.handleProtocols] A hook to handle protocols
@@ -6446,10 +6446,10 @@ async function validateToken(token) {
 // apps/gateway/src/index.ts
 import_dotenv.default.config({ path: "../../.env" });
 import_dotenv.default.config();
-var PORT = parseInt(process.env.GATEWAY_PORT || "2281", 10);
+var PORT = parseInt(process.env.GATEWAY_PORT || "22081", 10);
 var HOST = process.env.GATEWAY_HOST || "0.0.0.0";
 var ALLOWED_ORIGINS = new Set(
-  (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:2280").split(",").map((o) => o.trim().toLowerCase()).filter(Boolean)
+  (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:22080").split(",").map((o) => o.trim().toLowerCase()).filter(Boolean)
 );
 var MAX_CONNECTIONS_PER_USER = 10;
 var CONNECTION_TIMEOUT = 3e5;

@@ -22,6 +22,7 @@ export interface Session {
     gatewayUrl: string | null;
     status: SessionStatus;
     showFiles: boolean;
+    errorMessage?: string | null;
 }
 
 interface SessionsContextValue {
@@ -35,6 +36,7 @@ interface SessionsContextValue {
     renewSession: (tabId: string, serverId: string) => Promise<void>;
     toggleFiles: (tabId: string) => void;
     updateSessionStatus: (tabId: string, status: SessionStatus) => void;
+    setSessionError: (tabId: string, error: string | null) => void;
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
 }
 
@@ -67,10 +69,14 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     // Map of tabId → active WebSocket, used to send close-session before removing
     const wsRefs = useRef(new Map<string, WebSocket>());
 
+    // Guard: don't persist until after the restore effect has run (avoids wiping saved sessions)
+    const hasRestoredRef = useRef(false);
+
     // ── Persist sessions to localStorage (survives browser close) ──
     // Local terminal sessions are excluded: their PTY processes die on refresh.
 
     useEffect(() => {
+        if (!hasRestoredRef.current) return; // Wait until restore has run
         const remote = sessions.filter(s => s.type !== 'local');
         const state: PersistedState = {
             sessions: remote.map(s => ({ sessionId: s.sessionId, serverId: s.serverId, serverName: s.serverName })),
@@ -83,6 +89,12 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     const updateSessionStatus = useCallback((tabId: string, status: SessionStatus) => {
         setSessions(prev => prev.map(s => s.tabId === tabId ? { ...s, status } : s));
+    }, []);
+
+    const setSessionError = useCallback((tabId: string, error: string | null) => {
+        setSessions(prev => prev.map(s =>
+            s.tabId === tabId ? { ...s, errorMessage: error, status: 'error' } : s
+        ));
     }, []);
 
     const setSessionWs = useCallback((tabId: string, ws: WebSocket | null) => {
@@ -223,6 +235,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     // Sessions start as 'detached' then immediately begin reconnecting.
 
     useEffect(() => {
+        hasRestoredRef.current = true; // Allow persist effect to run after this
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (!raw) return;
@@ -261,7 +274,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         <SessionsContext.Provider value={{
             sessions, activeTabId, setActiveTabId,
             addSession, addLocalSession, removeSession, reconnectSession, renewSession,
-            toggleFiles, updateSessionStatus, setSessionWs,
+            toggleFiles, updateSessionStatus, setSessionError, setSessionWs,
         }}>
             {children}
         </SessionsContext.Provider>

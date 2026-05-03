@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev --port 22080",
         "build": "next build",
-        "start": "next start",
+        "start": "next start --port 22080",
         "lint": "next lint",
         "test": "vitest",
         "test:e2e": "playwright test",

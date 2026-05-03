@@ -183,7 +183,7 @@ export default function SessionsWorkspace() {
     const {
         sessions, activeTabId, setActiveTabId,
         addSession, addLocalSession, removeSession, reconnectSession, renewSession,
-        toggleFiles, updateSessionStatus, setSessionWs,
+        toggleFiles, updateSessionStatus, setSessionError, setSessionWs,
     } = useSessionsContext();
 
     const [showPicker, setShowPicker] = useState(false);
@@ -540,6 +540,11 @@ export default function SessionsWorkspace() {
                                                     <div className="flex flex-col items-center justify-center h-full gap-3 bg-card rounded-xl border border-border">
                                                         <AlertCircle className="w-8 h-8 text-destructive" />
                                                         <p className="text-sm text-destructive">Failed to connect</p>
+                                                        {session.errorMessage && (
+                                                            <p className="text-xs text-muted-foreground max-w-xs text-center px-4 break-words">
+                                                                {session.errorMessage}
+                                                            </p>
+                                                        )}
                                                         <Button
                                                             variant="secondary"
                                                             size="sm"
@@ -563,7 +568,7 @@ export default function SessionsWorkspace() {
                                                         connectionToken={session.token}
                                                         gatewayUrl={session.gatewayUrl ?? undefined}
                                                         onDisconnect={() => updateSessionStatus(session.tabId, 'disconnected')}
-                                                        onError={() => updateSessionStatus(session.tabId, 'error')}
+                                                        onError={(err) => setSessionError(session.tabId, err)}
                                                         onKeyHandlerReady={() => updateSessionStatus(session.tabId, 'connected')}
                                                         onWebSocketCreated={(ws) => setSessionWs(session.tabId, ws)}
                                                         onSessionNotFound={() => renewSession(session.tabId, session.serverId)}

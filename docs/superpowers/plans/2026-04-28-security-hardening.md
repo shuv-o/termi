@@ -472,7 +472,7 @@ Add a startup assertion that fails loudly in production if `DATABASE_URL` lacks 
 
   ```bash
   # REMOVE this line from .env.example:
-  GATEWAY_URL=ws://localhost:2281
+  GATEWAY_URL=ws://localhost:22081
   ```
 
   And update the comment block for the gateway URL section:
@@ -650,7 +650,7 @@ The fallback `|| 'https://gateway.termi.dp.shuvoo.com'` hardcodes an internal in
   Replace with:
 
   ```ts
-  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:2281';
+  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
   ```
 
 - [ ] **Step 2: Verify TypeScript compilation**

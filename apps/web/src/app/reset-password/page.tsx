@@ -49,7 +49,7 @@ function ResetPasswordForm() {
                 return;
             }
             setSuccess(true);
-            setTimeout(() => router.push('/login?reset=1'), 2280);
+            setTimeout(() => router.push('/login?reset=1'), 22080);
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {

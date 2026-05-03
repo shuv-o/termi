@@ -65,7 +65,7 @@ services:
         - "traefik.http.routers.termi-web.tls.certresolver=letsencrypt"
         - "traefik.http.routers.termi-web.service=termi-web"               # ← add
         # Service
-        - "traefik.http.services.termi-web.loadbalancer.server.port=2280"
+        - "traefik.http.services.termi-web.loadbalancer.server.port=22080"
         # Middleware
         - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     networks:
@@ -85,7 +85,7 @@ services:
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://example.com}
       # Gateway Settings
-      GATEWAY_PORT: 2281
+      GATEWAY_PORT: 22081
       GATEWAY_HOST: 0.0.0.0
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
 
@@ -108,7 +108,7 @@ services:
       - "traefik.http.routers.termi-gateway.tls.certresolver=letsencrypt"
       - "traefik.http.routers.termi-gateway.service=termi-gateway"       # ← add
       # Service
-      - "traefik.http.services.termi-gateway.loadbalancer.server.port=2281"
+      - "traefik.http.services.termi-gateway.loadbalancer.server.port=22081"
     networks:
       - dokploy-network
 

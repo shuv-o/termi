@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
         // Return gatewayUrl alongside the token so client components can read
         // it at runtime rather than relying on the NEXT_PUBLIC_ build-time bake-in.
-        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:2281';
+        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
 
         return successResponse({ token, gatewayUrl });
     } catch (error) {

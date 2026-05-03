@@ -6,8 +6,8 @@ Termi is an **npm workspaces monorepo** with two independently deployable servic
 
 | App | Package | Port | Role |
 |-----|---------|------|------|
-| `apps/web` | `@termi/web` | 2280 | Next.js 15 App Router PWA + REST API + Prisma ORM |
-| `apps/gateway` | `@termi/gateway` | 2281 | WebSocket gateway – proxies SSH/SCP/RDP/VNC |
+| `apps/web` | `@termi/web` | 22080 | Next.js 15 App Router PWA + REST API + Prisma ORM |
+| `apps/gateway` | `@termi/gateway` | 22081 | WebSocket gateway – proxies SSH/SCP/RDP/VNC |
 
 A third component, **guacd** (Apache Guacamole daemon), must run separately on port 4822 for RDP/VNC:
 ```bash
@@ -21,7 +21,7 @@ docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.4
 npm install
 
 # Run both services concurrently (recommended)
-npm run dev:all          # web on :2280, gateway on :2281
+npm run dev:all          # web on :22080, gateway on :22081
 
 # Database (run from repo root)
 npm run db:generate      # regenerate Prisma client after schema changes
@@ -44,7 +44,7 @@ npm run build            # builds both apps sequentially
 ## Connection Flow (Critical Path)
 
 1. Browser calls `POST /api/connection/token` → web server decrypts stored credentials and issues a **5-minute JWE token** (A256GCM, key = SHA-256 of `GATEWAY_JWT_SECRET`).
-2. Browser opens `ws://gateway:2281/connect?token=<jwe>&protocol=<ssh|scp|rdp|vnc>&serverId=<id>`.
+2. Browser opens `ws://gateway:22081/connect?token=<jwe>&protocol=<ssh|scp|rdp|vnc>&serverId=<id>`.
 3. Gateway validates the JWE (same key), routes to `SSHHandler`, `SCPHandler`, or `GuacamoleHandler`.
 4. For RDP/VNC, `GuacamoleHandler` connects to guacd on port 4822 using the Guacamole protocol, then forwards raw Guacamole frames to the browser.
 5. The browser-side bridge (`GatewayTunnel.ts`) wraps `guacamole-common-js` because the gateway sends JSON control frames *first* (e.g. `{"type":"connected"}`) then switches to raw Guacamole framing – `Guacamole.WebSocketTunnel` cannot handle this mixed protocol directly.

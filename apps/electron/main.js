@@ -29,7 +29,7 @@ if (fs.existsSync(rootEnvPath)) {
 }
 
 // In development mode the concurrently script already starts both the Next.js
-// dev server (:2280) and the gateway dev server (:2281), so Electron must NOT
+// dev server (:22080) and the gateway dev server (:22081), so Electron must NOT
 // spawn its own copies.  We detect dev mode by checking !app.isPackaged OR the
 // presence of the ELECTRON_DEV environment variable.
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
@@ -69,10 +69,10 @@ function getPaths() {
     };
 }
 
-// In dev mode, poll until the Next.js dev server (port 2280) is accepting
+// In dev mode, poll until the Next.js dev server (port 22080) is accepting
 // connections, then resolve.  Times out after 120 s to give the compiler
 // enough time on a cold start.
-function waitForDevServer(port = 2280, timeoutMs = 120000) {
+function waitForDevServer(port = 22080, timeoutMs = 120000) {
     return new Promise((resolve, reject) => {
         console.log(`[electron-dev] Waiting for Next.js dev server on :${port}…`);
         const poll = setInterval(() => {
@@ -111,9 +111,9 @@ function startGateway(paths) {
         env: {
             ...process.env,
             NODE_PATH: paths.nodePath,
-            GATEWAY_PORT: '2281',
+            GATEWAY_PORT: '22081',
             GATEWAY_HOST: '127.0.0.1',
-            ALLOWED_ORIGINS: 'http://localhost:2280,http://127.0.0.1:2280',
+            ALLOWED_ORIGINS: 'http://localhost:22080,http://127.0.0.1:22080',
         },
     });
     gatewayProcess.stdout.on('data', d => console.log('[gateway]', d.toString().trim()));
@@ -126,14 +126,14 @@ function startNextServer(paths) {
         nextProcess = spawn(process.execPath, [paths.nextServer], {
             env: {
                 ...process.env,
-                PORT: '2280',
+                PORT: '22080',
                 HOSTNAME: '127.0.0.1',
                 NODE_ENV: 'production',
                 // Tells the token API route to hand the local gateway URL to the browser
-                NEXT_PUBLIC_GATEWAY_URL: 'ws://127.0.0.1:2281',
+                NEXT_PUBLIC_GATEWAY_URL: 'ws://127.0.0.1:22081',
                 // Required for WebAuthn/passkey rpID — must match the actual serving origin.
                 // Only set if not already provided via termi.config.json.
-                NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:2280',
+                NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:22080',
             },
         });
         nextProcess.stdout.on('data', d => console.log('[next]', d.toString().trim()));
@@ -141,7 +141,7 @@ function startNextServer(paths) {
         nextProcess.on('error', reject);
 
         const poll = setInterval(() => {
-            const req = http.get('http://127.0.0.1:2280', res => {
+            const req = http.get('http://127.0.0.1:22080', res => {
                 // Any response (including redirects) means the server is up
                 if (res.statusCode < 500) {
                     clearInterval(poll);
@@ -234,10 +234,10 @@ function createWindow() {
         },
     });
 
-    // Dev: Next.js dev server on :2280; Production: standalone server on :2280
+    // Dev: Next.js dev server on :22080; Production: standalone server on :22080
     // Use 'localhost' (not '127.0.0.1') in dev so the WebSocket Origin header
-    // matches the gateway's default ALLOWED_ORIGINS ('http://localhost:2280').
-    const appUrl = IS_DEV ? 'http://localhost:2280' : 'http://127.0.0.1:2280';
+    // matches the gateway's default ALLOWED_ORIGINS ('http://localhost:22080').
+    const appUrl = IS_DEV ? 'http://localhost:22080' : 'http://127.0.0.1:22080';
     win.loadURL(appUrl);
 
     // In dev mode open DevTools automatically and configure session for HMR
@@ -248,9 +248,9 @@ function createWindow() {
         // header so Next.js allowedDevOrigins accepts it.  Without this, Electron
         // sometimes omits or sends a null Origin which the dev server refuses.
         session.defaultSession.webRequest.onBeforeSendHeaders(
-            { urls: ['ws://localhost:2280/_next/*', 'http://localhost:2280/_next/*'] },
+            { urls: ['ws://localhost:22080/_next/*', 'http://localhost:22080/_next/*'] },
             (details, callback) => {
-                details.requestHeaders['Origin'] = 'http://localhost:2280';
+                details.requestHeaders['Origin'] = 'http://localhost:22080';
                 callback({ requestHeaders: details.requestHeaders });
             }
         );
@@ -416,16 +416,16 @@ app.whenReady().then(async () => {
     if (IS_DEV) {
         // ── Development mode ──────────────────────────────────────────────────
         // The "electron:dev" concurrently script already started:
-        //   • Next.js dev server  → http://127.0.0.1:2280
-        //   • Gateway dev server  → ws://127.0.0.1:2281
+        //   • Next.js dev server  → http://127.0.0.1:22080
+        //   • Gateway dev server  → ws://127.0.0.1:22081
         // We just need to wait until Next.js is ready before opening the window.
         console.log('[electron-dev] Running in development mode.');
-        console.log('[electron-dev] Expecting Next.js on :2280 and gateway on :2281.');
+        console.log('[electron-dev] Expecting Next.js on :22080 and gateway on :22081.');
 
         startGuacd();
 
         try {
-            await waitForDevServer(2280);
+            await waitForDevServer(22080);
         } catch (err) {
             console.error('[electron-dev] Could not reach Next.js dev server:', err.message);
             app.quit();

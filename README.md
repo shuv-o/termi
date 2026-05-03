@@ -61,7 +61,7 @@
    node start-all.js
    ```
 
-3. **Go to http://localhost:2280** and add your RDP server!
+3. **Go to http://localhost:22080** and add your RDP server!
 
 📚 **Detailed guides:**
 - [SOLUTION.md](SOLUTION.md) - Complete setup and troubleshooting
@@ -106,7 +106,7 @@
 
 5. **Access Termi**
    
-   Open http://localhost:2280 in your browser.
+   Open http://localhost:22080 in your browser.
 
 ---
 
