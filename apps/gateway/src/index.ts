@@ -45,11 +45,19 @@ const CONNECTION_TIMEOUT = 300000; // 5 minutes
 // ============================================================================
 
 function isPrivateHost(host: string): boolean {
-    const h = host.trim().toLowerCase();
+    let h = host.trim().toLowerCase();
+    // Strip IPv6 brackets: [::1] → ::1
+    if (h.startsWith('[') && h.endsWith(']')) {
+        h = h.slice(1, -1);
+    }
+    // Unwrap IPv4-mapped IPv6: ::ffff:192.168.1.1 → 192.168.1.1
+    if (h.startsWith('::ffff:')) {
+        h = h.slice(7);
+    }
     if (h === 'localhost') return true;
     if (h === 'metadata.google.internal') return true;
     if (h === '::1') return true;
-    if (h === '169.254.169.254') return true;
+    if (h === '168.63.129.16') return true;   // Azure Instance Metadata Service
     if (h.startsWith('127.')) return true;
     if (h.startsWith('10.')) return true;
     if (h.startsWith('192.168.')) return true;
@@ -60,7 +68,7 @@ function isPrivateHost(host: string): boolean {
         if (second >= 16 && second <= 31) return true;
     }
     if (h.startsWith('fe80:')) return true;
-    if (h.startsWith('fc') || h.startsWith('fd')) return true;
+    if ((h.startsWith('fc') || h.startsWith('fd')) && h.includes(':')) return true;
     return false;
 }
 
@@ -184,6 +192,13 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
+    // SSRF guard — applies to all protocols
+    if (isPrivateHost(tokenPayload.host)) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
+        ws.close(1008, 'SSRF protection');
+        return;
+    }
+
     // ── SSH: persistent sessions ────────────────────────────────────────────
 
     if (protocol === 'ssh') {
@@ -226,12 +241,6 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
         } else {
             // ── New session ──
-            if (isPrivateHost(tokenPayload.host)) {
-                ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
-                ws.close(1008, 'SSRF protection');
-                return;
-            }
-
             if (persistentSessions.isAtLimit(tokenPayload.userId)) {
                 const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
                 if (!evicted) {
