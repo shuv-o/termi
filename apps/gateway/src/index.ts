@@ -365,12 +365,15 @@ server.listen(PORT, HOST, () => {
     console.log(`[gateway] Listening on ${HOST}:${PORT}`);
 });
 
+let isShuttingDown = false;
 function shutdown(signal: string): void {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
     console.log(`[gateway] Received ${signal} — shutting down gracefully`);
     persistentSessions.destroy();
     server.close(() => {
         console.log('[gateway] HTTP server closed');
-        process.exit(0);
+        process.exit(signal === 'SIGTERM' || signal === 'SIGINT' ? 0 : 1);
     });
     setTimeout(() => {
         console.error('[gateway] Forced exit after 5s timeout');
