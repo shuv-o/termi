@@ -12,6 +12,8 @@ import { createServer, IncomingMessage } from 'http';
 import { URL } from 'url';
 import { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
+import { isIP } from 'net';
+import dns from 'dns/promises';
 
 import { SSHHandler, type SSHOutputSink } from './handlers/ssh.js';
 import { SCPHandler } from './handlers/scp.js';
@@ -71,6 +73,26 @@ function isPrivateHost(host: string): boolean {
     if (h.startsWith('fe80:')) return true;
     if ((h.startsWith('fc') || h.startsWith('fd')) && h.includes(':')) return true;
     return false;
+}
+
+/**
+ * Async extension: if host is a hostname, resolve all IPs and check each.
+ * Falls back to allowing on DNS failure (let SSH connect fail naturally).
+ */
+async function isPrivateHostAsync(host: string): Promise<boolean> {
+    if (isPrivateHost(host)) return true;
+    // Strip brackets/prefix for isIP check
+    const stripped = host.trim().toLowerCase()
+        .replace(/^\[|]$/g, '')
+        .replace(/^::ffff:/i, '');
+    if (isIP(stripped) !== 0) return false; // raw IP already checked above
+    // Hostname — resolve DNS and check each returned address
+    try {
+        const addrs = await dns.lookup(stripped, { all: true });
+        return addrs.some((a) => isPrivateHost(a.address));
+    } catch {
+        return false; // DNS failure — let SSH connect fail naturally
+    }
 }
 
 // ============================================================================
@@ -211,6 +233,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         clearTimeout(authTimeout);
         ws.off('message', onAuthMessage);
 
+        // Guard: abort if the socket was closed while we awaited validateToken
+        if (ws.readyState !== WebSocket.OPEN) return;
+
         // ── Token payload cross-checks ─────────────────────────────────────
         if (tokenPayload.serverId !== serverId) {
             ws.send(JSON.stringify({ type: 'error', message: 'Server access denied' }));
@@ -225,7 +250,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         }
 
         // ── SSRF guard ────────────────────────────────────────────────────
-        if (isPrivateHost(tokenPayload.host)) {
+        if (await isPrivateHostAsync(tokenPayload.host)) {
             ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
             ws.close(1008, 'SSRF protection');
             return;
@@ -428,7 +453,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         });
     };
 
-    ws.on('message', onAuthMessage);
+    ws.once('message', onAuthMessage);
 });
 
 // ============================================================================
