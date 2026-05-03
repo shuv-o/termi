@@ -147,6 +147,7 @@ export default function SSHTerminal({
             if (intentionalCloseRef.current) {
                 intentionalCloseRef.current = false;
                 onWebSocketCreatedRef.current?.(null);
+                wsRef.current = null;
                 return; // don't retry intentional closes
             }
             onWebSocketCreatedRef.current?.(null);
@@ -170,7 +171,7 @@ export default function SSHTerminal({
         ws.onerror = () => {
             if (wsRef.current !== ws) return;
             updateStatus('error');
-            if (retryCountRef.current >= MAX_AUTO_RETRIES - 1) {
+            if (retryCountRef.current >= MAX_AUTO_RETRIES) {
                 onErrorRef.current?.('WebSocket connection failed');
             }
         };
@@ -252,7 +253,7 @@ export default function SSHTerminal({
             }
             const ws = wsRef.current;
             wsRef.current = null;
-            onWebSocketCreatedRef.current?.(null);
+            if (ws) onWebSocketCreatedRef.current?.(null);
             ws?.close();
             terminal.dispose();
         };
