@@ -382,9 +382,13 @@ function GridCard({
                     <Button
                         onClick={onSessions}
                         variant="secondary"
-                        size="icon"
-                        className={`h-7 w-7 shrink-0 transition-colors ${hasSession ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30' : ''}`}
-                        title={hasSession ? 'Session active — open in Sessions' : 'Open in Sessions'}
+                        size="sm"
+                        className={`h-7 px-2.5 gap-1.5 text-xs shrink-0 transition-colors ${
+                            hasSession
+                                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
+                                : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title={hasSession ? 'Session active — open in Sessions' : 'Add to Sessions'}
                     >
                         <div className="relative">
                             <Layers className="w-3.5 h-3.5" />
@@ -392,6 +396,7 @@ function GridCard({
                                 <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
                             )}
                         </div>
+                        Sessions
                     </Button>
                 )}
             </div>
@@ -513,14 +518,14 @@ function ListRow({
                 {server.protocol === 'SSH' && (
                     <Button
                         variant="secondary"
-                        size="icon"
+                        size="sm"
                         onClick={onSessions}
-                        className={`h-7 w-7 transition-all ${
+                        className={`h-7 px-2.5 text-xs gap-1.5 transition-all ${
                             hasSession
                                 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
-                                : 'opacity-0 group-hover:opacity-100'
+                                : 'text-muted-foreground hover:text-foreground'
                         }`}
-                        title={hasSession ? 'Session active — open in Sessions' : 'Open in Sessions'}
+                        title={hasSession ? 'Session active — open in Sessions' : 'Add to Sessions'}
                     >
                         <div className="relative">
                             <Layers className="w-3.5 h-3.5" />
@@ -528,6 +533,7 @@ function ListRow({
                                 <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
                             )}
                         </div>
+                        <span className="hidden sm:inline">{hasSession ? 'Sessions' : 'Sessions'}</span>
                     </Button>
                 )}
                 <DropdownMenu>
