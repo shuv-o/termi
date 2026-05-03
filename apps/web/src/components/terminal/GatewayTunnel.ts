@@ -13,7 +13,7 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createGatewayTunnel(Guacamole: any, wsUrl: string): any {
+export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionToken: string): any {
     const tunnel = new Guacamole.Tunnel();
 
     let socket: WebSocket | null = null;
@@ -140,6 +140,10 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string): any {
         }, 30000); // 30 s — enough for NLA auth on slow servers
 
         socket.onopen = () => {
+            // Send auth handshake — gateway expects {type:"auth",token} as first message
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'auth', token: connectionToken }));
+            }
             // State stays CONNECTING until the first Guacamole instruction arrives
         };
 

@@ -59,11 +59,10 @@ export default function GuacamoleDisplay({
             const width  = container.clientWidth  || 1280;
             const height = container.clientHeight || 800;
             const connectData =
-                `token=${encodeURIComponent(connectionToken)}` +
-                `&protocol=${protocol}` +
+                `protocol=${protocol}` +
                 `&serverId=${encodeURIComponent(serverId)}` +
                 `&width=${width}&height=${height}`;
-            const tunnel = createGatewayTunnel(Guacamole, wsUrl);
+            const tunnel = createGatewayTunnel(Guacamole, wsUrl, connectionToken);
             // Client
             guacClient = new Guacamole.Client(tunnel);
             // Display
