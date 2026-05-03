@@ -236,6 +236,30 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
             }
         }
 
+        // ── Heartbeat: detect silently-dropped WS connections ──────────────────────
+        const HEARTBEAT_INTERVAL_MS = 30_000;
+        const HEARTBEAT_TIMEOUT_MS  = 15_000;
+        let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+        let pongTimer: ReturnType<typeof setTimeout> | null = null;
+
+        function startHeartbeat() {
+            heartbeatTimer = setInterval(() => {
+                if (ws.readyState !== WebSocket.OPEN) return;
+                ws.send(JSON.stringify({ type: 'ping' }));
+                pongTimer = setTimeout(() => {
+                    console.warn(`[gateway] SSH WS pong timeout for session ${resolvedSessionId} — closing`);
+                    ws.close(1001, 'Heartbeat timeout');
+                }, HEARTBEAT_TIMEOUT_MS);
+            }, HEARTBEAT_INTERVAL_MS);
+        }
+
+        function stopHeartbeat() {
+            if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+            if (pongTimer)      { clearTimeout(pongTimer);       pongTimer = null; }
+        }
+
+        startHeartbeat();
+
         // ── WS message routing for SSH ──
         ws.on('message', (data) => {
             const session = persistentSessions.get(resolvedSessionId);
@@ -255,8 +279,9 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
                             session.handler.resize(message.rows, message.cols);
                         }
                         break;
-                    case 'ping':
-                        ws.send(JSON.stringify({ type: 'pong' }));
+                    case 'pong':
+                        // Client acknowledged heartbeat — cancel the pong timeout
+                        if (pongTimer) { clearTimeout(pongTimer); pongTimer = null; }
                         break;
                     case 'close-session':
                         persistentSessions.delete(resolvedSessionId);
@@ -270,6 +295,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
         // ── WS close: detach only (SSH stays alive) ──
         ws.on('close', () => {
+            stopHeartbeat();
             const session = persistentSessions.get(resolvedSessionId);
             if (session && session.attachedWs === ws) {
                 session.attachedWs = null;
@@ -277,6 +303,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         });
 
         ws.on('error', (err) => {
+            stopHeartbeat();
             console.error('[gateway] SSH WebSocket error:', err);
         });
 

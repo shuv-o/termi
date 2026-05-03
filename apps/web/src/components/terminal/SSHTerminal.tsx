@@ -98,6 +98,13 @@ export default function SSHTerminal({
                         onSessionNotFoundRef.current?.();
                         break;
 
+                    case 'ping':
+                        // Gateway heartbeat — respond immediately
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ type: 'pong' }));
+                        }
+                        break;
+
                     case 'replaced':
                         // Another tab claimed this session; treat as a clean disconnect
                         updateStatus('disconnected');
