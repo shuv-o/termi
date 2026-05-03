@@ -7,6 +7,10 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 
 import '@xterm/xterm/css/xterm.css';
 
+const MAX_AUTO_RETRIES = 5;
+const getBackoffMs = (attempt: number) =>
+    Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
+
 interface SSHTerminalProps {
     sessionId: string;
     serverId: string;
@@ -48,6 +52,9 @@ export default function SSHTerminal({
     const onSessionNotFoundRef = useRef(onSessionNotFound);
     onSessionNotFoundRef.current = onSessionNotFound;
 
+    const retryCountRef = useRef(0);
+    const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const updateStatus = useCallback((newStatus: typeof status) => {
         statusRef.current = newStatus;
         setStatus(newStatus);
@@ -76,6 +83,7 @@ export default function SSHTerminal({
                         break;
 
                     case 'shell-ready':
+                        retryCountRef.current = 0;
                         updateStatus('connected');
                         if (terminalInstance.current && fitAddon.current) {
                             fitAddon.current.fit();
@@ -95,6 +103,7 @@ export default function SSHTerminal({
 
                     case 'session-not-found':
                         // Gateway lost the session (restart/expiry) — trigger new session creation
+                        retryCountRef.current = 0;
                         onSessionNotFoundRef.current?.();
                         break;
 
@@ -132,9 +141,20 @@ export default function SSHTerminal({
         ws.onclose = () => {
             if (wsRef.current !== ws) return;
             onWebSocketCreatedRef.current?.(null);
-            if (statusRef.current !== 'disconnected' && statusRef.current !== 'error') {
+            if (retryCountRef.current < MAX_AUTO_RETRIES) {
+                const attempt = retryCountRef.current;
+                retryCountRef.current += 1;
+                const delayMs = getBackoffMs(attempt);
+                const delaySec = Math.round(delayMs / 1000);
+                updateStatus('connecting');
+                terminalInstance.current?.writeln(`\r\n\x1b[33mConnection lost. Reconnecting in ${delaySec}s (attempt ${attempt + 1}/${MAX_AUTO_RETRIES})…\x1b[0m`);
+                retryTimerRef.current = setTimeout(() => {
+                    connect();
+                }, delayMs);
+            } else {
                 updateStatus('disconnected');
-                terminalInstance.current?.write('\r\n\x1b[33mConnection lost.\x1b[0m\r\n');
+                terminalInstance.current?.writeln(`\r\n\x1b[31mCould not reconnect after ${MAX_AUTO_RETRIES} attempts.\x1b[0m`);
+                onSessionNotFoundRef.current?.();
             }
         };
 
@@ -214,6 +234,10 @@ export default function SSHTerminal({
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            if (retryTimerRef.current) {
+                clearTimeout(retryTimerRef.current);
+                retryTimerRef.current = null;
+            }
             const ws = wsRef.current;
             wsRef.current = null;
             onWebSocketCreatedRef.current?.(null);
