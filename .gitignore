@@ -44,4 +44,4 @@ apps/web/prisma/*.db-journal
 # Misc
 *.tsbuildinfo
 .vercel
-/.idea
+/.idea.worktrees/
