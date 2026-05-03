@@ -44,7 +44,25 @@ describe('PersistentSessionStore', () => {
         store.add(session);
         store.delete('sess-1');
         expect(session.handler.close).toHaveBeenCalledOnce();
+        expect(session.isClosing).toBe(true);
         expect(store.get('sess-1')).toBeUndefined();
+    });
+
+    it('sets isClosing=true before calling handler.close', () => {
+        let closingAtCallTime: boolean | undefined;
+        const session = makeSession({
+            handler: {
+                close: vi.fn().mockImplementation(() => {
+                    closingAtCallTime = session.isClosing;
+                }),
+                write: vi.fn(),
+                resize: vi.fn(),
+                isConnected: vi.fn().mockReturnValue(true),
+            } as any,
+        });
+        store.add(session);
+        store.delete('sess-1');
+        expect(closingAtCallTime).toBe(true); // flag was set BEFORE close() ran
     });
 
     it('countByUser counts attached and detached sessions', () => {
