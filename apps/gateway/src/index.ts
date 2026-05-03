@@ -225,7 +225,15 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
 
             const sink = createSink(session);
             session.handler = new SSHHandler(tokenPayload, sink);
-            persistentSessions.add(session);
+            
+            // tryAdd is the atomic safety net — rejects if concurrent connect sneaked in
+            if (!persistentSessions.tryAdd(session)) {
+                session.isClosing = true;
+                session.handler.close();
+                ws.send(JSON.stringify({ type: 'error', message: 'Too many connections' }));
+                ws.close(4029, 'Too Many Requests');
+                return;
+            }
         }
 
         // ── WS message routing for SSH ──

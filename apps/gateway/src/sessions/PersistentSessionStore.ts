@@ -30,6 +30,17 @@ export class PersistentSessionStore {
         this.sessions.set(session.sessionId, session);
     }
 
+    /**
+     * Atomically checks the per-user limit and adds the session if under limit.
+     * Returns true if added, false if the user is at or over the limit.
+     * JavaScript is single-threaded — no async gap between check and insert.
+     */
+    tryAdd(session: PersistentSession): boolean {
+        if (this.countByUser(session.userId) >= MAX_CONNECTIONS_PER_USER) return false;
+        this.sessions.set(session.sessionId, session);
+        return true;
+    }
+
     get(sessionId: string): PersistentSession | undefined {
         return this.sessions.get(sessionId);
     }

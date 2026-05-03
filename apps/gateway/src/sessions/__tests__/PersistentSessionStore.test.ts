@@ -107,4 +107,36 @@ describe('PersistentSessionStore', () => {
         vi.advanceTimersByTime(60_000);
         expect(store.get('sess-1')).toBeDefined();
     });
+
+    describe('tryAdd', () => {
+        it('adds session when under limit and returns true', () => {
+            const session = makeSession();
+            const result = store.tryAdd(session);
+            expect(result).toBe(true);
+            expect(store.get('sess-1')).toBe(session);
+        });
+
+        it('returns false and does not add when at limit', () => {
+            // Fill up to MAX_CONNECTIONS_PER_USER (10)
+            for (let i = 0; i < 10; i++) {
+                store.tryAdd(makeSession({ sessionId: `sess-${i}`, userId: 'user-1' }));
+            }
+            const extra = makeSession({ sessionId: 'sess-extra', userId: 'user-1' });
+            const result = store.tryAdd(extra);
+            expect(result).toBe(false);
+            expect(store.get('sess-extra')).toBeUndefined();
+        });
+
+        it('counts only sessions for the same user', () => {
+            // Fill up user-1 to limit
+            for (let i = 0; i < 10; i++) {
+                store.tryAdd(makeSession({ sessionId: `sess-u1-${i}`, userId: 'user-1' }));
+            }
+            // user-2 should still be able to add
+            const user2Session = makeSession({ sessionId: 'sess-u2-1', userId: 'user-2' });
+            const result = store.tryAdd(user2Session);
+            expect(result).toBe(true);
+            expect(store.get('sess-u2-1')).toBe(user2Session);
+        });
+    });
 });
