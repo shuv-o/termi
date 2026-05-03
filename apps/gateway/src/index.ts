@@ -365,8 +365,26 @@ server.listen(PORT, HOST, () => {
     console.log(`[gateway] Listening on ${HOST}:${PORT}`);
 });
 
-process.on('SIGTERM', () => {
-    console.log('[gateway] Shutting down...');
+function shutdown(signal: string): void {
+    console.log(`[gateway] Received ${signal} — shutting down gracefully`);
     persistentSessions.destroy();
-    server.close();
+    server.close(() => {
+        console.log('[gateway] HTTP server closed');
+        process.exit(0);
+    });
+    setTimeout(() => {
+        console.error('[gateway] Forced exit after 5s timeout');
+        process.exit(1);
+    }, 5_000).unref();
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT',  () => shutdown('SIGINT'));
+process.on('uncaughtException', (err) => {
+    console.error('[gateway] Uncaught exception:', err);
+    shutdown('uncaughtException');
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[gateway] Unhandled rejection:', reason);
+    shutdown('unhandledRejection');
 });
