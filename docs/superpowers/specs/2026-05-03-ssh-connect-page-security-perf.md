@@ -39,9 +39,11 @@ The token is moved from the URL to the first WebSocket message.
 4. All existing protocol handling (reattach, SSH session creation, etc.) is unchanged.
 
 **Gateway changes (`apps/gateway/src/index.ts`):**
-- In `wss.on('connection')`, before reading `protocol`/`serverId`/`sessionId` from query params, set a 5-second auth timeout.
-- On `ws.on('message')`, if not yet authenticated: expect `{type:"auth",token}`, call `validateToken(token)`, store result in `tokenPayload`, clear auth timeout, proceed with existing logic.
+- In `wss.on('connection')`, read `protocol`/`serverId`/`sessionId` from query params as before (these are not secret). Set a 5-second auth timeout immediately.
+- The `validateToken()` call (currently at the top of the connection handler) is REMOVED from the query-param path and moved into the `ws.on('message')` first-message handler.
+- On `ws.on('message')`, if not yet authenticated (track with `let authenticated = false`): expect `{type:"auth",token}`, call `validateToken(token)`, store result in `tokenPayload`, set `authenticated = true`, clear auth timeout, proceed with existing protocol-branching logic.
 - If any other message type arrives before auth: close 1008.
+- If auth timeout fires: send `{"type":"error","message":"Authentication timeout"}` and close 1008.
 - `serverId` is still passed in the query string (not secret — just a DB ID).
 - `sessionId` is still in the query string (not secret — required for reattach before auth completes).
 
