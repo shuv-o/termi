@@ -32,6 +32,7 @@ interface SSHTerminalProps {
     onKeyHandlerReady?: (handler: (key: string) => void) => void;
     onWebSocketCreated?: (ws: WebSocket | null) => void;
     onSessionNotFound?: () => void;
+    onReconnectReady?: (fn: () => void) => void;
 }
 
 export default function SSHTerminal({
@@ -45,6 +46,7 @@ export default function SSHTerminal({
     onKeyHandlerReady,
     onWebSocketCreated,
     onSessionNotFound,
+    onReconnectReady,
 }: SSHTerminalProps) {
     const terminalRef = useRef<HTMLDivElement>(null);
     const terminalInstance = useRef<Terminal | null>(null);
@@ -63,6 +65,8 @@ export default function SSHTerminal({
     onWebSocketCreatedRef.current = onWebSocketCreated;
     const onSessionNotFoundRef = useRef(onSessionNotFound);
     onSessionNotFoundRef.current = onSessionNotFound;
+    const onReconnectReadyRef = useRef(onReconnectReady);
+    onReconnectReadyRef.current = onReconnectReady;
 
     const connectionTokenRef = useRef(connectionToken);
     connectionTokenRef.current = connectionToken;
@@ -100,7 +104,9 @@ export default function SSHTerminal({
                 }
             } catch (err) {
                 console.error('[SSHTerminal] Failed to renew token:', err);
-                token = connectionTokenRef.current;
+                ws.close(1008, 'Token renewal failed');
+                onErrorRef.current?.('Failed to renew connection token. Please reconnect.');
+                return;
             }
             hasConnectedOnceRef.current = true;
             if (ws.readyState === WebSocket.OPEN) {
@@ -211,6 +217,20 @@ export default function SSHTerminal({
             }
         };
     }, [serverId, sessionId, gatewayUrl, updateStatus]);
+
+    const reconnect = useCallback(() => {
+        intentionalCloseRef.current = false;
+        retryCountRef.current = 0;
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            wsRef.current.close();
+        } else {
+            connect().catch((err) => console.error('[SSHTerminal] manual reconnect error:', err));
+        }
+    }, [connect]);
+
+    useEffect(() => {
+        onReconnectReadyRef.current?.(reconnect);
+    }, [reconnect]);
 
     useEffect(() => {
         if (!terminalRef.current) return;

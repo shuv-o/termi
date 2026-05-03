@@ -51,6 +51,7 @@ export default function SSHConnectionPage() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
+    const triggerReconnectRef = useRef<(() => void) | null>(null);
     const sessionIdRef = useRef(crypto.randomUUID());
 
     const handleDisconnect = useCallback(() => {
@@ -204,7 +205,7 @@ export default function SSHConnectionPage() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => window.location.reload()}
+                        onClick={() => triggerReconnectRef.current?.()}
                         title="Reconnect"
                     >
                         <RotateCcw className="w-4 h-4" />
@@ -257,6 +258,7 @@ export default function SSHConnectionPage() {
                         onError={handleError}
                         onKeyHandlerReady={(handler) => { terminalKeyHandler.current = handler; }}
                         onSessionNotFound={() => router.push('/dashboard')}
+                        onReconnectReady={(fn) => { triggerReconnectRef.current = fn; }}
                     />
                 </div>
 
