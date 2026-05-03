@@ -87,9 +87,9 @@ export async function validateHost(
             }
         }
     } catch {
-        // DNS failure — let the SSH/RDP connection fail naturally;
-        // don't block saving the server record.
-        return { valid: true };
+        // DNS resolution failed — block to prevent SSRF via unresolvable hostnames.
+        // Users on private networks without DNS can set ALLOW_PRIVATE_NETWORKS=true.
+        return { valid: false, error: 'Unable to resolve hostname — check that the address is correct and reachable' };
     }
 
     return { valid: true };

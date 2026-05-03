@@ -178,6 +178,16 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
     });
 }
 
+/**
+ * Returns a server record with **decrypted credentials** (password, privateKey, passphrase).
+ *
+ * ⚠️  NEVER return this object directly to the client.
+ * Client-facing routes MUST strip credential fields:
+ *   const { password, privateKey, passphrase, ...safeFields } = server;
+ *
+ * Use `getServerForConnection()` for SSH/SFTP connection setup.
+ * Use `getServers()` for list views (already strips credentials).
+ */
 export async function getServerById(
     serverId: string,
     userId: string,
