@@ -11,6 +11,7 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         lastKeystrokeAt: Date.now(),
         createdAt: Date.now(),
         attachedWs: null,
+        isClosing: false,
         ...overrides,
     };
 }

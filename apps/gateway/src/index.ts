@@ -68,12 +68,14 @@ const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 function createSink(session: PersistentSession): SSHOutputSink {
     return {
         onData(encoded: string) {
+            if (session.isClosing) return;
             session.buffer.append(Buffer.from(encoded, 'base64'));
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
                 session.attachedWs.send(JSON.stringify({ type: 'data', data: encoded }));
             }
         },
         onMessage(type: string, extra?: Record<string, unknown>) {
+            if (session.isClosing) return;
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
                 session.attachedWs.send(JSON.stringify({ type, ...extra }));
             }
@@ -123,7 +125,6 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     const protocol      = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
     const serverId      = url.searchParams.get('serverId');
     const sessionId     = url.searchParams.get('sessionId');   // required for SSH
-
 
     if (!token || !protocol || !serverId) {
         ws.send(JSON.stringify({ type: 'error', message: 'Missing required parameters' }));
@@ -218,6 +219,7 @@ wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
                 lastKeystrokeAt: Date.now(),
                 createdAt: Date.now(),
                 attachedWs: ws,
+                isClosing: false,
             };
 
             const sink = createSink(session);

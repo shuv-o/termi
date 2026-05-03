@@ -11,6 +11,7 @@ export interface PersistentSession {
     lastKeystrokeAt: number;
     createdAt: number;
     attachedWs: WebSocket | null;
+    isClosing: boolean;
 }
 
 const MAX_CONNECTIONS_PER_USER = 10;
@@ -37,6 +38,7 @@ export class PersistentSessionStore {
     delete(sessionId: string): void {
         const session = this.sessions.get(sessionId);
         if (session) {
+            session.isClosing = true;
             session.handler.close();
             this.sessions.delete(sessionId);
         }
