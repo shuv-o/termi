@@ -55,7 +55,8 @@ export default function SSHTerminal({
 
     const connect = useCallback(() => {
         const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
-        const wsUrl = `${gatewayBase}/connect?token=${connectionToken}&protocol=ssh&serverId=${serverId}&sessionId=${sessionId}`;
+        const wsUrl = `${gatewayBase}/connect?token=${encodeURIComponent(connectionToken)}&protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
+        console.log('[SSHTerminal] connecting to:', wsUrl.replace(/token=[^&]+/, 'token=<redacted>'));
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;

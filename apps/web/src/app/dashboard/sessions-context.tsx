@@ -250,7 +250,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             // Insert sessions as 'detached', then immediately start reconnecting each one
             const restoredSessions: Session[] = ordered.map((s, i) => ({
                 tabId: `${uid}-restored-${i}-${Date.now()}`,
-                sessionId: s.sessionId,
+                sessionId: s.sessionId || crypto.randomUUID(), // defensive: regenerate if missing/empty
                 type: 'remote' as const,
                 serverId: s.serverId,
                 serverName: s.serverName,
