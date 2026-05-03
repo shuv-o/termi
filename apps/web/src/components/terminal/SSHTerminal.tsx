@@ -15,6 +15,7 @@ interface SSHTerminalProps {
     sessionId: string;
     serverId: string;
     connectionToken: string;
+    renewToken?: () => Promise<string>;
     gatewayUrl?: string;
     onDisconnect?: () => void;
     onError?: (error: string) => void;
@@ -27,6 +28,7 @@ export default function SSHTerminal({
     sessionId,
     serverId,
     connectionToken,
+    renewToken,
     gatewayUrl,
     onDisconnect,
     onError,
@@ -52,6 +54,12 @@ export default function SSHTerminal({
     const onSessionNotFoundRef = useRef(onSessionNotFound);
     onSessionNotFoundRef.current = onSessionNotFound;
 
+    const connectionTokenRef = useRef(connectionToken);
+    connectionTokenRef.current = connectionToken;
+    const renewTokenRef = useRef(renewToken);
+    renewTokenRef.current = renewToken;
+    const hasConnectedOnceRef = useRef(false);
+
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const intentionalCloseRef = useRef(false);
@@ -61,16 +69,33 @@ export default function SSHTerminal({
         setStatus(newStatus);
     }, []);
 
-    const connect = useCallback(() => {
+    const connect = useCallback(async () => {
         const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
-        const wsUrl = `${gatewayBase}/connect?token=${encodeURIComponent(connectionToken)}&protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
+        const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
         onWebSocketCreatedRef.current?.(ws);
 
-        ws.onopen = () => {
+        ws.onopen = async () => {
             console.log('[SSHTerminal] WebSocket connected');
+            let token: string;
+            try {
+                if (!hasConnectedOnceRef.current) {
+                    token = connectionTokenRef.current;
+                } else {
+                    token = renewTokenRef.current
+                        ? await renewTokenRef.current()
+                        : connectionTokenRef.current;
+                }
+            } catch (err) {
+                console.error('[SSHTerminal] Failed to renew token:', err);
+                token = connectionTokenRef.current;
+            }
+            hasConnectedOnceRef.current = true;
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'auth', token }));
+            }
         };
 
         ws.onmessage = (event) => {
@@ -159,7 +184,7 @@ export default function SSHTerminal({
                 updateStatus('connecting');
                 terminalInstance.current?.writeln(`\r\n\x1b[33mConnection lost. Reconnecting in ${delaySec}s (attempt ${attempt + 1}/${MAX_AUTO_RETRIES})…\x1b[0m`);
                 retryTimerRef.current = setTimeout(() => {
-                    connect();
+                    connect().catch((err) => console.error('[SSHTerminal] reconnect error:', err));
                 }, delayMs);
             } else {
                 updateStatus('disconnected');
@@ -175,7 +200,7 @@ export default function SSHTerminal({
                 onErrorRef.current?.('WebSocket connection failed');
             }
         };
-    }, [serverId, connectionToken, sessionId, gatewayUrl, updateStatus]);
+    }, [serverId, sessionId, gatewayUrl, updateStatus]);
 
     useEffect(() => {
         if (!terminalRef.current) return;
@@ -243,7 +268,7 @@ export default function SSHTerminal({
 
         terminal.write('Connecting to server...\r\n');
         retryCountRef.current = 0;
-        connect();
+        connect().catch((err) => console.error('[SSHTerminal] initial connect error:', err));
 
         return () => {
             window.removeEventListener('resize', handleResize);
