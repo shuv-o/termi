@@ -7,6 +7,16 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 
 import '@xterm/xterm/css/xterm.css';
 
+const TEXT_ENCODER = new TextEncoder();
+
+function bytesToBase64(bytes: Uint8Array): string {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
 const MAX_AUTO_RETRIES = 5;
 const getBackoffMs = (attempt: number) =>
     Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
@@ -249,20 +259,24 @@ export default function SSHTerminal({
 
         terminal.onData((data) => {
             if (wsRef.current?.readyState === WebSocket.OPEN) {
-                const bytes = new TextEncoder().encode(data);
-                const encoded = btoa(String.fromCharCode(...bytes));
+                const bytes = TEXT_ENCODER.encode(data);
+                const encoded = bytesToBase64(bytes);
                 wsRef.current.send(JSON.stringify({ type: 'data', data: encoded }));
             }
         });
 
         onKeyHandlerReadyRef.current?.((key) => terminal.input(key));
 
+        let resizeTimer: ReturnType<typeof setTimeout> | null = null;
         const handleResize = () => {
-            fit.fit();
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-                const { cols, rows } = terminal;
-                wsRef.current.send(JSON.stringify({ type: 'resize', cols, rows }));
-            }
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                fit.fit();
+                if (wsRef.current?.readyState === WebSocket.OPEN) {
+                    const { cols, rows } = terminal;
+                    wsRef.current.send(JSON.stringify({ type: 'resize', cols, rows }));
+                }
+            }, 100);
         };
         window.addEventListener('resize', handleResize);
 
@@ -272,6 +286,7 @@ export default function SSHTerminal({
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            if (resizeTimer) clearTimeout(resizeTimer);
             if (retryTimerRef.current) {
                 clearTimeout(retryTimerRef.current);
                 retryTimerRef.current = null;
