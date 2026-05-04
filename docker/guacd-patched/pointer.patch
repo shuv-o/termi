@@ -1,0 +1,52 @@
+--- a/src/protocols/rdp/pointer.c
++++ b/src/protocols/rdp/pointer.c
+@@ -33,9 +33,37 @@ BOOL guac_rdp_pointer_new(rdpContext* context, rdpPointer* pointer) {
+     guac_client* client = ((rdp_freerdp_context*) context)->client;
+     guac_rdp_client* rdp_client = (guac_rdp_client*) client->data;
+ 
+-    /* Allocate buffer */
+-    guac_common_display_layer* buffer = guac_common_display_alloc_buffer(
+-            rdp_client->display, pointer->width, pointer->height);
++    /* Guard against zero-size or oversized cursor dimensions.
++     *
++     * GUACAMOLE-1971 (open, unpatched in 1.5.5): when Windows sends a
++     * POINTER_LARGE_PDU, FreeRDP 2.x may populate rdpPointer->width/height
++     * with values that, when multiplied by 4 (BGRA bytes/pixel), overflow a
++     * 32-bit size_t on 32-bit platforms OR cause _aligned_malloc to receive a
++     * dangerously small size on any platform where the intermediate product
++     * wraps.  The subsequent freerdp_image_copy_from_pointer_data() then writes
++     * the full cursor bitmap into the undersized buffer, producing a heap
++     * overflow and fatal signal (SIGSEGV / SIGABRT) in the guacd child process.
++     *
++     * Fix: reject any cursor whose raw pixel count exceeds 1024×1024 and fall
++     * back to the system default pointer.  Legitimate desktop cursors never
++     * exceed ~256×256; RDP POINTER_LARGE spec allows up to 384×384 @ 32 bpp
++     * (GUAC_RDP_MAX_POINTER_SIZE reflects this generous upper bound).
++     */
++    if (pointer->width == 0 || pointer->height == 0 ||
++            pointer->width > 1024 || pointer->height > 1024) {
++        guac_client_log(client, GUAC_LOG_WARNING,
++                "Ignoring cursor with invalid or oversized dimensions: %ux%u "
++                "(GUACAMOLE-1971 guard; falling back to default pointer)",
++                pointer->width, pointer->height);
++        return guac_rdp_pointer_set_default(context);
++    }
+ 
++    /* Allocate buffer */
++    guac_common_display_layer* buffer = guac_common_display_alloc_buffer(
++            rdp_client->display, pointer->width, pointer->height);
++
++    /* Allocate pixel scratch buffer.  Cast both operands to size_t before
++     * multiplying so that the arithmetic is performed in pointer-width
++     * precision and cannot overflow even on 32-bit hosts. */
+     /* Allocate data for image */
+-    unsigned char* data = _aligned_malloc(pointer->width * pointer->height * 4, 16);
++    const size_t data_size = (size_t)pointer->width * (size_t)pointer->height * 4;
++    unsigned char* data = _aligned_malloc(data_size, 16);
++    if (!data) {
++        guac_client_log(client, GUAC_LOG_ERROR,
++                "Failed to allocate %zu-byte cursor buffer for %ux%u pointer",
++                data_size, pointer->width, pointer->height);
++        guac_common_display_free_buffer(rdp_client->display, buffer);
++        return guac_rdp_pointer_set_default(context);
++    }

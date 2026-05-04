@@ -10,15 +10,22 @@ import { Socket } from 'net';
 import type { TokenPayload } from '../auth/token.js';
 
 // Guacd connection settings
-const GUACD_HOST = process.env.GUACD_HOST || '103.159.2.185';
+const GUACD_HOST = process.env.GUACD_HOST || 'localhost';
 const GUACD_PORT = parseInt(process.env.GUACD_PORT || '4822', 10);
 
 /**
- * Encode a Guacamole protocol instruction
+ * Encode a Guacamole protocol instruction.
+ * The Guacamole protocol requires UTF-8 byte counts as the length prefix,
+ * NOT JavaScript's UTF-16 code-unit count. Using p.length would corrupt any
+ * field that follows a value containing multi-byte UTF-8 characters
+ * (e.g. non-ASCII usernames or passwords), misaligning all subsequent args.
  */
-function encodeInstruction(opcode: string, ...args: string[]): string {
+function encodeInstruction(opcode: string, ...args: string[]): Buffer {
     const parts = [opcode, ...args];
-    return parts.map(p => `${p.length}.${p}`).join(',') + ';';
+    const encoded = parts
+        .map(p => `${Buffer.byteLength(p, 'utf8')}.${p}`)
+        .join(',') + ';';
+    return Buffer.from(encoded, 'utf8');
 }
 
 /**
@@ -115,8 +122,8 @@ export class GuacamoleHandler {
 
                 const parsed = parseInstruction(instruction);
                 if (parsed) {
-                    // Log notable instructions; log everything except high-frequency drawing ones
-                    if (!['png', 'jpeg', 'webp', 'blob', 'video', 'audio', 'mouse', 'nop', 'sync'].includes(parsed.opcode)) {
+                    // Log non-drawing instructions (excludes high-frequency drawing opcodes)
+                    if (!['png', 'jpeg', 'webp', 'blob', 'video', 'audio', 'mouse', 'nop', 'sync', 'size', 'cursor', 'move', 'shade', 'dispose', 'cfill', 'cstroke', 'lstroke', 'line', 'arc', 'pop', 'push', 'identity', 'transform', 'rect', 'clip', 'end'].includes(parsed.opcode)) {
                         console.log('[Guacamole] ←', parsed.opcode, parsed.args.length > 0 ? `(${parsed.args.length} args)` : '');
                     }
                     if (parsed.opcode === 'error') {
@@ -260,9 +267,11 @@ export class GuacamoleHandler {
             'width': String(payload.displayWidth || 1024),
             'height': String(payload.displayHeight || 768),
             'dpi': '96',
-            // 32-bit color depth works well with FreeRDP 2.x (guacd 1.5.x).
-            // 16-bit can cause an immediate disconnect on some RDP servers.
-            'color-depth': String(payload.colorDepth || 32),
+            // 32-bit colour → FreeRDP negotiates PIXEL_FORMAT_BGRA32.
+            // This avoids the BGR24 "Cache Bitmap V2 + MemBlt" crash that was
+            // seen with 24-bit depth, while the patched guacd image fixes the
+            // remaining POINTER_LARGE_PDU heap-overflow (GUACAMOLE-1971).
+            'color-depth': '32',
 
             // Audio
             'disable-audio': 'true',
@@ -280,7 +289,11 @@ export class GuacamoleHandler {
             'disable-upload': '',
 
             // RDP-specific settings
-            // 'any' tries NLA → TLS → RDP in order; works with most servers
+            // Let the server negotiate the best security mode (NLA → TLS → RDP).
+            // All modes were failing before due to the SIGFPE crash in guacd
+            // (division by zero when no 'size' handshake was sent). Now that
+            // the 'size' instruction is sent, 'any' allows the server to pick
+            // the most secure mode it supports.
             'security': 'any',
             // ignore-cert: FreeRDP 2.x (guacd 1.5.x) cert bypass — skips all
             // certificate validation so self-signed RDP certs are accepted.
@@ -311,13 +324,15 @@ export class GuacamoleHandler {
             'enable-full-window-drag': 'false',
             'enable-desktop-composition': 'false',
             'enable-menu-animations': 'false',
-            'disable-bitmap-caching': 'false',
-            'disable-offscreen-caching': 'false',
-            'disable-glyph-caching': 'false',
-            // Disable the GFX (Graphics Pipeline) virtual channel.
-            // FreeRDP 2.x (guacd 1.5.x) can fail silently when negotiating GFX
-            // with servers that don't fully support it; disabling forces the
-            // stable classic drawing-order path and improves compatibility.
+            // Disable all three client-side caches for FreeRDP 2.x stability.
+            // FreeRDP 2.11.5 can segfault on Cache Bitmap V2 (Compressed) + MemBlt
+            // drawing orders; disabling caches forces a stateless rendering path.
+            'disable-bitmap-caching': 'true',
+            'disable-offscreen-caching': 'true',
+            'disable-glyph-caching': 'true',
+            // Disable the GFX (Graphics Pipeline Extension) virtual channel.
+            // FreeRDP 2.x may silently fail when negotiating GFX with servers that
+            // do not fully support it; the classic drawing-order path is more stable.
             'disable-gfx': 'true',
 
             // SFTP settings
@@ -349,7 +364,11 @@ export class GuacamoleHandler {
 
             // Other settings
             'static-channels': '',
-            'resize-method': 'display-update',
+            // Disable dynamic display resize. Using 'display-update' loads the
+            // DisplayControl DVC (disp channel) which can conflict with cursor
+            // shape PDU processing in FreeRDP 2.11.5. Using '' disables resize
+            // support entirely and keeps the display fixed at initial dimensions.
+            'resize-method': '',
             'enable-touch': '',
             'read-only': '',
             'disable-copy': '',
@@ -399,8 +418,34 @@ export class GuacamoleHandler {
             security: paramMap['security']
         });
 
-        // Send connect instruction
-        this.guacdSocket.write(encodeInstruction('connect', ...connectionArgs));
+        // Send the Guacamole handshake 'size' instruction BEFORE 'connect'.
+        // guacd's settings.c computes:
+        //   width = user->info.optimal_width * resolution / user->info.optimal_resolution
+        // before reading argv[IDX_WIDTH]. If optimal_resolution is 0 (the default
+        // when no 'size' is sent), this triggers an integer division-by-zero (SIGFPE)
+        // which silently crashes the guacd child process. The 'size' instruction
+        // is part of the standard Guacamole handshake protocol and populates
+        // user->info so that the override in argv[IDX_WIDTH/HEIGHT] is actually reached.
+        const width = payload.displayWidth || 1024;
+        const height = payload.displayHeight || 768;
+        const dpi = 96;
+        this.guacdSocket.write(encodeInstruction('size', String(width), String(height), String(dpi)));
+
+        // Send capability handshake instructions as the standard Guacamole.Client
+        // does (audio/video/image/timezone).  Without these, guacd leaves its
+        // internal capability arrays (audio_mimetypes, image_mimetypes, etc.) as
+        // NULL, which can trigger null-dereference crashes in certain PDU-handling
+        // paths within FreeRDP's channel callbacks.
+        this.guacdSocket.write(encodeInstruction('audio'));           // no audio support — disables server audio
+        this.guacdSocket.write(encodeInstruction('video'));           // no video support
+        this.guacdSocket.write(encodeInstruction('image', 'image/png', 'image/jpeg', 'image/webp'));
+        this.guacdSocket.write(encodeInstruction('timezone', 'UTC'));
+
+        // Build and send the connect instruction.
+        // encodeInstruction uses Buffer.byteLength for length prefixes so that
+        // multi-byte characters in username/password do not misalign subsequent args.
+        const connectBuf = encodeInstruction('connect', ...connectionArgs);
+        this.guacdSocket.write(connectBuf);
 
         this.ws.send(JSON.stringify({ type: 'connected' }));
     }
