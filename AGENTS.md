@@ -11,7 +11,7 @@ Termi is an **npm workspaces monorepo** with two independently deployable servic
 
 A third component, **guacd** (Apache Guacamole daemon), must run separately on port 4822 for RDP/VNC:
 ```bash
-docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.4
+docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
 ```
 
 ## Developer Workflows

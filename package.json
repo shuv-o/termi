@@ -18,6 +18,8 @@
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",
     "db:push": "npm run db:push --workspace=apps/web",
+
+
     "db:migrate": "npm run db:migrate --workspace=apps/web",
     "db:generate": "npm run db:generate --workspace=apps/web",
     "db:seed": "npm run db:seed --workspace=apps/web",

@@ -155,6 +155,9 @@ model Server {
   displayWidth  Int? @default(1920)
   displayHeight Int? @default(1080)
   colorDepth    Int? @default(24)
+  // RDP security mode: "any" (default), "rdp", "nla", "tls"
+  // Use "rdp" to bypass NLA if the server doesn't support it or credentials fail silently
+  rdpSecurity   String? @default("any")
 
   // Favorites and usage
   isFavorite Boolean   @default(false)

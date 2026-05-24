@@ -162,6 +162,7 @@ export const ServerScalarFieldEnum = {
   displayWidth: 'displayWidth',
   displayHeight: 'displayHeight',
   colorDepth: 'colorDepth',
+  rdpSecurity: 'rdpSecurity',
   isFavorite: 'isFavorite',
   lastUsedAt: 'lastUsedAt',
   useCount: 'useCount',

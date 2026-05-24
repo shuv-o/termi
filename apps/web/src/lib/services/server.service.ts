@@ -34,6 +34,7 @@ export interface CreateServerInput {
     displayWidth?: number;
     displayHeight?: number;
     colorDepth?: number;
+    rdpSecurity?: string;
 }
 
 export interface UpdateServerInput {
@@ -52,6 +53,7 @@ export interface UpdateServerInput {
     displayWidth?: number;
     displayHeight?: number;
     colorDepth?: number;
+    rdpSecurity?: string;
     isFavorite?: boolean;
 }
 
@@ -237,7 +239,7 @@ export async function getServerForConnection(
     serverId: string,
     userId: string,
     encryptionContext?: EncryptionContext
-): Promise<ServerCredentials & { id: string; port: number; protocol: Protocol; displayWidth: number | null; displayHeight: number | null; colorDepth: number | null } | null> {
+): Promise<ServerCredentials & { id: string; port: number; protocol: Protocol; displayWidth: number | null; displayHeight: number | null; colorDepth: number | null; rdpSecurity: string | null } | null> {
     const server = await prisma.server.findFirst({
         where: { id: serverId, userId },
     });
@@ -274,6 +276,7 @@ export async function getServerForConnection(
         displayWidth: server.displayWidth,
         displayHeight: server.displayHeight,
         colorDepth: server.colorDepth,
+        rdpSecurity: server.rdpSecurity ?? null,
         ...credentials,
     };
 }
@@ -316,6 +319,7 @@ export async function updateServer(
     if (input.displayWidth !== undefined) updateData.displayWidth = input.displayWidth;
     if (input.displayHeight !== undefined) updateData.displayHeight = input.displayHeight;
     if (input.colorDepth !== undefined) updateData.colorDepth = input.colorDepth;
+    if (input.rdpSecurity !== undefined) updateData.rdpSecurity = input.rdpSecurity;
     if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 
     // Encrypted fields - need to re-encrypt if changed

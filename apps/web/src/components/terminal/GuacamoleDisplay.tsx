@@ -13,6 +13,27 @@ interface GuacamoleDisplayProps {
     onDisconnect?: () => void;
     onError?: (error: string) => void;
 }
+/** Human-readable messages for Guacamole protocol status codes (sent by guacd) */
+const GUAC_STATUS_MESSAGES: Record<number, string> = {
+    512: 'Internal server error in guacd',
+    513: 'guacd server is too busy',
+    514: 'Connection timed out — verify the RDP/VNC server is running, port is correct, and reachable from the gateway',
+    515: 'Upstream connection error — the remote server refused or dropped the connection',
+    516: 'Session resource not found',
+    517: 'Session resource conflict',
+    518: 'Session closed by the remote server',
+    519: 'Remote server not found — check the host address and port',
+    520: 'Remote desktop service unavailable',
+    521: 'Session conflict',
+    522: 'Session timed out',
+    523: 'Session closed',
+    768: 'Bad connection request',
+    769: 'Authentication required',
+    771: 'Access forbidden',
+    776: 'Connection attempt timed out (client-side)',
+    781: 'Too many connections',
+};
+
 /** Guacamole.Client.State numeric values to human labels */
 const CLIENT_STATE_LABELS: Record<number, string> = {
     0: 'idle',
@@ -104,9 +125,10 @@ export default function GuacamoleDisplay({
             // Error — Guacamole.Status has .code (number) and .message (string)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             guacClient.onerror = (status: any) => {
-                const msg: string =
-                    status?.message
-                    ?? (status?.code != null ? `Remote desktop error (code 0x${status.code.toString(16).toUpperCase()})` : 'Unknown remote desktop error');
+                const code: number = status?.code ?? 0;
+                // guacd prefixes all messages with "Guacamole error: " — strip it for clarity
+                const raw: string = (status?.message ?? '').replace(/^Guacamole error:\s*/i, '').trim();
+                const msg = raw || (GUAC_STATUS_MESSAGES[code] ?? `Remote desktop error (code ${code})`);
                 console.error('[Guacamole] Client error:', msg, status);
                 setErrorMsg(msg);
                 onErrorRef.current?.(msg);
@@ -198,10 +220,16 @@ export default function GuacamoleDisplay({
             )}
             {/* Error overlay */}
             {errorMsg && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
-                    <div className="text-center px-4">
-                        <p className="text-red-400 text-sm font-medium mb-1">Connection Error</p>
-                        <p className="text-gray-300 text-xs">{errorMsg}</p>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20">
+                    <div className="text-center px-6 max-w-md">
+                        <p className="text-red-400 text-sm font-semibold mb-2">Connection Error</p>
+                        <p className="text-gray-300 text-xs leading-relaxed">{errorMsg}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded hover:opacity-90"
+                        >
+                            Retry
+                        </button>
                     </div>
                 </div>
             )}

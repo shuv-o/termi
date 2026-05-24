@@ -51,7 +51,10 @@ export async function POST(request: Request) {
         if (!server) return notFoundResponse('Server not found');
 
         // Re-validate host at token issuance time (defence-in-depth against tampered DB entries)
-        const hostValidation = await validateHost(server.host);
+        const hostValidation = await validateHost(
+            server.host,
+            process.env.ALLOW_PRIVATE_NETWORKS === 'true'
+        );
         if (!hostValidation.valid) {
             return errorResponse('Invalid server host configuration', 400);
         }
@@ -72,6 +75,7 @@ export async function POST(request: Request) {
             displayWidth: server.displayWidth ?? 1920,
             displayHeight: server.displayHeight ?? 1080,
             colorDepth: server.colorDepth ?? 24,
+            rdpSecurity: server.rdpSecurity ?? 'any',
         })
             .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
             .setExpirationTime('5m')

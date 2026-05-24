@@ -98,7 +98,7 @@ function waitForDevServer(port = 22080, timeoutMs = 120000) {
 function startGuacd() {
     guacdProcess = spawn('docker', [
         'run', '--rm', '-p', '4822:4822', '--name', 'guacd-desktop',
-        'guacamole/guacd:1.5.4',
+        'guacamole/guacd:1.5.5',
     ]);
     guacdProcess.stderr.on('data', d => console.log('[guacd]', d.toString().trim()));
     guacdProcess.on('error', err =>

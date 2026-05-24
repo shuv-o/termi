@@ -53,7 +53,7 @@
 
 1. **Start guacd daemon**
    ```powershell
-   docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.4
+   docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
    ```
 
 2. **Run the setup script**

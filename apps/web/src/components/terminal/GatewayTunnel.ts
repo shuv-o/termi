@@ -212,11 +212,12 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
         if (!tunnel.isConnected() || !socket) return;
         if (elements.length === 0) return;
 
+        const enc = new TextEncoder();
         const message =
             elements
                 .map((e: unknown) => {
                     const s = String(e);
-                    return `${s.length}.${s}`;
+                    return `${enc.encode(s).length}.${s}`;
                 })
                 .join(',') + ';';
 

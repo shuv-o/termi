@@ -25,6 +25,7 @@ export interface TokenPayload {
     displayWidth?: number;
     displayHeight?: number;
     colorDepth?: number;
+    rdpSecurity?: string;
     exp: number;
 }
 

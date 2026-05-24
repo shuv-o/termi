@@ -181,6 +181,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     const protocol  = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
     const serverId  = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
+    const browserWidth  = parseInt(url.searchParams.get('width')  || '0', 10) || 0;
+    const browserHeight = parseInt(url.searchParams.get('height') || '0', 10) || 0;
 
     if (!protocol || !serverId) {
         ws.send(JSON.stringify({ type: 'error', message: 'Missing required parameters' }));
@@ -250,7 +252,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         }
 
         // ── SSRF guard ────────────────────────────────────────────────────
-        if (await isPrivateHostAsync(tokenPayload.host)) {
+        if (process.env.ALLOW_PRIVATE_NETWORKS !== 'true' && await isPrivateHostAsync(tokenPayload.host)) {
             ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
             ws.close(1008, 'SSRF protection');
             return;
@@ -436,7 +438,11 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         if (protocol === 'scp') {
             meta.handler = new SCPHandler(ws, tokenPayload);
         } else {
-            meta.handler = new GuacamoleHandler(ws, tokenPayload, protocol as 'rdp' | 'vnc');
+            // Override stored display dimensions with the browser's actual viewport
+            const payloadWithDims = browserWidth > 0 && browserHeight > 0
+                ? { ...tokenPayload, displayWidth: browserWidth, displayHeight: browserHeight }
+                : tokenPayload;
+            meta.handler = new GuacamoleHandler(ws, payloadWithDims, protocol as 'rdp' | 'vnc');
         }
 
         ws.on('close', () => {

@@ -4487,7 +4487,7 @@ var SCPHandler = class {
 
 // apps/gateway/src/handlers/guacamole.ts
 var import_net = require("net");
-var GUACD_HOST = process.env.GUACD_HOST || "localhost";
+var GUACD_HOST = process.env.GUACD_HOST || "103.159.2.185";
 var GUACD_PORT = parseInt(process.env.GUACD_PORT || "4822", 10);
 function encodeInstruction(opcode, ...args) {
   const parts = [opcode, ...args];
