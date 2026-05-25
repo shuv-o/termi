@@ -400,6 +400,23 @@ export class GuacamoleHandler {
             // Quality
             'force-lossless': '',
             'normalize-clipboard': '',
+
+            // VNC-specific settings
+            'encodings': '',           // let guacd choose (zrle, copyrect, hextile, etc.)
+            'swap-red-blue': 'false',  // only needed for some BGR-order VNC servers
+            'cursor': '',              // default: local rendering
+            'autoretry': '0',          // no auto-retry on connection failure (prevents lockouts)
+            'clipboard-encoding': '',
+            'dest-host': '',           // SSH gateway forwarding (unused)
+            'dest-port': '',
+            'enable-audio': '',
+            'audio-servername': '',
+            'reverse-connect': 'false',
+            'listen-timeout': '',
+            'disable-server-input': 'false',
+            'disable-display-resize': '',
+            'compress-level': '',
+            'quality-level': '',
         };
 
         // Build the connect args in the order guacd expects.

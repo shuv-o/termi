@@ -29,8 +29,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-termi}
     volumes:
       - postgres-local-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"  # exposed so you can connect with a local DB client
     networks:
       - termi-local-network
     healthcheck:
@@ -89,8 +87,9 @@ services:
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080,http://127.0.0.1:22080}
       # In dev mode the gateway is directly reachable on :22081 — no Traefik needed.
-      # Override with ws://localhost:22080/gateway if you want to test the Traefik path.
-      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL:-ws://localhost:22081}
+      # Hardcoded (not from .env) because Docker Compose expands .env before applying
+      # defaults, so ${VAR:-default} would silently pick up the production value.
+      NEXT_PUBLIC_GATEWAY_URL: ws://localhost:22081
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:22080}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
       SESSION_SECRET: ${SESSION_SECRET}
