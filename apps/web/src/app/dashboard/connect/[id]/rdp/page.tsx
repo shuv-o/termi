@@ -12,6 +12,7 @@ import {
     X,
     Monitor,
     Scan,
+    ZoomIn,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +42,16 @@ function parsePreset(value: string): { w: number; h: number } | null {
     return { w, h };
 }
 
+const ZOOM_LEVELS = [
+    { label: 'Fit', value: 'fit' },
+    { label: '50%',  value: '0.5' },
+    { label: '75%',  value: '0.75' },
+    { label: '100%', value: '1' },
+    { label: '125%', value: '1.25' },
+    { label: '150%', value: '1.5' },
+    { label: '200%', value: '2' },
+] as const;
+
 export default function RDPConnectionPage() {
     const params = useParams();
     const router = useRouter();
@@ -52,6 +63,9 @@ export default function RDPConnectionPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Visual zoom. undefined = auto-fit (Fit). Number = fixed scale (e.g. 1.0 = 100%).
+    const [zoom, setZoom] = useState<number | undefined>(undefined);
 
     // Explicit resolution override. null = use container size (Auto).
     const [resolution, setResolution] = useState<{ w: number; h: number } | null>(null);
@@ -195,6 +209,24 @@ export default function RDPConnectionPage() {
                         </SelectContent>
                     </Select>
 
+                    {/* Zoom selector */}
+                    <Select
+                        value={zoom !== undefined ? String(zoom) : 'fit'}
+                        onValueChange={(v) => setZoom(v === 'fit' ? undefined : parseFloat(v))}
+                    >
+                        <SelectTrigger className="h-8 w-auto gap-1.5 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden">
+                            <ZoomIn className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent align="end" className="bg-card border-border">
+                            {ZOOM_LEVELS.map(z => (
+                                <SelectItem key={z.value} value={z.value} className="text-xs">
+                                    {z.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
                     <Button
                         variant="ghost"
                         size="icon"
@@ -235,6 +267,7 @@ export default function RDPConnectionPage() {
                     gatewayUrl={gatewayUrl ?? undefined}
                     preferredWidth={resolution?.w}
                     preferredHeight={resolution?.h}
+                    scale={zoom}
                     onDisconnect={() => { console.log('RDP disconnected'); }}
                     onError={(err) => { console.error('RDP error:', err); }}
                 />

@@ -15,6 +15,13 @@ interface GuacamoleDisplayProps {
     /** Override the RDP/VNC session resolution. When omitted, the container size is used. */
     preferredWidth?: number;
     preferredHeight?: number;
+    /**
+     * Visual zoom scale applied to the Guacamole display without reconnecting.
+     * undefined = auto-fit to container (default).
+     * 1.0 = 100% (1 remote pixel : 1 screen pixel).
+     * Values > auto-fit scale will clip at the container edges.
+     */
+    scale?: number;
 }
 /** Human-readable messages for Guacamole protocol status codes (sent by guacd) */
 const GUAC_STATUS_MESSAGES: Record<number, string> = {
@@ -55,6 +62,7 @@ export default function GuacamoleDisplay({
     onError,
     preferredWidth,
     preferredHeight,
+    scale,
 }: GuacamoleDisplayProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     // 0=IDLE 1=CONNECTING 2=WAITING 3=CONNECTED 4=DISCONNECTING 5=DISCONNECTED
@@ -63,6 +71,15 @@ export default function GuacamoleDisplay({
     const onDisconnectRef = useRef(onDisconnect);
     onDisconnectRef.current = onDisconnect;
     const onErrorRef = useRef(onError);
+
+    // Refs that let scale changes re-fit the display without remounting the connection.
+    const scaleRef = useRef<number | undefined>(scale);
+    const fitFnRef = useRef<(() => void) | null>(null);
+
+    useEffect(() => {
+        scaleRef.current = scale;
+        fitFnRef.current?.();
+    }, [scale]);
     onErrorRef.current = onError;
     useEffect(() => {
         if (!containerRef.current) return;
@@ -103,16 +120,20 @@ export default function GuacamoleDisplay({
             displayEl.style.outline = 'none';
             container.style.position = 'relative';
             container.appendChild(displayEl);
-            // Scale display to fit container
+            // Scale display to fit container, honouring any manual zoom override.
             const fitDisplay = () => {
                 const cw = container.clientWidth;
                 const ch = container.clientHeight;
                 const dw = display.getWidth();
                 const dh = display.getHeight();
                 if (dw > 0 && dh > 0 && cw > 0 && ch > 0) {
-                    display.scale(Math.min(cw / dw, ch / dh));
+                    const s = scaleRef.current !== undefined
+                        ? scaleRef.current
+                        : Math.min(cw / dw, ch / dh);
+                    display.scale(s);
                 }
             };
+            fitFnRef.current = fitDisplay;
             resizeObserver = new ResizeObserver(fitDisplay);
             resizeObserver.observe(container);
             display.onresize = fitDisplay;
@@ -198,6 +219,7 @@ export default function GuacamoleDisplay({
             guacClient.connect(connectData);
         });
         return () => {
+            fitFnRef.current = null;
             try { guacClient?.disconnect(); } catch { /* ignore */ }
             try { windowKeyboard?.reset?.(); } catch { /* ignore */ }
             resizeObserver?.disconnect();
