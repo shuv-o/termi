@@ -79,7 +79,7 @@ export default function GuacamoleDisplay({
             const Guacamole = (module as any).default ?? module;
             // Gateway tunnel
             const gatewayBase =
-                gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
+                gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
             const wsUrl = `${gatewayBase}/connect`;
             // Use explicit preferred dimensions if provided, otherwise fall back to the container size.
             // preferredWidth/Height come from the parent (e.g. user-selected resolution or screen dims).

@@ -4,18 +4,23 @@ services:
     container_name: termi-traefik
     restart: unless-stopped
     command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=termi-network"
       - "--entrypoints.web.address=:22080"
-      # Keep WebSocket connections alive (SSH/RDP sessions can be long)
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"
+      # Keep WebSocket connections alive (SSH/RDP sessions can be long-lived)
       - "--entrypoints.web.transport.respondingTimeouts.readTimeout=0"
       - "--entrypoints.web.transport.respondingTimeouts.writeTimeout=0"
       - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=0"
     ports:
       - "${WEB_PORT:-22080}:22080"
+    environment:
+      # --- Same-domain mode: set GATEWAY_PREFIX (e.g. /gateway), leave GATEWAY_DOMAIN empty
+      # --- Separate-domain mode: set GATEWAY_DOMAIN (e.g. gateway.example.com), leave GATEWAY_PREFIX empty
+      GATEWAY_PREFIX: ${GATEWAY_PREFIX:-}
+      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN:-}
+      WEB_DOMAIN: ${WEB_DOMAIN:-}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik:ro
     networks:
       - termi-network
 
@@ -50,7 +55,6 @@ services:
       dockerfile: apps/web/Dockerfile
       target: builder
       args:
-        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
     container_name: termi-migrate
     restart: "no"
@@ -68,7 +72,8 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+        # NEXT_PUBLIC_GATEWAY_URL is intentionally excluded — it is a runtime env var only,
+        # served to the browser via the token API. This keeps the image deployment-agnostic.
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
 
     depends_on:
@@ -81,13 +86,17 @@ services:
     restart: unless-stopped
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
+      # Returned by the token API to the browser at runtime — determines which URL the
+      # browser uses to open the WebSocket. Set to match your deployment:
+      #   Same domain:      ws://example.com/gateway   (with GATEWAY_PREFIX=/gateway in Traefik)
+      #   Separate domain:  wss://gateway.example.com  (with GATEWAY_DOMAIN=gateway.example.com)
       NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
       SESSION_SECRET: ${SESSION_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
-      # Internal Docker network URL — web server talks directly to gateway, bypassing Traefik
+      # Internal Docker network URL — web server talks directly to gateway, bypasses Traefik
       GATEWAY_URL: ws://gateway:22081
       WEB_DOMAIN: ${WEB_DOMAIN:-}
       GATEWAY_DOMAIN: ${GATEWAY_DOMAIN:-}
@@ -104,13 +113,6 @@ services:
       ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-false}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.web.entrypoints=web"
-      - "traefik.http.routers.web.priority=1"
-      - "traefik.http.routers.web.service=web-svc"
-      - "traefik.http.services.web-svc.loadbalancer.server.port=22080"
     networks:
       - termi-network
 
@@ -130,17 +132,6 @@ services:
       GUACD_HOST: guacd
       GUACD_PORT: 4822
       NODE_ENV: production
-    labels:
-      - "traefik.enable=true"
-      # Higher priority so /gateway matches before the catch-all /
-      - "traefik.http.routers.gateway.rule=PathPrefix(`/gateway`)"
-      - "traefik.http.routers.gateway.entrypoints=web"
-      - "traefik.http.routers.gateway.priority=10"
-      - "traefik.http.routers.gateway.service=gateway-svc"
-      # Strip /gateway prefix before forwarding to the gateway process
-      - "traefik.http.middlewares.strip-gateway.stripprefix.prefixes=/gateway"
-      - "traefik.http.routers.gateway.middlewares=strip-gateway"
-      - "traefik.http.services.gateway-svc.loadbalancer.server.port=22081"
     networks:
       - termi-network
 

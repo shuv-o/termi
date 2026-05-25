@@ -41,15 +41,15 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate --schema=apps/web/prisma/schema.prisma
 
-# Build-time arguments — public vars baked into JS bundle must be set here
-ARG NEXT_PUBLIC_GATEWAY_URL
+# Build-time arguments — only values that must be statically embedded in the JS bundle.
+# NEXT_PUBLIC_GATEWAY_URL is intentionally NOT here: the browser reads it from the
+# token API response at runtime, so baking it in would break multi-environment images.
 ARG NEXT_PUBLIC_APP_URL
 ARG VAPID_PUBLIC_KEY=your-vapid-public-key
 ARG VAPID_SUBJECT=mailto:admin@example.com
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
 ENV VAPID_SUBJECT=${VAPID_SUBJECT}

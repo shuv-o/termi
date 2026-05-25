@@ -1,0 +1,131 @@
+# Local development stack — hot reload for both web and gateway.
+#
+# Usage:
+#   docker compose -f docker-compose.local.yml up
+#
+# First run builds the dev image (installs all deps for Linux) — takes ~3 min.
+# Subsequent starts are instant because node_modules are cached in a named volume.
+#
+# After adding/removing packages:
+#   docker compose -f docker-compose.local.yml build
+#   docker volume rm termi_dev_node_modules
+#   docker compose -f docker-compose.local.yml up
+
+services:
+  guacd:
+    image: guacamole/guacd:1.6.0
+    container_name: termi-local-guacd
+    restart: unless-stopped
+    networks:
+      - termi-local-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: termi-local-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-termi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-termi}
+      POSTGRES_DB: ${POSTGRES_DB:-termi}
+    volumes:
+      - postgres-local-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # exposed so you can connect with a local DB client
+    networks:
+      - termi-local-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    # Reuse the deps stage — has all workspace deps compiled for Linux.
+    # Source is mounted at runtime so tsx watch picks up changes instantly.
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: deps
+    container_name: termi-local-gateway
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      - guacd
+    volumes:
+      - .:/app                              # live source code
+      - dev_node_modules:/app/node_modules  # Linux-compiled node_modules (not host macOS ones)
+    ports:
+      - "22081:22081"
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080,http://127.0.0.1:22080}
+      GATEWAY_PORT: 22081
+      GATEWAY_HOST: 0.0.0.0
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      NODE_ENV: development
+    command: npm run dev:gateway
+    networks:
+      - termi-local-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: deps
+    container_name: termi-local-web
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+    volumes:
+      - .:/app                              # live source code
+      - dev_node_modules:/app/node_modules  # shared with gateway — same Linux node_modules
+    ports:
+      - "22080:22080"
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080,http://127.0.0.1:22080}
+      # In dev mode the gateway is directly reachable on :22081 — no Traefik needed.
+      # Override with ws://localhost:22080/gateway if you want to test the Traefik path.
+      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL:-ws://localhost:22081}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:22080}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+      # Internal: web server reaches gateway directly over the Docker network
+      GATEWAY_URL: ws://gateway:22081
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+    # Generate Prisma client, apply migrations, then start Next.js dev server.
+    # Use the workspace-local prisma binary — avoids npx downloading a mismatched version.
+    command: >
+      sh -c "
+        npm run db:generate &&
+        (cd apps/web && ../../node_modules/.bin/prisma migrate deploy) &&
+        npm run dev
+      "
+    networks:
+      - termi-local-network
+
+volumes:
+  postgres-local-data:
+  # Shared Linux-compiled node_modules for web and gateway containers.
+  # Initialized from the deps stage image on first run.
+  dev_node_modules:
+
+networks:
+  termi-local-network:
+    driver: bridge

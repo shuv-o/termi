@@ -1,0 +1,74 @@
+{{/*
+  Termi Traefik dynamic routing configuration.
+
+  Supports two deployment modes, controlled by environment variables:
+
+  Mode 1 — Same domain, path-based (default for local/single-server):
+    GATEWAY_PREFIX=/gateway   (or any path like /ws, /api/gateway)
+    GATEWAY_DOMAIN=           (leave empty)
+    Result: example.com/gateway/* → gateway (prefix stripped), example.com/* → web
+
+  Mode 2 — Separate domains (production multi-domain):
+    GATEWAY_DOMAIN=gateway.example.com
+    GATEWAY_PREFIX=           (leave empty)
+    WEB_DOMAIN=app.example.com  (optional, restricts web to that host)
+    Result: gateway.example.com/* → gateway, app.example.com/* → web
+*/}}
+
+{{ $prefix       := env "GATEWAY_PREFIX"  | default "" }}
+{{ $gatewayDomain := env "GATEWAY_DOMAIN" | default "" }}
+{{ $webDomain     := env "WEB_DOMAIN"     | default "" }}
+
+http:
+  routers:
+
+    {{- if $gatewayDomain }}
+    {{- /* Mode 2: separate domain — route by Host header, no prefix stripping */}}
+    gateway:
+      rule: "Host(`{{ $gatewayDomain }}`)"
+      entryPoints: [web]
+      priority: 10
+      service: gateway-svc
+
+    {{- else if $prefix }}
+    {{- /* Mode 1: same domain — route by path prefix, strip it before forwarding */}}
+    gateway:
+      rule: "PathPrefix(`{{ $prefix }}`)"
+      entryPoints: [web]
+      priority: 10
+      middlewares: [strip-gateway]
+      service: gateway-svc
+    {{- end }}
+
+    web:
+      rule: "{{ if $webDomain }}Host(`{{ $webDomain }}`){{ else }}PathPrefix(`/`){{ end }}"
+      entryPoints: [web]
+      priority: 1
+      service: web-svc
+
+  middlewares:
+    {{- if and $prefix (not $gatewayDomain) }}
+    strip-gateway:
+      stripPrefix:
+        prefixes:
+          - "{{ $prefix }}"
+    {{- else }}
+    {{- /* Placeholder so the middlewares block is never empty */}}
+    noop:
+      headers:
+        customResponseHeaders:
+          X-Powered-By: ""
+    {{- end }}
+
+  services:
+    gateway-svc:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://gateway:22081"
+
+    web-svc:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://web:22080"
