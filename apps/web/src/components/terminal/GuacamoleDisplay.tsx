@@ -12,6 +12,9 @@ interface GuacamoleDisplayProps {
     gatewayUrl?: string;
     onDisconnect?: () => void;
     onError?: (error: string) => void;
+    /** Override the RDP/VNC session resolution. When omitted, the container size is used. */
+    preferredWidth?: number;
+    preferredHeight?: number;
 }
 /** Human-readable messages for Guacamole protocol status codes (sent by guacd) */
 const GUAC_STATUS_MESSAGES: Record<number, string> = {
@@ -50,6 +53,8 @@ export default function GuacamoleDisplay({
     gatewayUrl,
     onDisconnect,
     onError,
+    preferredWidth,
+    preferredHeight,
 }: GuacamoleDisplayProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     // 0=IDLE 1=CONNECTING 2=WAITING 3=CONNECTED 4=DISCONNECTING 5=DISCONNECTED
@@ -76,9 +81,10 @@ export default function GuacamoleDisplay({
             const gatewayBase =
                 gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22081';
             const wsUrl = `${gatewayBase}/connect`;
-            // Send display dimensions so guacd uses the actual container size
-            const width  = container.clientWidth  || 1280;
-            const height = container.clientHeight || 800;
+            // Use explicit preferred dimensions if provided, otherwise fall back to the container size.
+            // preferredWidth/Height come from the parent (e.g. user-selected resolution or screen dims).
+            const width  = preferredWidth  || container.clientWidth  || 1280;
+            const height = preferredHeight || container.clientHeight || 800;
             const connectData =
                 `protocol=${protocol}` +
                 `&serverId=${encodeURIComponent(serverId)}` +
@@ -133,7 +139,7 @@ export default function GuacamoleDisplay({
                 setErrorMsg(msg);
                 onErrorRef.current?.(msg);
             };
-            // Clipboard receive from remote
+            // Clipboard: remote → local
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             guacClient.onclipboard = (stream: any, mimetype: string) => {
                 if (mimetype === 'text/plain') {
@@ -143,6 +149,22 @@ export default function GuacamoleDisplay({
                         try { navigator.clipboard?.writeText(atob(b64)); } catch { /* ignore */ }
                     };
                 }
+            };
+            // Clipboard: local → remote (intercept browser paste events)
+            displayEl.addEventListener('paste', (e: Event) => {
+                const text = (e as ClipboardEvent).clipboardData?.getData('text/plain');
+                if (text) {
+                    const stream = guacClient.createClipboardStream('text/plain');
+                    const writer = new Guacamole.StringWriter(stream);
+                    writer.sendText(text);
+                    writer.sendEnd();
+                }
+                // Don't preventDefault — keyboard handler also sends Ctrl+V so remote pastes
+            });
+            // Audio from remote desktop
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            guacClient.onaudio = (stream: any, mimetype: string) => {
+                Guacamole.AudioPlayer.getInstance(stream, mimetype);
             };
             // Mouse: legacy handler API receives Guacamole.Mouse.State directly
             const mouse = new Guacamole.Mouse(displayEl);
@@ -184,7 +206,7 @@ export default function GuacamoleDisplay({
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [serverId, connectionToken, protocol]);
+    }, [serverId, connectionToken, protocol, preferredWidth, preferredHeight]);
     const isConnecting = clientState === 1 || clientState === 2;
     const isConnected  = clientState === 3;
     const label        = CLIENT_STATE_LABELS[clientState] ?? String(clientState);

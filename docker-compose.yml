@@ -1,0 +1,152 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: termi-traefik
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=termi-network"
+      - "--entrypoints.web.address=:22080"
+      # Keep WebSocket connections alive (SSH/RDP sessions can be long)
+      - "--entrypoints.web.transport.respondingTimeouts.readTimeout=0"
+      - "--entrypoints.web.transport.respondingTimeouts.writeTimeout=0"
+      - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=0"
+    ports:
+      - "${WEB_PORT:-22080}:22080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - termi-network
+
+  guacd:
+    image: guacamole/guacd:1.6.0
+    container_name: termi-guacd
+    restart: unless-stopped
+    networks:
+      - termi-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: termi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-termi}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - termi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: builder
+      args:
+        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    container_name: termi-migrate
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
+    command: ["sh", "-c", "cd apps/web && npx prisma migrate deploy"]
+    networks:
+      - termi-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      gateway:
+        condition: service_started
+
+    container_name: termi-web
+    restart: unless-stopped
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
+      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+      # Internal Docker network URL — web server talks directly to gateway, bypassing Traefik
+      GATEWAY_URL: ws://gateway:22081
+      WEB_DOMAIN: ${WEB_DOMAIN:-}
+      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN:-}
+      WEB_PORT: ${WEB_PORT:-22080}
+      GATEWAY_PORT: ${GATEWAY_PORT:-22081}
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-false}
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.web.entrypoints=web"
+      - "traefik.http.routers.web.priority=1"
+      - "traefik.http.routers.web.service=web-svc"
+      - "traefik.http.services.web-svc.loadbalancer.server.port=22080"
+    networks:
+      - termi-network
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: termi-gateway
+    restart: unless-stopped
+    depends_on:
+      - guacd
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
+      GATEWAY_PORT: 22081
+      GATEWAY_HOST: 0.0.0.0
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      NODE_ENV: production
+    labels:
+      - "traefik.enable=true"
+      # Higher priority so /gateway matches before the catch-all /
+      - "traefik.http.routers.gateway.rule=PathPrefix(`/gateway`)"
+      - "traefik.http.routers.gateway.entrypoints=web"
+      - "traefik.http.routers.gateway.priority=10"
+      - "traefik.http.routers.gateway.service=gateway-svc"
+      # Strip /gateway prefix before forwarding to the gateway process
+      - "traefik.http.middlewares.strip-gateway.stripprefix.prefixes=/gateway"
+      - "traefik.http.routers.gateway.middlewares=strip-gateway"
+      - "traefik.http.services.gateway-svc.loadbalancer.server.port=22081"
+    networks:
+      - termi-network
+
+volumes:
+  postgres-data:
+
+networks:
+  termi-network:
+    driver: bridge

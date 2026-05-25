@@ -7,7 +7,7 @@
 # packages section because it was generated on macOS; npm install at the root level
 # (not workspace-scoped) triggers proper cross-platform optional dep resolution.
 FROM node:20-slim AS deps
-RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy ALL workspace package.json files so npm can resolve the full workspace graph

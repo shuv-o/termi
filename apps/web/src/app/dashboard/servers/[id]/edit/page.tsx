@@ -61,6 +61,9 @@ export default function EditServerPage() {
         authMethod: 'password' as 'password' | 'key',
         password: '', privateKey: '', passphrase: '',
         notes: '', tags: [] as string[],
+        displayWidth: 1920,
+        displayHeight: 1080,
+        rdpSecurity: 'any' as 'any' | 'rdp' | 'nla' | 'tls',
     });
 
     useEffect(() => {
@@ -87,6 +90,9 @@ export default function EditServerPage() {
                 password: '', privateKey: '', passphrase: '',
                 notes:       s.notes       ?? '',
                 tags:        s.tags        ?? [],
+                displayWidth:  s.displayWidth  ?? 1920,
+                displayHeight: s.displayHeight ?? 1080,
+                rdpSecurity:   (s.rdpSecurity  ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
             });
             if (groupData.success) setGroups(groupData.data.groups);
         }).catch(() => router.push('/dashboard'))
@@ -150,6 +156,11 @@ export default function EditServerPage() {
                 username:    form.username,
                 notes:       form.notes       || undefined,
                 tags:        form.tags.length > 0 ? form.tags : [],
+                ...(form.protocol === 'RDP' || form.protocol === 'VNC' ? {
+                    displayWidth:  form.displayWidth,
+                    displayHeight: form.displayHeight,
+                } : {}),
+                ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
             };
             if (form.authMethod === 'password' && form.password.trim()) {
                 payload.password = form.password;
@@ -365,6 +376,77 @@ export default function EditServerPage() {
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* RDP / VNC display settings */}
+                        {(form.protocol === 'RDP' || form.protocol === 'VNC') && (
+                            <Card>
+                                <CardContent className="p-4 space-y-3">
+                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Display Settings</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs">Width (px)</Label>
+                                            <Input
+                                                type="number"
+                                                value={form.displayWidth}
+                                                onChange={e => update({ displayWidth: parseInt(e.target.value) || 1920 })}
+                                                className="bg-secondary border-border text-sm h-9 font-mono"
+                                                min={640} max={7680}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs">Height (px)</Label>
+                                            <Input
+                                                type="number"
+                                                value={form.displayHeight}
+                                                onChange={e => update({ displayHeight: parseInt(e.target.value) || 1080 })}
+                                                className="bg-secondary border-border text-sm h-9 font-mono"
+                                                min={480} max={4320}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-1.5 flex-wrap">
+                                        {([
+                                            [1280, 720, 'HD'],
+                                            [1920, 1080, 'FHD'],
+                                            [2560, 1440, '2K'],
+                                            [3840, 2160, '4K'],
+                                        ] as [number, number, string][]).map(([w, h, label]) => (
+                                            <button
+                                                key={label}
+                                                type="button"
+                                                onClick={() => update({ displayWidth: w, displayHeight: h })}
+                                                className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
+                                                    form.displayWidth === w && form.displayHeight === h
+                                                        ? 'bg-primary/15 text-primary border-primary/30'
+                                                        : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                                                }`}
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {form.protocol === 'RDP' && (
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs">Security Mode</Label>
+                                            <Select
+                                                value={form.rdpSecurity}
+                                                onValueChange={(v) => update({ rdpSecurity: v as 'any' | 'rdp' | 'nla' | 'tls' })}
+                                            >
+                                                <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-card border-border">
+                                                    <SelectItem value="any">Any (auto-negotiate)</SelectItem>
+                                                    <SelectItem value="rdp">RDP (classic, most compatible)</SelectItem>
+                                                    <SelectItem value="nla">NLA (Network Level Auth)</SelectItem>
+                                                    <SelectItem value="tls">TLS only</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {/* Advanced */}
                         <Card className="overflow-visible">

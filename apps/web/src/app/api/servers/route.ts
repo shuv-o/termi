@@ -35,6 +35,7 @@ const createServerSchema = z.object({
     displayWidth: z.number().int().min(640).max(7680).optional(),
     displayHeight: z.number().int().min(480).max(4320).optional(),
     colorDepth: z.union([z.literal(8), z.literal(16), z.literal(24), z.literal(32)]).optional(),
+    rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
 });
 
 export async function GET(request: Request) {
