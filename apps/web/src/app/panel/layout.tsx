@@ -32,10 +32,10 @@ interface User {
 }
 
 const navigation = [
-    { name: 'Servers', href: '/dashboard', icon: Server },
-    { name: 'Groups', href: '/dashboard/groups', icon: FolderOpen },
-    { name: 'Sessions', href: '/dashboard/sessions', icon: Monitor },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { name: 'Servers', href: '/panel', icon: Server },
+    { name: 'Groups', href: '/panel/groups', icon: FolderOpen },
+    { name: 'Sessions', href: '/panel/sessions', icon: Monitor },
+    { name: 'Settings', href: '/panel/settings', icon: Settings },
 ];
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
@@ -47,7 +47,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
 
-    const isSessionsPage = pathname === '/dashboard/sessions';
+    const isSessionsPage = pathname === '/panel/sessions';
 
     useEffect(() => {
         async function fetchUser() {
@@ -140,7 +140,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                     <div className="px-4 mb-4">
                         <Button asChild className="w-full">
-                            <Link href="/dashboard/servers/new">
+                            <Link href="/apps/web/src/app/panel/servers/new">
                                 <Plus className="w-4 h-4" />
                                 Add Server
                             </Link>
@@ -151,7 +151,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         {navigation.map((item) => {
                             const isActive =
                                 pathname === item.href ||
-                                (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                                (item.href !== '/panel' && pathname.startsWith(item.href));
                             return (
                                 <Link
                                     key={item.name}

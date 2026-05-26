@@ -160,7 +160,7 @@ self.addEventListener('notificationclick', (event) => {
 
     if (event.action === 'dismiss') return;
 
-    const targetUrl = event.notification.data?.url || '/dashboard';
+    const targetUrl = event.notification.data?.url || '/panel';
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {

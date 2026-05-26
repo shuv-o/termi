@@ -1255,7 +1255,7 @@ Expected: TypeScript errors about `SSHTerminal` missing the new `sessionId`/`onW
 - [ ] **Step 5.3: Commit**
 
 ```bash
-git add apps/web/src/app/dashboard/sessions-context.tsx
+git add apps/web/src/app/panel/sessions-context.tsx
 git commit -m "feat(web): persistent session context with localStorage and detached state
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
@@ -1684,7 +1684,7 @@ Expected: all existing web tests pass; all gateway tests pass.
 - [ ] **Step 7.7: Commit**
 
 ```bash
-git add apps/web/src/app/dashboard/sessions-workspace.tsx
+git add apps/web/src/app/panel/sessions-workspace.tsx
 git commit -m "feat(web): sessions-workspace detached spinner, badge, wired props
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"

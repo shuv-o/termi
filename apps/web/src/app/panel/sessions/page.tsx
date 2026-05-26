@@ -2,11 +2,11 @@
 
 /**
  * The sessions UI (terminals, tab bar, file manager) lives in SessionsWorkspace,
- * which is rendered persistently in the dashboard layout so that WebSocket
+ * which is rendered persistently in the panel layout so that WebSocket
  * connections survive navigation between pages.
  *
  * This page component only handles the ?add=serverId URL param so that other
- * pages can deep-link into sessions (e.g. "Open in Sessions" on the dashboard).
+ * pages can deep-link into sessions (e.g. "Open in Sessions" on the panel).
  */
 
 import { Suspense, useEffect } from 'react';

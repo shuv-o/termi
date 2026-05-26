@@ -383,7 +383,7 @@ function GroupCard({
                             <FolderClosed className="w-8 h-8 mx-auto mb-2 opacity-40" />
                             No servers in this group yet.
                             <Link
-                                href="/dashboard/servers/new"
+                                href="/apps/web/src/app/panel/servers/new"
                                 className="block mt-2 text-primary hover:text-primary/80 transition-colors"
                             >
                                 Add a server
@@ -395,7 +395,7 @@ function GroupCard({
                             {detail.servers.map(srv => (
                                 <Link
                                     key={srv.id}
-                                    href={`/dashboard/servers/${srv.id}`}
+                                    href={`/panel/servers/${srv.id}`}
                                     className="flex items-center gap-3 px-6 py-3 hover:bg-accent/50 transition-colors group"
                                 >
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${protocolColors[srv.protocol] || ''}`}>

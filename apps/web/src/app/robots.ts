@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: '*',
                 allow: ['/', '/login', '/register'],
-                disallow: ['/dashboard/', '/api/'],
+                disallow: ['/panel/', '/api/'],
             },
         ],
         sitemap: 'https://github.com/shuvoooo/termi/sitemap.xml',

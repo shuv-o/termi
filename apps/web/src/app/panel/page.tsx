@@ -267,7 +267,7 @@ function GridCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-40 bg-card border-border">
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/dashboard/servers/${server.id}`} className="flex items-center gap-2">
+                                    <Link href={`/panel/servers/${server.id}`} className="flex items-center gap-2">
                                         <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
                                     </Link>
                                 </DropdownMenuItem>
@@ -548,7 +548,7 @@ function ListRow({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40 bg-card border-border">
                         <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/servers/${server.id}`} className="flex items-center gap-2">
+                            <Link href={`/panel/servers/${server.id}`} className="flex items-center gap-2">
                                 <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
                             </Link>
                         </DropdownMenuItem>
@@ -589,16 +589,16 @@ export default function DashboardPage() {
     const metricsCacheRef = useRef<Record<string, { data: ServerMetrics; fetchedAt: number }>>({});
 
     useEffect(() => {
-        const v = localStorage.getItem('dashboard-view') as ViewMode | null;
+        const v = localStorage.getItem('panel-view') as ViewMode | null;
         if (v === 'grid' || v === 'list') setViewMode(v);
-        const s = localStorage.getItem('dashboard-sort');
+        const s = localStorage.getItem('panel-sort');
         if (s) { try { setSort(JSON.parse(s)); } catch { /* ignore */ } }
     }, []);
 
-    const switchView = (v: ViewMode) => { setViewMode(v); localStorage.setItem('dashboard-view', v); };
+    const switchView = (v: ViewMode) => { setViewMode(v); localStorage.setItem('panel-view', v); };
     const applySort  = (field: SortField, dir: SortDir) => {
         setSort({ field, dir });
-        localStorage.setItem('dashboard-sort', JSON.stringify({ field, dir }));
+        localStorage.setItem('panel-sort', JSON.stringify({ field, dir }));
     };
 
     const fetchServers = async () => {
@@ -739,7 +739,7 @@ export default function DashboardPage() {
                     </p>
                 </div>
                 <Button asChild>
-                    <Link href="/dashboard/servers/new">
+                    <Link href="/apps/web/src/app/panel/servers/new">
                         <Plus className="w-4 h-4" /> Add Server
                     </Link>
                 </Button>
@@ -872,7 +872,7 @@ export default function DashboardPage() {
                     <h3 className="font-medium mb-1.5">No servers yet</h3>
                     <p className="text-sm text-muted-foreground mb-6">Add your first server to get started</p>
                     <Button asChild>
-                        <Link href="/dashboard/servers/new">
+                        <Link href="/apps/web/src/app/panel/servers/new">
                             <Plus className="w-4 h-4" /> Add Server
                         </Link>
                     </Button>

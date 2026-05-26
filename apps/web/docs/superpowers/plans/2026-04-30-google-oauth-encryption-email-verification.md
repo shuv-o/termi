@@ -2358,7 +2358,7 @@ import {
 - [ ] **Step 4: Commit**
 
 ```bash
-git add apps/web/src/app/dashboard/layout.tsx
+git add apps/web/src/app/panel/layout.tsx
 git commit -m "feat(ui): add email verification banner to dashboard layout"
 ```
 
@@ -2527,7 +2527,7 @@ Make sure `Lock` is in the lucide-react import (it likely already is: `import { 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/web/src/app/dashboard/settings/page.tsx
+git add apps/web/src/app/panel/settings/page.tsx
 git commit -m "feat(ui): add encryption section to settings page"
 ```
 

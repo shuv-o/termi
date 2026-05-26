@@ -395,7 +395,7 @@ export default function ServerDetailsPage() {
                     )}
                 </div>
                 <Button variant="secondary" size="sm" asChild className="gap-1.5">
-                    <Link href={`/dashboard/servers/${id}/edit`}>
+                    <Link href={`/panel/servers/${id}/edit`}>
                         <Pencil className="w-3.5 h-3.5" />
                         Edit
                     </Link>
@@ -446,7 +446,7 @@ export default function ServerDetailsPage() {
 
                 <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
                     <Button size="sm" asChild className="gap-1.5">
-                        <Link href={`/dashboard/connect/${id}/${server.protocol.toLowerCase()}`}>
+                        <Link href={`/panel/connect/${id}/${server.protocol.toLowerCase()}`}>
                             <ProtoIcon className="w-3.5 h-3.5" />
                             Connect via {server.protocol}
                         </Link>

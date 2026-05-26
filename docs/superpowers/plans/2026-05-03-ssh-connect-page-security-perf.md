@@ -541,7 +541,7 @@ Expected: 0 errors.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add apps/web/src/app/dashboard/connect/[id]/ssh/page.tsx
+git add apps/web/src/app/panel/connect/[id]/ssh/page.tsx
 git commit -m "feat: parallel token fetch, renewToken, disconnect UX and proper reconnect
 
 - Promise.all for server+token fetches cuts load time in half
