@@ -64,8 +64,8 @@ services:
         TRUSTED_PROXY: ${TRUSTED_PROXY}
 
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+#      migrate:
+#        condition: service_completed_successfully
       gateway:
         condition: service_started
 
