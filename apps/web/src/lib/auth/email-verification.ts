@@ -7,6 +7,7 @@
 import { randomBytes } from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
+import { hashToken } from '@/lib/crypto';
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -24,12 +25,13 @@ function createTransporter() {
 
 export async function sendVerificationEmail(userId: string, email: string): Promise<void> {
     const token = randomBytes(32).toString('hex');
+    const tokenHash = hashToken(token);
     const expiresAt = new Date(Date.now() + TOKEN_TTL_MS);
 
     await prisma.user.update({
         where: { id: userId },
         data: {
-            emailVerificationToken: token,
+            emailVerificationToken: tokenHash,
             emailVerificationExpiresAt: expiresAt,
         },
     });
@@ -60,9 +62,10 @@ export async function sendVerificationEmail(userId: string, email: string): Prom
 }
 
 export async function verifyEmailToken(token: string): Promise<{ success: boolean; error?: string }> {
+    const tokenHash = hashToken(token);
     const user = await prisma.user.findFirst({
         where: {
-            emailVerificationToken: token,
+            emailVerificationToken: tokenHash,
             emailVerificationExpiresAt: { gt: new Date() },
             isVerified: false,
         },

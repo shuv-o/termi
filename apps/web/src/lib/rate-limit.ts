@@ -100,7 +100,7 @@ export function connectionTestRateLimit(userId: string): RateLimitResult {
 
 /** 30 connection token requests per 5 minutes per user */
 export function connectionTokenRateLimit(userId: string): RateLimitResult {
-    return rateLimit(`conn-token:${userId}`, 3000, 50 * 60 * 1000);
+    return rateLimit(`conn-token:${userId}`, 30, 5 * 60 * 1000);
 }
 
 /** 3 forgot-password requests per hour per IP */

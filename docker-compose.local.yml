@@ -1,12 +1,4 @@
-# Local development stack — hot reload for both web and gateway.
-#
-# Usage:
-#   docker compose -f docker-compose.local.yml up
-#
-# First run builds the dev image (installs all deps for Linux) — takes ~3 min.
-# Subsequent starts are instant because node_modules are cached in a named volume.
-#
-# After adding/removing packages:
+# useful commands:
 #   docker compose -f docker-compose.local.yml build
 #   docker volume rm termi_node_modules
 #   docker compose -f docker-compose.local.yml up
@@ -32,7 +24,7 @@ services:
     networks:
       - termi-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}" ]
       interval: 10s
       timeout: 5s
       retries: 5

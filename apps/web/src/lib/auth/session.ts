@@ -190,7 +190,7 @@ export async function revokeSession(
     reason?: string
 ): Promise<void> {
     await prisma.session.update({
-        where: { id: sessionId },
+        where: { id: sessionId, userId },
         data: {
             isRevoked: true,
             revokedAt: new Date(),

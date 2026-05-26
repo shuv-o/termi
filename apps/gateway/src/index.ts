@@ -91,7 +91,7 @@ async function isPrivateHostAsync(host: string): Promise<boolean> {
         const addrs = await dns.lookup(stripped, { all: true });
         return addrs.some((a) => isPrivateHost(a.address));
     } catch {
-        return false; // DNS failure — let SSH connect fail naturally
+        return true; // DNS failure — block to prevent SSRF via unresolvable hostnames
     }
 }
 

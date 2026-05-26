@@ -7,6 +7,7 @@
 import { randomBytes } from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
+import { hashToken } from '@/lib/crypto';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -69,11 +70,12 @@ export async function sendShareInvitation(
     });
 
     const token = randomBytes(32).toString('hex');
+    const tokenHash = hashToken(token);
     const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
     await prisma.serverInvitation.create({
         data: {
-            token,
+            token: tokenHash,
             serverId,
             inviterId,
             inviteeEmail: inviteeEmail.toLowerCase(),
@@ -92,7 +94,7 @@ export async function sendShareInvitation(
     });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';
-    const inviteUrl = `${appUrl}/invitations/${token}`;
+    const inviteUrl = `${appUrl}/invitations/${token}`; // raw token in URL, hash stored in DB
     const from = process.env.SMTP_FROM || '"Termi" <noreply@termi.app>';
 
     const transporter = createTransporter();
@@ -133,8 +135,9 @@ export async function sendShareInvitation(
 // ============================================================================
 
 export async function getInvitationByToken(token: string) {
+    const tokenHash = hashToken(token);
     return prisma.serverInvitation.findFirst({
-        where: { token, status: 'PENDING', expiresAt: { gt: new Date() } },
+        where: { token: tokenHash, status: 'PENDING', expiresAt: { gt: new Date() } },
         include: {
             server: { select: { id: true, name: true, protocol: true } },
             inviter: { select: { email: true } },
@@ -174,8 +177,9 @@ export async function acceptInvitation(
     token: string,
     userId: string
 ): Promise<{ success: boolean; error?: string; serverId?: string }> {
+    const tokenHash = hashToken(token);
     const invitation = await prisma.serverInvitation.findFirst({
-        where: { token, status: 'PENDING', expiresAt: { gt: new Date() } },
+        where: { token: tokenHash, status: 'PENDING', expiresAt: { gt: new Date() } },
         include: { inviter: { select: { email: true } } },
     });
 
