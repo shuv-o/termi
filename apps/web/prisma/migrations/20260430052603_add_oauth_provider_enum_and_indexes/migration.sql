@@ -1,20 +1,27 @@
-/*
-  Warnings:
-
-  - Added the required column `updatedAt` to the `OAuthAccount` table without a default value. This is not possible if the table is not empty.
-  - Changed the type of `provider` on the `OAuthAccount` table. No cast exists, the column would be dropped and recreated, which cannot be done if there is data, since the column is required.
-
-*/
 -- CreateEnum
-CREATE TYPE "OAuthProvider" AS ENUM ('GOOGLE');
+DO $$ BEGIN
+  CREATE TYPE "OAuthProvider" AS ENUM ('GOOGLE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- AlterTable
-ALTER TABLE "OAuthAccount" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
-DROP COLUMN "provider",
-ADD COLUMN     "provider" "OAuthProvider" NOT NULL;
+-- Add updatedAt to OAuthAccount if missing, backfill nulls, ensure NOT NULL
+ALTER TABLE "OAuthAccount" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3);
+UPDATE "OAuthAccount" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "updatedAt" IS NULL;
+ALTER TABLE "OAuthAccount" ALTER COLUMN "updatedAt" SET NOT NULL;
+
+-- Replace TEXT provider column with OAuthProvider enum — only if still text type
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'OAuthAccount'
+      AND column_name = 'provider'
+      AND udt_name = 'text'
+  ) THEN
+    ALTER TABLE "OAuthAccount" DROP COLUMN "provider";
+    ALTER TABLE "OAuthAccount" ADD COLUMN "provider" "OAuthProvider" NOT NULL;
+  END IF;
+END $$;
 
 -- CreateIndex
-CREATE UNIQUE INDEX "OAuthAccount_provider_providerAccountId_key" ON "OAuthAccount"("provider", "providerAccountId");
-
--- CreateIndex
-CREATE INDEX "User_passwordResetToken_idx" ON "User"("passwordResetToken");
+CREATE UNIQUE INDEX IF NOT EXISTS "OAuthAccount_provider_providerAccountId_key" ON "OAuthAccount"("provider", "providerAccountId");
+CREATE INDEX IF NOT EXISTS "User_passwordResetToken_idx" ON "User"("passwordResetToken");

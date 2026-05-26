@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "PushSubscription" (
+CREATE TABLE IF NOT EXISTS "PushSubscription" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "endpoint" TEXT NOT NULL,
@@ -8,12 +8,10 @@ CREATE TABLE "PushSubscription" (
     "deviceLabel" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
     CONSTRAINT "PushSubscription_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ServerMonitorConfig" (
+CREATE TABLE IF NOT EXISTS "ServerMonitorConfig" (
     "id" TEXT NOT NULL,
     "serverId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -28,12 +26,10 @@ CREATE TABLE "ServerMonitorConfig" (
     "lastStatus" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
     CONSTRAINT "ServerMonitorConfig_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ServerHealthRecord" (
+CREATE TABLE IF NOT EXISTS "ServerHealthRecord" (
     "id" TEXT NOT NULL,
     "serverId" TEXT NOT NULL,
     "reachable" BOOLEAN NOT NULL,
@@ -42,36 +38,30 @@ CREATE TABLE "ServerHealthRecord" (
     "ramPercent" DOUBLE PRECISION,
     "diskPercent" DOUBLE PRECISION,
     "checkedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
     CONSTRAINT "ServerHealthRecord_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
-
--- CreateIndex
-CREATE INDEX "PushSubscription_userId_idx" ON "PushSubscription"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ServerMonitorConfig_serverId_key" ON "ServerMonitorConfig"("serverId");
-
--- CreateIndex
-CREATE INDEX "ServerMonitorConfig_userId_idx" ON "ServerMonitorConfig"("userId");
-
--- CreateIndex
-CREATE INDEX "ServerMonitorConfig_enabled_idx" ON "ServerMonitorConfig"("enabled");
-
--- CreateIndex
-CREATE INDEX "ServerHealthRecord_serverId_checkedAt_idx" ON "ServerHealthRecord"("serverId", "checkedAt");
+CREATE UNIQUE INDEX IF NOT EXISTS "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
+CREATE INDEX IF NOT EXISTS "PushSubscription_userId_idx" ON "PushSubscription"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "ServerMonitorConfig_serverId_key" ON "ServerMonitorConfig"("serverId");
+CREATE INDEX IF NOT EXISTS "ServerMonitorConfig_userId_idx" ON "ServerMonitorConfig"("userId");
+CREATE INDEX IF NOT EXISTS "ServerMonitorConfig_enabled_idx" ON "ServerMonitorConfig"("enabled");
+CREATE INDEX IF NOT EXISTS "ServerHealthRecord_serverId_checkedAt_idx" ON "ServerHealthRecord"("serverId", "checkedAt");
 
 -- AddForeignKey
-ALTER TABLE "PushSubscription" ADD CONSTRAINT "PushSubscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "PushSubscription" ADD CONSTRAINT "PushSubscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- AddForeignKey
-ALTER TABLE "ServerMonitorConfig" ADD CONSTRAINT "ServerMonitorConfig_serverId_fkey" FOREIGN KEY ("serverId") REFERENCES "Server"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ServerMonitorConfig" ADD CONSTRAINT "ServerMonitorConfig_serverId_fkey" FOREIGN KEY ("serverId") REFERENCES "Server"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- AddForeignKey
-ALTER TABLE "ServerMonitorConfig" ADD CONSTRAINT "ServerMonitorConfig_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ServerMonitorConfig" ADD CONSTRAINT "ServerMonitorConfig_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- AddForeignKey
-ALTER TABLE "ServerHealthRecord" ADD CONSTRAINT "ServerHealthRecord_serverId_fkey" FOREIGN KEY ("serverId") REFERENCES "Server"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ServerHealthRecord" ADD CONSTRAINT "ServerHealthRecord_serverId_fkey" FOREIGN KEY ("serverId") REFERENCES "Server"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;

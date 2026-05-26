@@ -1,8 +1,8 @@
--- AlterTable: add passkeyEnabled to User
-ALTER TABLE "User" ADD COLUMN "passkeyEnabled" BOOLEAN NOT NULL DEFAULT false;
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passkeyEnabled" BOOLEAN NOT NULL DEFAULT false;
 
--- CreateTable: Passkey (WebAuthn credentials)
-CREATE TABLE "Passkey" (
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Passkey" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL DEFAULT 'Passkey',
@@ -14,18 +14,19 @@ CREATE TABLE "Passkey" (
     "transports" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUsedAt" TIMESTAMP(3),
-
     CONSTRAINT "Passkey_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Passkey_credentialID_key" ON "Passkey"("credentialID");
-CREATE INDEX "Passkey_userId_idx" ON "Passkey"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Passkey_credentialID_key" ON "Passkey"("credentialID");
+CREATE INDEX IF NOT EXISTS "Passkey_userId_idx" ON "Passkey"("userId");
 
 -- AddForeignKey
-ALTER TABLE "Passkey" ADD CONSTRAINT "Passkey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Passkey" ADD CONSTRAINT "Passkey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- AlterEnum: add passkey audit actions
-ALTER TYPE "AuditAction" ADD VALUE 'PASSKEY_REGISTERED';
-ALTER TYPE "AuditAction" ADD VALUE 'PASSKEY_REMOVED';
-ALTER TYPE "AuditAction" ADD VALUE 'PASSKEY_USED';
+-- AlterEnum
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'PASSKEY_REGISTERED';
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'PASSKEY_REMOVED';
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'PASSKEY_USED';

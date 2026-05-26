@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "Server" ADD COLUMN "rdpSecurity" TEXT DEFAULT 'any';
+ALTER TABLE "Server" ADD COLUMN IF NOT EXISTS "rdpSecurity" TEXT DEFAULT 'any';

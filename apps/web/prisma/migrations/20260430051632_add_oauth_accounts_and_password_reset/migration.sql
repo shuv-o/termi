@@ -1,25 +1,26 @@
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "passwordResetExpiresAt" TIMESTAMP(3),
-ADD COLUMN     "passwordResetToken" TEXT,
-ALTER COLUMN "passwordHash" DROP NOT NULL;
+ALTER TABLE "User"
+  ADD COLUMN IF NOT EXISTS "passwordResetExpiresAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "passwordResetToken" TEXT;
+
+ALTER TABLE "User" ALTER COLUMN "passwordHash" DROP NOT NULL;
 
 -- CreateTable
-CREATE TABLE "OAuthAccount" (
+CREATE TABLE IF NOT EXISTS "OAuthAccount" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
     CONSTRAINT "OAuthAccount_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE INDEX "OAuthAccount_userId_idx" ON "OAuthAccount"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "OAuthAccount_provider_providerAccountId_key" ON "OAuthAccount"("provider", "providerAccountId");
+CREATE INDEX IF NOT EXISTS "OAuthAccount_userId_idx" ON "OAuthAccount"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "OAuthAccount_provider_providerAccountId_key" ON "OAuthAccount"("provider", "providerAccountId");
 
 -- AddForeignKey
-ALTER TABLE "OAuthAccount" ADD CONSTRAINT "OAuthAccount_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "OAuthAccount" ADD CONSTRAINT "OAuthAccount_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
