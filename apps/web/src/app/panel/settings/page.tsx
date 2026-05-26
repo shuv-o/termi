@@ -71,7 +71,7 @@ function ToastList({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: num
     };
     if (!toasts.length) return null;
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 w-80">
+        <div className="fixed bottom-20 left-3 right-3 sm:bottom-6 sm:left-auto sm:right-6 z-50 flex flex-col gap-2 sm:w-80">
             {toasts.map(t => (
                 <div key={t.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm shadow-xl backdrop-blur-sm ${colors[t.type]}`}>
                     {icons[t.type]}
@@ -240,7 +240,7 @@ function PasskeyRow({ passkey, onDelete }: { passkey: Passkey; onDelete: (id: st
             ) : (
                 <button
                     onClick={() => setConfirming(true)}
-                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
                     title="Remove passkey"
                 >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -321,14 +321,14 @@ function SessionRow({ session, onRevoke }: { session: AuthSession; onRevoke: (id
                         <button onClick={() => setConfirmed(false)} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded">
                             Cancel
                         </button>
-                        <Button variant="destructive" size="sm" onClick={handleRevoke} disabled={revoking} className="h-7 text-xs px-2">
+                        <Button variant="destructive" size="sm" onClick={handleRevoke} disabled={revoking} className="h-8 text-xs px-2">
                             {revoking ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sign out'}
                         </Button>
                     </div>
                 ) : (
                     <button
                         onClick={() => setConfirmed(true)}
-                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
                         title="Revoke this session"
                     >
                         <LogOut className="w-3.5 h-3.5" />
@@ -851,9 +851,9 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground mb-4">
                         Store these securely. Each code can only be used once and won&apos;t be shown again.
                     </p>
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 mb-4">
                         {recoveryCodes.map(code => (
-                            <div key={code} className="flex items-center justify-between bg-background rounded-lg px-3 py-2 font-mono text-sm border border-border">
+                            <div key={code} className="flex items-center justify-between bg-background rounded-lg px-3 py-2.5 font-mono text-sm border border-border">
                                 <span className="tracking-wider">{code}</span>
                                 <button onClick={() => copyCode(code)} className="text-muted-foreground hover:text-foreground ml-2 transition-colors">
                                     {copiedCode === code ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -898,21 +898,27 @@ export default function SettingsPage() {
                 </aside>
 
                 {/* ── Mobile section picker ── */}
-                <div className="lg:hidden w-full mb-4 overflow-x-auto">
-                    <div className="flex gap-1.5 pb-1">
-                        {(['profile', 'security', 'passkeys', 'encryption', 'notifications', 'sessions', 'danger'] as Section[]).map(s => (
-                            <button
-                                key={s}
-                                onClick={() => setActiveSection(s)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
-                                    activeSection === s
-                                        ? s === 'danger' ? 'bg-red-500/20 text-red-400' : 'bg-primary/20 text-primary'
-                                        : 'bg-secondary text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                                {s === 'sessions' ? 'Sessions' : s.charAt(0).toUpperCase() + s.slice(1)}
-                            </button>
-                        ))}
+                <div className="lg:hidden w-full mb-4">
+                    <div className="flex flex-wrap gap-1.5">
+                        {(['profile', 'security', 'passkeys', 'encryption', 'notifications', 'sessions', 'danger'] as Section[]).map(s => {
+                            const labels: Record<Section, string> = {
+                                profile: 'Profile', security: 'Security', passkeys: 'Passkeys',
+                                encryption: 'Encryption', notifications: 'Alerts', sessions: 'Sessions', danger: 'Danger',
+                            };
+                            return (
+                                <button
+                                    key={s}
+                                    onClick={() => setActiveSection(s)}
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                                        activeSection === s
+                                            ? s === 'danger' ? 'bg-red-500/20 text-red-400' : 'bg-primary/20 text-primary'
+                                            : 'bg-secondary text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    {labels[s]}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 

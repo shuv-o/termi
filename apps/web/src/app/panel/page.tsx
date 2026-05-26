@@ -349,9 +349,9 @@ function FleetAlerts({
                     onClick={() => onSelectServer(s.id)}
                 >
                     <WifiOff className="w-4 h-4 text-red-400 shrink-0" />
-                    <span className="font-medium text-red-400">{s.name}</span>
-                    <span className="text-red-400/60 text-xs">is offline</span>
-                    <span className="ml-auto text-[10px] text-muted-foreground/40 font-mono">{s.host}</span>
+                    <span className="font-medium text-red-400 truncate">{s.name}</span>
+                    <span className="text-red-400/60 text-xs shrink-0">is offline</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground/40 font-mono hidden sm:block">{s.host}</span>
                 </div>
             ))}
             {highLoad.map(s => {
@@ -418,10 +418,10 @@ function GridCard({
                             variant="ghost"
                             size="icon"
                             onClick={onFavorite}
-                            className={`h-6 w-6 transition-all ${
+                            className={`h-8 w-8 sm:h-6 sm:w-6 transition-all ${
                                 server.isFavorite
                                     ? 'text-yellow-400'
-                                    : 'text-muted-foreground/30 opacity-0 group-hover:opacity-100 hover:text-yellow-400'
+                                    : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'
                             }`}
                         >
                             <Star className={`w-3.5 h-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
@@ -431,7 +431,7 @@ function GridCard({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6 text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-foreground"
+                                    className="h-8 w-8 sm:h-6 sm:w-6 text-muted-foreground/50 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-foreground"
                                 >
                                     <MoreVertical className="w-3.5 h-3.5" />
                                 </Button>
@@ -545,11 +545,11 @@ function GridCard({
             </div>
 
             <div className="px-3 py-2.5 border-t border-border/60 bg-secondary/20 flex gap-1.5">
-                <Button onClick={onConnect} size="sm" className="flex-1 justify-center text-xs h-7">
+                <Button onClick={onConnect} size="sm" className="flex-1 justify-center text-xs h-9 sm:h-7">
                     Connect
                 </Button>
                 {server.hasPassword && (
-                    <Button onClick={onCopyPassword} variant="secondary" size="icon" className="h-7 w-7 shrink-0" title="Copy password (passkey required)">
+                    <Button onClick={onCopyPassword} variant="secondary" size="icon" className="h-9 w-9 sm:h-7 sm:w-7 shrink-0" title="Copy password (passkey required)">
                         <KeyRound className="w-3.5 h-3.5" />
                     </Button>
                 )}
@@ -558,7 +558,7 @@ function GridCard({
                         onClick={onSessions}
                         variant="secondary"
                         size="sm"
-                        className={`h-7 px-2.5 gap-1.5 text-xs shrink-0 transition-colors ${
+                        className={`h-9 sm:h-7 px-2.5 gap-1.5 text-xs shrink-0 transition-colors ${
                             hasSession
                                 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -681,7 +681,7 @@ function ListRow({
                     variant="ghost"
                     size="icon"
                     onClick={onFavorite}
-                    className={`h-7 w-7 transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 opacity-0 group-hover:opacity-100 hover:text-yellow-400'}`}
+                    className={`h-9 w-9 sm:h-7 sm:w-7 transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'}`}
                 >
                     <Star className={`w-3.5 h-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                 </Button>
@@ -690,19 +690,19 @@ function ListRow({
                         variant="ghost"
                         size="icon"
                         onClick={onCopyPassword}
-                        className="h-7 w-7 text-muted-foreground/50 hover:text-primary opacity-0 group-hover:opacity-100"
+                        className="h-9 w-9 sm:h-7 sm:w-7 text-muted-foreground/50 hover:text-primary [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
                         title="Copy password (passkey required)"
                     >
                         <KeyRound className="w-3.5 h-3.5" />
                     </Button>
                 )}
-                <Button onClick={onConnect} size="sm" className="text-xs h-7 px-2.5">Connect</Button>
+                <Button onClick={onConnect} size="sm" className="text-xs h-9 sm:h-7 px-3 sm:px-2.5">Connect</Button>
                 {server.protocol === 'SSH' && (
                     <Button
                         variant="secondary"
                         size="sm"
                         onClick={onSessions}
-                        className={`h-7 px-2.5 text-xs gap-1.5 transition-all ${
+                        className={`h-9 sm:h-7 px-2.5 text-xs gap-1.5 transition-all ${
                             hasSession
                                 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -723,7 +723,7 @@ function ListRow({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-foreground"
+                            className="h-9 w-9 sm:h-7 sm:w-7 text-muted-foreground/50 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-foreground"
                         >
                             <MoreVertical className="w-3.5 h-3.5" />
                         </Button>
