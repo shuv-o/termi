@@ -71,7 +71,7 @@ export default function EditServerPage() {
             fetch(`/api/servers/${id}`).then(r => r.json()),
             fetch('/api/groups').then(r => r.json()),
         ]).then(([serverData, groupData]) => {
-            if (!serverData.success) { router.push('/dashboard'); return; }
+            if (!serverData.success) { router.push('/panel'); return; }
             const s = serverData.data.server;
             setStoredCreds({
                 hasPassword:   s.hasPassword   ?? false,
@@ -95,7 +95,7 @@ export default function EditServerPage() {
                 rdpSecurity:   (s.rdpSecurity  ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
             });
             if (groupData.success) setGroups(groupData.data.groups);
-        }).catch(() => router.push('/dashboard'))
+        }).catch(() => router.push('/panel'))
           .finally(() => setPageLoading(false));
     }, [id, router]);
 
@@ -177,7 +177,7 @@ export default function EditServerPage() {
             });
             const data = await res.json();
             if (!data.success) { setError(data.error || 'Failed to update server'); setSaving(false); return; }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('An error occurred. Please try again.'); setSaving(false);
         }
@@ -200,7 +200,7 @@ export default function EditServerPage() {
         <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-5">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                    <Link href="/dashboard">
+                    <Link href="/panel">
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                 </Button>
@@ -629,7 +629,7 @@ export default function EditServerPage() {
                                 {saving ? 'Saving…' : 'Save Changes'}
                             </Button>
                             <Button variant="secondary" asChild className="w-full">
-                                <Link href="/dashboard">Cancel</Link>
+                                <Link href="/panel">Cancel</Link>
                             </Button>
                         </div>
                     </div>

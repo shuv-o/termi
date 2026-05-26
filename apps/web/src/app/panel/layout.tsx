@@ -113,7 +113,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             >
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-                        <Link href="/dashboard" className="flex items-center gap-3">
+                        <Link href="/panel" className="flex items-center gap-3">
                             <TerminalLogo width={36} height={36} className="rounded-lg" />
                             <span className="text-lg font-bold gradient-text">Termi</span>
                         </Link>
@@ -140,7 +140,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                     <div className="px-4 mb-4">
                         <Button asChild className="w-full">
-                            <Link href="/apps/web/src/app/panel/servers/new">
+                            <Link href="/panel/servers/new">
                                 <Plus className="w-4 h-4" />
                                 Add Server
                             </Link>
@@ -222,7 +222,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
                             <Menu className="w-6 h-6" />
                         </Button>
-                        <Link href="/dashboard" className="flex items-center gap-2">
+                        <Link href="/panel" className="flex items-center gap-2">
                             <TerminalLogo width={28} height={28} className="rounded-md" />
                             <span className="font-bold">Termi</span>
                         </Link>

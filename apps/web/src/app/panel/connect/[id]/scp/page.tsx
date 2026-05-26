@@ -38,7 +38,7 @@ export default function SCPPage() {
                 <AlertCircle className="w-10 h-10 text-destructive" />
                 <p className="text-destructive">{error}</p>
                 <Button asChild>
-                    <Link href="/dashboard">Back to Dashboard</Link>
+                    <Link href="/panel">Back to Dashboard</Link>
                 </Button>
             </div>
         );
@@ -49,7 +49,7 @@ export default function SCPPage() {
             {/* Header */}
             <div className="flex items-center gap-3 mb-3 shrink-0">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                    <Link href="/dashboard">
+                    <Link href="/panel">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                 </Button>

@@ -162,7 +162,7 @@ export default function RDPConnectionPage() {
             <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
-                    <Link href="/dashboard">Back to Dashboard</Link>
+                    <Link href="/panel">Back to Dashboard</Link>
                 </Button>
             </div>
         );
@@ -174,7 +174,7 @@ export default function RDPConnectionPage() {
             <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                        <Link href="/dashboard">
+                        <Link href="/panel">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                     </Button>
@@ -248,7 +248,7 @@ export default function RDPConnectionPage() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/panel')}
                         className="text-destructive hover:text-destructive h-8 w-8"
                         title="Disconnect"
                     >

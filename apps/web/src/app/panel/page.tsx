@@ -9,7 +9,7 @@ import {
     Layers, Pencil, Trash2, AlertTriangle,
     LayoutGrid, List, KeyRound, Clock, Wifi, WifiOff, Activity,
     Copy, Check, User, HardDrive, ArrowDown, ArrowUp, Cpu, MemoryStick,
-    ArrowUpDown,
+    ArrowUpDown, Zap, Tag, X,
 } from 'lucide-react';
 import { useSessionsContext } from './sessions-context';
 import dynamic from 'next/dynamic';
@@ -17,7 +17,6 @@ import type { RevealField } from '@/components/auth/PasskeyRevealModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
@@ -76,6 +75,7 @@ interface ServerMetrics {
 }
 
 type ViewMode = 'grid' | 'list';
+type ProtocolFilter = 'all' | 'SSH' | 'SCP' | 'RDP' | 'VNC';
 
 type SortField = 'name' | 'lastUsed' | 'protocol' | 'status' | 'cpu' | 'ram' | 'latency' | 'favorite';
 type SortDir  = 'asc' | 'desc';
@@ -208,9 +208,179 @@ function StatusIndicator({ metrics, loading }: { metrics: ServerMetrics | null; 
     );
 }
 
+// ── Fleet Overview Stats ────────────────────────────────────────────────────
+
+function FleetStats({
+    servers,
+    metrics,
+    metricsLoading,
+    sessions,
+}: {
+    servers: ServerItem[];
+    metrics: Record<string, ServerMetrics | null>;
+    metricsLoading: Record<string, boolean>;
+    sessions: { serverId: string }[];
+}) {
+    const metricsReady = servers.length > 0 && !Object.values(metricsLoading).some(Boolean);
+
+    const online  = servers.filter(s => metrics[s.id]?.reachable === true).length;
+    const offline = servers.filter(s => metrics[s.id]?.reachable === false).length;
+    const unknown = servers.length - online - offline;
+
+    const latencies = servers
+        .map(s => metrics[s.id]?.latencyMs)
+        .filter((l): l is number => l != null);
+    const avgLatency = latencies.length > 0
+        ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length)
+        : null;
+
+    const highCpu = servers.filter(s => (metrics[s.id]?.cpu ?? 0) >= 80).length;
+    const highRam = servers.filter(s => (metrics[s.id]?.ram?.percent ?? 0) >= 80).length;
+    const activeSessions = sessions.length;
+
+    if (servers.length === 0) return null;
+
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <Server className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">Total</span>
+                </div>
+                <p className="text-2xl font-bold tabular-nums">{servers.length}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">servers</p>
+            </Card>
+
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">Online</span>
+                </div>
+                {metricsReady || online > 0 || offline > 0 ? (
+                    <>
+                        <p className="text-2xl font-bold tabular-nums text-emerald-400">{online}</p>
+                        {offline > 0 && <p className="text-[10px] text-red-400 mt-0.5">{offline} offline</p>}
+                        {offline === 0 && unknown === 0 && <p className="text-[10px] text-muted-foreground mt-0.5">all reachable</p>}
+                        {unknown > 0 && offline === 0 && <p className="text-[10px] text-muted-foreground/50 mt-0.5">{unknown} checking…</p>}
+                    </>
+                ) : (
+                    <Skeleton className="h-6 w-8 mt-0.5" />
+                )}
+            </Card>
+
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-3.5 h-3.5 text-sky-400" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">Avg Latency</span>
+                </div>
+                {avgLatency != null ? (
+                    <>
+                        <p className={`text-2xl font-bold tabular-nums ${avgLatency < 50 ? 'text-emerald-400' : avgLatency < 150 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            {avgLatency}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">ms</p>
+                    </>
+                ) : (
+                    <Skeleton className="h-6 w-12 mt-0.5" />
+                )}
+            </Card>
+
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <Cpu className="w-3.5 h-3.5 text-violet-400" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">High CPU</span>
+                </div>
+                <p className={`text-2xl font-bold tabular-nums ${highCpu > 0 ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                    {highCpu}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">≥ 80%</p>
+            </Card>
+
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <MemoryStick className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">High RAM</span>
+                </div>
+                <p className={`text-2xl font-bold tabular-nums ${highRam > 0 ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                    {highRam}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">≥ 80%</p>
+            </Card>
+
+            <Card className="p-3 bg-card border-border">
+                <div className="flex items-center gap-2 mb-1">
+                    <Layers className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">Sessions</span>
+                </div>
+                <p className={`text-2xl font-bold tabular-nums ${activeSessions > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {activeSessions}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">active</p>
+            </Card>
+        </div>
+    );
+}
+
+// ── Fleet Alert Banner ──────────────────────────────────────────────────────
+
+function FleetAlerts({
+    servers,
+    metrics,
+    onSelectServer,
+}: {
+    servers: ServerItem[];
+    metrics: Record<string, ServerMetrics | null>;
+    onSelectServer: (id: string) => void;
+}) {
+    const offline = servers.filter(s => metrics[s.id]?.reachable === false);
+    const highLoad = servers.filter(s => {
+        const m = metrics[s.id];
+        return m?.reachable && ((m.cpu ?? 0) >= 90 || (m.ram?.percent ?? 0) >= 90);
+    });
+
+    if (offline.length === 0 && highLoad.length === 0) return null;
+
+    return (
+        <div className="mb-5 space-y-2">
+            {offline.map(s => (
+                <div
+                    key={s.id}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-500/8 border border-red-500/20 text-sm cursor-pointer hover:bg-red-500/12 transition-colors"
+                    onClick={() => onSelectServer(s.id)}
+                >
+                    <WifiOff className="w-4 h-4 text-red-400 shrink-0" />
+                    <span className="font-medium text-red-400">{s.name}</span>
+                    <span className="text-red-400/60 text-xs">is offline</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground/40 font-mono">{s.host}</span>
+                </div>
+            ))}
+            {highLoad.map(s => {
+                const m = metrics[s.id]!;
+                return (
+                    <div
+                        key={s.id}
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-amber-500/8 border border-amber-500/20 text-sm cursor-pointer hover:bg-amber-500/12 transition-colors"
+                        onClick={() => onSelectServer(s.id)}
+                    >
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                        <span className="font-medium text-amber-300">{s.name}</span>
+                        <span className="text-amber-400/60 text-xs">high resource usage</span>
+                        <div className="ml-auto flex items-center gap-3 text-[10px] text-muted-foreground/60">
+                            {(m.cpu ?? 0) >= 90 && <span>CPU {m.cpu}%</span>}
+                            {(m.ram?.percent ?? 0) >= 90 && <span>RAM {Math.round(m.ram!.percent)}%</span>}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+// ── Grid Card ───────────────────────────────────────────────────────────────
+
 function GridCard({
     server, m, mLoading, hasSession,
-    onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions,
+    onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions, onTagClick,
 }: {
     server: ServerItem;
     m: ServerMetrics | null;
@@ -222,6 +392,7 @@ function GridCard({
     onCopyPassword: () => void;
     onConnect: () => void;
     onSessions: () => void;
+    onTagClick: (tag: string) => void;
 }) {
     const Icon = protocolIcons[server.protocol];
     const hasMetrics = server.protocol === 'SSH' && m && m.reachable && !m.error;
@@ -319,10 +490,14 @@ function GridCard({
                             {server.group.name}
                         </span>
                     )}
-                    {server.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border">
+                    {server.tags.slice(0, 3).map((tag) => (
+                        <button
+                            key={tag}
+                            onClick={(e) => { e.stopPropagation(); onTagClick(tag); }}
+                            className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
+                        >
                             {tag}
-                        </span>
+                        </button>
                     ))}
                 </div>
 
@@ -404,9 +579,11 @@ function GridCard({
     );
 }
 
+// ── List Row ────────────────────────────────────────────────────────────────
+
 function ListRow({
     server, m, mLoading, hasSession,
-    onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions,
+    onFavorite, onEdit, onDelete, onCopyPassword, onConnect, onSessions, onTagClick,
 }: {
     server: ServerItem;
     m: ServerMetrics | null;
@@ -418,6 +595,7 @@ function ListRow({
     onCopyPassword: () => void;
     onConnect: () => void;
     onSessions: () => void;
+    onTagClick: (tag: string) => void;
 }) {
     const Icon = protocolIcons[server.protocol];
 
@@ -449,9 +627,13 @@ function ListRow({
                     </span>
                 )}
                 {server.tags.slice(0, 2).map((tag) => (
-                    <span key={tag} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border">
+                    <button
+                        key={tag}
+                        onClick={() => onTagClick(tag)}
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
+                    >
                         {tag}
-                    </span>
+                    </button>
                 ))}
             </div>
 
@@ -533,7 +715,7 @@ function ListRow({
                                 <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
                             )}
                         </div>
-                        <span className="hidden sm:inline">{hasSession ? 'Sessions' : 'Sessions'}</span>
+                        <span className="hidden sm:inline">Sessions</span>
                     </Button>
                 )}
                 <DropdownMenu>
@@ -571,6 +753,8 @@ function ListRow({
     );
 }
 
+// ── Main Page ───────────────────────────────────────────────────────────────
+
 export default function DashboardPage() {
     const router = useRouter();
     const { addSession, sessions } = useSessionsContext();
@@ -579,6 +763,8 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState<'all' | 'favorites'>('all');
+    const [protocolFilter, setProtocolFilter] = useState<ProtocolFilter>('all');
+    const [activeTag, setActiveTag] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [metrics, setMetrics] = useState<Record<string, ServerMetrics | null>>({});
     const [metricsLoading, setMetricsLoading] = useState<Record<string, boolean>>({});
@@ -665,7 +851,23 @@ export default function DashboardPage() {
         return () => clearInterval(id);
     }, [servers, fetchMetrics]);
 
-    const sortedServers = useMemo(() => [...servers].sort((a, b) => {
+    // All unique tags across all servers
+    const allTags = useMemo(() => {
+        const tagSet = new Set<string>();
+        servers.forEach(s => s.tags.forEach(t => tagSet.add(t)));
+        return Array.from(tagSet).sort();
+    }, [servers]);
+
+    // Apply protocol + tag filters client-side (search/favorites are server-side)
+    const filteredServers = useMemo(() => {
+        return servers.filter(s => {
+            if (protocolFilter !== 'all' && s.protocol !== protocolFilter) return false;
+            if (activeTag && !s.tags.includes(activeTag)) return false;
+            return true;
+        });
+    }, [servers, protocolFilter, activeTag]);
+
+    const sortedServers = useMemo(() => [...filteredServers].sort((a, b) => {
         const ma = metrics[a.id]; const mb = metrics[b.id];
         switch (sort.field) {
             case 'name':     return sort.dir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
@@ -678,7 +880,7 @@ export default function DashboardPage() {
             case 'latency':  { const la = ma?.latencyMs ?? Infinity; const lb = mb?.latencyMs ?? Infinity; return sort.dir === 'asc' ? la - lb : lb - la; }
             default: return 0;
         }
-    }), [servers, sort, metrics]);
+    }), [filteredServers, sort, metrics]);
 
     const toggleFavorite = async (serverId: string) => {
         const server = servers.find((s) => s.id === serverId);
@@ -694,7 +896,7 @@ export default function DashboardPage() {
     const openInSessions = async (server: ServerItem) => {
         const alreadyOpen = sessions.some(s => s.serverId === server.id);
         if (!alreadyOpen) await addSession(server.id, server.name);
-        router.push('/dashboard/sessions');
+        router.push('/panel/sessions');
     };
 
     const handleDelete = async () => {
@@ -713,126 +915,230 @@ export default function DashboardPage() {
 
     const currentSortLabel = SORT_OPTIONS.find(o => o.field === sort.field && o.dir === sort.dir)?.label ?? 'Sort';
 
+    const handleTagClick = (tag: string) => {
+        setActiveTag(prev => prev === tag ? null : tag);
+    };
+
     const sharedProps = (server: ServerItem) => ({
         server,
         m: metrics[server.id] ?? null,
         mLoading: metricsLoading[server.id] ?? false,
         hasSession: sessions.some(s => s.serverId === server.id),
         onFavorite:     () => toggleFavorite(server.id),
-        onEdit:         () => router.push(`/dashboard/servers/${server.id}/edit`),
+        onEdit:         () => router.push(`/panel/servers/${server.id}/edit`),
         onDelete:       () => setDeleteConfirm(server),
         onCopyPassword: () => setRevealTarget({ server, field: 'password' }),
-        onConnect:      () => router.push(`/dashboard/connect/${server.id}/${server.protocol.toLowerCase()}`),
+        onConnect:      () => router.push(`/panel/connect/${server.id}/${server.protocol.toLowerCase()}`),
         onSessions:     () => openInSessions(server),
+        onTagClick:     handleTagClick,
     });
+
+    // Protocol counts for filter buttons
+    const protocolCounts = useMemo(() => {
+        const base = servers.filter(s => {
+            if (filter === 'favorites' && !s.isFavorite) return false;
+            if (activeTag && !s.tags.includes(activeTag)) return false;
+            return true;
+        });
+        return {
+            all: base.length,
+            SSH: base.filter(s => s.protocol === 'SSH').length,
+            SCP: base.filter(s => s.protocol === 'SCP').length,
+            RDP: base.filter(s => s.protocol === 'RDP').length,
+            VNC: base.filter(s => s.protocol === 'VNC').length,
+        };
+    }, [servers, filter, activeTag]);
+
+    const showProtocolFilters = Object.values({ SSH: protocolCounts.SSH, SCP: protocolCounts.SCP, RDP: protocolCounts.RDP, VNC: protocolCounts.VNC }).some(c => c > 0);
 
     return (
         <>
         <div className="max-w-6xl mx-auto">
+            {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                     <h1 className="text-xl font-bold">Servers</h1>
                     <p className="text-sm text-muted-foreground mt-0.5">
                         {servers.length > 0
-                            ? `${servers.length} server${servers.length === 1 ? '' : 's'}`
+                            ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
                             : 'Manage and connect to your servers'}
                     </p>
                 </div>
                 <Button asChild>
-                    <Link href="/apps/web/src/app/panel/servers/new">
+                    <Link href="/panel/servers/new">
                         <Plus className="w-4 h-4" /> Add Server
                     </Link>
                 </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-5">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                        type="text"
-                        placeholder="Search servers..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 text-sm h-9 bg-secondary border-border"
-                    />
-                </div>
+            {/* ── Fleet Overview Stats ── */}
+            <FleetStats
+                servers={servers}
+                metrics={metrics}
+                metricsLoading={metricsLoading}
+                sessions={sessions}
+            />
 
-                <div className="flex gap-2 shrink-0 flex-wrap">
-                    <Button
-                        onClick={() => setFilter('all')}
-                        variant={filter === 'all' ? 'default' : 'secondary'}
-                        size="sm"
-                        className="h-9 px-3 text-xs"
-                    >
-                        All
-                    </Button>
-                    <Button
-                        onClick={() => setFilter('favorites')}
-                        variant={filter === 'favorites' ? 'default' : 'secondary'}
-                        size="sm"
-                        className="h-9 px-3 text-xs"
-                    >
-                        <Star className="w-3.5 h-3.5" /> Starred
-                    </Button>
+            {/* ── Fleet Alerts ── */}
+            {!loading && (
+                <FleetAlerts
+                    servers={servers}
+                    metrics={metrics}
+                    onSelectServer={(id) => router.push(`/panel/servers/${id}`)}
+                />
+            )}
 
-                    <div className="w-px bg-border self-stretch" />
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="secondary" size="sm" className="h-9 px-3 text-xs gap-1.5 max-w-[164px]">
-                                <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate hidden sm:inline">{currentSortLabel}</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-card border-border">
-                            <DropdownMenuLabel className="text-xs text-muted-foreground">Sort by</DropdownMenuLabel>
-                            {SORT_OPTIONS.map((opt) => {
-                                const active = sort.field === opt.field && sort.dir === opt.dir;
-                                return (
-                                    <DropdownMenuItem
-                                        key={`${opt.field}-${opt.dir}`}
-                                        onClick={() => applySort(opt.field, opt.dir)}
-                                        className={`gap-2 text-xs ${active ? 'text-primary' : ''}`}
-                                    >
-                                        {active ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
-                                        {opt.label}
-                                    </DropdownMenuItem>
-                                );
-                            })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <div className="w-px bg-border self-stretch" />
-
-                    <div className="flex rounded-lg border border-border overflow-hidden">
-                        <button
-                            onClick={() => switchView('grid')}
-                            className={`px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                            title="Grid view"
-                        >
-                            <LayoutGrid className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => switchView('list')}
-                            className={`px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                            title="List view"
-                        >
-                            <List className="w-4 h-4" />
-                        </button>
+            {/* ── Search + Filters ── */}
+            <div className="flex flex-col gap-3 mb-5">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Search servers..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 text-sm h-9 bg-secondary border-border"
+                        />
                     </div>
 
-                    <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => { fetchServers(); fetchMetrics(servers, true); }}
-                        className="h-9 w-9"
-                        title="Refresh"
-                    >
-                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    </Button>
+                    <div className="flex gap-2 shrink-0 flex-wrap">
+                        <Button
+                            onClick={() => setFilter('all')}
+                            variant={filter === 'all' ? 'default' : 'secondary'}
+                            size="sm"
+                            className="h-9 px-3 text-xs"
+                        >
+                            All
+                        </Button>
+                        <Button
+                            onClick={() => setFilter('favorites')}
+                            variant={filter === 'favorites' ? 'default' : 'secondary'}
+                            size="sm"
+                            className="h-9 px-3 text-xs"
+                        >
+                            <Star className="w-3.5 h-3.5" /> Starred
+                        </Button>
+
+                        <div className="w-px bg-border self-stretch" />
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="secondary" size="sm" className="h-9 px-3 text-xs gap-1.5 max-w-[164px]">
+                                    <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="truncate hidden sm:inline">{currentSortLabel}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-card border-border">
+                                <DropdownMenuLabel className="text-xs text-muted-foreground">Sort by</DropdownMenuLabel>
+                                {SORT_OPTIONS.map((opt) => {
+                                    const active = sort.field === opt.field && sort.dir === opt.dir;
+                                    return (
+                                        <DropdownMenuItem
+                                            key={`${opt.field}-${opt.dir}`}
+                                            onClick={() => applySort(opt.field, opt.dir)}
+                                            className={`gap-2 text-xs ${active ? 'text-primary' : ''}`}
+                                        >
+                                            {active ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
+                                            {opt.label}
+                                        </DropdownMenuItem>
+                                    );
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <div className="w-px bg-border self-stretch" />
+
+                        <div className="flex rounded-lg border border-border overflow-hidden">
+                            <button
+                                onClick={() => switchView('grid')}
+                                className={`px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                                title="Grid view"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => switchView('list')}
+                                className={`px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                                title="List view"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => { fetchServers(); fetchMetrics(servers, true); }}
+                            className="h-9 w-9"
+                            title="Refresh"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        </Button>
+                    </div>
                 </div>
+
+                {/* Protocol filter pills */}
+                {showProtocolFilters && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {(['all', 'SSH', 'SCP', 'RDP', 'VNC'] as ProtocolFilter[]).map((p) => {
+                            const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
+                            if (p !== 'all' && count === 0) return null;
+                            const active = protocolFilter === p;
+                            const colorMap: Record<string, string> = {
+                                SSH: active ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'text-muted-foreground border-border hover:border-emerald-500/30 hover:text-emerald-400',
+                                SCP: active ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'         : 'text-muted-foreground border-border hover:border-blue-500/30 hover:text-blue-400',
+                                RDP: active ? 'bg-purple-500/20 text-purple-400 border-purple-500/40'   : 'text-muted-foreground border-border hover:border-purple-500/30 hover:text-purple-400',
+                                VNC: active ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'   : 'text-muted-foreground border-border hover:border-orange-500/30 hover:text-orange-400',
+                                all: active ? 'bg-primary/15 text-primary border-primary/30'             : 'text-muted-foreground border-border hover:text-foreground',
+                            };
+                            return (
+                                <button
+                                    key={p}
+                                    onClick={() => setProtocolFilter(p)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all ${colorMap[p]}`}
+                                >
+                                    {p === 'all' ? 'All protocols' : p}
+                                    <span className="tabular-nums opacity-60">{count}</span>
+                                </button>
+                            );
+                        })}
+
+                        {/* Active tag filter chip */}
+                        {activeTag && (
+                            <>
+                                <div className="w-px h-4 bg-border" />
+                                <button
+                                    onClick={() => setActiveTag(null)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium bg-primary/15 text-primary border-primary/30 transition-all"
+                                >
+                                    <Tag className="w-3 h-3" />
+                                    {activeTag}
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Tag filter bar (when there are tags and no active tag filter) */}
+                {allTags.length > 0 && !activeTag && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <Tag className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                        {allTags.map(tag => (
+                            <button
+                                key={tag}
+                                onClick={() => setActiveTag(tag)}
+                                className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
+                            >
+                                {tag}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
+            {/* ── Server List ── */}
             {loading ? (
                 viewMode === 'grid' ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -866,17 +1172,32 @@ export default function DashboardPage() {
                         ))}
                     </Card>
                 )
-            ) : servers.length === 0 ? (
-                <Card className="p-16 text-center bg-card border-border">
-                    <Server className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-                    <h3 className="font-medium mb-1.5">No servers yet</h3>
-                    <p className="text-sm text-muted-foreground mb-6">Add your first server to get started</p>
-                    <Button asChild>
-                        <Link href="/apps/web/src/app/panel/servers/new">
-                            <Plus className="w-4 h-4" /> Add Server
-                        </Link>
-                    </Button>
-                </Card>
+            ) : sortedServers.length === 0 ? (
+                servers.length === 0 ? (
+                    <Card className="p-16 text-center bg-card border-border">
+                        <Server className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+                        <h3 className="font-medium mb-1.5">No servers yet</h3>
+                        <p className="text-sm text-muted-foreground mb-6">Add your first server to get started</p>
+                        <Button asChild>
+                            <Link href="/panel/servers/new">
+                                <Plus className="w-4 h-4" /> Add Server
+                            </Link>
+                        </Button>
+                    </Card>
+                ) : (
+                    <Card className="p-12 text-center bg-card border-border">
+                        <Search className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
+                        <h3 className="font-medium mb-1">No matching servers</h3>
+                        <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters or search</p>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => { setProtocolFilter('all'); setActiveTag(null); setSearchQuery(''); setFilter('all'); }}
+                        >
+                            Clear filters
+                        </Button>
+                    </Card>
+                )
             ) : viewMode === 'grid' ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {sortedServers.map((server) => <GridCard key={server.id} {...sharedProps(server)} />)}

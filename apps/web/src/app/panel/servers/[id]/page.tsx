@@ -242,7 +242,7 @@ export default function ServerDetailsPage() {
                 historyRes.json(),
             ]);
 
-            if (!serverData.success) { router.push('/dashboard'); return; }
+            if (!serverData.success) { router.push('/panel'); return; }
             setServer(serverData.data.server);
 
             if (monitorData.success && monitorData.data.config) {
@@ -261,7 +261,7 @@ export default function ServerDetailsPage() {
                 setHealthRecords(historyData.data.records);
             }
         } catch {
-            router.push('/dashboard');
+            router.push('/panel');
         } finally {
             setLoading(false);
         }
@@ -371,7 +371,7 @@ export default function ServerDetailsPage() {
             {/* ── Header ── */}
             <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                    <Link href="/dashboard">
+                    <Link href="/panel">
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                 </Button>

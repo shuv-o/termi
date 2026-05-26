@@ -202,7 +202,7 @@ export default function NewServerPage() {
                 setLoading(false);
                 return;
             }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('An error occurred. Please try again.');
             setLoading(false);
@@ -218,7 +218,7 @@ export default function NewServerPage() {
         <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-5">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                    <Link href="/dashboard">
+                    <Link href="/panel">
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                 </Button>
@@ -822,7 +822,7 @@ export default function NewServerPage() {
                                 {loading ? 'Creating…' : 'Create Server'}
                             </Button>
                             <Button variant="secondary" asChild className="w-full">
-                                <Link href="/dashboard">Cancel</Link>
+                                <Link href="/panel">Cancel</Link>
                             </Button>
                         </div>
                     </div>
