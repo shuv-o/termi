@@ -393,8 +393,11 @@ app.whenReady().then(async () => {
             }
         }
 
-        const required = ['DATABASE_URL', 'SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
-        const missing = required.filter(k => !process.env[k]);
+        // Accept either split DB vars or a full DATABASE_URL
+        const hasDb = process.env.DATABASE_URL ||
+            (process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME);
+        const required = ['SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
+        const missing = [...required.filter(k => !process.env[k]), ...(hasDb ? [] : ['DATABASE_URL (or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME)'])];
         if (missing.length > 0) {
             dialog.showErrorBox(
                 'Termi — Configuration Required',

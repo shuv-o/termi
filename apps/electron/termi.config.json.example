@@ -1,0 +1,32 @@
+{
+  "_comment": "Termi packaged-app configuration. Copy to the OS user-data directory:",
+  "_comment_mac": "  macOS:   ~/Library/Application Support/Termi/termi.config.json",
+  "_comment_win": "  Windows: %APPDATA%\\Termi\\termi.config.json",
+  "_comment_gen": "  Generate secrets with: openssl rand -base64 32",
+
+  "_section_database": "--- DATABASE (required) ---",
+  "DATABASE_URL": "postgresql://termi:your-db-password@your-db-host:5432/termi?schema=public",
+
+  "_section_keys": "--- SECURITY KEYS (required) ---",
+  "SESSION_SECRET": "change-me-generate-with-openssl-rand-base64-32",
+  "ENCRYPTION_KEY": "change-me-generate-with-openssl-rand-base64-32",
+  "GATEWAY_JWT_SECRET": "change-me-generate-with-openssl-rand-base64-32",
+
+  "_section_app": "--- APP URL (required for passkey rpID & email links) ---",
+  "NEXT_PUBLIC_APP_URL": "http://127.0.0.1:22080",
+
+  "_section_guacd": "--- RDP/VNC GUACD (optional — needed for RDP/VNC connections) ---",
+  "GUACD_HOST": "localhost",
+  "GUACD_PORT": "4822",
+
+  "_section_net": "--- NETWORK (optional) ---",
+  "ALLOW_PRIVATE_NETWORKS": "true",
+
+  "_section_smtp": "--- SMTP EMAIL (optional) ---",
+  "SMTP_HOST": "smtp.gmail.com",
+  "SMTP_PORT": "587",
+  "SMTP_SECURE": "false",
+  "SMTP_USER": "your@email.com",
+  "SMTP_PASS": "your-app-password",
+  "SMTP_FROM": "Termi <noreply@your-domain.com>"
+}

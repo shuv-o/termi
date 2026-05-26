@@ -1,0 +1,116 @@
+services:
+  guacd:
+    image: guacamole/guacd:1.6.0
+    container_name: termi-guacd
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: builder
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    container_name: termi-migrate
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    command: [ "sh", "-c", "cd apps/web && npx prisma migrate deploy" ]
+    networks:
+      - dokploy-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # NEXT_PUBLIC_GATEWAY_URL is intentionally excluded — it is a runtime env var only,
+        # served to the browser via the token API. This keeps the image deployment-agnostic.
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      gateway:
+        condition: service_started
+
+    container_name: termi-web
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
+
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
+
+      TRUSTED_PROXY: ${TRUSTED_PROXY}
+
+      NEXT_TELEMETRY_DISABLED: 1
+      DEBUG: "false"
+
+    networks:
+      - dokploy-network
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: termi-gateway
+    restart: unless-stopped
+    depends_on:
+      - guacd
+    environment:
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+
+      GATEWAY_PORT: ${GATEWAY_PORT:-4000}
+      GATEWAY_HOST: ${GATEWAY_HOST:-"0.0.0.0"}
+
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+
+      GUACD_HOST: ${GUACD_HOST:-"guacd"}
+      GUACD_PORT: ${GUACD_PORT:-4822}
+
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
+
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    driver: bridge
