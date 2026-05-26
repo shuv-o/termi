@@ -41,13 +41,13 @@ const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
 function getSessionSecret(): string {
     const secret = process.env.SESSION_SECRET;
     if (!secret || secret.length < 32) {
-        if (process.env.NODE_ENV === 'production') {
+        if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build') {
             throw new Error(
                 'SESSION_SECRET must be set and at least 32 characters long. ' +
                 'Generate one with: openssl rand -base64 32'
             );
         }
-        // Dev fallback — never used in production
+        // Dev fallback and build-time placeholder — never used in production at runtime
         return 'dev-only-fallback-secret-at-least-32-chars!!';
     }
     return secret;

@@ -25,6 +25,11 @@ function getDatabaseUrl(): string {
         return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${port}/${DB_NAME}?schema=${schema}`;
     }
     if (DATABASE_URL) return DATABASE_URL;
+    // During `next build` no DB connection is needed — return a placeholder so the
+    // build succeeds without requiring runtime secrets as build-time args.
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+        return 'postgresql://build:build@localhost:5432/build';
+    }
     throw new Error('Database not configured. Set DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME or DATABASE_URL.');
 }
 
