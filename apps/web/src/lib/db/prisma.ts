@@ -14,27 +14,23 @@ import { Pool } from 'pg';
 // ============================================================================
 
 /**
- * Assert that DATABASE_URL includes SSL parameters in production.
- * Exported for unit-testing. Called automatically at module load time.
- *
- * @param url - The DATABASE_URL string to check (defaults to process.env.DATABASE_URL)
- * @throws Error in production when SSL is not configured
+ * Build a PostgreSQL connection URL from split env vars.
+ * Falls back to DATABASE_URL for backwards compatibility.
  */
+function getDatabaseUrl(): string {
+    const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SCHEMA, DATABASE_URL } = process.env;
+    if (DB_HOST && DB_USER && DB_PASSWORD && DB_NAME) {
+        const schema = DB_SCHEMA ?? 'public';
+        const port   = DB_PORT ?? '5432';
+        return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${port}/${DB_NAME}?schema=${schema}`;
+    }
+    if (DATABASE_URL) return DATABASE_URL;
+    throw new Error('Database not configured. Set DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME or DATABASE_URL.');
+}
+
 export function assertDatabaseSslInProduction(url?: string): void {
     if (process.env.NODE_ENV !== 'production') return;
-    const dbUrl = url ?? process.env.DATABASE_URL ?? '';
-    // const hasSsl =
-    //     dbUrl.includes('sslmode=require') ||
-    //     dbUrl.includes('sslmode=verify-full') ||
-    //     dbUrl.includes('sslmode=verify-ca') ||
-    //     dbUrl.includes('ssl=true');
-    // if (!hasSsl) {
-    //     throw new Error(
-    //         'DATABASE_URL must include SSL parameters for production deployments. ' +
-    //         'Append ?sslmode=require to your connection string. ' +
-    //         'Example: postgresql://user:pass@host:5432/termi?sslmode=require'
-    //     );
-    // }
+    void (url ?? getDatabaseUrl()); // no-op: SSL enforcement removed
 }
 
 // Guard: skip during test runs (Vitest sets VITEST=true automatically)
@@ -54,7 +50,7 @@ const globalForPrisma = globalThis as unknown as {
 
 // Create PostgreSQL connection pool
 const pool = globalForPrisma.pool ?? new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: getDatabaseUrl(),
 });
 
 if (process.env.NODE_ENV !== 'production') {
