@@ -1,11 +1,3 @@
-# Termi Web Application Dockerfile
-# Multi-stage build for production
-
-# Stage 1: Dependencies
-# Use Debian-based image so npm correctly installs glibc optional native binaries
-# (lightningcss, @tailwindcss/oxide). These packages are absent from the lockfile's
-# packages section because it was generated on macOS; npm install at the root level
-# (not workspace-scoped) triggers proper cross-platform optional dep resolution.
 FROM node:20-slim AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
@@ -15,9 +7,6 @@ COPY package.json package-lock.json* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/gateway/package.json ./apps/gateway/
 
-# Install deps. Then explicitly install the correct linux native packages that are absent
-# from the lockfile (generated on macOS); npm never adds them automatically.
-# Detects CPU arch at build time so the same Dockerfile works on both x64 and arm64.
 RUN npm install && \
     LCSS_VER=$(node -p "require('./node_modules/lightningcss/package.json').version") && \
     OXIDE_VER=$(node -p "require('./node_modules/@tailwindcss/oxide/package.json').version") && \
@@ -41,26 +30,57 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate --schema=apps/web/prisma/schema.prisma
 
-# Build-time arguments — only values that must be statically embedded in the JS bundle.
-# NEXT_PUBLIC_GATEWAY_URL is intentionally NOT here: the browser reads it from the
-# token API response at runtime, so baking it in would break multi-environment images.
+ARG DB_HOST
+ARG DB_PORT
+ARG DB_USER
+ARG DB_NAME
+ARG DB_PASSWORD
+ARG SESSION_SECRET
+ARG ENCRYPTION_KEY
+ARG GATEWAY_JWT_SECRET
 ARG NEXT_PUBLIC_APP_URL
-ARG VAPID_PUBLIC_KEY=your-vapid-public-key
-ARG VAPID_SUBJECT=mailto:admin@example.com
+ARG NEXT_PUBLIC_GATEWAY_URL
+ARG GOOGLE_CLIENT_ID
+ARG GOOGLE_CLIENT_SECRET
+ARG GOOGLE_REDIRECT_URI
+ARG SMTP_HOST
+ARG SMTP_PORT
+ARG SMTP_SECURE
+ARG SMTP_USER
+ARG SMTP_PASS
+ARG SMTP_FROM
+ARG VAPID_PUBLIC_KEY
+ARG VAPID_PRIVATE_KEY
+ARG VAPID_SUBJECT
+ARG ALLOW_PRIVATE_NETWORKS
+ARG TRUSTED_PROXY
 
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
+ENV DB_HOST=${DB_HOST}
+ENV DB_PORT=${DB_PORT}
+ENV DB_USER=${DB_USER}
+ENV DB_NAME=${DB_NAME}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV SESSION_SECRET=${SESSION_SECRET}
+ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
+ENV GATEWAY_JWT_SECRET=${GATEWAY_JWT_SECRET}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL}
+ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+ENV GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+ENV SMTP_HOST=${SMTP_HOST}
+ENV SMTP_PORT=${SMTP_PORT}
+ENV SMTP_SECURE=${SMTP_SECURE}
+ENV SMTP_USER=${SMTP_USER}
+ENV SMTP_PASS=${SMTP_PASS}
+ENV SMTP_FROM=${SMTP_FROM}
 ENV VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+ENV VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
 ENV VAPID_SUBJECT=${VAPID_SUBJECT}
-
-# Build-time placeholder values for secrets — real values injected at runtime only.
-# These constants keep Next.js env validation happy during `npm run build` without
-# ever leaking production secrets into the image layer history.
-ENV SESSION_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
-ENV ENCRYPTION_KEY=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
-ENV GATEWAY_JWT_SECRET=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
-ENV VAPID_PRIVATE_KEY=build-time-placeholder-not-used-in-runtime-xxxxxxxxxx
+ENV ALLOW_PRIVATE_NETWORKS=${ALLOW_PRIVATE_NETWORKS}
+ENV TRUSTED_PROXY=${TRUSTED_PROXY}
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build --workspace=apps/web
 
