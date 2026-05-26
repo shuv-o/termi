@@ -33,13 +33,8 @@ export function assertDatabaseSslInProduction(url?: string): void {
     void (url ?? getDatabaseUrl()); // no-op: SSL enforcement removed
 }
 
-// Guard: skip during test runs (Vitest sets VITEST=true automatically)
-if (process.env.NODE_ENV === 'production' && process.env.VITEST !== 'true') {
-    assertDatabaseSslInProduction();
-}
-
 // ============================================================================
-// CLIENT SINGLETON
+// CLIENT SINGLETON (lazy – initialised on first access, not at import time)
 // ============================================================================
 
 // Prevent multiple Prisma Client instances in development
@@ -48,29 +43,35 @@ const globalForPrisma = globalThis as unknown as {
     pool: Pool | undefined;
 };
 
-// Create PostgreSQL connection pool
-const pool = globalForPrisma.pool ?? new Pool({
-    connectionString: getDatabaseUrl(),
-});
+function getPrisma(): PrismaClient {
+    if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
-if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.pool = pool;
-}
+    const pool = globalForPrisma.pool ?? new Pool({ connectionString: getDatabaseUrl() });
 
-// Create Prisma adapter
-const adapter = new PrismaPg(pool);
+    if (process.env.NODE_ENV !== 'production') {
+        globalForPrisma.pool = pool;
+    }
 
-export const prisma =
-    globalForPrisma.prisma ??
-    new PrismaClient({
+    const adapter = new PrismaPg(pool);
+
+    const client = new PrismaClient({
         adapter,
         log: process.env.NODE_ENV === 'development'
             ? ['query', 'error', 'warn']
             : ['error'],
     });
 
-if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma;
+    if (process.env.NODE_ENV !== 'production') {
+        globalForPrisma.prisma = client;
+    }
+
+    return client;
 }
+
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+    get(_target, prop) {
+        return (getPrisma() as unknown as Record<string | symbol, unknown>)[prop];
+    },
+});
 
 export default prisma;
