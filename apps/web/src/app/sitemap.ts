@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://github.com/shuvoooo/termi';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://github.com/shuvoooo/termi';
 
     return [
         {
