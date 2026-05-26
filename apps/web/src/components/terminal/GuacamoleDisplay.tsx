@@ -90,6 +90,11 @@ export default function GuacamoleDisplay({
         let windowKeyboard: any = null;
         let resizeObserver: ResizeObserver | null = null;
         let displayEl: HTMLElement | null = null;
+        let pasteHandler: ((e: ClipboardEvent) => void) | null = null;
+        // Mac keyboard state — reset on cleanup
+        let macMetaDown   = false; // true while Cmd (Meta) is physically held
+        let macVSuppressed = false; // true when Cmd+V V-key was suppressed (paste handler sends it)
+        let ctrlDown      = false; // true while physical Ctrl is held (all platforms)
         // guacamole-common-js uses browser globals - must be loaded client-side
         import('guacamole-common-js').then((module) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -167,21 +172,65 @@ export default function GuacamoleDisplay({
                     let b64 = '';
                     stream.onblob = (chunk: string) => { b64 += chunk; };
                     stream.onend = () => {
-                        try { navigator.clipboard?.writeText(atob(b64)); } catch { /* ignore */ }
+                        try {
+                            // atob gives raw bytes; TextDecoder handles multi-byte UTF-8 correctly
+                            const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                            const text = new TextDecoder().decode(bytes);
+                            navigator.clipboard?.writeText(text);
+                        } catch { /* ignore */ }
                     };
                 }
             };
-            // Clipboard: local → remote (intercept browser paste events)
-            displayEl.addEventListener('paste', (e: Event) => {
-                const text = (e as ClipboardEvent).clipboardData?.getData('text/plain');
+            // Shared guard: skip forwarding when a native text field is focused.
+            const isNativeInput = () => {
+                const a = document.activeElement as HTMLElement | null;
+                if (!a) return false;
+                const tag = a.tagName.toLowerCase();
+                return tag === 'input' || tag === 'textarea' || tag === 'select' || !!a.isContentEditable;
+            };
+            // ── Mac Cmd → Ctrl mapping ───────────────────────────────────────────
+            // X11 keysyms used by guacamole-common-js on Mac:
+            //   Meta_L 0xFFE7  Meta_R 0xFFE8  (Mac Command key)
+            //   Control_L 0xFFE3  Control_R 0xFFE4
+            const isMac = /Mac/i.test(navigator.platform);
+            const META_L = 0xFFE7, META_R = 0xFFE8;
+            const CTRL_L = 0xFFE3, CTRL_R = 0xFFE4;
+            const V_KEYSYM = 0x76;
+            // ────────────────────────────────────────────────────────────────────
+            // Clipboard: local → remote
+            // Listen on document so paste fires even when the display canvas is not
+            // the focused element — mirrors how the keyboard handler works.
+            pasteHandler = (e: ClipboardEvent) => {
+                if (isNativeInput()) return;
+                const text = e.clipboardData?.getData('text/plain');
                 if (text) {
                     const stream = guacClient.createClipboardStream('text/plain');
                     const writer = new Guacamole.StringWriter(stream);
                     writer.sendText(text);
                     writer.sendEnd();
                 }
-                // Don't preventDefault — keyboard handler also sends Ctrl+V so remote pastes
-            });
+                // Send Ctrl+V AFTER clipboard content so the remote always pastes
+                // the correct data regardless of timing:
+                //   • Mac Cmd+V: V keydown was suppressed in keyboard handler;
+                //     Ctrl is held (Meta→Ctrl translation) — just send V.
+                //   • Non-Mac right-click paste (Ctrl not held): send full Ctrl+V.
+                //   • Non-Mac Ctrl+V via keyboard: keyboard already sent Ctrl+V before
+                //     this event, so we skip to avoid double paste.
+                if (isMac && macMetaDown) {
+                    // Ctrl already held by Meta→Ctrl mapping; append V
+                    guacClient.sendKeyEvent(1, V_KEYSYM);
+                    guacClient.sendKeyEvent(0, V_KEYSYM);
+                } else if (!ctrlDown) {
+                    // Right-click paste (no keyboard Ctrl held on any platform)
+                    guacClient.sendKeyEvent(1, CTRL_L);
+                    guacClient.sendKeyEvent(1, V_KEYSYM);
+                    guacClient.sendKeyEvent(0, V_KEYSYM);
+                    guacClient.sendKeyEvent(0, CTRL_L);
+                }
+                // else: physical Ctrl+V — keyboard already sent Ctrl+V first (pre-existing
+                //       timing limitation; clipboard content syncs for the next paste).
+            };
+            document.addEventListener('paste', pasteHandler);
             // Audio from remote desktop
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             guacClient.onaudio = (stream: any, mimetype: string) => {
@@ -197,31 +246,61 @@ export default function GuacamoleDisplay({
             mouse.onmouseout  = forwardMouse;
             // Suppress context menu so right-click is forwarded
             displayEl.addEventListener('contextmenu', (e: Event) => e.preventDefault());
-            // Keyboard on the display element
-            const keyboard = new Guacamole.Keyboard(displayEl);
-            keyboard.onkeydown = (keysym: number) => guacClient.sendKeyEvent(true, keysym);
-            keyboard.onkeyup   = (keysym: number) => guacClient.sendKeyEvent(false, keysym);
-            // Window-level keyboard fallback when display is not focused
-            windowKeyboard = new Guacamole.Keyboard(window);
+            // Document-level keyboard — works regardless of which element has DOM focus.
+            windowKeyboard = new Guacamole.Keyboard(document);
+            // sendKeyEvent expects integer 1/0 (not boolean); guacd parses via atoi().
             windowKeyboard.onkeydown = (keysym: number) => {
-                const a = document.activeElement;
-                if (a === displayEl || a === document.body || a === null) {
-                    guacClient.sendKeyEvent(true, keysym);
+                if (isNativeInput()) return;
+                if (keysym === CTRL_L || keysym === CTRL_R) ctrlDown = true;
+                if (isMac) {
+                    if (keysym === META_L || keysym === META_R) {
+                        // Cmd → Ctrl: covers Cmd+C (copy), Cmd+A, Cmd+Z, etc.
+                        macMetaDown = true;
+                        guacClient.sendKeyEvent(1, keysym === META_L ? CTRL_L : CTRL_R);
+                        return;
+                    }
+                    if (macMetaDown && keysym === V_KEYSYM) {
+                        // Cmd+V: suppress keyboard V — paste handler sends clipboard
+                        // then V so the remote gets them in the correct order.
+                        macVSuppressed = true;
+                        return;
+                    }
                 }
+                guacClient.sendKeyEvent(1, keysym);
             };
             windowKeyboard.onkeyup = (keysym: number) => {
-                const a = document.activeElement;
-                if (a === displayEl || a === document.body || a === null) {
-                    guacClient.sendKeyEvent(false, keysym);
+                if (isNativeInput()) return;
+                if (keysym === CTRL_L || keysym === CTRL_R) ctrlDown = false;
+                if (isMac) {
+                    if (keysym === META_L || keysym === META_R) {
+                        macMetaDown = false;
+                        guacClient.sendKeyEvent(0, keysym === META_L ? CTRL_L : CTRL_R);
+                        return;
+                    }
+                    if (keysym === V_KEYSYM && macVSuppressed) {
+                        // V keydown was suppressed; skip the keyup too (paste handler
+                        // already sent the matched down+up pair).
+                        macVSuppressed = false;
+                        return;
+                    }
                 }
+                guacClient.sendKeyEvent(0, keysym);
             };
             // Connect
             guacClient.connect(connectData);
         });
         return () => {
             fitFnRef.current = null;
+            macMetaDown = macVSuppressed = ctrlDown = false;
+            if (pasteHandler) document.removeEventListener('paste', pasteHandler);
             try { guacClient?.disconnect(); } catch { /* ignore */ }
-            try { windowKeyboard?.reset?.(); } catch { /* ignore */ }
+            try {
+                if (windowKeyboard) {
+                    windowKeyboard.onkeydown = null;
+                    windowKeyboard.onkeyup = null;
+                    windowKeyboard.reset?.();
+                }
+            } catch { /* ignore */ }
             resizeObserver?.disconnect();
             if (displayEl && displayEl.parentNode === container) {
                 container.removeChild(displayEl);

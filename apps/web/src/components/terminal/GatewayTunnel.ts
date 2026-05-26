@@ -209,7 +209,10 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tunnel.sendMessage = function sendMessage(...elements: any[]) {
-        if (!tunnel.isConnected() || !socket) return;
+        if (!tunnel.isConnected() || !socket) {
+            if (elements[0] === 'key') console.log('[GatewayTunnel] key BLOCKED - connected:', tunnel.isConnected(), 'socket:', !!socket);
+            return;
+        }
         if (elements.length === 0) return;
 
         const enc = new TextEncoder();
@@ -221,6 +224,7 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
                 })
                 .join(',') + ';';
 
+        if (elements[0] === 'key') console.log('[GatewayTunnel] sending key message:', message);
         socket.send(message);
     };
 

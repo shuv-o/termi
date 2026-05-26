@@ -173,6 +173,7 @@ export class GuacamoleHandler {
 
                 // Check if it's a Guacamole instruction (contains period-length prefix)
                 if (data.match(/^\d+\./)) {
+                    if (data.match(/^\d+\.key,/)) console.log('[Guacamole] → key to guacd:', data);
                     this.guacdSocket.write(data);
                 } else {
                     // Try to parse as JSON
