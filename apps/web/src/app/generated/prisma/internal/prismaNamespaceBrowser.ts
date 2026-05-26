@@ -64,7 +64,9 @@ export const ModelName = {
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
   RecoveryCode: 'RecoveryCode',
-  EmailOTP: 'EmailOTP'
+  EmailOTP: 'EmailOTP',
+  ServerInvitation: 'ServerInvitation',
+  ServerShare: 'ServerShare'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -317,6 +319,33 @@ export const EmailOTPScalarFieldEnum = {
 } as const
 
 export type EmailOTPScalarFieldEnum = (typeof EmailOTPScalarFieldEnum)[keyof typeof EmailOTPScalarFieldEnum]
+
+
+export const ServerInvitationScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  serverId: 'serverId',
+  inviterId: 'inviterId',
+  inviteeEmail: 'inviteeEmail',
+  permissions: 'permissions',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerInvitationScalarFieldEnum = (typeof ServerInvitationScalarFieldEnum)[keyof typeof ServerInvitationScalarFieldEnum]
+
+
+export const ServerShareScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  ownerId: 'ownerId',
+  sharedWithId: 'sharedWithId',
+  permissions: 'permissions',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerShareScalarFieldEnum = (typeof ServerShareScalarFieldEnum)[keyof typeof ServerShareScalarFieldEnum]
 
 
 export const SortOrder = {

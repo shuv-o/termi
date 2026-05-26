@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Loader2, Check, X, Terminal, Shield, Zap, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,13 @@ const features = [
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
+
+    useEffect(() => {
+        const emailParam = searchParams.get('email');
+        if (emailParam) setFormData(f => ({ ...f, email: emailParam }));
+    }, [searchParams]);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -59,7 +65,8 @@ export default function RegisterPage() {
             });
             const data = await response.json();
             if (!data.success) { setError(data.error || 'Registration failed'); setLoading(false); return; }
-            router.push('/login?registered=true');
+            const nextUrl = searchParams.get('next');
+            router.push(nextUrl ? `/login?registered=true&next=${encodeURIComponent(nextUrl)}` : '/login?registered=true');
         } catch {
             setError('An error occurred. Please try again.');
             setLoading(false);

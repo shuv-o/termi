@@ -66,6 +66,9 @@ model User {
   monitorConfigs      ServerMonitorConfig[]
   oauthAccounts       OAuthAccount[]
   persistentSessions  PersistentSession[]
+  sentInvitations     ServerInvitation[]    @relation("SentInvitations")
+  ownedShares         ServerShare[]         @relation("OwnedShares")
+  receivedShares      ServerShare[]         @relation("ReceivedShares")
 
   @@index([email])
   @@index([passwordResetToken])
@@ -175,6 +178,8 @@ model Server {
   connections   Connection[]
   monitorConfig ServerMonitorConfig?
   healthRecords ServerHealthRecord[]
+  invitations   ServerInvitation[]
+  shares        ServerShare[]
 
   @@index([userId])
   @@index([groupId])
@@ -366,6 +371,12 @@ enum AuditAction {
   PASSKEY_REGISTERED
   PASSKEY_REMOVED
   PASSKEY_USED
+
+  // Sharing events
+  SERVER_INVITE_SENT
+  SERVER_INVITE_ACCEPTED
+  SERVER_INVITE_DECLINED
+  SERVER_SHARE_REVOKED
 }
 
 // ============================================================================
@@ -496,4 +507,52 @@ model EmailOTP {
 
 enum OAuthProvider {
   GOOGLE
+}
+
+// ============================================================================
+// SERVER SHARING & INVITATIONS
+// ============================================================================
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model ServerInvitation {
+  id           String           @id @default(cuid())
+  token        String           @unique // crypto-random 32-byte hex, used in email link
+  serverId     String
+  inviterId    String
+  inviteeEmail String           // email of the person being invited
+  permissions  String           @default("manage") // "manage" | "connect"
+  status       InvitationStatus @default(PENDING)
+  expiresAt    DateTime
+  createdAt    DateTime         @default(now())
+
+  server  Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  inviter User   @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([inviterId])
+  @@index([inviteeEmail])
+  @@index([serverId])
+}
+
+model ServerShare {
+  id           String   @id @default(cuid())
+  serverId     String
+  ownerId      String
+  sharedWithId String
+  permissions  String   @default("manage") // "manage" | "connect"
+  createdAt    DateTime @default(now())
+
+  server     Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  owner      User   @relation("OwnedShares", fields: [ownerId], references: [id], onDelete: Cascade)
+  sharedWith User   @relation("ReceivedShares", fields: [sharedWithId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, sharedWithId])
+  @@index([ownerId])
+  @@index([sharedWithId])
 }

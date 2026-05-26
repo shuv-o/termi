@@ -397,7 +397,9 @@ export const ModelName = {
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
   RecoveryCode: 'RecoveryCode',
-  EmailOTP: 'EmailOTP'
+  EmailOTP: 'EmailOTP',
+  ServerInvitation: 'ServerInvitation',
+  ServerShare: 'ServerShare'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -413,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1453,6 +1455,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ServerInvitation: {
+      payload: Prisma.$ServerInvitationPayload<ExtArgs>
+      fields: Prisma.ServerInvitationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServerInvitationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServerInvitationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        findFirst: {
+          args: Prisma.ServerInvitationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServerInvitationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        findMany: {
+          args: Prisma.ServerInvitationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>[]
+        }
+        create: {
+          args: Prisma.ServerInvitationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        createMany: {
+          args: Prisma.ServerInvitationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServerInvitationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>[]
+        }
+        delete: {
+          args: Prisma.ServerInvitationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        update: {
+          args: Prisma.ServerInvitationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ServerInvitationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServerInvitationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServerInvitationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ServerInvitationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerInvitationPayload>
+        }
+        aggregate: {
+          args: Prisma.ServerInvitationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServerInvitation>
+        }
+        groupBy: {
+          args: Prisma.ServerInvitationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerInvitationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServerInvitationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerInvitationCountAggregateOutputType> | number
+        }
+      }
+    }
+    ServerShare: {
+      payload: Prisma.$ServerSharePayload<ExtArgs>
+      fields: Prisma.ServerShareFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServerShareFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServerShareFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        findFirst: {
+          args: Prisma.ServerShareFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServerShareFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        findMany: {
+          args: Prisma.ServerShareFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>[]
+        }
+        create: {
+          args: Prisma.ServerShareCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        createMany: {
+          args: Prisma.ServerShareCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServerShareCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>[]
+        }
+        delete: {
+          args: Prisma.ServerShareDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        update: {
+          args: Prisma.ServerShareUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        deleteMany: {
+          args: Prisma.ServerShareDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServerShareUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServerShareUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>[]
+        }
+        upsert: {
+          args: Prisma.ServerShareUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerSharePayload>
+        }
+        aggregate: {
+          args: Prisma.ServerShareAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServerShare>
+        }
+        groupBy: {
+          args: Prisma.ServerShareGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerShareGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServerShareCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerShareCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1728,6 +1878,33 @@ export const EmailOTPScalarFieldEnum = {
 export type EmailOTPScalarFieldEnum = (typeof EmailOTPScalarFieldEnum)[keyof typeof EmailOTPScalarFieldEnum]
 
 
+export const ServerInvitationScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  serverId: 'serverId',
+  inviterId: 'inviterId',
+  inviteeEmail: 'inviteeEmail',
+  permissions: 'permissions',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerInvitationScalarFieldEnum = (typeof ServerInvitationScalarFieldEnum)[keyof typeof ServerInvitationScalarFieldEnum]
+
+
+export const ServerShareScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  ownerId: 'ownerId',
+  sharedWithId: 'sharedWithId',
+  permissions: 'permissions',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerShareScalarFieldEnum = (typeof ServerShareScalarFieldEnum)[keyof typeof ServerShareScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1949,6 +2126,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
+
+/**
+ * Reference to a field of type 'InvitationStatus'
+ */
+export type EnumInvitationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvitationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InvitationStatus[]'
+ */
+export type ListEnumInvitationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvitationStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -2058,6 +2249,8 @@ export type GlobalOmitConfig = {
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
+  serverInvitation?: Prisma.ServerInvitationOmit
+  serverShare?: Prisma.ServerShareOmit
 }
 
 /* Types for Logging */

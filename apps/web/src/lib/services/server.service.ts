@@ -240,9 +240,22 @@ export async function getServerForConnection(
     userId: string,
     encryptionContext?: EncryptionContext
 ): Promise<ServerCredentials & { id: string; port: number; protocol: Protocol; displayWidth: number | null; displayHeight: number | null; colorDepth: number | null; rdpSecurity: string | null } | null> {
-    const server = await prisma.server.findFirst({
+    // Try as owner first
+    let server = await prisma.server.findFirst({
         where: { id: serverId, userId },
     });
+
+    // Fall back to shared access: fetch the server as its owner
+    if (!server) {
+        const share = await prisma.serverShare.findFirst({
+            where: { serverId, sharedWithId: userId },
+        });
+        if (share) {
+            server = await prisma.server.findFirst({
+                where: { id: serverId, userId: share.ownerId },
+            });
+        }
+    }
 
     if (!server) {
         return null;

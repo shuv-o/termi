@@ -70,7 +70,11 @@ export const AuditAction = {
   GROUP_DELETED: 'GROUP_DELETED',
   PASSKEY_REGISTERED: 'PASSKEY_REGISTERED',
   PASSKEY_REMOVED: 'PASSKEY_REMOVED',
-  PASSKEY_USED: 'PASSKEY_USED'
+  PASSKEY_USED: 'PASSKEY_USED',
+  SERVER_INVITE_SENT: 'SERVER_INVITE_SENT',
+  SERVER_INVITE_ACCEPTED: 'SERVER_INVITE_ACCEPTED',
+  SERVER_INVITE_DECLINED: 'SERVER_INVITE_DECLINED',
+  SERVER_SHARE_REVOKED: 'SERVER_SHARE_REVOKED'
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -81,3 +85,13 @@ export const OAuthProvider = {
 } as const
 
 export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider]
+
+
+export const InvitationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus]

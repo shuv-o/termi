@@ -355,6 +355,9 @@ export type UserWhereInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigListRelationFilter
   oauthAccounts?: Prisma.OAuthAccountListRelationFilter
   persistentSessions?: Prisma.PersistentSessionListRelationFilter
+  sentInvitations?: Prisma.ServerInvitationListRelationFilter
+  ownedShares?: Prisma.ServerShareListRelationFilter
+  receivedShares?: Prisma.ServerShareListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -390,6 +393,9 @@ export type UserOrderByWithRelationInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigOrderByRelationAggregateInput
   oauthAccounts?: Prisma.OAuthAccountOrderByRelationAggregateInput
   persistentSessions?: Prisma.PersistentSessionOrderByRelationAggregateInput
+  sentInvitations?: Prisma.ServerInvitationOrderByRelationAggregateInput
+  ownedShares?: Prisma.ServerShareOrderByRelationAggregateInput
+  receivedShares?: Prisma.ServerShareOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -428,6 +434,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   monitorConfigs?: Prisma.ServerMonitorConfigListRelationFilter
   oauthAccounts?: Prisma.OAuthAccountListRelationFilter
   persistentSessions?: Prisma.PersistentSessionListRelationFilter
+  sentInvitations?: Prisma.ServerInvitationListRelationFilter
+  ownedShares?: Prisma.ServerShareListRelationFilter
+  receivedShares?: Prisma.ServerShareListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -519,6 +528,9 @@ export type UserCreateInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -554,6 +566,9 @@ export type UserUncheckedCreateInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUpdateInput = {
@@ -589,6 +604,9 @@ export type UserUpdateInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -624,6 +642,9 @@ export type UserUncheckedUpdateInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -976,6 +997,48 @@ export type UserUpdateOneRequiredWithoutEmailOTPsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailOTPsInput, Prisma.UserUpdateWithoutEmailOTPsInput>, Prisma.UserUncheckedUpdateWithoutEmailOTPsInput>
 }
 
+export type UserCreateNestedOneWithoutSentInvitationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitationsInput, Prisma.UserUncheckedCreateWithoutSentInvitationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSentInvitationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitationsInput, Prisma.UserUncheckedCreateWithoutSentInvitationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitationsInput
+  upsert?: Prisma.UserUpsertWithoutSentInvitationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentInvitationsInput, Prisma.UserUpdateWithoutSentInvitationsInput>, Prisma.UserUncheckedUpdateWithoutSentInvitationsInput>
+}
+
+export type UserCreateNestedOneWithoutOwnedSharesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedSharesInput, Prisma.UserUncheckedCreateWithoutOwnedSharesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedSharesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReceivedSharesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedSharesInput, Prisma.UserUncheckedCreateWithoutReceivedSharesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedSharesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOwnedSharesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedSharesInput, Prisma.UserUncheckedCreateWithoutOwnedSharesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedSharesInput
+  upsert?: Prisma.UserUpsertWithoutOwnedSharesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOwnedSharesInput, Prisma.UserUpdateWithoutOwnedSharesInput>, Prisma.UserUncheckedUpdateWithoutOwnedSharesInput>
+}
+
+export type UserUpdateOneRequiredWithoutReceivedSharesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedSharesInput, Prisma.UserUncheckedCreateWithoutReceivedSharesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedSharesInput
+  upsert?: Prisma.UserUpsertWithoutReceivedSharesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReceivedSharesInput, Prisma.UserUpdateWithoutReceivedSharesInput>, Prisma.UserUncheckedUpdateWithoutReceivedSharesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1008,6 +1071,9 @@ export type UserCreateWithoutSessionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1042,6 +1108,9 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1092,6 +1161,9 @@ export type UserUpdateWithoutSessionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1126,6 +1198,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutServerGroupsInput = {
@@ -1160,6 +1235,9 @@ export type UserCreateWithoutServerGroupsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutServerGroupsInput = {
@@ -1194,6 +1272,9 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutServerGroupsInput = {
@@ -1244,6 +1325,9 @@ export type UserUpdateWithoutServerGroupsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
@@ -1278,6 +1362,9 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutServersInput = {
@@ -1312,6 +1399,9 @@ export type UserCreateWithoutServersInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutServersInput = {
@@ -1346,6 +1436,9 @@ export type UserUncheckedCreateWithoutServersInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutServersInput = {
@@ -1396,6 +1489,9 @@ export type UserUpdateWithoutServersInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServersInput = {
@@ -1430,6 +1526,9 @@ export type UserUncheckedUpdateWithoutServersInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutPersistentSessionsInput = {
@@ -1464,6 +1563,9 @@ export type UserCreateWithoutPersistentSessionsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
@@ -1498,6 +1600,9 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutPersistentSessionsInput = {
@@ -1548,6 +1653,9 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
@@ -1582,6 +1690,9 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -1616,6 +1727,9 @@ export type UserCreateWithoutAuditLogsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -1650,6 +1764,9 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -1700,6 +1817,9 @@ export type UserUpdateWithoutAuditLogsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -1734,6 +1854,9 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutOauthAccountsInput = {
@@ -1768,6 +1891,9 @@ export type UserCreateWithoutOauthAccountsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -1802,6 +1928,9 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -1852,6 +1981,9 @@ export type UserUpdateWithoutOauthAccountsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -1886,6 +2018,9 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutPasskeysInput = {
@@ -1920,6 +2055,9 @@ export type UserCreateWithoutPasskeysInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutPasskeysInput = {
@@ -1954,6 +2092,9 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutPasskeysInput = {
@@ -2004,6 +2145,9 @@ export type UserUpdateWithoutPasskeysInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasskeysInput = {
@@ -2038,6 +2182,9 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -2072,6 +2219,9 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -2106,6 +2256,9 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -2156,6 +2309,9 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -2190,6 +2346,9 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutMonitorConfigsInput = {
@@ -2224,6 +2383,9 @@ export type UserCreateWithoutMonitorConfigsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
@@ -2258,6 +2420,9 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutMonitorConfigsInput = {
@@ -2308,6 +2473,9 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
@@ -2342,6 +2510,9 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutRecoveryCodesInput = {
@@ -2376,6 +2547,9 @@ export type UserCreateWithoutRecoveryCodesInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
@@ -2410,6 +2584,9 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutRecoveryCodesInput = {
@@ -2460,6 +2637,9 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
@@ -2494,6 +2674,9 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserCreateWithoutEmailOTPsInput = {
@@ -2528,6 +2711,9 @@ export type UserCreateWithoutEmailOTPsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
@@ -2562,6 +2748,9 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
   persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
 }
 
 export type UserCreateOrConnectWithoutEmailOTPsInput = {
@@ -2612,6 +2801,9 @@ export type UserUpdateWithoutEmailOTPsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
@@ -2646,6 +2838,501 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
   persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+}
+
+export type UserCreateWithoutSentInvitationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+}
+
+export type UserUncheckedCreateWithoutSentInvitationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+}
+
+export type UserCreateOrConnectWithoutSentInvitationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitationsInput, Prisma.UserUncheckedCreateWithoutSentInvitationsInput>
+}
+
+export type UserUpsertWithoutSentInvitationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitationsInput, Prisma.UserUncheckedUpdateWithoutSentInvitationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitationsInput, Prisma.UserUncheckedCreateWithoutSentInvitationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentInvitationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitationsInput, Prisma.UserUncheckedUpdateWithoutSentInvitationsInput>
+}
+
+export type UserUpdateWithoutSentInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+}
+
+export type UserCreateWithoutOwnedSharesInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+}
+
+export type UserUncheckedCreateWithoutOwnedSharesInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+}
+
+export type UserCreateOrConnectWithoutOwnedSharesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedSharesInput, Prisma.UserUncheckedCreateWithoutOwnedSharesInput>
+}
+
+export type UserCreateWithoutReceivedSharesInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+}
+
+export type UserUncheckedCreateWithoutReceivedSharesInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type UserCreateOrConnectWithoutReceivedSharesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedSharesInput, Prisma.UserUncheckedCreateWithoutReceivedSharesInput>
+}
+
+export type UserUpsertWithoutOwnedSharesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOwnedSharesInput, Prisma.UserUncheckedUpdateWithoutOwnedSharesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedSharesInput, Prisma.UserUncheckedCreateWithoutOwnedSharesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOwnedSharesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOwnedSharesInput, Prisma.UserUncheckedUpdateWithoutOwnedSharesInput>
+}
+
+export type UserUpdateWithoutOwnedSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOwnedSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+}
+
+export type UserUpsertWithoutReceivedSharesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReceivedSharesInput, Prisma.UserUncheckedUpdateWithoutReceivedSharesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedSharesInput, Prisma.UserUncheckedCreateWithoutReceivedSharesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReceivedSharesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReceivedSharesInput, Prisma.UserUncheckedUpdateWithoutReceivedSharesInput>
+}
+
+export type UserUpdateWithoutReceivedSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReceivedSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 
@@ -2665,6 +3352,9 @@ export type UserCountOutputType = {
   monitorConfigs: number
   oauthAccounts: number
   persistentSessions: number
+  sentInvitations: number
+  ownedShares: number
+  receivedShares: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2679,6 +3369,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   monitorConfigs?: boolean | UserCountOutputTypeCountMonitorConfigsArgs
   oauthAccounts?: boolean | UserCountOutputTypeCountOauthAccountsArgs
   persistentSessions?: boolean | UserCountOutputTypeCountPersistentSessionsArgs
+  sentInvitations?: boolean | UserCountOutputTypeCountSentInvitationsArgs
+  ownedShares?: boolean | UserCountOutputTypeCountOwnedSharesArgs
+  receivedShares?: boolean | UserCountOutputTypeCountReceivedSharesArgs
 }
 
 /**
@@ -2768,6 +3461,27 @@ export type UserCountOutputTypeCountPersistentSessionsArgs<ExtArgs extends runti
   where?: Prisma.PersistentSessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentInvitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerInvitationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOwnedSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerShareWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReceivedSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerShareWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2802,6 +3516,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   monitorConfigs?: boolean | Prisma.User$monitorConfigsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
   persistentSessions?: boolean | Prisma.User$persistentSessionsArgs<ExtArgs>
+  sentInvitations?: boolean | Prisma.User$sentInvitationsArgs<ExtArgs>
+  ownedShares?: boolean | Prisma.User$ownedSharesArgs<ExtArgs>
+  receivedShares?: boolean | Prisma.User$receivedSharesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2890,6 +3607,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   monitorConfigs?: boolean | Prisma.User$monitorConfigsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
   persistentSessions?: boolean | Prisma.User$persistentSessionsArgs<ExtArgs>
+  sentInvitations?: boolean | Prisma.User$sentInvitationsArgs<ExtArgs>
+  ownedShares?: boolean | Prisma.User$ownedSharesArgs<ExtArgs>
+  receivedShares?: boolean | Prisma.User$receivedSharesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2909,6 +3629,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     monitorConfigs: Prisma.$ServerMonitorConfigPayload<ExtArgs>[]
     oauthAccounts: Prisma.$OAuthAccountPayload<ExtArgs>[]
     persistentSessions: Prisma.$PersistentSessionPayload<ExtArgs>[]
+    sentInvitations: Prisma.$ServerInvitationPayload<ExtArgs>[]
+    ownedShares: Prisma.$ServerSharePayload<ExtArgs>[]
+    receivedShares: Prisma.$ServerSharePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3337,6 +4060,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   monitorConfigs<T extends Prisma.User$monitorConfigsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$monitorConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerMonitorConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthAccounts<T extends Prisma.User$oauthAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OAuthAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   persistentSessions<T extends Prisma.User$persistentSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$persistentSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersistentSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentInvitations<T extends Prisma.User$sentInvitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentInvitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedShares<T extends Prisma.User$ownedSharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedSharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  receivedShares<T extends Prisma.User$receivedSharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedSharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4041,6 +4767,78 @@ export type User$persistentSessionsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.PersistentSessionScalarFieldEnum | Prisma.PersistentSessionScalarFieldEnum[]
+}
+
+/**
+ * User.sentInvitations
+ */
+export type User$sentInvitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerInvitation
+   */
+  select?: Prisma.ServerInvitationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerInvitation
+   */
+  omit?: Prisma.ServerInvitationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerInvitationInclude<ExtArgs> | null
+  where?: Prisma.ServerInvitationWhereInput
+  orderBy?: Prisma.ServerInvitationOrderByWithRelationInput | Prisma.ServerInvitationOrderByWithRelationInput[]
+  cursor?: Prisma.ServerInvitationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerInvitationScalarFieldEnum | Prisma.ServerInvitationScalarFieldEnum[]
+}
+
+/**
+ * User.ownedShares
+ */
+export type User$ownedSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerShare
+   */
+  select?: Prisma.ServerShareSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerShare
+   */
+  omit?: Prisma.ServerShareOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerShareInclude<ExtArgs> | null
+  where?: Prisma.ServerShareWhereInput
+  orderBy?: Prisma.ServerShareOrderByWithRelationInput | Prisma.ServerShareOrderByWithRelationInput[]
+  cursor?: Prisma.ServerShareWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerShareScalarFieldEnum | Prisma.ServerShareScalarFieldEnum[]
+}
+
+/**
+ * User.receivedShares
+ */
+export type User$receivedSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerShare
+   */
+  select?: Prisma.ServerShareSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerShare
+   */
+  omit?: Prisma.ServerShareOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerShareInclude<ExtArgs> | null
+  where?: Prisma.ServerShareWhereInput
+  orderBy?: Prisma.ServerShareOrderByWithRelationInput | Prisma.ServerShareOrderByWithRelationInput[]
+  cursor?: Prisma.ServerShareWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerShareScalarFieldEnum | Prisma.ServerShareScalarFieldEnum[]
 }
 
 /**

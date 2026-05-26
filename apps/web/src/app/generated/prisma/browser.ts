@@ -87,3 +87,13 @@ export type RecoveryCode = Prisma.RecoveryCodeModel
  * 
  */
 export type EmailOTP = Prisma.EmailOTPModel
+/**
+ * Model ServerInvitation
+ * 
+ */
+export type ServerInvitation = Prisma.ServerInvitationModel
+/**
+ * Model ServerShare
+ * 
+ */
+export type ServerShare = Prisma.ServerShareModel

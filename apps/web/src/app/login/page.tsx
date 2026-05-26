@@ -121,9 +121,10 @@ export default function LoginPage() {
                 navigator.credentials.store(cred).catch(() => {});
             } catch { /* not supported */ }
         }
+        const nextUrl = searchParams.get('next');
         // Don't offer passkey setup in Electron — platform authenticator unavailable
         if (data?.suggestPasskeySetup && webAuthnSupported && !isElectron) setShowPasskeySetup(true);
-        else router.push('/dashboard');
+        else router.push(nextUrl && nextUrl.startsWith('/') ? nextUrl : '/panel');
     }
 
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); void performLogin(); };
@@ -181,7 +182,7 @@ export default function LoginPage() {
             });
             const authData = await authRes.json();
             if (!authData.success) { setError(authData.error || 'Passkey authentication failed'); setPasskeyLoading(false); return; }
-            router.push('/dashboard');
+            router.push(searchParams.get('next') && searchParams.get('next')!.startsWith('/') ? searchParams.get('next')! : '/panel');
         } catch (err: any) {
             clearTimeout(timeoutId);
             if (timedOut) {
@@ -209,7 +210,7 @@ export default function LoginPage() {
             });
             const regData = await regRes.json();
             if (!regData.success) { setPasskeySetupError(regData.error || 'Passkey registration failed'); setPasskeySetupLoading(false); return; }
-            router.push('/dashboard');
+            router.push(searchParams.get('next') && searchParams.get('next')!.startsWith('/') ? searchParams.get('next')! : '/panel');
         } catch (err: any) {
             clearTimeout(timeoutId);
             if (timedOut) {
@@ -279,7 +280,7 @@ export default function LoginPage() {
                             Look for a Touch ID or passkey prompt on your screen.
                         </p>
                     )}
-                    <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full text-muted-foreground">
+                    <Button variant="ghost" onClick={() => router.push(searchParams.get('next') && searchParams.get('next')!.startsWith('/') ? searchParams.get('next')! : '/panel')} className="w-full text-muted-foreground">
                         <X className="w-4 h-4" /> Skip for now
                     </Button>
                 </div>
