@@ -22,7 +22,9 @@ services:
       DB_NAME: ${DB_NAME}
       DB_PASSWORD: ${DB_PASSWORD}
 
-    command: [ "sh", "-c", "cd apps/web && npx prisma migrate deploy" ]
+#    command: [ "sh", "-c", "cd apps/web && npx prisma migrate deploy" ]
+    # just hold the container open
+    command: [ "sh", "-c", "while true; do sleep 3600; done" ]
     networks:
       - dokploy-network
 
