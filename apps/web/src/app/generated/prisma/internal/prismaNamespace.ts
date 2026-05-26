@@ -389,6 +389,7 @@ export const ModelName = {
   ServerGroup: 'ServerGroup',
   Server: 'Server',
   Connection: 'Connection',
+  PersistentSession: 'PersistentSession',
   AuditLog: 'AuditLog',
   OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -783,6 +784,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ConnectionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    PersistentSession: {
+      payload: Prisma.$PersistentSessionPayload<ExtArgs>
+      fields: Prisma.PersistentSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PersistentSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PersistentSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.PersistentSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PersistentSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        findMany: {
+          args: Prisma.PersistentSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>[]
+        }
+        create: {
+          args: Prisma.PersistentSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        createMany: {
+          args: Prisma.PersistentSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PersistentSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.PersistentSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        update: {
+          args: Prisma.PersistentSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PersistentSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PersistentSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PersistentSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.PersistentSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersistentSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.PersistentSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePersistentSession>
+        }
+        groupBy: {
+          args: Prisma.PersistentSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersistentSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PersistentSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersistentSessionCountAggregateOutputType> | number
         }
       }
     }
@@ -1524,6 +1599,19 @@ export const ConnectionScalarFieldEnum = {
 export type ConnectionScalarFieldEnum = (typeof ConnectionScalarFieldEnum)[keyof typeof ConnectionScalarFieldEnum]
 
 
+export const PersistentSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersistentSessionScalarFieldEnum = (typeof PersistentSessionScalarFieldEnum)[keyof typeof PersistentSessionScalarFieldEnum]
+
+
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1961,6 +2049,7 @@ export type GlobalOmitConfig = {
   serverGroup?: Prisma.ServerGroupOmit
   server?: Prisma.ServerOmit
   connection?: Prisma.ConnectionOmit
+  persistentSession?: Prisma.PersistentSessionOmit
   auditLog?: Prisma.AuditLogOmit
   oAuthAccount?: Prisma.OAuthAccountOmit
   passkey?: Prisma.PasskeyOmit

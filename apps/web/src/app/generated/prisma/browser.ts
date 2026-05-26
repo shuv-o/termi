@@ -43,6 +43,11 @@ export type Server = Prisma.ServerModel
  */
 export type Connection = Prisma.ConnectionModel
 /**
+ * Model PersistentSession
+ * 
+ */
+export type PersistentSession = Prisma.PersistentSessionModel
+/**
  * Model AuditLog
  * 
  */

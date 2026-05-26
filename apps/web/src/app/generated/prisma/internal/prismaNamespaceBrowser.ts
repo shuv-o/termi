@@ -56,6 +56,7 @@ export const ModelName = {
   ServerGroup: 'ServerGroup',
   Server: 'Server',
   Connection: 'Connection',
+  PersistentSession: 'PersistentSession',
   AuditLog: 'AuditLog',
   OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
@@ -187,6 +188,19 @@ export const ConnectionScalarFieldEnum = {
 } as const
 
 export type ConnectionScalarFieldEnum = (typeof ConnectionScalarFieldEnum)[keyof typeof ConnectionScalarFieldEnum]
+
+
+export const PersistentSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersistentSessionScalarFieldEnum = (typeof PersistentSessionScalarFieldEnum)[keyof typeof PersistentSessionScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

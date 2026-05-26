@@ -55,16 +55,17 @@ model User {
   passkeyEnabled Boolean @default(false)
 
   // Relations
-  sessions          Session[]
-  servers           Server[]
-  serverGroups      ServerGroup[]
-  auditLogs         AuditLog[]
-  recoveryCodes     RecoveryCode[]
-  emailOTPs         EmailOTP[]
-  passkeys          Passkey[]
-  pushSubscriptions PushSubscription[]
-  monitorConfigs    ServerMonitorConfig[]
-  oauthAccounts     OAuthAccount[]
+  sessions            Session[]
+  servers             Server[]
+  serverGroups        ServerGroup[]
+  auditLogs           AuditLog[]
+  recoveryCodes       RecoveryCode[]
+  emailOTPs           EmailOTP[]
+  passkeys            Passkey[]
+  pushSubscriptions   PushSubscription[]
+  monitorConfigs      ServerMonitorConfig[]
+  oauthAccounts       OAuthAccount[]
+  persistentSessions  PersistentSession[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -210,6 +211,25 @@ model Connection {
   @@index([serverId])
   @@index([sessionId])
   @@index([startedAt])
+}
+
+// ============================================================================
+// PERSISTENT TERMINAL SESSIONS (cross-device session continuity)
+// ============================================================================
+
+model PersistentSession {
+  id         String   @id @default(cuid())
+  userId     String
+  sessionId  String   @unique // stable UUID sent to the SSH gateway
+  serverId   String
+  serverName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // ============================================================================

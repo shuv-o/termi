@@ -4,8 +4,6 @@ import {
     createContext, useContext, useState, useCallback, useId, useEffect, useRef, type ReactNode,
 } from 'react';
 
-const STORAGE_KEY = 'termi-sessions';
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -14,7 +12,7 @@ export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error
 
 export interface Session {
     tabId: string;
-    sessionId: string;        // stable UUID, persists across browser restarts
+    sessionId: string;        // stable UUID, persists across devices via DB
     type: 'remote' | 'local';
     serverId: string;
     serverName: string;
@@ -53,11 +51,51 @@ export function useSessionsContext() {
 }
 
 // ============================================================================
+// DB HELPERS
+// ============================================================================
+
+async function dbRegisterSession(sessionId: string, serverId: string, serverName: string) {
+    try {
+        const res = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, serverId, serverName }),
+        });
+        if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            console.error('[sessions] Failed to save session to DB:', res.status, text);
+        }
+    } catch (err) {
+        console.error('[sessions] Network error saving session:', err);
+    }
+}
+
+async function dbDeleteSession(sessionId: string) {
+    try {
+        const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+        if (!res.ok) console.error('[sessions] Failed to delete session from DB:', res.status);
+    } catch (err) {
+        console.error('[sessions] Network error deleting session:', err);
+    }
+}
+
+async function dbRenewSession(oldSessionId: string, newSessionId: string) {
+    try {
+        const res = await fetch(`/api/sessions/${oldSessionId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newSessionId }),
+        });
+        if (!res.ok) console.error('[sessions] Failed to update session in DB:', res.status);
+    } catch (err) {
+        console.error('[sessions] Network error updating session:', err);
+    }
+}
+
+// ============================================================================
 // PROVIDER
 // ============================================================================
 
-interface PersistedSession { sessionId: string; serverId: string; serverName: string; }
-interface PersistedState { sessions: PersistedSession[]; activeServerId: string | null; }
 type SessionsProvider_AddSession = (serverId: string, serverName?: string) => Promise<void>;
 type SessionsProvider_AddLocalSession = () => void;
 
@@ -68,22 +106,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     // Map of tabId → active WebSocket, used to send close-session before removing
     const wsRefs = useRef(new Map<string, WebSocket>());
-
-    // Guard: don't persist until after the restore effect has run (avoids wiping saved sessions)
-    const hasRestoredRef = useRef(false);
-
-    // ── Persist sessions to localStorage (survives browser close) ──
-    // Local terminal sessions are excluded: their PTY processes die on refresh.
-
-    useEffect(() => {
-        if (!hasRestoredRef.current) return; // Wait until restore has run
-        const remote = sessions.filter(s => s.type !== 'local');
-        const state: PersistedState = {
-            sessions: remote.map(s => ({ sessionId: s.sessionId, serverId: s.serverId, serverName: s.serverName })),
-            activeServerId: remote.find(s => s.tabId === activeTabId)?.serverId ?? null,
-        };
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* quota */ }
-    }, [sessions, activeTabId]);
+    // Always-current snapshot of sessions (avoids stale closure reads)
+    const sessionsRef = useRef<Session[]>([]);
+    useEffect(() => { sessionsRef.current = sessions; }, [sessions]);
 
     // ── Helpers ──
 
@@ -160,6 +185,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }]);
         setActiveTabId(tabId);
 
+        // Persist to DB so other devices can see this session
+        await dbRegisterSession(sessionId, serverId, name);
+
         const result = await fetchToken(serverId);
         setSessions(prev => prev.map(s => {
             if (s.tabId !== tabId) return s;
@@ -186,9 +214,14 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     /** Generate a new sessionId and reconnect (used when gateway reports session-not-found). */
     const renewSession = useCallback(async (tabId: string, serverId: string) => {
         const newSessionId = crypto.randomUUID();
+        // Read old sessionId from ref (avoids stale closure)
+        const oldSessionId = sessionsRef.current.find(s => s.tabId === tabId)?.sessionId ?? null;
         setSessions(prev => prev.map(s =>
             s.tabId === tabId ? { ...s, sessionId: newSessionId, token: null, status: 'connecting' } : s
         ));
+        // Update DB with new sessionId
+        if (oldSessionId) await dbRenewSession(oldSessionId, newSessionId);
+
         const result = await fetchToken(serverId);
         setSessions(prev => prev.map(s => {
             if (s.tabId !== tabId) return s;
@@ -207,6 +240,11 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         wsRefs.current.delete(tabId);
 
         setSessions(prev => {
+            const target = prev.find(s => s.tabId === tabId);
+            if (target?.type === 'remote') {
+                // Remove from DB — fire and forget
+                dbDeleteSession(target.sessionId);
+            }
             const remaining = prev.filter(s => s.tabId !== tabId);
             setActiveTabId(curr => {
                 if (curr !== tabId) return curr;
@@ -224,49 +262,41 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     // ── Refs so restore effect can call stable functions without re-running ──
 
-    const addSessionRef = useRef<SessionsProvider_AddSession | null>(null);
-    const addLocalSessionRef = useRef<SessionsProvider_AddLocalSession | null>(null);
     const reconnectSessionRef = useRef<typeof reconnectSession | null>(null);
-    addSessionRef.current = addSession;
-    addLocalSessionRef.current = addLocalSession;
     reconnectSessionRef.current = reconnectSession;
 
-    // ── Restore sessions on mount (after a full browser restart) ──
+    // ── Restore sessions on mount from DB (cross-device persistence) ──
     // Sessions start as 'detached' then immediately begin reconnecting.
 
     useEffect(() => {
-        hasRestoredRef.current = true; // Allow persist effect to run after this
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return;
-            const { sessions: saved, activeServerId }: PersistedState = JSON.parse(raw);
-            if (!saved?.length) return;
+        async function restoreSessions() {
+            try {
+                const res = await fetch('/api/sessions');
+                const data = await res.json();
+                if (!data.success || !data.data.sessions?.length) return;
 
-            const ordered = [
-                ...saved.filter(s => s.serverId !== activeServerId),
-                ...saved.filter(s => s.serverId === activeServerId),
-            ];
+                const saved: { sessionId: string; serverId: string; serverName: string }[] = data.data.sessions;
 
-            // Insert sessions as 'detached', then immediately start reconnecting each one
-            const restoredSessions: Session[] = ordered.map((s, i) => ({
-                tabId: `${uid}-restored-${i}-${Date.now()}`,
-                sessionId: s.sessionId || crypto.randomUUID(), // defensive: regenerate if missing/empty
-                type: 'remote' as const,
-                serverId: s.serverId,
-                serverName: s.serverName,
-                token: null,
-                gatewayUrl: null,
-                status: 'detached' as const,
-                showFiles: false,
-            }));
+                const restoredSessions: Session[] = saved.map((s, i) => ({
+                    tabId: `${uid}-restored-${i}-${Date.now()}`,
+                    sessionId: s.sessionId,
+                    type: 'remote' as const,
+                    serverId: s.serverId,
+                    serverName: s.serverName,
+                    token: null,
+                    gatewayUrl: null,
+                    status: 'detached' as const,
+                    showFiles: false,
+                }));
 
-            if (restoredSessions.length > 0) {
-                setSessions(restoredSessions);
-                setActiveTabId(restoredSessions[restoredSessions.length - 1].tabId);
-                // Kick off token fetch for each restored session immediately
-                restoredSessions.forEach(s => reconnectSessionRef.current?.(s.tabId, s.serverId));
-            }
-        } catch { /* corrupted data — ignore */ }
+                if (restoredSessions.length > 0) {
+                    setSessions(restoredSessions);
+                    setActiveTabId(restoredSessions[restoredSessions.length - 1].tabId);
+                    restoredSessions.forEach(s => reconnectSessionRef.current?.(s.tabId, s.serverId));
+                }
+            } catch { /* silently ignore — network issues shouldn't break the page */ }
+        }
+        restoreSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally empty — runs once on mount only
 
