@@ -38,7 +38,7 @@ export default function SetupEncryptionPage() {
         fetch('/api/auth/me').then(async (res) => {
             const data = await res.json();
             if (!data.success) { router.push('/login'); return; }
-            if (data.data.user.hasMasterKey) { router.push('/dashboard'); return; }
+            if (data.data.user.hasMasterKey) { router.push('/panel'); return; }
             setCheckingUser(false);
         }).catch(() => router.push('/login'));
     }, [router]);
@@ -56,7 +56,7 @@ export default function SetupEncryptionPage() {
             });
             const data = await res.json();
             if (!data.success) { setError(data.error || 'Setup failed'); return; }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {

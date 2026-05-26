@@ -23,8 +23,8 @@
 | `apps/gateway/src/sessions/__tests__/PersistentSessionStore.test.ts` | Create — unit tests |
 | `apps/gateway/src/handlers/ssh.ts` | Modify — replace `WebSocket` ref with `SSHOutputSink` |
 | `apps/gateway/src/index.ts` | Modify — sessionId routing, detach/reattach/evict logic |
-| `apps/web/src/app/dashboard/sessions-context.tsx` | Modify — localStorage, sessionId, detached status, wsRefs |
-| `apps/web/src/app/dashboard/sessions-workspace.tsx` | Modify — auto-reconnect, detached badge |
+| `apps/web/src/app/panel/sessions-context.tsx` | Modify — localStorage, sessionId, detached status, wsRefs |
+| `apps/web/src/app/panel/sessions-workspace.tsx` | Modify — auto-reconnect, detached badge |
 | `apps/web/src/components/terminal/SSHTerminal.tsx` | Modify — sessionId prop, buffer-replay, session-not-found, replaced |
 
 ---
@@ -956,7 +956,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ## Task 5: sessions-context.tsx — localStorage, sessionId, detached status
 
 **Files:**
-- Modify: `apps/web/src/app/dashboard/sessions-context.tsx`
+- Modify: `apps/web/src/app/panel/sessions-context.tsx`
 
 Key changes:
 1. `SessionStatus` gains `'detached'`
@@ -970,7 +970,7 @@ Key changes:
 9. A `setSessionWs` function is exposed so `SSHTerminal` can register its WebSocket
 10. Restored sessions start with `'detached'` status
 
-- [ ] **Step 5.1: Replace `apps/web/src/app/dashboard/sessions-context.tsx`**
+- [ ] **Step 5.1: Replace `apps/web/src/app/panel/sessions-context.tsx`**
 
 ```tsx
 'use client';
@@ -1545,7 +1545,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ## Task 7: sessions-workspace.tsx — detached badge + auto-reconnect + wire props
 
 **Files:**
-- Modify: `apps/web/src/app/dashboard/sessions-workspace.tsx`
+- Modify: `apps/web/src/app/panel/sessions-workspace.tsx`
 
 Changes:
 1. `StatusDot`: add `detached` case — amber `animate-pulse` dot
@@ -1704,7 +1704,7 @@ Expected: web on `:22080`, gateway on `:22081` with no startup errors.
 
 - [ ] **Step 8.2: Test new session + browser-close persistence**
 
-1. Open `http://localhost:22080/dashboard/sessions`
+1. Open `http://localhost:22080/panel/sessions`
 2. Click `+` and open an SSH server
 3. Run a command like `sleep 60` or `watch date`
 4. Open browser DevTools → Application → Local Storage → verify `termi-sessions` contains `sessionId`

@@ -30,7 +30,7 @@ export default function UnlockEncryptionPage() {
             });
             const data = await res.json();
             if (!data.success) { setError(data.error || 'Incorrect passphrase'); return; }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {
@@ -105,7 +105,7 @@ export default function UnlockEncryptionPage() {
                     <Button type="submit" className="w-full" disabled={loading || !passphrase}>
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Unlock & Continue'}
                     </Button>
-                    <Button type="button" variant="ghost" className="w-full" onClick={() => router.push('/dashboard')}>
+                    <Button type="button" variant="ghost" className="w-full" onClick={() => router.push('/panel')}>
                         Skip for now (server connections won't work)
                     </Button>
                     <div className="text-center">

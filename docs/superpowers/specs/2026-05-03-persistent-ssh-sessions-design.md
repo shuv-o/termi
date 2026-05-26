@@ -174,6 +174,6 @@ interface PersistedState {
 | `apps/gateway/src/sessions/RingBuffer.ts` | New — circular output buffer |
 | `apps/gateway/src/handlers/ssh.ts` | Refactor — replace WS reference with `AttachableSink` |
 | `apps/gateway/src/index.ts` | Update — handle `sessionId` param, reconnect flow, WS-only disconnect |
-| `apps/web/src/app/dashboard/sessions-context.tsx` | Update — localStorage, sessionId, detached status |
-| `apps/web/src/app/dashboard/sessions-workspace.tsx` | Update — auto-reconnect on detached, detached UI badge |
+| `apps/web/src/app/panel/sessions-context.tsx` | Update — localStorage, sessionId, detached status |
+| `apps/web/src/app/panel/sessions-workspace.tsx` | Update — auto-reconnect on detached, detached UI badge |
 | `apps/web/src/components/terminal/SSHTerminal.tsx` | Update — accept `sessionId` prop; handle `session-not-found`, `replaced`, `buffer-replay` messages |

@@ -662,7 +662,7 @@ Expected: both apps build without errors
 
 - [ ] **Manual smoke test**
 1. Start dev stack: `npm run dev:all`
-2. Open `/dashboard` → click "Sessions" on an SSH server → terminal connects ✓
+2. Open `/panel` → click "Sessions" on an SSH server → terminal connects ✓
 3. Close browser tab → re-open sessions page → session restores from background ✓
 4. Kill and restart gateway → session shows error + retries with visible backoff delay ✓
 5. After 5 retries it stops and shows "Max reconnect attempts reached" ✓

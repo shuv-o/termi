@@ -1,13 +1,13 @@
 # SSH Connect Page — Security & Performance Hardening
 
 **Date:** 2026-05-03  
-**Scope:** `apps/web/src/app/dashboard/connect/[id]/ssh/page.tsx`, `apps/web/src/components/terminal/SSHTerminal.tsx`, `apps/gateway/src/index.ts`
+**Scope:** `apps/web/src/app/panel/connect/[id]/ssh/page.tsx`, `apps/web/src/components/terminal/SSHTerminal.tsx`, `apps/gateway/src/index.ts`
 
 ---
 
 ## Problem Statement
 
-The `/dashboard/connect/[id]/ssh` page has several security and performance issues:
+The `/panel/connect/[id]/ssh` page has several security and performance issues:
 
 1. **JWE token in WS URL** — the encrypted credentials token appears in gateway server access logs.
 2. **No token renewal** — JWE expires in 5 minutes; reconnect attempts after expiry silently fail.
@@ -149,7 +149,7 @@ Clear `resizeTimer` in effect cleanup.
 |------|---------|
 | `apps/gateway/src/index.ts` | Auth handshake: 5s timeout, auth-first message handling |
 | `apps/web/src/components/terminal/SSHTerminal.tsx` | Token out of URL, send auth on open, `renewToken` prop, `connectionTokenRef`, `bytesToBase64`, `TEXT_ENCODER`, debounced resize, `triggerReconnect` callback |
-| `apps/web/src/app/dashboard/connect/[id]/ssh/page.tsx` | Parallel fetches, `renewToken` impl, `onDisconnect`/`onError`/`onSessionNotFound` handlers, reconnect button without `location.reload()` |
+| `apps/web/src/app/panel/connect/[id]/ssh/page.tsx` | Parallel fetches, `renewToken` impl, `onDisconnect`/`onError`/`onSessionNotFound` handlers, reconnect button without `location.reload()` |
 
 ---
 

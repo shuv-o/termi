@@ -60,7 +60,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
             title: `Server Down: ${serverName}`,
             body: `${serverAddr} is unreachable. Check your server.`,
             tag: `server-down-${serverId}`,
-            url: `/dashboard/servers/${serverId}`,
+            url: `/panel/servers/${serverId}`,
         });
     }
 
@@ -82,7 +82,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
                   <tr><td style="color:#6b7280;padding:4px 0">Detected</td><td>${new Date().toUTCString()}</td></tr>
                 </table>
               </div>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/dashboard/servers/${serverId}"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/panel/servers/${serverId}"
                  style="display:inline-block;background:#3b82f6;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600">
                 View Server
               </a>
@@ -114,7 +114,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
             title: `Server Recovered: ${serverName}`,
             body: `${serverAddr} is back online.`,
             tag: `server-down-${serverId}`, // same tag replaces the "down" notification
-            url: `/dashboard/servers/${serverId}`,
+            url: `/panel/servers/${serverId}`,
         });
     }
 
@@ -136,7 +136,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
                   <tr><td style="color:#6b7280;padding:4px 0">Recovered</td><td>${new Date().toUTCString()}</td></tr>
                 </table>
               </div>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/dashboard/servers/${serverId}"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/panel/servers/${serverId}"
                  style="display:inline-block;background:#3b82f6;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600">
                 View Server
               </a>

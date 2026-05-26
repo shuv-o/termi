@@ -40,8 +40,8 @@
 | Create | `apps/web/src/app/reset-password/page.tsx` |
 | Modify | `apps/web/src/app/login/page.tsx` |
 | Modify | `apps/web/src/app/register/page.tsx` |
-| Modify | `apps/web/src/app/dashboard/layout.tsx` |
-| Modify | `apps/web/src/app/dashboard/settings/page.tsx` |
+| Modify | `apps/web/src/app/panel/layout.tsx` |
+| Modify | `apps/web/src/app/panel/settings/page.tsx` |
 
 ---
 
@@ -1700,7 +1700,7 @@ export default function SetupEncryptionPage() {
             if (!data.success) { router.push('/login'); return; }
             const user = data.data.user;
             if (user.hasMasterKey) {
-                router.push('/dashboard');
+                router.push('/panel');
                 return;
             }
             setCheckingUser(false);
@@ -1724,7 +1724,7 @@ export default function SetupEncryptionPage() {
                 setError(data.error || 'Setup failed');
                 return;
             }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {
@@ -1883,7 +1883,7 @@ export default function UnlockEncryptionPage() {
                 setError(data.error || 'Incorrect passphrase');
                 return;
             }
-            router.push('/dashboard');
+            router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {
@@ -1976,7 +1976,7 @@ export default function UnlockEncryptionPage() {
                         type="button"
                         variant="ghost"
                         className="w-full"
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/panel')}
                     >
                         Skip for now (server connections won't work)
                     </Button>
@@ -2291,7 +2291,7 @@ git commit -m "feat(ui): remove master key setup from register, add Google sign-
 ## Task 12: Dashboard Layout — Email Verification Banner
 
 **Files:**
-- Modify: `apps/web/src/app/dashboard/layout.tsx`
+- Modify: `apps/web/src/app/panel/layout.tsx`
 
 - [ ] **Step 1: Update the `User` interface in `dashboard/layout.tsx` to include `isVerified` and `isGoogleUser`**
 
@@ -2367,7 +2367,7 @@ git commit -m "feat(ui): add email verification banner to dashboard layout"
 ## Task 13: Settings Page — Encryption Section
 
 **Files:**
-- Modify: `apps/web/src/app/dashboard/settings/page.tsx`
+- Modify: `apps/web/src/app/panel/settings/page.tsx`
 
 - [ ] **Step 1: Add `isGoogleUser` to the `User` interface in settings**
 

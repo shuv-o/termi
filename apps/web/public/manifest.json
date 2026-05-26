@@ -3,7 +3,7 @@
     "name": "Termi",
     "short_name": "Termi",
     "description": "Open-source self-hosted server management — SSH, SCP, RDP, VNC from your browser. Built by Shuvo.",
-    "start_url": "/dashboard",
+    "start_url": "/panel",
     "display": "standalone",
     "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
     "background_color": "#0f172a",
@@ -79,7 +79,7 @@
             "name": "Add Server",
             "short_name": "Add",
             "description": "Add a new server connection",
-            "url": "/dashboard/servers/new",
+            "url": "/panel/servers/new",
             "icons": [
                 {
                     "src": "/icons/add-server.png",

@@ -16,7 +16,7 @@
 |------|--------|
 | `apps/gateway/src/index.ts` | Auth handshake: 5s timeout, defer `validateToken` to first WS message |
 | `apps/web/src/components/terminal/SSHTerminal.tsx` | Remove token from URL, send auth on open, `renewToken` prop, `connectionTokenRef`, `bytesToBase64`, `TEXT_ENCODER`, debounced resize, `onReconnectReady` |
-| `apps/web/src/app/dashboard/connect/[id]/ssh/page.tsx` | Parallel fetches, `renewToken` impl, `onDisconnect`/`onError`/`onSessionNotFound` handlers, reconnect button fix |
+| `apps/web/src/app/panel/connect/[id]/ssh/page.tsx` | Parallel fetches, `renewToken` impl, `onDisconnect`/`onError`/`onSessionNotFound` handlers, reconnect button fix |
 
 ---
 
@@ -361,7 +361,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ## Task 3: page.tsx — Parallel Fetches, Token Renewal, UX Handlers
 
 **Files:**
-- Modify: `apps/web/src/app/dashboard/connect/[id]/ssh/page.tsx`
+- Modify: `apps/web/src/app/panel/connect/[id]/ssh/page.tsx`
 
 Changes:
 - Parallel `Promise.all` for server info + token fetch

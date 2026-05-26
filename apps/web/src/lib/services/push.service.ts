@@ -117,7 +117,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
         icon: payload.icon || '/icons/icon-192x192.png',
         badge: payload.badge || '/icons/icon-72x72.png',
         tag: payload.tag,
-        url: payload.url || '/dashboard',
+        url: payload.url || '/panel',
     });
 
     const results = await Promise.allSettled(

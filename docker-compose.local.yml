@@ -8,29 +8,29 @@
 #
 # After adding/removing packages:
 #   docker compose -f docker-compose.local.yml build
-#   docker volume rm termi_dev_node_modules
+#   docker volume rm termi_node_modules
 #   docker compose -f docker-compose.local.yml up
 
 services:
   guacd:
     image: guacamole/guacd:1.6.0
-    container_name: termi-local-guacd
+    container_name: termi-guacd
     restart: unless-stopped
     networks:
-      - termi-local-network
+      - termi-network
 
   postgres:
     image: postgres:17-alpine
-    container_name: termi-local-postgres
+    container_name: termi-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-termi}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-termi}
       POSTGRES_DB: ${POSTGRES_DB:-termi}
     volumes:
-      - postgres-local-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - termi-local-network
+      - termi-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
       interval: 10s
@@ -44,14 +44,14 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-local-gateway
+    container_name: termi-gateway
     working_dir: /app
     restart: unless-stopped
     depends_on:
       - guacd
     volumes:
       - .:/app                              # live source code
-      - dev_node_modules:/app/node_modules  # Linux-compiled node_modules (not host macOS ones)
+      - node_modules:/app/node_modules  # Linux-compiled node_modules (not host macOS ones)
     ports:
       - "22081:22081"
     environment:
@@ -64,14 +64,14 @@ services:
       NODE_ENV: development
     command: npm run dev:gateway
     networks:
-      - termi-local-network
+      - termi-network
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-local-web
+    container_name: termi-web
     working_dir: /app
     restart: unless-stopped
     depends_on:
@@ -81,7 +81,7 @@ services:
         condition: service_started
     volumes:
       - .:/app                              # live source code
-      - dev_node_modules:/app/node_modules  # shared with gateway — same Linux node_modules
+      - node_modules:/app/node_modules  # shared with gateway — same Linux node_modules
     ports:
       - "22080:22080"
     environment:
@@ -109,7 +109,7 @@ services:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: 1
     # Generate Prisma client, apply migrations, then start Next.js dev server.
-    # Use the workspace-local prisma binary — avoids npx downloading a mismatched version.
+    # Use the workspace prisma binary — avoids npx downloading a mismatched version.
     command: >
       sh -c "
         npm run db:generate &&
@@ -117,14 +117,14 @@ services:
         npm run dev
       "
     networks:
-      - termi-local-network
+      - termi-network
 
 volumes:
-  postgres-local-data:
+  postgres_data:
   # Shared Linux-compiled node_modules for web and gateway containers.
   # Initialized from the deps stage image on first run.
-  dev_node_modules:
+  node_modules:
 
 networks:
-  termi-local-network:
+  termi-network:
     driver: bridge

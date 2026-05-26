@@ -138,7 +138,7 @@ self.addEventListener('push', (event) => {
         icon: payload.icon || '/icons/icon-192x192.png',
         badge: payload.badge || '/icons/icon-96x96.png',
         tag: payload.tag || 'termi-alert',
-        data: { url: payload.url || '/dashboard' },
+        data: { url: payload.url || '/panel' },
         requireInteraction: true,
         actions: [
             { action: 'open', title: 'Open Dashboard' },
