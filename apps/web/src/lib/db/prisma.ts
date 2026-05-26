@@ -52,10 +52,7 @@ function getPrisma(): PrismaClient {
     if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
     const pool = globalForPrisma.pool ?? new Pool({ connectionString: getDatabaseUrl() });
-
-    if (process.env.NODE_ENV !== 'production') {
-        globalForPrisma.pool = pool;
-    }
+    globalForPrisma.pool = pool;
 
     const adapter = new PrismaPg(pool);
 
@@ -66,9 +63,7 @@ function getPrisma(): PrismaClient {
             : ['error'],
     });
 
-    if (process.env.NODE_ENV !== 'production') {
-        globalForPrisma.prisma = client;
-    }
+    globalForPrisma.prisma = client;
 
     return client;
 }
