@@ -31,9 +31,37 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        # NEXT_PUBLIC_GATEWAY_URL is intentionally excluded — it is a runtime env var only,
-        # served to the browser via the token API. This keeps the image deployment-agnostic.
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT:-5432}
+        DB_USER: ${DB_USER}
+        DB_NAME: ${DB_NAME}
+        DB_PASSWORD: ${DB_PASSWORD}
+
+        SESSION_SECRET: ${SESSION_SECRET}
+        ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+        GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+
+        SMTP_HOST: ${SMTP_HOST}
+        SMTP_PORT: ${SMTP_PORT}
+        SMTP_SECURE: ${SMTP_SECURE:-false}
+        SMTP_USER: ${SMTP_USER}
+        SMTP_PASS: ${SMTP_PASS}
+        SMTP_FROM: ${SMTP_FROM}
+
+        VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+        VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+        VAPID_SUBJECT: ${VAPID_SUBJECT}
+
+        ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
+
+        TRUSTED_PROXY: ${TRUSTED_PROXY}
 
     depends_on:
       migrate:
