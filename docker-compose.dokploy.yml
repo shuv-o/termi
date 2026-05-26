@@ -15,9 +15,6 @@ services:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
     container_name: termi-migrate
     restart: "no"
-    depends_on:
-      postgres:
-        condition: service_healthy
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT:-5432}
