@@ -1,7 +1,9 @@
 # useful commands:
 #   docker compose -f docker-compose.local.yml build
-#   docker volume rm termi_node_modules
 #   docker compose -f docker-compose.local.yml up
+#
+# If node_modules seem stale/wrong, force-reinitialise:
+#   docker volume rm termi_node_modules && docker compose -f docker-compose.local.yml up
 
 services:
   guacd:
@@ -29,6 +31,42 @@ services:
       timeout: 5s
       retries: 5
 
+  # Ensures the shared node_modules volume contains Linux-compiled packages from
+  # the deps image. Mounts at /vol (not /app/node_modules) so the image's own
+  # /app/node_modules is untouched and can be copied into the volume when stale.
+  init-modules:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: deps
+    container_name: termi-init-modules
+    restart: "no"
+    volumes:
+      - node_modules:/vol
+    command: ["sh", "-c", "test -f /vol/.bin/prisma && echo 'node_modules OK' || (echo 'Copying Linux node_modules into volume...' && cp -a /app/node_modules/. /vol/)"]
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: deps
+    container_name: termi-migrate
+    working_dir: /app
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      init-modules:
+        condition: service_completed_successfully
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-termi}:${POSTGRES_PASSWORD:-termi}@postgres:5432/${POSTGRES_DB:-termi}
+    command: ["sh", "-c", "cd apps/web && ../../node_modules/.bin/prisma generate && ../../node_modules/.bin/prisma migrate deploy"]
+    networks:
+      - termi-network
+
   gateway:
     # Reuse the deps stage — has all workspace deps compiled for Linux.
     # Source is mounted at runtime so tsx watch picks up changes instantly.
@@ -40,19 +78,24 @@ services:
     working_dir: /app
     restart: unless-stopped
     depends_on:
-      - guacd
+      guacd:
+        condition: service_started
+      init-modules:
+        condition: service_completed_successfully
     volumes:
       - .:/app                              # live source code
-      - node_modules:/app/node_modules  # Linux-compiled node_modules (not host macOS ones)
+      - node_modules:/app/node_modules      # Linux-compiled node_modules (not host macOS ones)
     ports:
       - "22081:22081"
     environment:
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080,http://127.0.0.1:22080}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080,http://127.0.0.1:22080,http://localhost:22081}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:22080}
       GATEWAY_PORT: 22081
       GATEWAY_HOST: 0.0.0.0
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
       GUACD_HOST: guacd
       GUACD_PORT: 4822
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
       NODE_ENV: development
     command: npm run dev:gateway
     networks:
@@ -67,13 +110,13 @@ services:
     working_dir: /app
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       gateway:
         condition: service_started
     volumes:
       - .:/app                              # live source code
-      - node_modules:/app/node_modules  # shared with gateway — same Linux node_modules
+      - node_modules:/app/node_modules      # shared with gateway — same Linux node_modules
     ports:
       - "22080:22080"
     environment:
@@ -83,7 +126,7 @@ services:
       # defaults, so ${VAR:-default} would silently pick up the production value.
       NEXT_PUBLIC_GATEWAY_URL: ws://localhost:22081
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:22080}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-termi}:${POSTGRES_PASSWORD:-termi}@postgres:5432/${POSTGRES_DB:-termi}
       SESSION_SECRET: ${SESSION_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
@@ -100,21 +143,14 @@ services:
       ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-true}
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: 1
-    # Generate Prisma client, apply migrations, then start Next.js dev server.
-    # Use the workspace prisma binary — avoids npx downloading a mismatched version.
-    command: >
-      sh -c "
-        npm run db:generate &&
-        (cd apps/web && ../../node_modules/.bin/prisma migrate deploy) &&
-        npm run dev
-      "
+    command: npm run dev
     networks:
       - termi-network
 
 volumes:
   postgres_data:
-  # Shared Linux-compiled node_modules for web and gateway containers.
-  # Initialized from the deps stage image on first run.
+  # Shared Linux-compiled node_modules for web, gateway, and migrate containers.
+  # Populated by init-modules on startup; delete to force reinit: docker volume rm termi_node_modules
   node_modules:
 
 networks:
