@@ -9,7 +9,7 @@ import {
     Search, ChevronRight, WifiOff, Globe,
     SplitSquareHorizontal, Monitor, Wifi,
     ArrowRightLeft, RefreshCw, ChevronDown, ChevronUp,
-    FileX, CheckCircle2, Clock, Zap,
+    FileX, CheckCircle2, Clock, Zap, Keyboard,
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
 import { useSessionsContext, type Session, type SessionStatus } from './sessions-context';
@@ -21,6 +21,7 @@ import {
 
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
+const VirtualKeyboard = dynamic(() => import('@/components/terminal/VirtualKeyboard'), { ssr: false });
 
 // ============================================================================
 // TYPES
@@ -616,6 +617,21 @@ function TerminalPane({
     toggleFiles: (tabId: string) => void;
     removeSession: (tabId: string) => void;
 }) {
+    const [showKeyboard, setShowKeyboard] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
+
+    useEffect(() => {
+        const check = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            if (mobile) setShowKeyboard(true);
+        };
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, []);
+
     return (
         <div
             className="absolute inset-0 flex flex-col"
@@ -632,17 +648,16 @@ function TerminalPane({
                         : <Terminal className="w-4 h-4 text-muted-foreground shrink-0" />}
                     <span className="font-medium text-sm truncate">{session.serverName}</span>
                     <StatusDot status={session.status} />
-                    <span className={`text-xs ${statusColor(session.status)}`}>{statusLabel(session.status)}</span>
+                    <span className={`text-xs ${statusColor(session.status)} hidden sm:inline`}>{statusLabel(session.status)}</span>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                     {session.type !== 'local' && (
                         <>
-                            <Button variant={session.showFiles ? 'default' : 'ghost'} size="sm"
+                            <Button variant={session.showFiles ? 'default' : 'ghost'} size="icon"
                                 onClick={() => toggleFiles(session.tabId)}
-                                className="gap-1.5 h-7 text-xs" title="Toggle file manager"
+                                className="h-7 w-7" title="Toggle file manager"
                             >
                                 <FolderOpen className="w-3.5 h-3.5" />
-                                <span className="hidden md:inline">Files</span>
                             </Button>
                             <Button variant="ghost" size="icon"
                                 onClick={() => reconnectSession(session.tabId, session.serverId)}
@@ -652,6 +667,15 @@ function TerminalPane({
                             </Button>
                         </>
                     )}
+                    <Button
+                        variant={showKeyboard ? 'default' : 'ghost'}
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => setShowKeyboard(k => !k)}
+                        title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
+                    >
+                        <Keyboard className="w-3.5 h-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon"
                         onClick={() => removeSession(session.tabId)}
                         className="h-7 w-7 text-destructive/60 hover:text-destructive" title="Close session"
@@ -711,9 +735,13 @@ function TerminalPane({
                             serverId={session.serverId}
                             connectionToken={session.token}
                             gatewayUrl={session.gatewayUrl ?? undefined}
+                            disableNativeKeyboard={isMobile}
                             onDisconnect={() => updateSessionStatus(session.tabId, 'disconnected')}
                             onError={(err) => setSessionError(session.tabId, err)}
-                            onKeyHandlerReady={() => updateSessionStatus(session.tabId, 'connected')}
+                            onKeyHandlerReady={(handler) => {
+                                terminalKeyHandler.current = handler;
+                                updateSessionStatus(session.tabId, 'connected');
+                            }}
                             onWebSocketCreated={(ws) => setSessionWs(session.tabId, ws)}
                             onSessionNotFound={() => renewSession(session.tabId, session.serverId)}
                         />
@@ -729,6 +757,11 @@ function TerminalPane({
                     </div>
                 )}
             </div>
+
+            {/* Virtual keyboard */}
+            {showKeyboard && session.type !== 'local' && (
+                <VirtualKeyboard onKey={(key) => { terminalKeyHandler.current?.(key); }} />
+            )}
         </div>
     );
 }
