@@ -324,24 +324,34 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
             {/* ── Mobile bottom navigation bar ─────────────────────────── */}
             <nav
-                className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border"
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
-                <div className="flex items-stretch h-16">
+                {/* Frosted glass background */}
+                <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/60" />
+
+                <div className="relative flex items-center h-16 px-2 gap-1">
                     {navigation.map(item => {
                         const isActive = pathname === item.href || (item.href !== '/panel' && pathname.startsWith(item.href));
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex flex-1 flex-col items-center justify-center gap-1 transition-colors active:scale-95 ${
-                                    isActive ? 'text-primary' : 'text-muted-foreground'
-                                }`}
+                                className="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-transform active:scale-90"
                             >
-                                <div className={`flex items-center justify-center w-10 h-6 rounded-full transition-colors ${isActive ? 'bg-primary/15' : ''}`}>
-                                    <item.icon className="w-5 h-5" />
+                                {/* Pill indicator behind icon */}
+                                <div className={`relative flex items-center justify-center w-12 h-7 rounded-full transition-all duration-200 ${
+                                    isActive
+                                        ? 'bg-primary shadow-[0_0_12px_2px_rgba(14,165,233,0.35)]'
+                                        : 'bg-transparent'
+                                }`}>
+                                    <item.icon className={`w-[18px] h-[18px] transition-colors duration-200 ${
+                                        isActive ? 'text-white' : 'text-muted-foreground'
+                                    }`} />
                                 </div>
-                                <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                                <span className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${
+                                    isActive ? 'text-primary' : 'text-muted-foreground/60'
+                                }`}>
                                     {item.name}
                                 </span>
                             </Link>
