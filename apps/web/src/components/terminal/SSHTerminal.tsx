@@ -27,6 +27,7 @@ interface SSHTerminalProps {
     connectionToken: string;
     renewToken?: () => Promise<string>;
     gatewayUrl?: string;
+    disableNativeKeyboard?: boolean;
     onDisconnect?: () => void;
     onError?: (error: string) => void;
     onKeyHandlerReady?: (handler: (key: string) => void) => void;
@@ -41,6 +42,7 @@ export default function SSHTerminal({
     connectionToken,
     renewToken,
     gatewayUrl,
+    disableNativeKeyboard,
     onDisconnect,
     onError,
     onKeyHandlerReady,
@@ -276,6 +278,18 @@ export default function SSHTerminal({
         terminal.loadAddon(new WebLinksAddon());
         terminal.open(terminalRef.current);
         fit.fit();
+
+        // Prevent native mobile keyboard from opening when terminal is tapped
+        if (disableNativeKeyboard) {
+            const ta = terminalRef.current.querySelector('textarea');
+            if (ta) {
+                ta.setAttribute('inputmode', 'none');
+                ta.setAttribute('autocomplete', 'off');
+                ta.setAttribute('autocorrect', 'off');
+                ta.setAttribute('autocapitalize', 'off');
+                (ta as HTMLTextAreaElement).spellcheck = false;
+            }
+        }
 
         terminal.onData((data) => {
             if (wsRef.current?.readyState === WebSocket.OPEN) {

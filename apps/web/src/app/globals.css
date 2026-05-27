@@ -213,4 +213,30 @@ html {
   .virtual-key-modifier {
     @apply font-semibold;
   }
+
+  /* Full virtual keyboard (replaces native keyboard) */
+  .vk-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    min-width: 0;
+    padding: 0 3px;
+    background: #334155;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e2e8f0;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 70ms, background 70ms;
+  }
+  .vk-key:active { background: #475569; transform: scale(0.91); }
+  .vk-key-action { background: #1e3a5f; }
+  .vk-key-action:active { background: #1e4d80; }
+  .vk-key-active { background: #0284c7 !important; color: #fff; }
+  .vk-key-danger { color: #f87171; }
+  .vk-key-warn  { color: #fbbf24; }
 }

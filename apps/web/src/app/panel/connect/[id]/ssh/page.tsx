@@ -78,7 +78,11 @@ export default function SSHConnectionPage() {
     }, [serverId]);
 
     useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768);
+        const check = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            if (mobile) setShowKeyboard(true);
+        };
         check();
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
@@ -237,16 +241,14 @@ export default function SSHConnectionPage() {
                         {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                     </Button>
 
-                    {isMobile && (
-                        <Button
-                            variant={showKeyboard ? 'default' : 'ghost'}
-                            size="icon"
-                            onClick={() => setShowKeyboard(!showKeyboard)}
-                            title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
-                        >
-                            <Keyboard className="w-4 h-4" />
-                        </Button>
-                    )}
+                    <Button
+                        variant={showKeyboard ? 'default' : 'ghost'}
+                        size="icon"
+                        onClick={() => setShowKeyboard(!showKeyboard)}
+                        title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
+                    >
+                        <Keyboard className="w-4 h-4" />
+                    </Button>
 
                     <Button
                         variant="ghost"
@@ -270,6 +272,7 @@ export default function SSHConnectionPage() {
                         connectionToken={connectionToken}
                         renewToken={renewToken}
                         gatewayUrl={gatewayUrl ?? undefined}
+                        disableNativeKeyboard={isMobile}
                         onDisconnect={handleDisconnect}
                         onError={handleError}
                         onKeyHandlerReady={(handler) => { terminalKeyHandler.current = handler; }}
@@ -298,8 +301,8 @@ export default function SSHConnectionPage() {
                 )}
             </div>
 
-            {/* Mobile keyboard */}
-            {isMobile && showKeyboard && (
+            {/* Virtual keyboard — always shown on mobile, toggleable on desktop */}
+            {showKeyboard && (
                 <VirtualKeyboard onKey={(key) => { terminalKeyHandler.current?.(key); }} />
             )}
 
