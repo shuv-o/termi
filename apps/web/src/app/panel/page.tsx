@@ -571,44 +571,45 @@ function GridCard({
 }) {
     const Icon = protocolIcons[server.protocol];
     const hasMetrics = server.protocol === 'SSH' && m && m.reachable && !m.error;
+    const statusStrip = mLoading ? '' : m?.reachable === true ? 'bg-emerald-500/60' : m?.reachable === false ? 'bg-red-500/60' : '';
 
     return (
         <Card className="group flex flex-col overflow-hidden bg-card border-border hover:border-border/80 hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-            <div className="p-4 flex-1 space-y-3">
-                <div className="flex items-start gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}>
-                        <Icon className="w-4 h-4" />
+            <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
+
+            <div className="p-3 flex-1 space-y-2">
+                {/* Header */}
+                <div className="flex items-center gap-2">
+                    <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}>
+                        <Icon className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 min-w-0">
                             <h3 className="font-semibold truncate text-sm leading-tight">{server.name}</h3>
-                            <StatusIndicator metrics={m} loading={mLoading} />
+                            {mLoading ? (
+                                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-pulse shrink-0" />
+                            ) : m?.reachable === true ? (
+                                m.latencyMs != null && <span className="text-[10px] text-emerald-400 tabular-nums shrink-0">{m.latencyMs}ms</span>
+                            ) : m?.reachable === false ? (
+                                <WifiOff className="w-3 h-3 text-red-400 shrink-0" />
+                            ) : null}
                         </div>
-                        {server.description && (
-                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">{server.description}</p>
-                        )}
+                        <p className="text-[10px] text-muted-foreground/70 font-mono truncate">
+                            {server.description || `${server.username}@${server.host}`}
+                        </p>
                     </div>
                     <div className="flex items-center gap-0.5 shrink-0">
                         <Button
-                            variant="ghost"
-                            size="icon"
+                            variant="ghost" size="icon"
                             onClick={onFavorite}
-                            className={`h-8 w-8 sm:h-6 sm:w-6 transition-all ${
-                                server.isFavorite
-                                    ? 'text-yellow-400'
-                                    : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'
-                            }`}
+                            className={`h-6 w-6 transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
                         >
-                            <Star className={`w-3.5 h-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
+                            <Star className={`w-3 h-3 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                         </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 sm:h-6 sm:w-6 text-muted-foreground/50 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-foreground"
-                                >
-                                    <MoreVertical className="w-3.5 h-3.5" />
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-foreground [@media(hover:none)]:opacity-100">
+                                    <MoreVertical className="w-3 h-3" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44 bg-card border-border">
@@ -637,119 +638,114 @@ function GridCard({
                     </div>
                 </div>
 
-                <div className="rounded-md bg-secondary/60 border border-border/50 px-2.5 py-2 space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 min-w-0">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <Server className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-                            <span className="text-[11px] text-foreground/80 font-mono truncate">{server.host}</span>
-                            <span className="text-[10px] text-muted-foreground/50 shrink-0">:{server.port}</span>
-                        </div>
-                        <CopyButton text={`${server.host}:${server.port}`} />
-                    </div>
-                    <div className="flex items-center gap-1.5 min-w-0">
-                        <User className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-                        <span className="text-[11px] text-muted-foreground font-mono truncate">{server.username}</span>
-                    </div>
+                {/* Connection info */}
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-secondary/60 border border-border/50 min-w-0">
+                    <span className="text-[10px] text-foreground/70 font-mono truncate flex-1">
+                        {server.host}<span className="text-muted-foreground/40">:{server.port}</span>
+                    </span>
+                    <CopyButton text={`${server.host}:${server.port}`} />
                 </div>
 
+                {/* Badges */}
                 <div className="flex flex-wrap items-center gap-1">
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${protocolVariants[server.protocol]}`}>
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${protocolVariants[server.protocol]}`}>
                         {server.protocol}
                     </span>
                     {server.group && (
                         <span
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border"
-                            style={{
-                                backgroundColor: `${server.group.color}20`,
-                                color: server.group.color || undefined,
-                                borderColor: `${server.group.color}40`,
-                            }}
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                            style={{ backgroundColor: `${server.group.color}20`, color: server.group.color || undefined, borderColor: `${server.group.color}40` }}
                         >
                             {server.group.name}
                         </span>
                     )}
-                    {server.tags.slice(0, 3).map((tag) => (
+                    {server.tags.slice(0, 2).map((tag) => (
                         <button
                             key={tag}
                             onClick={(e) => { e.stopPropagation(); onTagClick(tag); }}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
                         >
                             {tag}
                         </button>
                     ))}
                 </div>
 
+                {/* Metrics — 3-col CPU / RAM / Disk */}
                 {hasMetrics && (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-1.5">
                         {m!.cpu != null && (
-                            <MetricBar label="CPU" icon={Cpu} percent={m!.cpu} used={`${m!.cpu}%`} sub={m!.cpuModel} />
+                            <div className="space-y-0.5">
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-muted-foreground/60">CPU</span>
+                                    <span className={`tabular-nums font-medium ${m!.cpu >= 90 ? 'text-red-400' : m!.cpu >= 70 ? 'text-yellow-400' : 'text-emerald-400'}`}>{m!.cpu}%</span>
+                                </div>
+                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all duration-700 ${m!.cpu >= 90 ? 'bg-red-500' : m!.cpu >= 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, m!.cpu)}%` }} />
+                                </div>
+                            </div>
                         )}
                         {m!.ram && (
-                            <MetricBar
-                                label="RAM" icon={MemoryStick}
-                                percent={m!.ram.percent}
-                                used={formatBytes(m!.ram.usedBytes)}
-                                total={formatBytes(m!.ram.totalBytes)}
-                                sub={m!.ram.speedMhz ? `${m!.ram.speedMhz} MT/s` : undefined}
-                            />
+                            <div className="space-y-0.5">
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-muted-foreground/60">RAM</span>
+                                    <span className={`tabular-nums font-medium ${m!.ram.percent >= 90 ? 'text-red-400' : m!.ram.percent >= 70 ? 'text-yellow-400' : 'text-sky-400'}`}>{Math.round(m!.ram.percent)}%</span>
+                                </div>
+                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all duration-700 ${m!.ram.percent >= 90 ? 'bg-red-500' : m!.ram.percent >= 70 ? 'bg-yellow-500' : 'bg-sky-500'}`} style={{ width: `${Math.min(100, m!.ram.percent)}%` }} />
+                                </div>
+                            </div>
                         )}
                         {m!.disk && (
-                            <MetricBar
-                                label="Disk" icon={HardDrive}
-                                percent={m!.disk.percent}
-                                used={formatBytes(m!.disk.usedBytes)}
-                                total={formatBytes(m!.disk.totalBytes)}
-                            />
-                        )}
-                        {m!.network && (
-                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                    <ArrowDown className="w-2.5 h-2.5 text-emerald-500" />
-                                    {formatBytes(m!.network.rxBytes)}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <ArrowUp className="w-2.5 h-2.5 text-blue-400" />
-                                    {formatBytes(m!.network.txBytes)}
-                                </span>
+                            <div className="space-y-0.5">
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-muted-foreground/60">Disk</span>
+                                    <span className={`tabular-nums font-medium ${m!.disk.percent >= 90 ? 'text-red-400' : m!.disk.percent >= 70 ? 'text-yellow-400' : 'text-muted-foreground'}`}>{Math.round(m!.disk.percent)}%</span>
+                                </div>
+                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all duration-700 ${m!.disk.percent >= 90 ? 'bg-red-500' : m!.disk.percent >= 70 ? 'bg-yellow-500' : 'bg-muted-foreground/30'}`} style={{ width: `${Math.min(100, m!.disk.percent)}%` }} />
+                                </div>
                             </div>
                         )}
                     </div>
                 )}
 
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-                    <Clock className="w-3 h-3" />
-                    {formatRelativeTime(server.lastUsedAt)}
+                {/* Footer info */}
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
+                    <Clock className="w-2.5 h-2.5 shrink-0" />
+                    <span>{formatRelativeTime(server.lastUsedAt)}</span>
+                    {m?.network && (
+                        <>
+                            <span className="text-muted-foreground/30 mx-0.5">·</span>
+                            <ArrowDown className="w-2 h-2 text-emerald-500/60" />
+                            <span className="tabular-nums">{formatBytes(m.network.rxBytes)}</span>
+                            <ArrowUp className="w-2 h-2 text-sky-400/60" />
+                            <span className="tabular-nums">{formatBytes(m.network.txBytes)}</span>
+                        </>
+                    )}
                 </div>
             </div>
 
-            <div className="px-3 py-2.5 border-t border-border/60 bg-secondary/20 flex gap-1.5">
-                <Button onClick={onConnect} size="sm" className="flex-1 justify-center text-xs h-9 sm:h-7">
+            <div className="px-3 py-2 border-t border-border/60 bg-secondary/20 flex gap-1.5">
+                <Button onClick={onConnect} size="sm" className="flex-1 justify-center text-xs h-7">
                     Connect
                 </Button>
                 {server.hasPassword && (
-                    <Button onClick={onCopyPassword} variant="secondary" size="icon" className="h-9 w-9 sm:h-7 sm:w-7 shrink-0" title="Copy password (passkey required)">
-                        <KeyRound className="w-3.5 h-3.5" />
+                    <Button onClick={onCopyPassword} variant="secondary" size="icon" className="h-7 w-7 shrink-0" title="Copy password (passkey required)">
+                        <KeyRound className="w-3 h-3" />
                     </Button>
                 )}
                 {server.protocol === 'SSH' && (
                     <Button
                         onClick={onSessions}
                         variant="secondary"
-                        size="sm"
-                        className={`h-9 sm:h-7 px-2.5 gap-1.5 text-xs shrink-0 transition-colors ${
-                            hasSession
-                                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
-                                : 'text-muted-foreground hover:text-foreground'
-                        }`}
+                        size="icon"
+                        className={`h-7 w-7 shrink-0 transition-colors ${hasSession ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30' : 'text-muted-foreground hover:text-foreground'}`}
                         title={hasSession ? 'Session active — open in Sessions' : 'Add to Sessions'}
                     >
                         <div className="relative">
-                            <Layers className="w-3.5 h-3.5" />
-                            {hasSession && (
-                                <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            )}
+                            <Layers className="w-3 h-3" />
+                            {hasSession && <span className="absolute -top-0.5 -right-0.5 w-1 h-1 rounded-full bg-emerald-400" />}
                         </div>
-                        Sessions
                     </Button>
                 )}
             </div>
@@ -945,6 +941,7 @@ export default function DashboardPage() {
     const [sharedServers, setSharedServers] = useState<(ServerItem & { sharedBy: string; permissions: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
     const [filter, setFilter] = useState<'all' | 'favorites'>('all');
     const [protocolFilter, setProtocolFilter] = useState<ProtocolFilter>('all');
     const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -965,6 +962,11 @@ export default function DashboardPage() {
         if (s) { try { setSort(JSON.parse(s)); } catch { /* ignore */ } }
     }, []);
 
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
+        return () => clearTimeout(t);
+    }, [searchQuery]);
+
     const switchView = (v: ViewMode) => { setViewMode(v); localStorage.setItem('panel-view', v); };
     const applySort  = (field: SortField, dir: SortDir) => {
         setSort({ field, dir });
@@ -975,7 +977,7 @@ export default function DashboardPage() {
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (searchQuery) params.set('q', searchQuery);
+            if (debouncedSearchQuery) params.set('q', debouncedSearchQuery);
             if (filter === 'favorites') params.set('favorites', 'true');
             const response = await fetch(`/api/servers?${params}`);
             const data = await response.json();
@@ -1027,7 +1029,7 @@ export default function DashboardPage() {
         );
     }, []);
 
-    useEffect(() => { fetchServers(); }, [searchQuery, filter]);
+    useEffect(() => { fetchServers(); }, [debouncedSearchQuery, filter]);
     useEffect(() => {
         fetch('/api/shared-servers')
             .then(r => r.json())
@@ -1189,8 +1191,11 @@ export default function DashboardPage() {
                             placeholder="Search servers..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 text-sm h-9 bg-secondary border-border"
+                            className="pl-9 pr-9 text-sm h-9 bg-secondary border-border"
                         />
+                        {searchQuery !== debouncedSearchQuery && (
+                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 animate-spin" />
+                        )}
                     </div>
 
                     <div className="flex gap-2 shrink-0 flex-wrap">
@@ -1332,19 +1337,19 @@ export default function DashboardPage() {
             {/* ── Server List ── */}
             {loading ? (
                 viewMode === 'grid' ? (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <Card key={i} className="p-4 bg-card border-border">
-                                <div className="flex items-start gap-3">
-                                    <Skeleton className="w-9 h-9 rounded-lg" />
-                                    <div className="flex-1 space-y-2">
-                                        <Skeleton className="h-4 w-28" />
-                                        <Skeleton className="h-3 w-20" />
+                            <Card key={i} className="p-3 bg-card border-border">
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="w-7 h-7 rounded-md" />
+                                    <div className="flex-1 space-y-1.5">
+                                        <Skeleton className="h-3.5 w-24" />
+                                        <Skeleton className="h-2.5 w-16" />
                                     </div>
                                 </div>
-                                <div className="mt-3 space-y-1.5">
-                                    <Skeleton className="h-2 w-full" />
-                                    <Skeleton className="h-2 w-3/4" />
+                                <div className="mt-2.5 space-y-1.5">
+                                    <Skeleton className="h-6 w-full rounded" />
+                                    <Skeleton className="h-3.5 w-1/2" />
                                 </div>
                             </Card>
                         ))}
@@ -1383,14 +1388,14 @@ export default function DashboardPage() {
                         <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => { setProtocolFilter('all'); setActiveTag(null); setSearchQuery(''); setFilter('all'); }}
+                            onClick={() => { setProtocolFilter('all'); setActiveTag(null); setSearchQuery(''); setDebouncedSearchQuery(''); setFilter('all'); }}
                         >
                             Clear filters
                         </Button>
                     </Card>
                 )
             ) : viewMode === 'grid' ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {sortedServers.map((server) => <GridCard key={server.id} {...sharedProps(server)} />)}
                 </div>
             ) : (
