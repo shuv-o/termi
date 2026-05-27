@@ -34,7 +34,7 @@ const navigation = [
 
 function CollapseTooltip({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <span className="group relative flex">
+        <span className="group relative flex justify-center">
             {children}
             <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap z-50 bg-popover border border-border text-foreground shadow-md opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150">
                 {label}
@@ -139,12 +139,14 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             `}>
                 {/* Header */}
                 <div className={`flex items-center h-16 px-3 border-b border-border shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
-                    <Link href="/panel" className={`flex items-center gap-3 overflow-hidden ${collapsed ? 'pointer-events-none' : ''}`} tabIndex={collapsed ? -1 : 0}>
-                        <TerminalLogo width={32} height={32} className="rounded-lg shrink-0" />
-                        <span className={`text-lg font-bold gradient-text whitespace-nowrap overflow-hidden transition-all duration-200 ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                            Termi
-                        </span>
-                    </Link>
+                    {!collapsed && (
+                        <Link href="/panel" className="flex items-center gap-3 overflow-hidden min-w-0">
+                            <TerminalLogo width={32} height={32} className="rounded-lg shrink-0" />
+                            <span className="text-lg font-bold gradient-text whitespace-nowrap overflow-hidden">
+                                Termi
+                            </span>
+                        </Link>
+                    )}
                     <button
                         onClick={toggleCollapsed}
                         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -179,12 +181,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 )}
 
                 {/* Nav */}
-                <nav className="flex-1 px-2 pt-3 space-y-0.5 overflow-y-auto">
+                <nav className="flex-1 px-2 pt-3 space-y-0.5">
                     {navigation.map(item => {
                         const isActive = pathname === item.href || (item.href !== '/panel' && pathname.startsWith(item.href));
                         const cls = `flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none ${
                             isActive ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                        } ${collapsed ? 'justify-center px-0' : 'px-3'}`;
+                        } ${collapsed ? 'justify-center px-0 w-full' : 'px-3'}`;
 
                         if (collapsed) return (
                             <CollapseTooltip key={item.name} label={item.name}>
