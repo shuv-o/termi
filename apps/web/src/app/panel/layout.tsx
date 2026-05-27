@@ -330,30 +330,29 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 {/* Frosted glass background */}
                 <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/60" />
 
-                <div className="relative flex items-center h-16 px-2 gap-1">
+                <div className="relative flex items-center justify-around h-16 px-3">
                     {navigation.map(item => {
                         const isActive = pathname === item.href || (item.href !== '/panel' && pathname.startsWith(item.href));
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-transform active:scale-90"
+                                className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
                             >
-                                {/* Pill indicator behind icon */}
-                                <div className={`relative flex items-center justify-center w-12 h-7 rounded-full transition-all duration-200 ${
-                                    isActive
-                                        ? 'bg-primary shadow-[0_0_12px_2px_rgba(14,165,233,0.35)]'
-                                        : 'bg-transparent'
-                                }`}>
-                                    <item.icon className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                                        isActive ? 'text-white' : 'text-muted-foreground'
-                                    }`} />
-                                </div>
-                                <span className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${
-                                    isActive ? 'text-primary' : 'text-muted-foreground/60'
-                                }`}>
-                                    {item.name}
-                                </span>
+                                {isActive ? (
+                                    /* Active: pill with icon + label inside */
+                                    <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary shadow-[0_0_14px_3px_rgba(14,165,233,0.30)]">
+                                        <item.icon className="w-[17px] h-[17px] text-white shrink-0" />
+                                        <span className="text-[12px] font-semibold text-white leading-none">
+                                            {item.name}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    /* Inactive: icon only */
+                                    <div className="flex items-center justify-center w-10 h-[34px]">
+                                        <item.icon className="w-[20px] h-[20px] text-muted-foreground/50" />
+                                    </div>
+                                )}
                             </Link>
                         );
                     })}
