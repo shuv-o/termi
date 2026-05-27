@@ -54,6 +54,9 @@ export default function SSHConnectionPage() {
     const triggerReconnectRef = useRef<(() => void) | null>(null);
     const sessionIdRef = useRef(crypto.randomUUID());
 
+    // Tracks the actual visible height — shrinks when native keyboard opens
+    const [visualH, setVisualH] = useState(0);
+
     const handleDisconnect = useCallback(() => {
         console.log('[SSHConnectionPage] Terminal disconnected');
     }, []);
@@ -80,6 +83,22 @@ export default function SSHConnectionPage() {
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
     }, []);
+
+    // Keep visualH in sync with the visual viewport (shrinks when native keyboard opens)
+    useEffect(() => {
+        const update = () => {
+            const vv = window.visualViewport;
+            setVisualH(vv ? vv.height : window.innerHeight);
+        };
+        update();
+        window.visualViewport?.addEventListener('resize', update);
+        return () => window.visualViewport?.removeEventListener('resize', update);
+    }, []);
+
+    // After React re-renders with the new visualH, tell xterm to refit
+    useEffect(() => {
+        if (visualH > 0) window.dispatchEvent(new Event('resize'));
+    }, [visualH]);
 
     useEffect(() => {
         async function initConnection() {
@@ -153,20 +172,17 @@ export default function SSHConnectionPage() {
         );
     }
 
-    const kbHeight = 120;
-
     return (
         <div
             ref={containerRef}
-            className="flex flex-col lg:h-[calc(100vh-6rem)]"
-            style={{
-                height: isMobile && showKeyboard
-                    ? `calc(100dvh - 8rem - ${kbHeight}px)`
-                    : 'calc(100dvh - 8rem)',
-            }}
+            className="flex flex-col bg-background"
+            style={isMobile
+                ? { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: visualH > 0 ? `${visualH}px` : '100dvh' }
+                : { height: 'calc(100dvh - 8rem)' }
+            }
         >
             {/* ── Header ── */}
-            <div className="flex items-center justify-between gap-4 mb-4 shrink-0">
+            <div className="flex items-center justify-between gap-4 mb-3 px-3 pt-3 shrink-0 lg:px-0 lg:pt-0 lg:mb-4">
                 <div className="flex items-center gap-3 min-w-0">
                     <Button variant="ghost" size="icon" asChild className="shrink-0 h-8 w-8">
                         <Link href="/panel">
@@ -245,7 +261,7 @@ export default function SSHConnectionPage() {
             </div>
 
             {/* ── Main area: terminal + optional file panel ── */}
-            <div className="flex flex-1 min-h-0 gap-3">
+            <div className="flex flex-1 min-h-0 gap-3 px-3 lg:px-0">
                 {/* Terminal */}
                 <div className="flex-1 min-w-0 min-h-0">
                     <SSHTerminal
