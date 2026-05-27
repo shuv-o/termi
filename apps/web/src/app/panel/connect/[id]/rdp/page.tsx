@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -10,7 +10,6 @@ import {
     Minimize2,
     RotateCcw,
     X,
-    Monitor,
     Scan,
     ZoomIn,
 } from 'lucide-react';
@@ -63,20 +62,32 @@ export default function RDPConnectionPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [toolbarVisible, setToolbarVisible] = useState(true);
 
-    // Visual zoom. undefined = auto-fit (Fit). Number = fixed scale (e.g. 1.0 = 100%).
     const [zoom, setZoom] = useState<number | undefined>(undefined);
-
-    // Explicit resolution override. null = use container size (Auto).
     const [resolution, setResolution] = useState<{ w: number; h: number } | null>(null);
-
-    // Incrementing this key remounts GuacamoleDisplay, forcing it to re-read the
-    // container dimensions on mount. We bump it whenever fullscreen toggles so
-    // the RDP session opens at exactly the new container size instead of being
-    // CSS-scaled (which causes the "zoomed" appearance).
     const [reconnectKey, setReconnectKey] = useState(0);
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Show toolbar and restart auto-hide timer (fullscreen only)
+    const bumpToolbar = useCallback(() => {
+        setToolbarVisible(true);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => setToolbarVisible(false), 2500);
+    }, []);
+
+    // Auto-hide toolbar when entering fullscreen; always show when leaving
+    useEffect(() => {
+        if (!isFullscreen) {
+            setToolbarVisible(true);
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+            return;
+        }
+        bumpToolbar();
+        return () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current); };
+    }, [isFullscreen, bumpToolbar]);
 
     useEffect(() => {
         async function initConnection() {
@@ -131,27 +142,22 @@ export default function RDPConnectionPage() {
         const handleFullscreenChange = () => {
             const entered = !!document.fullscreenElement;
             setIsFullscreen(entered);
-            // Remount GuacamoleDisplay so it re-reads the container size.
-            // In Auto mode this reconnects at the fullscreen (or windowed) container
-            // dimensions rather than CSS-upscaling the existing smaller session.
             if (resolution === null) {
                 setReconnectKey(k => k + 1);
             }
         };
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    // resolution is intentionally included so the handler always sees the latest value
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resolution]);
 
-    // Derive the Select value from current resolution
     const selectValue = resolution
         ? (PRESETS.find(p => p.value !== 'auto' && p.value === `${resolution.w}x${resolution.h}`)?.value ?? `${resolution.w}x${resolution.h}`)
         : 'auto';
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+            <div className="flex items-center justify-center h-[calc(100dvh-8rem)]">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -159,7 +165,7 @@ export default function RDPConnectionPage() {
 
     if (error || !connectionToken) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+            <div className="flex flex-col items-center justify-center h-[calc(100dvh-8rem)] gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back to Dashboard</Link>
@@ -168,97 +174,108 @@ export default function RDPConnectionPage() {
         );
     }
 
-    return (
-        <div ref={containerRef} className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                        <Link href="/panel">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Link>
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <Monitor className="w-5 h-5 text-purple-400" />
-                            <h1 className="font-medium">{server?.name}</h1>
-                        </div>
-                        <span className="text-sm text-muted-foreground">Remote Desktop (RDP)</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-1">
-                    {/* Resolution selector */}
-                    <Select
-                        value={selectValue}
-                        onValueChange={(v) => {
-                            const parsed = parsePreset(v);
-                            setResolution(parsed);
-                        }}
-                    >
-                        <SelectTrigger className="h-8 w-auto gap-1.5 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden">
-                            <Scan className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent align="end" className="bg-card border-border">
-                            {PRESETS.map(p => (
-                                <SelectItem key={p.value} value={p.value} className="text-xs">
-                                    {p.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    {/* Zoom selector */}
-                    <Select
-                        value={zoom !== undefined ? String(zoom) : 'fit'}
-                        onValueChange={(v) => setZoom(v === 'fit' ? undefined : parseFloat(v))}
-                    >
-                        <SelectTrigger className="h-8 w-auto gap-1.5 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden">
-                            <ZoomIn className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent align="end" className="bg-card border-border">
-                            {ZOOM_LEVELS.map(z => (
-                                <SelectItem key={z.value} value={z.value} className="text-xs">
-                                    {z.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setReconnectKey(k => k + 1)}
-                        title="Reconnect / Fit to current window"
-                        className="h-8 w-8"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleFullscreen}
-                        className="hidden sm:flex h-8 w-8"
-                        title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen — auto-fits to screen size'}
-                    >
-                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => router.push('/panel')}
-                        className="text-destructive hover:text-destructive h-8 w-8"
-                        title="Disconnect"
-                    >
-                        <X className="w-4 h-4" />
-                    </Button>
-                </div>
+    // Shared toolbar buttons — rendered in both normal and fullscreen mode
+    const toolbar = (
+        <>
+            <div className="flex items-center gap-2 min-w-0">
+                <Button variant="ghost" size="icon" asChild className={`shrink-0 ${isFullscreen ? 'h-8 w-8' : 'h-7 w-7'}`}>
+                    <Link href="/panel">
+                        <ArrowLeft className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                    </Link>
+                </Button>
+                <span className={`font-medium truncate ${isFullscreen ? 'text-white text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}>
+                    {server?.name}
+                </span>
+                {!isFullscreen && (
+                    <span className="text-xs text-muted-foreground hidden sm:inline shrink-0">— RDP</span>
+                )}
             </div>
 
+            <div className={`flex items-center shrink-0 ${isFullscreen ? 'gap-1.5' : 'gap-1'}`}>
+                <Select
+                    value={selectValue}
+                    onValueChange={(v) => setResolution(parsePreset(v))}
+                >
+                    <SelectTrigger className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}>
+                        <Scan className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`} />
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent align="end" className="bg-card border-border">
+                        {PRESETS.map(p => (
+                            <SelectItem key={p.value} value={p.value} className="text-xs">{p.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select
+                    value={zoom !== undefined ? String(zoom) : 'fit'}
+                    onValueChange={(v) => setZoom(v === 'fit' ? undefined : parseFloat(v))}
+                >
+                    <SelectTrigger className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}>
+                        <ZoomIn className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`} />
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent align="end" className="bg-card border-border">
+                        {ZOOM_LEVELS.map(z => (
+                            <SelectItem key={z.value} value={z.value} className="text-xs">{z.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setReconnectKey(k => k + 1)}
+                    title="Reconnect / Fit to current window"
+                    className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7'}
+                >
+                    <RotateCcw className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleFullscreen}
+                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen — auto-fits to screen size'}
+                    className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7 hidden sm:flex'}
+                >
+                    {isFullscreen
+                        ? <Minimize2 className="w-4 h-4" />
+                        : <Maximize2 className="w-3.5 h-3.5" />
+                    }
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => router.push('/panel')}
+                    title="Disconnect"
+                    className={isFullscreen
+                        ? 'h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/20'
+                        : 'h-7 w-7 text-destructive hover:text-destructive'
+                    }
+                >
+                    <X className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                </Button>
+            </div>
+        </>
+    );
+
+    return (
+        <div
+            ref={containerRef}
+            className="flex flex-col h-[calc(100dvh-8rem)]"
+            onMouseMove={isFullscreen ? bumpToolbar : undefined}
+        >
+            {/* Normal header (hidden when fullscreen — browser's fullscreen API takes over the element) */}
+            {!isFullscreen && (
+                <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
+                    {toolbar}
+                </div>
+            )}
+
             {/* Display */}
-            <div className="flex-1 min-h-0 bg-card rounded-lg overflow-hidden">
+            <div className="flex-1 min-h-0 bg-card rounded-lg overflow-hidden relative">
                 <GuacamoleDisplay
                     key={`${connectionToken}-${reconnectKey}`}
                     serverId={serverId}
@@ -271,11 +288,15 @@ export default function RDPConnectionPage() {
                     onDisconnect={() => { console.log('RDP disconnected'); }}
                     onError={(err) => { console.error('RDP error:', err); }}
                 />
-            </div>
 
-            {/* Info */}
-            <div className="mt-4 text-xs text-muted-foreground text-center">
-                <p>Use your mouse and keyboard to interact with the remote desktop. Ctrl+V pastes your clipboard.</p>
+                {/* Floating toolbar — shown in fullscreen on mouse activity */}
+                {isFullscreen && (
+                    <div
+                        className={`absolute top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 px-3 py-2 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${toolbarVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    >
+                        {toolbar}
+                    </div>
+                )}
             </div>
         </div>
     );

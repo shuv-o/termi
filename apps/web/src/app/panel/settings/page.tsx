@@ -228,14 +228,16 @@ function PasskeyRow({ passkey, onDelete }: { passkey: Passkey; onDelete: (id: st
                 </p>
             </div>
             {confirming ? (
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className="text-xs text-destructive">Remove?</span>
-                    <button onClick={() => setConfirming(false)} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded">
-                        Cancel
-                    </button>
-                    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting} className="h-7 text-xs px-2">
-                        {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Remove'}
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                        <button onClick={() => setConfirming(false)} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded">
+                            Cancel
+                        </button>
+                        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting} className="h-7 text-xs px-2">
+                            {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Remove'}
+                        </Button>
+                    </div>
                 </div>
             ) : (
                 <button
@@ -316,14 +318,16 @@ function SessionRow({ session, onRevoke }: { session: AuthSession; onRevoke: (id
             </div>
             {!session.isCurrent && (
                 confirmed ? (
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <span className="text-xs text-destructive">Sign out?</span>
-                        <button onClick={() => setConfirmed(false)} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded">
-                            Cancel
-                        </button>
-                        <Button variant="destructive" size="sm" onClick={handleRevoke} disabled={revoking} className="h-8 text-xs px-2">
-                            {revoking ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sign out'}
-                        </Button>
+                        <div className="flex items-center gap-1.5">
+                            <button onClick={() => setConfirmed(false)} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded">
+                                Cancel
+                            </button>
+                            <Button variant="destructive" size="sm" onClick={handleRevoke} disabled={revoking} className="h-7 text-xs px-2">
+                                {revoking ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sign out'}
+                            </Button>
+                        </div>
                     </div>
                 ) : (
                     <button
@@ -868,7 +872,7 @@ export default function SettingsPage() {
             )}
 
             <div className="flex gap-6">
-                {/* ── Sidebar ── */}
+                {/* ── Sidebar (desktop only) ── */}
                 <aside className="hidden lg:flex flex-col w-52 shrink-0">
                     {user && (
                         <div className="mb-4 p-3 rounded-xl bg-card border border-border">
@@ -897,19 +901,22 @@ export default function SettingsPage() {
                     />
                 </aside>
 
+                {/* ── Content ── */}
+                <div className="flex-1 min-w-0">
+
                 {/* ── Mobile section picker ── */}
-                <div className="lg:hidden w-full mb-4">
-                    <div className="flex flex-wrap gap-1.5">
+                <div className="lg:hidden mb-4 -mx-1">
+                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
                         {(['profile', 'security', 'passkeys', 'encryption', 'notifications', 'sessions', 'danger'] as Section[]).map(s => {
                             const labels: Record<Section, string> = {
                                 profile: 'Profile', security: 'Security', passkeys: 'Passkeys',
-                                encryption: 'Encryption', notifications: 'Alerts', sessions: 'Sessions', danger: 'Danger',
+                                encryption: 'Encrypt', notifications: 'Alerts', sessions: 'Sessions', danger: 'Danger',
                             };
                             return (
                                 <button
                                     key={s}
                                     onClick={() => setActiveSection(s)}
-                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                                         activeSection === s
                                             ? s === 'danger' ? 'bg-red-500/20 text-red-400' : 'bg-primary/20 text-primary'
                                             : 'bg-secondary text-muted-foreground hover:text-foreground'
@@ -922,9 +929,6 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* ── Content ── */}
-                <div className="flex-1 min-w-0">
-
                     {/* ══════════════ PROFILE ══════════════ */}
                     {activeSection === 'profile' && user && (
                         <div className="space-y-4">
@@ -932,44 +936,44 @@ export default function SettingsPage() {
 
                             <Card className="p-5">
                                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Account Details</h2>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between py-2.5 border-b border-border/50">
-                                        <span className="text-sm text-muted-foreground">Email address</span>
-                                        <span className="text-sm flex items-center gap-2">
-                                            {user.email}
+                                <div className="space-y-0">
+                                    <div className="flex flex-wrap items-center justify-between gap-1 py-2.5 border-b border-border/50">
+                                        <span className="text-sm text-muted-foreground shrink-0">Email</span>
+                                        <span className="text-sm flex items-center gap-1.5 min-w-0">
+                                            <span className="truncate max-w-[180px] sm:max-w-xs">{user.email}</span>
                                             {user.isVerified
-                                                ? <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                                                : <AlertCircle className="w-3.5 h-3.5 text-yellow-400" />
+                                                ? <CheckCircle className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                                                : <AlertCircle className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
                                             }
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between py-2.5 border-b border-border/50">
-                                        <span className="text-sm text-muted-foreground">Sign-in method</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-1 py-2.5 border-b border-border/50">
+                                        <span className="text-sm text-muted-foreground shrink-0">Sign-in</span>
                                         <span className="text-sm">
                                             {user.isGoogleUser ? (
                                                 <span className="flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                                    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24"><path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                                                     Google OAuth
                                                 </span>
                                             ) : 'Password'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between py-2.5 border-b border-border/50">
-                                        <span className="text-sm text-muted-foreground">Two-factor auth</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-1 py-2.5 border-b border-border/50">
+                                        <span className="text-sm text-muted-foreground shrink-0">Two-factor auth</span>
                                         <span className={`text-sm font-medium ${has2FA ? 'text-green-400' : 'text-muted-foreground'}`}>
                                             {user.twoFactorMethod === 'TOTP' ? 'Authenticator App'
                                                 : user.twoFactorMethod === 'EMAIL' ? 'Email OTP'
                                                 : 'Disabled'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between py-2.5 border-b border-border/50">
-                                        <span className="text-sm text-muted-foreground">Passkeys</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-1 py-2.5 border-b border-border/50">
+                                        <span className="text-sm text-muted-foreground shrink-0">Passkeys</span>
                                         <span className={`text-sm font-medium ${user.passkeyEnabled ? 'text-green-400' : 'text-muted-foreground'}`}>
                                             {user.passkeyEnabled ? `${passkeys.length} registered` : 'None'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between py-2.5">
-                                        <span className="text-sm text-muted-foreground">Encryption key</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-1 py-2.5">
+                                        <span className="text-sm text-muted-foreground shrink-0">Encryption key</span>
                                         <span className={`text-sm font-medium ${user.hasMasterKey || !user.isGoogleUser ? 'text-green-400' : 'text-yellow-400'}`}>
                                             {!user.isGoogleUser ? 'Auto (password-derived)' : user.hasMasterKey ? 'Configured' : 'Not set'}
                                         </span>

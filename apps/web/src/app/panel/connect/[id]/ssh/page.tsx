@@ -186,84 +186,84 @@ export default function SSHConnectionPage() {
             }
         >
             {/* ── Header ── */}
-            <div className="flex items-center justify-between gap-4 mb-3 px-3 pt-3 shrink-0 lg:px-0 lg:pt-0 lg:mb-4">
-                <div className="flex items-center gap-3 min-w-0">
-                    <Button variant="ghost" size="icon" asChild className="shrink-0 h-8 w-8">
+            <div className="flex items-center justify-between gap-2 mb-2 px-3 pt-2 shrink-0 lg:px-0 lg:pt-0 lg:mb-3">
+                <div className="flex items-center gap-2 min-w-0">
+                    <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
                         <Link href="/panel">
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-4 h-4" />
                         </Link>
                     </Button>
-                    <div className="min-w-0">
-                        <h1 className="font-medium truncate">{server?.name}</h1>
-                        <span className="text-sm text-muted-foreground">SSH Terminal</span>
-                    </div>
+                    <span className="font-medium text-sm truncate max-w-[120px] sm:max-w-xs">{server?.name}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline shrink-0">— SSH</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                     {server?.hasPassword && (
                         <Button
                             variant="ghost"
                             size="icon"
+                            className="h-7 w-7"
                             onClick={() => setRevealField('password')}
                             title="Copy password (passkey required)"
                         >
-                            <KeyRound className="w-4 h-4" />
+                            <KeyRound className="w-3.5 h-3.5" />
                         </Button>
                     )}
 
                     <Button
                         variant={showFiles ? 'default' : 'ghost'}
-                        size="sm"
+                        size="icon"
+                        className="h-7 w-7"
                         onClick={() => setShowFiles(f => !f)}
-                        className="gap-1.5"
                         title={showFiles ? 'Hide file manager' : 'Open file manager'}
                     >
-                        <FolderOpen className="w-4 h-4" />
-                        <span className="hidden sm:inline text-xs">Files</span>
+                        <FolderOpen className="w-3.5 h-3.5" />
                     </Button>
 
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="h-7 w-7"
                         onClick={() => triggerReconnectRef.current?.()}
                         title="Reconnect"
                     >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className="w-3.5 h-3.5" />
                     </Button>
 
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="hidden sm:flex h-7 w-7"
                         onClick={toggleFullscreen}
-                        className="hidden sm:flex"
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
-                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                        {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                     </Button>
 
                     <Button
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
+                        className="h-7 w-7"
                         onClick={() => setShowKeyboard(!showKeyboard)}
                         title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
                     >
-                        <Keyboard className="w-4 h-4" />
+                        <Keyboard className="w-3.5 h-3.5" />
                     </Button>
 
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
                         onClick={() => router.push('/panel')}
-                        className="text-destructive hover:text-destructive"
                         title="Disconnect"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-3.5 h-3.5" />
                     </Button>
                 </div>
             </div>
 
             {/* ── Main area: terminal + optional file panel ── */}
-            <div className="flex flex-1 min-h-0 gap-3 px-3 lg:px-0">
+            <div className="flex flex-1 min-h-0 gap-2 px-3 lg:px-0">
                 {/* Terminal */}
                 <div className="flex-1 min-w-0 min-h-0">
                     <SSHTerminal

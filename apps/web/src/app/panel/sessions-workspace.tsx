@@ -266,6 +266,7 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
     const [queue, setQueue] = useState<TransferItem[]>([]);
     const [queueOpen, setQueueOpen] = useState(true);
     const [activeDir, setActiveDir] = useState<'lr' | 'rl' | null>(null);
+    const [mobilePanel, setMobilePanel] = useState<'left' | 'right'>('left');
     const fakeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Sync server ids when server list changes (initial load)
@@ -415,7 +416,58 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
             </div>
 
             {/* ── File manager panels + transfer controls ── */}
-            <div className="flex flex-1 min-h-0 overflow-hidden">
+
+            {/* Mobile: tab bar to switch between left/right panels */}
+            <div className="md:hidden shrink-0 flex border-b border-border">
+                <button
+                    onClick={() => setMobilePanel('left')}
+                    className={`flex-1 py-2 text-xs font-medium truncate px-3 transition-colors border-b-2 ${mobilePanel === 'left' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent hover:text-foreground'}`}
+                >
+                    {servers.find(s => s.id === leftId)?.name ?? 'Source'}
+                </button>
+                <button
+                    onClick={() => setMobilePanel('right')}
+                    className={`flex-1 py-2 text-xs font-medium truncate px-3 transition-colors border-b-2 ${mobilePanel === 'right' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent hover:text-foreground'}`}
+                >
+                    {servers.find(s => s.id === rightId)?.name ?? 'Destination'}
+                </button>
+            </div>
+
+            {/* Mobile: single active panel */}
+            <div className="md:hidden flex flex-1 min-h-0 overflow-hidden flex-col">
+                {hasNoServers ? (
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                        <p className="text-sm">No SSH servers available</p>
+                    </div>
+                ) : mobilePanel === 'left' && leftId ? (
+                    <FileManagerPanel key={leftId} serverId={leftId} onSelectionChange={onLeftChange} />
+                ) : mobilePanel === 'right' && rightId ? (
+                    <FileManagerPanel key={rightId} serverId={rightId} onSelectionChange={onRightChange} />
+                ) : null}
+            </div>
+
+            {/* Mobile: transfer action bar */}
+            <div className="md:hidden shrink-0 flex items-center justify-center gap-3 px-3 py-2 border-t border-border bg-card/60">
+                <button
+                    onClick={() => doTransfer('rl')}
+                    disabled={!!activeDir || rightFiles.length === 0}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${rightFiles.length > 0 && !activeDir ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-secondary/40 border-border/50 text-muted-foreground opacity-40 cursor-not-allowed'}`}
+                >
+                    {activeDir === 'rl' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowLeft className="w-3.5 h-3.5" />}
+                    Send left {rightFiles.length > 0 ? `(${rightFiles.length})` : ''}
+                </button>
+                <button
+                    onClick={() => doTransfer('lr')}
+                    disabled={!!activeDir || leftFiles.length === 0}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${leftFiles.length > 0 && !activeDir ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-secondary/40 border-border/50 text-muted-foreground opacity-40 cursor-not-allowed'}`}
+                >
+                    Send right {leftFiles.length > 0 ? `(${leftFiles.length})` : ''}
+                    {activeDir === 'lr' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowRight className="w-3.5 h-3.5" />}
+                </button>
+            </div>
+
+            {/* Desktop: side-by-side panels */}
+            <div className="hidden md:flex flex-1 min-h-0 overflow-hidden">
                 {/* Left panel */}
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     {hasNoServers ? (
@@ -429,7 +481,6 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
 
                 {/* Middle transfer controls */}
                 <div className="shrink-0 w-20 flex flex-col items-center justify-center gap-4 border-x border-border bg-card/30 py-4">
-                    {/* → transfer button */}
                     <div className="flex flex-col items-center gap-1.5">
                         <button
                             onClick={() => doTransfer('lr')}
@@ -441,20 +492,12 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
                                 }`}
                             title="Transfer selected → right"
                         >
-                            {activeDir === 'lr'
-                                ? <Loader2 className="w-4 h-4 animate-spin" />
-                                : <ArrowRight className="w-4 h-4" />
-                            }
-                            {leftFiles.length > 0 && (
-                                <span className="text-[9px] font-bold leading-none">{leftFiles.length}</span>
-                            )}
+                            {activeDir === 'lr' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                            {leftFiles.length > 0 && <span className="text-[9px] font-bold leading-none">{leftFiles.length}</span>}
                         </button>
-                        {leftFiles.length > 0 && (
-                            <span className="text-[9px] text-muted-foreground">{fmt(leftBytes)}</span>
-                        )}
+                        {leftFiles.length > 0 && <span className="text-[9px] text-muted-foreground">{fmt(leftBytes)}</span>}
                     </div>
 
-                    {/* ← transfer button */}
                     <div className="flex flex-col items-center gap-1.5">
                         <button
                             onClick={() => doTransfer('rl')}
@@ -466,20 +509,12 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
                                 }`}
                             title="Transfer selected ← left"
                         >
-                            {activeDir === 'rl'
-                                ? <Loader2 className="w-4 h-4 animate-spin" />
-                                : <ArrowLeft className="w-4 h-4" />
-                            }
-                            {rightFiles.length > 0 && (
-                                <span className="text-[9px] font-bold leading-none">{rightFiles.length}</span>
-                            )}
+                            {activeDir === 'rl' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
+                            {rightFiles.length > 0 && <span className="text-[9px] font-bold leading-none">{rightFiles.length}</span>}
                         </button>
-                        {rightFiles.length > 0 && (
-                            <span className="text-[9px] text-muted-foreground">{fmt(rightBytes)}</span>
-                        )}
+                        {rightFiles.length > 0 && <span className="text-[9px] text-muted-foreground">{fmt(rightBytes)}</span>}
                     </div>
 
-                    {/* Active animation */}
                     {activeDir && (
                         <div className="flex flex-col items-center gap-1">
                             <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
@@ -712,12 +747,14 @@ export default function SessionsWorkspace() {
     const [showPicker, setShowPicker] = useState(false);
     const [mode, setMode] = useState<'terminal' | 'transfer'>('terminal');
     const [isElectron, setIsElectron] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
 
     useEffect(() => {
         setIsElectron(Boolean(window.electronAPI?.isElectron));
+        // Default sidebar open only on desktop
+        setSidebarOpen(window.innerWidth >= 1024);
     }, []);
 
     const [allServers, setAllServers] = useState<ServerItem[]>([]);
@@ -752,24 +789,23 @@ export default function SessionsWorkspace() {
         <div className={`flex flex-col ${containerHeight}`}>
 
             {/* ── Top toolbar ── */}
-            <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-card border-b border-border">
+            <div className="shrink-0 flex items-center gap-1.5 px-2 py-2 bg-card border-b border-border">
                 <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(o => !o)}
                     className="h-8 w-8 shrink-0" title={sidebarOpen ? 'Hide session list' : 'Show session list'}
                 >
                     <SplitSquareHorizontal className="w-4 h-4" />
                 </Button>
 
-                <div className="w-px h-5 bg-border" />
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
+                <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
                     <Monitor className="w-4 h-4" />
                     <span>
-                        <span className="text-foreground font-medium">{sessions.length}</span> session{sessions.length !== 1 ? 's' : ''}
+                        <span className="text-foreground font-medium">{sessions.length}</span>
+                        <span className="hidden md:inline"> session{sessions.length !== 1 ? 's' : ''}</span>
                     </span>
                     {connectedCount > 0 && (
-                        <span className="flex items-center gap-1 text-green-400 text-xs">
+                        <span className="flex items-center gap-0.5 text-green-400 text-xs">
                             <Wifi className="w-3 h-3" />
-                            {connectedCount} live
+                            <span className="hidden md:inline">{connectedCount} live</span>
                         </span>
                     )}
                 </div>
@@ -777,30 +813,29 @@ export default function SessionsWorkspace() {
                 <div className="flex-1" />
 
                 {/* Mode toggle */}
-                <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
+                <div className="flex items-center gap-0.5 bg-secondary rounded-lg p-0.5">
                     <button onClick={() => setMode('terminal')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                        className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
                             mode === 'terminal' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
-                        <Terminal className="w-3.5 h-3.5" /> Terminal
+                        <Terminal className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Terminal</span>
                     </button>
                     <button onClick={() => setMode('transfer')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                        className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
                             mode === 'transfer' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
-                        <ArrowLeftRight className="w-3.5 h-3.5" /> Transfer
+                        <ArrowLeftRight className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Transfer</span>
                     </button>
                 </div>
 
-                <div className="w-px h-5 bg-border" />
-
-                <Button variant="ghost" size="sm" onClick={() => setShowPicker(true)}
-                    className="h-8 gap-1.5 text-xs" title="Open new server session"
+                <Button variant="ghost" size="icon" onClick={() => setShowPicker(true)}
+                    className="h-8 w-8" title="Open new server session"
                 >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">New Session</span>
+                    <Plus className="w-4 h-4" />
                 </Button>
 
                 {isElectron && (
@@ -814,18 +849,26 @@ export default function SessionsWorkspace() {
 
                 <Button variant="ghost" size="icon"
                     onClick={() => { setIsFullscreen(f => !f); setTimeout(() => window.dispatchEvent(new Event('resize')), 50); }}
-                    className="h-8 w-8" title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    className="hidden sm:flex h-8 w-8" title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                 >
                     {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </Button>
             </div>
 
             {/* ── Body: sidebar + content ── */}
-            <div className="flex flex-1 min-h-0">
+            <div className="flex flex-1 min-h-0 relative">
+
+                {/* Mobile backdrop */}
+                {sidebarOpen && (
+                    <div
+                        className="lg:hidden fixed inset-0 z-10 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
 
                 {/* ── Session sidebar ── */}
                 {sidebarOpen && (
-                    <aside className="w-56 lg:w-64 shrink-0 flex flex-col border-r border-border bg-card/40">
+                    <aside className="fixed inset-y-0 left-0 z-20 w-72 flex flex-col border-r border-border bg-card lg:relative lg:inset-auto lg:w-64 lg:shrink-0 lg:z-auto lg:bg-card/40">
                         <div className="p-2 border-b border-border">
                             <div className="relative">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
