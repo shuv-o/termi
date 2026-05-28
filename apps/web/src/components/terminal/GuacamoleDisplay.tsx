@@ -92,9 +92,10 @@ export default function GuacamoleDisplay({
         let displayEl: HTMLElement | null = null;
         let pasteHandler: ((e: ClipboardEvent) => void) | null = null;
         // Mac keyboard state — reset on cleanup
-        let macMetaDown   = false; // true while Cmd (Meta) is physically held
+        let macMetaDown    = false; // true while Cmd (Meta) is physically held
         let macVSuppressed = false; // true when Cmd+V V-key was suppressed (paste handler sends it)
-        let ctrlDown      = false; // true while physical Ctrl is held (all platforms)
+        let ctrlDown       = false; // true while physical Ctrl is held (all platforms)
+        let ctrlVSuppressed = false; // true when Ctrl+V V-key was suppressed (paste handler sends it)
         // guacamole-common-js uses browser globals - must be loaded client-side
         import('guacamole-common-js').then((module) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,7 +177,7 @@ export default function GuacamoleDisplay({
                             // atob gives raw bytes; TextDecoder handles multi-byte UTF-8 correctly
                             const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
                             const text = new TextDecoder().decode(bytes);
-                            navigator.clipboard?.writeText(text);
+                            navigator.clipboard?.writeText(text).catch(() => { /* silently ignore — page may lack focus */ });
                         } catch { /* ignore */ }
                     };
                 }
@@ -209,26 +210,25 @@ export default function GuacamoleDisplay({
                     writer.sendText(text);
                     writer.sendEnd();
                 }
-                // Send Ctrl+V AFTER clipboard content so the remote always pastes
-                // the correct data regardless of timing:
-                //   • Mac Cmd+V: V keydown was suppressed in keyboard handler;
-                //     Ctrl is held (Meta→Ctrl translation) — just send V.
-                //   • Non-Mac right-click paste (Ctrl not held): send full Ctrl+V.
-                //   • Non-Mac Ctrl+V via keyboard: keyboard already sent Ctrl+V before
-                //     this event, so we skip to avoid double paste.
+                // Send Ctrl+V AFTER clipboard content so the remote pastes the correct data.
+                // V keydown is suppressed in the keyboard handler for both Mac Cmd+V and
+                // non-Mac Ctrl+V, so clipboard always arrives before the V keystroke.
                 if (isMac && macMetaDown) {
-                    // Ctrl already held by Meta→Ctrl mapping; append V
+                    // Mac: Ctrl already held via Meta→Ctrl mapping; just send V
                     guacClient.sendKeyEvent(1, V_KEYSYM);
                     guacClient.sendKeyEvent(0, V_KEYSYM);
+                } else if (ctrlVSuppressed) {
+                    // Windows/Linux Ctrl+V: Ctrl is held, V was suppressed; send V now
+                    guacClient.sendKeyEvent(1, V_KEYSYM);
+                    guacClient.sendKeyEvent(0, V_KEYSYM);
+                    // Leave ctrlVSuppressed=true so keyup handler knows to skip the V keyup
                 } else if (!ctrlDown) {
-                    // Right-click paste (no keyboard Ctrl held on any platform)
+                    // Right-click / menu paste — no Ctrl held; send full Ctrl+V
                     guacClient.sendKeyEvent(1, CTRL_L);
                     guacClient.sendKeyEvent(1, V_KEYSYM);
                     guacClient.sendKeyEvent(0, V_KEYSYM);
                     guacClient.sendKeyEvent(0, CTRL_L);
                 }
-                // else: physical Ctrl+V — keyboard already sent Ctrl+V first (pre-existing
-                //       timing limitation; clipboard content syncs for the next paste).
             };
             document.addEventListener('paste', pasteHandler);
             // Audio from remote desktop
@@ -260,11 +260,16 @@ export default function GuacamoleDisplay({
                         return;
                     }
                     if (macMetaDown && keysym === V_KEYSYM) {
-                        // Cmd+V: suppress keyboard V — paste handler sends clipboard
-                        // then V so the remote gets them in the correct order.
+                        // Cmd+V: suppress V — paste handler sends clipboard then V in order.
                         macVSuppressed = true;
                         return;
                     }
+                }
+                // Ctrl+V: suppress V on all platforms — paste handler sends clipboard
+                // then V so the remote always receives clipboard data before the keystroke.
+                if (ctrlDown && keysym === V_KEYSYM) {
+                    ctrlVSuppressed = true;
+                    return;
                 }
                 guacClient.sendKeyEvent(1, keysym);
             };
@@ -278,11 +283,14 @@ export default function GuacamoleDisplay({
                         return;
                     }
                     if (keysym === V_KEYSYM && macVSuppressed) {
-                        // V keydown was suppressed; skip the keyup too (paste handler
-                        // already sent the matched down+up pair).
                         macVSuppressed = false;
                         return;
                     }
+                }
+                if (keysym === V_KEYSYM && ctrlVSuppressed) {
+                    // V keydown was suppressed; skip keyup too (paste handler already sent the pair).
+                    ctrlVSuppressed = false;
+                    return;
                 }
                 guacClient.sendKeyEvent(0, keysym);
             };
@@ -291,7 +299,7 @@ export default function GuacamoleDisplay({
         });
         return () => {
             fitFnRef.current = null;
-            macMetaDown = macVSuppressed = ctrlDown = false;
+            macMetaDown = macVSuppressed = ctrlDown = ctrlVSuppressed = false;
             if (pasteHandler) document.removeEventListener('paste', pasteHandler);
             try { guacClient?.disconnect(); } catch { /* ignore */ }
             try {

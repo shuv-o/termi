@@ -72,28 +72,24 @@ export default function RDPConnectionPage() {
     const containerRef = useRef<HTMLDivElement>(null);
     const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Show toolbar and restart auto-hide timer (fullscreen only)
-    const bumpToolbar = useCallback(() => {
-        setToolbarVisible(true);
+    const scheduleHide = useCallback(() => {
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = setTimeout(() => setToolbarVisible(false), 2500);
+        hideTimerRef.current = setTimeout(() => setToolbarVisible(false), 2000);
     }, []);
 
-    const toggleToolbar = useCallback(() => {
+    const cancelHide = useCallback(() => {
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        setToolbarVisible(prev => !prev);
     }, []);
 
-    // Auto-hide toolbar when entering fullscreen; always show when leaving
+    // Hide toolbar when entering fullscreen; always show when leaving
     useEffect(() => {
         if (!isFullscreen) {
             setToolbarVisible(true);
             if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
             return;
         }
-        bumpToolbar();
-        return () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current); };
-    }, [isFullscreen, bumpToolbar]);
+        setToolbarVisible(false);
+    }, [isFullscreen]);
 
     useEffect(() => {
         async function initConnection() {
@@ -271,7 +267,6 @@ export default function RDPConnectionPage() {
         <div
             ref={containerRef}
             className="flex flex-col h-[calc(100dvh-8rem)]"
-            onMouseMove={isFullscreen ? bumpToolbar : undefined}
         >
             {/* Normal header (hidden when fullscreen — browser's fullscreen API takes over the element) */}
             {!isFullscreen && (
@@ -295,20 +290,24 @@ export default function RDPConnectionPage() {
                     onError={(err) => { console.error('RDP error:', err); }}
                 />
 
-                {/* Pill toggle — always visible in fullscreen */}
+                {/* Pill — always visible in fullscreen; click to show controls */}
                 {isFullscreen && (
                     <button
-                        onClick={toggleToolbar}
+                        onClick={() => setToolbarVisible(true)}
+                        onMouseEnter={cancelHide}
+                        onMouseLeave={scheduleHide}
                         className="absolute top-0 left-1/2 -translate-x-1/2 z-[51] flex items-center justify-center w-10 h-4 bg-white/20 hover:bg-white/35 rounded-b-full transition-colors"
-                        title={toolbarVisible ? 'Hide controls' : 'Show controls'}
+                        title="Show controls"
                     >
-                        <ChevronDown className={`w-3 h-3 text-white/80 transition-transform duration-200 ${toolbarVisible ? 'rotate-180' : ''}`} />
+                        <ChevronDown className="w-3 h-3 text-white/80" />
                     </button>
                 )}
 
-                {/* Floating toolbar — shown in fullscreen on mouse activity or pill click */}
+                {/* Floating toolbar — hides automatically when mouse leaves */}
                 {isFullscreen && (
                     <div
+                        onMouseEnter={cancelHide}
+                        onMouseLeave={scheduleHide}
                         className={`absolute top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 px-3 py-2 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${toolbarVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                     >
                         {toolbar}
