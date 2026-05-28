@@ -12,6 +12,7 @@ import {
     X,
     Scan,
     ZoomIn,
+    ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -76,6 +77,11 @@ export default function RDPConnectionPage() {
         setToolbarVisible(true);
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
         hideTimerRef.current = setTimeout(() => setToolbarVisible(false), 2500);
+    }, []);
+
+    const toggleToolbar = useCallback(() => {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        setToolbarVisible(prev => !prev);
     }, []);
 
     // Auto-hide toolbar when entering fullscreen; always show when leaving
@@ -289,7 +295,18 @@ export default function RDPConnectionPage() {
                     onError={(err) => { console.error('RDP error:', err); }}
                 />
 
-                {/* Floating toolbar — shown in fullscreen on mouse activity */}
+                {/* Pill toggle — always visible in fullscreen */}
+                {isFullscreen && (
+                    <button
+                        onClick={toggleToolbar}
+                        className="absolute top-0 left-1/2 -translate-x-1/2 z-[51] flex items-center justify-center w-10 h-4 bg-white/20 hover:bg-white/35 rounded-b-full transition-colors"
+                        title={toolbarVisible ? 'Hide controls' : 'Show controls'}
+                    >
+                        <ChevronDown className={`w-3 h-3 text-white/80 transition-transform duration-200 ${toolbarVisible ? 'rotate-180' : ''}`} />
+                    </button>
+                )}
+
+                {/* Floating toolbar — shown in fullscreen on mouse activity or pill click */}
                 {isFullscreen && (
                     <div
                         className={`absolute top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 px-3 py-2 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${toolbarVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
