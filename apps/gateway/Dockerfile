@@ -4,11 +4,14 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# node-pty requires native build tools
+RUN apk add --no-cache python3 make g++ linux-headers
+
 # Copy package files
 COPY package.json package-lock.json* ./
 COPY apps/gateway/package.json ./apps/gateway/
 
-# Install dependencies
+# Install dependencies (includes node-pty native compilation)
 RUN npm ci --workspace=apps/gateway
 
 # Copy source code
@@ -27,7 +30,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 gateway
 RUN adduser --system --uid 1001 gateway
 
-# Copy built files
+# Copy built files and compiled native modules from builder
 COPY --from=builder /app/apps/gateway/dist ./dist
 COPY --from=builder /app/apps/gateway/package.json ./
 COPY --from=builder /app/node_modules ./node_modules

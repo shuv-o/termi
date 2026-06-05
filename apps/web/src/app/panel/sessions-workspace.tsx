@@ -691,6 +691,8 @@ function TerminalPane({
                     {session.type === 'local' ? (
                         <LocalTerminal
                             tabId={session.tabId}
+                            connectionToken={session.token ?? undefined}
+                            gatewayUrl={session.gatewayUrl ?? undefined}
                             onReady={() => updateSessionStatus(session.tabId, 'connected')}
                             onExit={() => updateSessionStatus(session.tabId, 'disconnected')}
                         />
@@ -871,14 +873,12 @@ export default function SessionsWorkspace() {
                     <Plus className="w-4 h-4" />
                 </Button>
 
-                {isElectron && (
-                    <Button variant="ghost" size="icon"
+                <Button variant="ghost" size="icon"
                         onClick={() => { addLocalSession(); setMode('terminal'); }}
                         className="h-8 w-8 text-violet-400 hover:text-violet-300" title="Open local terminal"
                     >
                         <Laptop className="w-4 h-4" />
                     </Button>
-                )}
 
                 <Button variant="ghost" size="icon"
                     onClick={() => { setIsFullscreen(f => !f); setTimeout(() => window.dispatchEvent(new Event('resize')), 50); }}
@@ -959,13 +959,11 @@ export default function SessionsWorkspace() {
                             >
                                 <Plus className="w-3.5 h-3.5" /> New session
                             </button>
-                            {isElectron && (
-                                <button onClick={() => { addLocalSession(); setMode('terminal'); }}
+                            <button onClick={() => { addLocalSession(); setMode('terminal'); }}
                                     className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-violet-400 hover:text-violet-300 hover:bg-secondary transition-colors"
                                 >
                                     <Laptop className="w-3.5 h-3.5" /> Local terminal
                                 </button>
-                            )}
                             <div className="px-3 py-1.5 rounded-lg bg-secondary/50 flex items-center gap-2">
                                 <Globe className="w-3 h-3 text-muted-foreground shrink-0" />
                                 <p className="text-[10px] text-muted-foreground leading-snug">
@@ -999,11 +997,9 @@ export default function SessionsWorkspace() {
                                 <Button onClick={() => setShowPicker(true)} className="gap-2">
                                     <Plus className="w-4 h-4" /> Open Server
                                 </Button>
-                                {isElectron && (
-                                    <Button variant="secondary" onClick={() => addLocalSession()} className="gap-2">
+                                <Button variant="secondary" onClick={() => addLocalSession()} className="gap-2">
                                         <Laptop className="w-4 h-4" /> Local Terminal
                                     </Button>
-                                )}
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-4 py-2 rounded-full">
                                 <Globe className="w-3.5 h-3.5 text-primary" />

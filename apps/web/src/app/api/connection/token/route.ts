@@ -14,10 +14,16 @@ import { validateHost } from '@/lib/security/ssrf';
 import { createHash } from 'crypto';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 
-const tokenSchema = z.object({
-    serverId: z.string(),
-    protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc']),
-});
+const tokenSchema = z.discriminatedUnion('protocol', [
+    z.object({
+        protocol: z.literal('local'),
+        serverId: z.string().optional(),
+    }),
+    z.object({
+        protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc']),
+        serverId: z.string(),
+    }),
+]);
 
 function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
@@ -44,9 +50,34 @@ export async function POST(request: Request) {
     const validation = await validateBody(request, tokenSchema);
     if ('error' in validation) return validation.error;
 
-    const { serverId, protocol } = validation.data;
+    const tokenData = validation.data;
 
     try {
+        // ── Local terminal: no server lookup needed ──────────────────────────────
+        if (tokenData.protocol === 'local') {
+            if (process.env.ALLOW_LOCAL_TERMINAL !== 'true') {
+                return errorResponse('Local terminal is not enabled on this server', 403);
+            }
+
+            const key = getJWEKey();
+            const token = await new jose.EncryptJWT({
+                userId: user.id,
+                serverId: 'local',
+                protocol: 'local',
+                host: '',
+                port: 0,
+                username: '',
+            })
+                .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+                .setExpirationTime('5m')
+                .setIssuedAt()
+                .encrypt(key);
+
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
+            return successResponse({ token, gatewayUrl });
+        }
+
+        const { serverId, protocol } = tokenData;
         const server = await getServerForConnection(serverId, user.id);
         if (!server) return notFoundResponse('Server not found');
 

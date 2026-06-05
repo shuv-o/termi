@@ -15,7 +15,8 @@ import { createHash } from 'crypto';
 export interface TokenPayload {
     userId: string;
     serverId: string;
-    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc';
+    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
+    // host/username are present for remote protocols, absent for 'local'
     host: string;
     port: number;
     username: string;
@@ -54,13 +55,18 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             contentEncryptionAlgorithms: ['A256GCM'],
         });
 
-        if (!payload.userId || !payload.serverId || !payload.host || !payload.username) {
+        if (!payload.userId || !payload.serverId) {
             throw new Error('Invalid token payload');
         }
 
-        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc'] as const;
+        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'local'] as const;
         if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol as typeof VALID_PROTOCOLS[number])) {
             throw new Error('Invalid token protocol');
+        }
+
+        // Remote protocols require host and username; local does not
+        if (payload.protocol !== 'local' && (!payload.host || !payload.username)) {
+            throw new Error('Invalid token payload');
         }
 
         return payload as unknown as TokenPayload;

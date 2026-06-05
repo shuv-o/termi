@@ -18,6 +18,7 @@ import dns from 'dns/promises';
 import { SSHHandler, type SSHOutputSink } from './handlers/ssh.js';
 import { SCPHandler } from './handlers/scp.js';
 import { GuacamoleHandler } from './handlers/guacamole.js';
+import { LocalHandler } from './handlers/local.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
 import { PersistentSessionStore, type PersistentSession } from './sessions/PersistentSessionStore.js';
@@ -105,9 +106,9 @@ const persistentSessions = new PersistentSessionStore();
 /** Active non-SSH WebSocket connections (for cleanup on error/close). */
 interface NonSshMeta {
     userId: string;
-    protocol: 'scp' | 'rdp' | 'vnc';
+    protocol: 'scp' | 'rdp' | 'vnc' | 'local';
     serverId: string;
-    handler?: SCPHandler | GuacamoleHandler;
+    handler?: SCPHandler | GuacamoleHandler | LocalHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
@@ -178,7 +179,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     // token is NO LONGER in the URL — it arrives in the first WS message
-    const protocol  = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc';
+    const protocol  = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
     const serverId  = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
     const browserWidth  = parseInt(url.searchParams.get('width')  || '0', 10) || 0;
@@ -190,9 +191,16 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
-    if (!['ssh', 'scp', 'rdp', 'vnc'].includes(protocol)) {
+    if (!['ssh', 'scp', 'rdp', 'vnc', 'local'].includes(protocol)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Invalid protocol' }));
         ws.close(4000, 'Bad Request');
+        return;
+    }
+
+    // Local terminal requires explicit opt-in via environment variable
+    if (protocol === 'local' && process.env.ALLOW_LOCAL_TERMINAL !== 'true') {
+        ws.send(JSON.stringify({ type: 'error', message: 'Local terminal is not enabled on this server' }));
+        ws.close(4403, 'Forbidden');
         return;
     }
 
@@ -251,11 +259,61 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return;
         }
 
-        // ── SSRF guard ────────────────────────────────────────────────────
-        if (process.env.ALLOW_PRIVATE_NETWORKS !== 'true' && await isPrivateHostAsync(tokenPayload.host)) {
+        // ── SSRF guard (skipped for local protocol — no remote host involved) ──
+        if (protocol !== 'local' && process.env.ALLOW_PRIVATE_NETWORKS !== 'true' && await isPrivateHostAsync(tokenPayload.host)) {
             ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
             ws.close(1008, 'SSRF protection');
             return;
+        }
+
+        // ── Local terminal: PTY on this machine ───────────────────────────
+        if (protocol === 'local') {
+            const meta: NonSshMeta = {
+                userId: tokenPayload.userId,
+                protocol: 'local',
+                serverId,
+            };
+            nonSshConnections.set(ws, meta);
+
+            meta.handler = new LocalHandler(ws, tokenPayload.userId);
+
+            ws.on('message', (data) => {
+                try {
+                    const message = JSON.parse(data.toString());
+                    const handler = meta.handler as LocalHandler;
+                    switch (message.type) {
+                        case 'data':
+                            if (message.data) {
+                                handler.write(Buffer.from(message.data, 'base64'));
+                            }
+                            break;
+                        case 'resize':
+                            if (message.cols && message.rows) {
+                                handler.resize(message.rows, message.cols);
+                            }
+                            break;
+                        case 'close-session':
+                            handler.close();
+                            ws.close(1000, 'Session closed');
+                            break;
+                    }
+                } catch (err) {
+                    console.error('[gateway] Invalid local terminal message:', err);
+                }
+            });
+
+            ws.on('close', () => {
+                meta.handler?.close();
+                nonSshConnections.delete(ws);
+            });
+
+            ws.on('error', (err) => {
+                console.error('[gateway] Local terminal WebSocket error:', err);
+                meta.handler?.close();
+                nonSshConnections.delete(ws);
+            });
+
+            return; // local handled
         }
 
         // ── SSH: persistent sessions ──────────────────────────────────────

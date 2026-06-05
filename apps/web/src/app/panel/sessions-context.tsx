@@ -150,18 +150,45 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     const addLocalSession: SessionsProvider_AddLocalSession = useCallback(() => {
         const tabId = `${uid}-local-${Date.now()}`;
+        const isElectronMode = typeof window !== 'undefined' && Boolean((window as any).electronAPI?.isElectron);
+        const serverName = isElectronMode ? 'Local Terminal' : 'Gateway Shell';
+
         setSessions(prev => [...prev, {
             tabId,
             sessionId: crypto.randomUUID(),
             type: 'local',
             serverId: 'local',
-            serverName: 'Local Terminal',
+            serverName,
             token: null,
             gatewayUrl: null,
             status: 'connecting',
             showFiles: false,
         }]);
         setActiveTabId(tabId);
+
+        if (!isElectronMode) {
+            // Fetch a gateway token for the WebSocket-based cloud path
+            fetch('/api/connection/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ protocol: 'local' }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setSessions(prev => prev.map(s => {
+                        if (s.tabId !== tabId) return s;
+                        if (data.success) {
+                            return { ...s, token: data.data.token, gatewayUrl: data.data.gatewayUrl };
+                        }
+                        return { ...s, status: 'error', errorMessage: data.error || 'Local terminal not available on this server' };
+                    }));
+                })
+                .catch(() => {
+                    setSessions(prev => prev.map(s =>
+                        s.tabId === tabId ? { ...s, status: 'error', errorMessage: 'Failed to connect' } : s
+                    ));
+                });
+        }
     }, [uid]);
 
     const addSession: SessionsProvider_AddSession = useCallback(async (serverId: string, serverName?: string) => {
