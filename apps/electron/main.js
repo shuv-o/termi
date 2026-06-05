@@ -307,7 +307,7 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
     const shell =
         process.platform === 'win32'
             ? 'powershell.exe'
-            : (process.env.SHELL || '/bin/zsh');
+            : (process.env.SHELL || '/bin/bash');
 
     const safeHome = os.homedir();
     let safeCwd = safeHome;
