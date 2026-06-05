@@ -27,6 +27,7 @@ interface SessionsContextValue {
     sessions: Session[];
     activeTabId: string | null;
     setActiveTabId: (tabId: string) => void;
+    sessionsRestored: boolean;
     addSession: (serverId: string, serverName?: string) => Promise<void>;
     addLocalSession: () => void;
     removeSession: (tabId: string) => void;
@@ -103,6 +104,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     const uid = useId();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
+    const [sessionsRestored, setSessionsRestored] = useState(false);
 
     // Map of tabId → active WebSocket, used to send close-session before removing
     const wsRefs = useRef(new Map<string, WebSocket>());
@@ -322,6 +324,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                     restoredSessions.forEach(s => reconnectSessionRef.current?.(s.tabId, s.serverId));
                 }
             } catch { /* silently ignore — network issues shouldn't break the page */ }
+            finally {
+                setSessionsRestored(true);
+            }
         }
         restoreSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,6 +335,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     return (
         <SessionsContext.Provider value={{
             sessions, activeTabId, setActiveTabId,
+            sessionsRestored,
             addSession, addLocalSession, removeSession, reconnectSession, renewSession,
             toggleFiles, updateSessionStatus, setSessionError, setSessionWs,
         }}>

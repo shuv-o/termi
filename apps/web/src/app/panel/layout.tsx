@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
     Server, FolderOpen, Settings, LogOut, X,
     Plus, Search, Shield, Monitor, Mail,
-    PanelLeftClose, PanelLeftOpen, ChevronDown,
+    PanelLeftClose, PanelLeftOpen, ChevronDown, Laptop,
 } from 'lucide-react';
-import { SessionsProvider } from './sessions-context';
+import { SessionsProvider, useSessionsContext } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import TerminalLogo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
@@ -65,6 +65,41 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const [verificationSent,      setVerificationSent]      = useState(false);
 
     const isSessionsPage = pathname === '/panel/sessions';
+
+    // ── Sessions context (local terminal sidebar entry + Electron auto-open) ──
+    const {
+        addLocalSession, sessions, activeTabId: activeSessionTabId,
+        setActiveTabId: setActiveSessionTabId, sessionsRestored,
+    } = useSessionsContext();
+
+    /** Open an existing local session or create a new one, then navigate to sessions page. */
+    const handleOpenLocalTerminal = useCallback(() => {
+        const existing = sessions.find(s => s.type === 'local');
+        if (existing) {
+            setActiveSessionTabId(existing.tabId);
+        } else {
+            addLocalSession();
+        }
+        router.push('/panel/sessions');
+    }, [sessions, addLocalSession, setActiveSessionTabId, router]);
+
+    /** True only when a local session tab is the active tab and we're on the sessions page. */
+    const localTerminalActive =
+        pathname === '/panel/sessions' &&
+        sessions.some(s => s.type === 'local' && s.tabId === activeSessionTabId);
+
+    // ── Electron: auto-open local terminal after sessions are restored ──
+    const autoOpenDoneRef = useRef(false);
+    useEffect(() => {
+        if (!sessionsRestored || autoOpenDoneRef.current) return;
+        if (!(window as any).electronAPI?.isElectron) return;
+        const key = 'electron-local-auto-opened';
+        if (sessionStorage.getItem(key)) return;
+        autoOpenDoneRef.current = true;
+        sessionStorage.setItem(key, '1');
+        if (!sessions.some(s => s.type === 'local')) addLocalSession();
+        router.push('/panel/sessions');
+    }, [sessionsRestored, sessions, addLocalSession, router]);
 
     function toggleCollapsed() {
         setCollapsed(prev => {
@@ -203,6 +238,35 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             </Link>
                         );
                     })}
+
+                    {/* Local Terminal */}
+                    {collapsed ? (
+                        <CollapseTooltip label="Local Terminal">
+                            <button
+                                onClick={handleOpenLocalTerminal}
+                                title="Local Terminal"
+                                className={`flex items-center justify-center py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                    localTerminalActive
+                                        ? 'bg-primary/20 text-primary'
+                                        : 'text-violet-400 hover:bg-accent hover:text-violet-300'
+                                }`}
+                            >
+                                <Laptop className="w-5 h-5 shrink-0" />
+                            </button>
+                        </CollapseTooltip>
+                    ) : (
+                        <button
+                            onClick={handleOpenLocalTerminal}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                localTerminalActive
+                                    ? 'bg-primary/20 text-primary'
+                                    : 'text-violet-400 hover:bg-accent hover:text-violet-300'
+                            }`}
+                        >
+                            <Laptop className="w-5 h-5 shrink-0" />
+                            <span className="truncate">Local Terminal</span>
+                        </button>
+                    )}
                 </nav>
 
                 {/* Footer */}
@@ -356,6 +420,23 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             </Link>
                         );
                     })}
+
+                    {/* Local Terminal (mobile) */}
+                    <button
+                        onClick={handleOpenLocalTerminal}
+                        className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
+                    >
+                        {localTerminalActive ? (
+                            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-600 shadow-[0_0_14px_3px_rgba(124,58,237,0.30)]">
+                                <Laptop className="w-[17px] h-[17px] text-white shrink-0" />
+                                <span className="text-[12px] font-semibold text-white leading-none">Local</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center w-10 h-[34px]">
+                                <Laptop className="w-[20px] h-[20px] text-violet-400/60" />
+                            </div>
+                        )}
+                    </button>
                 </div>
             </nav>
         </div>
