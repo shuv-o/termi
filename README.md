@@ -19,6 +19,7 @@
 ## ✨ Features
 
 ### 🔐 Security & Authentication
+
 - **AES-256-GCM** encryption for all stored server credentials
 - **Argon2id** password hashing with secure parameters
 - **TOTP-based 2FA** — works with Google Authenticator, Authy, and any TOTP app
@@ -28,39 +29,46 @@
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
 
 ### 🖥️ Multi-Protocol Remote Access
+
 - **SSH** — full terminal emulation with [xterm.js](https://xtermjs.org/), key forwarding, and resizable viewport
 - **SCP / SFTP** — web-based file manager: upload, download, create folders, rename, delete
 - **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/)
 - **VNC** — Virtual Network Computing via Apache Guacamole
 
 ### 💻 Local Terminal
+
 - Access your **local machine's shell** directly from the app
 - **Electron**: spawns PowerShell (Windows) or your default shell (macOS/Linux)
 - **Browser/cloud**: spawns a shell on the gateway host (gated by `ALLOW_LOCAL_TERMINAL=true`)
 
 ### 📊 Server Monitoring
+
 - Real-time **CPU, memory, and disk** metrics fetched over SSH
 - **Health history** charts
 - Configurable **email & push notification** alerts
 - Built-in **benchmark tool**
 
 ### 🤝 Server Sharing
+
 - Share server access with other users via invitation links
 - Per-server share management and revocation
 
 ### 📱 PWA & Mobile
+
 - **Install as a PWA** on any device (iOS, Android, desktop)
 - Virtual keyboard with Ctrl, Alt, Shift, Fn, and arrow keys
 - Touch-optimised design
 - **Web push notifications** for monitoring alerts
 
 ### 🖥️ Desktop App (Electron)
+
 - Native app for **macOS, Windows, and Linux**
 - Local terminal access via node-pty
 - Connects to your self-hosted Termi instance
 - Bundled gateway for fully offline / local-stack operation (`electron:dev:full`)
 
 ### 📦 Self-Hosted & Privacy-First
+
 - **Docker Compose** one-command deployment
 - **PostgreSQL** database — your data stays on your server
 - **No telemetry**, no cloud dependencies
@@ -211,35 +219,35 @@ termi/
 
 ### Required Variables
 
-| Variable | Description |
-|----------|-------------|
-| `DB_HOST` | PostgreSQL host |
-| `DB_USER` | PostgreSQL username |
-| `DB_PASSWORD` | PostgreSQL password |
-| `DB_NAME` | Database name |
-| `SESSION_SECRET` | iron-session cookie key (≥32 chars) |
-| `ENCRYPTION_KEY` | AES-256-GCM key for credentials at rest (≥32 chars) |
-| `GATEWAY_JWT_SECRET` | Shared secret for JWE connection tokens (≥32 chars) |
-| `NEXT_PUBLIC_GATEWAY_URL` | Browser-visible WebSocket URL of the gateway |
-| `NEXT_PUBLIC_APP_URL` | Public URL of the web app |
+| Variable                  | Description                                         |
+|---------------------------|-----------------------------------------------------|
+| `DB_HOST`                 | PostgreSQL host                                     |
+| `DB_USER`                 | PostgreSQL username                                 |
+| `DB_PASSWORD`             | PostgreSQL password                                 |
+| `DB_NAME`                 | Database name                                       |
+| `SESSION_SECRET`          | iron-session cookie key (≥32 chars)                 |
+| `ENCRYPTION_KEY`          | AES-256-GCM key for credentials at rest (≥32 chars) |
+| `GATEWAY_JWT_SECRET`      | Shared secret for JWE connection tokens (≥32 chars) |
+| `NEXT_PUBLIC_GATEWAY_URL` | Browser-visible WebSocket URL of the gateway        |
+| `NEXT_PUBLIC_APP_URL`     | Public URL of the web app                           |
 
 ### Optional Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GUACD_HOST` | `localhost` | guacd host for RDP/VNC |
-| `GUACD_PORT` | `4822` | guacd port |
-| `ALLOW_PRIVATE_NETWORKS` | `false` | Allow connections to private/internal IPs |
-| `TRUSTED_PROXY` | `false` | Trust `X-Forwarded-For` (enable behind Nginx/Traefik) |
-| `ALLOWED_ORIGINS` | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway |
-| `ALLOW_LOCAL_TERMINAL` | `false` | Enable local PTY terminal on the gateway host |
-| `GOOGLE_CLIENT_ID` | — | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | — | Google OAuth client secret |
-| `SMTP_HOST` | — | SMTP host for email (verification, alerts, invites) |
-| `SMTP_USER` | — | SMTP username |
-| `SMTP_PASS` | — | SMTP password |
-| `VAPID_PUBLIC_KEY` | — | Web push VAPID public key |
-| `VAPID_PRIVATE_KEY` | — | Web push VAPID private key |
+| Variable                 | Default               | Description                                           |
+|--------------------------|-----------------------|-------------------------------------------------------|
+| `GUACD_HOST`             | `localhost`           | guacd host for RDP/VNC                                |
+| `GUACD_PORT`             | `4822`                | guacd port                                            |
+| `ALLOW_PRIVATE_NETWORKS` | `false`               | Allow connections to private/internal IPs             |
+| `TRUSTED_PROXY`          | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik) |
+| `ALLOWED_ORIGINS`        | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                          |
+| `ALLOW_LOCAL_TERMINAL`   | `false`               | Enable local PTY terminal on the gateway host         |
+| `GOOGLE_CLIENT_ID`       | —                     | Google OAuth client ID                                |
+| `GOOGLE_CLIENT_SECRET`   | —                     | Google OAuth client secret                            |
+| `SMTP_HOST`              | —                     | SMTP host for email (verification, alerts, invites)   |
+| `SMTP_USER`              | —                     | SMTP username                                         |
+| `SMTP_PASS`              | —                     | SMTP password                                         |
+| `VAPID_PUBLIC_KEY`       | —                     | Web push VAPID public key                             |
+| `VAPID_PRIVATE_KEY`      | —                     | Web push VAPID private key                            |
 
 > See [`.env.example`](.env.example) for the full list with descriptions.
 
@@ -276,9 +284,12 @@ termi/
 ```
 
 **Connection flow:**
-1. Browser calls `POST /api/connection/token` → server decrypts stored credentials and issues a short-lived **JWE token** (A256GCM, 5-minute TTL).
+
+1. Browser calls `POST /api/connection/token` → server decrypts stored credentials and issues a short-lived **JWE token
+   ** (A256GCM, 5-minute TTL).
 2. Browser opens a WebSocket to the gateway with the JWE token as a query parameter.
-3. Gateway validates the token and routes to the appropriate handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler`, or `LocalHandler`.
+3. Gateway validates the token and routes to the appropriate handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler`, or
+   `LocalHandler`.
 4. For RDP/VNC, `GuacamoleHandler` connects to guacd and forwards the Guacamole protocol frames to the browser.
 
 ---
@@ -288,6 +299,7 @@ termi/
 See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability reporting process, and threat model.
 
 **Highlights:**
+
 - Credentials encrypted with AES-256-GCM before database storage
 - SSRF protection on all user-supplied host inputs
 - Rate limiting on authentication endpoints
@@ -330,7 +342,7 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 **If Termi saves you time, consider supporting its development:**
 
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/shuvoo)
+# [Buy me a Coffee](https://www.buymeacoffee.com/shuvoo)
 
 Made with ❤️ for the self-hosting community
 
