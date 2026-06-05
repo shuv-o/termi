@@ -3,11 +3,16 @@
   "_comment_mac": "  macOS:   ~/Library/Application Support/Termi/termi.config.json",
   "_comment_win": "  Windows: %APPDATA%\\Termi\\termi.config.json",
   "_comment_gen": "  Generate secrets with: openssl rand -base64 32",
+  "_comment_wizard": "  Or use the built-in setup wizard — it generates secrets and writes this file automatically.",
 
-  "_section_database": "--- DATABASE (required) ---",
+  "_section_mode": "--- MODE (required) ---",
+  "_comment_mode": "Use 'local' to run everything on this machine, or 'online' to connect to a remote Termi instance.",
+  "TERMI_MODE": "local",
+
+  "_section_database": "--- DATABASE (required for local mode) ---",
   "DATABASE_URL": "postgresql://termi:your-db-password@your-db-host:5432/termi?schema=public",
 
-  "_section_keys": "--- SECURITY KEYS (required) ---",
+  "_section_keys": "--- SECURITY KEYS (required for local mode) ---",
   "SESSION_SECRET": "change-me-generate-with-openssl-rand-base64-32",
   "ENCRYPTION_KEY": "change-me-generate-with-openssl-rand-base64-32",
   "GATEWAY_JWT_SECRET": "change-me-generate-with-openssl-rand-base64-32",
@@ -28,5 +33,13 @@
   "SMTP_SECURE": "false",
   "SMTP_USER": "your@email.com",
   "SMTP_PASS": "your-app-password",
-  "SMTP_FROM": "Termi <noreply@your-domain.com>"
+  "SMTP_FROM": "Termi <noreply@your-domain.com>",
+
+  "_comment_online": "Example online-mode config (replace entire file):",
+  "_online_example_TERMI_MODE": "online",
+  "_online_example_TERMI_REMOTE_URL": "https://my-termi.example.com",
+  "_online_example_RUN_LOCAL_GATEWAY": "true",
+  "_online_example_GATEWAY_JWT_SECRET": "must-match-remote-server-secret",
+  "_online_example_GATEWAY_PORT": "22081",
+  "_online_example_RUN_LOCAL_GUACD": "false"
 }

@@ -1,13 +1,13 @@
-const { app, BrowserWindow, shell, ipcMain, dialog, session, Menu } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, session, Menu } = require('electron');
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const http = require('http');
 const os = require('os');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // ── Environment loading ───────────────────────────────────────────────────────
 
-// Minimal .env parser — avoids a dotenv dependency in the main process.
 function parseEnvFile(content) {
     for (const raw of content.split('\n')) {
         const line = raw.trim();
@@ -17,28 +17,20 @@ function parseEnvFile(content) {
         const key = line.slice(0, eq).trim();
         let val = line.slice(eq + 1).trim();
         if (/^["'][\s\S]*["']$/.test(val)) val = val.slice(1, -1);
-        // Don't override vars already set in the OS environment
         if (key && !(key in process.env)) process.env[key] = val;
     }
 }
 
-// Dev: load the monorepo root .env (apps/electron/main.js is two levels below root)
+// Dev: load the monorepo root .env
 const rootEnvPath = path.join(__dirname, '../../.env');
 if (fs.existsSync(rootEnvPath)) {
     try { parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8')); } catch (_) {}
 }
 
-// In development mode the concurrently script already starts both the Next.js
-// dev server (:22080) and the gateway dev server (:22081), so Electron must NOT
-// spawn its own copies.  We detect dev mode by checking !app.isPackaged OR the
-// presence of the ELECTRON_DEV environment variable.
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
-let guacdProcess, gatewayProcess, nextProcess, win;
+let guacdProcess, gatewayProcess, nextProcess, win, setupWin;
 
-// node-pty provides real PTY (pseudo-terminal) for the local terminal feature.
-// Loaded lazily so the app still starts if node-pty hasn't been rebuilt for this
-// Electron version — local terminal will show an error but nothing else breaks.
 let nodePty;
 try {
     nodePty = require('node-pty');
@@ -49,8 +41,39 @@ try {
     }
 }
 
-// tabId → IPty instance
 const localPtys = new Map();
+
+// ── Config loading ────────────────────────────────────────────────────────────
+
+function getConfigPath() {
+    return path.join(app.getPath('userData'), 'termi.config.json');
+}
+
+function loadConfig() {
+    const configPath = getConfigPath();
+    if (!fs.existsSync(configPath)) return;
+
+    if (process.platform !== 'win32') {
+        try { fs.chmodSync(configPath, 0o600); } catch (_) {}
+    } else {
+        try {
+            const { execSync } = require('child_process');
+            const username = os.userInfo().username;
+            execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, { stdio: 'ignore' });
+        } catch (_) {}
+    }
+
+    try {
+        const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        for (const [k, v] of Object.entries(cfg)) {
+            if (typeof v === 'string' && !(k in process.env)) process.env[k] = v;
+        }
+    } catch (e) {
+        console.error('[config] Failed to parse termi.config.json:', e.message);
+    }
+}
+
+// ── Service helpers ───────────────────────────────────────────────────────────
 
 function getPaths() {
     if (app.isPackaged) {
@@ -61,7 +84,6 @@ function getPaths() {
             nodePath: path.join(r, 'web-standalone', 'node_modules'),
         };
     }
-    // Development: __dirname = apps/electron
     return {
         nextServer: path.join(__dirname, '../web/.next/standalone/apps/web/server.js'),
         gateway: path.join(__dirname, 'gateway.cjs'),
@@ -69,9 +91,6 @@ function getPaths() {
     };
 }
 
-// In dev mode, poll until the Next.js dev server (port 22080) is accepting
-// connections, then resolve.  Times out after 120 s to give the compiler
-// enough time on a cold start.
 function waitForDevServer(port = 22080, timeoutMs = 120000) {
     return new Promise((resolve, reject) => {
         console.log(`[electron-dev] Waiting for Next.js dev server on :${port}…`);
@@ -85,7 +104,7 @@ function waitForDevServer(port = 22080, timeoutMs = 120000) {
                 }
                 res.resume();
             });
-            req.on('error', () => {}); // not ready yet – keep polling
+            req.on('error', () => {});
         }, 500);
 
         const timeout = setTimeout(() => {
@@ -111,7 +130,7 @@ function startGateway(paths) {
         env: {
             ...process.env,
             NODE_PATH: paths.nodePath,
-            GATEWAY_PORT: '22081',
+            GATEWAY_PORT: process.env.GATEWAY_PORT || '22081',
             GATEWAY_HOST: '127.0.0.1',
             ALLOWED_ORIGINS: 'http://localhost:22080,http://127.0.0.1:22080',
         },
@@ -129,10 +148,7 @@ function startNextServer(paths) {
                 PORT: '22080',
                 HOSTNAME: '127.0.0.1',
                 NODE_ENV: 'production',
-                // Tells the token API route to hand the local gateway URL to the browser
                 NEXT_PUBLIC_GATEWAY_URL: 'ws://127.0.0.1:22081',
-                // Required for WebAuthn/passkey rpID — must match the actual serving origin.
-                // Only set if not already provided via termi.config.json.
                 NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:22080',
             },
         });
@@ -142,7 +158,6 @@ function startNextServer(paths) {
 
         const poll = setInterval(() => {
             const req = http.get('http://127.0.0.1:22080', res => {
-                // Any response (including redirects) means the server is up
                 if (res.statusCode < 500) {
                     clearInterval(poll);
                     clearTimeout(timeout);
@@ -150,7 +165,7 @@ function startNextServer(paths) {
                 }
                 res.resume();
             });
-            req.on('error', () => {}); // not ready yet
+            req.on('error', () => {});
         }, 500);
 
         const timeout = setTimeout(() => {
@@ -160,13 +175,21 @@ function startNextServer(paths) {
     });
 }
 
+// ── Windows ───────────────────────────────────────────────────────────────────
+
 function buildAppMenu() {
     const isMac = process.platform === 'darwin';
+    const reconfigureItem = {
+        label: 'Reconfigure…',
+        click: () => { app.relaunch(); app.quit(); },
+    };
+
     const template = [
         ...(isMac ? [{
             label: app.name,
             submenu: [
                 { role: 'about' },
+                reconfigureItem,
                 { type: 'separator' },
                 { role: 'services' },
                 { type: 'separator' },
@@ -176,7 +199,14 @@ function buildAppMenu() {
                 { type: 'separator' },
                 { role: 'quit' },
             ],
-        }] : []),
+        }] : [{
+            label: 'Termi',
+            submenu: [
+                reconfigureItem,
+                { type: 'separator' },
+                { role: 'quit' },
+            ],
+        }]),
         {
             label: 'Edit',
             submenu: [
@@ -219,7 +249,27 @@ function buildAppMenu() {
     return Menu.buildFromTemplate(template);
 }
 
-function createWindow() {
+function createSetupWindow(errorMsg) {
+    setupWin = new BrowserWindow({
+        width: 700,
+        height: 580,
+        resizable: false,
+        title: 'Termi Setup',
+        icon: path.join(__dirname, '../../build/icon.png'),
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'setup-preload.js'),
+        },
+    });
+
+    const fileUrl = new URL(`file://${path.join(__dirname, 'setup.html')}`);
+    if (errorMsg) fileUrl.searchParams.set('error', errorMsg);
+    setupWin.loadURL(fileUrl.toString());
+    setupWin.on('closed', () => { setupWin = null; });
+}
+
+function createWindow(appUrl) {
     Menu.setApplicationMenu(buildAppMenu());
 
     win = new BrowserWindow({
@@ -234,19 +284,11 @@ function createWindow() {
         },
     });
 
-    // Dev: Next.js dev server on :22080; Production: standalone server on :22080
-    // Use 'localhost' (not '127.0.0.1') in dev so the WebSocket Origin header
-    // matches the gateway's default ALLOWED_ORIGINS ('http://localhost:22080').
-    const appUrl = IS_DEV ? 'http://localhost:22080' : 'http://127.0.0.1:22080';
     win.loadURL(appUrl);
 
-    // In dev mode open DevTools automatically and configure session for HMR
     if (IS_DEV) {
         win.webContents.openDevTools({ mode: 'detach' });
 
-        // Ensure the HMR WebSocket upgrade request carries the correct Origin
-        // header so Next.js allowedDevOrigins accepts it.  Without this, Electron
-        // sometimes omits or sends a null Origin which the dev server refuses.
         session.defaultSession.webRequest.onBeforeSendHeaders(
             { urls: ['ws://localhost:22080/_next/*', 'http://localhost:22080/_next/*'] },
             (details, callback) => {
@@ -256,12 +298,84 @@ function createWindow() {
         );
     }
 
-    // Open external links in default browser rather than a new Electron window
     win.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
 }
+
+// ── Startup logic ─────────────────────────────────────────────────────────────
+
+async function startApp(mode) {
+    if (mode === 'local') {
+        if (IS_DEV) {
+            console.log('[electron-dev] Running in development mode.');
+            console.log('[electron-dev] Expecting Next.js on :22080 and gateway on :22081.');
+            startGuacd();
+            try {
+                await waitForDevServer(22080);
+            } catch (err) {
+                console.error('[electron-dev] Could not reach Next.js dev server:', err.message);
+                app.quit();
+                return;
+            }
+        } else {
+            const paths = getPaths();
+            startGuacd();
+            startGateway(paths);
+            try {
+                await startNextServer(paths);
+            } catch (err) {
+                console.error('Failed to start Next.js server:', err.message);
+                app.quit();
+                return;
+            }
+        }
+        createWindow(IS_DEV ? 'http://localhost:22080' : 'http://127.0.0.1:22080');
+    } else if (mode === 'online') {
+        const remoteUrl = process.env.TERMI_REMOTE_URL;
+        if (!remoteUrl) {
+            createSetupWindow('TERMI_REMOTE_URL is required for online mode');
+            return;
+        }
+        if (process.env.RUN_LOCAL_GATEWAY === 'true') startGateway(getPaths());
+        if (process.env.RUN_LOCAL_GUACD === 'true') startGuacd();
+        createWindow(remoteUrl);
+    }
+}
+
+// ── Setup IPC handlers ────────────────────────────────────────────────────────
+
+ipcMain.handle('setup:generate-secret', () =>
+    crypto.randomBytes(32).toString('base64')
+);
+
+ipcMain.handle('setup:check-docker', () => {
+    const r = spawnSync('docker', ['info'], { timeout: 5000 });
+    return { available: r.status === 0 };
+});
+
+ipcMain.handle('setup:get-config-path', () => getConfigPath());
+
+ipcMain.handle('setup:open-config-folder', () =>
+    shell.openPath(app.getPath('userData'))
+);
+
+ipcMain.handle('setup:save-config', (_e, config) => {
+    const p = getConfigPath();
+    fs.writeFileSync(p, JSON.stringify(config, null, 2), { mode: 0o600 });
+    if (process.platform !== 'win32') {
+        try { fs.chmodSync(p, 0o600); } catch (_) {}
+    }
+    return { ok: true };
+});
+
+ipcMain.handle('setup:launch', async () => {
+    if (setupWin && !setupWin.isDestroyed()) setupWin.close();
+    // Reload config that was just saved into process.env
+    loadConfig();
+    await startApp(process.env.TERMI_MODE);
+});
 
 // ── Local terminal IPC ────────────────────────────────────────────────────────
 
@@ -280,9 +394,6 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
             ? 'powershell.exe'
             : (process.env.SHELL || '/bin/zsh');
 
-    // Validate and sanitise the working directory supplied by the renderer.
-    // Fall back to the user's home directory if the path is missing, not
-    // absolute, or does not exist on disk.
     const safeHome = os.homedir();
     let safeCwd = safeHome;
     if (cwd) {
@@ -345,8 +456,6 @@ ipcMain.on('local-terminal:kill', (event, id) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Enforce single instance — if a second instance is launched, focus the
-// existing window and quit the new process immediately.
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
     app.quit();
@@ -361,95 +470,25 @@ app.on('second-instance', () => {
 });
 
 app.whenReady().then(async () => {
-    // Packaged builds: load termi.config.json from the OS user-data directory.
-    // On macOS: ~/Library/Application Support/Termi/termi.config.json
-    // On Windows: %APPDATA%\Termi\termi.config.json
-    if (app.isPackaged) {
-        const configPath = path.join(app.getPath('userData'), 'termi.config.json');
+    loadConfig();
 
-        // Restrict config file to owner-only access (defence-in-depth for secrets).
-        // Unix/macOS: chmod 0600 (rw-------).
-        // Windows: use icacls to remove inheritance and grant only the current user full control.
-        if (process.platform !== 'win32') {
-            try { fs.chmodSync(configPath, 0o600); } catch (e) {
-                if (fs.existsSync(configPath)) console.warn('[config] Failed to set permissions:', e.message);
-            }
-        } else {
-            try {
-                const { execSync } = require('child_process');
-                const username = os.userInfo().username;
-                execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, { stdio: 'ignore' });
-            } catch (_) {}
-        }
+    const mode = process.env.TERMI_MODE;
 
-        if (fs.existsSync(configPath)) {
-            try {
-                const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                for (const [k, v] of Object.entries(cfg)) {
-                    if (typeof v === 'string' && !(k in process.env)) process.env[k] = v;
-                }
-            } catch (e) {
-                console.error('[config] Failed to parse termi.config.json:', e.message);
-            }
-        }
+    if (!mode) {
+        createSetupWindow();
+        return;
+    }
 
-        // Accept either split DB vars or a full DATABASE_URL
-        const hasDb = process.env.DATABASE_URL ||
-            (process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME);
-        const required = ['SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
-        const missing = [...required.filter(k => !process.env[k]), ...(hasDb ? [] : ['DATABASE_URL (or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME)'])];
-        if (missing.length > 0) {
-            dialog.showErrorBox(
-                'Termi — Configuration Required',
-                `Missing required configuration: ${missing.join(', ')}\n\n` +
-                `Create the file:\n${configPath}\n\n` +
-                `with the following JSON:\n` +
-                `{\n` +
-                `  "DATABASE_URL": "postgresql://user:pass@host:5432/termi",\n` +
-                `  "SESSION_SECRET": "<openssl rand -base64 32>",\n` +
-                `  "ENCRYPTION_KEY": "<openssl rand -base64 32>",\n` +
-                `  "GATEWAY_JWT_SECRET": "<openssl rand -base64 32>"\n` +
-                `}`
-            );
-            app.quit();
+    if (mode === 'local') {
+        const required = ['DATABASE_URL', 'SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
+        const missing = required.filter(k => !process.env[k]);
+        if (missing.length) {
+            createSetupWindow(`Missing: ${missing.join(', ')}`);
             return;
         }
     }
 
-    if (IS_DEV) {
-        // ── Development mode ──────────────────────────────────────────────────
-        // The "electron:dev" concurrently script already started:
-        //   • Next.js dev server  → http://127.0.0.1:22080
-        //   • Gateway dev server  → ws://127.0.0.1:22081
-        // We just need to wait until Next.js is ready before opening the window.
-        console.log('[electron-dev] Running in development mode.');
-        console.log('[electron-dev] Expecting Next.js on :22080 and gateway on :22081.');
-
-        startGuacd();
-
-        try {
-            await waitForDevServer(22080);
-        } catch (err) {
-            console.error('[electron-dev] Could not reach Next.js dev server:', err.message);
-            app.quit();
-            return;
-        }
-    } else {
-        // ── Production / packaged mode ────────────────────────────────────────
-        const paths = getPaths();
-        startGuacd();
-        startGateway(paths);
-
-        try {
-            await startNextServer(paths);
-        } catch (err) {
-            console.error('Failed to start Next.js server:', err.message);
-            app.quit();
-            return;
-        }
-    }
-
-    createWindow();
+    await startApp(mode);
 });
 
 app.on('window-all-closed', () => {
@@ -457,7 +496,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0 && process.env.TERMI_MODE) {
+        startApp(process.env.TERMI_MODE);
+    }
 });
 
 app.on('before-quit', () => {
@@ -465,13 +506,10 @@ app.on('before-quit', () => {
         try { term.kill(); } catch (_) {}
     }
     localPtys.clear();
-    // Only kill processes that Electron itself spawned (production mode).
-    // In dev mode, Next.js and the gateway are managed by the concurrently script.
     if (!IS_DEV) {
         nextProcess?.kill();
         gatewayProcess?.kill();
     }
     guacdProcess?.kill();
-    // Best-effort synchronous stop so the named container is released
     try { spawnSync('docker', ['stop', 'guacd-desktop']); } catch (_) {}
 });

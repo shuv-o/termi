@@ -3283,7 +3283,7 @@ var require_websocket_server = __commonJS({
        *     pending connections
        * @param {Boolean} [options.clientTracking=true] Specifies whether or not to
        *     track clients
-       * @param {Number} [options.closeTimeout=220800] Duration in milliseconds to
+       * @param {Number} [options.closeTimeout=30000] Duration in milliseconds to
        *     wait for the closing handshake to finish after `websocket.close()` is
        *     called
        * @param {Function} [options.handleProtocols] A hook to handle protocols
@@ -4052,130 +4052,38 @@ var import_websocket_server = __toESM(require_websocket_server(), 1);
 // apps/gateway/src/index.ts
 var import_http = require("http");
 var import_url = require("url");
+var import_crypto2 = require("crypto");
 var import_dotenv = __toESM(require_main(), 1);
+var import_net2 = require("net");
+var import_promises = __toESM(require("dns/promises"), 1);
 
 // apps/gateway/src/handlers/ssh.ts
 var import_ssh2 = require("ssh2");
 var SSHHandler = class {
-  ws;
   ssh;
   stream = null;
   connected = false;
   closing = false;
-  constructor(ws, token) {
-    this.ws = ws;
+  sink;
+  constructor(token, sink) {
+    this.sink = sink;
     this.ssh = new import_ssh2.Client();
     this.setupSSH(token);
-    this.setupWebSocket();
   }
-  setupSSH(token) {
-    const config = {
-      host: token.host,
-      port: token.port,
-      username: token.username,
-      readyTimeout: 1e4,
-      keepaliveInterval: 15e3,
-      // send SSH keepalive every 15 s
-      keepaliveCountMax: 6
-      // allow up to 6 missed keepalives (~90 s) before giving up
-    };
-    if (token.privateKey) {
-      config.privateKey = token.privateKey;
-      if (token.passphrase) {
-        config.passphrase = token.passphrase;
-      }
-    } else if (token.password) {
-      config.password = token.password;
-    }
-    this.ssh.on("ready", () => {
-      this.connected = true;
-      this.ssh.shell({
-        term: "xterm-256color",
-        cols: 80,
-        rows: 24
-      }, (err, stream) => {
-        if (err) {
-          this.sendError("Failed to open shell: " + err.message);
-          this.close();
-          return;
-        }
-        this.stream = stream;
-        this.ws.send(JSON.stringify({ type: "shell-ready" }));
-        stream.on("data", (data) => {
-          if (this.ws.readyState === import_websocket.default.OPEN) {
-            this.ws.send(JSON.stringify({
-              type: "data",
-              data: data.toString("base64")
-            }));
-          }
-        });
-        stream.on("close", () => {
-          this.ws.send(JSON.stringify({ type: "closed" }));
-          this.close();
-        });
-        stream.stderr.on("data", (data) => {
-          if (this.ws.readyState === import_websocket.default.OPEN) {
-            this.ws.send(JSON.stringify({
-              type: "data",
-              data: data.toString("base64")
-            }));
-          }
-        });
-      });
-    });
-    this.ssh.on("error", (err) => {
-      this.sendError("SSH error: " + err.message);
-      this.close();
-    });
-    this.ssh.on("close", () => {
-      if (this.ws.readyState === import_websocket.default.OPEN) {
-        this.ws.send(JSON.stringify({ type: "disconnected" }));
-      }
-    });
-    try {
-      this.ssh.connect(config);
-    } catch (error) {
-      this.sendError("Connection failed: " + error.message);
-      this.close();
+  /** Forward terminal input from browser to the SSH stream. */
+  write(data) {
+    if (this.stream) {
+      this.stream.write(data);
     }
   }
-  setupWebSocket() {
-    this.ws.on("message", (data) => {
-      try {
-        const message2 = JSON.parse(data.toString());
-        this.handleMessage(message2);
-      } catch (error) {
-        console.error("Invalid message:", error);
-      }
-    });
-  }
-  handleMessage(message2) {
-    switch (message2.type) {
-      case "data":
-        if (this.stream && message2.data) {
-          const buffer = Buffer.from(message2.data, "base64");
-          this.stream.write(buffer);
-        }
-        break;
-      case "resize":
-        if (this.stream && message2.cols && message2.rows) {
-          this.stream.setWindow(message2.rows, message2.cols, 0, 0);
-        }
-        break;
-      case "ping":
-        this.ws.send(JSON.stringify({ type: "pong" }));
-        break;
-    }
-  }
-  sendError(message2) {
-    if (this.ws.readyState === import_websocket.default.OPEN) {
-      this.ws.send(JSON.stringify({ type: "error", message: message2 }));
+  /** Forward terminal resize from browser to the SSH stream. */
+  resize(rows, cols) {
+    if (this.stream) {
+      this.stream.setWindow(rows, cols, 0, 0);
     }
   }
   close() {
-    if (this.closing) {
-      return;
-    }
+    if (this.closing) return;
     this.closing = true;
     if (this.stream) {
       this.stream.end();
@@ -4188,6 +4096,57 @@ var SSHHandler = class {
   }
   isConnected() {
     return this.connected;
+  }
+  setupSSH(token) {
+    const config = {
+      host: token.host,
+      port: token.port,
+      username: token.username,
+      readyTimeout: 1e4,
+      keepaliveInterval: 15e3,
+      keepaliveCountMax: 6
+    };
+    if (token.privateKey) {
+      config.privateKey = token.privateKey;
+      if (token.passphrase) config.passphrase = token.passphrase;
+    } else if (token.password) {
+      config.password = token.password;
+    }
+    this.ssh.on("ready", () => {
+      this.connected = true;
+      this.ssh.shell({ term: "xterm-256color", cols: 80, rows: 24 }, (err, stream) => {
+        if (err) {
+          this.sink.onMessage("error", { message: "Failed to open shell: " + err.message });
+          this.close();
+          return;
+        }
+        this.stream = stream;
+        this.sink.onMessage("shell-ready");
+        stream.on("data", (data) => {
+          this.sink.onData(data.toString("base64"));
+        });
+        stream.stderr.on("data", (data) => {
+          this.sink.onData(data.toString("base64"));
+        });
+        stream.on("close", () => {
+          this.sink.onMessage("closed");
+          this.close();
+        });
+      });
+    });
+    this.ssh.on("error", (err) => {
+      this.sink.onMessage("error", { message: "SSH error: " + err.message });
+      this.close();
+    });
+    this.ssh.on("close", () => {
+      this.sink.onMessage("disconnected");
+    });
+    try {
+      this.ssh.connect(config);
+    } catch (error) {
+      this.sink.onMessage("error", { message: "Connection failed: " + error.message });
+      this.close();
+    }
   }
 };
 
@@ -4487,11 +4446,16 @@ var SCPHandler = class {
 
 // apps/gateway/src/handlers/guacamole.ts
 var import_net = require("net");
-var GUACD_HOST = process.env.GUACD_HOST || "103.159.2.185";
-var GUACD_PORT = parseInt(process.env.GUACD_PORT || "4822", 10);
+function getGuacdHost() {
+  return process.env.GUACD_HOST || "localhost";
+}
+function getGuacdPort() {
+  return parseInt(process.env.GUACD_PORT || "4822", 10);
+}
 function encodeInstruction(opcode, ...args) {
   const parts = [opcode, ...args];
-  return parts.map((p) => `${p.length}.${p}`).join(",") + ";";
+  const encoded = parts.map((p) => `${Buffer.byteLength(p, "utf8")}.${p}`).join(",") + ";";
+  return Buffer.from(encoded, "utf8");
 }
 function parseInstruction(data) {
   const match = data.match(/^(\d+)\.([^,;]*)/);
@@ -4562,25 +4526,31 @@ var GuacamoleHandler = class {
       }
     });
     this.guacdSocket.on("data", (data) => {
-      this.buffer += data.toString();
+      const chunk = data.toString();
+      console.log(`[Guacamole] guacd raw data (${chunk.length} chars): ${chunk.substring(0, 300)}`);
+      this.buffer += chunk;
       while (this.buffer.includes(";")) {
         const endIndex = this.buffer.indexOf(";");
         const instruction = this.buffer.substring(0, endIndex + 1);
         this.buffer = this.buffer.substring(endIndex + 1);
+        console.log(`[Guacamole] Parsing instruction (${instruction.length} chars): ${instruction.substring(0, 200)}`);
         const parsed = parseInstruction(instruction);
+        console.log(`[Guacamole] Parse result: opcode=${parsed?.opcode ?? "NULL"} args=${parsed?.args.length ?? "N/A"} handshakeResolve=${!!this.handshakeResolve}`);
         if (parsed) {
-          if (!["png", "jpeg", "webp", "blob", "video", "audio", "mouse", "nop", "sync"].includes(parsed.opcode)) {
-            console.log("[Guacamole] \u2190", parsed.opcode, parsed.args.length > 0 ? `(${parsed.args.length} args)` : "");
+          if (!["png", "jpeg", "webp", "blob", "video", "audio", "mouse", "nop", "sync", "size", "cursor", "move", "shade", "dispose", "cfill", "cstroke", "lstroke", "line", "arc", "pop", "push", "identity", "transform", "rect", "clip", "end"].includes(parsed.opcode)) {
+            console.log("[Guacamole] \u2190", parsed.opcode, parsed.args.length > 0 ? `(${parsed.args.length} args): first 5 = ${JSON.stringify(parsed.args.slice(0, 5))}` : "");
           }
           if (parsed.opcode === "error") {
-            console.error("[Guacamole] guacd ERROR:", parsed.args);
+            const errMsg = parsed.args[0] ?? "";
+            const errCode = parsed.args[1] ?? "";
+            console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
           }
         }
         if (parsed?.opcode === "args" && this.handshakeResolve) {
+          console.log(`[Guacamole] Got args instruction with ${parsed.args.length} params: ${JSON.stringify(parsed.args)}`);
           const resolve = this.handshakeResolve;
           this.handshakeResolve = null;
           this.handshakeReject = null;
-          console.log("[Guacamole] guacd expects args:", parsed.args);
           resolve(parsed.args);
           continue;
         }
@@ -4602,6 +4572,7 @@ var GuacamoleHandler = class {
       try {
         const data = message2.toString();
         if (data.match(/^\d+\./)) {
+          if (data.match(/^\d+\.key,/)) console.log("[Guacamole] \u2192 key to guacd:", data);
           this.guacdSocket.write(data);
         } else {
           const parsed = JSON.parse(data);
@@ -4622,14 +4593,16 @@ var GuacamoleHandler = class {
     });
   }
   async connect(payload, protocol) {
+    const guacdHost = getGuacdHost();
+    const guacdPort = getGuacdPort();
     console.log(`[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`);
-    console.log(`[Guacamole] Connecting to guacd at ${GUACD_HOST}:${GUACD_PORT}`);
+    console.log(`[Guacamole] Connecting to guacd at ${guacdHost}:${guacdPort}`);
     try {
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error("Connection to guacd timed out"));
         }, 1e4);
-        this.guacdSocket.connect(GUACD_PORT, GUACD_HOST, () => {
+        this.guacdSocket.connect(guacdPort, guacdHost, () => {
           clearTimeout(timeout);
           console.log("[Guacamole] Connected to guacd");
           resolve();
@@ -4640,7 +4613,7 @@ var GuacamoleHandler = class {
         });
       });
     } catch (err) {
-      const errorMsg = `Failed to connect to guacd daemon at ${GUACD_HOST}:${GUACD_PORT}: ${err.message}`;
+      const errorMsg = `Failed to connect to guacd daemon at ${guacdHost}:${guacdPort}: ${err.message}`;
       console.error("[Guacamole]", errorMsg);
       this.sendError(errorMsg);
       this.ws.close();
@@ -4686,11 +4659,13 @@ var GuacamoleHandler = class {
       "width": String(payload.displayWidth || 1024),
       "height": String(payload.displayHeight || 768),
       "dpi": "96",
-      // 32-bit color depth works well with FreeRDP 2.x (guacd 1.5.x).
-      // 16-bit can cause an immediate disconnect on some RDP servers.
-      "color-depth": String(payload.colorDepth || 32),
+      // 32-bit colour → FreeRDP negotiates PIXEL_FORMAT_BGRA32.
+      // This avoids the BGR24 "Cache Bitmap V2 + MemBlt" crash that was
+      // seen with 24-bit depth, while the patched guacd image fixes the
+      // remaining POINTER_LARGE_PDU heap-overflow (GUACAMOLE-1971).
+      "color-depth": "32",
       // Audio
-      "disable-audio": "true",
+      "disable-audio": "false",
       "enable-audio-input": "false",
       "console-audio": "",
       // Printing and file sharing
@@ -4703,8 +4678,10 @@ var GuacamoleHandler = class {
       "disable-download": "",
       "disable-upload": "",
       // RDP-specific settings
-      // 'any' tries NLA → TLS → RDP in order; works with most servers
-      "security": "any",
+      // Security mode from server config (defaults to 'any').
+      // Use 'rdp' if the server doesn't support NLA or NLA silently times out (error 514).
+      // Use 'nla' for servers that strictly require Network Level Authentication.
+      "security": payload.rdpSecurity || "any",
       // ignore-cert: FreeRDP 2.x (guacd 1.5.x) cert bypass — skips all
       // certificate validation so self-signed RDP certs are accepted.
       "ignore-cert": "true",
@@ -4732,13 +4709,15 @@ var GuacamoleHandler = class {
       "enable-full-window-drag": "false",
       "enable-desktop-composition": "false",
       "enable-menu-animations": "false",
-      "disable-bitmap-caching": "false",
-      "disable-offscreen-caching": "false",
-      "disable-glyph-caching": "false",
-      // Disable the GFX (Graphics Pipeline) virtual channel.
-      // FreeRDP 2.x (guacd 1.5.x) can fail silently when negotiating GFX
-      // with servers that don't fully support it; disabling forces the
-      // stable classic drawing-order path and improves compatibility.
+      // Disable all three client-side caches for FreeRDP 2.x stability.
+      // FreeRDP 2.11.5 can segfault on Cache Bitmap V2 (Compressed) + MemBlt
+      // drawing orders; disabling caches forces a stateless rendering path.
+      "disable-bitmap-caching": "true",
+      "disable-offscreen-caching": "true",
+      "disable-glyph-caching": "true",
+      // Disable the GFX (Graphics Pipeline Extension) virtual channel.
+      // FreeRDP 2.x may silently fail when negotiating GFX with servers that
+      // do not fully support it; the classic drawing-order path is more stable.
       "disable-gfx": "true",
       // SFTP settings
       "enable-sftp": "",
@@ -4767,7 +4746,11 @@ var GuacamoleHandler = class {
       "recording-write-existing": "",
       // Other settings
       "static-channels": "",
-      "resize-method": "display-update",
+      // Disable dynamic display resize. Using 'display-update' loads the
+      // DisplayControl DVC (disp channel) which can conflict with cursor
+      // shape PDU processing in FreeRDP 2.11.5. Using '' disables resize
+      // support entirely and keeps the display fixed at initial dimensions.
+      "resize-method": "",
       "enable-touch": "",
       "read-only": "",
       "disable-copy": "",
@@ -4786,7 +4769,28 @@ var GuacamoleHandler = class {
       "wol-wait-time": "",
       // Quality
       "force-lossless": "",
-      "normalize-clipboard": ""
+      "normalize-clipboard": "",
+      // VNC-specific settings
+      "encodings": "",
+      // let guacd choose (zrle, copyrect, hextile, etc.)
+      "swap-red-blue": "false",
+      // only needed for some BGR-order VNC servers
+      "cursor": "",
+      // default: local rendering
+      "autoretry": "0",
+      // no auto-retry on connection failure (prevents lockouts)
+      "clipboard-encoding": "",
+      "dest-host": "",
+      // SSH gateway forwarding (unused)
+      "dest-port": "",
+      "enable-audio": "",
+      "audio-servername": "",
+      "reverse-connect": "false",
+      "listen-timeout": "",
+      "disable-server-input": "false",
+      "disable-display-resize": "",
+      "compress-level": "",
+      "quality-level": ""
     };
     for (const arg of expectedArgs) {
       if (/^VERSION_/.test(arg)) {
@@ -4799,15 +4803,30 @@ var GuacamoleHandler = class {
     console.log("[Guacamole] Connection params:", {
       hostname: paramMap["hostname"],
       port: paramMap["port"],
-      username: paramMap["username"] ? "***" : "(empty)",
-      password: paramMap["password"] ? "***" : "(empty)",
+      username: paramMap["username"] || "(empty)",
+      password: paramMap["password"] ? "(set)" : "(empty)",
       width: paramMap["width"],
       height: paramMap["height"],
       "color-depth": paramMap["color-depth"],
       "ignore-cert": paramMap["ignore-cert"],
-      security: paramMap["security"]
+      security: paramMap["security"],
+      "disable-auth": paramMap["disable-auth"]
     });
-    this.guacdSocket.write(encodeInstruction("connect", ...connectionArgs));
+    const unmapped = expectedArgs.filter((a) => !/^VERSION_/.test(a) && !(a in paramMap));
+    if (unmapped.length > 0) {
+      console.warn("[Guacamole] Unmapped guacd args (sent as empty):", unmapped);
+    }
+    const width = payload.displayWidth || 1024;
+    const height = payload.displayHeight || 768;
+    const dpi = 96;
+    this.guacdSocket.write(encodeInstruction("size", String(width), String(height), String(dpi)));
+    this.guacdSocket.write(encodeInstruction("audio", "audio/L16;rate=44100,channels=2", "audio/L16;rate=22050,channels=2"));
+    this.guacdSocket.write(encodeInstruction("video"));
+    this.guacdSocket.write(encodeInstruction("image", "image/png", "image/jpeg", "image/webp"));
+    this.guacdSocket.write(encodeInstruction("timezone", "UTC"));
+    const connectBuf = encodeInstruction("connect", ...connectionArgs);
+    console.log(`[Guacamole] Sending connect instruction (${connectBuf.length} bytes): ${connectBuf.toString().substring(0, 200)}`);
+    this.guacdSocket.write(connectBuf);
     this.ws.send(JSON.stringify({ type: "connected" }));
   }
   sendError(message2) {
@@ -6443,6 +6462,139 @@ async function validateToken(token) {
   }
 }
 
+// apps/gateway/src/sessions/RingBuffer.ts
+var RingBuffer = class {
+  // current used bytes
+  constructor(capacity = 256 * 1024) {
+    this.capacity = capacity;
+    if (capacity <= 0 || !Number.isInteger(capacity)) {
+      throw new RangeError(`RingBuffer capacity must be a positive integer, got ${capacity}`);
+    }
+    this.buf = new Uint8Array(capacity);
+  }
+  capacity;
+  buf;
+  head = 0;
+  // next write position
+  size = 0;
+  append(data) {
+    const len = data.length;
+    if (len === 0) return;
+    const src = len > this.capacity ? data.subarray(len - this.capacity) : data;
+    const n = src.length;
+    const spaceToEnd = this.capacity - this.head;
+    if (n <= spaceToEnd) {
+      this.buf.set(src, this.head);
+    } else {
+      this.buf.set(src.subarray(0, spaceToEnd), this.head);
+      this.buf.set(src.subarray(spaceToEnd), 0);
+    }
+    this.head = (this.head + n) % this.capacity;
+    this.size = Math.min(this.size + n, this.capacity);
+  }
+  /** Returns all buffered bytes in order (oldest first). Does not clear the buffer. */
+  snapshot() {
+    if (this.size === 0) return new Uint8Array(0);
+    const out = new Uint8Array(this.size);
+    const start = this.size < this.capacity ? 0 : this.head;
+    for (let i = 0; i < this.size; i++) {
+      out[i] = this.buf[(start + i) % this.capacity];
+    }
+    return out;
+  }
+  /** Clears the buffer without zeroing memory. */
+  clear() {
+    this.head = 0;
+    this.size = 0;
+  }
+  get byteLength() {
+    return this.size;
+  }
+};
+
+// apps/gateway/src/sessions/PersistentSessionStore.ts
+var MAX_CONNECTIONS_PER_USER = 5;
+var PersistentSessionStore = class {
+  sessions = /* @__PURE__ */ new Map();
+  idleCheckInterval;
+  idleTimeoutMs;
+  constructor(idleTimeoutMs = 6 * 3600 * 1e3) {
+    this.idleTimeoutMs = idleTimeoutMs;
+    this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 6e4);
+  }
+  add(session) {
+    this.sessions.set(session.sessionId, session);
+  }
+  /**
+   * Atomically checks the per-user limit and adds the session if under limit.
+   * Returns true if added, false if the user is at or over the limit.
+   * JavaScript is single-threaded — no async gap between check and insert.
+   */
+  tryAdd(session) {
+    if (this.countByUser(session.userId) >= MAX_CONNECTIONS_PER_USER) return false;
+    this.sessions.set(session.sessionId, session);
+    return true;
+  }
+  get(sessionId) {
+    return this.sessions.get(sessionId);
+  }
+  /** Closes the SSH handler and removes the session. */
+  delete(sessionId) {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.isClosing = true;
+      session.handler.close();
+      this.sessions.delete(sessionId);
+    }
+  }
+  get size() {
+    return this.sessions.size;
+  }
+  countByUser(userId) {
+    let n = 0;
+    for (const s of this.sessions.values()) {
+      if (s.userId === userId) n++;
+    }
+    return n;
+  }
+  /**
+   * Attempts to evict the oldest detached session for userId.
+   * Returns true if a session was evicted, false if none available.
+   */
+  evictOldestDetachedForUser(userId) {
+    let oldest = null;
+    for (const s of this.sessions.values()) {
+      if (s.userId === userId && s.attachedWs === null) {
+        if (!oldest || s.createdAt < oldest.createdAt) oldest = s;
+      }
+    }
+    if (oldest) {
+      this.delete(oldest.sessionId);
+      return true;
+    }
+    return false;
+  }
+  isAtLimit(userId) {
+    return this.countByUser(userId) >= MAX_CONNECTIONS_PER_USER;
+  }
+  evictIdleSessions() {
+    const now = Date.now();
+    for (const [id, session] of this.sessions) {
+      if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
+        console.log(`[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`);
+        this.delete(id);
+      }
+    }
+  }
+  /** Call on gateway shutdown to clean up the interval and all sessions. */
+  destroy() {
+    clearInterval(this.idleCheckInterval);
+    for (const id of [...this.sessions.keys()]) {
+      this.delete(id);
+    }
+  }
+};
+
 // apps/gateway/src/index.ts
 import_dotenv.default.config({ path: "../../.env" });
 import_dotenv.default.config();
@@ -6451,36 +6603,74 @@ var HOST = process.env.GATEWAY_HOST || "0.0.0.0";
 var ALLOWED_ORIGINS = new Set(
   (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:22080").split(",").map((o) => o.trim().toLowerCase()).filter(Boolean)
 );
-var MAX_CONNECTIONS_PER_USER = 10;
 var CONNECTION_TIMEOUT = 3e5;
-var connections = /* @__PURE__ */ new Map();
-var userConnectionCount = /* @__PURE__ */ new Map();
-function addConnection(ws, meta) {
-  const count = userConnectionCount.get(meta.userId) || 0;
-  if (count >= MAX_CONNECTIONS_PER_USER) {
-    return false;
+function isPrivateHost(host) {
+  let h = host.trim().toLowerCase();
+  if (h.startsWith("[") && h.endsWith("]")) {
+    h = h.slice(1, -1);
   }
-  connections.set(ws, meta);
-  userConnectionCount.set(meta.userId, count + 1);
-  return true;
+  if (h.startsWith("::ffff:")) {
+    h = h.slice(7);
+  }
+  if (h === "localhost") return true;
+  if (h === "metadata.google.internal") return true;
+  if (h === "::1") return true;
+  if (h === "168.63.129.16") return true;
+  if (h === "0.0.0.0") return true;
+  if (h.startsWith("127.")) return true;
+  if (h.startsWith("10.")) return true;
+  if (h.startsWith("192.168.")) return true;
+  if (h.startsWith("169.254.")) return true;
+  const parts = h.split(".");
+  if (parts.length === 4 && parts[0] === "172") {
+    const second = parseInt(parts[1], 10);
+    if (second >= 16 && second <= 31) return true;
+  }
+  if (h.startsWith("fe80:")) return true;
+  if ((h.startsWith("fc") || h.startsWith("fd")) && h.includes(":")) return true;
+  return false;
 }
-function removeConnection(ws) {
-  const meta = connections.get(ws);
-  if (meta) {
-    const count = userConnectionCount.get(meta.userId) || 1;
-    userConnectionCount.set(meta.userId, count - 1);
-    if (meta.handler) {
-      meta.handler.close();
-    }
-    connections.delete(ws);
+async function isPrivateHostAsync(host) {
+  if (isPrivateHost(host)) return true;
+  const stripped = host.trim().toLowerCase().replace(/^\[|]$/g, "").replace(/^::ffff:/i, "");
+  if ((0, import_net2.isIP)(stripped) !== 0) return false;
+  try {
+    const addrs = await import_promises.default.lookup(stripped, { all: true });
+    return addrs.some((a) => isPrivateHost(a.address));
+  } catch {
+    return true;
   }
+}
+var persistentSessions = new PersistentSessionStore();
+var nonSshConnections = /* @__PURE__ */ new Map();
+function createSink(session) {
+  return {
+    onData(encoded) {
+      if (session.isClosing) return;
+      session.lastActivityAt = Date.now();
+      session.buffer.append(Buffer.from(encoded, "base64"));
+      if (session.attachedWs?.readyState === import_websocket.default.OPEN) {
+        session.attachedWs.send(JSON.stringify({ type: "data", data: encoded }));
+      }
+    },
+    onMessage(type, extra) {
+      if (session.isClosing) return;
+      if (session.attachedWs?.readyState === import_websocket.default.OPEN) {
+        session.attachedWs.send(JSON.stringify({ type, ...extra }));
+      }
+      if (type === "disconnected" || type === "closed" || type === "error") {
+        persistentSessions.delete(session.sessionId);
+      }
+    }
+  };
 }
 var server = (0, import_http.createServer)((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
       status: "healthy",
-      connections: connections.size,
+      sshSessions: persistentSessions.size,
+      nonSshConnections: nonSshConnections.size,
       uptime: process.uptime()
     }));
     return;
@@ -6488,13 +6678,8 @@ var server = (0, import_http.createServer)((req, res) => {
   res.writeHead(404);
   res.end("Not Found");
 });
-var wss = new import_websocket_server.default({
-  server,
-  path: "/connect",
-  maxPayload: 1024 * 1024
-  // 1MB max payload
-});
-wss.on("connection", async (ws, req) => {
+var wss = new import_websocket_server.default({ server, path: "/connect", maxPayload: 1024 * 1024 });
+wss.on("connection", (ws, req) => {
   const origin = (req.headers["origin"] || "").toLowerCase();
   if (origin && !ALLOWED_ORIGINS.has(origin)) {
     ws.send(JSON.stringify({ type: "error", message: "Origin not allowed" }));
@@ -6502,140 +6687,263 @@ wss.on("connection", async (ws, req) => {
     return;
   }
   const url = new import_url.URL(req.url || "/", `http://${req.headers.host}`);
-  const token = url.searchParams.get("token");
   const protocol = url.searchParams.get("protocol");
   const serverId = url.searchParams.get("serverId");
-  const displayWidth = parseInt(url.searchParams.get("width") || "0", 10) || void 0;
-  const displayHeight = parseInt(url.searchParams.get("height") || "0", 10) || void 0;
-  if (!token || !protocol || !serverId) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Missing required parameters"
-    }));
+  const sessionId = url.searchParams.get("sessionId");
+  const browserWidth = parseInt(url.searchParams.get("width") || "0", 10) || 0;
+  const browserHeight = parseInt(url.searchParams.get("height") || "0", 10) || 0;
+  if (!protocol || !serverId) {
+    ws.send(JSON.stringify({ type: "error", message: "Missing required parameters" }));
     ws.close(4e3, "Bad Request");
     return;
   }
   if (!["ssh", "scp", "rdp", "vnc"].includes(protocol)) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Invalid protocol"
-    }));
+    ws.send(JSON.stringify({ type: "error", message: "Invalid protocol" }));
     ws.close(4e3, "Bad Request");
     return;
   }
-  let tokenPayload;
-  try {
-    tokenPayload = await validateToken(token);
-  } catch (error) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Invalid or expired token"
-    }));
-    ws.close(4001, "Unauthorized");
-    return;
-  }
-  if (tokenPayload.serverId !== serverId) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Server access denied"
-    }));
-    ws.close(4003, "Forbidden");
-    return;
-  }
-  if (tokenPayload.protocol !== protocol) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Protocol mismatch"
-    }));
-    ws.close(4003, "Forbidden");
-    return;
-  }
-  const meta = {
-    userId: tokenPayload.userId,
-    protocol,
-    serverId,
-    connectedAt: /* @__PURE__ */ new Date()
-  };
-  if (!addConnection(ws, meta)) {
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Too many connections"
-    }));
-    ws.close(4029, "Too Many Requests");
-    return;
-  }
-  let timeoutId = null;
-  const resetTimeout = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    const idleLimit = protocol === "rdp" || protocol === "vnc" ? CONNECTION_TIMEOUT * 2 : CONNECTION_TIMEOUT;
-    timeoutId = setTimeout(() => {
-      if (ws.readyState === import_websocket.default.OPEN) {
-        ws.send(JSON.stringify({
-          type: "error",
-          message: "Connection timeout - no activity"
-        }));
-        ws.close(4408, "Connection Timeout");
+  const AUTH_TIMEOUT_MS = 5e3;
+  const authTimeout = setTimeout(() => {
+    ws.send(JSON.stringify({ type: "error", message: "Authentication timeout" }));
+    ws.close(1008, "Authentication timeout");
+  }, AUTH_TIMEOUT_MS);
+  ws.once("close", () => clearTimeout(authTimeout));
+  ws.once("error", () => clearTimeout(authTimeout));
+  const onAuthMessage = async (rawData) => {
+    let message2;
+    try {
+      message2 = JSON.parse(rawData.toString());
+    } catch {
+      ws.send(JSON.stringify({ type: "error", message: "Authentication required" }));
+      ws.close(1008, "Authentication required");
+      return;
+    }
+    if (message2.type !== "auth" || typeof message2.token !== "string") {
+      ws.send(JSON.stringify({ type: "error", message: "Authentication required" }));
+      ws.close(1008, "Authentication required");
+      return;
+    }
+    let tokenPayload;
+    try {
+      tokenPayload = await validateToken(message2.token);
+    } catch {
+      ws.send(JSON.stringify({ type: "error", message: "Invalid or expired token" }));
+      ws.close(4001, "Unauthorized");
+      return;
+    }
+    clearTimeout(authTimeout);
+    ws.off("message", onAuthMessage);
+    if (ws.readyState !== import_websocket.default.OPEN) return;
+    if (tokenPayload.serverId !== serverId) {
+      ws.send(JSON.stringify({ type: "error", message: "Server access denied" }));
+      ws.close(4003, "Forbidden");
+      return;
+    }
+    if (tokenPayload.protocol !== protocol) {
+      ws.send(JSON.stringify({ type: "error", message: "Protocol mismatch" }));
+      ws.close(4003, "Forbidden");
+      return;
+    }
+    if (process.env.ALLOW_PRIVATE_NETWORKS !== "true" && await isPrivateHostAsync(tokenPayload.host)) {
+      ws.send(JSON.stringify({ type: "error", message: "Connection to private/internal hosts is not allowed" }));
+      ws.close(1008, "SSRF protection");
+      return;
+    }
+    if (protocol === "ssh") {
+      let startHeartbeat2 = function() {
+        heartbeatTimer = setInterval(() => {
+          if (ws.readyState !== import_websocket.default.OPEN) return;
+          ws.send(JSON.stringify({ type: "ping" }));
+          pongTimer = setTimeout(() => {
+            console.warn(`[gateway] SSH WS pong timeout for session ${resolvedSessionId} \u2014 closing`);
+            ws.close(1001, "Heartbeat timeout");
+          }, HEARTBEAT_TIMEOUT_MS);
+        }, HEARTBEAT_INTERVAL_MS);
+      }, stopHeartbeat2 = function() {
+        if (heartbeatTimer) {
+          clearInterval(heartbeatTimer);
+          heartbeatTimer = null;
+        }
+        if (pongTimer) {
+          clearTimeout(pongTimer);
+          pongTimer = null;
+        }
+      };
+      var startHeartbeat = startHeartbeat2, stopHeartbeat = stopHeartbeat2;
+      const resolvedSessionId = sessionId || (0, import_crypto2.randomUUID)();
+      if (!sessionId) {
+        console.warn(`[gateway] SSH connection missing sessionId \u2014 generated fallback ${resolvedSessionId}`);
       }
-    }, idleLimit);
-  };
-  resetTimeout();
-  ws.on("message", () => {
+      const existing = persistentSessions.get(resolvedSessionId);
+      if (existing) {
+        if (existing.userId !== tokenPayload.userId) {
+          ws.send(JSON.stringify({ type: "error", message: "Session access denied" }));
+          ws.close(4003, "Forbidden");
+          return;
+        }
+        if (existing.attachedWs && existing.attachedWs.readyState === import_websocket.default.OPEN) {
+          existing.attachedWs.send(JSON.stringify({ type: "replaced" }));
+          existing.attachedWs.close(1e3, "Replaced");
+        }
+        existing.attachedWs = ws;
+        const buffered = existing.buffer.snapshot();
+        if (buffered.length > 0) {
+          ws.send(JSON.stringify({
+            type: "buffer-replay",
+            data: Buffer.from(buffered).toString("base64")
+          }));
+        }
+        ws.send(JSON.stringify({ type: "shell-ready" }));
+      } else {
+        if (persistentSessions.isAtLimit(tokenPayload.userId)) {
+          const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
+          if (!evicted) {
+            ws.send(JSON.stringify({ type: "error", message: "Too many connections" }));
+            ws.close(4029, "Too Many Requests");
+            return;
+          }
+        }
+        const session = {
+          sessionId: resolvedSessionId,
+          userId: tokenPayload.userId,
+          serverId,
+          handler: null,
+          // set below after sink is created
+          buffer: new RingBuffer(),
+          lastActivityAt: Date.now(),
+          createdAt: Date.now(),
+          attachedWs: ws,
+          isClosing: false
+        };
+        const sink = createSink(session);
+        session.handler = new SSHHandler(tokenPayload, sink);
+        if (!persistentSessions.tryAdd(session)) {
+          session.isClosing = true;
+          session.handler.close();
+          ws.send(JSON.stringify({ type: "error", message: "Too many connections" }));
+          ws.close(4029, "Too Many Requests");
+          return;
+        }
+      }
+      const HEARTBEAT_INTERVAL_MS = 3e4;
+      const HEARTBEAT_TIMEOUT_MS = 15e3;
+      let heartbeatTimer = null;
+      let pongTimer = null;
+      startHeartbeat2();
+      ws.on("message", (data) => {
+        const session = persistentSessions.get(resolvedSessionId);
+        if (!session) return;
+        try {
+          const message3 = JSON.parse(data.toString());
+          switch (message3.type) {
+            case "data":
+              if (message3.data) {
+                session.lastActivityAt = Date.now();
+                session.handler.write(Buffer.from(message3.data, "base64"));
+              }
+              break;
+            case "resize":
+              if (message3.cols && message3.rows) {
+                session.handler.resize(message3.rows, message3.cols);
+              }
+              break;
+            case "pong":
+              if (pongTimer) {
+                clearTimeout(pongTimer);
+                pongTimer = null;
+              }
+              break;
+            case "close-session":
+              persistentSessions.delete(resolvedSessionId);
+              ws.close(1e3, "Session closed");
+              break;
+          }
+        } catch (err) {
+          console.error("[gateway] Invalid SSH message:", err);
+        }
+      });
+      ws.on("close", () => {
+        stopHeartbeat2();
+        const session = persistentSessions.get(resolvedSessionId);
+        if (session && session.attachedWs === ws) {
+          session.attachedWs = null;
+        }
+      });
+      ws.on("error", (err) => {
+        stopHeartbeat2();
+        console.error("[gateway] SSH WebSocket error:", err);
+      });
+      return;
+    }
+    const meta = {
+      userId: tokenPayload.userId,
+      protocol,
+      serverId
+    };
+    nonSshConnections.set(ws, meta);
+    let timeoutId = null;
+    const resetTimeout = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      const idleLimit = protocol === "rdp" || protocol === "vnc" ? CONNECTION_TIMEOUT * 2 : CONNECTION_TIMEOUT;
+      timeoutId = setTimeout(() => {
+        if (ws.readyState === import_websocket.default.OPEN) {
+          ws.send(JSON.stringify({ type: "error", message: "Connection timed out due to inactivity" }));
+          ws.close(4008, "Idle timeout");
+        }
+      }, idleLimit);
+    };
     resetTimeout();
-  });
-  try {
-    switch (protocol) {
-      case "ssh":
-        meta.handler = new SSHHandler(ws, tokenPayload);
-        ws.send(JSON.stringify({ type: "connected", protocol }));
-        break;
-      case "scp":
-        meta.handler = new SCPHandler(ws, tokenPayload);
-        ws.send(JSON.stringify({ type: "connected", protocol }));
-        break;
-      case "rdp":
-      case "vnc": {
-        const rdpPayload = { ...tokenPayload, displayWidth, displayHeight };
-        meta.handler = new GuacamoleHandler(ws, rdpPayload, protocol);
-        break;
-      }
+    ws.on("message", () => resetTimeout());
+    if (protocol === "scp") {
+      meta.handler = new SCPHandler(ws, tokenPayload);
+    } else {
+      const payloadWithDims = browserWidth > 0 && browserHeight > 0 ? { ...tokenPayload, displayWidth: browserWidth, displayHeight: browserHeight } : tokenPayload;
+      meta.handler = new GuacamoleHandler(ws, payloadWithDims, protocol);
     }
-  } catch (error) {
-    console.error("Handler creation error:", error);
-    ws.send(JSON.stringify({
-      type: "error",
-      message: "Failed to initialize connection"
-    }));
-    ws.close(5e3, "Internal Error");
-    return;
-  }
-  ws.on("close", () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    removeConnection(ws);
-    console.log(`Connection closed: ${protocol}://${serverId}`);
-  });
-  ws.on("error", (error) => {
-    console.error("WebSocket error:", error);
-    removeConnection(ws);
-  });
-  console.log(`New ${protocol} connection from user ${tokenPayload.userId} to server ${serverId}`);
+    ws.on("close", () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      meta.handler?.close();
+      nonSshConnections.delete(ws);
+    });
+    ws.on("error", (err) => {
+      console.error("[gateway] Non-SSH WebSocket error:", err);
+      if (timeoutId) clearTimeout(timeoutId);
+      meta.handler?.close();
+      nonSshConnections.delete(ws);
+    });
+  };
+  ws.once("message", onAuthMessage);
 });
-function shutdown() {
-  console.log("Shutting down gateway...");
-  for (const [ws, meta] of connections) {
-    if (meta.handler) {
-      meta.handler.close();
-    }
-    ws.close(1001, "Server shutting down");
-  }
-  wss.close();
-  server.close(() => {
-    console.log("Gateway shut down");
-    process.exit(0);
-  });
-}
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
 server.listen(PORT, HOST, () => {
-  console.log(`\u{1F680} Termi Gateway running at ws://${HOST}:${PORT}/connect`);
-  console.log(`   Health check: http://${HOST}:${PORT}/health`);
+  console.log(`[gateway] Listening on ${HOST}:${PORT}`);
+});
+var isShuttingDown = false;
+function shutdown(signal) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log(`[gateway] Received ${signal} \u2014 shutting down gracefully`);
+  persistentSessions.destroy();
+  wss.clients.forEach((client) => {
+    if (client.readyState === import_websocket.default.OPEN) {
+      client.close(1001, "Server shutting down");
+    }
+  });
+  server.close(() => {
+    console.log("[gateway] HTTP server closed");
+    process.exit(signal === "SIGTERM" || signal === "SIGINT" ? 0 : 1);
+  });
+  setTimeout(() => {
+    console.error("[gateway] Forced exit after 5s timeout");
+    process.exit(1);
+  }, 5e3).unref();
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("uncaughtException", (err) => {
+  console.error("[gateway] Uncaught exception:", err);
+  shutdown("uncaughtException");
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[gateway] Unhandled rejection:", reason);
+  shutdown("unhandledRejection");
 });
