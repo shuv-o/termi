@@ -1,0 +1,118 @@
+name: 🐛 Bug Report
+description: Something is not working as expected
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out this form as completely as possible.
+        
+        > ⚠️ **Security vulnerabilities** — please do NOT use this form. See [SECURITY.md](../SECURITY.md) instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: Termi Version
+      description: What version are you running? (check `package.json` or the Docker image tag)
+      placeholder: "e.g. 1.0.0 or main branch @ abc1234"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment Type
+      options:
+        - Docker Compose (production)
+        - Docker Compose (local dev)
+        - npm run dev:all (development)
+        - Electron desktop app
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System (server)
+      options:
+        - Linux (x86_64)
+        - Linux (ARM64)
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / Electron Version
+      placeholder: "e.g. Chrome 124, Firefox 125, Electron 41"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: protocol
+    attributes:
+      label: Affected Protocol (if applicable)
+      options:
+        - SSH
+        - SCP / SFTP
+        - RDP
+        - VNC
+        - Local Terminal
+        - Authentication
+        - Monitoring
+        - Other / Not protocol-specific
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: |
+        Paste any relevant logs here. You can find them with:
+        - Docker: `docker compose logs web` / `docker compose logs gateway`
+        - Dev: terminal output from `npm run dev:all`
+        - Browser: DevTools → Console
+      render: text
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Screenshots, configuration snippets (redact all secrets!), or anything else that helps.

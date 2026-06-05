@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/shuvoooo/termi/security/advisories/new
+    about: Please report security vulnerabilities privately — do NOT open a public issue.
+  - name: 💬 Discussion / Question
+    url: https://github.com/shuvoooo/termi/discussions
+    about: Have a question or want to discuss an idea? Start a discussion.

@@ -1,0 +1,57 @@
+name: 💡 Feature Request
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please fill out this form to help us understand your idea.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What problem does this feature solve? Is your request related to a frustration you have with Termi?
+      placeholder: "I'm frustrated when... / It would be useful to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see. Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you thought of other ways to solve this problem? What are the trade-offs?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature Area
+      options:
+        - SSH Terminal
+        - SCP / File Manager
+        - RDP / VNC
+        - Local Terminal
+        - Authentication / Security
+        - Server Monitoring
+        - Server Sharing
+        - Push Notifications
+        - Mobile / PWA
+        - Electron Desktop App
+        - Docker / Deployment
+        - API
+        - UI / UX
+        - Other
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Mockups, links to similar features in other tools, or any other context.
