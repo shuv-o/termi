@@ -1,7 +1,6 @@
 const { app, BrowserWindow, shell, ipcMain, session, Menu } = require('electron');
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
-const http = require('http');
 const os = require('os');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -29,7 +28,7 @@ if (fs.existsSync(rootEnvPath)) {
 
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
-let guacdProcess, gatewayProcess, nextProcess, win, setupWin;
+let guacdProcess, gatewayProcess, win, setupWin;
 
 let nodePty;
 try {
@@ -79,39 +78,16 @@ function getPaths() {
     if (app.isPackaged) {
         const r = process.resourcesPath;
         return {
-            nextServer: path.join(r, 'web-standalone', 'apps', 'web', 'server.js'),
             gateway: path.join(r, 'gateway.cjs'),
-            nodePath: path.join(r, 'web-standalone', 'node_modules'),
+            // Native modules (node-pty, ssh2) are unpacked from the asar here
+            nodePath: path.join(r, 'app.asar.unpacked', 'node_modules'),
         };
     }
     return {
-        nextServer: path.join(__dirname, '../web/.next/standalone/apps/web/server.js'),
         gateway: path.join(__dirname, 'gateway.cjs'),
-        nodePath: path.join(__dirname, '../web/.next/standalone/node_modules'),
+        // In dev, use the workspace root node_modules (workspaces hoist deps)
+        nodePath: path.join(__dirname, '../../node_modules'),
     };
-}
-
-function waitForDevServer(port = 22080, timeoutMs = 120000) {
-    return new Promise((resolve, reject) => {
-        console.log(`[electron-dev] Waiting for Next.js dev server on :${port}…`);
-        const poll = setInterval(() => {
-            const req = http.get(`http://127.0.0.1:${port}`, res => {
-                if (res.statusCode < 500) {
-                    clearInterval(poll);
-                    clearTimeout(timeout);
-                    console.log(`[electron-dev] Next.js dev server is up on :${port}`);
-                    resolve();
-                }
-                res.resume();
-            });
-            req.on('error', () => {});
-        }, 500);
-
-        const timeout = setTimeout(() => {
-            clearInterval(poll);
-            reject(new Error(`Dev server on :${port} did not start within ${timeoutMs / 1000} s`));
-        }, timeoutMs);
-    });
 }
 
 function startGuacd() {
@@ -138,41 +114,6 @@ function startGateway(paths) {
     gatewayProcess.stdout.on('data', d => console.log('[gateway]', d.toString().trim()));
     gatewayProcess.stderr.on('data', d => console.error('[gateway]', d.toString().trim()));
     gatewayProcess.on('error', err => console.error('[gateway] Failed to start:', err.message));
-}
-
-function startNextServer(paths) {
-    return new Promise((resolve, reject) => {
-        nextProcess = spawn(process.execPath, [paths.nextServer], {
-            env: {
-                ...process.env,
-                PORT: '22080',
-                HOSTNAME: '127.0.0.1',
-                NODE_ENV: 'production',
-                NEXT_PUBLIC_GATEWAY_URL: 'ws://127.0.0.1:22081',
-                NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:22080',
-            },
-        });
-        nextProcess.stdout.on('data', d => console.log('[next]', d.toString().trim()));
-        nextProcess.stderr.on('data', d => console.error('[next]', d.toString().trim()));
-        nextProcess.on('error', reject);
-
-        const poll = setInterval(() => {
-            const req = http.get('http://127.0.0.1:22080', res => {
-                if (res.statusCode < 500) {
-                    clearInterval(poll);
-                    clearTimeout(timeout);
-                    resolve();
-                }
-                res.resume();
-            });
-            req.on('error', () => {});
-        }, 500);
-
-        const timeout = setTimeout(() => {
-            clearInterval(poll);
-            reject(new Error('Next.js server did not start within 30 s'));
-        }, 30000);
-    });
 }
 
 // ── Windows ───────────────────────────────────────────────────────────────────
@@ -306,42 +247,16 @@ function createWindow(appUrl) {
 
 // ── Startup logic ─────────────────────────────────────────────────────────────
 
-async function startApp(mode) {
-    if (mode === 'local') {
-        if (IS_DEV) {
-            console.log('[electron-dev] Running in development mode.');
-            console.log('[electron-dev] Expecting Next.js on :22080 and gateway on :22081.');
-            startGuacd();
-            try {
-                await waitForDevServer(22080);
-            } catch (err) {
-                console.error('[electron-dev] Could not reach Next.js dev server:', err.message);
-                app.quit();
-                return;
-            }
-        } else {
-            const paths = getPaths();
-            startGuacd();
-            startGateway(paths);
-            try {
-                await startNextServer(paths);
-            } catch (err) {
-                console.error('Failed to start Next.js server:', err.message);
-                app.quit();
-                return;
-            }
-        }
-        createWindow(IS_DEV ? 'http://localhost:22080' : 'http://127.0.0.1:22080');
-    } else if (mode === 'online') {
-        const remoteUrl = process.env.TERMI_REMOTE_URL;
-        if (!remoteUrl) {
-            createSetupWindow('TERMI_REMOTE_URL is required for online mode');
-            return;
-        }
-        if (process.env.RUN_LOCAL_GATEWAY === 'true') startGateway(getPaths());
-        if (process.env.RUN_LOCAL_GUACD === 'true') startGuacd();
-        createWindow(remoteUrl);
+async function startApp() {
+    const remoteUrl = process.env.TERMI_REMOTE_URL;
+    if (!remoteUrl) {
+        createSetupWindow('TERMI_REMOTE_URL is not set');
+        return;
     }
+
+    if (process.env.RUN_LOCAL_GATEWAY === 'true') startGateway(getPaths());
+    if (process.env.RUN_LOCAL_GUACD === 'true') startGuacd();
+    createWindow(remoteUrl);
 }
 
 // ── Setup IPC handlers ────────────────────────────────────────────────────────
@@ -374,7 +289,7 @@ ipcMain.handle('setup:launch', async () => {
     if (setupWin && !setupWin.isDestroyed()) setupWin.close();
     // Reload config that was just saved into process.env
     loadConfig();
-    await startApp(process.env.TERMI_MODE);
+    await startApp();
 });
 
 // ── Local terminal IPC ────────────────────────────────────────────────────────
@@ -472,23 +387,12 @@ app.on('second-instance', () => {
 app.whenReady().then(async () => {
     loadConfig();
 
-    const mode = process.env.TERMI_MODE;
-
-    if (!mode) {
+    if (!process.env.TERMI_REMOTE_URL) {
         createSetupWindow();
         return;
     }
 
-    if (mode === 'local') {
-        const required = ['DATABASE_URL', 'SESSION_SECRET', 'ENCRYPTION_KEY', 'GATEWAY_JWT_SECRET'];
-        const missing = required.filter(k => !process.env[k]);
-        if (missing.length) {
-            createSetupWindow(`Missing: ${missing.join(', ')}`);
-            return;
-        }
-    }
-
-    await startApp(mode);
+    await startApp();
 });
 
 app.on('window-all-closed', () => {
@@ -496,8 +400,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0 && process.env.TERMI_MODE) {
-        startApp(process.env.TERMI_MODE);
+    if (BrowserWindow.getAllWindows().length === 0 && process.env.TERMI_REMOTE_URL) {
+        startApp();
     }
 });
 
@@ -506,10 +410,7 @@ app.on('before-quit', () => {
         try { term.kill(); } catch (_) {}
     }
     localPtys.clear();
-    if (!IS_DEV) {
-        nextProcess?.kill();
-        gatewayProcess?.kill();
-    }
+    gatewayProcess?.kill();
     guacdProcess?.kill();
     try { spawnSync('docker', ['stop', 'guacd-desktop']); } catch (_) {}
 });

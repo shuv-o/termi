@@ -4,22 +4,23 @@ directories:
   output: dist
 
 # Only the Electron entry points go into the asar.
-# The Next.js standalone server and bundled gateway are placed as extraResources
-# so they can be spawned as child processes (asar-packed files cannot be spawned).
+# The bundled gateway is placed as an extraResource so it can be spawned
+# as a child process (asar-packed files cannot be spawned directly).
 files:
   - apps/electron/main.js
   - apps/electron/preload.js
+  - apps/electron/setup-preload.js
+  - apps/electron/setup.html
   - node_modules/node-pty/**/*
+  - node_modules/ssh2/**/*
 
-# node-pty ships a native addon (.node file) that cannot be loaded from inside
-# an asar archive — unpack it to the filesystem alongside the asar.
+# Native addons cannot be loaded from inside an asar archive — unpack them.
+# The gateway child process also uses these via NODE_PATH pointing here.
 asarUnpack:
   - node_modules/node-pty/**/*
+  - node_modules/ssh2/**/*
 
 extraResources:
-  # Next.js standalone output — already contains public/ and .next/static/
-  - from: apps/web/.next/standalone
-    to: web-standalone
   # Gateway bundled to CJS by the build:gateway-bundle script
   - from: apps/electron/gateway.cjs
     to: gateway.cjs
