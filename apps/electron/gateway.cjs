@@ -3718,7 +3718,7 @@ var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
     var fs = require("fs");
     var path = require("path");
-    var os = require("os");
+    var os2 = require("os");
     var crypto2 = require("crypto");
     var packageJson = require_package();
     var version = packageJson.version;
@@ -3874,7 +3874,7 @@ var require_main = __commonJS({
       return null;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path.join(os.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path.join(os2.homedir(), envPath.slice(1)) : envPath;
     }
     function _configVault(options) {
       const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || options && options.debug);
@@ -4843,6 +4843,139 @@ var GuacamoleHandler = class {
     }
     this.closing = true;
     this.guacdSocket.end();
+  }
+};
+
+// apps/gateway/src/handlers/local.ts
+var import_module = require("module");
+var import_os = __toESM(require("os"), 1);
+var import_meta = {};
+var _require = (0, import_module.createRequire)(import_meta.url);
+var _ptySpawn = null;
+try {
+  const nodePty = _require("node-pty");
+  _ptySpawn = nodePty.spawn;
+} catch {
+  console.warn("[LocalHandler] node-pty not available \u2014 local terminal disabled. Run: npm ci --workspace=apps/gateway");
+}
+var MAX_LOCAL_PTYS_PER_USER = 3;
+var userPtyCounts = /* @__PURE__ */ new Map();
+function incrementUser(userId) {
+  const n = userPtyCounts.get(userId) ?? 0;
+  if (n >= MAX_LOCAL_PTYS_PER_USER) return false;
+  userPtyCounts.set(userId, n + 1);
+  return true;
+}
+function decrementUser(userId) {
+  const n = userPtyCounts.get(userId) ?? 0;
+  if (n <= 1) userPtyCounts.delete(userId);
+  else userPtyCounts.set(userId, n - 1);
+}
+var IDLE_TIMEOUT_MS = 15 * 60 * 1e3;
+var LocalHandler = class {
+  constructor(ws, userId) {
+    this.ws = ws;
+    this.userId = userId;
+    this.spawn();
+  }
+  ws;
+  pty = null;
+  closing = false;
+  userId;
+  idleTimer = null;
+  resetIdleTimer() {
+    if (this.idleTimer) clearTimeout(this.idleTimer);
+    this.idleTimer = setTimeout(() => {
+      if (this.ws.readyState === import_websocket.default.OPEN) {
+        this.ws.send(JSON.stringify({ type: "error", message: "Session timed out due to inactivity" }));
+        this.ws.close(4008, "Idle timeout");
+      }
+      this.close();
+    }, IDLE_TIMEOUT_MS);
+  }
+  spawn() {
+    if (!_ptySpawn) {
+      this.ws.send(JSON.stringify({ type: "error", message: "Local terminal is not available on this server (node-pty missing)" }));
+      this.ws.close(4500, "node-pty unavailable");
+      return;
+    }
+    if (!incrementUser(this.userId)) {
+      this.ws.send(JSON.stringify({ type: "error", message: `Too many local terminal sessions (max ${MAX_LOCAL_PTYS_PER_USER})` }));
+      this.ws.close(4029, "Too Many Requests");
+      return;
+    }
+    const shell = process.platform === "win32" ? "powershell.exe" : process.env.SHELL || "/bin/sh";
+    const safeEnv = {
+      TERM: "xterm-256color",
+      COLORTERM: "truecolor",
+      HOME: process.env.HOME || import_os.default.homedir(),
+      PATH: process.env.PATH || "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      LANG: process.env.LANG || "en_US.UTF-8",
+      USER: process.env.USER || "gateway",
+      SHELL: shell
+    };
+    try {
+      this.pty = _ptySpawn(shell, [], {
+        name: "xterm-256color",
+        cols: 80,
+        rows: 24,
+        cwd: safeEnv.HOME,
+        env: safeEnv
+      });
+    } catch (err) {
+      decrementUser(this.userId);
+      this.ws.send(JSON.stringify({ type: "error", message: `Failed to spawn shell: ${err.message}` }));
+      this.ws.close(4500, "Spawn failed");
+      return;
+    }
+    this.pty.onData((data) => {
+      this.resetIdleTimer();
+      if (this.ws.readyState === import_websocket.default.OPEN) {
+        this.ws.send(JSON.stringify({
+          type: "data",
+          data: Buffer.from(data).toString("base64")
+        }));
+      }
+    });
+    this.pty.onExit(({ exitCode }) => {
+      if (this.ws.readyState === import_websocket.default.OPEN) {
+        this.ws.send(JSON.stringify({ type: "disconnected", exitCode }));
+        this.ws.close(1e3, "Shell exited");
+      }
+      this.cleanup();
+    });
+    this.ws.send(JSON.stringify({ type: "connected" }));
+    this.resetIdleTimer();
+  }
+  write(data) {
+    this.resetIdleTimer();
+    if (this.pty) {
+      this.pty.write(data.toString("utf8"));
+    }
+  }
+  resize(rows, cols) {
+    if (this.pty) {
+      this.pty.resize(cols, rows);
+    }
+  }
+  close() {
+    if (this.closing) return;
+    this.closing = true;
+    this.cleanup();
+  }
+  cleanup() {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+    if (this.pty) {
+      try {
+        this.pty.kill();
+      } catch {
+      }
+      this.pty = null;
+    }
+    decrementUser(this.userId);
   }
 };
 
@@ -6446,12 +6579,15 @@ async function validateToken(token) {
     const { payload } = await jwtDecrypt(token, key, {
       contentEncryptionAlgorithms: ["A256GCM"]
     });
-    if (!payload.userId || !payload.serverId || !payload.host || !payload.username) {
+    if (!payload.userId || !payload.serverId) {
       throw new Error("Invalid token payload");
     }
-    const VALID_PROTOCOLS = ["ssh", "scp", "rdp", "vnc"];
+    const VALID_PROTOCOLS = ["ssh", "scp", "rdp", "vnc", "local"];
     if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol)) {
       throw new Error("Invalid token protocol");
+    }
+    if (payload.protocol !== "local" && (!payload.host || !payload.username)) {
+      throw new Error("Invalid token payload");
     }
     return payload;
   } catch (error) {
@@ -6697,9 +6833,14 @@ wss.on("connection", (ws, req) => {
     ws.close(4e3, "Bad Request");
     return;
   }
-  if (!["ssh", "scp", "rdp", "vnc"].includes(protocol)) {
+  if (!["ssh", "scp", "rdp", "vnc", "local"].includes(protocol)) {
     ws.send(JSON.stringify({ type: "error", message: "Invalid protocol" }));
     ws.close(4e3, "Bad Request");
+    return;
+  }
+  if (protocol === "local" && process.env.ALLOW_LOCAL_TERMINAL !== "true") {
+    ws.send(JSON.stringify({ type: "error", message: "Local terminal is not enabled on this server" }));
+    ws.close(4403, "Forbidden");
     return;
   }
   const AUTH_TIMEOUT_MS = 5e3;
@@ -6744,9 +6885,52 @@ wss.on("connection", (ws, req) => {
       ws.close(4003, "Forbidden");
       return;
     }
-    if (process.env.ALLOW_PRIVATE_NETWORKS !== "true" && await isPrivateHostAsync(tokenPayload.host)) {
+    if (protocol !== "local" && process.env.ALLOW_PRIVATE_NETWORKS !== "true" && await isPrivateHostAsync(tokenPayload.host)) {
       ws.send(JSON.stringify({ type: "error", message: "Connection to private/internal hosts is not allowed" }));
       ws.close(1008, "SSRF protection");
+      return;
+    }
+    if (protocol === "local") {
+      const meta2 = {
+        userId: tokenPayload.userId,
+        protocol: "local",
+        serverId
+      };
+      nonSshConnections.set(ws, meta2);
+      meta2.handler = new LocalHandler(ws, tokenPayload.userId);
+      ws.on("message", (data) => {
+        try {
+          const message3 = JSON.parse(data.toString());
+          const handler = meta2.handler;
+          switch (message3.type) {
+            case "data":
+              if (message3.data) {
+                handler.write(Buffer.from(message3.data, "base64"));
+              }
+              break;
+            case "resize":
+              if (message3.cols && message3.rows) {
+                handler.resize(message3.rows, message3.cols);
+              }
+              break;
+            case "close-session":
+              handler.close();
+              ws.close(1e3, "Session closed");
+              break;
+          }
+        } catch (err) {
+          console.error("[gateway] Invalid local terminal message:", err);
+        }
+      });
+      ws.on("close", () => {
+        meta2.handler?.close();
+        nonSshConnections.delete(ws);
+      });
+      ws.on("error", (err) => {
+        console.error("[gateway] Local terminal WebSocket error:", err);
+        meta2.handler?.close();
+        nonSshConnections.delete(ws);
+      });
       return;
     }
     if (protocol === "ssh") {
