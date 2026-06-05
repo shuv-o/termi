@@ -114,7 +114,6 @@ export class GuacamoleHandler {
 
         this.guacdSocket.on('data', (data) => {
             const chunk = data.toString();
-            console.log(`[Guacamole] guacd raw data (${chunk.length} chars): ${chunk.substring(0, 300)}`);
             this.buffer += chunk;
 
             // Process all complete instructions in the buffer
@@ -123,26 +122,17 @@ export class GuacamoleHandler {
                 const instruction = this.buffer.substring(0, endIndex + 1);
                 this.buffer = this.buffer.substring(endIndex + 1);
 
-                console.log(`[Guacamole] Parsing instruction (${instruction.length} chars): ${instruction.substring(0, 200)}`);
                 const parsed = parseInstruction(instruction);
-                console.log(`[Guacamole] Parse result: opcode=${parsed?.opcode ?? 'NULL'} args=${parsed?.args.length ?? 'N/A'} handshakeResolve=${!!this.handshakeResolve}`);
 
-                if (parsed) {
-                    // Log non-drawing instructions (excludes high-frequency drawing opcodes)
-                    if (!['png', 'jpeg', 'webp', 'blob', 'video', 'audio', 'mouse', 'nop', 'sync', 'size', 'cursor', 'move', 'shade', 'dispose', 'cfill', 'cstroke', 'lstroke', 'line', 'arc', 'pop', 'push', 'identity', 'transform', 'rect', 'clip', 'end'].includes(parsed.opcode)) {
-                        console.log('[Guacamole] ←', parsed.opcode, parsed.args.length > 0 ? `(${parsed.args.length} args): first 5 = ${JSON.stringify(parsed.args.slice(0, 5))}` : '');
-                    }
-                    if (parsed.opcode === 'error') {
-                        const errMsg  = parsed.args[0] ?? '';
-                        const errCode = parsed.args[1] ?? '';
-                        console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
-                    }
+                if (parsed?.opcode === 'error') {
+                    const errMsg  = parsed.args[0] ?? '';
+                    const errCode = parsed.args[1] ?? '';
+                    console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
                 }
 
                 // During the handshake phase, intercept args/error internally
                 // so they are not forwarded to the browser
                 if (parsed?.opcode === 'args' && this.handshakeResolve) {
-                    console.log(`[Guacamole] Got args instruction with ${parsed.args.length} params: ${JSON.stringify(parsed.args)}`);
                     const resolve = this.handshakeResolve;
                     this.handshakeResolve = null;
                     this.handshakeReject = null;
@@ -173,7 +163,6 @@ export class GuacamoleHandler {
 
                 // Check if it's a Guacamole instruction (contains period-length prefix)
                 if (data.match(/^\d+\./)) {
-                    if (data.match(/^\d+\.key,/)) console.log('[Guacamole] → key to guacd:', data);
                     this.guacdSocket.write(data);
                 } else {
                     // Try to parse as JSON
@@ -193,7 +182,6 @@ export class GuacamoleHandler {
         });
 
         this.ws.on('close', () => {
-            console.log('[Guacamole] WebSocket closed');
             this.guacdSocket.end();
         });
     }
@@ -202,7 +190,6 @@ export class GuacamoleHandler {
         const guacdHost = getGuacdHost();
         const guacdPort = getGuacdPort();
         console.log(`[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`);
-        console.log(`[Guacamole] Connecting to guacd at ${guacdHost}:${guacdPort}`);
 
         try {
             await new Promise<void>((resolve, reject) => {
@@ -212,7 +199,6 @@ export class GuacamoleHandler {
 
                 this.guacdSocket.connect(guacdPort, guacdHost, () => {
                     clearTimeout(timeout);
-                    console.log('[Guacamole] Connected to guacd');
                     resolve();
                 });
 
@@ -231,7 +217,6 @@ export class GuacamoleHandler {
 
         // Send select instruction
         const guacProtocol = protocol === 'rdp' ? 'rdp' : 'vnc';
-        console.log(`[Guacamole] Sending select instruction: ${guacProtocol}`);
         this.guacdSocket.write(encodeInstruction('select', guacProtocol));
 
         // Wait for the args instruction using the single buffered data handler
@@ -432,19 +417,6 @@ export class GuacamoleHandler {
             }
         }
 
-        console.log('[Guacamole] Sending', connectionArgs.length, 'args to guacd');
-        console.log('[Guacamole] Connection params:', {
-            hostname: paramMap['hostname'],
-            port: paramMap['port'],
-            username: paramMap['username'] || '(empty)',
-            password: paramMap['password'] ? '(set)' : '(empty)',
-            width: paramMap['width'],
-            height: paramMap['height'],
-            'color-depth': paramMap['color-depth'],
-            'ignore-cert': paramMap['ignore-cert'],
-            security: paramMap['security'],
-            'disable-auth': paramMap['disable-auth'],
-        });
         // Log any expected args that have no mapping (likely need adding to paramMap)
         const unmapped = expectedArgs.filter(a => !/^VERSION_/.test(a) && !(a in paramMap));
         if (unmapped.length > 0) {
@@ -478,7 +450,6 @@ export class GuacamoleHandler {
         // encodeInstruction uses Buffer.byteLength for length prefixes so that
         // multi-byte characters in username/password do not misalign subsequent args.
         const connectBuf = encodeInstruction('connect', ...connectionArgs);
-        console.log(`[Guacamole] Sending connect instruction (${connectBuf.length} bytes): ${connectBuf.toString().substring(0, 200)}`);
         this.guacdSocket.write(connectBuf);
 
         this.ws.send(JSON.stringify({ type: 'connected' }));

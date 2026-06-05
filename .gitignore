@@ -50,3 +50,6 @@ CLAUDE.md
 /.idea
 /.claude
 /.worktrees
+
+# Internal design docs
+apps/web/docs/

@@ -1,42 +1,70 @@
-# Termi 🖥️
+<div align="center">
 
-**Secure Server Management PWA** - SSH, SCP, RDP, and VNC from your browser.
+# 🖥️ Termi
+
+**Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue.svg)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js)](https://nextjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 
-> **🎯 NEW: RDP Support is Ready!** For quick RDP setup, see [SOLUTION.md](SOLUTION.md) or run `node start-all.js`
+[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/shuvoo)
 
-<p align="center">
-  <img src="docs/screenshot.png" alt="Termi Dashboard" width="800">
-</p>
+</div>
+
+---
 
 ## ✨ Features
 
-### 🔐 Security First
-- **AES-256-GCM** encryption for all stored credentials
+### 🔐 Security & Authentication
+- **AES-256-GCM** encryption for all stored server credentials
 - **Argon2id** password hashing with secure parameters
-- **TOTP-based 2FA** (Google Authenticator, Authy compatible)
-- Optional **master key encryption** for extra protection
-- Zero-trust architecture - credentials decrypted only in memory
+- **TOTP-based 2FA** — works with Google Authenticator, Authy, and any TOTP app
+- **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
+- **Google OAuth** — "Sign in with Google" support
+- **Optional master key** — adds a second encryption layer derived via PBKDF2
+- Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
 
-### 🖥️ Multi-Protocol Support
-- **SSH** - Full terminal access with xterm.js
-- **SCP** - Web-based file manager with upload/download
-- **RDP** - Windows Remote Desktop via Guacamole
-- **VNC** - Virtual Network Computing via Guacamole
+### 🖥️ Multi-Protocol Remote Access
+- **SSH** — full terminal emulation with [xterm.js](https://xtermjs.org/), key forwarding, and resizable viewport
+- **SCP / SFTP** — web-based file manager: upload, download, create folders, rename, delete
+- **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/)
+- **VNC** — Virtual Network Computing via Apache Guacamole
 
-### 📱 Mobile Optimized
-- **PWA** - Install on any device
-- **Virtual Keyboard** - Ctrl, Alt, Shift, Fn keys, arrows
-- **Touch Gestures** - Optimized for touchscreens
-- **Responsive Design** - Works on any screen size
+### 💻 Local Terminal
+- Access your **local machine's shell** directly from the app
+- **Electron**: spawns PowerShell (Windows) or your default shell (macOS/Linux)
+- **Browser/cloud**: spawns a shell on the gateway host (gated by `ALLOW_LOCAL_TERMINAL=true`)
 
-### 📦 Self-Hosted
-- **Docker Compose** deployment
-- **PostgreSQL** database
-- **No cloud dependencies**
+### 📊 Server Monitoring
+- Real-time **CPU, memory, and disk** metrics fetched over SSH
+- **Health history** charts
+- Configurable **email & push notification** alerts
+- Built-in **benchmark tool**
+
+### 🤝 Server Sharing
+- Share server access with other users via invitation links
+- Per-server share management and revocation
+
+### 📱 PWA & Mobile
+- **Install as a PWA** on any device (iOS, Android, desktop)
+- Virtual keyboard with Ctrl, Alt, Shift, Fn, and arrow keys
+- Touch-optimised design
+- **Web push notifications** for monitoring alerts
+
+### 🖥️ Desktop App (Electron)
+- Native app for **macOS, Windows, and Linux**
+- Local terminal access via node-pty
+- Connects to your self-hosted Termi instance
+- Bundled gateway for fully offline / local-stack operation (`electron:dev:full`)
+
+### 📦 Self-Hosted & Privacy-First
+- **Docker Compose** one-command deployment
+- **PostgreSQL** database — your data stays on your server
+- **No telemetry**, no cloud dependencies
+- [Traefik](https://traefik.io/) reverse-proxy support included
 
 ---
 
@@ -44,260 +72,267 @@
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Node.js 20+ (for development)
-
-### 🎯 RDP Quick Start (Development)
-
-**Get RDP working in 3 steps:**
-
-1. **Start guacd daemon**
-   ```powershell
-   docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
-   ```
-
-2. **Run the setup script**
-   ```powershell
-   node start-all.js
-   ```
-
-3. **Go to http://localhost:22080** and add your RDP server!
-
-📚 **Detailed guides:**
-- [SOLUTION.md](SOLUTION.md) - Complete setup and troubleshooting
-- [README_RDP_QUICKSTART.md](README_RDP_QUICKSTART.md) - Quick reference
-- [RDP_SETUP_GUIDE.md](RDP_SETUP_GUIDE.md) - Detailed instructions
-
-**Diagnostic tools:**
-- `node diagnose-rdp.js` - Check all components
-- `.\start-services.ps1` - Start gateway and web app
-
----
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Deploy with Docker
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/termi.git
-   cd termi
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/shuvoooo/termi.git
+cd termi
 
-2. **Configure environment**
-   ```bash
-   cp .env.example .env
-   
-   # Generate secure keys
-   openssl rand -base64 32  # For SESSION_SECRET
-   openssl rand -base64 32  # For ENCRYPTION_KEY
-   openssl rand -base64 32  # For GATEWAY_JWT_SECRET
-   ```
-   
-   Edit `.env` and fill in the generated secrets.
+# 2. Copy and configure environment
+cp .env.example .env
+```
 
-3. **Start the stack**
-   ```bash
-   docker-compose up -d
-   ```
+Open `.env` and set the required secrets (generate each with `openssl rand -base64 32`):
 
-4. **Initialize database**
-   ```bash
-   docker-compose exec web npx prisma migrate deploy
-   ```
+```dotenv
+DB_HOST=postgres          # set to your DB host (Docker service name or external host)
+DB_USER=termi
+DB_PASSWORD=<strong-password>
+DB_NAME=termi
 
-5. **Access Termi**
-   
-   Open http://localhost:22080 in your browser.
+SESSION_SECRET=<openssl rand -base64 32>
+ENCRYPTION_KEY=<openssl rand -base64 32>
+GATEWAY_JWT_SECRET=<openssl rand -base64 32>
+
+NEXT_PUBLIC_GATEWAY_URL=ws://localhost:22080/gateway
+NEXT_PUBLIC_APP_URL=http://localhost:22080
+```
+
+```bash
+# 3. Start the stack
+docker compose up -d
+
+# 4. Run database migrations
+docker compose exec web npx prisma migrate deploy
+
+# 5. Open Termi
+open http://localhost:22080
+```
+
+> **RDP / VNC**: also start guacd — on Apple Silicon, add `--platform linux/arm64`:
+> ```bash
+> docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
+> ```
 
 ---
 
-## 🛠️ Development
+## 🛠️ Development Setup
 
-### Setup
+### Prerequisites
+
+- Node.js 22+
+- PostgreSQL 15+ (or use Docker Compose)
 
 ```bash
 # Install dependencies
 npm install
 
-# Setup database
-cd apps/web
-npx prisma generate
-npx prisma db push
+# Copy and configure env
+cp .env.example .env
+# Edit .env — set DATABASE_URL (or DB_HOST/USER/PASS/NAME) + secrets
 
-# Start development servers
+# Generate Prisma client
+npm run db:generate
+
+# Push schema to database
+npm run db:push
+
+# Start both services (web :22080, gateway :22081)
 npm run dev:all
 ```
 
-### Project Structure
+### Useful Commands
 
-```
-termi/
-├── apps/
-│   ├── web/                    # Next.js PWA
-│   │   ├── src/
-│   │   │   ├── app/            # App Router pages
-│   │   │   ├── components/     # React components
-│   │   │   ├── lib/            # Utilities
-│   │   │   │   ├── crypto/     # Encryption
-│   │   │   │   ├── auth/       # Authentication
-│   │   │   │   └── services/   # Business logic
-│   │   │   └── types/          # TypeScript types
-│   │   └── prisma/             # Database schema
-│   │
-│   └── gateway/                # WebSocket Gateway
-│       └── src/
-│           ├── handlers/       # SSH, SCP, Guacamole
-│           └── auth/           # Token validation
-│
-├── docker/                     # Docker configs
-├── docker-compose.yml
-├── README.md
-└── SECURITY.md
+```bash
+npm run dev:all          # Web + Gateway (recommended)
+npm run dev              # Web only
+npm run dev:gateway      # Gateway only
+
+npm run db:migrate       # Create + apply a migration
+npm run db:studio        # Prisma Studio database browser
+npm run db:seed          # Seed with sample data
+
+npm run test             # Unit tests (Vitest)
+npm run test:e2e         # End-to-end tests (Playwright)
+npm run lint             # ESLint across all workspaces
+npm run build            # Production build
+
+# Desktop app
+npm run electron:dev              # Open Electron pointing at a running web instance
+npm run electron:dev:full         # Run full local stack + Electron together
+npm run build:electron            # Package Electron app
 ```
 
 ---
 
-## 🔧 Configuration
+## 🗂️ Project Structure
 
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `SESSION_SECRET` | Session encryption key (min 32 chars) | Yes |
-| `ENCRYPTION_KEY` | AES-256 encryption key | Yes |
-| `GATEWAY_JWT_SECRET` | Gateway authentication secret | Yes |
-| `NEXT_PUBLIC_GATEWAY_URL` | WebSocket gateway URL | Yes |
-| `POSTGRES_USER` | Database username | Yes |
-| `POSTGRES_PASSWORD` | Database password | Yes |
-
-### Generate Secure Keys
-
-```bash
-# Generate a secure random key
-openssl rand -base64 32
 ```
+termi/
+├── apps/
+│   ├── web/                    # Next.js 15 App Router
+│   │   ├── src/
+│   │   │   ├── app/            # Pages + API routes (App Router)
+│   │   │   │   ├── api/        # 53 REST endpoints
+│   │   │   │   └── panel/      # Dashboard UI
+│   │   │   ├── components/     # React components
+│   │   │   │   ├── terminal/   # SSH/RDP/VNC/local terminal
+│   │   │   │   ├── scp/        # File manager
+│   │   │   │   └── monitoring/ # Metrics & charts
+│   │   │   └── lib/
+│   │   │       ├── auth/       # Session, TOTP, passkey, OAuth
+│   │   │       ├── crypto/     # AES-256-GCM, key derivation
+│   │   │       ├── security/   # SSRF protection, rate limiting
+│   │   │       └── services/   # SSH pool, SFTP, monitoring, alerts
+│   │   └── prisma/             # Database schema & migrations
+│   │
+│   ├── gateway/                # WebSocket gateway (pure ESM)
+│   │   └── src/
+│   │       ├── handlers/       # SSH, SCP, Guacamole (RDP/VNC), Local PTY
+│   │       └── auth/           # JWE token validation
+│   │
+│   └── electron/               # Desktop app wrapper
+│       ├── main.js             # Electron main process + node-pty IPC
+│       └── preload.js          # Secure context bridge
+│
+├── traefik/                    # Reverse-proxy configuration
+├── docker-compose.yml
+├── docker-compose.local.yml    # Local development with Docker
+├── electron-builder.yml        # Desktop app build config
+└── .env.example
+```
+
+---
+
+## ⚙️ Configuration
+
+### Required Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | PostgreSQL host |
+| `DB_USER` | PostgreSQL username |
+| `DB_PASSWORD` | PostgreSQL password |
+| `DB_NAME` | Database name |
+| `SESSION_SECRET` | iron-session cookie key (≥32 chars) |
+| `ENCRYPTION_KEY` | AES-256-GCM key for credentials at rest (≥32 chars) |
+| `GATEWAY_JWT_SECRET` | Shared secret for JWE connection tokens (≥32 chars) |
+| `NEXT_PUBLIC_GATEWAY_URL` | Browser-visible WebSocket URL of the gateway |
+| `NEXT_PUBLIC_APP_URL` | Public URL of the web app |
+
+### Optional Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GUACD_HOST` | `localhost` | guacd host for RDP/VNC |
+| `GUACD_PORT` | `4822` | guacd port |
+| `ALLOW_PRIVATE_NETWORKS` | `false` | Allow connections to private/internal IPs |
+| `TRUSTED_PROXY` | `false` | Trust `X-Forwarded-For` (enable behind Nginx/Traefik) |
+| `ALLOWED_ORIGINS` | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway |
+| `ALLOW_LOCAL_TERMINAL` | `false` | Enable local PTY terminal on the gateway host |
+| `GOOGLE_CLIENT_ID` | — | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | — | Google OAuth client secret |
+| `SMTP_HOST` | — | SMTP host for email (verification, alerts, invites) |
+| `SMTP_USER` | — | SMTP username |
+| `SMTP_PASS` | — | SMTP password |
+| `VAPID_PUBLIC_KEY` | — | Web push VAPID public key |
+| `VAPID_PRIVATE_KEY` | — | Web push VAPID private key |
+
+> See [`.env.example`](.env.example) for the full list with descriptions.
 
 ---
 
 ## 📡 Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Browser / PWA                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │  Login   │  │ Dashboard│  │ Terminal │  │   SCP    │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     Next.js Application                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │   API    │  │   Auth   │  │  Crypto  │  │  Prisma  │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-          ┌─────────────────┼─────────────────┐
-          ▼                 ▼                 ▼
-    ┌──────────┐     ┌──────────┐      ┌──────────┐
-    │ Gateway  │     │ PostgreSQL│     │   Redis  │
-    │ (WS)     │     │          │      │          │
-    └────┬─────┘     └──────────┘      └──────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌──────┐  ┌──────┐
-│ SSH  │  │guacd │──────► RDP/VNC Servers
-└──────┘  └──────┘
-    │
-    ▼
-  SSH Servers
+┌──────────────────────────────────────────────────────────────┐
+│                  Browser / PWA / Electron                     │
+│   Login · Dashboard · Terminal · File Manager · Monitoring    │
+└─────────────────────────┬────────────────────────────────────┘
+                          │ HTTP / REST
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│               Next.js Web App  (:22080)                       │
+│   API Routes │ Auth │ AES-256 Crypto │ Prisma ORM            │
+└───────┬──────────────────────────────┬───────────────────────┘
+        │                              │
+        │ PostgreSQL                   │ POST /api/connection/token
+        ▼                              ▼
+  ┌──────────┐               ┌─────────────────────────────────┐
+  │PostgreSQL│               │    WebSocket Gateway  (:22081)  │
+  └──────────┘               │    JWE token validation         │
+                             └───┬─────────────┬───────────────┘
+                                 │             │
+                           SSH/SCP        RDP / VNC
+                                 │             │
+                         ┌───────┴──┐   ┌──────┴──────┐
+                         │ SSH Host │   │  guacd:4822  │
+                         └──────────┘   └──────┬───────┘
+                                               │
+                                        RDP / VNC Servers
 ```
+
+**Connection flow:**
+1. Browser calls `POST /api/connection/token` → server decrypts stored credentials and issues a short-lived **JWE token** (A256GCM, 5-minute TTL).
+2. Browser opens a WebSocket to the gateway with the JWE token as a query parameter.
+3. Gateway validates the token and routes to the appropriate handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler`, or `LocalHandler`.
+4. For RDP/VNC, `GuacamoleHandler` connects to guacd and forwards the Guacamole protocol frames to the browser.
 
 ---
 
 ## 🔒 Security
 
-Please read [SECURITY.md](SECURITY.md) for detailed information about:
+See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability reporting process, and threat model.
 
-- Encryption architecture
-- Threat model
-- Self-hosting best practices
-- Vulnerability reporting
-
-### Key Security Features
-
-1. **Encryption at Rest**: All credentials encrypted with AES-256-GCM
-2. **Secure Key Derivation**: Argon2id for passwords, PBKDF2 for master keys
-3. **No Plaintext Storage**: Secrets never stored unencrypted
-4. **Memory-Only Decryption**: Credentials decrypted only during active sessions
-5. **Session Management**: Token-based sessions with revocation support
-6. **2FA Support**: TOTP-based two-factor authentication
-
----
-
-## 📖 API Reference
-
-### Authentication
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Create new account |
-| `/api/auth/login` | POST | Authenticate user |
-| `/api/auth/verify-2fa` | POST | Verify TOTP code |
-| `/api/auth/logout` | POST | End session |
-| `/api/auth/me` | GET | Get current user |
-
-### Servers
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/servers` | GET | List all servers |
-| `/api/servers` | POST | Create server |
-| `/api/servers/:id` | GET | Get server details |
-| `/api/servers/:id` | PATCH | Update server |
-| `/api/servers/:id` | DELETE | Delete server |
-
-### Groups
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/groups` | GET | List all groups |
-| `/api/groups` | POST | Create group |
-| `/api/groups/:id` | PATCH | Update group |
-| `/api/groups/:id` | DELETE | Delete group |
+**Highlights:**
+- Credentials encrypted with AES-256-GCM before database storage
+- SSRF protection on all user-supplied host inputs
+- Rate limiting on authentication endpoints
+- CSP and security headers on every response
+- Session tokens revocable per-device
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our contributing guidelines.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- Setting up the development environment
+- Branching and commit conventions
+- Submitting pull requests
+- Reporting bugs and requesting features
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- [xterm.js](https://xtermjs.org/) - Terminal emulator
-- [Apache Guacamole](https://guacamole.apache.org/) - RDP/VNC gateway
-- [ssh2](https://github.com/mscdex/ssh2) - SSH client
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Prisma](https://www.prisma.io/) - Database ORM
+- [xterm.js](https://xtermjs.org/) — terminal emulator
+- [Apache Guacamole](https://guacamole.apache.org/) — RDP/VNC gateway
+- [ssh2](https://github.com/mscdex/ssh2) — SSH client for Node.js
+- [node-pty](https://github.com/microsoft/node-pty) — local PTY for Electron
+- [Next.js](https://nextjs.org/) — React framework
+- [Prisma](https://www.prisma.io/) — database ORM
+- [Tailwind CSS](https://tailwindcss.com/) — utility-first CSS
+- [iron-session](https://github.com/vvo/iron-session) — session management
 
 ---
 
-<p align="center">
-  Made with ❤️ for the self-hosting community
-</p>
+<div align="center">
+
+**If Termi saves you time, consider supporting its development:**
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/shuvoo)
+
+Made with ❤️ for the self-hosting community
+
+</div>
+
