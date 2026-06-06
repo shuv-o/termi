@@ -70,6 +70,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     // Mobile user menu (top-bar avatar dropdown)
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [isElectron, setIsElectron] = useState(false);
 
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
@@ -112,6 +113,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             return next;
         });
     }
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        setIsElectron(Boolean(window.electronAPI?.isElectron));
+    }, []);
 
     useEffect(() => {
         async function fetchUser() {
@@ -253,34 +259,35 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                 {/* Nav */}
                 <nav className="flex-1 px-2 pt-3 space-y-0.5">
-                    {/* Local Terminal */}
-                    {collapsed ? (
-                        <CollapseTooltip label="Local Terminal">
+                    {/* Local Terminal (Electron only) */}
+                    {isElectron &&
+                        (collapsed ? (
+                            <CollapseTooltip label="Local Terminal">
+                                <button
+                                    onClick={handleOpenLocalTerminal}
+                                    title="Local Terminal"
+                                    className={`flex items-center justify-center py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                        localTerminalActive
+                                            ? 'bg-primary/20 text-primary'
+                                            : 'text-violet-400 hover:bg-accent hover:text-violet-300'
+                                    }`}
+                                >
+                                    <Laptop className="w-5 h-5 shrink-0" />
+                                </button>
+                            </CollapseTooltip>
+                        ) : (
                             <button
                                 onClick={handleOpenLocalTerminal}
-                                title="Local Terminal"
-                                className={`flex items-center justify-center py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
                                     localTerminalActive
                                         ? 'bg-primary/20 text-primary'
                                         : 'text-violet-400 hover:bg-accent hover:text-violet-300'
                                 }`}
                             >
                                 <Laptop className="w-5 h-5 shrink-0" />
+                                <span className="truncate">Local Terminal</span>
                             </button>
-                        </CollapseTooltip>
-                    ) : (
-                        <button
-                            onClick={handleOpenLocalTerminal}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
-                                localTerminalActive
-                                    ? 'bg-primary/20 text-primary'
-                                    : 'text-violet-400 hover:bg-accent hover:text-violet-300'
-                            }`}
-                        >
-                            <Laptop className="w-5 h-5 shrink-0" />
-                            <span className="truncate">Local Terminal</span>
-                        </button>
-                    )}
+                        ))}
 
                     {navigation.map((item) => {
                         const isActive =
@@ -494,24 +501,26 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         );
                     })}
 
-                    {/* Local Terminal (mobile) */}
-                    <button
-                        onClick={handleOpenLocalTerminal}
-                        className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
-                    >
-                        {localTerminalActive ? (
-                            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-600 shadow-[0_0_14px_3px_rgba(124,58,237,0.30)]">
-                                <Laptop className="w-[17px] h-[17px] text-white shrink-0" />
-                                <span className="text-[12px] font-semibold text-white leading-none">
-                                    Local
-                                </span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-center w-10 h-[34px]">
-                                <Laptop className="w-[20px] h-[20px] text-violet-400/60" />
-                            </div>
-                        )}
-                    </button>
+                    {/* Local Terminal (mobile, Electron only) */}
+                    {isElectron && (
+                        <button
+                            onClick={handleOpenLocalTerminal}
+                            className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
+                        >
+                            {localTerminalActive ? (
+                                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-600 shadow-[0_0_14px_3px_rgba(124,58,237,0.30)]">
+                                    <Laptop className="w-[17px] h-[17px] text-white shrink-0" />
+                                    <span className="text-[12px] font-semibold text-white leading-none">
+                                        Local
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center w-10 h-[34px]">
+                                    <Laptop className="w-[20px] h-[20px] text-violet-400/60" />
+                                </div>
+                            )}
+                        </button>
+                    )}
                 </div>
             </nav>
         </div>
