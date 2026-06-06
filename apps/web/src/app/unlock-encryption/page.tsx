@@ -29,7 +29,10 @@ export default function UnlockEncryptionPage() {
                 body: JSON.stringify({ passphrase }),
             });
             const data = await res.json();
-            if (!data.success) { setError(data.error || 'Incorrect passphrase'); return; }
+            if (!data.success) {
+                setError(data.error || 'Incorrect passphrase');
+                return;
+            }
             router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
@@ -57,15 +60,33 @@ export default function UnlockEncryptionPage() {
                 <CardContent className="pt-8 pb-6 px-8 space-y-4">
                     <div className="flex flex-col items-center mb-2">
                         <AlertTriangle className="w-12 h-12 text-red-400 mb-2" />
-                        <h1 className="text-xl font-bold text-red-400">Delete All Server Credentials?</h1>
+                        <h1 className="text-xl font-bold text-red-400">
+                            Delete All Server Credentials?
+                        </h1>
                     </div>
                     <p className="text-sm text-muted-foreground text-center">
-                        This will permanently delete all your stored servers and credentials. This cannot be undone.
+                        This will permanently delete all your stored servers and credentials. This
+                        cannot be undone.
                     </p>
-                    <Button variant="destructive" className="w-full" onClick={handleReset} disabled={resetLoading}>
-                        {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yes, Delete Everything & Reset'}
+                    <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={handleReset}
+                        disabled={resetLoading}
+                    >
+                        {resetLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            'Yes, Delete Everything & Reset'
+                        )}
                     </Button>
-                    <Button variant="ghost" className="w-full" onClick={() => setShowResetConfirm(false)}>Cancel</Button>
+                    <Button
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => setShowResetConfirm(false)}
+                    >
+                        Cancel
+                    </Button>
                 </CardContent>
             </Card>
         );
@@ -96,20 +117,41 @@ export default function UnlockEncryptionPage() {
                                 className="pr-10"
                                 autoFocus
                             />
-                            <button type="button" onClick={() => setShowPassphrase(!showPassphrase)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <button
+                                type="button"
+                                onClick={() => setShowPassphrase(!showPassphrase)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            >
+                                {showPassphrase ? (
+                                    <EyeOff className="w-4 h-4" />
+                                ) : (
+                                    <Eye className="w-4 h-4" />
+                                )}
                             </button>
                         </div>
                     </div>
                     {error && <p className="text-sm text-red-400">{error}</p>}
                     <Button type="submit" className="w-full" disabled={loading || !passphrase}>
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Unlock & Continue'}
+                        {loading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            'Unlock & Continue'
+                        )}
                     </Button>
-                    <Button type="button" variant="ghost" className="w-full" onClick={() => router.push('/panel')}>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => router.push('/panel')}
+                    >
                         Skip for now (server connections won&apos;t work)
                     </Button>
                     <div className="text-center">
-                        <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setShowResetConfirm(true)}>
+                        <button
+                            type="button"
+                            className="text-xs text-muted-foreground underline"
+                            onClick={() => setShowResetConfirm(true)}
+                        >
                             Forgot your passphrase?
                         </button>
                     </div>

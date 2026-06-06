@@ -1,5 +1,5 @@
-import type {Metadata, Viewport} from 'next';
-import {headers} from 'next/headers';
+import type { Metadata, Viewport } from 'next';
+import { headers } from 'next/headers';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -39,13 +39,11 @@ export const metadata: Metadata = {
     manifest: '/manifest.json',
     icons: {
         icon: [
-            {url: '/favicon.ico', sizes: 'any'},
-            {url: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png'},
-            {url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png'},
+            { url: '/favicon.ico', sizes: 'any' },
+            { url: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
+            { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
         ],
-        apple: [
-            {url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png'},
-        ],
+        apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     },
     appleWebApp: {
         capable: true,
@@ -91,85 +89,81 @@ export const viewport: Viewport = {
     viewportFit: 'cover',
 };
 
-export default async function RootLayout({
-                                             children,
-                                         }: {
-    children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
     const nonce = (await headers()).get('x-nonce') ?? '';
 
     return (
         <html lang="en" className="dark">
-        <head>
-            {/* Propagate the per-request nonce so Next.js can apply it to
+            <head>
+                {/* Propagate the per-request nonce so Next.js can apply it to
                     any inline scripts it injects during hydration */}
-            <meta name="csp-nonce" content={nonce}/>
-            {/* Microsoft tile */}
-            <meta name="msapplication-TileColor" content="#0f172a"/>
-            <meta name="msapplication-TileImage" content="/icons/icon-144x144.png"/>
-        </head>
-        <body className="min-h-screen bg-background text-white antialiased">
-        {children}
-        <script
-            type="application/ld+json"
-            nonce={nonce}
-            dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                    '@context': 'https://schema.org',
-                    '@graph': [
-                        {
-                            '@type': 'SoftwareApplication',
-                            name: 'Termi',
-                            applicationCategory: 'DeveloperApplication',
-                            operatingSystem: 'Any',
-                            description:
-                                'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-                            url: 'https://github.com/shuvoooo/termi',
-                            author: {
-                                '@type': 'Person',
-                                name: 'Shuvo',
-                                email: 'shuvo.punam@gmail.com',
-                                url: 'https://github.com/shuvoooo',
-                                sameAs: [
-                                    'https://github.com/shuvoooo',
-                                    'https://www.linkedin.com/in/shuvoooo/',
-                                ],
-                            },
-                            license: 'https://opensource.org/licenses/MIT',
-                            offers: {
-                                '@type': 'Offer',
-                                price: '0',
-                                priceCurrency: 'USD',
-                            },
-                            featureList: [
-                                'SSH Terminal',
-                                'SCP File Manager',
-                                'RDP Remote Desktop',
-                                'VNC Viewer',
-                                'AES-256-GCM Encryption',
-                                'TOTP Two-Factor Authentication',
-                                'Progressive Web App',
-                                'Mobile Optimized',
+                <meta name="csp-nonce" content={nonce} />
+                {/* Microsoft tile */}
+                <meta name="msapplication-TileColor" content="#0f172a" />
+                <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+            </head>
+            <body className="min-h-screen bg-background text-white antialiased">
+                {children}
+                <script
+                    type="application/ld+json"
+                    nonce={nonce}
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@graph': [
+                                {
+                                    '@type': 'SoftwareApplication',
+                                    name: 'Termi',
+                                    applicationCategory: 'DeveloperApplication',
+                                    operatingSystem: 'Any',
+                                    description:
+                                        'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
+                                    url: 'https://github.com/shuvoooo/termi',
+                                    author: {
+                                        '@type': 'Person',
+                                        name: 'Shuvo',
+                                        email: 'shuvo.punam@gmail.com',
+                                        url: 'https://github.com/shuvoooo',
+                                        sameAs: [
+                                            'https://github.com/shuvoooo',
+                                            'https://www.linkedin.com/in/shuvoooo/',
+                                        ],
+                                    },
+                                    license: 'https://opensource.org/licenses/MIT',
+                                    offers: {
+                                        '@type': 'Offer',
+                                        price: '0',
+                                        priceCurrency: 'USD',
+                                    },
+                                    featureList: [
+                                        'SSH Terminal',
+                                        'SCP File Manager',
+                                        'RDP Remote Desktop',
+                                        'VNC Viewer',
+                                        'AES-256-GCM Encryption',
+                                        'TOTP Two-Factor Authentication',
+                                        'Progressive Web App',
+                                        'Mobile Optimized',
+                                    ],
+                                },
+                                {
+                                    '@type': 'Person',
+                                    name: 'Shuvo',
+                                    email: 'shuvo.punam@gmail.com',
+                                    url: 'https://github.com/shuvoooo',
+                                    sameAs: [
+                                        'https://github.com/shuvoooo',
+                                        'https://www.linkedin.com/in/shuvoooo/',
+                                    ],
+                                },
                             ],
-                        },
-                        {
-                            '@type': 'Person',
-                            name: 'Shuvo',
-                            email: 'shuvo.punam@gmail.com',
-                            url: 'https://github.com/shuvoooo',
-                            sameAs: [
-                                'https://github.com/shuvoooo',
-                                'https://www.linkedin.com/in/shuvoooo/',
-                            ],
-                        },
-                    ],
-                }),
-            }}
-        />
-        <script
-            nonce={nonce}
-            dangerouslySetInnerHTML={{
-                __html: `
+                        }),
+                    }}
+                />
+                <script
+                    nonce={nonce}
+                    dangerouslySetInnerHTML={{
+                        __html: `
                         if ('serviceWorker' in navigator) {
                           window.addEventListener('load', function() {
                             navigator.serviceWorker.register('/sw.js').catch(function(err) {
@@ -177,9 +171,9 @@ export default async function RootLayout({
                             });
                           });
                         }`.trim(),
-            }}
-        />
-        </body>
+                    }}
+                />
+            </body>
         </html>
     );
 }

@@ -1,10 +1,10 @@
 /**
  * Credential Encryption Service
- * 
+ *
  * Handles encryption and decryption of server credentials with support for:
  * - System-level encryption (using ENCRYPTION_KEY)
  * - User master key encryption (optional additional layer)
- * 
+ *
  * Encryption Hierarchy:
  * 1. If user has master key: credentials encrypted with derived master key
  * 2. Always: data encrypted with system key for storage
@@ -32,8 +32,8 @@ export interface ServerCredentials {
 }
 
 export interface EncryptedCredentials {
-    host: string;      // Encrypted + serialized
-    username: string;  // Encrypted + serialized
+    host: string; // Encrypted + serialized
+    username: string; // Encrypted + serialized
     password?: string; // Encrypted + serialized, if present
     privateKey?: string;
     passphrase?: string;
@@ -41,7 +41,7 @@ export interface EncryptedCredentials {
 }
 
 export interface EncryptionContext {
-    masterKey?: Buffer;  // Derived master key, if user has one
+    masterKey?: Buffer; // Derived master key, if user has one
 }
 
 // ============================================================================
@@ -50,14 +50,14 @@ export interface EncryptionContext {
 
 /**
  * Encrypt server credentials for storage
- * 
+ *
  * @param credentials - Plaintext credentials
  * @param context - Optional encryption context with master key
  * @returns Encrypted credentials ready for database storage
  */
 export function encryptCredentials(
     credentials: ServerCredentials,
-    context?: EncryptionContext
+    context?: EncryptionContext,
 ): EncryptedCredentials {
     const key = context?.masterKey;
 
@@ -87,14 +87,14 @@ export function encryptCredentials(
 
 /**
  * Decrypt server credentials from storage
- * 
+ *
  * @param encrypted - Encrypted credentials from database
  * @param context - Optional decryption context with master key
  * @returns Decrypted plaintext credentials
  */
 export function decryptCredentials(
     encrypted: EncryptedCredentials,
-    context?: EncryptionContext
+    context?: EncryptionContext,
 ): ServerCredentials {
     const key = context?.masterKey;
 
@@ -129,7 +129,7 @@ export function decryptCredentials(
 export function reEncryptCredentials(
     encrypted: EncryptedCredentials,
     oldContext: EncryptionContext | undefined,
-    newContext: EncryptionContext | undefined
+    newContext: EncryptionContext | undefined,
 ): EncryptedCredentials {
     // Decrypt with old key
     const credentials = decryptCredentials(encrypted, oldContext);
@@ -145,10 +145,7 @@ export function reEncryptCredentials(
 /**
  * Create master key context for a user
  */
-export function createMasterKeyContext(
-    masterPassword: string,
-    salt: Buffer
-): EncryptionContext {
+export function createMasterKeyContext(masterPassword: string, salt: Buffer): EncryptionContext {
     return {
         masterKey: deriveMasterKey(masterPassword, salt),
     };

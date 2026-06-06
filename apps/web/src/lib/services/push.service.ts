@@ -26,7 +26,7 @@ function ensureVapidKeys() {
         // without real keys set in env, but the app will still start.
         console.warn(
             '[Push] VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not set. ' +
-            'Push notifications are disabled. Run `npx web-push generate-vapid-keys` and set them in .env.'
+                'Push notifications are disabled. Run `npx web-push generate-vapid-keys` and set them in .env.',
         );
         return;
     }
@@ -54,7 +54,7 @@ export interface PushSubscriptionData {
 export async function saveSubscription(
     userId: string,
     subscription: PushSubscriptionData,
-    deviceLabel?: string
+    deviceLabel?: string,
 ): Promise<void> {
     await prisma.pushSubscription.upsert({
         where: { endpoint: subscription.endpoint },
@@ -121,15 +121,15 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
     });
 
     const results = await Promise.allSettled(
-        subscriptions.map(sub =>
+        subscriptions.map((sub) =>
             webpush.sendNotification(
                 {
                     endpoint: sub.endpoint,
                     keys: { p256dh: sub.p256dhKey, auth: sub.authKey },
                 },
-                data
-            )
-        )
+                data,
+            ),
+        ),
     );
 
     // Clean up invalid/expired subscriptions (410 Gone, 404 Not Found)

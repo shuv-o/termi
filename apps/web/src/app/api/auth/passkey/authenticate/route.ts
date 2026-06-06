@@ -5,7 +5,13 @@
 
 import { z } from 'zod';
 import { verifyPasskeyAuthentication } from '@/lib/auth';
-import { validateBody, successResponse, errorResponse, getClientIP, getDeviceInfo } from '@/lib/api';
+import {
+    validateBody,
+    successResponse,
+    errorResponse,
+    getClientIP,
+    getDeviceInfo,
+} from '@/lib/api';
 import { passkeyAuthRateLimit } from '@/lib/rate-limit';
 
 const authenticateSchema = z.object({

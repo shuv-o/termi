@@ -2,10 +2,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getInvitationByToken, acceptInvitation } from '@/lib/services/share.service';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
-export async function GET(
-    _request: Request,
-    { params }: { params: Promise<{ token: string }> }
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
     const { token } = await params;
     const invitation = await getInvitationByToken(token);
     if (!invitation) return notFoundResponse('Invitation not found or expired');
@@ -23,10 +20,7 @@ export async function GET(
     });
 }
 
-export async function POST(
-    _request: Request,
-    { params }: { params: Promise<{ token: string }> }
-) {
+export async function POST(_request: Request, { params }: { params: Promise<{ token: string }> }) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 

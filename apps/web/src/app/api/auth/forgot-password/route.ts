@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if ('error' in validation) return validation.error;
 
     forgotPassword(validation.data.email).catch((err) =>
-        console.error('forgotPassword error:', err)
+        console.error('forgotPassword error:', err),
     );
 
     return successResponse({ message: 'If that email exists, a reset link has been sent.' });

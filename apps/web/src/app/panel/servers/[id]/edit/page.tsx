@@ -4,18 +4,44 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Terminal, FolderOpen, Monitor, Loader2,
-    Eye, EyeOff, Plus, X, CheckCircle2, AlertCircle,
-    ChevronDown, ChevronUp, Lock, Key, Tag, Globe, Activity, Tv,
+    ArrowLeft,
+    Terminal,
+    FolderOpen,
+    Monitor,
+    Loader2,
+    Eye,
+    EyeOff,
+    Plus,
+    X,
+    CheckCircle2,
+    AlertCircle,
+    ChevronDown,
+    ChevronUp,
+    Lock,
+    Key,
+    Tag,
+    Globe,
+    Activity,
+    Tv,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
-interface Group { id: string; name: string; color: string | null; }
+interface Group {
+    id: string;
+    name: string;
+    color: string | null;
+}
 
 const protocols = [
     { value: 'SSH', label: 'SSH', icon: Terminal, desc: 'Secure Shell' },
@@ -27,10 +53,26 @@ const protocols = [
 const defaultPorts = { SSH: 22, SCP: 22, RDP: 3389, VNC: 5900 };
 
 const protoColors = {
-    SSH: { pill: 'bg-green-500/15 text-green-400 border-green-500/30', ring: 'ring-green-500/40 border-green-500/60', badge: 'bg-green-500/15 text-green-400' },
-    SCP: { pill: 'bg-blue-500/15 text-blue-400 border-blue-500/30', ring: 'ring-blue-500/40 border-blue-500/60', badge: 'bg-blue-500/15 text-blue-400' },
-    RDP: { pill: 'bg-purple-500/15 text-purple-400 border-purple-500/30', ring: 'ring-purple-500/40 border-purple-500/60', badge: 'bg-purple-500/15 text-purple-400' },
-    VNC: { pill: 'bg-orange-500/15 text-orange-400 border-orange-500/30', ring: 'ring-orange-500/40 border-orange-500/60', badge: 'bg-orange-500/15 text-orange-400' },
+    SSH: {
+        pill: 'bg-green-500/15 text-green-400 border-green-500/30',
+        ring: 'ring-green-500/40 border-green-500/60',
+        badge: 'bg-green-500/15 text-green-400',
+    },
+    SCP: {
+        pill: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+        ring: 'ring-blue-500/40 border-blue-500/60',
+        badge: 'bg-blue-500/15 text-blue-400',
+    },
+    RDP: {
+        pill: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+        ring: 'ring-purple-500/40 border-purple-500/60',
+        badge: 'bg-purple-500/15 text-purple-400',
+    },
+    VNC: {
+        pill: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+        ring: 'ring-orange-500/40 border-orange-500/60',
+        badge: 'bg-orange-500/15 text-orange-400',
+    },
 };
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'failed';
@@ -51,16 +93,25 @@ export default function EditServerPage() {
     const [tagInput, setTagInput] = useState('');
 
     const [storedCreds, setStoredCreds] = useState({
-        hasPassword: false, hasPrivateKey: false, hasPassphrase: false,
+        hasPassword: false,
+        hasPrivateKey: false,
+        hasPassphrase: false,
     });
 
     const [form, setForm] = useState({
-        name: '', description: '', groupId: '',
+        name: '',
+        description: '',
+        groupId: '',
         protocol: 'SSH' as keyof typeof defaultPorts,
-        host: '', port: 22, username: '',
+        host: '',
+        port: 22,
+        username: '',
         authMethod: 'password' as 'password' | 'key',
-        password: '', privateKey: '', passphrase: '',
-        notes: '', tags: [] as string[],
+        password: '',
+        privateKey: '',
+        passphrase: '',
+        notes: '',
+        tags: [] as string[],
         displayWidth: 1920,
         displayHeight: 1080,
         rdpSecurity: 'any' as 'any' | 'rdp' | 'nla' | 'tls',
@@ -68,106 +119,133 @@ export default function EditServerPage() {
 
     useEffect(() => {
         Promise.all([
-            fetch(`/api/servers/${id}`).then(r => r.json()),
-            fetch('/api/groups').then(r => r.json()),
-        ]).then(([serverData, groupData]) => {
-            if (!serverData.success) { router.push('/panel'); return; }
-            const s = serverData.data.server;
-            setStoredCreds({
-                hasPassword:   s.hasPassword   ?? false,
-                hasPrivateKey: s.hasPrivateKey  ?? false,
-                hasPassphrase: s.hasPassphrase  ?? false,
-            });
-            setForm({
-                name:        s.name        ?? '',
-                description: s.description ?? '',
-                groupId:     s.group?.id   ?? '',
-                protocol:    s.protocol    as keyof typeof defaultPorts,
-                host:        s.host        ?? '',
-                port:        s.port        ?? 22,
-                username:    s.username    ?? '',
-                authMethod:  s.hasPrivateKey ? 'key' : 'password',
-                password: '', privateKey: '', passphrase: '',
-                notes:       s.notes       ?? '',
-                tags:        s.tags        ?? [],
-                displayWidth:  s.displayWidth  ?? 1920,
-                displayHeight: s.displayHeight ?? 1080,
-                rdpSecurity:   (s.rdpSecurity  ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
-            });
-            if (groupData.success) setGroups(groupData.data.groups);
-        }).catch(() => router.push('/panel'))
-          .finally(() => setPageLoading(false));
+            fetch(`/api/servers/${id}`).then((r) => r.json()),
+            fetch('/api/groups').then((r) => r.json()),
+        ])
+            .then(([serverData, groupData]) => {
+                if (!serverData.success) {
+                    router.push('/panel');
+                    return;
+                }
+                const s = serverData.data.server;
+                setStoredCreds({
+                    hasPassword: s.hasPassword ?? false,
+                    hasPrivateKey: s.hasPrivateKey ?? false,
+                    hasPassphrase: s.hasPassphrase ?? false,
+                });
+                setForm({
+                    name: s.name ?? '',
+                    description: s.description ?? '',
+                    groupId: s.group?.id ?? '',
+                    protocol: s.protocol as keyof typeof defaultPorts,
+                    host: s.host ?? '',
+                    port: s.port ?? 22,
+                    username: s.username ?? '',
+                    authMethod: s.hasPrivateKey ? 'key' : 'password',
+                    password: '',
+                    privateKey: '',
+                    passphrase: '',
+                    notes: s.notes ?? '',
+                    tags: s.tags ?? [],
+                    displayWidth: s.displayWidth ?? 1920,
+                    displayHeight: s.displayHeight ?? 1080,
+                    rdpSecurity: (s.rdpSecurity ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
+                });
+                if (groupData.success) setGroups(groupData.data.groups);
+            })
+            .catch(() => router.push('/panel'))
+            .finally(() => setPageLoading(false));
     }, [id, router]);
 
-    const update = (fields: Partial<typeof form>) => setForm(f => ({ ...f, ...fields }));
+    const update = (fields: Partial<typeof form>) => setForm((f) => ({ ...f, ...fields }));
 
     const handleProtocolChange = (p: keyof typeof defaultPorts) => {
         update({ protocol: p, port: defaultPorts[p] });
-        setTestStatus('idle'); setTestResult(null);
+        setTestStatus('idle');
+        setTestResult(null);
     };
 
     const addTag = () => {
         const tag = tagInput.trim();
-        if (tag && !form.tags.includes(tag)) { update({ tags: [...form.tags, tag] }); setTagInput(''); }
+        if (tag && !form.tags.includes(tag)) {
+            update({ tags: [...form.tags, tag] });
+            setTagInput('');
+        }
     };
 
     const isSSHProto = form.protocol === 'SSH' || form.protocol === 'SCP';
 
-    const testHasAuth = form.authMethod === 'password'
-        ? !!form.password.trim()
-        : !!form.privateKey.trim();
+    const testHasAuth =
+        form.authMethod === 'password' ? !!form.password.trim() : !!form.privateKey.trim();
 
-    const canTest = !!(form.host.trim() && form.port > 0 && form.username.trim() && (!isSSHProto || testHasAuth));
+    const canTest = !!(
+        form.host.trim() &&
+        form.port > 0 &&
+        form.username.trim() &&
+        (!isSSHProto || testHasAuth)
+    );
 
     const handleTest = async () => {
         if (!canTest) return;
-        setTestStatus('testing'); setTestResult(null);
+        setTestStatus('testing');
+        setTestResult(null);
         try {
             const res = await fetch('/api/servers/test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    host: form.host, port: form.port,
-                    protocol: form.protocol, username: form.username,
-                    password:   form.authMethod === 'password' ? form.password    : undefined,
-                    privateKey: form.authMethod === 'key'      ? form.privateKey  : undefined,
-                    passphrase: form.authMethod === 'key'      ? form.passphrase  : undefined,
+                    host: form.host,
+                    port: form.port,
+                    protocol: form.protocol,
+                    username: form.username,
+                    password: form.authMethod === 'password' ? form.password : undefined,
+                    privateKey: form.authMethod === 'key' ? form.privateKey : undefined,
+                    passphrase: form.authMethod === 'key' ? form.passphrase : undefined,
                 }),
             });
             const data = await res.json();
-            if (data.success) { setTestStatus('success'); setTestResult({ latency: data.latency }); }
-            else               { setTestStatus('failed');  setTestResult({ error: data.error }); }
+            if (data.success) {
+                setTestStatus('success');
+                setTestResult({ latency: data.latency });
+            } else {
+                setTestStatus('failed');
+                setTestResult({ error: data.error });
+            }
         } catch {
-            setTestStatus('failed'); setTestResult({ error: 'Network error' });
+            setTestStatus('failed');
+            setTestResult({ error: 'Network error' });
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(''); setSaving(true);
+        setError('');
+        setSaving(true);
         try {
             const payload: Record<string, unknown> = {
-                name:        form.name,
+                name: form.name,
                 description: form.description || undefined,
-                groupId:     form.groupId     || undefined,
-                protocol:    form.protocol,
-                host:        form.host,
-                port:        form.port,
-                username:    form.username,
-                notes:       form.notes       || undefined,
-                tags:        form.tags.length > 0 ? form.tags : [],
-                ...(form.protocol === 'RDP' || form.protocol === 'VNC' ? {
-                    displayWidth:  form.displayWidth,
-                    displayHeight: form.displayHeight,
-                } : {}),
+                groupId: form.groupId || undefined,
+                protocol: form.protocol,
+                host: form.host,
+                port: form.port,
+                username: form.username,
+                notes: form.notes || undefined,
+                tags: form.tags.length > 0 ? form.tags : [],
+                ...(form.protocol === 'RDP' || form.protocol === 'VNC'
+                    ? {
+                          displayWidth: form.displayWidth,
+                          displayHeight: form.displayHeight,
+                      }
+                    : {}),
                 ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
             };
             if (form.authMethod === 'password' && form.password.trim()) {
                 payload.password = form.password;
             }
             if (form.authMethod === 'key') {
-                if (form.privateKey.trim())  payload.privateKey  = form.privateKey;
-                if (form.passphrase.trim())  payload.passphrase  = form.passphrase;
+                if (form.privateKey.trim()) payload.privateKey = form.privateKey;
+                if (form.passphrase.trim()) payload.passphrase = form.passphrase;
             }
 
             const res = await fetch(`/api/servers/${id}`, {
@@ -176,10 +254,15 @@ export default function EditServerPage() {
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
-            if (!data.success) { setError(data.error || 'Failed to update server'); setSaving(false); return; }
+            if (!data.success) {
+                setError(data.error || 'Failed to update server');
+                setSaving(false);
+                return;
+            }
             router.push('/panel');
         } catch {
-            setError('An error occurred. Please try again.'); setSaving(false);
+            setError('An error occurred. Please try again.');
+            setSaving(false);
         }
     };
 
@@ -191,10 +274,10 @@ export default function EditServerPage() {
         );
     }
 
-    const proto = protocols.find(p => p.value === form.protocol)!;
+    const proto = protocols.find((p) => p.value === form.protocol)!;
     const ProtoIcon = proto.icon;
     const colors = protoColors[form.protocol];
-    const selectedGroup = groups.find(g => g.id === form.groupId);
+    const selectedGroup = groups.find((g) => g.id === form.groupId);
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -212,21 +295,23 @@ export default function EditServerPage() {
 
             <form onSubmit={handleSubmit} method="POST" action="#">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-
-                    {/* ── LEFT: Form ── */}
+                    {/*   LEFT: Form   */}
                     <div className="lg:col-span-3 space-y-3">
-
                         {/* Protocol */}
                         <Card>
                             <CardContent className="p-4">
-                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Protocol</p>
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                    Protocol
+                                </p>
                                 <div className="grid grid-cols-4 gap-2">
-                                    {protocols.map(p => {
+                                    {protocols.map((p) => {
                                         const isActive = form.protocol === p.value;
                                         const c = protoColors[p.value];
                                         const Icon = p.icon;
                                         return (
-                                            <button key={p.value} type="button"
+                                            <button
+                                                key={p.value}
+                                                type="button"
                                                 onClick={() => handleProtocolChange(p.value)}
                                                 className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 ${
                                                     isActive
@@ -235,8 +320,12 @@ export default function EditServerPage() {
                                                 }`}
                                             >
                                                 <Icon className="w-4 h-4" />
-                                                <span className="text-xs font-semibold">{p.label}</span>
-                                                <span className="text-[10px] opacity-60 hidden sm:block leading-none">{p.desc}</span>
+                                                <span className="text-xs font-semibold">
+                                                    {p.label}
+                                                </span>
+                                                <span className="text-[10px] opacity-60 hidden sm:block leading-none">
+                                                    {p.desc}
+                                                </span>
                                             </button>
                                         );
                                     })}
@@ -248,22 +337,39 @@ export default function EditServerPage() {
                         <Card className="divide-y divide-border">
                             <div className="p-4 grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Name <span className="text-red-400">*</span></Label>
-                                    <Input type="text" value={form.name} onChange={e => update({ name: e.target.value })}
-                                        className="bg-secondary border-border text-sm h-9" placeholder="Production Web" required />
+                                    <Label className="text-xs">
+                                        Name <span className="text-red-400">*</span>
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.name}
+                                        onChange={(e) => update({ name: e.target.value })}
+                                        className="bg-secondary border-border text-sm h-9"
+                                        placeholder="Production Web"
+                                        required
+                                    />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Group <span className="text-muted-foreground/50">(optional)</span></Label>
+                                    <Label className="text-xs">
+                                        Group{' '}
+                                        <span className="text-muted-foreground/50">(optional)</span>
+                                    </Label>
                                     <Select
                                         value={form.groupId || 'none'}
-                                        onValueChange={(v) => update({ groupId: v === 'none' ? '' : v })}
+                                        onValueChange={(v) =>
+                                            update({ groupId: v === 'none' ? '' : v })
+                                        }
                                     >
                                         <SelectTrigger className="bg-secondary border-border text-sm h-9">
                                             <SelectValue placeholder="No group" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-card border-border">
                                             <SelectItem value="none">No group</SelectItem>
-                                            {groups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+                                            {groups.map((g) => (
+                                                <SelectItem key={g.id} value={g.id}>
+                                                    {g.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -271,22 +377,51 @@ export default function EditServerPage() {
                             <div className="p-4 space-y-3">
                                 <div className="grid grid-cols-3 gap-3">
                                     <div className="col-span-2 space-y-1.5">
-                                        <Label className="text-xs">Host / IP <span className="text-red-400">*</span></Label>
-                                        <Input type="text" value={form.host}
-                                            onChange={e => { update({ host: e.target.value }); setTestStatus('idle'); setTestResult(null); }}
-                                            className="bg-secondary border-border text-sm h-9 font-mono" placeholder="192.168.1.100" required />
+                                        <Label className="text-xs">
+                                            Host / IP <span className="text-red-400">*</span>
+                                        </Label>
+                                        <Input
+                                            type="text"
+                                            value={form.host}
+                                            onChange={(e) => {
+                                                update({ host: e.target.value });
+                                                setTestStatus('idle');
+                                                setTestResult(null);
+                                            }}
+                                            className="bg-secondary border-border text-sm h-9 font-mono"
+                                            placeholder="192.168.1.100"
+                                            required
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">Port</Label>
-                                        <Input type="number" value={form.port}
-                                            onChange={e => { update({ port: parseInt(e.target.value) || 0 }); setTestStatus('idle'); setTestResult(null); }}
-                                            className="bg-secondary border-border text-sm h-9 font-mono" min={1} max={65535} required />
+                                        <Input
+                                            type="number"
+                                            value={form.port}
+                                            onChange={(e) => {
+                                                update({ port: parseInt(e.target.value) || 0 });
+                                                setTestStatus('idle');
+                                                setTestResult(null);
+                                            }}
+                                            className="bg-secondary border-border text-sm h-9 font-mono"
+                                            min={1}
+                                            max={65535}
+                                            required
+                                        />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Username <span className="text-red-400">*</span></Label>
-                                    <Input type="text" value={form.username} onChange={e => update({ username: e.target.value })}
-                                        className="bg-secondary border-border text-sm h-9" placeholder="root" required />
+                                    <Label className="text-xs">
+                                        Username <span className="text-red-400">*</span>
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.username}
+                                        onChange={(e) => update({ username: e.target.value })}
+                                        className="bg-secondary border-border text-sm h-9"
+                                        placeholder="root"
+                                        required
+                                    />
                                 </div>
                             </div>
                         </Card>
@@ -294,19 +429,28 @@ export default function EditServerPage() {
                         {/* Authentication */}
                         <Card>
                             <CardContent className="p-4 space-y-3">
-                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Authentication</p>
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                    Authentication
+                                </p>
 
                                 {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
                                     <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
-                                        {(['password', 'key'] as const).map(method => (
-                                            <button key={method} type="button" onClick={() => update({ authMethod: method })}
+                                        {(['password', 'key'] as const).map((method) => (
+                                            <button
+                                                key={method}
+                                                type="button"
+                                                onClick={() => update({ authMethod: method })}
                                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                                                     form.authMethod === method
                                                         ? 'bg-primary text-primary-foreground shadow-sm'
                                                         : 'text-muted-foreground hover:text-foreground'
                                                 }`}
                                             >
-                                                {method === 'password' ? <Lock className="w-3 h-3" /> : <Key className="w-3 h-3" />}
+                                                {method === 'password' ? (
+                                                    <Lock className="w-3 h-3" />
+                                                ) : (
+                                                    <Key className="w-3 h-3" />
+                                                )}
                                                 {method === 'password' ? 'Password' : 'SSH Key'}
                                             </button>
                                         ))}
@@ -316,29 +460,49 @@ export default function EditServerPage() {
                                 {form.authMethod === 'password' && storedCreds.hasPassword && (
                                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
                                         <Lock className="w-3 h-3 text-green-500/70" />
-                                        Password saved — leave blank to keep it, or enter a new one to replace it
+                                        Password saved — leave blank to keep it, or enter a new one
+                                        to replace it
                                     </div>
                                 )}
                                 {form.authMethod === 'key' && storedCreds.hasPrivateKey && (
                                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
                                         <Key className="w-3 h-3 text-green-500/70" />
-                                        Private key saved — leave blank to keep it, or paste a new key to replace it
+                                        Private key saved — leave blank to keep it, or paste a new
+                                        key to replace it
                                     </div>
                                 )}
 
                                 {form.authMethod === 'password' && (
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">
-                                            New Password <span className="text-muted-foreground/50">(leave blank to keep existing)</span>
+                                            New Password{' '}
+                                            <span className="text-muted-foreground/50">
+                                                (leave blank to keep existing)
+                                            </span>
                                         </Label>
                                         <div className="relative">
-                                            <Input type={showPassword ? 'text' : 'password'} value={form.password}
-                                                onChange={e => update({ password: e.target.value })}
-                                                className="bg-secondary border-border text-sm h-9 pr-10" placeholder="••••••••" autoComplete="new-password" />
-                                            <Button type="button" variant="ghost" size="icon"
+                                            <Input
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={form.password}
+                                                onChange={(e) =>
+                                                    update({ password: e.target.value })
+                                                }
+                                                className="bg-secondary border-border text-sm h-9 pr-10"
+                                                placeholder="••••••••"
+                                                autoComplete="new-password"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground">
-                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="w-4 h-4" />
+                                                ) : (
+                                                    <Eye className="w-4 h-4" />
+                                                )}
                                             </Button>
                                         </div>
                                     </div>
@@ -348,27 +512,56 @@ export default function EditServerPage() {
                                     <div className="space-y-3">
                                         <div className="space-y-1.5">
                                             <Label className="text-xs">
-                                                New Private Key <span className="text-muted-foreground/50">(leave blank to keep existing)</span>
+                                                New Private Key{' '}
+                                                <span className="text-muted-foreground/50">
+                                                    (leave blank to keep existing)
+                                                </span>
                                             </Label>
-                                            <Textarea value={form.privateKey} onChange={e => update({ privateKey: e.target.value })}
+                                            <Textarea
+                                                value={form.privateKey}
+                                                onChange={(e) =>
+                                                    update({ privateKey: e.target.value })
+                                                }
                                                 className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
-                                                placeholder={"-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"} />
+                                                placeholder={
+                                                    '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
+                                                }
+                                            />
                                         </div>
                                         <div className="space-y-1.5">
                                             <Label className="text-xs">
                                                 Passphrase{' '}
                                                 <span className="text-muted-foreground/50">
-                                                    {storedCreds.hasPassphrase ? '(leave blank to keep existing)' : '(if encrypted)'}
+                                                    {storedCreds.hasPassphrase
+                                                        ? '(leave blank to keep existing)'
+                                                        : '(if encrypted)'}
                                                 </span>
                                             </Label>
                                             <div className="relative">
-                                                <Input type={showPassphrase ? 'text' : 'password'} value={form.passphrase}
-                                                    onChange={e => update({ passphrase: e.target.value })}
-                                                    className="bg-secondary border-border text-sm h-9 pr-10" placeholder="••••••••" autoComplete="new-password" />
-                                                <Button type="button" variant="ghost" size="icon"
-                                                    onClick={() => setShowPassphrase(!showPassphrase)}
-                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground">
-                                                    {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                <Input
+                                                    type={showPassphrase ? 'text' : 'password'}
+                                                    value={form.passphrase}
+                                                    onChange={(e) =>
+                                                        update({ passphrase: e.target.value })
+                                                    }
+                                                    className="bg-secondary border-border text-sm h-9 pr-10"
+                                                    placeholder="••••••••"
+                                                    autoComplete="new-password"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        setShowPassphrase(!showPassphrase)
+                                                    }
+                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    {showPassphrase ? (
+                                                        <EyeOff className="w-4 h-4" />
+                                                    ) : (
+                                                        <Eye className="w-4 h-4" />
+                                                    )}
                                                 </Button>
                                             </div>
                                         </div>
@@ -381,16 +574,24 @@ export default function EditServerPage() {
                         {(form.protocol === 'RDP' || form.protocol === 'VNC') && (
                             <Card>
                                 <CardContent className="p-4 space-y-3">
-                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Display Settings</p>
+                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Display Settings
+                                    </p>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="space-y-1.5">
                                             <Label className="text-xs">Width (px)</Label>
                                             <Input
                                                 type="number"
                                                 value={form.displayWidth}
-                                                onChange={e => update({ displayWidth: parseInt(e.target.value) || 1920 })}
+                                                onChange={(e) =>
+                                                    update({
+                                                        displayWidth:
+                                                            parseInt(e.target.value) || 1920,
+                                                    })
+                                                }
                                                 className="bg-secondary border-border text-sm h-9 font-mono"
-                                                min={640} max={7680}
+                                                min={640}
+                                                max={7680}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
@@ -398,25 +599,36 @@ export default function EditServerPage() {
                                             <Input
                                                 type="number"
                                                 value={form.displayHeight}
-                                                onChange={e => update({ displayHeight: parseInt(e.target.value) || 1080 })}
+                                                onChange={(e) =>
+                                                    update({
+                                                        displayHeight:
+                                                            parseInt(e.target.value) || 1080,
+                                                    })
+                                                }
                                                 className="bg-secondary border-border text-sm h-9 font-mono"
-                                                min={480} max={4320}
+                                                min={480}
+                                                max={4320}
                                             />
                                         </div>
                                     </div>
                                     <div className="flex gap-1.5 flex-wrap">
-                                        {([
-                                            [1280, 720, 'HD'],
-                                            [1920, 1080, 'FHD'],
-                                            [2560, 1440, '2K'],
-                                            [3840, 2160, '4K'],
-                                        ] as [number, number, string][]).map(([w, h, label]) => (
+                                        {(
+                                            [
+                                                [1280, 720, 'HD'],
+                                                [1920, 1080, 'FHD'],
+                                                [2560, 1440, '2K'],
+                                                [3840, 2160, '4K'],
+                                            ] as [number, number, string][]
+                                        ).map(([w, h, label]) => (
                                             <button
                                                 key={label}
                                                 type="button"
-                                                onClick={() => update({ displayWidth: w, displayHeight: h })}
+                                                onClick={() =>
+                                                    update({ displayWidth: w, displayHeight: h })
+                                                }
                                                 className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
-                                                    form.displayWidth === w && form.displayHeight === h
+                                                    form.displayWidth === w &&
+                                                    form.displayHeight === h
                                                         ? 'bg-primary/15 text-primary border-primary/30'
                                                         : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/30'
                                                 }`}
@@ -430,15 +642,29 @@ export default function EditServerPage() {
                                             <Label className="text-xs">Security Mode</Label>
                                             <Select
                                                 value={form.rdpSecurity}
-                                                onValueChange={(v) => update({ rdpSecurity: v as 'any' | 'rdp' | 'nla' | 'tls' })}
+                                                onValueChange={(v) =>
+                                                    update({
+                                                        rdpSecurity: v as
+                                                            | 'any'
+                                                            | 'rdp'
+                                                            | 'nla'
+                                                            | 'tls',
+                                                    })
+                                                }
                                             >
                                                 <SelectTrigger className="bg-secondary border-border text-sm h-9">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-card border-border">
-                                                    <SelectItem value="any">Any (auto-negotiate)</SelectItem>
-                                                    <SelectItem value="rdp">RDP (classic, most compatible)</SelectItem>
-                                                    <SelectItem value="nla">NLA (Network Level Auth)</SelectItem>
+                                                    <SelectItem value="any">
+                                                        Any (auto-negotiate)
+                                                    </SelectItem>
+                                                    <SelectItem value="rdp">
+                                                        RDP (classic, most compatible)
+                                                    </SelectItem>
+                                                    <SelectItem value="nla">
+                                                        NLA (Network Level Auth)
+                                                    </SelectItem>
                                                     <SelectItem value="tls">TLS only</SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -450,38 +676,79 @@ export default function EditServerPage() {
 
                         {/* Advanced */}
                         <Card className="overflow-visible">
-                            <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors rounded-xl">
-                                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Advanced</span>
-                                {showAdvanced
-                                    ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
-                                    : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                                }
+                            <button
+                                type="button"
+                                onClick={() => setShowAdvanced(!showAdvanced)}
+                                className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors rounded-xl"
+                            >
+                                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                    Advanced
+                                </span>
+                                {showAdvanced ? (
+                                    <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                                ) : (
+                                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                                )}
                             </button>
                             {showAdvanced && (
                                 <div className="px-4 pb-4 border-t border-border space-y-3 pt-3">
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">Description</Label>
-                                        <Input type="text" value={form.description} onChange={e => update({ description: e.target.value })}
-                                            className="bg-secondary border-border text-sm h-9" placeholder="Production web server" />
+                                        <Input
+                                            type="text"
+                                            value={form.description}
+                                            onChange={(e) =>
+                                                update({ description: e.target.value })
+                                            }
+                                            className="bg-secondary border-border text-sm h-9"
+                                            placeholder="Production web server"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">Tags</Label>
                                         <div className="flex gap-2">
-                                            <Input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
-                                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-                                                className="bg-secondary border-border text-sm h-9 flex-1" placeholder="production, linux, aws…" />
-                                            <Button type="button" variant="secondary" size="sm" onClick={addTag} className="px-3">
+                                            <Input
+                                                type="text"
+                                                value={tagInput}
+                                                onChange={(e) => setTagInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        addTag();
+                                                    }
+                                                }}
+                                                className="bg-secondary border-border text-sm h-9 flex-1"
+                                                placeholder="production, linux, aws…"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={addTag}
+                                                className="px-3"
+                                            >
                                                 <Plus className="w-3.5 h-3.5" />
                                             </Button>
                                         </div>
                                         {form.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-1.5 mt-2">
-                                                {form.tags.map(tag => (
-                                                    <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs">
+                                                {form.tags.map((tag) => (
+                                                    <span
+                                                        key={tag}
+                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs"
+                                                    >
                                                         {tag}
-                                                        <button type="button" onClick={() => update({ tags: form.tags.filter(t => t !== tag) })}
-                                                            className="text-muted-foreground hover:text-destructive transition-colors">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                update({
+                                                                    tags: form.tags.filter(
+                                                                        (t) => t !== tag,
+                                                                    ),
+                                                                })
+                                                            }
+                                                            className="text-muted-foreground hover:text-destructive transition-colors"
+                                                        >
                                                             <X className="w-3 h-3" />
                                                         </button>
                                                     </span>
@@ -491,33 +758,50 @@ export default function EditServerPage() {
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">Notes</Label>
-                                        <Textarea value={form.notes} onChange={e => update({ notes: e.target.value })}
-                                            className="bg-secondary border-border text-sm min-h-[72px] resize-none" placeholder="Additional notes…" />
+                                        <Textarea
+                                            value={form.notes}
+                                            onChange={(e) => update({ notes: e.target.value })}
+                                            className="bg-secondary border-border text-sm min-h-[72px] resize-none"
+                                            placeholder="Additional notes…"
+                                        />
                                     </div>
                                 </div>
                             )}
                         </Card>
                     </div>
 
-                    {/* ── RIGHT: Preview + Test + Actions ── */}
+                    {/*   RIGHT: Preview + Test + Actions   */}
                     <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-4 self-start">
-
                         {/* Preview */}
                         <Card>
                             <CardContent className="p-4">
-                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Preview</p>
+                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                    Preview
+                                </p>
                                 <div className="bg-background/60 rounded-lg p-3.5 border border-border/60">
                                     <div className="flex items-start gap-3">
-                                        <div className={`p-2 rounded-lg border shrink-0 ${colors.pill}`}>
+                                        <div
+                                            className={`p-2 rounded-lg border shrink-0 ${colors.pill}`}
+                                        >
                                             <ProtoIcon className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="font-medium text-sm truncate">
-                                                {form.name || <span className="text-muted-foreground italic">Untitled</span>}
+                                                {form.name || (
+                                                    <span className="text-muted-foreground italic">
+                                                        Untitled
+                                                    </span>
+                                                )}
                                             </p>
-                                            {form.description && <p className="text-[11px] text-muted-foreground truncate mt-0.5">{form.description}</p>}
+                                            {form.description && (
+                                                <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                                                    {form.description}
+                                                </p>
+                                            )}
                                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.badge}`}>
+                                                <span
+                                                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.badge}`}
+                                                >
                                                     {form.protocol}
                                                 </span>
                                                 {selectedGroup && (
@@ -533,24 +817,40 @@ export default function EditServerPage() {
                                             {form.host && (
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                     <Globe className="w-3 h-3 shrink-0 text-muted-foreground/60" />
-                                                    <span className="font-mono truncate text-foreground/80">{form.host}:{form.port}</span>
+                                                    <span className="font-mono truncate text-foreground/80">
+                                                        {form.host}:{form.port}
+                                                    </span>
                                                 </div>
                                             )}
                                             {form.username && (
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                    {form.authMethod === 'key'
-                                                        ? <Key className="w-3 h-3 shrink-0 text-muted-foreground/60" />
-                                                        : <Lock className="w-3 h-3 shrink-0 text-muted-foreground/60" />
-                                                    }
-                                                    <span className="font-mono truncate text-foreground/80">{form.username}</span>
-                                                    <span className="text-muted-foreground/40 text-[10px]">({form.authMethod === 'key' ? 'key' : 'password'})</span>
+                                                    {form.authMethod === 'key' ? (
+                                                        <Key className="w-3 h-3 shrink-0 text-muted-foreground/60" />
+                                                    ) : (
+                                                        <Lock className="w-3 h-3 shrink-0 text-muted-foreground/60" />
+                                                    )}
+                                                    <span className="font-mono truncate text-foreground/80">
+                                                        {form.username}
+                                                    </span>
+                                                    <span className="text-muted-foreground/40 text-[10px]">
+                                                        (
+                                                        {form.authMethod === 'key'
+                                                            ? 'key'
+                                                            : 'password'}
+                                                        )
+                                                    </span>
                                                 </div>
                                             )}
                                             {form.tags.length > 0 && (
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <Tag className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                                                    {form.tags.map(t => (
-                                                        <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground">{t}</span>
+                                                    {form.tags.map((t) => (
+                                                        <span
+                                                            key={t}
+                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground"
+                                                        >
+                                                            {t}
+                                                        </span>
                                                     ))}
                                                 </div>
                                             )}
@@ -566,30 +866,45 @@ export default function EditServerPage() {
                                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                                     {isSSHProto ? 'Authentication Test' : 'Connectivity'}
                                 </p>
-                                <button type="button" onClick={handleTest}
+                                <button
+                                    type="button"
+                                    onClick={handleTest}
                                     disabled={!canTest || testStatus === 'testing'}
                                     className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border text-sm font-medium transition-all duration-200 ${
                                         !canTest
                                             ? 'border-border text-muted-foreground/40 cursor-not-allowed bg-transparent'
                                             : testStatus === 'success'
-                                                ? 'border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/15'
-                                                : testStatus === 'failed'
-                                                    ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
-                                                    : 'border-primary/30 bg-primary/8 text-primary hover:bg-primary/15'
+                                              ? 'border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/15'
+                                              : testStatus === 'failed'
+                                                ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
+                                                : 'border-primary/30 bg-primary/8 text-primary hover:bg-primary/15'
                                     }`}
                                 >
-                                    {testStatus === 'testing'
-                                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing…</>
-                                        : testStatus === 'success'
-                                            ? <><CheckCircle2 className="w-3.5 h-3.5" /> Test Again</>
-                                            : testStatus === 'failed'
-                                                ? <><AlertCircle className="w-3.5 h-3.5" /> Retry</>
-                                                : <><Activity className="w-3.5 h-3.5" /> {isSSHProto ? 'Test Authentication' : 'Test Connection'}</>
-                                    }
+                                    {testStatus === 'testing' ? (
+                                        <>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />{' '}
+                                            Testing…
+                                        </>
+                                    ) : testStatus === 'success' ? (
+                                        <>
+                                            <CheckCircle2 className="w-3.5 h-3.5" /> Test Again
+                                        </>
+                                    ) : testStatus === 'failed' ? (
+                                        <>
+                                            <AlertCircle className="w-3.5 h-3.5" /> Retry
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Activity className="w-3.5 h-3.5" />{' '}
+                                            {isSSHProto ? 'Test Authentication' : 'Test Connection'}
+                                        </>
+                                    )}
                                 </button>
                                 {!canTest && (
                                     <p className="text-[11px] text-muted-foreground/40 mt-2 text-center">
-                                        {isSSHProto ? 'Enter new credentials to test' : 'Enter host & port first'}
+                                        {isSSHProto
+                                            ? 'Enter new credentials to test'
+                                            : 'Enter host & port first'}
                                     </p>
                                 )}
                                 {testStatus === 'success' && testResult?.latency !== undefined && (
@@ -597,9 +912,13 @@ export default function EditServerPage() {
                                         <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
                                         <div>
                                             <p className="text-xs font-medium text-green-400">
-                                                {isSSHProto ? 'Authentication successful' : 'Port reachable'}
+                                                {isSSHProto
+                                                    ? 'Authentication successful'
+                                                    : 'Port reachable'}
                                             </p>
-                                            <p className="text-[11px] text-green-500/60">Latency: {testResult.latency}ms</p>
+                                            <p className="text-[11px] text-green-500/60">
+                                                Latency: {testResult.latency}ms
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -608,9 +927,13 @@ export default function EditServerPage() {
                                         <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
                                         <div>
                                             <p className="text-xs font-medium text-destructive">
-                                                {isSSHProto ? 'Authentication failed' : 'Unreachable'}
+                                                {isSSHProto
+                                                    ? 'Authentication failed'
+                                                    : 'Unreachable'}
                                             </p>
-                                            <p className="text-[11px] text-destructive/60 break-words">{testResult.error}</p>
+                                            <p className="text-[11px] text-destructive/60 break-words">
+                                                {testResult.error}
+                                            </p>
                                         </div>
                                     </div>
                                 )}

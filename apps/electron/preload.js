@@ -9,14 +9,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
         return () => ipcRenderer.removeListener('app:navigate', handler);
     },
     localTerminal: {
-        create: (id, opts) =>
-            ipcRenderer.invoke('local-terminal:create', id, opts),
-        write: (id, data) =>
-            ipcRenderer.send('local-terminal:write', id, data),
-        resize: (id, cols, rows) =>
-            ipcRenderer.send('local-terminal:resize', id, cols, rows),
-        kill: (id) =>
-            ipcRenderer.send('local-terminal:kill', id),
+        create: (id, opts) => ipcRenderer.invoke('local-terminal:create', id, opts),
+        write: (id, data) => ipcRenderer.send('local-terminal:write', id, data),
+        resize: (id, cols, rows) => ipcRenderer.send('local-terminal:resize', id, cols, rows),
+        kill: (id) => ipcRenderer.send('local-terminal:kill', id),
         onData: (id, cb) => {
             const handler = (_e, termId, data) => {
                 if (termId === id) cb(data);

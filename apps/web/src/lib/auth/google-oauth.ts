@@ -55,7 +55,7 @@ export interface GoogleUserInfo {
  */
 export async function exchangeGoogleCode(
     code: string,
-    codeVerifier: string
+    codeVerifier: string,
 ): Promise<GoogleUserInfo> {
     const google = getGoogleClient();
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
@@ -68,7 +68,7 @@ export async function exchangeGoogleCode(
         throw new Error(`Failed to fetch Google user info: ${response.statusText}`);
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
         sub: string;
         email: string;
         email_verified: boolean;
@@ -101,7 +101,7 @@ export interface FindOrCreateGoogleUserResult {
  * C — Existing email/password user: link OAuthAccount to existing user
  */
 export async function findOrCreateGoogleUser(
-    googleInfo: GoogleUserInfo
+    googleInfo: GoogleUserInfo,
 ): Promise<FindOrCreateGoogleUserResult> {
     const { sub, email } = googleInfo;
 

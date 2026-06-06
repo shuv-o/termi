@@ -8,12 +8,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { checkReachability, getSSHMetrics } from '@/lib/services/metrics.service';
-import {
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-    notFoundResponse,
-} from '@/lib/api';
+import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -37,13 +32,13 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
         if (server.protocol === 'SSH') {
             const metrics = await getSSHMetrics({
-                id:          server.id,
-                host:        server.host,
-                port:        server.port,
-                username:    server.username,
-                password:    server.password ?? undefined,
-                privateKey:  server.privateKey ?? undefined,
-                passphrase:  server.passphrase ?? undefined,
+                id: server.id,
+                host: server.host,
+                port: server.port,
+                username: server.username,
+                password: server.password ?? undefined,
+                privateKey: server.privateKey ?? undefined,
+                passphrase: server.passphrase ?? undefined,
             });
             return successResponse({ metrics: { ...metrics, latencyMs } });
         }

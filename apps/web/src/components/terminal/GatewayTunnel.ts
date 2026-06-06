@@ -155,13 +155,19 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
                 try {
                     const msg = JSON.parse(raw) as { type: string; message?: string };
                     if (msg.type === 'error') {
-                        if (connectTimeoutId !== null) { clearTimeout(connectTimeoutId); connectTimeoutId = null; }
+                        if (connectTimeoutId !== null) {
+                            clearTimeout(connectTimeoutId);
+                            connectTimeoutId = null;
+                        }
                         // Inject as a synthetic Guacamole error instruction — Guacamole.Client
                         // does NOT respond to tunnel.onerror; only oninstruction('error') works.
                         injectError(msg.message || 'Gateway error', 514);
                         socket?.close();
                     } else if (msg.type === 'closed') {
-                        if (connectTimeoutId !== null) { clearTimeout(connectTimeoutId); connectTimeoutId = null; }
+                        if (connectTimeoutId !== null) {
+                            clearTimeout(connectTimeoutId);
+                            connectTimeoutId = null;
+                        }
                         // guacd closed the connection (e.g. RDP server unreachable/rejected).
                         // Inject synthetic error so Guacamole.Client leaves WAITING state.
                         injectError('Remote desktop connection was closed', 516);
@@ -178,7 +184,10 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
         };
 
         socket.onclose = (event: CloseEvent) => {
-            if (connectTimeoutId !== null) { clearTimeout(connectTimeoutId); connectTimeoutId = null; }
+            if (connectTimeoutId !== null) {
+                clearTimeout(connectTimeoutId);
+                connectTimeoutId = null;
+            }
             if (tunnel.state !== Guacamole.Tunnel.State.CLOSED) {
                 if (event.code !== 1000) {
                     // Unexpected close — inject error so Guacamole.Client leaves WAITING.
@@ -191,7 +200,10 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
         };
 
         socket.onerror = () => {
-            if (connectTimeoutId !== null) { clearTimeout(connectTimeoutId); connectTimeoutId = null; }
+            if (connectTimeoutId !== null) {
+                clearTimeout(connectTimeoutId);
+                connectTimeoutId = null;
+            }
             if (tunnel.state !== Guacamole.Tunnel.State.CLOSED) {
                 injectError('WebSocket connection failed', 515);
             }
@@ -199,7 +211,10 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
     };
 
     tunnel.disconnect = function disconnect() {
-        if (connectTimeoutId !== null) { clearTimeout(connectTimeoutId); connectTimeoutId = null; }
+        if (connectTimeoutId !== null) {
+            clearTimeout(connectTimeoutId);
+            connectTimeoutId = null;
+        }
         if (socket) {
             socket.close(1000, 'Client disconnect');
             socket = null;
@@ -226,4 +241,3 @@ export function createGatewayTunnel(Guacamole: any, wsUrl: string, connectionTok
 
     return tunnel;
 }
-

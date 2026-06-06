@@ -25,13 +25,16 @@ const schema = z.object({
     toPath: z.string().min(1),
 });
 
-function toSFTPConfig(server: Awaited<ReturnType<typeof getServerById>> & object, serverId: string) {
+function toSFTPConfig(
+    server: Awaited<ReturnType<typeof getServerById>> & object,
+    serverId: string,
+) {
     return {
-        id:         serverId,
-        host:       server.host,
-        port:       server.port,
-        username:   server.username,
-        password:   server.password ?? undefined,
+        id: serverId,
+        host: server.host,
+        port: server.port,
+        username: server.username,
+        password: server.password ?? undefined,
         privateKey: server.privateKey ?? undefined,
         passphrase: server.passphrase ?? undefined,
     };
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
             toSFTPConfig(fromServer, fromServerId),
             fromPaths,
             toSFTPConfig(toServer, toServerId),
-            toPath
+            toPath,
         );
 
         return successResponse(result);

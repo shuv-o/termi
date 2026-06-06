@@ -28,15 +28,15 @@ export async function GET(request: Request, { params }: RouteParams) {
         const fileName = filePath.split('/').pop() || 'download';
         const stream = createDownloadStream(
             {
-                id:         server.id,
-                host:       server.host,
-                port:       server.port,
-                username:   server.username,
-                password:   server.password ?? undefined,
+                id: server.id,
+                host: server.host,
+                port: server.port,
+                username: server.username,
+                password: server.password ?? undefined,
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
             },
-            filePath
+            filePath,
         );
 
         return new Response(stream, {

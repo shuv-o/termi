@@ -1,6 +1,6 @@
 /**
  * SCP File Transfer Handler
- * 
+ *
  * Proxies WebSocket messages for file upload/download via SCP.
  */
 
@@ -182,11 +182,13 @@ export class SCPHandler {
                 return a.name.localeCompare(b.name);
             });
 
-            this.ws.send(JSON.stringify({
-                type: 'list',
-                path,
-                files,
-            }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'list',
+                    path,
+                    files,
+                }),
+            );
         });
     }
 
@@ -209,23 +211,27 @@ export class SCPHandler {
                 bytesRead += chunk.length;
 
                 // Send progress
-                this.ws.send(JSON.stringify({
-                    type: 'download-progress',
-                    path,
-                    bytesRead,
-                    totalBytes: stats.size,
-                }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'download-progress',
+                        path,
+                        bytesRead,
+                        totalBytes: stats.size,
+                    }),
+                );
             });
 
             stream.on('end', () => {
                 const data = Buffer.concat(chunks);
 
-                this.ws.send(JSON.stringify({
-                    type: 'download-complete',
-                    path,
-                    data: data.toString('base64'),
-                    size: stats.size,
-                }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'download-complete',
+                        path,
+                        data: data.toString('base64'),
+                        size: stats.size,
+                    }),
+                );
             });
 
             stream.on('error', (err: Error) => {
@@ -236,12 +242,7 @@ export class SCPHandler {
 
     private uploadChunks = new Map<string, Buffer[]>();
 
-    private uploadFile(
-        path: string,
-        data: string,
-        chunk = 0,
-        totalChunks = 1
-    ): void {
+    private uploadFile(path: string, data: string, chunk = 0, totalChunks = 1): void {
         if (!this.sftp) return;
 
         const buffer = Buffer.from(data, 'base64');
@@ -258,12 +259,14 @@ export class SCPHandler {
             const receivedCount = chunks.filter((c) => c).length;
 
             if (receivedCount < totalChunks) {
-                this.ws.send(JSON.stringify({
-                    type: 'upload-progress',
-                    path,
-                    chunksReceived: receivedCount,
-                    totalChunks,
-                }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'upload-progress',
+                        path,
+                        chunksReceived: receivedCount,
+                        totalChunks,
+                    }),
+                );
                 return;
             }
 
@@ -286,11 +289,13 @@ export class SCPHandler {
         });
 
         stream.on('close', () => {
-            this.ws.send(JSON.stringify({
-                type: 'upload-complete',
-                path,
-                size: data.length,
-            }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'upload-complete',
+                    path,
+                    size: data.length,
+                }),
+            );
         });
 
         stream.end(data);
@@ -305,10 +310,12 @@ export class SCPHandler {
                 return;
             }
 
-            this.ws.send(JSON.stringify({
-                type: 'mkdir-complete',
-                path,
-            }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'mkdir-complete',
+                    path,
+                }),
+            );
         });
     }
 
@@ -332,10 +339,12 @@ export class SCPHandler {
                     return;
                 }
 
-                this.ws.send(JSON.stringify({
-                    type: 'delete-complete',
-                    path,
-                }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'delete-complete',
+                        path,
+                    }),
+                );
             });
         });
     }
@@ -349,11 +358,13 @@ export class SCPHandler {
                 return;
             }
 
-            this.ws.send(JSON.stringify({
-                type: 'rename-complete',
-                oldPath,
-                newPath,
-            }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'rename-complete',
+                    oldPath,
+                    newPath,
+                }),
+            );
         });
     }
 

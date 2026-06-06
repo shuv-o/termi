@@ -11,12 +11,11 @@ interface PasswordCredential extends Credential {
 
 declare var PasswordCredential: {
     prototype: PasswordCredential;
-    new(data: { id: string; password: string; name?: string }): PasswordCredential;
-    new(form: HTMLFormElement): PasswordCredential;
+    new (data: { id: string; password: string; name?: string }): PasswordCredential;
+    new (form: HTMLFormElement): PasswordCredential;
 };
 
 interface CredentialsContainer {
     get(options?: CredentialRequestOptions & { password?: boolean }): Promise<Credential | null>;
     store(credential: Credential): Promise<Credential>;
 }
-

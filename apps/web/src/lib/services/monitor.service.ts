@@ -52,7 +52,7 @@ export async function runMonitoringPass(): Promise<void> {
     const CONCURRENCY = 10;
     for (let i = 0; i < configs.length; i += CONCURRENCY) {
         const batch = configs.slice(i, i + CONCURRENCY);
-        await Promise.allSettled(batch.map(cfg => checkServer(cfg, now)));
+        await Promise.allSettled(batch.map((cfg) => checkServer(cfg, now)));
     }
 }
 
@@ -128,15 +128,18 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
     // Collect SSH metrics if server is reachable and is SSH protocol
     if (reachable && cfg.server.protocol === 'SSH') {
         try {
-            const metrics = await getSSHMetrics({
-                id:        cfg.serverId,
-                host,
-                port:      cfg.server.port,
-                username,
-                password,
-                privateKey,
-                passphrase,
-            }, 10000);
+            const metrics = await getSSHMetrics(
+                {
+                    id: cfg.serverId,
+                    host,
+                    port: cfg.server.port,
+                    username,
+                    password,
+                    privateKey,
+                    passphrase,
+                },
+                10000,
+            );
             if (!metrics.error) {
                 cpuPercent = metrics.cpu ?? null;
                 ramPercent = metrics.ram?.percent ?? null;
@@ -167,7 +170,7 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
         select: { id: true },
     });
     if (records.length > 100) {
-        const toDelete = records.slice(100).map(r => r.id);
+        const toDelete = records.slice(100).map((r) => r.id);
         await prisma.serverHealthRecord.deleteMany({ where: { id: { in: toDelete } } });
     }
 

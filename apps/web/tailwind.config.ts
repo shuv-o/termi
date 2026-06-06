@@ -62,7 +62,7 @@ const config: Config = {
                 'fade-in': 'fadeIn 0.3s ease-in-out',
                 'slide-up': 'slideUp 0.3s ease-out',
                 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'glow': 'glow 2s ease-in-out infinite alternate',
+                glow: 'glow 2s ease-in-out infinite alternate',
             },
             keyframes: {
                 fadeIn: {

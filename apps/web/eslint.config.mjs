@@ -1,5 +1,6 @@
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier';
 
 const config = [
   {
@@ -32,6 +33,8 @@ const config = [
       'no-var': 'off',
     },
   },
+  // Must be last: turns off ESLint rules that conflict with Prettier.
+  prettier,
 ];
 
 export default config;

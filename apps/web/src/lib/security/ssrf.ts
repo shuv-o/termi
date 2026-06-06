@@ -11,18 +11,18 @@ import dns from 'dns/promises';
 
 // Private / reserved CIDR ranges (IPv4)
 const BLOCKED_V4_RANGES = [
-    { start: ip4ToInt('0.0.0.0'),       end: ip4ToInt('0.255.255.255')       }, // 0.0.0.0/8
-    { start: ip4ToInt('10.0.0.0'),      end: ip4ToInt('10.255.255.255')      }, // 10.0.0.0/8
-    { start: ip4ToInt('100.64.0.0'),    end: ip4ToInt('100.127.255.255')     }, // 100.64.0.0/10 (CGNAT)
-    { start: ip4ToInt('127.0.0.0'),     end: ip4ToInt('127.255.255.255')     }, // 127.0.0.0/8 (loopback)
-    { start: ip4ToInt('169.254.0.0'),   end: ip4ToInt('169.254.255.255')     }, // 169.254.0.0/16 (link-local / AWS metadata)
-    { start: ip4ToInt('172.16.0.0'),    end: ip4ToInt('172.31.255.255')      }, // 172.16.0.0/12
-    { start: ip4ToInt('192.0.0.0'),     end: ip4ToInt('192.0.0.255')         }, // 192.0.0.0/24
-    { start: ip4ToInt('192.168.0.0'),   end: ip4ToInt('192.168.255.255')     }, // 192.168.0.0/16
-    { start: ip4ToInt('198.18.0.0'),    end: ip4ToInt('198.19.255.255')      }, // 198.18.0.0/15
-    { start: ip4ToInt('198.51.100.0'),  end: ip4ToInt('198.51.100.255')      }, // TEST-NET-2
-    { start: ip4ToInt('203.0.113.0'),   end: ip4ToInt('203.0.113.255')       }, // TEST-NET-3
-    { start: ip4ToInt('224.0.0.0'),     end: ip4ToInt('255.255.255.255')     }, // multicast + reserved
+    { start: ip4ToInt('0.0.0.0'), end: ip4ToInt('0.255.255.255') }, // 0.0.0.0/8
+    { start: ip4ToInt('10.0.0.0'), end: ip4ToInt('10.255.255.255') }, // 10.0.0.0/8
+    { start: ip4ToInt('100.64.0.0'), end: ip4ToInt('100.127.255.255') }, // 100.64.0.0/10 (CGNAT)
+    { start: ip4ToInt('127.0.0.0'), end: ip4ToInt('127.255.255.255') }, // 127.0.0.0/8 (loopback)
+    { start: ip4ToInt('169.254.0.0'), end: ip4ToInt('169.254.255.255') }, // 169.254.0.0/16 (link-local / AWS metadata)
+    { start: ip4ToInt('172.16.0.0'), end: ip4ToInt('172.31.255.255') }, // 172.16.0.0/12
+    { start: ip4ToInt('192.0.0.0'), end: ip4ToInt('192.0.0.255') }, // 192.0.0.0/24
+    { start: ip4ToInt('192.168.0.0'), end: ip4ToInt('192.168.255.255') }, // 192.168.0.0/16
+    { start: ip4ToInt('198.18.0.0'), end: ip4ToInt('198.19.255.255') }, // 198.18.0.0/15
+    { start: ip4ToInt('198.51.100.0'), end: ip4ToInt('198.51.100.255') }, // TEST-NET-2
+    { start: ip4ToInt('203.0.113.0'), end: ip4ToInt('203.0.113.255') }, // TEST-NET-3
+    { start: ip4ToInt('224.0.0.0'), end: ip4ToInt('255.255.255.255') }, // multicast + reserved
 ];
 
 function ip4ToInt(ip: string): number {
@@ -48,7 +48,7 @@ function isBlockedIPv6(ip: string): boolean {
 
 export async function validateHost(
     host: string,
-    allowPrivateNetworks = false
+    allowPrivateNetworks = false,
 ): Promise<{ valid: boolean; error?: string }> {
     if (allowPrivateNetworks) return { valid: true };
 
@@ -63,13 +63,19 @@ export async function validateHost(
     const ipVersion = isIP(trimmed);
     if (ipVersion === 4) {
         if (isBlockedIPv4(trimmed)) {
-            return { valid: false, error: 'Connections to private/reserved IP addresses are not allowed' };
+            return {
+                valid: false,
+                error: 'Connections to private/reserved IP addresses are not allowed',
+            };
         }
         return { valid: true };
     }
     if (ipVersion === 6) {
         if (isBlockedIPv6(trimmed)) {
-            return { valid: false, error: 'Connections to private/reserved IP addresses are not allowed' };
+            return {
+                valid: false,
+                error: 'Connections to private/reserved IP addresses are not allowed',
+            };
         }
         return { valid: true };
     }
@@ -89,9 +95,11 @@ export async function validateHost(
     } catch {
         // DNS resolution failed — block to prevent SSRF via unresolvable hostnames.
         // Users on private networks without DNS can set ALLOW_PRIVATE_NETWORKS=true.
-        return { valid: false, error: 'Unable to resolve hostname — check that the address is correct and reachable' };
+        return {
+            valid: false,
+            error: 'Unable to resolve hostname — check that the address is correct and reachable',
+        };
     }
 
     return { valid: true };
 }
-

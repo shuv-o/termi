@@ -47,13 +47,22 @@ export default function HomePage() {
                         </div>
 
                         <nav className="hidden md:flex items-center gap-6">
-                            <Link href="#features" className="text-slate-300 hover:text-white transition-colors">
+                            <Link
+                                href="#features"
+                                className="text-slate-300 hover:text-white transition-colors"
+                            >
                                 Features
                             </Link>
-                            <Link href="#security" className="text-slate-300 hover:text-white transition-colors">
+                            <Link
+                                href="#security"
+                                className="text-slate-300 hover:text-white transition-colors"
+                            >
                                 Security
                             </Link>
-                            <Link href="https://github.com/shuvoooo/termi" className="text-slate-300 hover:text-white transition-colors">
+                            <Link
+                                href="https://github.com/shuvoooo/termi"
+                                className="text-slate-300 hover:text-white transition-colors"
+                            >
                                 GitHub
                             </Link>
                         </nav>
@@ -89,8 +98,8 @@ export default function HomePage() {
                     </h1>
 
                     <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
-                        SSH, SCP, RDP, and VNC access directly from your browser.
-                        Zero-trust security with end-to-end encryption and TOTP 2FA.
+                        SSH, SCP, RDP, and VNC access directly from your browser. Zero-trust
+                        security with end-to-end encryption and TOTP 2FA.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -109,7 +118,9 @@ export default function HomePage() {
                     <div className="mt-10 flex flex-col items-center gap-4">
                         <div className="flex items-center gap-3 w-full max-w-xs">
                             <div className="flex-1 h-px bg-slate-700/60" />
-                            <span className="text-xs uppercase tracking-wider text-slate-500">Or get the desktop app</span>
+                            <span className="text-xs uppercase tracking-wider text-slate-500">
+                                Or get the desktop app
+                            </span>
                             <div className="flex-1 h-px bg-slate-700/60" />
                         </div>
                         <DownloadDesktopButton />
@@ -117,10 +128,18 @@ export default function HomePage() {
 
                     {/* Protocol badges */}
                     <div className="flex items-center justify-center gap-3 mt-12">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SSH</span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">SCP</span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">RDP</span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">VNC</span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            SSH
+                        </span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            SCP
+                        </span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            RDP
+                        </span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                            VNC
+                        </span>
                     </div>
                 </div>
             </section>
@@ -129,11 +148,10 @@ export default function HomePage() {
             <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            Everything You Need
-                        </h2>
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">Everything You Need</h2>
                         <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                            A complete solution for managing Linux and Windows servers from any device.
+                            A complete solution for managing Linux and Windows servers from any
+                            device.
                         </p>
                     </div>
 
@@ -144,7 +162,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">SSH Terminal</h3>
                             <p className="text-slate-400">
-                                Full-featured terminal with xterm.js. Support for colors, unicode, and all keyboard shortcuts.
+                                Full-featured terminal with xterm.js. Support for colors, unicode,
+                                and all keyboard shortcuts.
                             </p>
                         </Card>
 
@@ -154,7 +173,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">File Manager</h3>
                             <p className="text-slate-400">
-                                Browse, upload, download, and manage files via SCP with a modern web interface.
+                                Browse, upload, download, and manage files via SCP with a modern web
+                                interface.
                             </p>
                         </Card>
 
@@ -164,7 +184,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">Remote Desktop</h3>
                             <p className="text-slate-400">
-                                Access Windows RDP and Linux VNC directly from your browser or mobile device.
+                                Access Windows RDP and Linux VNC directly from your browser or
+                                mobile device.
                             </p>
                         </Card>
 
@@ -174,7 +195,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">Secure Vault</h3>
                             <p className="text-slate-400">
-                                AES-256-GCM encryption for all credentials. Optional master key for extra protection.
+                                AES-256-GCM encryption for all credentials. Optional master key for
+                                extra protection.
                             </p>
                         </Card>
 
@@ -184,7 +206,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">Two-Factor Auth</h3>
                             <p className="text-slate-400">
-                                TOTP-based 2FA with support for Google Authenticator, Authy, and other apps.
+                                TOTP-based 2FA with support for Google Authenticator, Authy, and
+                                other apps.
                             </p>
                         </Card>
 
@@ -194,7 +217,8 @@ export default function HomePage() {
                             </div>
                             <h3 className="text-lg font-semibold mb-2">Mobile Optimized</h3>
                             <p className="text-slate-400">
-                                PWA with virtual keyboard, touch gestures, and mobile-first responsive design.
+                                PWA with virtual keyboard, touch gestures, and mobile-first
+                                responsive design.
                             </p>
                         </Card>
                     </div>
@@ -204,22 +228,24 @@ export default function HomePage() {
             {/* Security Section */}
             <section id="security" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/50">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-                        Security First Design
-                    </h2>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">Security First Design</h2>
                     <p className="text-lg text-slate-300 mb-12">
-                        Your credentials are encrypted with AES-256-GCM and never stored in plaintext.
-                        We follow zero-trust principles and industry best practices.
+                        Your credentials are encrypted with AES-256-GCM and never stored in
+                        plaintext. We follow zero-trust principles and industry best practices.
                     </p>
 
                     <div className="grid sm:grid-cols-3 gap-8 text-left">
                         <div>
                             <div className="text-3xl font-bold text-primary mb-2">AES-256</div>
-                            <div className="text-slate-400">GCM encryption for all stored credentials</div>
+                            <div className="text-slate-400">
+                                GCM encryption for all stored credentials
+                            </div>
                         </div>
                         <div>
                             <div className="text-3xl font-bold text-primary mb-2">Argon2id</div>
-                            <div className="text-slate-400">Password hashing with secure parameters</div>
+                            <div className="text-slate-400">
+                                Password hashing with secure parameters
+                            </div>
                         </div>
                         <div>
                             <div className="text-3xl font-bold text-primary mb-2">TOTP 2FA</div>
@@ -232,9 +258,7 @@ export default function HomePage() {
             {/* CTA Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-                        Ready to Get Started?
-                    </h2>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Get Started?</h2>
                     <p className="text-lg text-slate-300 mb-8">
                         Deploy your own Termi instance in minutes with Docker.
                     </p>

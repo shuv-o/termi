@@ -92,9 +92,9 @@ export default function GuacamoleDisplay({
         let displayEl: HTMLElement | null = null;
         let pasteHandler: ((e: ClipboardEvent) => void) | null = null;
         // Mac keyboard state — reset on cleanup
-        let macMetaDown    = false; // true while Cmd (Meta) is physically held
+        let macMetaDown = false; // true while Cmd (Meta) is physically held
         let macVSuppressed = false; // true when Cmd+V V-key was suppressed (paste handler sends it)
-        let ctrlDown       = false; // true while physical Ctrl is held (all platforms)
+        let ctrlDown = false; // true while physical Ctrl is held (all platforms)
         let ctrlVSuppressed = false; // true when Ctrl+V V-key was suppressed (paste handler sends it)
         // guacamole-common-js uses browser globals - must be loaded client-side
         import('guacamole-common-js').then((module) => {
@@ -106,7 +106,7 @@ export default function GuacamoleDisplay({
             const wsUrl = `${gatewayBase}/connect`;
             // Use explicit preferred dimensions if provided, otherwise fall back to the container size.
             // preferredWidth/Height come from the parent (e.g. user-selected resolution or screen dims).
-            const width  = preferredWidth  || container.clientWidth  || 1280;
+            const width = preferredWidth || container.clientWidth || 1280;
             const height = preferredHeight || container.clientHeight || 800;
             const connectData =
                 `protocol=${protocol}` +
@@ -133,9 +133,10 @@ export default function GuacamoleDisplay({
                 const dw = display.getWidth();
                 const dh = display.getHeight();
                 if (dw > 0 && dh > 0 && cw > 0 && ch > 0) {
-                    const s = scaleRef.current !== undefined
-                        ? scaleRef.current
-                        : Math.min(cw / dw, ch / dh);
+                    const s =
+                        scaleRef.current !== undefined
+                            ? scaleRef.current
+                            : Math.min(cw / dw, ch / dh);
                     display.scale(s);
                 }
             };
@@ -159,8 +160,11 @@ export default function GuacamoleDisplay({
             guacClient.onerror = (status: any) => {
                 const code: number = status?.code ?? 0;
                 // guacd prefixes all messages with "Guacamole error: " — strip it for clarity
-                const raw: string = (status?.message ?? '').replace(/^Guacamole error:\s*/i, '').trim();
-                const msg = raw || (GUAC_STATUS_MESSAGES[code] ?? `Remote desktop error (code ${code})`);
+                const raw: string = (status?.message ?? '')
+                    .replace(/^Guacamole error:\s*/i, '')
+                    .trim();
+                const msg =
+                    raw || (GUAC_STATUS_MESSAGES[code] ?? `Remote desktop error (code ${code})`);
                 console.error('[Guacamole] Client error:', msg, status);
                 setErrorMsg(msg);
                 onErrorRef.current?.(msg);
@@ -170,14 +174,20 @@ export default function GuacamoleDisplay({
             guacClient.onclipboard = (stream: any, mimetype: string) => {
                 if (mimetype === 'text/plain') {
                     let b64 = '';
-                    stream.onblob = (chunk: string) => { b64 += chunk; };
+                    stream.onblob = (chunk: string) => {
+                        b64 += chunk;
+                    };
                     stream.onend = () => {
                         try {
                             // atob gives raw bytes; TextDecoder handles multi-byte UTF-8 correctly
-                            const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                            const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
                             const text = new TextDecoder().decode(bytes);
-                            navigator.clipboard?.writeText(text).catch(() => { /* silently ignore — page may lack focus */ });
-                        } catch { /* ignore */ }
+                            navigator.clipboard?.writeText(text).catch(() => {
+                                /* silently ignore — page may lack focus */
+                            });
+                        } catch {
+                            /* ignore */
+                        }
                     };
                 }
             };
@@ -186,17 +196,24 @@ export default function GuacamoleDisplay({
                 const a = document.activeElement as HTMLElement | null;
                 if (!a) return false;
                 const tag = a.tagName.toLowerCase();
-                return tag === 'input' || tag === 'textarea' || tag === 'select' || !!a.isContentEditable;
+                return (
+                    tag === 'input' ||
+                    tag === 'textarea' ||
+                    tag === 'select' ||
+                    !!a.isContentEditable
+                );
             };
-            // ── Mac Cmd → Ctrl mapping ───────────────────────────────────────────
+            //   Mac Cmd → Ctrl mapping                      ─
             // X11 keysyms used by guacamole-common-js on Mac:
             //   Meta_L 0xFFE7  Meta_R 0xFFE8  (Mac Command key)
             //   Control_L 0xFFE3  Control_R 0xFFE4
             const isMac = /Mac/i.test(navigator.platform);
-            const META_L = 0xFFE7, META_R = 0xFFE8;
-            const CTRL_L = 0xFFE3, CTRL_R = 0xFFE4;
+            const META_L = 0xffe7,
+                META_R = 0xffe8;
+            const CTRL_L = 0xffe3,
+                CTRL_R = 0xffe4;
             const V_KEYSYM = 0x76;
-            // ────────────────────────────────────────────────────────────────────
+            //
             // Clipboard: local → remote
             // Listen on document so paste fires even when the display canvas is not
             // the focused element — mirrors how the keyboard handler works.
@@ -240,9 +257,9 @@ export default function GuacamoleDisplay({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const forwardMouse = (state: any) => guacClient.sendMouseState(state, true);
             mouse.onmousedown = forwardMouse;
-            mouse.onmouseup   = forwardMouse;
+            mouse.onmouseup = forwardMouse;
             mouse.onmousemove = forwardMouse;
-            mouse.onmouseout  = forwardMouse;
+            mouse.onmouseout = forwardMouse;
             // Suppress context menu so right-click is forwarded
             displayEl.addEventListener('contextmenu', (e: Event) => e.preventDefault());
             // Document-level keyboard — works regardless of which element has DOM focus.
@@ -300,14 +317,20 @@ export default function GuacamoleDisplay({
             fitFnRef.current = null;
             macMetaDown = macVSuppressed = ctrlDown = ctrlVSuppressed = false;
             if (pasteHandler) document.removeEventListener('paste', pasteHandler);
-            try { guacClient?.disconnect(); } catch { /* ignore */ }
+            try {
+                guacClient?.disconnect();
+            } catch {
+                /* ignore */
+            }
             try {
                 if (windowKeyboard) {
                     windowKeyboard.onkeydown = null;
                     windowKeyboard.onkeyup = null;
                     windowKeyboard.reset?.();
                 }
-            } catch { /* ignore */ }
+            } catch {
+                /* ignore */
+            }
             resizeObserver?.disconnect();
             if (displayEl && displayEl.parentNode === container) {
                 container.removeChild(displayEl);
@@ -316,8 +339,8 @@ export default function GuacamoleDisplay({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverId, connectionToken, protocol, preferredWidth, preferredHeight]);
     const isConnecting = clientState === 1 || clientState === 2;
-    const isConnected  = clientState === 3;
-    const label        = CLIENT_STATE_LABELS[clientState] ?? String(clientState);
+    const isConnected = clientState === 3;
+    const label = CLIENT_STATE_LABELS[clientState] ?? String(clientState);
     return (
         <div className="relative h-full w-full bg-black overflow-hidden">
             {/* Status badge */}
@@ -327,8 +350,8 @@ export default function GuacamoleDisplay({
                         isConnected
                             ? 'bg-green-500'
                             : isConnecting
-                            ? 'bg-yellow-500 animate-pulse'
-                            : 'bg-red-500'
+                              ? 'bg-yellow-500 animate-pulse'
+                              : 'bg-red-500'
                     }`}
                 />
                 <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded">
@@ -342,9 +365,7 @@ export default function GuacamoleDisplay({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
                     <div className="text-center">
                         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                        <p className="text-white">
-                            Connecting to {protocol.toUpperCase()}...
-                        </p>
+                        <p className="text-white">Connecting to {protocol.toUpperCase()}...</p>
                     </div>
                 </div>
             )}

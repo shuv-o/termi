@@ -51,7 +51,8 @@ export async function POST(request: Request) {
         }
 
         return successResponse({
-            message: '2FA enabled successfully. Save these recovery codes – they will not be shown again.',
+            message:
+                '2FA enabled successfully. Save these recovery codes – they will not be shown again.',
             recoveryCodes: result.recoveryCodes,
         });
     } catch (error) {

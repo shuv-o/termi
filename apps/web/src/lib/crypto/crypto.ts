@@ -1,16 +1,24 @@
 /**
  * Termi Cryptography Module
- * 
+ *
  * Security Architecture:
  * - All credentials are encrypted using AES-256-GCM before storage
  * - Passwords are hashed using scrypt with secure parameters (N=16384, r=8, p=1)
  * - Optional master key encryption using PBKDF2 key derivation (600,000 iterations, SHA-256)
  * - All cryptographic operations use Node.js crypto module (FIPS-compliant)
- * 
+ *
  * SECURITY WARNING: Never log or expose encryption keys or plaintext credentials
  */
 
-import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync, createHash, scryptSync, timingSafeEqual } from 'crypto';
+import {
+    createCipheriv,
+    createDecipheriv,
+    randomBytes,
+    pbkdf2Sync,
+    createHash,
+    scryptSync,
+    timingSafeEqual,
+} from 'crypto';
 
 // ============================================================================
 // CONSTANTS
@@ -18,15 +26,15 @@ import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync, createHash, 
 
 // AES-256-GCM parameters
 const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 12;  // 96 bits for GCM
+const IV_LENGTH = 12; // 96 bits for GCM
 const TAG_LENGTH = 16; // 128 bits auth tag
 const KEY_LENGTH = 32; // 256 bits
 
 // Scrypt parameters (used as Argon2 alternative for better compatibility)
 const SCRYPT_OPTIONS = {
-    N: 16384,     // CPU/memory cost parameter
-    r: 8,         // Block size
-    p: 1,         // Parallelization
+    N: 16384, // CPU/memory cost parameter
+    r: 8, // Block size
+    p: 1, // Parallelization
     maxmem: 64 * 1024 * 1024, // 64 MB
 };
 
@@ -49,7 +57,7 @@ function getSystemKey(): Buffer {
     if (!envKey) {
         throw new Error(
             'ENCRYPTION_KEY environment variable is required. ' +
-            'Generate one with: openssl rand -base64 32'
+                'Generate one with: openssl rand -base64 32',
         );
     }
 
@@ -62,13 +70,7 @@ function getSystemKey(): Buffer {
  * Uses PBKDF2 with high iteration count for slow key derivation
  */
 export function deriveMasterKey(masterPassword: string, salt: Buffer): Buffer {
-    return pbkdf2Sync(
-        masterPassword,
-        salt,
-        PBKDF2_ITERATIONS,
-        KEY_LENGTH,
-        PBKDF2_DIGEST
-    );
+    return pbkdf2Sync(masterPassword, salt, PBKDF2_ITERATIONS, KEY_LENGTH, PBKDF2_DIGEST);
 }
 
 /**
@@ -90,14 +92,14 @@ export function hashDerivedKey(derivedKey: Buffer): string {
 // ============================================================================
 
 export interface EncryptedData {
-    iv: string;       // Base64 encoded IV
-    data: string;     // Base64 encoded ciphertext
-    tag: string;      // Base64 encoded auth tag
+    iv: string; // Base64 encoded IV
+    data: string; // Base64 encoded ciphertext
+    tag: string; // Base64 encoded auth tag
 }
 
 /**
  * Encrypt plaintext using AES-256-GCM
- * 
+ *
  * @param plaintext - The data to encrypt
  * @param key - Optional encryption key (uses system key if not provided)
  * @returns Encrypted data structure with IV, ciphertext, and auth tag
@@ -112,10 +114,7 @@ export function encrypt(plaintext: string, key?: Buffer): EncryptedData {
     const cipher = createCipheriv(ALGORITHM, encryptionKey, iv);
 
     // Encrypt
-    const encrypted = Buffer.concat([
-        cipher.update(plaintext, 'utf8'),
-        cipher.final()
-    ]);
+    const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
 
     // Get authentication tag
     const tag = cipher.getAuthTag();
@@ -129,7 +128,7 @@ export function encrypt(plaintext: string, key?: Buffer): EncryptedData {
 
 /**
  * Decrypt AES-256-GCM encrypted data
- * 
+ *
  * @param encryptedData - The encrypted data structure
  * @param key - Optional decryption key (uses system key if not provided)
  * @returns Decrypted plaintext
@@ -158,10 +157,7 @@ export function decrypt(encryptedData: EncryptedData, key?: Buffer): string {
     decipher.setAuthTag(tag);
 
     // Decrypt (will throw if authentication fails)
-    const decrypted = Buffer.concat([
-        decipher.update(encrypted),
-        decipher.final()
-    ]);
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 
     return decrypted.toString('utf8');
 }
@@ -187,7 +183,7 @@ export function decryptJson<T>(encryptedData: EncryptedData, key?: Buffer): T {
 
 /**
  * Hash a password using scrypt
- * 
+ *
  * @param password - The plaintext password to hash
  * @returns The password hash string (includes algorithm params and salt)
  */
@@ -201,7 +197,7 @@ export async function hashPassword(password: string): Promise<string> {
 
 /**
  * Verify a password against a scrypt hash
- * 
+ *
  * @param hash - The stored password hash
  * @param password - The plaintext password to verify
  * @returns true if password matches, false otherwise
@@ -222,8 +218,9 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
         const computedHash = scryptSync(password, salt, 64, { N, r, p, maxmem: 64 * 1024 * 1024 });
 
         // Constant-time comparison to prevent timing attacks
-        return computedHash.length === storedHash.length &&
-            timingSafeEqual(computedHash, storedHash);
+        return (
+            computedHash.length === storedHash.length && timingSafeEqual(computedHash, storedHash)
+        );
     } catch {
         return false;
     }

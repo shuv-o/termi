@@ -6,7 +6,7 @@
  * shared across metrics fetches, SFTP operations, and monitoring checks.
  *
  * Lifecycle
- * ─────────
+ *     ─
  *  acquire(cfg)  – Returns an existing ready connection or opens a new one.
  *                  Parallel callers for the same key share a single connect
  *                  attempt (connect-coalescing).
@@ -16,26 +16,26 @@
  *  destroy(key)  – Force-removes and ends a connection (e.g. on auth error).
  *
  * Isolation
- * ─────────
+ *     ─
  * Always pass cfg.id = serverId so two servers that happen to share the same
  * host/port/username get separate pool entries.
  *
  * Persistence across hot reloads
- * ──────────────────────────────
+ *
  * The singleton is stored on globalThis so Next.js dev-mode module reloads
  * reuse the same pool instead of leaking connections.
  */
 
 import { Client, ConnectConfig, SFTPWrapper } from 'ssh2';
 
-// ─── Tuning constants ─────────────────────────────────────────────────────────
+//  ─ Tuning constants                             ─
 
-const IDLE_TTL_MS     = 5 * 60_000;   // destroy connection after 5 min idle
-const CONNECT_TIMEOUT = 15_000;        // maximum time to establish SSH connection
-const KEEPALIVE_MS    = 20_000;        // send SSH keepalive every 20 s
-const KEEPALIVE_MAX   = 3;             // give up after 3 missed keepalives (~60 s)
+const IDLE_TTL_MS = 5 * 60_000; // destroy connection after 5 min idle
+const CONNECT_TIMEOUT = 15_000; // maximum time to establish SSH connection
+const KEEPALIVE_MS = 20_000; // send SSH keepalive every 20 s
+const KEEPALIVE_MAX = 3; // give up after 3 missed keepalives (~60 s)
 
-// ─── Public config type ───────────────────────────────────────────────────────
+//  ─ Public config type                            ─
 
 export interface SSHPoolConfig {
     /**
@@ -52,7 +52,7 @@ export interface SSHPoolConfig {
     passphrase?: string;
 }
 
-// ─── Internal types ───────────────────────────────────────────────────────────
+//  ─ Internal types                              ─
 
 interface PoolEntry {
     client: Client;
@@ -71,20 +71,20 @@ interface PoolEntry {
     sftpPending: Promise<SFTPWrapper> | null;
 }
 
-// ─── Pool implementation ──────────────────────────────────────────────────────
+//  ─ Pool implementation
 
 export class SSHConnectionPool {
     private entries = new Map<string, PoolEntry>();
     /** Coalesces parallel first-connect attempts for the same key. */
     private connecting = new Map<string, Promise<Client>>();
 
-    // ── Key ────────────────────────────────────────────────────────────────
+    //   Key
 
     static makeKey(cfg: SSHPoolConfig): string {
         return cfg.id ?? `${cfg.username}@${cfg.host}:${cfg.port}`;
     }
 
-    // ── acquire ────────────────────────────────────────────────────────────
+    //   acquire
 
     async acquire(cfg: SSHPoolConfig): Promise<{ client: Client; key: string }> {
         const key = SSHConnectionPool.makeKey(cfg);
@@ -130,7 +130,7 @@ export class SSHConnectionPool {
         }
     }
 
-    // ── release ────────────────────────────────────────────────────────────
+    //   release
 
     release(key: string): void {
         const e = this.entries.get(key);
@@ -142,7 +142,7 @@ export class SSHConnectionPool {
         }
     }
 
-    // ── acquireSFTP ────────────────────────────────────────────────────────
+    //   acquireSFTP
     /**
      * Acquire a pooled SSH client AND obtain (or reuse) a single shared SFTP
      * subsystem channel on that connection. Multiple concurrent SFTP operations
@@ -187,22 +187,28 @@ export class SSHConnectionPool {
         return { sftp, key };
     }
 
-    // ── destroy ────────────────────────────────────────────────────────────
+    //   destroy
     /** Force-remove a connection (permanent auth failure, etc.) */
     destroy(key: string): void {
         const e = this.entries.get(key);
         if (!e) return;
         this.cancelIdle(e);
         e.ready = false;
-        e.sftp  = null;
+        e.sftp = null;
         this.entries.delete(key);
-        try { e.client.end(); } catch { /* already gone */ }
+        try {
+            e.client.end();
+        } catch {
+            /* already gone */
+        }
     }
 
-    // ── stats ──────────────────────────────────────────────────────────────
-    get size(): number { return this.entries.size; }
+    //   stats
+    get size(): number {
+        return this.entries.size;
+    }
 
-    // ── internal helpers ───────────────────────────────────────────────────
+    //   internal helpers                          ─
 
     private openConnection(key: string, cfg: SSHPoolConfig): Promise<Client> {
         return new Promise<Client>((resolve, reject) => {
@@ -236,7 +242,7 @@ export class SSHConnectionPool {
                 if (e?.client === client) {
                     this.cancelIdle(e);
                     e.ready = false;
-                    e.sftp  = null;
+                    e.sftp = null;
                     this.entries.delete(key);
                 }
             });
@@ -248,10 +254,10 @@ export class SSHConnectionPool {
             }
 
             const cc: ConnectConfig = {
-                host:             cfg.host,
-                port:             cfg.port,
-                username:         cfg.username,
-                readyTimeout:     CONNECT_TIMEOUT,
+                host: cfg.host,
+                port: cfg.port,
+                username: cfg.username,
+                readyTimeout: CONNECT_TIMEOUT,
                 keepaliveInterval: KEEPALIVE_MS,
                 keepaliveCountMax: KEEPALIVE_MAX,
             };
@@ -260,8 +266,8 @@ export class SSHConnectionPool {
                 cc.privateKey = cfg.privateKey;
                 if (cfg.passphrase?.trim()) cc.passphrase = cfg.passphrase;
             } else if (cfg.password?.trim()) {
-                cc.password     = cfg.password;
-                cc.tryKeyboard  = true;
+                cc.password = cfg.password;
+                cc.tryKeyboard = true;
             }
 
             try {
@@ -279,9 +285,13 @@ export class SSHConnectionPool {
             const e = this.entries.get(key);
             if (e?.refCount === 0) {
                 e.ready = false;
-                e.sftp  = null;
+                e.sftp = null;
                 this.entries.delete(key);
-                try { e.client.end(); } catch { /* ignore */ }
+                try {
+                    e.client.end();
+                } catch {
+                    /* ignore */
+                }
                 console.log(`[SSH Pool] Idle connection closed: ${key}`);
             }
         }, IDLE_TTL_MS);
@@ -295,12 +305,10 @@ export class SSHConnectionPool {
     }
 }
 
-// ─── Singleton ────────────────────────────────────────────────────────────────
+//  ─ Singleton
 
 declare global {
-     
     var __sshPool: SSHConnectionPool | undefined;
 }
 
 export const sshPool = (globalThis.__sshPool ??= new SSHConnectionPool());
-

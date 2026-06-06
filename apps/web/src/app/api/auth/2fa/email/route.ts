@@ -24,7 +24,9 @@ export async function POST() {
         if (!result.success) {
             return errorResponse(result.error || 'Failed to enable email 2FA', 400);
         }
-        return successResponse({ message: 'Email OTP 2FA enabled. A code will be sent to your email on each login.' });
+        return successResponse({
+            message: 'Email OTP 2FA enabled. A code will be sent to your email on each login.',
+        });
     } catch (error) {
         console.error('Enable email OTP error:', error);
         return errorResponse('Failed to enable email 2FA', 500);
@@ -42,7 +44,10 @@ export async function PUT(request: Request) {
 
     const rl = emailOtpRateLimit(session.tempUserId);
     if (!rl.allowed) {
-        return errorResponse('Too many OTP requests. Please wait before requesting another code.', 429);
+        return errorResponse(
+            'Too many OTP requests. Please wait before requesting another code.',
+            429,
+        );
     }
 
     try {
@@ -63,4 +68,3 @@ export async function PUT(request: Request) {
         return errorResponse('Failed to resend verification code', 500);
     }
 }
-

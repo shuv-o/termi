@@ -9,7 +9,13 @@ import { z } from 'zod';
 import * as jose from 'jose';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerForConnection } from '@/lib/services';
-import { validateBody, successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
+import {
+    validateBody,
+    successResponse,
+    errorResponse,
+    unauthorizedResponse,
+    notFoundResponse,
+} from '@/lib/api';
 import { validateHost } from '@/lib/security/ssrf';
 import { createHash } from 'crypto';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
@@ -29,7 +35,9 @@ function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
     if (!secret || secret === 'gateway-secret-key-change-in-production') {
         if (process.env.NODE_ENV === 'production') {
-            throw new Error('GATEWAY_JWT_SECRET must be set to a strong random value in production');
+            throw new Error(
+                'GATEWAY_JWT_SECRET must be set to a strong random value in production',
+            );
         }
         // Dev fallback
         return new Uint8Array(createHash('sha256').update('dev-gateway-secret').digest());
@@ -53,7 +61,7 @@ export async function POST(request: Request) {
     const tokenData = validation.data;
 
     try {
-        // ── Local terminal: no server lookup needed ──────────────────────────────
+        //   Local terminal: no server lookup needed
         if (tokenData.protocol === 'local') {
             if (process.env.ALLOW_LOCAL_TERMINAL !== 'true') {
                 return errorResponse('Local terminal is not enabled on this server', 403);
@@ -73,7 +81,8 @@ export async function POST(request: Request) {
                 .setIssuedAt()
                 .encrypt(key);
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
+            const gatewayUrl =
+                process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
             return successResponse({ token, gatewayUrl });
         }
 
@@ -84,7 +93,7 @@ export async function POST(request: Request) {
         // Re-validate host at token issuance time (defence-in-depth against tampered DB entries)
         const hostValidation = await validateHost(
             server.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true'
+            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
         );
         if (!hostValidation.valid) {
             return errorResponse('Invalid server host configuration', 400);

@@ -21,52 +21,34 @@ export interface ApiResponse<T = unknown> {
 // ============================================================================
 
 export function successResponse<T>(data: T, status: number = 200) {
-    return NextResponse.json<ApiResponse<T>>(
-        { success: true, data },
-        { status }
-    );
+    return NextResponse.json<ApiResponse<T>>({ success: true, data }, { status });
 }
 
 export function errorResponse(error: string, status: number = 400) {
-    return NextResponse.json<ApiResponse>(
-        { success: false, error },
-        { status }
-    );
+    return NextResponse.json<ApiResponse>({ success: false, error }, { status });
 }
 
 export function validationErrorResponse(errors: Record<string, string[]>) {
     return NextResponse.json<ApiResponse>(
         { success: false, error: 'Validation failed', errors },
-        { status: 400 }
+        { status: 400 },
     );
 }
 
 export function unauthorizedResponse(message: string = 'Unauthorized') {
-    return NextResponse.json<ApiResponse>(
-        { success: false, error: message },
-        { status: 401 }
-    );
+    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 401 });
 }
 
 export function forbiddenResponse(message: string = 'Forbidden') {
-    return NextResponse.json<ApiResponse>(
-        { success: false, error: message },
-        { status: 403 }
-    );
+    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 403 });
 }
 
 export function notFoundResponse(message: string = 'Not found') {
-    return NextResponse.json<ApiResponse>(
-        { success: false, error: message },
-        { status: 404 }
-    );
+    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 404 });
 }
 
 export function serverErrorResponse(message: string = 'Internal server error') {
-    return NextResponse.json<ApiResponse>(
-        { success: false, error: message },
-        { status: 500 }
-    );
+    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 500 });
 }
 
 // ============================================================================
@@ -78,7 +60,7 @@ export function serverErrorResponse(message: string = 'Internal server error') {
  */
 export async function validateBody<T>(
     request: Request,
-    schema: ZodSchema<T>
+    schema: ZodSchema<T>,
 ): Promise<{ data: T } | { error: NextResponse }> {
     try {
         const body = await request.json();

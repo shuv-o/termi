@@ -43,7 +43,7 @@ const THEME = {
 
 type SetStatus = (s: 'starting' | 'ready' | 'exited' | 'error') => void;
 
-// ── Electron IPC path ─────────────────────────────────────────────────────────
+//   Electron IPC path                             ─
 
 function setupElectronTerminal(
     tabId: string,
@@ -54,7 +54,10 @@ function setupElectronTerminal(
     onExitRef: MutableRefObject<((code: number) => void) | undefined>,
 ): () => void {
     const api = window.electronAPI?.localTerminal;
-    if (!api) { setStatus('error'); return () => {}; }
+    if (!api) {
+        setStatus('error');
+        return () => {};
+    }
 
     const { cols, rows } = terminal;
 
@@ -64,7 +67,9 @@ function setupElectronTerminal(
             onReadyRef.current?.();
         } else {
             setStatus('error');
-            terminal.write(`\r\n\x1b[31mFailed to start shell: ${result.error ?? 'unknown error'}\x1b[0m\r\n`);
+            terminal.write(
+                `\r\n\x1b[31mFailed to start shell: ${result.error ?? 'unknown error'}\x1b[0m\r\n`,
+            );
         }
     });
 
@@ -77,7 +82,10 @@ function setupElectronTerminal(
 
     terminal.onData((data: string) => api.write(tabId, data));
 
-    const handleResize = () => { fit.fit(); api.resize(tabId, terminal.cols, terminal.rows); };
+    const handleResize = () => {
+        fit.fit();
+        api.resize(tabId, terminal.cols, terminal.rows);
+    };
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -88,7 +96,7 @@ function setupElectronTerminal(
     };
 }
 
-// ── Cloud WebSocket path ──────────────────────────────────────────────────────
+//   Cloud WebSocket path
 
 function setupWebSocketTerminal(
     _tabId: string,
@@ -116,16 +124,26 @@ function setupWebSocketTerminal(
                     connected = true;
                     setStatus('ready');
                     onReadyRef.current?.();
-                    ws.send(JSON.stringify({ type: 'resize', cols: terminal.cols, rows: terminal.rows }));
+                    ws.send(
+                        JSON.stringify({
+                            type: 'resize',
+                            cols: terminal.cols,
+                            rows: terminal.rows,
+                        }),
+                    );
                     break;
                 case 'data':
                     if (msg.data) {
-                        terminal.write(Uint8Array.from(atob(msg.data), (c: string) => c.charCodeAt(0)));
+                        terminal.write(
+                            Uint8Array.from(atob(msg.data), (c: string) => c.charCodeAt(0)),
+                        );
                     }
                     break;
                 case 'disconnected':
                     setStatus('exited');
-                    terminal.write(`\r\n\x1b[33mShell exited (code ${msg.exitCode ?? 0}).\x1b[0m\r\n`);
+                    terminal.write(
+                        `\r\n\x1b[33mShell exited (code ${msg.exitCode ?? 0}).\x1b[0m\r\n`,
+                    );
                     onExitRef.current?.(msg.exitCode ?? 0);
                     break;
                 case 'error':
@@ -133,7 +151,9 @@ function setupWebSocketTerminal(
                     terminal.write(`\r\n\x1b[31m${msg.message ?? 'Connection error'}\x1b[0m\r\n`);
                     break;
             }
-        } catch { /* ignore parse errors */ }
+        } catch {
+            /* ignore parse errors */
+        }
     };
 
     ws.onerror = () => {
@@ -168,9 +188,15 @@ function setupWebSocketTerminal(
     };
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+//   Component                                 ─
 
-export default function LocalTerminal({ tabId, connectionToken, gatewayUrl, onReady, onExit }: LocalTerminalProps) {
+export default function LocalTerminal({
+    tabId,
+    connectionToken,
+    gatewayUrl,
+    onReady,
+    onExit,
+}: LocalTerminalProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<'starting' | 'ready' | 'exited' | 'error'>('starting');
 
@@ -208,14 +234,23 @@ export default function LocalTerminal({ tabId, connectionToken, gatewayUrl, onRe
 
         const cleanup = isElectron
             ? setupElectronTerminal(tabId, terminal, fit, setStatus, onReadyRef, onExitRef)
-            : setupWebSocketTerminal(tabId, terminal, fit, connectionToken!, gatewayUrl!, setStatus, onReadyRef, onExitRef);
+            : setupWebSocketTerminal(
+                  tabId,
+                  terminal,
+                  fit,
+                  connectionToken!,
+                  gatewayUrl!,
+                  setStatus,
+                  onReadyRef,
+                  onExitRef,
+              );
 
         return () => {
             cleanup();
             terminal.dispose();
         };
-    // tabId, connectionToken and gatewayUrl are stable for the session lifetime
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // tabId, connectionToken and gatewayUrl are stable for the session lifetime
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tabId]);
 
     return (
@@ -223,9 +258,11 @@ export default function LocalTerminal({ tabId, connectionToken, gatewayUrl, onRe
             <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
                 <span
                     className={`w-2 h-2 rounded-full ${
-                        status === 'ready'    ? 'bg-green-500' :
-                        status === 'starting' ? 'bg-yellow-500 animate-pulse' :
-                                               'bg-red-500'
+                        status === 'ready'
+                            ? 'bg-green-500'
+                            : status === 'starting'
+                              ? 'bg-yellow-500 animate-pulse'
+                              : 'bg-red-500'
                     }`}
                 />
                 <span className="text-xs text-muted-foreground capitalize">{status}</span>

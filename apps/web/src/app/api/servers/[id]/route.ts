@@ -6,11 +6,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import {
-    getServerById,
-    updateServer,
-    deleteServer,
-} from '@/lib/services';
+import { getServerById, updateServer, deleteServer } from '@/lib/services';
 import {
     validateBody,
     successResponse,
@@ -67,9 +63,9 @@ export async function GET(request: Request, { params }: RouteParams) {
         return successResponse({
             server: {
                 ...safeFields,
-                hasPassword:    !!password,
-                hasPrivateKey:  !!privateKey,
-                hasPassphrase:  !!passphrase,
+                hasPassword: !!password,
+                hasPrivateKey: !!privateKey,
+                hasPassphrase: !!passphrase,
             },
         });
     } catch (error) {
@@ -96,7 +92,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (validation.data.host) {
         const ssrfCheck = await validateHost(
             validation.data.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true'
+            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
         );
         if (!ssrfCheck.valid) {
             return errorResponse(ssrfCheck.error || 'Invalid host', 400);

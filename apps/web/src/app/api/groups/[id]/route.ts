@@ -6,11 +6,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import {
-    getServerGroupById,
-    updateServerGroup,
-    deleteServerGroup,
-} from '@/lib/services';
+import { getServerGroupById, updateServerGroup, deleteServerGroup } from '@/lib/services';
 import {
     validateBody,
     successResponse,
@@ -22,7 +18,10 @@ import {
 const updateGroupSchema = z.object({
     name: z.string().min(1).max(50).optional(),
     description: z.string().max(200).optional(),
-    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    color: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/)
+        .optional(),
     icon: z.string().max(50).optional(),
     sortOrder: z.number().int().min(0).optional(),
 });

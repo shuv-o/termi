@@ -1,6 +1,6 @@
 /**
  * Server Management Service
- * 
+ *
  * Handles CRUD operations for server credentials with encryption.
  */
 
@@ -82,9 +82,24 @@ export interface ServerListItem {
 
 export async function createServer(
     input: CreateServerInput,
-    encryptionContext?: EncryptionContext
+    encryptionContext?: EncryptionContext,
 ) {
-    const { userId, name, description, groupId, host, port, protocol, username, password, privateKey, passphrase, notes, tags, ...settings } = input;
+    const {
+        userId,
+        name,
+        description,
+        groupId,
+        host,
+        port,
+        protocol,
+        username,
+        password,
+        privateKey,
+        passphrase,
+        notes,
+        tags,
+        ...settings
+    } = input;
 
     // Verify the group belongs to this user before assigning
     if (groupId) {
@@ -168,11 +183,7 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
                 },
             },
         },
-        orderBy: [
-            { isFavorite: 'desc' },
-            { lastUsedAt: 'desc' },
-            { name: 'asc' },
-        ],
+        orderBy: [{ isFavorite: 'desc' }, { lastUsedAt: 'desc' }, { name: 'asc' }],
     });
     return rows.map(({ password, host, username, ...rest }) => {
         const creds = decryptCredentials({ host, username });
@@ -193,7 +204,7 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
 export async function getServerById(
     serverId: string,
     userId: string,
-    encryptionContext?: EncryptionContext
+    encryptionContext?: EncryptionContext,
 ) {
     const server = await prisma.server.findFirst({
         where: { id: serverId, userId },
@@ -238,8 +249,19 @@ export async function getServerById(
 export async function getServerForConnection(
     serverId: string,
     userId: string,
-    encryptionContext?: EncryptionContext
-): Promise<ServerCredentials & { id: string; port: number; protocol: Protocol; displayWidth: number | null; displayHeight: number | null; colorDepth: number | null; rdpSecurity: string | null } | null> {
+    encryptionContext?: EncryptionContext,
+): Promise<
+    | (ServerCredentials & {
+          id: string;
+          port: number;
+          protocol: Protocol;
+          displayWidth: number | null;
+          displayHeight: number | null;
+          colorDepth: number | null;
+          rdpSecurity: string | null;
+      })
+    | null
+> {
     // Try as owner first
     let server = await prisma.server.findFirst({
         where: { id: serverId, userId },
@@ -302,7 +324,7 @@ export async function updateServer(
     serverId: string,
     userId: string,
     input: UpdateServerInput,
-    encryptionContext?: EncryptionContext
+    encryptionContext?: EncryptionContext,
 ) {
     // Verify ownership
     const existing = await prisma.server.findFirst({
@@ -336,8 +358,13 @@ export async function updateServer(
     if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 
     // Encrypted fields - need to re-encrypt if changed
-    const needsEncryption = input.host || input.username || input.password ||
-        input.privateKey || input.passphrase || input.notes;
+    const needsEncryption =
+        input.host ||
+        input.username ||
+        input.password ||
+        input.privateKey ||
+        input.passphrase ||
+        input.notes;
 
     if (needsEncryption) {
         // Get current decrypted values
@@ -436,19 +463,21 @@ export async function searchServers(
     query: string,
     protocol?: Protocol,
     groupId?: string,
-    favoritesOnly?: boolean
+    favoritesOnly?: boolean,
 ): Promise<ServerListItem[]> {
     const rows = await prisma.server.findMany({
         where: {
             userId,
             AND: [
-                query ? {
-                    OR: [
-                        { name: { contains: query, mode: 'insensitive' } },
-                        { description: { contains: query, mode: 'insensitive' } },
-                        { tags: { has: query } },
-                    ],
-                } : {},
+                query
+                    ? {
+                          OR: [
+                              { name: { contains: query, mode: 'insensitive' } },
+                              { description: { contains: query, mode: 'insensitive' } },
+                              { tags: { has: query } },
+                          ],
+                      }
+                    : {},
                 protocol ? { protocol } : {},
                 groupId ? { groupId } : {},
                 favoritesOnly ? { isFavorite: true } : {},
@@ -474,11 +503,7 @@ export async function searchServers(
                 },
             },
         },
-        orderBy: [
-            { isFavorite: 'desc' },
-            { lastUsedAt: 'desc' },
-            { name: 'asc' },
-        ],
+        orderBy: [{ isFavorite: 'desc' }, { lastUsedAt: 'desc' }, { name: 'asc' }],
     });
     return rows.map(({ password, host, username, ...rest }) => {
         const creds = decryptCredentials({ host, username });

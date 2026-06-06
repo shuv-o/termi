@@ -95,7 +95,11 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
  * Send an email OTP to the user and store the hash in DB.
  * Clears any existing unused OTPs for the user first.
  */
-export async function sendEmailOTP(userId: string, email: string, ipAddress: string): Promise<void> {
+export async function sendEmailOTP(
+    userId: string,
+    email: string,
+    ipAddress: string,
+): Promise<void> {
     // Invalidate previous OTPs
     await prisma.emailOTP.deleteMany({
         where: { userId, usedAt: null },
@@ -121,7 +125,7 @@ export async function sendEmailOTP(userId: string, email: string, ipAddress: str
           </div>
           <p style="color:#999;font-size:12px;margin-top:24px">If you did not request this code, ignore this email.</p>
         </div>
-        `
+        `,
     );
 }
 
@@ -152,4 +156,3 @@ export async function verifyEmailOTP(userId: string, code: string): Promise<bool
 
     return false;
 }
-

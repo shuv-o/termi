@@ -121,6 +121,7 @@ open http://localhost:22080
 ```
 
 > **RDP / VNC**: also start guacd — on Apple Silicon, add `--platform linux/arm64`:
+>
 > ```bash
 > docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
 > ```
@@ -180,37 +181,37 @@ npm run build:electron            # Package Electron app
 
 ```
 termi/
-├── apps/
-│   ├── web/                    # Next.js 16 App Router
-│   │   ├── src/
-│   │   │   ├── app/            # Pages + API routes (App Router)
-│   │   │   │   ├── api/        # 53 REST endpoints
-│   │   │   │   └── panel/      # Dashboard UI
-│   │   │   ├── components/     # React components
-│   │   │   │   ├── terminal/   # SSH/RDP/VNC/local terminal
-│   │   │   │   ├── scp/        # File manager
-│   │   │   │   └── monitoring/ # Metrics & charts
-│   │   │   └── lib/
-│   │   │       ├── auth/       # Session, TOTP, passkey, OAuth
-│   │   │       ├── crypto/     # AES-256-GCM, key derivation
-│   │   │       ├── security/   # SSRF protection, rate limiting
-│   │   │       └── services/   # SSH pool, SFTP, monitoring, alerts
-│   │   └── prisma/             # Database schema & migrations
+├  apps/
+│   ├  web/                    # Next.js 16 App Router
+│   │   ├  src/
+│   │   │   ├  app/            # Pages + API routes (App Router)
+│   │   │   │   ├  api/        # 53 REST endpoints
+│   │   │   │   └  panel/      # Dashboard UI
+│   │   │   ├  components/     # React components
+│   │   │   │   ├  terminal/   # SSH/RDP/VNC/local terminal
+│   │   │   │   ├  scp/        # File manager
+│   │   │   │   └  monitoring/ # Metrics & charts
+│   │   │   └  lib/
+│   │   │       ├  auth/       # Session, TOTP, passkey, OAuth
+│   │   │       ├  crypto/     # AES-256-GCM, key derivation
+│   │   │       ├  security/   # SSRF protection, rate limiting
+│   │   │       └  services/   # SSH pool, SFTP, monitoring, alerts
+│   │   └  prisma/             # Database schema & migrations
 │   │
-│   ├── gateway/                # WebSocket gateway (pure ESM)
-│   │   └── src/
-│   │       ├── handlers/       # SSH, SCP, Guacamole (RDP/VNC), Local PTY
-│   │       └── auth/           # JWE token validation
+│   ├  gateway/                # WebSocket gateway (pure ESM)
+│   │   └  src/
+│   │       ├  handlers/       # SSH, SCP, Guacamole (RDP/VNC), Local PTY
+│   │       └  auth/           # JWE token validation
 │   │
-│   └── electron/               # Desktop app wrapper
-│       ├── main.js             # Electron main process + node-pty IPC
-│       └── preload.js          # Secure context bridge
+│   └  electron/               # Desktop app wrapper
+│       ├  main.js             # Electron main process + node-pty IPC
+│       └  preload.js          # Secure context bridge
 │
-├── traefik/                    # Reverse-proxy configuration
-├── docker-compose.yml
-├── docker-compose.local.yml    # Local development with Docker
-├── electron-builder.yml        # Desktop app build config
-└── .env.example
+├  traefik/                    # Reverse-proxy configuration
+├  docker-compose.yml
+├  docker-compose.local.yml    # Local development with Docker
+├  electron-builder.yml        # Desktop app build config
+└  .env.example
 ```
 
 ---
@@ -220,7 +221,7 @@ termi/
 ### Required Variables
 
 | Variable                  | Description                                         |
-|---------------------------|-----------------------------------------------------|
+| ------------------------- | --------------------------------------------------- |
 | `DB_HOST`                 | PostgreSQL host                                     |
 | `DB_USER`                 | PostgreSQL username                                 |
 | `DB_PASSWORD`             | PostgreSQL password                                 |
@@ -234,7 +235,7 @@ termi/
 ### Optional Variables
 
 | Variable                 | Default               | Description                                           |
-|--------------------------|-----------------------|-------------------------------------------------------|
+| ------------------------ | --------------------- | ----------------------------------------------------- |
 | `GUACD_HOST`             | `localhost`           | guacd host for RDP/VNC                                |
 | `GUACD_PORT`             | `4822`                | guacd port                                            |
 | `ALLOW_PRIVATE_NETWORKS` | `false`               | Allow connections to private/internal IPs             |
@@ -256,29 +257,29 @@ termi/
 ## 📡 Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
+┌                               ┐
 │                  Browser / PWA / Electron                     │
 │   Login · Dashboard · Terminal · File Manager · Monitoring    │
-└─────────────────────────┬────────────────────────────────────┘
+└            ─┬                  ┘
                           │ HTTP / REST
                           ▼
-┌──────────────────────────────────────────────────────────────┐
+┌                               ┐
 │               Next.js Web App  (:22080)                       │
 │   API Routes │ Auth │ AES-256 Crypto │ Prisma ORM            │
-└───────┬──────────────────────────────┬───────────────────────┘
+└   ─┬               ┬           ─┘
         │                              │
         │ PostgreSQL                   │ POST /api/connection/token
         ▼                              ▼
-  ┌──────────┐               ┌─────────────────────────────────┐
+  ┌     ┐               ┌                ─┐
   │PostgreSQL│               │    WebSocket Gateway  (:22081)  │
-  └──────────┘               │    JWE token validation         │
-                             └───┬─────────────┬───────────────┘
+  └     ┘               │    JWE token validation         │
+                             └ ─┬      ─┬       ─┘
                                  │             │
                            SSH/SCP        RDP / VNC
                                  │             │
-                         ┌───────┴──┐   ┌──────┴──────┐
+                         ┌   ─┴ ┐   ┌   ┴   ┐
                          │ SSH Host │   │  guacd:4822  │
-                         └──────────┘   └──────┬───────┘
+                         └     ┘   └   ┬   ─┘
                                                │
                                         RDP / VNC Servers
 ```
@@ -347,4 +348,3 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 Made with ❤️ for the self-hosting community
 
 </div>
-

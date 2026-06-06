@@ -1,6 +1,6 @@
 /**
  * TOTP Two-Factor Authentication
- * 
+ *
  * Implements Time-based One-Time Password (TOTP) for 2FA.
  * Compatible with Google Authenticator, Authy, etc.
  */
@@ -28,7 +28,7 @@ const RECOVERY_CODE_LENGTH = 8;
 
 /**
  * Generate a new TOTP secret for a user
- * 
+ *
  * @param email - User's email for the label
  * @returns Secret and QR code data URL
  */
@@ -72,7 +72,7 @@ export async function generateTOTPSecret(email: string): Promise<{
 
 /**
  * Verify a TOTP code
- * 
+ *
  * @param secret - The user's TOTP secret (base32)
  * @param code - The code to verify
  * @param window - Number of periods to check before/after (default 1)

@@ -1,7 +1,14 @@
 'use client';
 
 import {
-    createContext, useContext, useState, useCallback, useId, useEffect, useRef, type ReactNode,
+    createContext,
+    useContext,
+    useState,
+    useCallback,
+    useId,
+    useEffect,
+    useRef,
+    type ReactNode,
 } from 'react';
 
 // ============================================================================
@@ -12,7 +19,7 @@ export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error
 
 export interface Session {
     tabId: string;
-    sessionId: string;        // stable UUID, persists across devices via DB
+    sessionId: string; // stable UUID, persists across devices via DB
     type: 'remote' | 'local';
     serverId: string;
     serverName: string;
@@ -110,18 +117,22 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     const wsRefs = useRef(new Map<string, WebSocket>());
     // Always-current snapshot of sessions (avoids stale closure reads)
     const sessionsRef = useRef<Session[]>([]);
-    useEffect(() => { sessionsRef.current = sessions; }, [sessions]);
+    useEffect(() => {
+        sessionsRef.current = sessions;
+    }, [sessions]);
 
-    // ── Helpers ──
+    //   Helpers
 
     const updateSessionStatus = useCallback((tabId: string, status: SessionStatus) => {
-        setSessions(prev => prev.map(s => s.tabId === tabId ? { ...s, status } : s));
+        setSessions((prev) => prev.map((s) => (s.tabId === tabId ? { ...s, status } : s)));
     }, []);
 
     const setSessionError = useCallback((tabId: string, error: string | null) => {
-        setSessions(prev => prev.map(s =>
-            s.tabId === tabId ? { ...s, errorMessage: error, status: 'error' } : s
-        ));
+        setSessions((prev) =>
+            prev.map((s) =>
+                s.tabId === tabId ? { ...s, errorMessage: error, status: 'error' } : s,
+            ),
+        );
     }, []);
 
     const setSessionWs = useCallback((tabId: string, ws: WebSocket | null) => {
@@ -132,9 +143,11 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // ── Fetch token helper ──
+    //   Fetch token helper
 
-    async function fetchToken(serverId: string): Promise<{ token: string; gatewayUrl: string | null } | null> {
+    async function fetchToken(
+        serverId: string,
+    ): Promise<{ token: string; gatewayUrl: string | null } | null> {
         try {
             const res = await fetch('/api/connection/token', {
                 method: 'POST',
@@ -142,30 +155,36 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 body: JSON.stringify({ serverId, protocol: 'ssh' }),
             });
             const data = await res.json();
-            return data.success ? { token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null } : null;
+            return data.success
+                ? { token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null }
+                : null;
         } catch {
             return null;
         }
     }
 
-    // ── Session management ──
+    //   Session management
 
     const addLocalSession: SessionsProvider_AddLocalSession = useCallback(() => {
         const tabId = `${uid}-local-${Date.now()}`;
-        const isElectronMode = typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
+        const isElectronMode =
+            typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
         const serverName = isElectronMode ? 'Local Terminal' : 'Gateway Shell';
 
-        setSessions(prev => [...prev, {
-            tabId,
-            sessionId: crypto.randomUUID(),
-            type: 'local',
-            serverId: 'local',
-            serverName,
-            token: null,
-            gatewayUrl: null,
-            status: 'connecting',
-            showFiles: false,
-        }]);
+        setSessions((prev) => [
+            ...prev,
+            {
+                tabId,
+                sessionId: crypto.randomUUID(),
+                type: 'local',
+                serverId: 'local',
+                serverName,
+                token: null,
+                gatewayUrl: null,
+                status: 'connecting',
+                showFiles: false,
+            },
+        ]);
         setActiveTabId(tabId);
 
         if (!isElectronMode) {
@@ -175,89 +194,136 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ protocol: 'local' }),
             })
-                .then(res => res.json())
-                .then(data => {
-                    setSessions(prev => prev.map(s => {
-                        if (s.tabId !== tabId) return s;
-                        if (data.success) {
-                            return { ...s, token: data.data.token, gatewayUrl: data.data.gatewayUrl };
-                        }
-                        return { ...s, status: 'error', errorMessage: data.error || 'Local terminal not available on this server' };
-                    }));
+                .then((res) => res.json())
+                .then((data) => {
+                    setSessions((prev) =>
+                        prev.map((s) => {
+                            if (s.tabId !== tabId) return s;
+                            if (data.success) {
+                                return {
+                                    ...s,
+                                    token: data.data.token,
+                                    gatewayUrl: data.data.gatewayUrl,
+                                };
+                            }
+                            return {
+                                ...s,
+                                status: 'error',
+                                errorMessage:
+                                    data.error || 'Local terminal not available on this server',
+                            };
+                        }),
+                    );
                 })
                 .catch(() => {
-                    setSessions(prev => prev.map(s =>
-                        s.tabId === tabId ? { ...s, status: 'error', errorMessage: 'Failed to connect' } : s
-                    ));
+                    setSessions((prev) =>
+                        prev.map((s) =>
+                            s.tabId === tabId
+                                ? { ...s, status: 'error', errorMessage: 'Failed to connect' }
+                                : s,
+                        ),
+                    );
                 });
         }
     }, [uid]);
 
-    const addSession: SessionsProvider_AddSession = useCallback(async (serverId: string, serverName?: string) => {
-        const tabId = `${uid}-${Date.now()}`;
-        const sessionId = crypto.randomUUID();
-        let name = serverName ?? '';
-        if (!name) {
-            try {
-                const res = await fetch(`/api/servers/${serverId}`);
-                const data = await res.json();
-                if (data.success) name = data.data.server.name;
-            } catch { name = serverId; }
-        }
+    const addSession: SessionsProvider_AddSession = useCallback(
+        async (serverId: string, serverName?: string) => {
+            const tabId = `${uid}-${Date.now()}`;
+            const sessionId = crypto.randomUUID();
+            let name = serverName ?? '';
+            if (!name) {
+                try {
+                    const res = await fetch(`/api/servers/${serverId}`);
+                    const data = await res.json();
+                    if (data.success) name = data.data.server.name;
+                } catch {
+                    name = serverId;
+                }
+            }
 
-        setSessions(prev => [...prev, {
-            tabId,
-            sessionId,
-            type: 'remote',
-            serverId, serverName: name,
-            token: null, gatewayUrl: null, status: 'connecting', showFiles: false,
-        }]);
-        setActiveTabId(tabId);
+            setSessions((prev) => [
+                ...prev,
+                {
+                    tabId,
+                    sessionId,
+                    type: 'remote',
+                    serverId,
+                    serverName: name,
+                    token: null,
+                    gatewayUrl: null,
+                    status: 'connecting',
+                    showFiles: false,
+                },
+            ]);
+            setActiveTabId(tabId);
 
-        // Persist to DB so other devices can see this session
-        await dbRegisterSession(sessionId, serverId, name);
+            // Persist to DB so other devices can see this session
+            await dbRegisterSession(sessionId, serverId, name);
 
-        const result = await fetchToken(serverId);
-        setSessions(prev => prev.map(s => {
-            if (s.tabId !== tabId) return s;
-            return result
-                ? { ...s, token: result.token, gatewayUrl: result.gatewayUrl }
-                : { ...s, status: 'error' };
-        }));
-    }, [uid]);
+            const result = await fetchToken(serverId);
+            setSessions((prev) =>
+                prev.map((s) => {
+                    if (s.tabId !== tabId) return s;
+                    return result
+                        ? { ...s, token: result.token, gatewayUrl: result.gatewayUrl }
+                        : { ...s, status: 'error' };
+                }),
+            );
+        },
+        [uid],
+    );
 
     /** Reconnect an existing session, reusing its sessionId (for reattach to persistent gateway session). */
     const reconnectSession = useCallback(async (tabId: string, serverId: string) => {
-        setSessions(prev => prev.map(s =>
-            s.tabId === tabId ? { ...s, token: null, status: 'connecting' } : s
-        ));
+        setSessions((prev) =>
+            prev.map((s) => (s.tabId === tabId ? { ...s, token: null, status: 'connecting' } : s)),
+        );
         const result = await fetchToken(serverId);
-        setSessions(prev => prev.map(s => {
-            if (s.tabId !== tabId) return s;
-            return result
-                ? { ...s, token: result.token, gatewayUrl: result.gatewayUrl, status: 'connecting' }
-                : { ...s, status: 'error' };
-        }));
+        setSessions((prev) =>
+            prev.map((s) => {
+                if (s.tabId !== tabId) return s;
+                return result
+                    ? {
+                          ...s,
+                          token: result.token,
+                          gatewayUrl: result.gatewayUrl,
+                          status: 'connecting',
+                      }
+                    : { ...s, status: 'error' };
+            }),
+        );
     }, []);
 
     /** Generate a new sessionId and reconnect (used when gateway reports session-not-found). */
     const renewSession = useCallback(async (tabId: string, serverId: string) => {
         const newSessionId = crypto.randomUUID();
         // Read old sessionId from ref (avoids stale closure)
-        const oldSessionId = sessionsRef.current.find(s => s.tabId === tabId)?.sessionId ?? null;
-        setSessions(prev => prev.map(s =>
-            s.tabId === tabId ? { ...s, sessionId: newSessionId, token: null, status: 'connecting' } : s
-        ));
+        const oldSessionId = sessionsRef.current.find((s) => s.tabId === tabId)?.sessionId ?? null;
+        setSessions((prev) =>
+            prev.map((s) =>
+                s.tabId === tabId
+                    ? { ...s, sessionId: newSessionId, token: null, status: 'connecting' }
+                    : s,
+            ),
+        );
         // Update DB with new sessionId
         if (oldSessionId) await dbRenewSession(oldSessionId, newSessionId);
 
         const result = await fetchToken(serverId);
-        setSessions(prev => prev.map(s => {
-            if (s.tabId !== tabId) return s;
-            return result
-                ? { ...s, token: result.token, gatewayUrl: result.gatewayUrl, status: 'connecting' }
-                : { ...s, status: 'error' };
-        }));
+        setSessions((prev) =>
+            prev.map((s) => {
+                if (s.tabId !== tabId) return s;
+                return result
+                    ? {
+                          ...s,
+                          token: result.token,
+                          gatewayUrl: result.gatewayUrl,
+                          status: 'connecting',
+                      }
+                    : { ...s, status: 'error' };
+            }),
+        );
     }, []);
 
     const removeSession = useCallback((tabId: string) => {
@@ -268,14 +334,14 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }
         wsRefs.current.delete(tabId);
 
-        setSessions(prev => {
-            const target = prev.find(s => s.tabId === tabId);
+        setSessions((prev) => {
+            const target = prev.find((s) => s.tabId === tabId);
             if (target?.type === 'remote') {
                 // Remove from DB — fire and forget
                 dbDeleteSession(target.sessionId);
             }
-            const remaining = prev.filter(s => s.tabId !== tabId);
-            setActiveTabId(curr => {
+            const remaining = prev.filter((s) => s.tabId !== tabId);
+            setActiveTabId((curr) => {
                 if (curr !== tabId) return curr;
                 return remaining.length > 0 ? remaining[remaining.length - 1].tabId : null;
             });
@@ -284,17 +350,17 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const toggleFiles = useCallback((tabId: string) => {
-        setSessions(prev => prev.map(s =>
-            s.tabId === tabId ? { ...s, showFiles: !s.showFiles } : s
-        ));
+        setSessions((prev) =>
+            prev.map((s) => (s.tabId === tabId ? { ...s, showFiles: !s.showFiles } : s)),
+        );
     }, []);
 
-    // ── Refs so restore effect can call stable functions without re-running ──
+    //   Refs so restore effect can call stable functions without re-running
 
     const reconnectSessionRef = useRef<typeof reconnectSession | null>(null);
     reconnectSessionRef.current = reconnectSession;
 
-    // ── Restore sessions on mount from DB (cross-device persistence) ──
+    //   Restore sessions on mount from DB (cross-device persistence)
     // Sessions start as 'detached' then immediately begin reconnecting.
 
     useEffect(() => {
@@ -304,7 +370,8 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 const data = await res.json();
                 if (!data.success || !data.data.sessions?.length) return;
 
-                const saved: { sessionId: string; serverId: string; serverName: string }[] = data.data.sessions;
+                const saved: { sessionId: string; serverId: string; serverName: string }[] =
+                    data.data.sessions;
 
                 const restoredSessions: Session[] = saved.map((s, i) => ({
                     tabId: `${uid}-restored-${i}-${Date.now()}`,
@@ -321,24 +388,38 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 if (restoredSessions.length > 0) {
                     setSessions(restoredSessions);
                     setActiveTabId(restoredSessions[restoredSessions.length - 1].tabId);
-                    restoredSessions.forEach(s => reconnectSessionRef.current?.(s.tabId, s.serverId));
+                    restoredSessions.forEach((s) =>
+                        reconnectSessionRef.current?.(s.tabId, s.serverId),
+                    );
                 }
-            } catch { /* silently ignore — network issues shouldn't break the page */ }
-            finally {
+            } catch {
+                /* silently ignore — network issues shouldn't break the page */
+            } finally {
                 setSessionsRestored(true);
             }
         }
         restoreSessions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally empty — runs once on mount only
 
     return (
-        <SessionsContext.Provider value={{
-            sessions, activeTabId, setActiveTabId,
-            sessionsRestored,
-            addSession, addLocalSession, removeSession, reconnectSession, renewSession,
-            toggleFiles, updateSessionStatus, setSessionError, setSessionWs,
-        }}>
+        <SessionsContext.Provider
+            value={{
+                sessions,
+                activeTabId,
+                setActiveTabId,
+                sessionsRestored,
+                addSession,
+                addLocalSession,
+                removeSession,
+                reconnectSession,
+                renewSession,
+                toggleFiles,
+                updateSessionStatus,
+                setSessionError,
+                setSessionWs,
+            }}
+        >
             {children}
         </SessionsContext.Provider>
     );

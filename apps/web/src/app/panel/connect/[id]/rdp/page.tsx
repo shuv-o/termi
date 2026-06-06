@@ -23,10 +23,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-const GuacamoleDisplay = dynamic(
-    () => import('@/components/terminal/GuacamoleDisplay'),
-    { ssr: false }
-);
+const GuacamoleDisplay = dynamic(() => import('@/components/terminal/GuacamoleDisplay'), {
+    ssr: false,
+});
 
 const PRESETS = [
     { label: 'Auto', value: 'auto' },
@@ -44,8 +43,8 @@ function parsePreset(value: string): { w: number; h: number } | null {
 
 const ZOOM_LEVELS = [
     { label: 'Fit', value: 'fit' },
-    { label: '50%',  value: '0.5' },
-    { label: '75%',  value: '0.75' },
+    { label: '50%', value: '0.5' },
+    { label: '75%', value: '0.75' },
     { label: '100%', value: '1' },
     { label: '125%', value: '1.25' },
     { label: '150%', value: '1.5' },
@@ -145,16 +144,16 @@ export default function RDPConnectionPage() {
             const entered = !!document.fullscreenElement;
             setIsFullscreen(entered);
             if (resolution === null) {
-                setReconnectKey(k => k + 1);
+                setReconnectKey((k) => k + 1);
             }
         };
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-     
     }, [resolution]);
 
     const selectValue = resolution
-        ? (PRESETS.find(p => p.value !== 'auto' && p.value === `${resolution.w}x${resolution.h}`)?.value ?? `${resolution.w}x${resolution.h}`)
+        ? (PRESETS.find((p) => p.value !== 'auto' && p.value === `${resolution.w}x${resolution.h}`)
+              ?.value ?? `${resolution.w}x${resolution.h}`)
         : 'auto';
 
     if (loading) {
@@ -180,31 +179,43 @@ export default function RDPConnectionPage() {
     const toolbar = (
         <>
             <div className="flex items-center gap-2 min-w-0">
-                <Button variant="ghost" size="icon" asChild className={`shrink-0 ${isFullscreen ? 'h-8 w-8' : 'h-7 w-7'}`}>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className={`shrink-0 ${isFullscreen ? 'h-8 w-8' : 'h-7 w-7'}`}
+                >
                     <Link href="/panel">
                         <ArrowLeft className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
                     </Link>
                 </Button>
-                <span className={`font-medium truncate ${isFullscreen ? 'text-white text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}>
+                <span
+                    className={`font-medium truncate ${isFullscreen ? 'text-white text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}
+                >
                     {server?.name}
                 </span>
                 {!isFullscreen && (
-                    <span className="text-xs text-muted-foreground hidden sm:inline shrink-0">— RDP</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline shrink-0">
+                        — RDP
+                    </span>
                 )}
             </div>
 
             <div className={`flex items-center shrink-0 ${isFullscreen ? 'gap-1.5' : 'gap-1'}`}>
-                <Select
-                    value={selectValue}
-                    onValueChange={(v) => setResolution(parsePreset(v))}
-                >
-                    <SelectTrigger className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}>
-                        <Scan className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`} />
+                <Select value={selectValue} onValueChange={(v) => setResolution(parsePreset(v))}>
+                    <SelectTrigger
+                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}
+                    >
+                        <Scan
+                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
+                        />
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="end" className="bg-card border-border">
-                        {PRESETS.map(p => (
-                            <SelectItem key={p.value} value={p.value} className="text-xs">{p.label}</SelectItem>
+                        {PRESETS.map((p) => (
+                            <SelectItem key={p.value} value={p.value} className="text-xs">
+                                {p.label}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -213,13 +224,19 @@ export default function RDPConnectionPage() {
                     value={zoom !== undefined ? String(zoom) : 'fit'}
                     onValueChange={(v) => setZoom(v === 'fit' ? undefined : parseFloat(v))}
                 >
-                    <SelectTrigger className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}>
-                        <ZoomIn className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`} />
+                    <SelectTrigger
+                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}
+                    >
+                        <ZoomIn
+                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
+                        />
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="end" className="bg-card border-border">
-                        {ZOOM_LEVELS.map(z => (
-                            <SelectItem key={z.value} value={z.value} className="text-xs">{z.label}</SelectItem>
+                        {ZOOM_LEVELS.map((z) => (
+                            <SelectItem key={z.value} value={z.value} className="text-xs">
+                                {z.label}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -227,7 +244,7 @@ export default function RDPConnectionPage() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setReconnectKey(k => k + 1)}
+                    onClick={() => setReconnectKey((k) => k + 1)}
                     title="Reconnect / Fit to current window"
                     className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7'}
                 >
@@ -238,13 +255,20 @@ export default function RDPConnectionPage() {
                     variant="ghost"
                     size="icon"
                     onClick={toggleFullscreen}
-                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen — auto-fits to screen size'}
-                    className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7 hidden sm:flex'}
-                >
-                    {isFullscreen
-                        ? <Minimize2 className="w-4 h-4" />
-                        : <Maximize2 className="w-3.5 h-3.5" />
+                    title={
+                        isFullscreen ? 'Exit Fullscreen' : 'Fullscreen — auto-fits to screen size'
                     }
+                    className={
+                        isFullscreen
+                            ? 'h-8 w-8 text-white hover:bg-white/20'
+                            : 'h-7 w-7 hidden sm:flex'
+                    }
+                >
+                    {isFullscreen ? (
+                        <Minimize2 className="w-4 h-4" />
+                    ) : (
+                        <Maximize2 className="w-3.5 h-3.5" />
+                    )}
                 </Button>
 
                 <Button
@@ -252,9 +276,10 @@ export default function RDPConnectionPage() {
                     size="icon"
                     onClick={() => router.push('/panel')}
                     title="Disconnect"
-                    className={isFullscreen
-                        ? 'h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/20'
-                        : 'h-7 w-7 text-destructive hover:text-destructive'
+                    className={
+                        isFullscreen
+                            ? 'h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/20'
+                            : 'h-7 w-7 text-destructive hover:text-destructive'
                     }
                 >
                     <X className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
@@ -264,10 +289,7 @@ export default function RDPConnectionPage() {
     );
 
     return (
-        <div
-            ref={containerRef}
-            className="flex flex-col h-[calc(100dvh-8rem)]"
-        >
+        <div ref={containerRef} className="flex flex-col h-[calc(100dvh-8rem)]">
             {/* Normal header (hidden when fullscreen — browser's fullscreen API takes over the element) */}
             {!isFullscreen && (
                 <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
@@ -286,8 +308,12 @@ export default function RDPConnectionPage() {
                     preferredWidth={resolution?.w}
                     preferredHeight={resolution?.h}
                     scale={zoom}
-                    onDisconnect={() => { /* session ended */ }}
-                    onError={(err) => { console.error('RDP error:', err); }}
+                    onDisconnect={() => {
+                        /* session ended */
+                    }}
+                    onError={(err) => {
+                        console.error('RDP error:', err);
+                    }}
                 />
 
                 {/* Pill — always visible in fullscreen; click to show controls */}

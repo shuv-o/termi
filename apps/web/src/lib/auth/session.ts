@@ -1,6 +1,6 @@
 /**
  * Termi Session Management
- * 
+ *
  * Uses iron-session for secure, encrypted, cookie-based sessions.
  * Session data is encrypted and stored in an HTTP-only cookie.
  */
@@ -21,7 +21,7 @@ export interface SessionData {
     isLoggedIn: boolean;
     requires2FA?: boolean;
     tempUserId?: string; // For 2FA flow
-    masterKey?: string;  // Encrypted master key for session
+    masterKey?: string; // Encrypted master key for session
     lastActivity?: number;
     passkeyChallenge?: string; // Base64URL challenge for WebAuthn registration/auth
     passkeyAuthUserId?: string; // userId resolved during passkey auth options (before assertion verified)
@@ -41,10 +41,13 @@ const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
 function getSessionSecret(): string {
     const secret = process.env.SESSION_SECRET;
     if (!secret || secret.length < 32) {
-        if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build') {
+        if (
+            process.env.NODE_ENV === 'production' &&
+            process.env.NEXT_PHASE !== 'phase-production-build'
+        ) {
             throw new Error(
                 'SESSION_SECRET must be set and at least 32 characters long. ' +
-                'Generate one with: openssl rand -base64 32'
+                    'Generate one with: openssl rand -base64 32',
             );
         }
         // Dev fallback and build-time placeholder — never used in production at runtime
@@ -95,7 +98,7 @@ export async function createSession(
     userId: string,
     email: string,
     deviceInfo: string,
-    ipAddress: string
+    ipAddress: string,
 ): Promise<string> {
     // Generate session token
     const token = generateSecureToken(32);
@@ -187,7 +190,7 @@ export async function validateSession(token: string): Promise<{ userId: string }
 export async function revokeSession(
     sessionId: string,
     userId: string,
-    reason?: string
+    reason?: string,
 ): Promise<void> {
     await prisma.session.update({
         where: { id: sessionId, userId },
@@ -213,7 +216,7 @@ export async function revokeSession(
  */
 export async function revokeAllUserSessions(
     userId: string,
-    exceptTokenHash?: string
+    exceptTokenHash?: string,
 ): Promise<number> {
     const result = await prisma.session.updateMany({
         where: {

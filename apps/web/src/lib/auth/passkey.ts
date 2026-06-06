@@ -54,7 +54,11 @@ function getRpDetails() {
 export async function generatePasskeyRegistrationOptions(userId: string) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, email: true, passkeys: { select: { credentialID: true, transports: true } } },
+        select: {
+            id: true,
+            email: true,
+            passkeys: { select: { credentialID: true, transports: true } },
+        },
     });
 
     if (!user) throw new Error('User not found');
@@ -91,7 +95,7 @@ export async function generatePasskeyRegistrationOptions(userId: string) {
 export async function verifyPasskeyRegistration(
     userId: string,
     response: RegistrationResponseJSON,
-    name: string
+    name: string,
 ): Promise<{ success: boolean; error?: string }> {
     const session = await getSession();
     const challenge = session.passkeyChallenge;
@@ -143,7 +147,11 @@ export async function verifyPasskeyRegistration(
             data: {
                 userId,
                 action: 'PASSKEY_REGISTERED',
-                details: { name: name.trim() || 'Passkey', deviceType: credentialDeviceType, backedUp: credentialBackedUp },
+                details: {
+                    name: name.trim() || 'Passkey',
+                    deviceType: credentialDeviceType,
+                    backedUp: credentialBackedUp,
+                },
             },
         }),
     ]);
@@ -206,8 +214,14 @@ export async function generatePasskeyAuthenticationOptions(email?: string) {
 export async function verifyPasskeyAuthentication(
     response: AuthenticationResponseJSON,
     deviceInfo: string,
-    ipAddress: string
-): Promise<{ success: boolean; error?: string; userId?: string; email?: string; sessionToken?: string }> {
+    ipAddress: string,
+): Promise<{
+    success: boolean;
+    error?: string;
+    userId?: string;
+    email?: string;
+    sessionToken?: string;
+}> {
     const session = await getSession();
     const challenge = session.passkeyChallenge;
 
@@ -218,7 +232,9 @@ export async function verifyPasskeyAuthentication(
     // Find the passkey by credential ID
     const passkey = await prisma.passkey.findUnique({
         where: { credentialID: response.id },
-        include: { user: { select: { id: true, email: true, isActive: true, lockoutUntil: true } } },
+        include: {
+            user: { select: { id: true, email: true, isActive: true, lockoutUntil: true } },
+        },
     });
 
     if (!passkey) {
@@ -231,7 +247,10 @@ export async function verifyPasskeyAuthentication(
 
     if (passkey.user.lockoutUntil && passkey.user.lockoutUntil > new Date()) {
         const remaining = Math.ceil((passkey.user.lockoutUntil.getTime() - Date.now()) / 60000);
-        return { success: false, error: `Account temporarily locked. Try again in ${remaining} minute(s).` };
+        return {
+            success: false,
+            error: `Account temporarily locked. Try again in ${remaining} minute(s).`,
+        };
     }
 
     const { rpID, origins } = getRpDetails();
@@ -281,7 +300,12 @@ export async function verifyPasskeyAuthentication(
     ]);
 
     // Create full session
-    const sessionToken = await createSession(passkey.userId, passkey.user.email, deviceInfo, ipAddress);
+    const sessionToken = await createSession(
+        passkey.userId,
+        passkey.user.email,
+        deviceInfo,
+        ipAddress,
+    );
 
     session.userId = passkey.userId;
     session.email = passkey.user.email;
@@ -323,7 +347,7 @@ export async function listPasskeys(userId: string) {
 /** Delete a specific passkey by ID (must belong to user) */
 export async function deletePasskey(
     passkeyId: string,
-    userId: string
+    userId: string,
 ): Promise<{ success: boolean; error?: string }> {
     const passkey = await prisma.passkey.findFirst({
         where: { id: passkeyId, userId },

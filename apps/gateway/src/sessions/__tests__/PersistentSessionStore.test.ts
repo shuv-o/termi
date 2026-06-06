@@ -7,7 +7,11 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         userId: 'user-1',
         serverId: 'server-1',
         handler: { close: vi.fn(), isConnected: vi.fn().mockReturnValue(true) } as any,
-        buffer: { append: vi.fn(), snapshot: vi.fn().mockReturnValue(new Uint8Array(0)), byteLength: 0 } as any,
+        buffer: {
+            append: vi.fn(),
+            snapshot: vi.fn().mockReturnValue(new Uint8Array(0)),
+            byteLength: 0,
+        } as any,
         lastActivityAt: Date.now(),
         createdAt: Date.now(),
         attachedWs: null,
@@ -74,8 +78,18 @@ describe('PersistentSessionStore', () => {
     });
 
     it('evictOldestDetachedForUser removes oldest detached session for user', () => {
-        const old = makeSession({ sessionId: 'old', userId: 'user-1', createdAt: 1000, attachedWs: null });
-        const newS = makeSession({ sessionId: 'new', userId: 'user-1', createdAt: 2000, attachedWs: null });
+        const old = makeSession({
+            sessionId: 'old',
+            userId: 'user-1',
+            createdAt: 1000,
+            attachedWs: null,
+        });
+        const newS = makeSession({
+            sessionId: 'new',
+            userId: 'user-1',
+            createdAt: 2000,
+            attachedWs: null,
+        });
         store.tryAdd(old);
         store.tryAdd(newS);
         const evicted = store.evictOldestDetachedForUser('user-1');
@@ -85,7 +99,12 @@ describe('PersistentSessionStore', () => {
     });
 
     it('evictOldestDetachedForUser skips attached sessions', () => {
-        const attached = makeSession({ sessionId: 'a', userId: 'user-1', createdAt: 1000, attachedWs: {} as any });
+        const attached = makeSession({
+            sessionId: 'a',
+            userId: 'user-1',
+            createdAt: 1000,
+            attachedWs: {} as any,
+        });
         store.tryAdd(attached);
         const evicted = store.evictOldestDetachedForUser('user-1');
         expect(evicted).toBe(false);

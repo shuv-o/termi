@@ -21,7 +21,10 @@ import { GuacamoleHandler } from './handlers/guacamole.js';
 import { LocalHandler } from './handlers/local.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
-import { PersistentSessionStore, type PersistentSession } from './sessions/PersistentSessionStore.js';
+import {
+    PersistentSessionStore,
+    type PersistentSession,
+} from './sessions/PersistentSessionStore.js';
 
 dotenv.config({ path: '../../.env' });
 dotenv.config();
@@ -37,7 +40,7 @@ const ALLOWED_ORIGINS: Set<string> = new Set(
     (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080')
         .split(',')
         .map((o) => o.trim().toLowerCase())
-        .filter(Boolean)
+        .filter(Boolean),
 );
 
 // Idle timeout for non-persistent (RDP/VNC/SCP) connections
@@ -60,7 +63,7 @@ function isPrivateHost(host: string): boolean {
     if (h === 'localhost') return true;
     if (h === 'metadata.google.internal') return true;
     if (h === '::1') return true;
-    if (h === '168.63.129.16') return true;   // Azure Instance Metadata Service
+    if (h === '168.63.129.16') return true; // Azure Instance Metadata Service
     if (h === '0.0.0.0') return true;
     if (h.startsWith('127.')) return true;
     if (h.startsWith('10.')) return true;
@@ -83,7 +86,9 @@ function isPrivateHost(host: string): boolean {
 async function isPrivateHostAsync(host: string): Promise<boolean> {
     if (isPrivateHost(host)) return true;
     // Strip brackets/prefix for isIP check
-    const stripped = host.trim().toLowerCase()
+    const stripped = host
+        .trim()
+        .toLowerCase()
         .replace(/^\[|]$/g, '')
         .replace(/^::ffff:/i, '');
     if (isIP(stripped) !== 0) return false; // raw IP already checked above
@@ -151,12 +156,14 @@ function createSink(session: PersistentSession): SSHOutputSink {
 const server = createServer((req, res) => {
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            status: 'healthy',
-            sshSessions: persistentSessions.size,
-            nonSshConnections: nonSshConnections.size,
-            uptime: process.uptime(),
-        }));
+        res.end(
+            JSON.stringify({
+                status: 'healthy',
+                sshSessions: persistentSessions.size,
+                nonSshConnections: nonSshConnections.size,
+                uptime: process.uptime(),
+            }),
+        );
         return;
     }
     res.writeHead(404);
@@ -179,10 +186,10 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     // token is NO LONGER in the URL — it arrives in the first WS message
-    const protocol  = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
-    const serverId  = url.searchParams.get('serverId');
+    const protocol = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
+    const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
-    const browserWidth  = parseInt(url.searchParams.get('width')  || '0', 10) || 0;
+    const browserWidth = parseInt(url.searchParams.get('width') || '0', 10) || 0;
     const browserHeight = parseInt(url.searchParams.get('height') || '0', 10) || 0;
 
     if (!protocol || !serverId) {
@@ -199,12 +206,17 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
     // Local terminal requires explicit opt-in via environment variable
     if (protocol === 'local' && process.env.ALLOW_LOCAL_TERMINAL !== 'true') {
-        ws.send(JSON.stringify({ type: 'error', message: 'Local terminal is not enabled on this server' }));
+        ws.send(
+            JSON.stringify({
+                type: 'error',
+                message: 'Local terminal is not enabled on this server',
+            }),
+        );
         ws.close(4403, 'Forbidden');
         return;
     }
 
-    // ── Auth handshake: expect {type:"auth",token} within 5 seconds ──────────
+    //   Auth handshake: expect {type:"auth",token} within 5 seconds
     const AUTH_TIMEOUT_MS = 5_000;
     const authTimeout = setTimeout(() => {
         ws.send(JSON.stringify({ type: 'error', message: 'Authentication timeout' }));
@@ -246,7 +258,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         // Guard: abort if the socket was closed while we awaited validateToken
         if (ws.readyState !== WebSocket.OPEN) return;
 
-        // ── Token payload cross-checks ─────────────────────────────────────
+        //   Token payload cross-checks                   ─
         if (tokenPayload.serverId !== serverId) {
             ws.send(JSON.stringify({ type: 'error', message: 'Server access denied' }));
             ws.close(4003, 'Forbidden');
@@ -259,14 +271,23 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return;
         }
 
-        // ── SSRF guard (skipped for local protocol — no remote host involved) ──
-        if (protocol !== 'local' && process.env.ALLOW_PRIVATE_NETWORKS !== 'true' && await isPrivateHostAsync(tokenPayload.host)) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Connection to private/internal hosts is not allowed' }));
+        //   SSRF guard (skipped for local protocol — no remote host involved)
+        if (
+            protocol !== 'local' &&
+            process.env.ALLOW_PRIVATE_NETWORKS !== 'true' &&
+            (await isPrivateHostAsync(tokenPayload.host))
+        ) {
+            ws.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Connection to private/internal hosts is not allowed',
+                }),
+            );
             ws.close(1008, 'SSRF protection');
             return;
         }
 
-        // ── Local terminal: PTY on this machine ───────────────────────────
+        //   Local terminal: PTY on this machine              ─
         if (protocol === 'local') {
             const meta: NonSshMeta = {
                 userId: tokenPayload.userId,
@@ -316,20 +337,22 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return; // local handled
         }
 
-        // ── SSH: persistent sessions ──────────────────────────────────────
+        //   SSH: persistent sessions
 
         if (protocol === 'ssh') {
             // If client doesn't send a sessionId (e.g. stale cached JS), generate one.
             // The session will still work but won't be reattachable by this browser.
             const resolvedSessionId = sessionId || randomUUID();
             if (!sessionId) {
-                console.warn(`[gateway] SSH connection missing sessionId — generated fallback ${resolvedSessionId}`);
+                console.warn(
+                    `[gateway] SSH connection missing sessionId — generated fallback ${resolvedSessionId}`,
+                );
             }
 
             const existing = persistentSessions.get(resolvedSessionId);
 
             if (existing) {
-                // ── Reattach to existing session ──
+                //   Reattach to existing session
                 if (existing.userId !== tokenPayload.userId) {
                     ws.send(JSON.stringify({ type: 'error', message: 'Session access denied' }));
                     ws.close(4003, 'Forbidden');
@@ -347,19 +370,22 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 // Replay buffered output (non-destructive snapshot)
                 const buffered = existing.buffer.snapshot();
                 if (buffered.length > 0) {
-                    ws.send(JSON.stringify({
-                        type: 'buffer-replay',
-                        data: Buffer.from(buffered).toString('base64'),
-                    }));
+                    ws.send(
+                        JSON.stringify({
+                            type: 'buffer-replay',
+                            data: Buffer.from(buffered).toString('base64'),
+                        }),
+                    );
                 }
 
                 // Signal ready (shell already open)
                 ws.send(JSON.stringify({ type: 'shell-ready' }));
-
             } else {
-                // ── New session ──
+                //   New session
                 if (persistentSessions.isAtLimit(tokenPayload.userId)) {
-                    const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
+                    const evicted = persistentSessions.evictOldestDetachedForUser(
+                        tokenPayload.userId,
+                    );
                     if (!evicted) {
                         ws.send(JSON.stringify({ type: 'error', message: 'Too many connections' }));
                         ws.close(4029, 'Too Many Requests');
@@ -394,9 +420,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 }
             }
 
-            // ── Heartbeat: detect silently-dropped WS connections ─────────────────
+            //   Heartbeat: detect silently-dropped WS connections         ─
             const HEARTBEAT_INTERVAL_MS = 30_000;
-            const HEARTBEAT_TIMEOUT_MS  = 15_000;
+            const HEARTBEAT_TIMEOUT_MS = 15_000;
             let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
             let pongTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -405,20 +431,28 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     if (ws.readyState !== WebSocket.OPEN) return;
                     ws.send(JSON.stringify({ type: 'ping' }));
                     pongTimer = setTimeout(() => {
-                        console.warn(`[gateway] SSH WS pong timeout for session ${resolvedSessionId} — closing`);
+                        console.warn(
+                            `[gateway] SSH WS pong timeout for session ${resolvedSessionId} — closing`,
+                        );
                         ws.close(1001, 'Heartbeat timeout');
                     }, HEARTBEAT_TIMEOUT_MS);
                 }, HEARTBEAT_INTERVAL_MS);
             }
 
             function stopHeartbeat() {
-                if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
-                if (pongTimer)      { clearTimeout(pongTimer);       pongTimer = null; }
+                if (heartbeatTimer) {
+                    clearInterval(heartbeatTimer);
+                    heartbeatTimer = null;
+                }
+                if (pongTimer) {
+                    clearTimeout(pongTimer);
+                    pongTimer = null;
+                }
             }
 
             startHeartbeat();
 
-            // ── WS message routing for SSH ──
+            //   WS message routing for SSH
             ws.on('message', (data) => {
                 const session = persistentSessions.get(resolvedSessionId);
                 if (!session) return;
@@ -439,7 +473,10 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                             break;
                         case 'pong':
                             // Client acknowledged heartbeat — cancel the pong timeout
-                            if (pongTimer) { clearTimeout(pongTimer); pongTimer = null; }
+                            if (pongTimer) {
+                                clearTimeout(pongTimer);
+                                pongTimer = null;
+                            }
                             break;
                         case 'close-session':
                             persistentSessions.delete(resolvedSessionId);
@@ -451,7 +488,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 }
             });
 
-            // ── WS close: detach only (SSH stays alive) ──
+            //   WS close: detach only (SSH stays alive)
             ws.on('close', () => {
                 stopHeartbeat();
                 const session = persistentSessions.get(resolvedSessionId);
@@ -468,7 +505,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return; // SSH handled
         }
 
-        // ── Non-SSH: SCP / RDP / VNC (unchanged behaviour) ───────────────────
+        //   Non-SSH: SCP / RDP / VNC (unchanged behaviour)          ─
 
         const meta: NonSshMeta = {
             userId: tokenPayload.userId,
@@ -481,12 +518,18 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
         const resetTimeout = () => {
             if (timeoutId) clearTimeout(timeoutId);
-            const idleLimit = (protocol === 'rdp' || protocol === 'vnc')
-                ? CONNECTION_TIMEOUT * 2
-                : CONNECTION_TIMEOUT;
+            const idleLimit =
+                protocol === 'rdp' || protocol === 'vnc'
+                    ? CONNECTION_TIMEOUT * 2
+                    : CONNECTION_TIMEOUT;
             timeoutId = setTimeout(() => {
                 if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ type: 'error', message: 'Connection timed out due to inactivity' }));
+                    ws.send(
+                        JSON.stringify({
+                            type: 'error',
+                            message: 'Connection timed out due to inactivity',
+                        }),
+                    );
                     ws.close(4008, 'Idle timeout');
                 }
             }, idleLimit);
@@ -499,9 +542,10 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             meta.handler = new SCPHandler(ws, tokenPayload);
         } else {
             // Override stored display dimensions with the browser's actual viewport
-            const payloadWithDims = browserWidth > 0 && browserHeight > 0
-                ? { ...tokenPayload, displayWidth: browserWidth, displayHeight: browserHeight }
-                : tokenPayload;
+            const payloadWithDims =
+                browserWidth > 0 && browserHeight > 0
+                    ? { ...tokenPayload, displayWidth: browserWidth, displayHeight: browserHeight }
+                    : tokenPayload;
             meta.handler = new GuacamoleHandler(ws, payloadWithDims, protocol as 'rdp' | 'vnc');
         }
 
@@ -553,7 +597,7 @@ function shutdown(signal: string): void {
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT',  () => shutdown('SIGINT'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('uncaughtException', (err) => {
     console.error('[gateway] Uncaught exception:', err);
     shutdown('uncaughtException');

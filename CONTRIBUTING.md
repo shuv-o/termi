@@ -29,14 +29,14 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 1. **Fork** the repository on GitHub.
 2. **Clone** your fork locally:
-   ```bash
-   git clone https://github.com/<your-username>/termi.git
-   cd termi
-   ```
+    ```bash
+    git clone https://github.com/<your-username>/termi.git
+    cd termi
+    ```
 3. **Add the upstream remote** so you can pull in future updates:
-   ```bash
-   git remote add upstream https://github.com/shuvoooo/termi.git
-   ```
+    ```bash
+    git remote add upstream https://github.com/shuvoooo/termi.git
+    ```
 
 ---
 
@@ -127,27 +127,28 @@ Key conventions:
 
 1. **Create a branch** from `main` using a descriptive name:
 
-   | Prefix | Use for |
-   |--------|---------|
-   | `feature/` | New features |
-   | `fix/` | Bug fixes |
-   | `docs/` | Documentation only |
-   | `refactor/` | Code refactoring |
-   | `chore/` | Dependencies, build, CI |
-   | `security/` | Security fixes |
+    | Prefix      | Use for                 |
+    | ----------- | ----------------------- |
+    | `feature/`  | New features            |
+    | `fix/`      | Bug fixes               |
+    | `docs/`     | Documentation only      |
+    | `refactor/` | Code refactoring        |
+    | `chore/`    | Dependencies, build, CI |
+    | `security/` | Security fixes          |
 
-   ```bash
-   git checkout -b feature/my-awesome-feature
-   ```
+    ```bash
+    git checkout -b feature/my-awesome-feature
+    ```
 
 2. **Make your changes**, keeping commits focused and atomic.
 
 3. **Run the checks** before pushing:
-   ```bash
-   npm run lint            # Must pass
-   npm test                # Must pass
-   npx tsc --noEmit        # Run in apps/web and apps/gateway
-   ```
+
+    ```bash
+    npm run lint            # Must pass
+    npm test                # Must pass
+    npx tsc --noEmit        # Run in apps/web and apps/gateway
+    ```
 
 4. **Push** your branch and open a Pull Request.
 
@@ -164,6 +165,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 **Types:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `security`, `perf`
 
 **Examples:**
+
 ```
 feat(ssh): add keep-alive interval configuration
 fix(guacamole): handle empty password correctly
@@ -177,10 +179,10 @@ security: validate host before SSRF in /api/servers/test
 ## Submitting a Pull Request
 
 1. Ensure your branch is up to date with `upstream/main`:
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
+    ```bash
+    git fetch upstream
+    git rebase upstream/main
+    ```
 2. Open a PR against the `main` branch of `shuvoooo/termi`.
 3. Fill out the **PR template** — describe what changed and why.
 4. Link the related issue if one exists (`Closes #123`).

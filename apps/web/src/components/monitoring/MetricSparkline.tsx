@@ -26,7 +26,7 @@ export default function MetricSparkline({
     const PADDING = 4;
 
     // Filter to valid numbers
-    const values = data.map(d => (d != null && isFinite(d) ? d : null));
+    const values = data.map((d) => (d != null && isFinite(d) ? d : null));
     const defined = values.filter((v): v is number => v !== null);
 
     if (defined.length < 2) {
@@ -50,7 +50,10 @@ export default function MetricSparkline({
 
     values.forEach((v, i) => {
         if (v === null) {
-            if (current.length > 0) { segments.push(current); current = []; }
+            if (current.length > 0) {
+                segments.push(current);
+                current = [];
+            }
         } else {
             const x = toX(i);
             const y = toY(v);
@@ -63,12 +66,11 @@ export default function MetricSparkline({
     const lastSeg = segments[segments.length - 1];
     const areaPath = lastSeg
         ? lastSeg.join(' ') +
-          ` L ${toX(values.length - 1)} ${H - PADDING} L ${toX(values.findIndex(v => v !== null))} ${H - PADDING} Z`
+          ` L ${toX(values.length - 1)} ${H - PADDING} L ${toX(values.findIndex((v) => v !== null))} ${H - PADDING} Z`
         : '';
 
-    const lineColor = alertThreshold != null && defined[defined.length - 1] >= alertThreshold
-        ? '#ef4444'
-        : color;
+    const lineColor =
+        alertThreshold != null && defined[defined.length - 1] >= alertThreshold ? '#ef4444' : color;
 
     return (
         <svg
@@ -85,12 +87,7 @@ export default function MetricSparkline({
             </defs>
 
             {/* Area fill */}
-            {areaPath && (
-                <path
-                    d={areaPath}
-                    fill={`url(#fill-${color.replace('#', '')})`}
-                />
-            )}
+            {areaPath && <path d={areaPath} fill={`url(#fill-${color.replace('#', '')})`} />}
 
             {/* Lines */}
             {segments.map((seg, si) => (
@@ -106,19 +103,20 @@ export default function MetricSparkline({
             ))}
 
             {/* Dots for last point */}
-            {showDots && values.map((v, i) => {
-                if (v === null) return null;
-                return (
-                    <circle
-                        key={i}
-                        cx={toX(i)}
-                        cy={toY(v)}
-                        r="2"
-                        fill={lineColor}
-                        fillOpacity={i === values.length - 1 ? 1 : 0.4}
-                    />
-                );
-            })}
+            {showDots &&
+                values.map((v, i) => {
+                    if (v === null) return null;
+                    return (
+                        <circle
+                            key={i}
+                            cx={toX(i)}
+                            cy={toY(v)}
+                            r="2"
+                            fill={lineColor}
+                            fillOpacity={i === values.length - 1 ? 1 : 0.4}
+                        />
+                    );
+                })}
         </svg>
     );
 }

@@ -5,10 +5,7 @@
 import { getCurrentUser, deletePasskey } from '@/lib/auth';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
-export async function DELETE(
-    _request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 

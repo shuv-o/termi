@@ -60,7 +60,10 @@ export async function validateToken(token: string): Promise<TokenPayload> {
         }
 
         const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'local'] as const;
-        if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol as typeof VALID_PROTOCOLS[number])) {
+        if (
+            !payload.protocol ||
+            !VALID_PROTOCOLS.includes(payload.protocol as (typeof VALID_PROTOCOLS)[number])
+        ) {
             throw new Error('Invalid token protocol');
         }
 

@@ -25,7 +25,7 @@ describe('RingBuffer', () => {
     it('wraps around and drops oldest bytes when capacity exceeded', () => {
         const buf = new RingBuffer(4);
         buf.append(new Uint8Array([1, 2, 3, 4])); // fills buffer
-        buf.append(new Uint8Array([5]));           // drops byte 1
+        buf.append(new Uint8Array([5])); // drops byte 1
         expect(buf.byteLength).toBe(4);
         expect(buf.snapshot()).toEqual(new Uint8Array([2, 3, 4, 5]));
     });

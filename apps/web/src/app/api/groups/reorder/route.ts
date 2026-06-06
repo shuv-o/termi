@@ -5,12 +5,7 @@
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { reorderGroups } from '@/lib/services';
-import {
-    validateBody,
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-} from '@/lib/api';
+import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 
 const reorderSchema = z.object({
     groupIds: z.array(z.string()).min(1),
@@ -37,4 +32,3 @@ export async function POST(request: Request) {
         return errorResponse('Failed to reorder groups', 500);
     }
 }
-

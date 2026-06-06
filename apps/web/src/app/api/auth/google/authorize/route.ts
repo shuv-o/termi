@@ -21,7 +21,7 @@ export async function GET() {
     } catch (error) {
         console.error('Google OAuth authorize error:', error);
         return NextResponse.redirect(
-            `${process.env.NEXT_PUBLIC_APP_URL || ''}/login?error=oauth_failed`
+            `${process.env.NEXT_PUBLIC_APP_URL || ''}/login?error=oauth_failed`,
         );
     }
 }

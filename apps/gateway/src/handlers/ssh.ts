@@ -81,7 +81,9 @@ export class SSHHandler {
             this.connected = true;
             this.ssh.shell({ term: 'xterm-256color', cols: 80, rows: 24 }, (err, stream) => {
                 if (err) {
-                    this.sink.onMessage('error', { message: 'Failed to open shell: ' + err.message });
+                    this.sink.onMessage('error', {
+                        message: 'Failed to open shell: ' + err.message,
+                    });
                     this.close();
                     return;
                 }
@@ -115,7 +117,9 @@ export class SSHHandler {
         try {
             this.ssh.connect(config);
         } catch (error) {
-            this.sink.onMessage('error', { message: 'Connection failed: ' + (error as Error).message });
+            this.sink.onMessage('error', {
+                message: 'Connection failed: ' + (error as Error).message,
+            });
             this.close();
         }
     }

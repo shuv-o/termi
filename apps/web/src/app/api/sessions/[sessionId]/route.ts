@@ -7,7 +7,7 @@ import prisma from '@/lib/db/prisma';
 // DELETE /api/sessions/[sessionId] — remove a persistent session
 export async function DELETE(
     _request: NextRequest,
-    { params }: { params: Promise<{ sessionId: string }> }
+    { params }: { params: Promise<{ sessionId: string }> },
 ) {
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) return unauthorizedResponse();
@@ -28,7 +28,7 @@ const patchSchema = z.object({
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: Promise<{ sessionId: string }> }
+    { params }: { params: Promise<{ sessionId: string }> },
 ) {
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) return unauthorizedResponse();

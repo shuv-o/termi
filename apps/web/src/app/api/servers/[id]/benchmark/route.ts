@@ -34,9 +34,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
         async start(controller) {
             const send = (data: object) => {
                 try {
-                    controller.enqueue(
-                        encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
-                    );
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
                 } catch {
                     // Client disconnected — ignore
                 }
@@ -44,25 +42,29 @@ export async function POST(_request: Request, { params }: RouteParams) {
 
             await runBenchmark(
                 {
-                    host:       server.host,
-                    port:       server.port,
-                    username:   server.username,
-                    password:   server.password   ?? undefined,
+                    host: server.host,
+                    port: server.port,
+                    username: server.username,
+                    password: server.password ?? undefined,
                     privateKey: server.privateKey ?? undefined,
                     passphrase: server.passphrase ?? undefined,
                 },
-                send
+                send,
             );
 
-            try { controller.close(); } catch { /* ignore */ }
+            try {
+                controller.close();
+            } catch {
+                /* ignore */
+            }
         },
     });
 
     return new Response(stream, {
         headers: {
-            'Content-Type':  'text/event-stream',
+            'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            'Connection':    'keep-alive',
+            Connection: 'keep-alive',
         },
     });
 }

@@ -4,8 +4,8 @@
  */
 export class RingBuffer {
     private readonly buf: Uint8Array;
-    private head = 0;  // next write position
-    private size = 0;  // current used bytes
+    private head = 0; // next write position
+    private size = 0; // current used bytes
 
     constructor(private readonly capacity: number = 256 * 1024) {
         if (capacity <= 0 || !Number.isInteger(capacity)) {

@@ -17,10 +17,12 @@ export async function GET(request: Request) {
 
     if (!result.success) {
         return NextResponse.redirect(
-            new URL(`/login?error=verification-failed&message=${encodeURIComponent(result.error || '')}`, request.url)
+            new URL(
+                `/login?error=verification-failed&message=${encodeURIComponent(result.error || '')}`,
+                request.url,
+            ),
         );
     }
 
     return NextResponse.redirect(new URL('/login?verified=1', request.url));
 }
-

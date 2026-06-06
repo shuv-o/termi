@@ -157,7 +157,10 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
 
     // Google-only users have no password
     if (!user.passwordHash) {
-        return { success: false, error: 'This account uses Google Sign-In. Please sign in with Google.' };
+        return {
+            success: false,
+            error: 'This account uses Google Sign-In. Please sign in with Google.',
+        };
     }
 
     // Lockout check
@@ -173,9 +176,8 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
 
     if (!passwordValid) {
         const newCount = user.failedLoginCount + 1;
-        const lockout = newCount >= MAX_FAILED_ATTEMPTS
-            ? new Date(Date.now() + LOCKOUT_DURATION_MS)
-            : null;
+        const lockout =
+            newCount >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_DURATION_MS) : null;
 
         await prisma.user.update({
             where: { id: user.id },
@@ -258,7 +260,13 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
 
     const passkeyCount = await prisma.passkey.count({ where: { userId: user.id } });
 
-    return { success: true, userId: user.id, email: user.email, sessionToken, suggestPasskeySetup: passkeyCount === 0 };
+    return {
+        success: true,
+        userId: user.id,
+        email: user.email,
+        sessionToken,
+        suggestPasskeySetup: passkeyCount === 0,
+    };
 }
 
 // ============================================================================
@@ -268,7 +276,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
 export async function verify2FA(
     code: string,
     deviceInfo: string,
-    ipAddress: string
+    ipAddress: string,
 ): Promise<AuthResult> {
     const session = await getSession();
 
@@ -362,7 +370,13 @@ export async function verify2FA(
 
     const passkeyCount = await prisma.passkey.count({ where: { userId: user.id } });
 
-    return { success: true, userId: user.id, email: user.email, sessionToken, suggestPasskeySetup: passkeyCount === 0 };
+    return {
+        success: true,
+        userId: user.id,
+        email: user.email,
+        sessionToken,
+        suggestPasskeySetup: passkeyCount === 0,
+    };
 }
 
 // ============================================================================
@@ -375,7 +389,7 @@ export async function verify2FA(
 export async function enable2FA(
     userId: string,
     totpSecret: string,
-    verificationCode: string
+    verificationCode: string,
 ): Promise<{ success: boolean; error?: string; recoveryCodes?: string[] }> {
     const isValid = verifyTOTP(totpSecret, verificationCode);
     if (!isValid) {
@@ -398,9 +412,7 @@ export async function enable2FA(
             },
         }),
         prisma.recoveryCode.deleteMany({ where: { userId } }),
-        ...codeHashes.map((codeHash) =>
-            prisma.recoveryCode.create({ data: { userId, codeHash } })
-        ),
+        ...codeHashes.map((codeHash) => prisma.recoveryCode.create({ data: { userId, codeHash } })),
         prisma.auditLog.create({
             data: { userId, action: 'USER_2FA_ENABLED', details: { method: 'TOTP' } },
         }),
@@ -417,7 +429,7 @@ export async function enable2FA(
  * Enable Email OTP as 2FA method.
  */
 export async function enableEmailOTP(
-    userId: string
+    userId: string,
 ): Promise<{ success: boolean; error?: string }> {
     await prisma.user.update({
         where: { id: userId },
@@ -440,7 +452,7 @@ export async function enableEmailOTP(
 
 export async function disable2FA(
     userId: string,
-    password: string
+    password: string,
 ): Promise<{ success: boolean; error?: string }> {
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -452,7 +464,10 @@ export async function disable2FA(
     }
 
     if (!user.passwordHash) {
-        return { success: false, error: 'This account uses Google Sign-In and does not have a password.' };
+        return {
+            success: false,
+            error: 'This account uses Google Sign-In and does not have a password.',
+        };
     }
 
     const passwordValid = await verifyPassword(user.passwordHash, password);
@@ -517,7 +532,7 @@ export async function getCurrentUser() {
 export async function changePassword(
     userId: string,
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
 ): Promise<{ success: boolean; error?: string }> {
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -528,7 +543,8 @@ export async function changePassword(
     });
 
     if (!user) return { success: false, error: 'User not found' };
-    if (!user.passwordHash) return { success: false, error: 'Account uses Google Sign-In — no password to change' };
+    if (!user.passwordHash)
+        return { success: false, error: 'Account uses Google Sign-In — no password to change' };
 
     const passwordValid = await verifyPassword(user.passwordHash, currentPassword);
     if (!passwordValid) return { success: false, error: 'Current password is incorrect' };
@@ -552,7 +568,15 @@ export async function changePassword(
     await prisma.$transaction(async (tx) => {
         const servers = await tx.server.findMany({
             where: { userId },
-            select: { id: true, host: true, username: true, password: true, privateKey: true, passphrase: true, notes: true },
+            select: {
+                id: true,
+                host: true,
+                username: true,
+                password: true,
+                privateKey: true,
+                passphrase: true,
+                notes: true,
+            },
         });
 
         // Update password + masterKey
@@ -577,7 +601,7 @@ export async function changePassword(
                     notes: server.notes ?? undefined,
                 },
                 oldMasterKey ? { masterKey: oldMasterKey } : undefined,
-                { masterKey: newMasterKey }
+                { masterKey: newMasterKey },
             );
             await tx.server.update({
                 where: { id: server.id },
@@ -668,13 +692,13 @@ export async function forgotPassword(email: string): Promise<void> {
     });
 
     await sendPasswordResetEmail(user.email, token).catch((err) =>
-        console.error('Failed to send password reset email:', err)
+        console.error('Failed to send password reset email:', err),
     );
 }
 
 export async function resetPassword(
     token: string,
-    newPassword: string
+    newPassword: string,
 ): Promise<{ success: boolean; error?: string }> {
     const tokenHash = hashToken(token);
 
@@ -732,7 +756,7 @@ export async function resetPassword(
 
 export async function setupEncryption(
     userId: string,
-    passphrase: string
+    passphrase: string,
 ): Promise<{ success: boolean; masterKey?: string; error?: string }> {
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -762,7 +786,7 @@ export async function setupEncryption(
 
 export async function unlockEncryption(
     userId: string,
-    passphrase: string
+    passphrase: string,
 ): Promise<{ success: boolean; masterKey?: string; error?: string }> {
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -784,9 +808,7 @@ export async function unlockEncryption(
     return { success: true, masterKey: derived.toString('hex') };
 }
 
-export async function resetEncryptionKey(
-    userId: string
-): Promise<{ success: boolean }> {
+export async function resetEncryptionKey(userId: string): Promise<{ success: boolean }> {
     // Delete all servers — credentials permanently inaccessible
     await prisma.$transaction(async (tx) => {
         await tx.server.deleteMany({ where: { userId } });
@@ -795,7 +817,11 @@ export async function resetEncryptionKey(
             data: { masterKeyHash: null, masterKeySalt: null },
         });
         await tx.auditLog.create({
-            data: { userId, action: 'USER_ENCRYPTION_KEY_RESET', details: { serversDeleted: true } },
+            data: {
+                userId,
+                action: 'USER_ENCRYPTION_KEY_RESET',
+                details: { serversDeleted: true },
+            },
         });
     });
 

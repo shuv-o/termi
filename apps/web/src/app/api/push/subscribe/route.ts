@@ -6,12 +6,7 @@
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { saveSubscription, removeSubscription } from '@/lib/services/push.service';
-import {
-    validateBody,
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-} from '@/lib/api';
+import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 
 const subscribeSchema = z.object({
     endpoint: z.string().url(),

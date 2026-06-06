@@ -93,7 +93,9 @@ export class PersistentSessionStore {
         const now = Date.now();
         for (const [id, session] of this.sessions) {
             if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
-                console.log(`[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`);
+                console.log(
+                    `[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`,
+                );
                 this.delete(id);
             }
         }

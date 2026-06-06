@@ -62,17 +62,30 @@ function entryType(mode: number): RemoteEntry['type'] {
 
 function modeToPermissions(mode: number): string {
     const typeChar: Record<number, string> = {
-        0o140000: 's', 0o120000: 'l', 0o100000: '-',
-        0o060000: 'b', 0o040000: 'd', 0o020000: 'c', 0o010000: 'p',
+        0o140000: 's',
+        0o120000: 'l',
+        0o100000: '-',
+        0o060000: 'b',
+        0o040000: 'd',
+        0o020000: 'c',
+        0o010000: 'p',
     };
     const t = typeChar[mode & 0o170000] ?? '-';
     const bits = 'rwxrwxrwx';
-    const p = bits.split('').map((c, i) => (mode & (1 << (8 - i))) ? c : '-').join('');
+    const p = bits
+        .split('')
+        .map((c, i) => (mode & (1 << (8 - i)) ? c : '-'))
+        .join('');
     return t + p;
 }
 
 function joinPath(...parts: string[]): string {
-    return parts.join('/').replace(/\/+/g, '/').replace(/(.)\/$/, '$1') || '/';
+    return (
+        parts
+            .join('/')
+            .replace(/\/+/g, '/')
+            .replace(/(.)\/$/, '$1') || '/'
+    );
 }
 
 // ============================================================================
@@ -80,28 +93,35 @@ function joinPath(...parts: string[]): string {
 // ============================================================================
 
 export async function listDirectory(config: SFTPConfig, dirPath: string): Promise<RemoteEntry[]> {
-    return withPooledSFTP(config, (sftp) => new Promise((resolve, reject) => {
-        sftp.readdir(dirPath, (err, list) => {
-            if (err) { reject(err); return; }
-            const entries: RemoteEntry[] = list
-                .filter(e => e.filename !== '.' && e.filename !== '..')
-                .map(e => ({
-                    name: e.filename,
-                    path: joinPath(dirPath, e.filename),
-                    type: entryType(e.attrs.mode ?? 0),
-                    size: e.attrs.size ?? 0,
-                    modifiedAt: e.attrs.mtime ?? 0,
-                    permissions: modeToPermissions(e.attrs.mode ?? 0),
-                    mode: e.attrs.mode ?? 0,
-                }))
-                .sort((a, b) => {
-                    if (a.type === 'dir' && b.type !== 'dir') return -1;
-                    if (a.type !== 'dir' && b.type === 'dir') return 1;
-                    return a.name.localeCompare(b.name);
+    return withPooledSFTP(
+        config,
+        (sftp) =>
+            new Promise((resolve, reject) => {
+                sftp.readdir(dirPath, (err, list) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    const entries: RemoteEntry[] = list
+                        .filter((e) => e.filename !== '.' && e.filename !== '..')
+                        .map((e) => ({
+                            name: e.filename,
+                            path: joinPath(dirPath, e.filename),
+                            type: entryType(e.attrs.mode ?? 0),
+                            size: e.attrs.size ?? 0,
+                            modifiedAt: e.attrs.mtime ?? 0,
+                            permissions: modeToPermissions(e.attrs.mode ?? 0),
+                            mode: e.attrs.mode ?? 0,
+                        }))
+                        .sort((a, b) => {
+                            if (a.type === 'dir' && b.type !== 'dir') return -1;
+                            if (a.type !== 'dir' && b.type === 'dir') return 1;
+                            return a.name.localeCompare(b.name);
+                        });
+                    resolve(entries);
                 });
-            resolve(entries);
-        });
-    }));
+            }),
+    );
 }
 
 // ============================================================================
@@ -109,9 +129,16 @@ export async function listDirectory(config: SFTPConfig, dirPath: string): Promis
 // ============================================================================
 
 export async function makeDirectory(config: SFTPConfig, dirPath: string): Promise<void> {
-    return withPooledSFTP(config, (sftp) => new Promise<void>((resolve, reject) => {
-        sftp.mkdir(dirPath, (err) => { if (err) reject(err); else resolve(); });
-    }));
+    return withPooledSFTP(
+        config,
+        (sftp) =>
+            new Promise<void>((resolve, reject) => {
+                sftp.mkdir(dirPath, (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            }),
+    );
 }
 
 // ============================================================================
@@ -120,7 +147,8 @@ export async function makeDirectory(config: SFTPConfig, dirPath: string): Promis
 
 async function rmRecursive(sftp: SFTPWrapper, dirPath: string): Promise<void> {
     const entries = await new Promise<Array<{ filename: string; attrs: { mode?: number } }>>(
-        (resolve, reject) => sftp.readdir(dirPath, (err, list) => err ? reject(err) : resolve(list))
+        (resolve, reject) =>
+            sftp.readdir(dirPath, (err, list) => (err ? reject(err) : resolve(list))),
     );
 
     for (const entry of entries) {
@@ -130,23 +158,27 @@ async function rmRecursive(sftp: SFTPWrapper, dirPath: string): Promise<void> {
             await rmRecursive(sftp, child);
         } else {
             await new Promise<void>((resolve, reject) =>
-                sftp.unlink(child, (err) => err ? reject(err) : resolve())
+                sftp.unlink(child, (err) => (err ? reject(err) : resolve())),
             );
         }
     }
 
     await new Promise<void>((resolve, reject) =>
-        sftp.rmdir(dirPath, (err) => err ? reject(err) : resolve())
+        sftp.rmdir(dirPath, (err) => (err ? reject(err) : resolve())),
     );
 }
 
-export async function deleteEntry(config: SFTPConfig, entryPath: string, isDirectory: boolean): Promise<void> {
+export async function deleteEntry(
+    config: SFTPConfig,
+    entryPath: string,
+    isDirectory: boolean,
+): Promise<void> {
     return withPooledSFTP(config, async (sftp) => {
         if (isDirectory) {
             await rmRecursive(sftp, entryPath);
         } else {
             await new Promise<void>((resolve, reject) =>
-                sftp.unlink(entryPath, (err) => err ? reject(err) : resolve())
+                sftp.unlink(entryPath, (err) => (err ? reject(err) : resolve())),
             );
         }
     });
@@ -156,20 +188,32 @@ export async function deleteEntry(config: SFTPConfig, entryPath: string, isDirec
 // RENAME / MOVE
 // ============================================================================
 
-export async function renameEntry(config: SFTPConfig, oldPath: string, newPath: string): Promise<void> {
-    return withPooledSFTP(config, (sftp) => new Promise<void>((resolve, reject) =>
-        sftp.rename(oldPath, newPath, (err) => err ? reject(err) : resolve())
-    ));
+export async function renameEntry(
+    config: SFTPConfig,
+    oldPath: string,
+    newPath: string,
+): Promise<void> {
+    return withPooledSFTP(
+        config,
+        (sftp) =>
+            new Promise<void>((resolve, reject) =>
+                sftp.rename(oldPath, newPath, (err) => (err ? reject(err) : resolve())),
+            ),
+    );
 }
 
 // ============================================================================
 // DOWNLOAD (returns a Web ReadableStream — holds pool slot until stream ends)
 // ============================================================================
 
-export function createDownloadStream(config: SFTPConfig, filePath: string): ReadableStream<Uint8Array> {
+export function createDownloadStream(
+    config: SFTPConfig,
+    filePath: string,
+): ReadableStream<Uint8Array> {
     return new ReadableStream<Uint8Array>({
         start(controller) {
-            sshPool.acquireSFTP(config)
+            sshPool
+                .acquireSFTP(config)
                 .then(({ sftp, key }) => {
                     const rs = sftp.createReadStream(filePath);
                     rs.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
@@ -244,11 +288,19 @@ export async function transferFiles(
 // UPLOAD
 // ============================================================================
 
-export async function uploadBuffer(config: SFTPConfig, remotePath: string, data: Buffer): Promise<void> {
-    return withPooledSFTP(config, (sftp) => new Promise<void>((resolve, reject) => {
-        const ws = sftp.createWriteStream(remotePath);
-        ws.on('close', resolve);
-        ws.on('error', reject);
-        ws.end(data);
-    }));
+export async function uploadBuffer(
+    config: SFTPConfig,
+    remotePath: string,
+    data: Buffer,
+): Promise<void> {
+    return withPooledSFTP(
+        config,
+        (sftp) =>
+            new Promise<void>((resolve, reject) => {
+                const ws = sftp.createWriteStream(remotePath);
+                ws.on('close', resolve);
+                ws.on('error', reject);
+                ws.end(data);
+            }),
+    );
 }

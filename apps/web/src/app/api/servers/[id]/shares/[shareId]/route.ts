@@ -4,7 +4,7 @@ import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/api'
 
 export async function DELETE(
     request: Request,
-    { params }: { params: Promise<{ id: string; shareId: string }> }
+    { params }: { params: Promise<{ id: string; shareId: string }> },
 ) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();

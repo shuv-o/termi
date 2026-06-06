@@ -1,7 +1,7 @@
 interface ElectronLocalTerminalAPI {
     create: (
         id: string,
-        opts: { cols: number; rows: number; cwd?: string }
+        opts: { cols: number; rows: number; cwd?: string },
     ) => Promise<{ success: boolean; error?: string }>;
     write: (id: string, data: string) => void;
     resize: (id: string, cols: number, rows: number) => void;

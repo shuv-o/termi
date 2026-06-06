@@ -8,12 +8,13 @@ import { validateBody, successResponse, errorResponse, unauthorizedResponse } fr
 
 const passwordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z.string()
+    newPassword: z
+        .string()
         .min(8, 'Password must be at least 8 characters')
         .max(128, 'Password too long')
         .regex(
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-            'Password must contain uppercase, lowercase, and a number'
+            'Password must contain uppercase, lowercase, and a number',
         ),
 });
 

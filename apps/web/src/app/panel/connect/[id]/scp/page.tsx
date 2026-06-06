@@ -15,8 +15,8 @@ export default function SCPPage() {
 
     useEffect(() => {
         fetch(`/api/servers/${serverId}`)
-            .then(r => r.json())
-            .then(data => {
+            .then((r) => r.json())
+            .then((data) => {
                 if (data.success) setServerName(data.data.server.name);
                 else setError('Server not found');
             })

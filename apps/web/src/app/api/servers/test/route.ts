@@ -14,16 +14,16 @@ import { validateHost } from '@/lib/security/ssrf';
 import { connectionTestRateLimit } from '@/lib/rate-limit';
 
 const schema = z.object({
-    host:       z.string().min(1),
-    port:       z.number().int().min(1).max(65535),
-    protocol:   z.enum(['SSH', 'SCP', 'RDP', 'VNC']).default('SSH'),
-    username:   z.string().optional(),
-    password:   z.string().optional(),
+    host: z.string().min(1),
+    port: z.number().int().min(1).max(65535),
+    protocol: z.enum(['SSH', 'SCP', 'RDP', 'VNC']).default('SSH'),
+    username: z.string().optional(),
+    password: z.string().optional(),
     privateKey: z.string().optional(),
     passphrase: z.string().optional(),
 });
 
-// ── TCP reachability (RDP / VNC) ─────────────────────────────────────────────
+//   TCP reachability (RDP / VNC)                       ─
 
 function tcpCheck(
     host: string,
@@ -47,23 +47,34 @@ function tcpCheck(
         socket.once('error', (err: NodeJS.ErrnoException) => {
             socket.destroy();
             const msg =
-                err.code === 'ECONNREFUSED' ? 'Connection refused — port is closed' :
-                err.code === 'ENOTFOUND'    ? 'Host not found — check the address' :
-                err.code === 'ETIMEDOUT'    ? 'Connection timed out' :
-                err.code === 'ENETUNREACH'  ? 'Network unreachable' :
-                err.message;
+                err.code === 'ECONNREFUSED'
+                    ? 'Connection refused — port is closed'
+                    : err.code === 'ENOTFOUND'
+                      ? 'Host not found — check the address'
+                      : err.code === 'ETIMEDOUT'
+                        ? 'Connection timed out'
+                        : err.code === 'ENETUNREACH'
+                          ? 'Network unreachable'
+                          : err.message;
             resolve({ ok: false, error: msg });
         });
         socket.connect(port, host);
     });
 }
 
-// ── SSH authentication test ───────────────────────────────────────────────────
+//   SSH authentication test                          ─
 
-function sshAuthTest(config: {
-    host: string; port: number; username: string;
-    password?: string; privateKey?: string; passphrase?: string;
-}, timeoutMs = 12000): Promise<{ ok: boolean; latencyMs?: number; error?: string }> {
+function sshAuthTest(
+    config: {
+        host: string;
+        port: number;
+        username: string;
+        password?: string;
+        privateKey?: string;
+        passphrase?: string;
+    },
+    timeoutMs = 12000,
+): Promise<{ ok: boolean; latencyMs?: number; error?: string }> {
     return new Promise((resolve) => {
         const client = new Client();
         const start = Date.now();
@@ -73,7 +84,11 @@ function sshAuthTest(config: {
             if (settled) return;
             settled = true;
             clearTimeout(timer);
-            try { client.end(); } catch { /* ignore */ }
+            try {
+                client.end();
+            } catch {
+                /* ignore */
+            }
             resolve(result);
         };
 
@@ -132,7 +147,7 @@ function sshAuthTest(config: {
     });
 }
 
-// ── Route handler ─────────────────────────────────────────────────────────────
+//   Route handler                               ─
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
@@ -143,12 +158,21 @@ export async function POST(request: Request) {
     // Rate limit: 20 test attempts per 5 minutes per user
     const rl = connectionTestRateLimit(user.id);
     if (!rl.allowed) {
-        return Response.json({ success: false, error: 'Too many connection tests. Please wait before trying again.' }, { status: 429 });
+        return Response.json(
+            {
+                success: false,
+                error: 'Too many connection tests. Please wait before trying again.',
+            },
+            { status: 429 },
+        );
     }
 
     let body: unknown;
-    try { body = await request.json(); }
-    catch { return Response.json({ success: false, error: 'Invalid JSON' }, { status: 400 }); }
+    try {
+        body = await request.json();
+    } catch {
+        return Response.json({ success: false, error: 'Invalid JSON' }, { status: 400 });
+    }
 
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
@@ -160,13 +184,23 @@ export async function POST(request: Request) {
     // SSRF protection: block connections to private/reserved addresses
     const ssrfCheck = await validateHost(host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
     if (!ssrfCheck.valid) {
-        return Response.json({ success: false, error: ssrfCheck.error || 'Invalid host' }, { status: 400 });
+        return Response.json(
+            { success: false, error: ssrfCheck.error || 'Invalid host' },
+            { status: 400 },
+        );
     }
 
     const isSSH = protocol === 'SSH' || protocol === 'SCP';
 
     if (isSSH && username) {
-        const result = await sshAuthTest({ host, port, username, password, privateKey, passphrase });
+        const result = await sshAuthTest({
+            host,
+            port,
+            username,
+            password,
+            privateKey,
+            passphrase,
+        });
         return Response.json({
             success: result.ok,
             latency: result.latencyMs,

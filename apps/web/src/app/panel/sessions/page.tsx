@@ -19,7 +19,7 @@ function AutoConnect() {
 
     useEffect(() => {
         const addId = searchParams.get('add');
-        if (addId && !sessions.some(s => s.serverId === addId)) {
+        if (addId && !sessions.some((s) => s.serverId === addId)) {
             addSession(addId);
         }
         // Run only on mount — intentional

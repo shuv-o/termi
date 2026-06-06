@@ -1,64 +1,64 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ============================================================================
    SHADCN/UI CSS VARIABLES (dark-only theme)
    ============================================================================ */
 :root {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --popover: #1e293b;
-  --popover-foreground: #f1f5f9;
-  --primary: #0ea5e9;
-  --primary-foreground: #ffffff;
-  --secondary: #334155;
-  --secondary-foreground: #f1f5f9;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #334155;
-  --accent-foreground: #f1f5f9;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #1e293b;
-  --ring: #0ea5e9;
-  --radius: 0.5rem;
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+    --popover: #1e293b;
+    --popover-foreground: #f1f5f9;
+    --primary: #0ea5e9;
+    --primary-foreground: #ffffff;
+    --secondary: #334155;
+    --secondary-foreground: #f1f5f9;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --accent: #334155;
+    --accent-foreground: #f1f5f9;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #334155;
+    --input: #1e293b;
+    --ring: #0ea5e9;
+    --radius: 0.5rem;
 
-  /* Terminal colors */
-  --terminal-bg: #0d1117;
-  --terminal-fg: #c9d1d9;
-  --terminal-cursor: #58a6ff;
+    /* Terminal colors */
+    --terminal-bg: #0d1117;
+    --terminal-fg: #c9d1d9;
+    --terminal-cursor: #58a6ff;
 
-  /* Spacing */
-  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    /* Spacing */
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Map CSS variables to Tailwind v4 color utilities */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
 }
 
 /* ============================================================================
@@ -66,177 +66,193 @@
    ============================================================================ */
 html,
 body {
-  height: 100%;
-  background-color: var(--background);
-  color: var(--foreground);
+    height: 100%;
+    background-color: var(--background);
+    color: var(--foreground);
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Prevent overscroll bounce on iOS */
 html {
-  overscroll-behavior: none;
+    overscroll-behavior: none;
 }
 
 /* ============================================================================
    SCROLLBAR STYLING
    ============================================================================ */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+    background: var(--border);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
+    background: var(--muted-foreground);
 }
 
 /* ============================================================================
    UTILITY CLASSES
    ============================================================================ */
 @layer utilities {
-  /* Glass effect */
-  .glass {
-    background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(71, 85, 105, 0.5);
-  }
+    /* Glass effect */
+    .glass {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+    }
 
-  /* Gradient text */
-  .gradient-text {
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 
-  /* Glow effect */
-  .glow {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
-  }
+    /* Glow effect */
+    .glow {
+        box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+    }
 
-  .glow-hover:hover {
-    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
-  }
+    .glow-hover:hover {
+        box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
+    }
 
-  /* Safe area padding for mobile */
-  .pb-safe {
-    padding-bottom: max(1rem, var(--safe-area-inset-bottom));
-  }
+    /* Safe area padding for mobile */
+    .pb-safe {
+        padding-bottom: max(1rem, var(--safe-area-inset-bottom));
+    }
 
-  /* Hide scrollbar but keep functionality */
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+    /* Hide scrollbar but keep functionality */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
 
-  /* Terminal container */
-  .terminal-container {
-    background: var(--terminal-bg);
-    font-family: 'JetBrains Mono', monospace;
-  }
+    /* Terminal container */
+    .terminal-container {
+        background: var(--terminal-bg);
+        font-family: 'JetBrains Mono', monospace;
+    }
 }
 
 /* ============================================================================
    XTERM.JS OVERRIDES
    ============================================================================ */
 .xterm {
-  padding: 8px;
+    padding: 8px;
 }
 
 .xterm-viewport {
-  overflow-y: auto !important;
+    overflow-y: auto !important;
 }
 
 .xterm-screen {
-  margin: 0 auto;
+    margin: 0 auto;
 }
 
 /* ============================================================================
    ANIMATIONS
    ============================================================================ */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 /* ============================================================================
    MOBILE VIRTUAL KEYBOARD
    ============================================================================ */
 .virtual-keyboard {
-  background: rgba(15, 23, 42, 0.98);
-  border-top: 1px solid var(--border);
-  padding: 8px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
-  flex-shrink: 0;
+    background: rgba(15, 23, 42, 0.98);
+    border-top: 1px solid var(--border);
+    padding: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    flex-shrink: 0;
 }
 
 @layer utilities {
-  .virtual-key {
-    @apply flex items-center justify-center;
-    @apply h-10 px-1;
-    @apply bg-slate-700/90 rounded-lg;
-    @apply text-xs font-medium text-slate-200;
-    @apply active:bg-slate-500 active:scale-95;
-    @apply transition-all duration-75;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
+    .virtual-key {
+        @apply flex items-center justify-center;
+        @apply h-10 px-1;
+        @apply bg-slate-700/90 rounded-lg;
+        @apply text-xs font-medium text-slate-200;
+        @apply active:bg-slate-500 active:scale-95;
+        @apply transition-all duration-75;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-  .virtual-key-active {
-    @apply bg-sky-600 text-white shadow-inner;
-  }
+    .virtual-key-active {
+        @apply bg-sky-600 text-white shadow-inner;
+    }
 
-  .virtual-key-modifier {
-    @apply font-semibold;
-  }
+    .virtual-key-modifier {
+        @apply font-semibold;
+    }
 
-  /* Full virtual keyboard (replaces native keyboard) */
-  .vk-key {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px;
-    min-width: 0;
-    padding: 0 3px;
-    background: #334155;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #e2e8f0;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 70ms, background 70ms;
-  }
-  .vk-key:active { background: #475569; transform: scale(0.91); }
-  .vk-key-action { background: #1e3a5f; }
-  .vk-key-action:active { background: #1e4d80; }
-  .vk-key-active { background: #0284c7 !important; color: #fff; }
-  .vk-key-danger { color: #f87171; }
-  .vk-key-warn  { color: #fbbf24; }
+    /* Full virtual keyboard (replaces native keyboard) */
+    .vk-key {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        min-width: 0;
+        padding: 0 3px;
+        background: #334155;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #e2e8f0;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+            transform 70ms,
+            background 70ms;
+    }
+    .vk-key:active {
+        background: #475569;
+        transform: scale(0.91);
+    }
+    .vk-key-action {
+        background: #1e3a5f;
+    }
+    .vk-key-action:active {
+        background: #1e4d80;
+    }
+    .vk-key-active {
+        background: #0284c7 !important;
+        color: #fff;
+    }
+    .vk-key-danger {
+        color: #f87171;
+    }
+    .vk-key-warn {
+        color: #fbbf24;
+    }
 }

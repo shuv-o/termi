@@ -24,9 +24,7 @@ const PRECACHE_URLS = [
 // ============================================================================
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-    );
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
     self.skipWaiting();
 });
 
@@ -36,11 +34,12 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(
-                keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        caches
+            .keys()
+            .then((keys) =>
+                Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))),
             )
-        ).then(() => self.clients.claim())
+            .then(() => self.clients.claim()),
     );
 });
 
@@ -56,10 +55,7 @@ self.addEventListener('fetch', (event) => {
     if (url.origin !== self.location.origin) return;
 
     // Skip API, auth, and WebSocket upgrade requests — always network
-    if (
-        url.pathname.startsWith('/api/') ||
-        request.headers.get('upgrade') === 'websocket'
-    ) {
+    if (url.pathname.startsWith('/api/') || request.headers.get('upgrade') === 'websocket') {
         return;
     }
 
@@ -67,7 +63,8 @@ self.addEventListener('fetch', (event) => {
     // Turbopack reuses chunk filenames across rebuilds (content changes, URL stays
     // the same). Caching those files permanently would serve stale JS to users.
     if (
-        (url.pathname.startsWith('/_next/static/') && !url.pathname.startsWith('/_next/static/chunks/')) ||
+        (url.pathname.startsWith('/_next/static/') &&
+            !url.pathname.startsWith('/_next/static/chunks/')) ||
         url.pathname.startsWith('/icons/') ||
         url.pathname.startsWith('/fonts/') ||
         url.pathname === '/manifest.json' ||
@@ -146,9 +143,7 @@ self.addEventListener('push', (event) => {
         ],
     };
 
-    event.waitUntil(
-        self.registration.showNotification(payload.title || 'Termi Alert', options)
-    );
+    event.waitUntil(self.registration.showNotification(payload.title || 'Termi Alert', options));
 });
 
 // ============================================================================
@@ -173,6 +168,6 @@ self.addEventListener('notificationclick', (event) => {
             if (self.clients.openWindow) {
                 return self.clients.openWindow(targetUrl);
             }
-        })
+        }),
     );
 });

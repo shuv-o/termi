@@ -61,7 +61,9 @@ export async function sendVerificationEmail(userId: string, email: string): Prom
     }
 }
 
-export async function verifyEmailToken(token: string): Promise<{ success: boolean; error?: string }> {
+export async function verifyEmailToken(
+    token: string,
+): Promise<{ success: boolean; error?: string }> {
     const tokenHash = hashToken(token);
     const user = await prisma.user.findFirst({
         where: {
@@ -90,4 +92,3 @@ export async function verifyEmailToken(token: string): Promise<{ success: boolea
 
     return { success: true };
 }
-

@@ -28,7 +28,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
     const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
-        params.then(p => setToken(p.token));
+        params.then((p) => setToken(p.token));
     }, [params]);
 
     useEffect(() => {
@@ -87,12 +87,11 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
     };
 
     const protocolLabel = (p: string) => p.toUpperCase();
-    const permLabel = (p: string) => p === 'manage' ? 'Manage & Connect' : 'Connect Only';
+    const permLabel = (p: string) => (p === 'manage' ? 'Manage & Connect' : 'Connect Only');
 
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md">
-
                 {/* Header */}
                 <div className="flex flex-col items-center mb-8">
                     <TerminalLogo width={48} height={48} className="rounded-xl mb-3" />
@@ -101,7 +100,6 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
                 {/* Card */}
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-xl">
-
                     {state === 'loading' && (
                         <div className="flex flex-col items-center gap-3 py-8">
                             <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -114,7 +112,8 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                             <XCircle className="w-12 h-12 text-red-400" />
                             <h2 className="text-lg font-semibold">Invitation Expired</h2>
                             <p className="text-sm text-muted-foreground">
-                                This invitation link is invalid or has expired. Please ask the server owner to send a new invitation.
+                                This invitation link is invalid or has expired. Please ask the
+                                server owner to send a new invitation.
                             </p>
                             <Button asChild variant="outline" className="mt-2">
                                 <Link href="/login">Go to Login</Link>
@@ -122,88 +121,107 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                         </div>
                     )}
 
-                    {(state === 'valid' || state === 'accepting' || state === 'wrong-user') && invitation && (
-                        <>
-                            <div className="flex items-center gap-2 mb-5">
-                                <Shield className="w-5 h-5 text-primary shrink-0" />
-                                <h2 className="text-lg font-semibold">Server Invitation</h2>
-                            </div>
-
-                            {/* Invitation details */}
-                            <div className="bg-secondary/50 rounded-xl p-4 mb-5 space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <Server className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs text-muted-foreground mb-0.5">Server</p>
-                                        <p className="font-medium text-sm">{invitation.serverName}</p>
-                                        <span className="text-xs bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">
-                                            {protocolLabel(invitation.serverProtocol)}
-                                        </span>
-                                    </div>
+                    {(state === 'valid' || state === 'accepting' || state === 'wrong-user') &&
+                        invitation && (
+                            <>
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Shield className="w-5 h-5 text-primary shrink-0" />
+                                    <h2 className="text-lg font-semibold">Server Invitation</h2>
                                 </div>
 
-                                <div className="border-t border-border pt-3 space-y-1.5 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Invited by</span>
-                                        <span className="font-medium truncate ml-2 max-w-[180px]">{invitation.inviterEmail}</span>
+                                {/* Invitation details */}
+                                <div className="bg-secondary/50 rounded-xl p-4 mb-5 space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <Server className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground mb-0.5">
+                                                Server
+                                            </p>
+                                            <p className="font-medium text-sm">
+                                                {invitation.serverName}
+                                            </p>
+                                            <span className="text-xs bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">
+                                                {protocolLabel(invitation.serverProtocol)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">For</span>
-                                        <span className="font-medium truncate ml-2 max-w-[180px]">{invitation.inviteeEmail}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Access</span>
-                                        <span className="font-medium">{permLabel(invitation.permissions)}</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {state === 'wrong-user' ? (
-                                <div className="space-y-3">
-                                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-300">
-                                        You are currently logged in as <strong>{currentUserEmail}</strong>.
-                                        This invitation is for <strong>{invitation.inviteeEmail}</strong>.
-                                        Please sign in with the correct account.
+                                    <div className="border-t border-border pt-3 space-y-1.5 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">
+                                                Invited by
+                                            </span>
+                                            <span className="font-medium truncate ml-2 max-w-[180px]">
+                                                {invitation.inviterEmail}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">For</span>
+                                            <span className="font-medium truncate ml-2 max-w-[180px]">
+                                                {invitation.inviteeEmail}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Access</span>
+                                            <span className="font-medium">
+                                                {permLabel(invitation.permissions)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <Button asChild className="w-full">
-                                        <Link href={`/login?next=/invitations/${token}`}>
-                                            <LogIn className="w-4 h-4" /> Sign in with the right account
-                                        </Link>
-                                    </Button>
                                 </div>
-                            ) : currentUserEmail ? (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-muted-foreground text-center">
-                                        Signed in as <strong>{currentUserEmail}</strong>
-                                    </p>
-                                    <Button
-                                        className="w-full"
-                                        onClick={handleAccept}
-                                        disabled={state === 'accepting'}
-                                    >
-                                        {state === 'accepting' && <Loader2 className="w-4 h-4 animate-spin" />}
-                                        Accept Invitation
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-muted-foreground text-center">
-                                        To accept, sign in or create a new account.
-                                    </p>
-                                    <Button asChild className="w-full">
-                                        <Link href={`/login?next=/invitations/${token}`}>
-                                            <LogIn className="w-4 h-4" /> Sign In
-                                        </Link>
-                                    </Button>
-                                    <Button asChild variant="outline" className="w-full">
-                                        <Link href={`/register?next=/invitations/${token}&email=${encodeURIComponent(invitation.inviteeEmail)}`}>
-                                            <UserPlus className="w-4 h-4" /> Create Account
-                                        </Link>
-                                    </Button>
-                                </div>
-                            )}
-                        </>
-                    )}
+
+                                {state === 'wrong-user' ? (
+                                    <div className="space-y-3">
+                                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-300">
+                                            You are currently logged in as{' '}
+                                            <strong>{currentUserEmail}</strong>. This invitation is
+                                            for <strong>{invitation.inviteeEmail}</strong>. Please
+                                            sign in with the correct account.
+                                        </div>
+                                        <Button asChild className="w-full">
+                                            <Link href={`/login?next=/invitations/${token}`}>
+                                                <LogIn className="w-4 h-4" /> Sign in with the right
+                                                account
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                ) : currentUserEmail ? (
+                                    <div className="space-y-3">
+                                        <p className="text-sm text-muted-foreground text-center">
+                                            Signed in as <strong>{currentUserEmail}</strong>
+                                        </p>
+                                        <Button
+                                            className="w-full"
+                                            onClick={handleAccept}
+                                            disabled={state === 'accepting'}
+                                        >
+                                            {state === 'accepting' && (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            )}
+                                            Accept Invitation
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <p className="text-sm text-muted-foreground text-center">
+                                            To accept, sign in or create a new account.
+                                        </p>
+                                        <Button asChild className="w-full">
+                                            <Link href={`/login?next=/invitations/${token}`}>
+                                                <LogIn className="w-4 h-4" /> Sign In
+                                            </Link>
+                                        </Button>
+                                        <Button asChild variant="outline" className="w-full">
+                                            <Link
+                                                href={`/register?next=/invitations/${token}&email=${encodeURIComponent(invitation.inviteeEmail)}`}
+                                            >
+                                                <UserPlus className="w-4 h-4" /> Create Account
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        )}
 
                     {state === 'accepted' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -221,7 +239,9 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                             <XCircle className="w-12 h-12 text-red-400" />
                             <h2 className="text-lg font-semibold">Something went wrong</h2>
                             <p className="text-sm text-muted-foreground">{errorMsg}</p>
-                            <Button variant="outline" onClick={() => setState('valid')}>Try Again</Button>
+                            <Button variant="outline" onClick={() => setState('valid')}>
+                                Try Again
+                            </Button>
                         </div>
                     )}
                 </div>

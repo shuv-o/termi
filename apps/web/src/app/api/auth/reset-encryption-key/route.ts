@@ -7,7 +7,9 @@ export async function POST() {
 
     try {
         await resetEncryptionKey(user.id);
-        return successResponse({ message: 'Encryption key reset. All server credentials have been deleted.' });
+        return successResponse({
+            message: 'Encryption key reset. All server credentials have been deleted.',
+        });
     } catch (err) {
         console.error('Reset encryption key error:', err);
         return errorResponse('Failed to reset encryption key', 500);

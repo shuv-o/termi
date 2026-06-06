@@ -21,14 +21,16 @@ interface RouteParams {
 
 const monitorSchema = z.object({
     enabled: z.boolean(),
-    checkIntervalMinutes: z.union([
-        z.literal(1),
-        z.literal(5),
-        z.literal(10),
-        z.literal(15),
-        z.literal(30),
-        z.literal(60),
-    ]).optional(),
+    checkIntervalMinutes: z
+        .union([
+            z.literal(1),
+            z.literal(5),
+            z.literal(10),
+            z.literal(15),
+            z.literal(30),
+            z.literal(60),
+        ])
+        .optional(),
     alertEmail: z.boolean().optional(),
     alertPush: z.boolean().optional(),
     failureThreshold: z.number().int().min(1).max(10).optional(),
@@ -89,10 +91,10 @@ export async function POST(request: Request, { params }: RouteParams) {
         // failure counters can't trigger false alerts.
         const resetState = isToggleChange
             ? {
-                consecutiveFailures: 0,
-                alertSent: false,
-                lastCheckedAt: null,
-                lastStatus: true,
+                  consecutiveFailures: 0,
+                  alertSent: false,
+                  lastCheckedAt: null,
+                  lastStatus: true,
               }
             : {};
 
@@ -100,10 +102,14 @@ export async function POST(request: Request, { params }: RouteParams) {
             where: { serverId: id },
             update: {
                 enabled: data.enabled,
-                ...(data.checkIntervalMinutes !== undefined && { checkIntervalMinutes: data.checkIntervalMinutes }),
+                ...(data.checkIntervalMinutes !== undefined && {
+                    checkIntervalMinutes: data.checkIntervalMinutes,
+                }),
                 ...(data.alertEmail !== undefined && { alertEmail: data.alertEmail }),
                 ...(data.alertPush !== undefined && { alertPush: data.alertPush }),
-                ...(data.failureThreshold !== undefined && { failureThreshold: data.failureThreshold }),
+                ...(data.failureThreshold !== undefined && {
+                    failureThreshold: data.failureThreshold,
+                }),
                 ...resetState,
             },
             create: {

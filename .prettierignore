@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+apps/web/.next/
+apps/web/out/
+apps/gateway/dist/
+dist/
+
+# Generated code
+apps/web/src/app/generated/
+
+# Bundled gateway for Electron
+apps/electron/gateway.cjs
+
+# Prisma migrations
+apps/web/prisma/migrations/
+
+# Misc
+*.min.js
+*.min.css
+package-lock.json
+coverage/
+playwright-report/
+test-results/

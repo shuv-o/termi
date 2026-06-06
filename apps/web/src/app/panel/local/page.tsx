@@ -2,7 +2,15 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { Laptop, Loader2, RotateCcw, WifiOff, Plus, X, Terminal as TerminalIcon } from 'lucide-react';
+import {
+    Laptop,
+    Loader2,
+    RotateCcw,
+    WifiOff,
+    Plus,
+    X,
+    Terminal as TerminalIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
@@ -41,9 +49,12 @@ export default function LocalTerminalPage() {
     const [tabs, setTabs] = useState<LocalTab[]>([]);
     const [activeId, setActiveId] = useState<string>('');
 
-    // ── Helpers ──
+    //   Helpers
 
-    const fetchLocalToken = useCallback(async (): Promise<{ token: string; gatewayUrl: string | null } | null> => {
+    const fetchLocalToken = useCallback(async (): Promise<{
+        token: string;
+        gatewayUrl: string | null;
+    } | null> => {
         try {
             const res = await fetch('/api/connection/token', {
                 method: 'POST',
@@ -58,19 +69,28 @@ export default function LocalTerminalPage() {
         }
     }, []);
 
-    const loadCloudToken = useCallback((id: string) => {
-        fetchLocalToken().then((result) => {
-            setTabs(prev => prev.map(t => {
-                if (t.id !== id) return t;
-                return result
-                    ? { ...t, token: result.token, gatewayUrl: result.gatewayUrl }
-                    : { ...t, status: 'error', error: 'Local terminal is not available on this server.' };
-            }));
-        });
-    }, [fetchLocalToken]);
+    const loadCloudToken = useCallback(
+        (id: string) => {
+            fetchLocalToken().then((result) => {
+                setTabs((prev) =>
+                    prev.map((t) => {
+                        if (t.id !== id) return t;
+                        return result
+                            ? { ...t, token: result.token, gatewayUrl: result.gatewayUrl }
+                            : {
+                                  ...t,
+                                  status: 'error',
+                                  error: 'Local terminal is not available on this server.',
+                              };
+                    }),
+                );
+            });
+        },
+        [fetchLocalToken],
+    );
 
     const setTabStatus = useCallback((id: string, status: Status) => {
-        setTabs(prev => prev.map(t => (t.id === id ? { ...t, status } : t)));
+        setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     }, []);
 
     const activateTab = useCallback((id: string) => {
@@ -80,15 +100,15 @@ export default function LocalTerminalPage() {
 
     const addTab = useCallback(() => {
         const tab = freshTab();
-        setTabs(prev => [...prev, tab]);
+        setTabs((prev) => [...prev, tab]);
         setActiveId(tab.id);
         if (envRef.current === 'cloud') loadCloudToken(tab.id);
     }, [loadCloudToken]);
 
     const closeTab = useCallback((id: string) => {
-        setTabs(prev => {
-            const remaining = prev.filter(t => t.id !== id);
-            setActiveId(curr => {
+        setTabs((prev) => {
+            const remaining = prev.filter((t) => t.id !== id);
+            setActiveId((curr) => {
                 if (curr !== id) return curr;
                 return remaining.length > 0 ? remaining[remaining.length - 1].id : '';
             });
@@ -96,14 +116,17 @@ export default function LocalTerminalPage() {
         });
     }, []);
 
-    const restartTab = useCallback((id: string) => {
-        const replacement = freshTab();
-        setTabs(prev => prev.map(t => (t.id === id ? replacement : t)));
-        setActiveId(curr => (curr === id ? replacement.id : curr));
-        if (envRef.current === 'cloud') loadCloudToken(replacement.id);
-    }, [loadCloudToken]);
+    const restartTab = useCallback(
+        (id: string) => {
+            const replacement = freshTab();
+            setTabs((prev) => prev.map((t) => (t.id === id ? replacement : t)));
+            setActiveId((curr) => (curr === id ? replacement.id : curr));
+            if (envRef.current === 'cloud') loadCloudToken(replacement.id);
+        },
+        [loadCloudToken],
+    );
 
-    // ── Detect environment and open the first tab ──
+    //   Detect environment and open the first tab
     useEffect(() => {
         const isElectron = Boolean(window.electronAPI?.isElectron);
         const e: Env = isElectron ? 'electron' : 'cloud';
@@ -118,7 +141,7 @@ export default function LocalTerminalPage() {
 
     const title = env === 'electron' ? 'Local Terminal' : 'Gateway Shell';
     const subtitle = env === 'electron' ? 'Running on this device' : 'Shell on the gateway host';
-    const activeTab = tabs.find(t => t.id === activeId) ?? null;
+    const activeTab = tabs.find((t) => t.id === activeId) ?? null;
     const activeStatus: Status = activeTab?.status ?? 'connecting';
 
     return (
@@ -130,21 +153,29 @@ export default function LocalTerminalPage() {
                 </span>
                 <div className="flex flex-col min-w-0">
                     <span className="text-sm font-semibold leading-tight truncate">{title}</span>
-                    <span className="text-[11px] text-muted-foreground leading-tight truncate">{subtitle}</span>
+                    <span className="text-[11px] text-muted-foreground leading-tight truncate">
+                        {subtitle}
+                    </span>
                 </div>
                 <div className="flex items-center gap-1.5 ml-2 shrink-0">
                     <span
                         className={`w-2 h-2 rounded-full ${
-                            activeStatus === 'connected'  ? 'bg-green-500'
-                            : activeStatus === 'connecting' ? 'bg-yellow-500 animate-pulse'
-                                                            : 'bg-red-500'
+                            activeStatus === 'connected'
+                                ? 'bg-green-500'
+                                : activeStatus === 'connecting'
+                                  ? 'bg-yellow-500 animate-pulse'
+                                  : 'bg-red-500'
                         }`}
                     />
-                    <span className="text-xs text-muted-foreground capitalize hidden sm:inline">{activeStatus}</span>
+                    <span className="text-xs text-muted-foreground capitalize hidden sm:inline">
+                        {activeStatus}
+                    </span>
                 </div>
                 <div className="flex-1" />
                 <Button
-                    variant="ghost" size="sm" onClick={() => activeTab && restartTab(activeTab.id)}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => activeTab && restartTab(activeTab.id)}
                     className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
                     title="Restart terminal"
                 >
@@ -163,7 +194,9 @@ export default function LocalTerminalPage() {
                             role="button"
                             tabIndex={0}
                             onClick={() => activateTab(tab.id)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') activateTab(tab.id); }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') activateTab(tab.id);
+                            }}
                             className={`group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap cursor-pointer transition-colors select-none ${
                                 isActive
                                     ? 'bg-violet-500/15 text-violet-300'
@@ -171,10 +204,15 @@ export default function LocalTerminalPage() {
                             }`}
                         >
                             <TerminalIcon className="w-3.5 h-3.5 shrink-0" />
-                            <span>{env === 'electron' ? 'Shell' : 'Session'} {i + 1}</span>
+                            <span>
+                                {env === 'electron' ? 'Shell' : 'Session'} {i + 1}
+                            </span>
                             {tabs.length > 1 && (
                                 <button
-                                    onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        closeTab(tab.id);
+                                    }}
                                     className="rounded p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
                                     title="Close shell"
                                 >
@@ -219,10 +257,21 @@ export default function LocalTerminalPage() {
                                             <WifiOff className="w-6 h-6 text-destructive/70" />
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-sm font-medium text-destructive">Could not start the terminal</p>
-                                            {tab.error && <p className="text-xs text-muted-foreground mt-1 max-w-sm px-4 break-words">{tab.error}</p>}
+                                            <p className="text-sm font-medium text-destructive">
+                                                Could not start the terminal
+                                            </p>
+                                            {tab.error && (
+                                                <p className="text-xs text-muted-foreground mt-1 max-w-sm px-4 break-words">
+                                                    {tab.error}
+                                                </p>
+                                            )}
                                         </div>
-                                        <Button variant="secondary" size="sm" onClick={() => restartTab(tab.id)} className="gap-1.5">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => restartTab(tab.id)}
+                                            className="gap-1.5"
+                                        >
                                             <RotateCcw className="w-3.5 h-3.5" /> Try again
                                         </Button>
                                     </div>

@@ -11,8 +11,12 @@ import type { TokenPayload } from '../auth/token.js';
 
 // Read guacd connection settings lazily (at call time, not module load time)
 // so that dotenv.config() in index.ts has already populated process.env.
-function getGuacdHost() { return process.env.GUACD_HOST || 'localhost'; }
-function getGuacdPort() { return parseInt(process.env.GUACD_PORT || '4822', 10); }
+function getGuacdHost() {
+    return process.env.GUACD_HOST || 'localhost';
+}
+function getGuacdPort() {
+    return parseInt(process.env.GUACD_PORT || '4822', 10);
+}
 
 /**
  * Encode a Guacamole protocol instruction.
@@ -23,9 +27,7 @@ function getGuacdPort() { return parseInt(process.env.GUACD_PORT || '4822', 10);
  */
 function encodeInstruction(opcode: string, ...args: string[]): Buffer {
     const parts = [opcode, ...args];
-    const encoded = parts
-        .map(p => `${Buffer.byteLength(p, 'utf8')}.${p}`)
-        .join(',') + ';';
+    const encoded = parts.map((p) => `${Buffer.byteLength(p, 'utf8')}.${p}`).join(',') + ';';
     return Buffer.from(encoded, 'utf8');
 }
 
@@ -44,7 +46,10 @@ function parseInstruction(data: string): { opcode: string; args: string[] } | nu
         if (!lengthMatch) break;
 
         const length = parseInt(lengthMatch[1], 10);
-        const value = remaining.substring(lengthMatch[1].length + 1, lengthMatch[1].length + 1 + length);
+        const value = remaining.substring(
+            lengthMatch[1].length + 1,
+            lengthMatch[1].length + 1 + length,
+        );
         parts.push(value);
 
         remaining = remaining.substring(lengthMatch[1].length + 1 + length);
@@ -76,7 +81,7 @@ export class GuacamoleHandler {
 
         this.setupSocket();
         this.setupWebSocket();
-        this.connect(payload, protocol).catch(err => {
+        this.connect(payload, protocol).catch((err) => {
             console.error('[Guacamole] Connection init error:', err);
             this.sendError('Failed to initialize connection');
         });
@@ -102,7 +107,10 @@ export class GuacamoleHandler {
         this.guacdSocket.on('close', () => {
             console.log('[Guacamole] guacd socket closed');
             if (this.buffer.length > 0) {
-                console.warn('[Guacamole] Unprocessed buffer on close (possible truncated error):', this.buffer.substring(0, 200));
+                console.warn(
+                    '[Guacamole] Unprocessed buffer on close (possible truncated error):',
+                    this.buffer.substring(0, 200),
+                );
             }
             if (this.closing) return; // Already handling shutdown
             this.closing = true;
@@ -125,7 +133,7 @@ export class GuacamoleHandler {
                 const parsed = parseInstruction(instruction);
 
                 if (parsed?.opcode === 'error') {
-                    const errMsg  = parsed.args[0] ?? '';
+                    const errMsg = parsed.args[0] ?? '';
                     const errCode = parsed.args[1] ?? '';
                     console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
                 }
@@ -189,7 +197,9 @@ export class GuacamoleHandler {
     private async connect(payload: TokenPayload, protocol: 'rdp' | 'vnc') {
         const guacdHost = getGuacdHost();
         const guacdPort = getGuacdPort();
-        console.log(`[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`);
+        console.log(
+            `[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`,
+        );
 
         try {
             await new Promise<void>((resolve, reject) => {
@@ -255,17 +265,17 @@ export class GuacamoleHandler {
         // Map of available parameter values
         const paramMap: Record<string, string> = {
             // Basic connection
-            'hostname': payload.host,
-            'port': String(payload.port || (protocol === 'rdp' ? 3389 : 5900)),
-            'username': payload.username || '',
-            'password': payload.password || '',
-            'domain': '',
-            'timeout': '',
+            hostname: payload.host,
+            port: String(payload.port || (protocol === 'rdp' ? 3389 : 5900)),
+            username: payload.username || '',
+            password: payload.password || '',
+            domain: '',
+            timeout: '',
 
             // Display settings
-            'width': String(payload.displayWidth || 1024),
-            'height': String(payload.displayHeight || 768),
-            'dpi': '96',
+            width: String(payload.displayWidth || 1024),
+            height: String(payload.displayHeight || 768),
+            dpi: '96',
             // 32-bit colour → FreeRDP negotiates PIXEL_FORMAT_BGRA32.
             // This avoids the BGR24 "Cache Bitmap V2 + MemBlt" crash that was
             // seen with 24-bit depth, while the patched guacd image fixes the
@@ -291,7 +301,7 @@ export class GuacamoleHandler {
             // Security mode from server config (defaults to 'any').
             // Use 'rdp' if the server doesn't support NLA or NLA silently times out (error 514).
             // Use 'nla' for servers that strictly require Network Level Authentication.
-            'security': payload.rdpSecurity || 'any',
+            security: payload.rdpSecurity || 'any',
             // ignore-cert: FreeRDP 2.x (guacd 1.5.x) cert bypass — skips all
             // certificate validation so self-signed RDP certs are accepted.
             'ignore-cert': 'true',
@@ -301,8 +311,8 @@ export class GuacamoleHandler {
             'cert-fingerprints': '',
             'disable-auth': '',
             'server-layout': '',
-            'timezone': '',
-            'console': '',
+            timezone: '',
+            console: '',
             'initial-program': '',
             'client-name': '',
             'preconnection-id': '',
@@ -390,12 +400,12 @@ export class GuacamoleHandler {
             'normalize-clipboard': '',
 
             // VNC-specific settings
-            'encodings': '',           // let guacd choose (zrle, copyrect, hextile, etc.)
-            'swap-red-blue': 'false',  // only needed for some BGR-order VNC servers
-            'cursor': '',              // default: local rendering
-            'autoretry': '0',          // no auto-retry on connection failure (prevents lockouts)
+            encodings: '', // let guacd choose (zrle, copyrect, hextile, etc.)
+            'swap-red-blue': 'false', // only needed for some BGR-order VNC servers
+            cursor: '', // default: local rendering
+            autoretry: '0', // no auto-retry on connection failure (prevents lockouts)
             'clipboard-encoding': '',
-            'dest-host': '',           // SSH gateway forwarding (unused)
+            'dest-host': '', // SSH gateway forwarding (unused)
             'dest-port': '',
             'enable-audio': '',
             'audio-servername': '',
@@ -420,7 +430,7 @@ export class GuacamoleHandler {
         }
 
         // Log any expected args that have no mapping (likely need adding to paramMap)
-        const unmapped = expectedArgs.filter(a => !/^VERSION_/.test(a) && !(a in paramMap));
+        const unmapped = expectedArgs.filter((a) => !/^VERSION_/.test(a) && !(a in paramMap));
         if (unmapped.length > 0) {
             console.warn('[Guacamole] Unmapped guacd args (sent as empty):', unmapped);
         }
@@ -436,15 +446,23 @@ export class GuacamoleHandler {
         const width = payload.displayWidth || 1024;
         const height = payload.displayHeight || 768;
         const dpi = 96;
-        this.guacdSocket.write(encodeInstruction('size', String(width), String(height), String(dpi)));
+        this.guacdSocket.write(
+            encodeInstruction('size', String(width), String(height), String(dpi)),
+        );
 
         // Send capability handshake instructions as the standard Guacamole.Client
         // does (audio/video/image/timezone).  Without these, guacd leaves its
         // internal capability arrays (audio_mimetypes, image_mimetypes, etc.) as
         // NULL, which can trigger null-dereference crashes in certain PDU-handling
         // paths within FreeRDP's channel callbacks.
-        this.guacdSocket.write(encodeInstruction('audio', 'audio/L16;rate=44100,channels=2', 'audio/L16;rate=22050,channels=2'));
-        this.guacdSocket.write(encodeInstruction('video'));           // no video support
+        this.guacdSocket.write(
+            encodeInstruction(
+                'audio',
+                'audio/L16;rate=44100,channels=2',
+                'audio/L16;rate=22050,channels=2',
+            ),
+        );
+        this.guacdSocket.write(encodeInstruction('video')); // no video support
         this.guacdSocket.write(encodeInstruction('image', 'image/png', 'image/jpeg', 'image/webp'));
         this.guacdSocket.write(encodeInstruction('timezone', 'UTC'));
 
@@ -459,10 +477,12 @@ export class GuacamoleHandler {
 
     private sendError(message: string): void {
         if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-                type: 'error',
-                message,
-            }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'error',
+                    message,
+                }),
+            );
         }
     }
 

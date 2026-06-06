@@ -35,12 +35,20 @@ export default function SetupEncryptionPage() {
     const passphraseMatch = passphrase === confirm && confirm.length > 0;
 
     useEffect(() => {
-        fetch('/api/auth/me').then(async (res) => {
-            const data = await res.json();
-            if (!data.success) { router.push('/login'); return; }
-            if (data.data.user.hasMasterKey) { router.push('/panel'); return; }
-            setCheckingUser(false);
-        }).catch(() => router.push('/login'));
+        fetch('/api/auth/me')
+            .then(async (res) => {
+                const data = await res.json();
+                if (!data.success) {
+                    router.push('/login');
+                    return;
+                }
+                if (data.data.user.hasMasterKey) {
+                    router.push('/panel');
+                    return;
+                }
+                setCheckingUser(false);
+            })
+            .catch(() => router.push('/login'));
     }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +63,10 @@ export default function SetupEncryptionPage() {
                 body: JSON.stringify({ passphrase }),
             });
             const data = await res.json();
-            if (!data.success) { setError(data.error || 'Setup failed'); return; }
+            if (!data.success) {
+                setError(data.error || 'Setup failed');
+                return;
+            }
             router.push('/panel');
         } catch {
             setError('Something went wrong. Please try again.');
@@ -64,7 +75,10 @@ export default function SetupEncryptionPage() {
         }
     };
 
-    if (checkingUser) return <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />;
+    if (checkingUser)
+        return (
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        );
 
     return (
         <Card className="w-full max-w-md border-border bg-card">
@@ -76,7 +90,8 @@ export default function SetupEncryptionPage() {
                     </div>
                     <h1 className="text-2xl font-bold">Set Up Encryption</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
-                        Your server credentials will be encrypted with this passphrase. You&apos;ll enter it each time you sign in with Google.
+                        Your server credentials will be encrypted with this passphrase. You&apos;ll
+                        enter it each time you sign in with Google.
                     </p>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,18 +108,31 @@ export default function SetupEncryptionPage() {
                                 autoFocus
                                 minLength={8}
                             />
-                            <button type="button" onClick={() => setShowPassphrase(!showPassphrase)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <button
+                                type="button"
+                                onClick={() => setShowPassphrase(!showPassphrase)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            >
+                                {showPassphrase ? (
+                                    <EyeOff className="w-4 h-4" />
+                                ) : (
+                                    <Eye className="w-4 h-4" />
+                                )}
                             </button>
                         </div>
                         {passphrase && (
                             <div className="mt-1 space-y-1">
                                 <div className="flex gap-1">
-                                    {[1,2,3,4,5,6].map((i) => (
-                                        <div key={i} className={`h-1 flex-1 rounded ${i <= strength.score ? strength.color : 'bg-muted'}`} />
+                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                        <div
+                                            key={i}
+                                            className={`h-1 flex-1 rounded ${i <= strength.score ? strength.color : 'bg-muted'}`}
+                                        />
                                     ))}
                                 </div>
-                                <p className="text-xs text-muted-foreground">Strength: {strength.label}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Strength: {strength.label}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -116,16 +144,35 @@ export default function SetupEncryptionPage() {
                             value={confirm}
                             onChange={(e) => setConfirm(e.target.value)}
                             placeholder="Repeat your passphrase"
-                            className={confirm.length > 0 ? (passphraseMatch ? 'border-green-500' : 'border-red-500') : ''}
+                            className={
+                                confirm.length > 0
+                                    ? passphraseMatch
+                                        ? 'border-green-500'
+                                        : 'border-red-500'
+                                    : ''
+                            }
                         />
-                        {passphraseMatch && <p className="text-xs text-green-400 flex items-center gap-1"><Check className="w-3 h-3" /> Passphrases match</p>}
+                        {passphraseMatch && (
+                            <p className="text-xs text-green-400 flex items-center gap-1">
+                                <Check className="w-3 h-3" /> Passphrases match
+                            </p>
+                        )}
                     </div>
                     <div className="bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 text-xs text-sky-300">
-                        ℹ️ This passphrase cannot be recovered. If you forget it, you&apos;ll need to reset it — which will delete all your server credentials.
+                        ℹ️ This passphrase cannot be recovered. If you forget it, you&apos;ll need
+                        to reset it — which will delete all your server credentials.
                     </div>
                     {error && <p className="text-sm text-red-400">{error}</p>}
-                    <Button type="submit" className="w-full" disabled={loading || passphrase.length < 8 || !passphraseMatch}>
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Set Up Encryption & Continue'}
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={loading || passphrase.length < 8 || !passphraseMatch}
+                    >
+                        {loading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            'Set Up Encryption & Continue'
+                        )}
                     </Button>
                 </form>
             </CardContent>

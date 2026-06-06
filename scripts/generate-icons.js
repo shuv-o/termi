@@ -19,7 +19,8 @@ mkdirSync(iconsDir, { recursive: true });
 const svgSource = readFileSync(join(iconsDir, 'source.svg'));
 
 // SVG with full-bleed background for maskable icons (no safe-zone padding)
-const maskableSvg = Buffer.from(`<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+const maskableSvg =
+    Buffer.from(`<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" fill="#0f172a"/>
   <path d="M 136 192 L 252 256 L 136 320" stroke="#0ea5e9" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   <rect x="278" y="232" width="100" height="48" rx="8" fill="#0ea5e9"/>
@@ -49,32 +50,20 @@ async function generate() {
     }
 
     // Apple touch icon (180x180, no transparency)
-    await sharp(maskableSvg)
-        .resize(180, 180)
-        .png()
-        .toFile(join(iconsDir, 'apple-touch-icon.png'));
+    await sharp(maskableSvg).resize(180, 180).png().toFile(join(iconsDir, 'apple-touch-icon.png'));
     console.log('  ✓ apple-touch-icon.png');
 
     // Shortcut icon (add-server)
-    await sharp(svgSource)
-        .resize(96, 96)
-        .png()
-        .toFile(join(iconsDir, 'add-server.png'));
+    await sharp(svgSource).resize(96, 96).png().toFile(join(iconsDir, 'add-server.png'));
     console.log('  ✓ add-server.png');
 
     // Favicon (32x32 PNG — served as /favicon.ico via Next.js)
-    await sharp(svgSource)
-        .resize(32, 32)
-        .png()
-        .toFile(join(publicDir, 'favicon.png'));
+    await sharp(svgSource).resize(32, 32).png().toFile(join(publicDir, 'favicon.png'));
     console.log('  ✓ favicon.png');
 
     // Also generate a 16x16 and 32x32 combined into favicon.ico via raw ICO writing
     // For simplicity, copy 32x32 PNG as favicon.ico (browsers accept PNG in .ico)
-    await sharp(svgSource)
-        .resize(32, 32)
-        .png()
-        .toFile(join(publicDir, 'favicon.ico'));
+    await sharp(svgSource).resize(32, 32).png().toFile(join(publicDir, 'favicon.ico'));
     console.log('  ✓ favicon.ico');
 
     console.log('\nAll icons generated successfully!');

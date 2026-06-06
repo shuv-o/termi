@@ -90,7 +90,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
                 You're receiving this because you enabled monitoring alerts for this server in Termi.
               </p>
             </div>
-            `
+            `,
         );
     }
 }
@@ -141,7 +141,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
                 View Server
               </a>
             </div>
-            `
+            `,
         );
     }
 }

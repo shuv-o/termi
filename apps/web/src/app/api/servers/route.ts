@@ -5,17 +5,8 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import {
-    getServers,
-    createServer,
-    searchServers,
-} from '@/lib/services';
-import {
-    validateBody,
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-} from '@/lib/api';
+import { getServers, createServer, searchServers } from '@/lib/services';
+import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 import { Protocol } from '@/app/generated/prisma/client';
 import { validateHost } from '@/lib/security/ssrf';
 
@@ -60,7 +51,7 @@ export async function GET(request: Request) {
                 query,
                 protocol || undefined,
                 groupId,
-                favorites
+                favorites,
             );
         } else {
             servers = await getServers(user.id);
@@ -90,7 +81,7 @@ export async function POST(request: Request) {
         // SSRF protection: validate host doesn't point to internal network
         const ssrfCheck = await validateHost(
             validation.data.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true'
+            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
         );
         if (!ssrfCheck.valid) {
             return errorResponse(ssrfCheck.error || 'Invalid host', 400);

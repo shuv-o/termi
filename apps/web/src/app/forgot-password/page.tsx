@@ -47,11 +47,12 @@ export default function ForgotPasswordPage() {
                             <Mail className="w-6 h-6 text-green-400" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            If that email address has an account, we&apos;ve sent a password reset link.
-                            Check your inbox.
+                            If that email address has an account, we&apos;ve sent a password reset
+                            link. Check your inbox.
                         </p>
                         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-xs text-yellow-300">
-                            ⚠️ Resetting your password will permanently delete your stored server credentials.
+                            ⚠️ Resetting your password will permanently delete your stored server
+                            credentials.
                         </div>
                         <Button asChild variant="ghost" className="w-full">
                             <Link href="/login">
@@ -66,7 +67,8 @@ export default function ForgotPasswordPage() {
                             Enter your email address and we&apos;ll send a reset link.
                         </p>
                         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
-                            ⚠️ Warning: Resetting your password will permanently delete all stored server credentials (passwords, private keys). This cannot be undone.
+                            ⚠️ Warning: Resetting your password will permanently delete all stored
+                            server credentials (passwords, private keys). This cannot be undone.
                         </div>
                         <div className="space-y-1">
                             <Label htmlFor="email">Email address</Label>
@@ -82,7 +84,11 @@ export default function ForgotPasswordPage() {
                         </div>
                         {error && <p className="text-sm text-red-400">{error}</p>}
                         <Button type="submit" className="w-full" disabled={loading || !email}>
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Reset Link'}
+                            {loading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                'Send Reset Link'
+                            )}
                         </Button>
                         <Button asChild variant="ghost" className="w-full">
                             <Link href="/login">

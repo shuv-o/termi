@@ -107,11 +107,7 @@ export async function getServerGroupById(groupId: string, userId: string) {
 // UPDATE
 // ============================================================================
 
-export async function updateServerGroup(
-    groupId: string,
-    userId: string,
-    input: UpdateGroupInput
-) {
+export async function updateServerGroup(groupId: string, userId: string, input: UpdateGroupInput) {
     // Verify ownership
     const existing = await prisma.serverGroup.findFirst({
         where: { id: groupId, userId },
@@ -193,8 +189,8 @@ export async function reorderGroups(userId: string, groupIds: string[]) {
             prisma.serverGroup.updateMany({
                 where: { id, userId },
                 data: { sortOrder: index },
-            })
-        )
+            }),
+        ),
     );
 
     return true;

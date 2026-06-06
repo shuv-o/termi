@@ -1,47 +1,49 @@
 {
-  "name": "termi",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
-  "license": "MIT",
-  "author": "Termi Contributors",
-  "main": "apps/electron/main.js",
-  "workspaces": [
-    "apps/*"
-  ],
-  "scripts": {
-    "dev": "npm run dev --workspace=apps/web",
-    "dev:gateway": "npm run dev --workspace=apps/gateway",
-    "dev:all": "concurrently \"npm run dev --workspace=apps/web\" \"npm run dev:gateway\"",
-    "build": "npm run build --workspace=apps/web && npm run build --workspace=apps/gateway",
-    "start": "npm run start --workspace=apps/web",
-    "lint": "npm run lint --workspaces",
-    "test": "npm run test --workspaces",
-    "db:push": "npm run db:push --workspace=apps/web",
-
-
-    "db:migrate": "npm run db:migrate --workspace=apps/web",
-    "db:generate": "npm run db:generate --workspace=apps/web",
-    "db:seed": "npm run db:seed --workspace=apps/web",
-    "db:studio": "npm run db:studio --workspace=apps/web",
-    "setup:electron": "electron-rebuild -f -w node-pty",
-    "electron:dev": "ELECTRON_DEV=1 electron .",
-    "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
-    "build:gateway-bundle": "esbuild apps/gateway/src/index.ts --bundle --platform=node --target=node20 --format=cjs --external:ssh2 --external:node-pty --outfile=apps/electron/gateway.cjs",
-    "build:electron": "npm run build:gateway-bundle && electron-builder"
-  },
-  "dependencies": {
-    "node-pty": "^1.0.0"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1",
-    "esbuild": "^0.27.4",
-    "typescript": "^5.9.3",
-    "electron": "41.3.0",
-    "electron-builder": "26.8.1",
-    "@electron/rebuild": "^4.0.0"
-  },
-  "engines": {
-    "node": ">=22.0.0"
-  }
+    "name": "termi",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
+    "license": "MIT",
+    "author": "Termi Contributors",
+    "main": "apps/electron/main.js",
+    "workspaces": [
+        "apps/*"
+    ],
+    "scripts": {
+        "dev": "npm run dev --workspace=apps/web",
+        "dev:gateway": "npm run dev --workspace=apps/gateway",
+        "dev:all": "concurrently \"npm run dev --workspace=apps/web\" \"npm run dev:gateway\"",
+        "build": "npm run build --workspace=apps/web && npm run build --workspace=apps/gateway",
+        "start": "npm run start --workspace=apps/web",
+        "lint": "npm run lint --workspaces",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "test": "npm run test --workspaces",
+        "db:push": "npm run db:push --workspace=apps/web",
+        "db:migrate": "npm run db:migrate --workspace=apps/web",
+        "db:generate": "npm run db:generate --workspace=apps/web",
+        "db:seed": "npm run db:seed --workspace=apps/web",
+        "db:studio": "npm run db:studio --workspace=apps/web",
+        "setup:electron": "electron-rebuild -f -w node-pty",
+        "electron:dev": "ELECTRON_DEV=1 electron .",
+        "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
+        "build:gateway-bundle": "esbuild apps/gateway/src/index.ts --bundle --platform=node --target=node20 --format=cjs --external:ssh2 --external:node-pty --outfile=apps/electron/gateway.cjs",
+        "build:electron": "npm run build:gateway-bundle && electron-builder"
+    },
+    "dependencies": {
+        "node-pty": "^1.0.0"
+    },
+    "devDependencies": {
+        "@electron/rebuild": "^4.0.0",
+        "concurrently": "^9.2.1",
+        "electron": "41.3.0",
+        "electron-builder": "26.8.1",
+        "esbuild": "^0.27.4",
+        "eslint-config-prettier": "^10.1.8",
+        "prettier": "^3.8.3",
+        "typescript": "^5.9.3"
+    },
+    "engines": {
+        "node": ">=22.0.0"
+    }
 }

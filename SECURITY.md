@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| `main` branch (latest) | ✅ Active |
-| Older tagged releases | ⚠️ Best-effort |
+| Version                | Supported      |
+| ---------------------- | -------------- |
+| `main` branch (latest) | ✅ Active      |
+| Older tagged releases  | ⚠️ Best-effort |
 
 We recommend always running the latest version.
 
@@ -87,16 +87,16 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 
 ### In Scope
 
-| Threat | Mitigation |
-|--------|-----------|
-| Database exfiltration | AES-256-GCM encryption at rest; optional master key |
-| Credential theft in transit | TLS (configured via reverse proxy) |
-| SSRF attacks | `validateHost()` blocks private/loopback ranges |
-| Brute-force login | Rate limiting on auth endpoints |
-| Session hijacking | HttpOnly, SameSite=Strict cookies; session revocation |
-| XSS | CSP with nonces; React's built-in escaping |
-| Clickjacking | `X-Frame-Options: DENY` |
-| CSRF | SameSite cookies; CORS origin validation |
+| Threat                      | Mitigation                                            |
+| --------------------------- | ----------------------------------------------------- |
+| Database exfiltration       | AES-256-GCM encryption at rest; optional master key   |
+| Credential theft in transit | TLS (configured via reverse proxy)                    |
+| SSRF attacks                | `validateHost()` blocks private/loopback ranges       |
+| Brute-force login           | Rate limiting on auth endpoints                       |
+| Session hijacking           | HttpOnly, SameSite=Strict cookies; session revocation |
+| XSS                         | CSP with nonces; React's built-in escaping            |
+| Clickjacking                | `X-Frame-Options: DENY`                               |
+| CSRF                        | SameSite cookies; CORS origin validation              |
 
 ### Out of Scope / Assumptions
 

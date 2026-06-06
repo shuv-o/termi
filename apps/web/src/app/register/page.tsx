@@ -13,19 +13,31 @@ import TerminalLogo from '@/components/common/Logo';
 function GoogleIcon({ className }: { className?: string }) {
     return (
         <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+            />
+            <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+            />
+            <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+            />
+            <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+            />
         </svg>
     );
 }
 
 const features = [
     { icon: Terminal, text: 'Manage SSH servers from one place' },
-    { icon: Shield,   text: 'End-to-end encrypted credentials' },
-    { icon: Zap,      text: 'Instant terminal sessions' },
-    { icon: Globe,    text: 'Access from anywhere, securely' },
+    { icon: Shield, text: 'End-to-end encrypted credentials' },
+    { icon: Zap, text: 'Instant terminal sessions' },
+    { icon: Globe, text: 'Access from anywhere, securely' },
 ];
 
 export default function RegisterPage() {
@@ -35,7 +47,7 @@ export default function RegisterPage() {
 
     useEffect(() => {
         const emailParam = searchParams.get('email');
-        if (emailParam) setFormData(f => ({ ...f, email: emailParam }));
+        if (emailParam) setFormData((f) => ({ ...f, email: emailParam }));
     }, [searchParams]);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -43,19 +55,26 @@ export default function RegisterPage() {
 
     const passwordRequirements = [
         { label: 'At least 8 characters', met: formData.password.length >= 8 },
-        { label: 'Uppercase letter',       met: /[A-Z]/.test(formData.password) },
-        { label: 'Lowercase letter',       met: /[a-z]/.test(formData.password) },
-        { label: 'Number',                 met: /\d/.test(formData.password) },
+        { label: 'Uppercase letter', met: /[A-Z]/.test(formData.password) },
+        { label: 'Lowercase letter', met: /[a-z]/.test(formData.password) },
+        { label: 'Number', met: /\d/.test(formData.password) },
     ];
 
-    const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
+    const passwordsMatch =
+        formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
     const allRequirementsMet = passwordRequirements.every((req) => req.met);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!allRequirementsMet) { setError('Please meet all password requirements'); return; }
-        if (!passwordsMatch) { setError('Passwords do not match'); return; }
+        if (!allRequirementsMet) {
+            setError('Please meet all password requirements');
+            return;
+        }
+        if (!passwordsMatch) {
+            setError('Passwords do not match');
+            return;
+        }
         setLoading(true);
         try {
             const response = await fetch('/api/auth/register', {
@@ -64,9 +83,17 @@ export default function RegisterPage() {
                 body: JSON.stringify({ email: formData.email, password: formData.password }),
             });
             const data = await response.json();
-            if (!data.success) { setError(data.error || 'Registration failed'); setLoading(false); return; }
+            if (!data.success) {
+                setError(data.error || 'Registration failed');
+                setLoading(false);
+                return;
+            }
             const nextUrl = searchParams.get('next');
-            router.push(nextUrl ? `/login?registered=true&next=${encodeURIComponent(nextUrl)}` : '/login?registered=true');
+            router.push(
+                nextUrl
+                    ? `/login?registered=true&next=${encodeURIComponent(nextUrl)}`
+                    : '/login?registered=true',
+            );
         } catch {
             setError('An error occurred. Please try again.');
             setLoading(false);
@@ -83,7 +110,7 @@ export default function RegisterPage() {
             <div className="relative w-full max-w-3xl">
                 <Card className="bg-card border-border overflow-hidden">
                     <div className="flex min-h-0">
-                        {/* ── Left brand panel ── */}
+                        {/*   Left brand panel   */}
                         <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-gradient-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
                             <div>
                                 <div className="flex items-center gap-3 mb-8">
@@ -91,14 +118,20 @@ export default function RegisterPage() {
                                     <span className="text-xl font-bold gradient-text">Termi</span>
                                 </div>
                                 <h2 className="text-2xl font-bold leading-snug mb-2">
-                                    Start managing<br />servers smarter.
+                                    Start managing
+                                    <br />
+                                    servers smarter.
                                 </h2>
                                 <p className="text-sm text-muted-foreground mb-8">
-                                    Join developers who trust Termi for secure, instant server access.
+                                    Join developers who trust Termi for secure, instant server
+                                    access.
                                 </p>
                                 <ul className="space-y-3">
                                     {features.map(({ icon: Icon, text }) => (
-                                        <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <li
+                                            key={text}
+                                            className="flex items-center gap-3 text-sm text-muted-foreground"
+                                        >
                                             <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
                                                 <Icon className="w-3.5 h-3.5 text-primary" />
                                             </span>
@@ -107,10 +140,12 @@ export default function RegisterPage() {
                                     ))}
                                 </ul>
                             </div>
-                            <p className="text-xs text-muted-foreground/50 mt-8">© {new Date().getFullYear()} Termi. All rights reserved.</p>
+                            <p className="text-xs text-muted-foreground/50 mt-8">
+                                © {new Date().getFullYear()} Termi. All rights reserved.
+                            </p>
                         </div>
 
-                        {/* ── Right form panel ── */}
+                        {/*   Right form panel   */}
                         <div className="flex-1 p-8 flex flex-col justify-center">
                             {/* Mobile logo */}
                             <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
@@ -119,7 +154,9 @@ export default function RegisterPage() {
                             </div>
 
                             <h1 className="text-2xl font-bold mb-1">Create Account</h1>
-                            <p className="text-muted-foreground text-sm mb-6">Start managing your servers securely</p>
+                            <p className="text-muted-foreground text-sm mb-6">
+                                Start managing your servers securely
+                            </p>
 
                             {/* Google Sign-Up */}
                             <a
@@ -135,20 +172,31 @@ export default function RegisterPage() {
                                     <div className="w-full border-t border-border" />
                                 </div>
                                 <div className="relative flex justify-center text-xs">
-                                    <span className="bg-card px-2 text-muted-foreground">or register with email</span>
+                                    <span className="bg-card px-2 text-muted-foreground">
+                                        or register with email
+                                    </span>
                                 </div>
                             </div>
 
-                            <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4">
+                            <form
+                                onSubmit={handleSubmit}
+                                method="POST"
+                                action="#"
+                                className="space-y-4"
+                            >
                                 <div className="space-y-1.5">
                                     <Label htmlFor="email">Email Address</Label>
                                     <Input
-                                        type="email" id="email"
+                                        type="email"
+                                        id="email"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, email: e.target.value })
+                                        }
                                         className="bg-secondary border-border"
                                         placeholder="you@example.com"
-                                        required autoComplete="email"
+                                        required
+                                        autoComplete="email"
                                     />
                                 </div>
 
@@ -159,25 +207,44 @@ export default function RegisterPage() {
                                             type={showPassword ? 'text' : 'password'}
                                             id="password"
                                             value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    password: e.target.value,
+                                                })
+                                            }
                                             className="bg-secondary border-border pr-12"
                                             placeholder="••••••••"
-                                            required autoComplete="new-password"
+                                            required
+                                            autoComplete="new-password"
                                         />
                                         <Button
-                                            type="button" variant="ghost" size="icon"
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                                         >
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            {showPassword ? (
+                                                <EyeOff className="w-4 h-4" />
+                                            ) : (
+                                                <Eye className="w-4 h-4" />
+                                            )}
                                         </Button>
                                     </div>
 
                                     {formData.password && (
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
                                             {passwordRequirements.map((req, i) => (
-                                                <div key={i} className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}>
-                                                    {req.met ? <Check className="w-3 h-3 shrink-0" /> : <X className="w-3 h-3 shrink-0" />}
+                                                <div
+                                                    key={i}
+                                                    className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}
+                                                >
+                                                    {req.met ? (
+                                                        <Check className="w-3 h-3 shrink-0" />
+                                                    ) : (
+                                                        <X className="w-3 h-3 shrink-0" />
+                                                    )}
                                                     {req.label}
                                                 </div>
                                             ))}
@@ -188,21 +255,33 @@ export default function RegisterPage() {
                                 <div className="space-y-1.5">
                                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                                     <Input
-                                        type="password" id="confirmPassword"
+                                        type="password"
+                                        id="confirmPassword"
                                         value={formData.confirmPassword}
-                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                confirmPassword: e.target.value,
+                                            })
+                                        }
                                         className={`bg-secondary border-border ${formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''}`}
                                         placeholder="••••••••"
-                                        required autoComplete="new-password"
+                                        required
+                                        autoComplete="new-password"
                                     />
                                     {formData.confirmPassword && !passwordsMatch && (
-                                        <p className="text-xs text-destructive">Passwords do not match</p>
+                                        <p className="text-xs text-destructive">
+                                            Passwords do not match
+                                        </p>
                                     )}
                                 </div>
 
                                 <div className="flex gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs text-sky-300">
                                     <span className="shrink-0">🔒</span>
-                                    <span>Credentials are encrypted using a key derived from your password. Keep it safe.</span>
+                                    <span>
+                                        Credentials are encrypted using a key derived from your
+                                        password. Keep it safe.
+                                    </span>
                                 </div>
 
                                 {error && (
@@ -211,8 +290,16 @@ export default function RegisterPage() {
                                     </div>
                                 )}
 
-                                <Button type="submit" disabled={loading || !allRequirementsMet || !passwordsMatch} className="w-full">
-                                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !allRequirementsMet || !passwordsMatch}
+                                    className="w-full"
+                                >
+                                    {loading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        'Create Account'
+                                    )}
                                 </Button>
                             </form>
 

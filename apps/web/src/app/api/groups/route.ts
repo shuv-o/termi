@@ -5,21 +5,16 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import {
-    getServerGroups,
-    createServerGroup,
-} from '@/lib/services';
-import {
-    validateBody,
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-} from '@/lib/api';
+import { getServerGroups, createServerGroup } from '@/lib/services';
+import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 
 const createGroupSchema = z.object({
     name: z.string().min(1, 'Name is required').max(50),
     description: z.string().max(200).optional(),
-    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    color: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/)
+        .optional(),
     icon: z.string().max(50).optional(),
 });
 

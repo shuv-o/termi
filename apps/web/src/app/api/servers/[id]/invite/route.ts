@@ -8,10 +8,7 @@ const schema = z.object({
     permissions: z.enum(['manage', 'connect']).default('connect'),
 });
 
-export async function POST(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 

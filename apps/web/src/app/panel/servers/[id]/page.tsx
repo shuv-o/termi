@@ -4,11 +4,29 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Terminal, FolderOpen, Monitor, Pencil,
-    Loader2, Activity, Wifi, WifiOff, Bell,
-    CheckCircle2, AlertTriangle, Clock, Cpu, MemoryStick,
-    HardDrive, Mail, BellRing,
-    RefreshCw, Tv, Zap, Play, Server,
+    ArrowLeft,
+    Terminal,
+    FolderOpen,
+    Monitor,
+    Pencil,
+    Loader2,
+    Activity,
+    Wifi,
+    WifiOff,
+    Bell,
+    CheckCircle2,
+    AlertTriangle,
+    Clock,
+    Cpu,
+    MemoryStick,
+    HardDrive,
+    Mail,
+    BellRing,
+    RefreshCw,
+    Tv,
+    Zap,
+    Play,
+    Server,
 } from 'lucide-react';
 import MetricSparkline from '@/components/monitoring/MetricSparkline';
 import { Button } from '@/components/ui/button';
@@ -99,12 +117,17 @@ interface BenchmarkResults {
 }
 
 type BenchmarkPhase =
-    | 'connecting' | 'hardware'
-    | 'cpu_single' | 'cpu_multi'
-    | 'ram_write' | 'ram_read'
-    | 'disk_write' | 'disk_read'
+    | 'connecting'
+    | 'hardware'
+    | 'cpu_single'
+    | 'cpu_multi'
+    | 'ram_write'
+    | 'ram_read'
+    | 'disk_write'
+    | 'disk_read'
     | 'network'
-    | 'done' | 'error';
+    | 'done'
+    | 'error';
 
 // ============================================================================
 // HELPERS
@@ -137,26 +160,26 @@ function formatRelativeTime(dateStr: string | null): string {
 
 function formatBytes(bytes: number): string {
     if (bytes >= 1_099_511_627_776) return `${(bytes / 1_099_511_627_776).toFixed(1)} TB`;
-    if (bytes >= 1_073_741_824)     return `${(bytes / 1_073_741_824).toFixed(1)} GB`;
-    if (bytes >= 1_048_576)         return `${(bytes / 1_048_576).toFixed(1)} MB`;
-    if (bytes >= 1024)              return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes >= 1_073_741_824) return `${(bytes / 1_073_741_824).toFixed(1)} GB`;
+    if (bytes >= 1_048_576) return `${(bytes / 1_048_576).toFixed(1)} MB`;
+    if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${bytes} B`;
 }
 
 const BENCHMARK_PHASES: { key: BenchmarkPhase; label: string }[] = [
-    { key: 'connecting',  label: 'Connect' },
-    { key: 'hardware',    label: 'HW Info' },
-    { key: 'cpu_single',  label: 'CPU 1C' },
-    { key: 'cpu_multi',   label: 'CPU NC' },
-    { key: 'ram_write',   label: 'RAM W' },
-    { key: 'ram_read',    label: 'RAM R' },
-    { key: 'disk_write',  label: 'Disk W' },
-    { key: 'disk_read',   label: 'Disk R' },
-    { key: 'network',     label: 'Network' },
+    { key: 'connecting', label: 'Connect' },
+    { key: 'hardware', label: 'HW Info' },
+    { key: 'cpu_single', label: 'CPU 1C' },
+    { key: 'cpu_multi', label: 'CPU NC' },
+    { key: 'ram_write', label: 'RAM W' },
+    { key: 'ram_read', label: 'RAM R' },
+    { key: 'disk_write', label: 'Disk W' },
+    { key: 'disk_read', label: 'Disk R' },
+    { key: 'network', label: 'Network' },
 ];
 
 function phaseIndex(phase: BenchmarkPhase | null): number {
-    return BENCHMARK_PHASES.findIndex(p => p.key === phase);
+    return BENCHMARK_PHASES.findIndex((p) => p.key === phase);
 }
 
 function scoreColor(score: number): string {
@@ -175,7 +198,9 @@ function scoreBg(score: number): string {
 
 function ScoreBadge({ score }: { score: number }) {
     return (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-sm font-bold tabular-nums ${scoreColor(score)} ${scoreBg(score)}`}>
+        <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-md border text-sm font-bold tabular-nums ${scoreColor(score)} ${scoreBg(score)}`}
+        >
             {score}
         </span>
     );
@@ -184,7 +209,9 @@ function ScoreBadge({ score }: { score: number }) {
 function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
         <div className="flex flex-col gap-0.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                {label}
+            </span>
             <span className="text-sm font-semibold text-foreground">{value}</span>
             {sub && <span className="text-[10px] text-muted-foreground">{sub}</span>}
         </div>
@@ -242,7 +269,10 @@ export default function ServerDetailsPage() {
                 historyRes.json(),
             ]);
 
-            if (!serverData.success) { router.push('/panel'); return; }
+            if (!serverData.success) {
+                router.push('/panel');
+                return;
+            }
             setServer(serverData.data.server);
 
             if (monitorData.success && monitorData.data.config) {
@@ -250,7 +280,8 @@ export default function ServerDetailsPage() {
                 setMonitorConfig(cfg);
                 setForm({
                     enabled: cfg.enabled,
-                    checkIntervalMinutes: cfg.checkIntervalMinutes as typeof form.checkIntervalMinutes,
+                    checkIntervalMinutes:
+                        cfg.checkIntervalMinutes as typeof form.checkIntervalMinutes,
                     alertEmail: cfg.alertEmail,
                     alertPush: cfg.alertPush,
                     failureThreshold: cfg.failureThreshold,
@@ -268,7 +299,9 @@ export default function ServerDetailsPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- 'form' is applied via functional setForm; excluding it avoids reloading on every keystroke
     }, [id, router]);
 
-    useEffect(() => { loadAll(); }, [loadAll]);
+    useEffect(() => {
+        loadAll();
+    }, [loadAll]);
 
     const refreshHistory = async () => {
         setRefreshing(true);
@@ -295,7 +328,7 @@ export default function ServerDetailsPage() {
                 return;
             }
 
-            const reader  = response.body.getReader();
+            const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
             while (true) {
@@ -309,9 +342,11 @@ export default function ServerDetailsPage() {
                         setBenchPhase(event.phase);
                         setBenchMessage(event.message ?? '');
                         if (event.results) {
-                            setBenchResults(prev => ({ ...(prev ?? {}), ...event.results }));
+                            setBenchResults((prev) => ({ ...(prev ?? {}), ...event.results }));
                         }
-                    } catch { /* ignore malformed SSE line */ }
+                    } catch {
+                        /* ignore malformed SSE line */
+                    }
                 }
             }
         } catch {
@@ -339,16 +374,15 @@ export default function ServerDetailsPage() {
         }
     };
 
-    const latencies = healthRecords.map(r => r.reachable ? (r.latencyMs ?? null) : null);
-    const cpus = healthRecords.map(r => r.cpuPercent);
-    const rams = healthRecords.map(r => r.ramPercent);
-    const disks = healthRecords.map(r => r.diskPercent);
+    const latencies = healthRecords.map((r) => (r.reachable ? (r.latencyMs ?? null) : null));
+    const cpus = healthRecords.map((r) => r.cpuPercent);
+    const rams = healthRecords.map((r) => r.ramPercent);
+    const disks = healthRecords.map((r) => r.diskPercent);
 
     const lastRecord = healthRecords[healthRecords.length - 1];
-    const upCount = healthRecords.filter(r => r.reachable).length;
-    const uptimePct = healthRecords.length > 0
-        ? Math.round((upCount / healthRecords.length) * 100)
-        : null;
+    const upCount = healthRecords.filter((r) => r.reachable).length;
+    const uptimePct =
+        healthRecords.length > 0 ? Math.round((upCount / healthRecords.length) * 100) : null;
 
     const isSSH = server?.protocol === 'SSH';
 
@@ -368,8 +402,7 @@ export default function ServerDetailsPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-5">
-
-            {/* ── Header ── */}
+            {/*   Header   */}
             <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                     <Link href="/panel">
@@ -379,20 +412,23 @@ export default function ServerDetailsPage() {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5">
                         <h1 className="text-xl font-semibold truncate">{server.name}</h1>
-                        {isOnline !== null && (
-                            isOnline
-                                ? <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+                        {isOnline !== null &&
+                            (isOnline ? (
+                                <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                     Online
-                                  </span>
-                                : <span className="flex items-center gap-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-2 py-0.5">
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-2 py-0.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
                                     Offline
-                                  </span>
-                        )}
+                                </span>
+                            ))}
                     </div>
                     {server.description && (
-                        <p className="text-sm text-muted-foreground mt-0.5 truncate">{server.description}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5 truncate">
+                            {server.description}
+                        </p>
                     )}
                 </div>
                 <Button variant="secondary" size="sm" asChild className="gap-1.5">
@@ -403,28 +439,40 @@ export default function ServerDetailsPage() {
                 </Button>
             </div>
 
-            {/* ── Server Info + Quick Stats ── */}
+            {/*   Server Info + Quick Stats   */}
             <Card className="p-4">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${protoColor}`}>
+                    <div
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${protoColor}`}
+                    >
                         <ProtoIcon className="w-3.5 h-3.5" />
                         {server.protocol}
                     </div>
-                    <span className="font-mono text-sm text-foreground/80">{server.host}:{server.port}</span>
+                    <span className="font-mono text-sm text-foreground/80">
+                        {server.host}:{server.port}
+                    </span>
                     {server.group && (
                         <span className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
                             {server.group.name}
                         </span>
                     )}
-                    {server.tags.map(t => (
-                        <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground">{t}</span>
+                    {server.tags.map((t) => (
+                        <span
+                            key={t}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground"
+                        >
+                            {t}
+                        </span>
                     ))}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                     <StatPill label="Last Used" value={formatRelativeTime(server.lastUsedAt)} />
                     {monitorConfig?.lastCheckedAt && (
-                        <StatPill label="Last Check" value={formatRelativeTime(monitorConfig.lastCheckedAt)} />
+                        <StatPill
+                            label="Last Check"
+                            value={formatRelativeTime(monitorConfig.lastCheckedAt)}
+                        />
                     )}
                     {uptimePct !== null && (
                         <StatPill
@@ -440,7 +488,11 @@ export default function ServerDetailsPage() {
                         <StatPill
                             label="Monitoring"
                             value={monitorConfig.enabled ? 'Active' : 'Inactive'}
-                            sub={monitorConfig.enabled ? `every ${monitorConfig.checkIntervalMinutes}m` : undefined}
+                            sub={
+                                monitorConfig.enabled
+                                    ? `every ${monitorConfig.checkIntervalMinutes}m`
+                                    : undefined
+                            }
                         />
                     )}
                 </div>
@@ -455,13 +507,15 @@ export default function ServerDetailsPage() {
                 </div>
             </Card>
 
-            {/* ── Monitoring Graphs ── */}
+            {/*   Monitoring Graphs   */}
             <div>
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
                         <Activity className="w-4 h-4 text-primary" />
                         Health History
-                        <span className="text-[10px] text-muted-foreground font-normal">({healthRecords.length} records)</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                            ({healthRecords.length} records)
+                        </span>
                     </h2>
                     <Button
                         variant="ghost"
@@ -479,7 +533,9 @@ export default function ServerDetailsPage() {
                     <Card className="p-8 text-center">
                         <Activity className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                         <p className="text-sm text-muted-foreground">No health data yet</p>
-                        <p className="text-xs text-muted-foreground/60 mt-1">Enable monitoring below to start collecting data</p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">
+                            Enable monitoring below to start collecting data
+                        </p>
                     </Card>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -487,10 +543,14 @@ export default function ServerDetailsPage() {
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <Wifi className="w-4 h-4 text-primary" />
-                                    <span className="text-xs font-medium text-muted-foreground">Latency</span>
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                        Latency
+                                    </span>
                                 </div>
                                 <span className="text-lg font-bold tabular-nums text-foreground">
-                                    {lastRecord?.latencyMs != null ? `${lastRecord.latencyMs}ms` : '—'}
+                                    {lastRecord?.latencyMs != null
+                                        ? `${lastRecord.latencyMs}ms`
+                                        : '—'}
                                 </span>
                             </div>
                             <MetricSparkline data={latencies} color="#38bdf8" height={44} />
@@ -515,13 +575,24 @@ export default function ServerDetailsPage() {
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <Cpu className="w-4 h-4 text-violet-400" />
-                                        <span className="text-xs font-medium text-muted-foreground">CPU</span>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            CPU
+                                        </span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.cpuPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
-                                        {lastRecord?.cpuPercent != null ? `${Math.round(lastRecord.cpuPercent)}%` : '—'}
+                                    <span
+                                        className={`text-lg font-bold tabular-nums ${(lastRecord?.cpuPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}
+                                    >
+                                        {lastRecord?.cpuPercent != null
+                                            ? `${Math.round(lastRecord.cpuPercent)}%`
+                                            : '—'}
                                     </span>
                                 </div>
-                                <MetricSparkline data={cpus} color="#a78bfa" height={44} alertThreshold={90} />
+                                <MetricSparkline
+                                    data={cpus}
+                                    color="#a78bfa"
+                                    height={44}
+                                    alertThreshold={90}
+                                />
                             </Card>
                         )}
 
@@ -530,13 +601,24 @@ export default function ServerDetailsPage() {
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <MemoryStick className="w-4 h-4 text-amber-400" />
-                                        <span className="text-xs font-medium text-muted-foreground">RAM</span>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            RAM
+                                        </span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.ramPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
-                                        {lastRecord?.ramPercent != null ? `${Math.round(lastRecord.ramPercent)}%` : '—'}
+                                    <span
+                                        className={`text-lg font-bold tabular-nums ${(lastRecord?.ramPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}
+                                    >
+                                        {lastRecord?.ramPercent != null
+                                            ? `${Math.round(lastRecord.ramPercent)}%`
+                                            : '—'}
                                     </span>
                                 </div>
-                                <MetricSparkline data={rams} color="#fbbf24" height={44} alertThreshold={90} />
+                                <MetricSparkline
+                                    data={rams}
+                                    color="#fbbf24"
+                                    height={44}
+                                    alertThreshold={90}
+                                />
                             </Card>
                         )}
 
@@ -545,20 +627,31 @@ export default function ServerDetailsPage() {
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <HardDrive className="w-4 h-4 text-rose-400" />
-                                        <span className="text-xs font-medium text-muted-foreground">Disk</span>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            Disk
+                                        </span>
                                     </div>
-                                    <span className={`text-lg font-bold tabular-nums ${(lastRecord?.diskPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}>
-                                        {lastRecord?.diskPercent != null ? `${Math.round(lastRecord.diskPercent)}%` : '—'}
+                                    <span
+                                        className={`text-lg font-bold tabular-nums ${(lastRecord?.diskPercent ?? 0) >= 90 ? 'text-red-400' : 'text-foreground'}`}
+                                    >
+                                        {lastRecord?.diskPercent != null
+                                            ? `${Math.round(lastRecord.diskPercent)}%`
+                                            : '—'}
                                     </span>
                                 </div>
-                                <MetricSparkline data={disks} color="#fb7185" height={44} alertThreshold={90} />
+                                <MetricSparkline
+                                    data={disks}
+                                    color="#fb7185"
+                                    height={44}
+                                    alertThreshold={90}
+                                />
                             </Card>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* ── Monitor Configuration ── */}
+            {/*   Monitor Configuration   */}
             <div>
                 <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
                     <Bell className="w-4 h-4 text-amber-400" />
@@ -576,7 +669,9 @@ export default function ServerDetailsPage() {
                         </div>
                         <Switch
                             checked={form.enabled}
-                            onCheckedChange={(checked) => setForm(f => ({ ...f, enabled: checked }))}
+                            onCheckedChange={(checked) =>
+                                setForm((f) => ({ ...f, enabled: checked }))
+                            }
                         />
                     </div>
 
@@ -587,20 +682,24 @@ export default function ServerDetailsPage() {
                                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                                 Check Interval
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">How often to ping the server</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                How often to ping the server
+                            </p>
                         </div>
                         <div className="flex flex-wrap gap-1.5 mt-2">
-                            {INTERVALS.map(opt => (
+                            {INTERVALS.map((opt) => (
                                 <button
                                     key={opt.value}
-                                    onClick={() => setForm(f => ({ ...f, checkIntervalMinutes: opt.value }))}
+                                    onClick={() =>
+                                        setForm((f) => ({ ...f, checkIntervalMinutes: opt.value }))
+                                    }
                                     disabled={!form.enabled}
                                     className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                                         form.checkIntervalMinutes === opt.value && form.enabled
                                             ? 'bg-primary/15 border-primary/40 text-primary'
                                             : !form.enabled
-                                            ? 'border-border text-muted-foreground/30 cursor-not-allowed'
-                                            : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
+                                              ? 'border-border text-muted-foreground/30 cursor-not-allowed'
+                                              : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
                                     }`}
                                 >
                                     {opt.label}
@@ -627,7 +726,12 @@ export default function ServerDetailsPage() {
                                 max={10}
                                 value={form.failureThreshold}
                                 disabled={!form.enabled}
-                                onChange={e => setForm(f => ({ ...f, failureThreshold: parseInt(e.target.value) }))}
+                                onChange={(e) =>
+                                    setForm((f) => ({
+                                        ...f,
+                                        failureThreshold: parseInt(e.target.value),
+                                    }))
+                                }
                                 className="flex-1 accent-sky-500 disabled:opacity-40"
                             />
                             <span className="text-sm font-bold text-foreground w-8 text-center tabular-nums">
@@ -635,7 +739,8 @@ export default function ServerDetailsPage() {
                             </span>
                         </div>
                         <p className="text-xs text-muted-foreground/40 mt-1">
-                            Alert fires after {form.failureThreshold} consecutive failure{form.failureThreshold !== 1 ? 's' : ''}
+                            Alert fires after {form.failureThreshold} consecutive failure
+                            {form.failureThreshold !== 1 ? 's' : ''}
                             {form.enabled && form.checkIntervalMinutes
                                 ? ` (~${form.failureThreshold * form.checkIntervalMinutes} min downtime)`
                                 : ''}
@@ -646,41 +751,49 @@ export default function ServerDetailsPage() {
                     <div className="p-4 space-y-3">
                         <p className="text-sm font-medium text-foreground/80">Alert Channels</p>
 
-                        <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
-                            form.alertEmail && form.enabled
-                                ? 'bg-primary/8 border-primary/30'
-                                : 'border-border/60 bg-transparent'
-                        } ${!form.enabled ? 'opacity-50' : ''}`}>
+                        <div
+                            className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
+                                form.alertEmail && form.enabled
+                                    ? 'bg-primary/8 border-primary/30'
+                                    : 'border-border/60 bg-transparent'
+                            } ${!form.enabled ? 'opacity-50' : ''}`}
+                        >
                             <div className="flex items-center gap-2.5">
                                 <Mail className="w-4 h-4 text-muted-foreground" />
                                 <div>
                                     <p className="text-sm font-medium">Email</p>
-                                    <p className="text-xs text-muted-foreground">Send alert to your account email</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Send alert to your account email
+                                    </p>
                                 </div>
                             </div>
                             <Checkbox
                                 checked={form.alertEmail}
                                 disabled={!form.enabled}
-                                onCheckedChange={(c) => setForm(f => ({ ...f, alertEmail: !!c }))}
+                                onCheckedChange={(c) => setForm((f) => ({ ...f, alertEmail: !!c }))}
                             />
                         </div>
 
-                        <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
-                            form.alertPush && form.enabled
-                                ? 'bg-primary/8 border-primary/30'
-                                : 'border-border/60 bg-transparent'
-                        } ${!form.enabled ? 'opacity-50' : ''}`}>
+                        <div
+                            className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-colors ${
+                                form.alertPush && form.enabled
+                                    ? 'bg-primary/8 border-primary/30'
+                                    : 'border-border/60 bg-transparent'
+                            } ${!form.enabled ? 'opacity-50' : ''}`}
+                        >
                             <div className="flex items-center gap-2.5">
                                 <BellRing className="w-4 h-4 text-muted-foreground" />
                                 <div>
                                     <p className="text-sm font-medium">Push Notification</p>
-                                    <p className="text-xs text-muted-foreground">Browser / mobile push alert</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Browser / mobile push alert
+                                    </p>
                                 </div>
                             </div>
                             <Checkbox
                                 checked={form.alertPush}
                                 disabled={!form.enabled}
-                                onCheckedChange={(c) => setForm(f => ({ ...f, alertPush: !!c }))}
+                                onCheckedChange={(c) => setForm((f) => ({ ...f, alertPush: !!c }))}
                             />
                         </div>
                     </div>
@@ -693,16 +806,23 @@ export default function ServerDetailsPage() {
                                     <>
                                         <WifiOff className="w-4 h-4 text-red-400 shrink-0" />
                                         <div>
-                                            <span className="text-red-400 font-medium">Server is currently DOWN</span>
-                                            <span className="text-muted-foreground ml-1.5">— alert was sent</span>
+                                            <span className="text-red-400 font-medium">
+                                                Server is currently DOWN
+                                            </span>
+                                            <span className="text-muted-foreground ml-1.5">
+                                                — alert was sent
+                                            </span>
                                         </div>
                                     </>
                                 ) : monitorConfig.consecutiveFailures > 0 ? (
                                     <>
                                         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
                                         <span className="text-amber-400">
-                                            {monitorConfig.consecutiveFailures} failure{monitorConfig.consecutiveFailures !== 1 ? 's' : ''} —
-                                            {monitorConfig.failureThreshold - monitorConfig.consecutiveFailures} more before alert
+                                            {monitorConfig.consecutiveFailures} failure
+                                            {monitorConfig.consecutiveFailures !== 1 ? 's' : ''} —
+                                            {monitorConfig.failureThreshold -
+                                                monitorConfig.consecutiveFailures}{' '}
+                                            more before alert
                                         </span>
                                     </>
                                 ) : (
@@ -713,7 +833,8 @@ export default function ServerDetailsPage() {
                                 )}
                                 {monitorConfig.lastCheckedAt && (
                                     <span className="ml-auto text-muted-foreground/40">
-                                        Last checked {formatRelativeTime(monitorConfig.lastCheckedAt)}
+                                        Last checked{' '}
+                                        {formatRelativeTime(monitorConfig.lastCheckedAt)}
                                     </span>
                                 )}
                             </div>
@@ -723,16 +844,21 @@ export default function ServerDetailsPage() {
                     {/* Save button */}
                     <div className="p-4">
                         <Button onClick={handleSaveMonitor} disabled={saving} className="w-full">
-                            {saving
-                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
-                                : <><Bell className="w-4 h-4" /> Save Monitoring Settings</>
-                            }
+                            {saving ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                                </>
+                            ) : (
+                                <>
+                                    <Bell className="w-4 h-4" /> Save Monitoring Settings
+                                </>
+                            )}
                         </Button>
                     </div>
                 </Card>
             </div>
 
-            {/* ── Hardware Benchmark ── */}
+            {/*   Hardware Benchmark   */}
             {isSSH && (
                 <div>
                     <div className="flex items-center justify-between mb-3">
@@ -747,10 +873,15 @@ export default function ServerDetailsPage() {
                             disabled={benchRunning}
                             className="gap-1.5"
                         >
-                            {benchRunning
-                                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Running…</>
-                                : <><Play className="w-3.5 h-3.5" /> Run Benchmark</>
-                            }
+                            {benchRunning ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running…
+                                </>
+                            ) : (
+                                <>
+                                    <Play className="w-3.5 h-3.5" /> Run Benchmark
+                                </>
+                            )}
                         </Button>
                     </div>
 
@@ -763,16 +894,25 @@ export default function ServerDetailsPage() {
                             <div className="flex gap-1">
                                 {BENCHMARK_PHASES.map((p, i) => {
                                     const current = phaseIndex(benchPhase);
-                                    const done    = i < current;
-                                    const active  = i === current;
+                                    const done = i < current;
+                                    const active = i === current;
                                     return (
-                                        <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
-                                            <div className={`h-1 w-full rounded-full transition-colors ${
-                                                done   ? 'bg-yellow-400' :
-                                                active ? 'bg-yellow-400/60 animate-pulse' :
-                                                         'bg-secondary'
-                                            }`} />
-                                            <span className={`text-[9px] hidden sm:block ${active ? 'text-yellow-400' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
+                                        <div
+                                            key={p.key}
+                                            className="flex-1 flex flex-col items-center gap-1"
+                                        >
+                                            <div
+                                                className={`h-1 w-full rounded-full transition-colors ${
+                                                    done
+                                                        ? 'bg-yellow-400'
+                                                        : active
+                                                          ? 'bg-yellow-400/60 animate-pulse'
+                                                          : 'bg-secondary'
+                                                }`}
+                                            />
+                                            <span
+                                                className={`text-[9px] hidden sm:block ${active ? 'text-yellow-400' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}
+                                            >
                                                 {p.label}
                                             </span>
                                         </div>
@@ -795,27 +935,51 @@ export default function ServerDetailsPage() {
                                 <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-4">
                                         <Zap className="w-4 h-4 text-yellow-400" />
-                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Benchmark Score</span>
-                                        <span className="text-[10px] text-muted-foreground ml-auto">scored vs. high-end server reference</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                            Benchmark Score
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground ml-auto">
+                                            scored vs. high-end server reference
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-center mb-4">
-                                        <div className={`flex flex-col items-center px-8 py-4 rounded-2xl border-2 ${scoreBg(benchResults.scores.overall)}`}>
-                                            <span className={`text-5xl font-black tabular-nums ${scoreColor(benchResults.scores.overall)}`}>
+                                        <div
+                                            className={`flex flex-col items-center px-8 py-4 rounded-2xl border-2 ${scoreBg(benchResults.scores.overall)}`}
+                                        >
+                                            <span
+                                                className={`text-5xl font-black tabular-nums ${scoreColor(benchResults.scores.overall)}`}
+                                            >
                                                 {benchResults.scores.overall}
                                             </span>
-                                            <span className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Overall</span>
+                                            <span className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                                                Overall
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-4 gap-2">
-                                        {([
-                                            { label: 'CPU',     score: benchResults.scores.cpu },
-                                            { label: 'RAM',     score: benchResults.scores.ram },
-                                            { label: 'Disk',    score: benchResults.scores.disk },
-                                            { label: 'Network', score: benchResults.scores.network },
-                                        ] as const).map(({ label, score }) => (
-                                            <div key={label} className="flex flex-col items-center gap-1.5 rounded-lg bg-secondary/60 border border-border/50 py-3">
-                                                <span className={`text-xl font-bold tabular-nums ${scoreColor(score)}`}>{score}</span>
-                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
+                                        {(
+                                            [
+                                                { label: 'CPU', score: benchResults.scores.cpu },
+                                                { label: 'RAM', score: benchResults.scores.ram },
+                                                { label: 'Disk', score: benchResults.scores.disk },
+                                                {
+                                                    label: 'Network',
+                                                    score: benchResults.scores.network,
+                                                },
+                                            ] as const
+                                        ).map(({ label, score }) => (
+                                            <div
+                                                key={label}
+                                                className="flex flex-col items-center gap-1.5 rounded-lg bg-secondary/60 border border-border/50 py-3"
+                                            >
+                                                <span
+                                                    className={`text-xl font-bold tabular-nums ${scoreColor(score)}`}
+                                                >
+                                                    {score}
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                                    {label}
+                                                </span>
                                                 <div className="w-full px-3">
                                                     <div className="h-1 rounded-full bg-secondary">
                                                         <div
@@ -834,22 +998,33 @@ export default function ServerDetailsPage() {
                                 <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
                                         <Server className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Hardware</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                            Hardware
+                                        </span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 flex-1 min-w-[200px]">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">CPU</p>
-                                            <p className="text-sm font-semibold text-foreground truncate">{benchResults.hardware.cpuModel}</p>
-                                            <p className="text-[11px] text-muted-foreground mt-0.5">
-                                                {benchResults.hardware.cpuCores}C / {benchResults.hardware.cpuThreads}T
-                                                {' · '}{benchResults.hardware.arch}
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                CPU
                                             </p>
-                                            {(benchResults.hardware.cpuFreqMhz || benchResults.hardware.cpuBaseFreqMhz) && (
+                                            <p className="text-sm font-semibold text-foreground truncate">
+                                                {benchResults.hardware.cpuModel}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                                {benchResults.hardware.cpuCores}C /{' '}
+                                                {benchResults.hardware.cpuThreads}T{' · '}
+                                                {benchResults.hardware.arch}
+                                            </p>
+                                            {(benchResults.hardware.cpuFreqMhz ||
+                                                benchResults.hardware.cpuBaseFreqMhz) && (
                                                 <p className="text-[11px] text-muted-foreground/70 mt-0.5">
                                                     {benchResults.hardware.cpuBaseFreqMhz
                                                         ? `${(benchResults.hardware.cpuBaseFreqMhz / 1000).toFixed(2)} GHz base`
                                                         : ''}
-                                                    {benchResults.hardware.cpuBaseFreqMhz && benchResults.hardware.cpuFreqMhz ? ' · ' : ''}
+                                                    {benchResults.hardware.cpuBaseFreqMhz &&
+                                                    benchResults.hardware.cpuFreqMhz
+                                                        ? ' · '
+                                                        : ''}
                                                     {benchResults.hardware.cpuFreqMhz
                                                         ? `${(benchResults.hardware.cpuFreqMhz / 1000).toFixed(2)} GHz boost`
                                                         : ''}
@@ -857,17 +1032,32 @@ export default function ServerDetailsPage() {
                                             )}
                                         </div>
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 min-w-[100px]">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">RAM</p>
-                                            <p className="text-sm font-semibold text-foreground">{formatBytes(benchResults.hardware.ramTotalBytes)}</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                RAM
+                                            </p>
+                                            <p className="text-sm font-semibold text-foreground">
+                                                {formatBytes(benchResults.hardware.ramTotalBytes)}
+                                            </p>
                                         </div>
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 min-w-[130px]">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Disk</p>
-                                            <p className="text-sm font-semibold text-foreground">{formatBytes(benchResults.hardware.diskTotalBytes)}</p>
-                                            <p className="text-[11px] text-muted-foreground mt-0.5">{formatBytes(benchResults.hardware.diskUsedBytes)} used</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                Disk
+                                            </p>
+                                            <p className="text-sm font-semibold text-foreground">
+                                                {formatBytes(benchResults.hardware.diskTotalBytes)}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                                {formatBytes(benchResults.hardware.diskUsedBytes)}{' '}
+                                                used
+                                            </p>
                                         </div>
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 flex-1 min-w-[120px]">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">OS</p>
-                                            <p className="text-sm font-semibold text-foreground truncate">{benchResults.hardware.os}</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                OS
+                                            </p>
+                                            <p className="text-sm font-semibold text-foreground truncate">
+                                                {benchResults.hardware.os}
+                                            </p>
                                         </div>
                                     </div>
                                 </Card>
@@ -877,26 +1067,40 @@ export default function ServerDetailsPage() {
                                 <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
                                         <Cpu className="w-4 h-4 text-violet-400" />
-                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">CPU Performance</span>
-                                        <span className="text-[10px] text-muted-foreground ml-1">SHA-256</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                            CPU Performance
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground ml-1">
+                                            SHA-256
+                                        </span>
                                         <div className="ml-auto">
                                             <ScoreBadge score={benchResults.cpu.score} />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Single-Core</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                Single-Core
+                                            </p>
                                             <p className="text-lg font-bold tabular-nums text-foreground">
                                                 {benchResults.cpu.singleCoreMBps.toLocaleString()}
-                                                <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>
+                                                <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                    MB/s
+                                                </span>
                                             </p>
-                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">1 thread</p>
+                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+                                                1 thread
+                                            </p>
                                         </div>
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Multi-Core</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                Multi-Core
+                                            </p>
                                             <p className="text-lg font-bold tabular-nums text-foreground">
                                                 {benchResults.cpu.multiCoreMBps.toLocaleString()}
-                                                <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>
+                                                <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                    MB/s
+                                                </span>
                                             </p>
                                             {benchResults.hardware && (
                                                 <p className="text-[10px] text-muted-foreground/40 mt-0.5">
@@ -916,24 +1120,42 @@ export default function ServerDetailsPage() {
                                     <Card className="p-4">
                                         <div className="flex items-center gap-2 mb-3">
                                             <MemoryStick className="w-4 h-4 text-amber-400" />
-                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">RAM Bandwidth</span>
+                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                                RAM Bandwidth
+                                            </span>
                                             <div className="ml-auto">
                                                 <ScoreBadge score={benchResults.ram.score} />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Write</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                    Write
+                                                </p>
                                                 <p className="text-base font-bold tabular-nums text-foreground">
-                                                    {benchResults.ram.writeMBps > 0 ? benchResults.ram.writeMBps.toLocaleString() : '—'}
-                                                    {benchResults.ram.writeMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
+                                                    {benchResults.ram.writeMBps > 0
+                                                        ? benchResults.ram.writeMBps.toLocaleString()
+                                                        : '—'}
+                                                    {benchResults.ram.writeMBps > 0 && (
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            MB/s
+                                                        </span>
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Read</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                    Read
+                                                </p>
                                                 <p className="text-base font-bold tabular-nums text-foreground">
-                                                    {benchResults.ram.readMBps > 0 ? benchResults.ram.readMBps.toLocaleString() : '—'}
-                                                    {benchResults.ram.readMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
+                                                    {benchResults.ram.readMBps > 0
+                                                        ? benchResults.ram.readMBps.toLocaleString()
+                                                        : '—'}
+                                                    {benchResults.ram.readMBps > 0 && (
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            MB/s
+                                                        </span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -943,24 +1165,42 @@ export default function ServerDetailsPage() {
                                     <Card className="p-4">
                                         <div className="flex items-center gap-2 mb-3">
                                             <HardDrive className="w-4 h-4 text-rose-400" />
-                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Disk Speed</span>
+                                            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                                Disk Speed
+                                            </span>
                                             <div className="ml-auto">
                                                 <ScoreBadge score={benchResults.disk.score} />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Write</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                    Write
+                                                </p>
                                                 <p className="text-base font-bold tabular-nums text-foreground">
-                                                    {benchResults.disk.writeMBps > 0 ? benchResults.disk.writeMBps.toLocaleString() : '—'}
-                                                    {benchResults.disk.writeMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
+                                                    {benchResults.disk.writeMBps > 0
+                                                        ? benchResults.disk.writeMBps.toLocaleString()
+                                                        : '—'}
+                                                    {benchResults.disk.writeMBps > 0 && (
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            MB/s
+                                                        </span>
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Read</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                    Read
+                                                </p>
                                                 <p className="text-base font-bold tabular-nums text-foreground">
-                                                    {benchResults.disk.readMBps > 0 ? benchResults.disk.readMBps.toLocaleString() : '—'}
-                                                    {benchResults.disk.readMBps > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span>}
+                                                    {benchResults.disk.readMBps > 0
+                                                        ? benchResults.disk.readMBps.toLocaleString()
+                                                        : '—'}
+                                                    {benchResults.disk.readMBps > 0 && (
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            MB/s
+                                                        </span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -972,30 +1212,54 @@ export default function ServerDetailsPage() {
                                 <Card className="p-4">
                                     <div className="flex items-center gap-2 mb-3">
                                         <Wifi className="w-4 h-4 text-primary" />
-                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Network</span>
+                                        <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                                            Network
+                                        </span>
                                         <div className="ml-auto">
                                             <ScoreBadge score={benchResults.network.score} />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Latency (ping 1.1.1.1)</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                Latency (ping 1.1.1.1)
+                                            </p>
                                             <p className="text-base font-bold tabular-nums text-foreground">
-                                                {benchResults.network.pingMs != null
-                                                    ? <>{benchResults.network.pingMs.toFixed(1)}<span className="text-xs font-normal text-muted-foreground ml-1">ms</span></>
-                                                    : <span className="text-muted-foreground">Unreachable</span>
-                                                }
+                                                {benchResults.network.pingMs != null ? (
+                                                    <>
+                                                        {benchResults.network.pingMs.toFixed(1)}
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            ms
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        Unreachable
+                                                    </span>
+                                                )}
                                             </p>
                                         </div>
                                         <div className="rounded-lg bg-secondary/60 border border-border/50 px-3 py-2">
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Loopback Bandwidth</p>
-                                            <p className="text-base font-bold tabular-nums text-foreground">
-                                                {benchResults.network.loopbackMBps != null
-                                                    ? <>{benchResults.network.loopbackMBps.toLocaleString()}<span className="text-xs font-normal text-muted-foreground ml-1">MB/s</span></>
-                                                    : <span className="text-muted-foreground">N/A</span>
-                                                }
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+                                                Loopback Bandwidth
                                             </p>
-                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">OS kernel socket speed</p>
+                                            <p className="text-base font-bold tabular-nums text-foreground">
+                                                {benchResults.network.loopbackMBps != null ? (
+                                                    <>
+                                                        {benchResults.network.loopbackMBps.toLocaleString()}
+                                                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                                                            MB/s
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        N/A
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+                                                OS kernel socket speed
+                                            </p>
                                         </div>
                                     </div>
                                 </Card>
@@ -1003,7 +1267,8 @@ export default function ServerDetailsPage() {
 
                             {benchResults.durationMs && (
                                 <p className="text-[11px] text-muted-foreground/40 text-right">
-                                    Completed in {(benchResults.durationMs / 1000).toFixed(1)}s · 256 MB test blocks · no software installed
+                                    Completed in {(benchResults.durationMs / 1000).toFixed(1)}s ·
+                                    256 MB test blocks · no software installed
                                 </p>
                             )}
                         </div>
@@ -1014,7 +1279,8 @@ export default function ServerDetailsPage() {
                             <Zap className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                             <p className="text-sm text-muted-foreground">No benchmark data</p>
                             <p className="text-xs text-muted-foreground/60 mt-1">
-                                Measures CPU single/multi-core, RAM, disk, and network — agentlessly via SSH
+                                Measures CPU single/multi-core, RAM, disk, and network — agentlessly
+                                via SSH
                             </p>
                         </Card>
                     )}

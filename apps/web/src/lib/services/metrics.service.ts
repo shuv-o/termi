@@ -15,13 +15,13 @@ import { sshPool, SSHPoolConfig } from './ssh-pool';
 export interface ServerMetrics {
     reachable: boolean;
     latencyMs?: number;
-    cpu?: number;           // percentage 0–100
-    cpuModel?: string;      // e.g. "Intel(R) Xeon(R) CPU E5-2690 v2 @ 3.00GHz"
+    cpu?: number; // percentage 0–100
+    cpuModel?: string; // e.g. "Intel(R) Xeon(R) CPU E5-2690 v2 @ 3.00GHz"
     ram?: {
         usedBytes: number;
         totalBytes: number;
         percent: number;
-        speedMhz?: number;  // e.g. 3200 (reported as MT/s ≈ MHz for DDR)
+        speedMhz?: number; // e.g. 3200 (reported as MT/s ≈ MHz for DDR)
     };
     disk?: {
         usedBytes: number;
@@ -42,7 +42,7 @@ export interface ServerMetrics {
 export function checkReachability(
     host: string,
     port: number,
-    timeoutMs = 5000
+    timeoutMs = 5000,
 ): Promise<{ reachable: boolean; latencyMs?: number }> {
     return new Promise((resolve) => {
         const start = Date.now();
@@ -94,10 +94,7 @@ const SSH_METRICS_CMD = [
 
 type SSHConfig = SSHPoolConfig;
 
-export function getSSHMetrics(
-    config: SSHConfig,
-    timeoutMs = 12000
-): Promise<ServerMetrics> {
+export function getSSHMetrics(config: SSHConfig, timeoutMs = 12000): Promise<ServerMetrics> {
     return new Promise((resolve) => {
         let poolKey: string | undefined;
         let released = false;
@@ -127,8 +124,12 @@ export function getSSHMetrics(
                     }
 
                     let output = '';
-                    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
-                    stream.stderr.on('data', () => { /* ignore */ });
+                    stream.on('data', (chunk: Buffer) => {
+                        output += chunk.toString();
+                    });
+                    stream.stderr.on('data', () => {
+                        /* ignore */
+                    });
 
                     stream.on('close', () => {
                         clearTimeout(timer);
@@ -148,13 +149,22 @@ export function getSSHMetrics(
                             // Optional hardware info (lines 5 and 6)
                             const cpuModel = lines[5]?.trim() || undefined;
                             const ramSpeedRaw = lines[6]?.trim();
-                            const ramSpeedMhz = ramSpeedRaw ? (parseInt(ramSpeedRaw, 10) || undefined) : undefined;
+                            const ramSpeedMhz = ramSpeedRaw
+                                ? parseInt(ramSpeedRaw, 10) || undefined
+                                : undefined;
 
                             const dtotal = total2 - total1;
-                            const didle  = idle2 - idle1;
-                            const cpu = dtotal > 0
-                                ? Math.min(100, Math.max(0, Math.round(((dtotal - didle) / dtotal) * 100)))
-                                : 0;
+                            const didle = idle2 - idle1;
+                            const cpu =
+                                dtotal > 0
+                                    ? Math.min(
+                                          100,
+                                          Math.max(
+                                              0,
+                                              Math.round(((dtotal - didle) / dtotal) * 100),
+                                          ),
+                                      )
+                                    : 0;
 
                             const ramUsed = memTotal - memAvail;
 
@@ -163,19 +173,19 @@ export function getSSHMetrics(
                                 cpu,
                                 cpuModel,
                                 ram: {
-                                    usedBytes:  ramUsed,
+                                    usedBytes: ramUsed,
                                     totalBytes: memTotal,
-                                    percent: memTotal > 0
-                                        ? Math.round((ramUsed / memTotal) * 100)
-                                        : 0,
+                                    percent:
+                                        memTotal > 0 ? Math.round((ramUsed / memTotal) * 100) : 0,
                                     speedMhz: ramSpeedMhz,
                                 },
                                 disk: {
-                                    usedBytes:  diskUsed,
+                                    usedBytes: diskUsed,
                                     totalBytes: diskTotal,
-                                    percent: diskTotal > 0
-                                        ? Math.round((diskUsed / diskTotal) * 100)
-                                        : 0,
+                                    percent:
+                                        diskTotal > 0
+                                            ? Math.round((diskUsed / diskTotal) * 100)
+                                            : 0,
                                 },
                                 network: { rxBytes, txBytes },
                             });

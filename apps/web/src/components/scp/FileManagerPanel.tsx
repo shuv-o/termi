@@ -2,11 +2,32 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
-    RefreshCw, Upload, FolderPlus, Trash2, Download, Pencil,
-    ChevronRight, Home, File, Folder,
-    FileText, Image, Film, Music, Archive, Code, Link2,
-    X, Check, AlertCircle, Loader2, Eye, EyeOff,
-    ChevronUp, MoreVertical, CheckSquare,
+    RefreshCw,
+    Upload,
+    FolderPlus,
+    Trash2,
+    Download,
+    Pencil,
+    ChevronRight,
+    Home,
+    File,
+    Folder,
+    FileText,
+    Image,
+    Film,
+    Music,
+    Archive,
+    Code,
+    Link2,
+    X,
+    Check,
+    AlertCircle,
+    Loader2,
+    Eye,
+    EyeOff,
+    ChevronUp,
+    MoreVertical,
+    CheckSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,9 +75,9 @@ export interface FileManagerPanelProps {
 function fmt(bytes: number): string {
     if (bytes === 0) return '—';
     if (bytes >= 1_099_511_627_776) return `${(bytes / 1_099_511_627_776).toFixed(1)} TB`;
-    if (bytes >= 1_073_741_824)     return `${(bytes / 1_073_741_824).toFixed(1)} GB`;
-    if (bytes >= 1_048_576)         return `${(bytes / 1_048_576).toFixed(1)} MB`;
-    if (bytes >= 1024)              return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes >= 1_073_741_824) return `${(bytes / 1_073_741_824).toFixed(1)} GB`;
+    if (bytes >= 1_048_576) return `${(bytes / 1_048_576).toFixed(1)} MB`;
+    if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${bytes} B`;
 }
 
@@ -70,14 +91,48 @@ function fmtDate(ts: number): string {
 }
 
 const EXT_ICONS: Record<string, React.ElementType> = {
-    txt: FileText, md: FileText, log: FileText, csv: FileText,
-    json: FileText, yaml: FileText, yml: FileText, xml: FileText,
-    jpg: Image, jpeg: Image, png: Image, gif: Image, svg: Image, webp: Image,
-    mp4: Film, mov: Film, avi: Film, mkv: Film,
-    mp3: Music, wav: Music, flac: Music, ogg: Music,
-    zip: Archive, tar: Archive, gz: Archive, bz2: Archive, xz: Archive, '7z': Archive, tgz: Archive,
-    js: Code, ts: Code, jsx: Code, tsx: Code, py: Code, go: Code,
-    rs: Code, java: Code, c: Code, cpp: Code, css: Code, html: Code, sh: Code,
+    txt: FileText,
+    md: FileText,
+    log: FileText,
+    csv: FileText,
+    json: FileText,
+    yaml: FileText,
+    yml: FileText,
+    xml: FileText,
+    jpg: Image,
+    jpeg: Image,
+    png: Image,
+    gif: Image,
+    svg: Image,
+    webp: Image,
+    mp4: Film,
+    mov: Film,
+    avi: Film,
+    mkv: Film,
+    mp3: Music,
+    wav: Music,
+    flac: Music,
+    ogg: Music,
+    zip: Archive,
+    tar: Archive,
+    gz: Archive,
+    bz2: Archive,
+    xz: Archive,
+    '7z': Archive,
+    tgz: Archive,
+    js: Code,
+    ts: Code,
+    jsx: Code,
+    tsx: Code,
+    py: Code,
+    go: Code,
+    rs: Code,
+    java: Code,
+    c: Code,
+    cpp: Code,
+    css: Code,
+    html: Code,
+    sh: Code,
 };
 
 function EntryIcon({ entry, size = 'sm' }: { entry: RemoteEntry; size?: 'sm' | 'md' }) {
@@ -140,7 +195,7 @@ function BottomSheet({
         >
             <div
                 className="bg-slate-800 rounded-t-2xl border-t border-slate-700 shadow-2xl max-h-[85vh] overflow-y-auto"
-                onClick={e => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Drag handle */}
                 <div className="flex justify-center pt-3 pb-1">
@@ -178,12 +233,15 @@ function SheetAction({
         <button
             onClick={onClick}
             className={`w-full flex items-center gap-4 px-3 py-3.5 rounded-xl text-sm font-medium transition-colors active:scale-[0.98]
-                ${variant === 'danger'
-                    ? 'text-red-400 hover:bg-red-500/10 active:bg-red-500/15'
-                    : 'text-slate-200 hover:bg-slate-700 active:bg-slate-600/80'
+                ${
+                    variant === 'danger'
+                        ? 'text-red-400 hover:bg-red-500/10 active:bg-red-500/15'
+                        : 'text-slate-200 hover:bg-slate-700 active:bg-slate-600/80'
                 }`}
         >
-            <Icon className={`w-5 h-5 shrink-0 ${variant === 'danger' ? 'text-red-400' : 'text-slate-400'}`} />
+            <Icon
+                className={`w-5 h-5 shrink-0 ${variant === 'danger' ? 'text-red-400' : 'text-slate-400'}`}
+            />
             {label}
         </button>
     );
@@ -258,30 +316,37 @@ export default function FileManagerPanel({
     // Breadcrumb ref for auto-scroll
     const breadcrumbRef = useRef<HTMLDivElement>(null);
 
-    // ── Directory listing ──────────────────────────────────────────────────
+    //   Directory listing
 
-    const loadDir = useCallback(async (path: string) => {
-        setLoading(true);
-        setError(null);
-        setSelected(new Set());
-        setSelectMode(false);
-        try {
-            const res = await fetch(`/api/servers/${serverId}/sftp/list?path=${encodeURIComponent(path)}`);
-            const data = await res.json();
-            if (data.success) {
-                setEntries(data.data.entries);
-                setCurrentPath(path);
-            } else {
-                setError(data.error ?? 'Cannot read directory');
+    const loadDir = useCallback(
+        async (path: string) => {
+            setLoading(true);
+            setError(null);
+            setSelected(new Set());
+            setSelectMode(false);
+            try {
+                const res = await fetch(
+                    `/api/servers/${serverId}/sftp/list?path=${encodeURIComponent(path)}`,
+                );
+                const data = await res.json();
+                if (data.success) {
+                    setEntries(data.data.entries);
+                    setCurrentPath(path);
+                } else {
+                    setError(data.error ?? 'Cannot read directory');
+                }
+            } catch {
+                setError('Network error');
+            } finally {
+                setLoading(false);
             }
-        } catch {
-            setError('Network error');
-        } finally {
-            setLoading(false);
-        }
-    }, [serverId]);
+        },
+        [serverId],
+    );
 
-    useEffect(() => { loadDir('/'); }, [loadDir]);
+    useEffect(() => {
+        loadDir('/');
+    }, [loadDir]);
 
     // Scroll breadcrumb to end when path changes
     useEffect(() => {
@@ -294,32 +359,33 @@ export default function FileManagerPanel({
     useEffect(() => {
         if (!onSelectionChange) return;
         onSelectionChange(
-            entries.filter(e => selected.has(e.path)),
-            currentPath
+            entries.filter((e) => selected.has(e.path)),
+            currentPath,
         );
     }, [selected, currentPath, entries, onSelectionChange]);
 
-    // ── Visible entries ────────────────────────────────────────────────────
+    //   Visible entries
 
     const visible = entries
-        .filter(e => showHidden || !e.name.startsWith('.'))
+        .filter((e) => showHidden || !e.name.startsWith('.'))
         .sort((a, b) => {
             if (a.type === 'dir' && b.type !== 'dir') return -1;
             if (a.type !== 'dir' && b.type === 'dir') return 1;
             return a.name.localeCompare(b.name);
         });
 
-    // ── Selection ──────────────────────────────────────────────────────────
+    //   Selection
 
     function toggle(path: string) {
-        setSelected(p => {
+        setSelected((p) => {
             const n = new Set(p);
-            if (n.has(path)) n.delete(path); else n.add(path);
+            if (n.has(path)) n.delete(path);
+            else n.add(path);
             return n;
         });
     }
 
-    // ── Download ───────────────────────────────────────────────────────────
+    //   Download                              ─
 
     function download(entry: RemoteEntry) {
         const a = document.createElement('a');
@@ -330,7 +396,7 @@ export default function FileManagerPanel({
         document.body.removeChild(a);
     }
 
-    // ── New folder ─────────────────────────────────────────────────────────
+    //   New folder                             ─
 
     async function createFolder() {
         if (!folderName.trim()) return;
@@ -352,7 +418,7 @@ export default function FileManagerPanel({
         }
     }
 
-    // ── Rename ─────────────────────────────────────────────────────────────
+    //   Rename                               ─
 
     async function doRename() {
         if (!renaming || !renameVal.trim() || renameVal === renaming.name) return;
@@ -373,19 +439,21 @@ export default function FileManagerPanel({
         }
     }
 
-    // ── Delete ─────────────────────────────────────────────────────────────
+    //   Delete                               ─
 
     async function doDelete() {
         if (!deleteTarget) return;
         setDeleteLoading(true);
         try {
-            await Promise.all(deleteTarget.map(e =>
-                fetch(`/api/servers/${serverId}/sftp/delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: e.path, isDirectory: e.type === 'dir' }),
-                })
-            ));
+            await Promise.all(
+                deleteTarget.map((e) =>
+                    fetch(`/api/servers/${serverId}/sftp/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: e.path, isDirectory: e.type === 'dir' }),
+                    }),
+                ),
+            );
             setDeleteTarget(null);
             setSelected(new Set());
             setSelectMode(false);
@@ -395,13 +463,16 @@ export default function FileManagerPanel({
         }
     }
 
-    // ── Upload ─────────────────────────────────────────────────────────────
+    //   Upload                               ─
 
     function uploadFiles(files: FileList | File[]) {
         setUploadsExpanded(true);
-        Array.from(files).forEach(file => {
+        Array.from(files).forEach((file) => {
             const uid = Math.random().toString(36).slice(2);
-            setUploads(p => [...p, { id: uid, name: file.name, size: file.size, progress: 0, status: 'uploading' }]);
+            setUploads((p) => [
+                ...p,
+                { id: uid, name: file.name, size: file.size, progress: 0, status: 'uploading' },
+            ]);
 
             const xhr = new XMLHttpRequest();
             const fd = new FormData();
@@ -409,27 +480,44 @@ export default function FileManagerPanel({
             fd.append('path', currentPath);
 
             xhr.upload.onprogress = (ev) => {
-                if (ev.lengthComputable) setUploads(p =>
-                    p.map(u => u.id === uid ? { ...u, progress: Math.round((ev.loaded / ev.total) * 100) } : u)
-                );
+                if (ev.lengthComputable)
+                    setUploads((p) =>
+                        p.map((u) =>
+                            u.id === uid
+                                ? { ...u, progress: Math.round((ev.loaded / ev.total) * 100) }
+                                : u,
+                        ),
+                    );
             };
             xhr.onload = () => {
                 const ok = xhr.status >= 200 && xhr.status < 300;
-                setUploads(p => p.map(u => u.id === uid
-                    ? { ...u, status: ok ? 'done' : 'error', progress: 100, error: ok ? undefined : 'Failed' }
-                    : u
-                ));
+                setUploads((p) =>
+                    p.map((u) =>
+                        u.id === uid
+                            ? {
+                                  ...u,
+                                  status: ok ? 'done' : 'error',
+                                  progress: 100,
+                                  error: ok ? undefined : 'Failed',
+                              }
+                            : u,
+                    ),
+                );
                 if (ok) loadDir(currentPath);
             };
             xhr.onerror = () =>
-                setUploads(p => p.map(u => u.id === uid ? { ...u, status: 'error', error: 'Network error' } : u));
+                setUploads((p) =>
+                    p.map((u) =>
+                        u.id === uid ? { ...u, status: 'error', error: 'Network error' } : u,
+                    ),
+                );
 
             xhr.open('POST', `/api/servers/${serverId}/sftp/upload`);
             xhr.send(fd);
         });
     }
 
-    // ── Drag & drop ────────────────────────────────────────────────────────
+    //   Drag & drop
 
     function onDragEnter(e: React.DragEvent) {
         e.preventDefault();
@@ -441,7 +529,9 @@ export default function FileManagerPanel({
         dragCounterRef.current--;
         if (dragCounterRef.current === 0) setDragging(false);
     }
-    function onDragOver(e: React.DragEvent) { e.preventDefault(); }
+    function onDragOver(e: React.DragEvent) {
+        e.preventDefault();
+    }
     function onDrop(e: React.DragEvent) {
         e.preventDefault();
         setDragging(false);
@@ -449,7 +539,7 @@ export default function FileManagerPanel({
         if (e.dataTransfer.files.length > 0) uploadFiles(e.dataTransfer.files);
     }
 
-    // ── Mobile row tap ─────────────────────────────────────────────────────
+    //   Mobile row tap                           ─
 
     function handleRowTap(entry: RemoteEntry) {
         if (selectMode) {
@@ -461,13 +551,13 @@ export default function FileManagerPanel({
         }
     }
 
-    // ── Computed ───────────────────────────────────────────────────────────
+    //   Computed                              ─
 
-    const activeUploads = uploads.filter(u => u.status !== 'done' || true);
-    const pendingCount = uploads.filter(u => u.status === 'uploading').length;
+    const activeUploads = uploads.filter((u) => u.status !== 'done' || true);
+    const pendingCount = uploads.filter((u) => u.status === 'uploading').length;
     const segs = segments(currentPath);
 
-    // ── Render ─────────────────────────────────────────────────────────────
+    //   Render                               ─
 
     return (
         <div
@@ -479,14 +569,16 @@ export default function FileManagerPanel({
         >
             {/* Drop overlay */}
             {dragging && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2
-                    bg-slate-900/95 border-2 border-dashed border-sky-500 rounded-xl pointer-events-none">
+                <div
+                    className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2
+                    bg-slate-900/95 border-2 border-dashed border-sky-500 rounded-xl pointer-events-none"
+                >
                     <Upload className="w-8 h-8 text-sky-400" />
                     <p className="text-sm font-semibold text-sky-300">Drop to upload</p>
                 </div>
             )}
 
-            {/* ── Top bar ── */}
+            {/*   Top bar   */}
             <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-slate-700 bg-slate-900">
                 {/* Breadcrumb — scrollable so long paths don't truncate on mobile */}
                 <div
@@ -505,7 +597,9 @@ export default function FileManagerPanel({
                         <span key={seg.path} className="flex items-center gap-0.5 shrink-0">
                             <ChevronRight className="w-3 h-3 text-slate-600 shrink-0" />
                             {i === segs.length - 2 ? (
-                                <span className="text-xs text-white font-medium px-1 whitespace-nowrap">{seg.label}</span>
+                                <span className="text-xs text-white font-medium px-1 whitespace-nowrap">
+                                    {seg.label}
+                                </span>
                             ) : (
                                 <button
                                     onClick={() => loadDir(seg.path)}
@@ -523,10 +617,14 @@ export default function FileManagerPanel({
                     {/* Select mode toggle — mobile only */}
                     {isMobile && (
                         <button
-                            onClick={() => { setSelectMode(m => !m); if (selectMode) setSelected(new Set()); }}
-                            className={`p-2 rounded transition-colors ${selectMode
-                                ? 'text-sky-400 bg-sky-500/10'
-                                : 'text-slate-500 hover:text-white hover:bg-slate-700'
+                            onClick={() => {
+                                setSelectMode((m) => !m);
+                                if (selectMode) setSelected(new Set());
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                                selectMode
+                                    ? 'text-sky-400 bg-sky-500/10'
+                                    : 'text-slate-500 hover:text-white hover:bg-slate-700'
                             }`}
                             title="Select files"
                         >
@@ -534,10 +632,11 @@ export default function FileManagerPanel({
                         </button>
                     )}
                     <button
-                        onClick={() => setShowHidden(h => !h)}
-                        className={`p-1.5 rounded transition-colors ${showHidden
-                            ? 'text-sky-400 bg-sky-500/10'
-                            : 'text-slate-500 hover:text-white hover:bg-slate-700'
+                        onClick={() => setShowHidden((h) => !h)}
+                        className={`p-1.5 rounded transition-colors ${
+                            showHidden
+                                ? 'text-sky-400 bg-sky-500/10'
+                                : 'text-slate-500 hover:text-white hover:bg-slate-700'
                         }`}
                         title={showHidden ? 'Hide hidden files' : 'Show hidden files'}
                     >
@@ -584,7 +683,10 @@ export default function FileManagerPanel({
                         {selected.size > 0 ? `${selected.size} selected` : 'Tap items to select'}
                     </span>
                     <button
-                        onClick={() => { setSelectMode(false); setSelected(new Set()); }}
+                        onClick={() => {
+                            setSelectMode(false);
+                            setSelected(new Set());
+                        }}
                         className="text-xs text-sky-400 active:text-white"
                     >
                         Done
@@ -592,7 +694,7 @@ export default function FileManagerPanel({
                 </div>
             )}
 
-            {/* ── File list ── */}
+            {/*   File list   */}
             <div className="flex-1 min-h-0 overflow-y-auto">
                 {error ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 p-6 text-center">
@@ -613,16 +715,23 @@ export default function FileManagerPanel({
                             >
                                 <ChevronUp className="w-4 h-4 text-slate-600 shrink-0" />
                                 <span className="text-xs text-slate-500 font-mono">..</span>
-                                <span className="text-xs text-slate-600 ml-1">Parent directory</span>
+                                <span className="text-xs text-slate-600 ml-1">
+                                    Parent directory
+                                </span>
                             </button>
                         )}
 
                         {/* Skeleton */}
                         {loading ? (
                             Array.from({ length: 8 }).map((_, i) => (
-                                <div key={i} className={`flex items-center gap-2.5 px-3 ${isMobile ? 'py-3.5' : 'py-2'}`}>
+                                <div
+                                    key={i}
+                                    className={`flex items-center gap-2.5 px-3 ${isMobile ? 'py-3.5' : 'py-2'}`}
+                                >
                                     <Skeleton className="w-4 h-4 rounded shrink-0" />
-                                    <Skeleton className={`h-4 rounded ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`} />
+                                    <Skeleton
+                                        className={`h-4 rounded ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`}
+                                    />
                                 </div>
                             ))
                         ) : visible.length === 0 ? (
@@ -631,8 +740,8 @@ export default function FileManagerPanel({
                                 <p className="text-sm">Empty directory</p>
                             </div>
                         ) : isMobile ? (
-                            /* ── Mobile rows ── */
-                            visible.map(entry => {
+                            /*   Mobile rows   */
+                            visible.map((entry) => {
                                 const isSelected = selected.has(entry.path);
                                 return (
                                     <div
@@ -643,30 +752,40 @@ export default function FileManagerPanel({
                                     >
                                         {/* Circle checkbox — only in select mode */}
                                         {selectMode && (
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                                            <div
+                                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                                                 ${isSelected ? 'bg-sky-500 border-sky-500' : 'border-slate-600'}`}
                                             >
-                                                {isSelected && <Check className="w-3 h-3 text-white" />}
+                                                {isSelected && (
+                                                    <Check className="w-3 h-3 text-white" />
+                                                )}
                                             </div>
                                         )}
 
                                         <EntryIcon entry={entry} size="md" />
 
                                         <div className="flex-1 min-w-0">
-                                            <span className={`text-sm truncate block font-medium leading-snug
-                                                ${entry.type === 'dir' ? 'text-amber-300' : 'text-slate-200'}`}>
+                                            <span
+                                                className={`text-sm truncate block font-medium leading-snug
+                                                ${entry.type === 'dir' ? 'text-amber-300' : 'text-slate-200'}`}
+                                            >
                                                 {entry.name}
                                             </span>
                                             <span className="text-xs text-slate-500 block mt-0.5">
                                                 {entry.type === 'dir' ? 'Folder' : fmt(entry.size)}
-                                                {entry.modifiedAt ? ` · ${fmtDate(entry.modifiedAt)}` : ''}
+                                                {entry.modifiedAt
+                                                    ? ` · ${fmtDate(entry.modifiedAt)}`
+                                                    : ''}
                                             </span>
                                         </div>
 
                                         {/* More button */}
                                         {!selectMode && (
                                             <button
-                                                onClick={e => { e.stopPropagation(); setMobileActionEntry(entry); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setMobileActionEntry(entry);
+                                                }}
                                                 className="p-2.5 rounded-full text-slate-500 active:bg-slate-700 shrink-0 -mr-1"
                                                 aria-label="More options"
                                             >
@@ -677,27 +796,35 @@ export default function FileManagerPanel({
                                 );
                             })
                         ) : (
-                            /* ── Desktop rows ── */
-                            visible.map(entry => (
+                            /*   Desktop rows   */
+                            visible.map((entry) => (
                                 <div
                                     key={entry.path}
                                     className={`group flex items-center gap-2 px-3 py-1.5 cursor-pointer transition-colors
                                         ${selected.has(entry.path) ? 'bg-sky-500/10' : 'hover:bg-slate-800/60'}`}
-                                    onClick={() => entry.type === 'dir' ? loadDir(entry.path) : toggle(entry.path)}
-                                    onDoubleClick={() => entry.type === 'dir' && loadDir(entry.path)}
+                                    onClick={() =>
+                                        entry.type === 'dir'
+                                            ? loadDir(entry.path)
+                                            : toggle(entry.path)
+                                    }
+                                    onDoubleClick={() =>
+                                        entry.type === 'dir' && loadDir(entry.path)
+                                    }
                                 >
                                     {/* Checkbox */}
                                     <Checkbox
                                         checked={selected.has(entry.path)}
                                         onCheckedChange={() => toggle(entry.path)}
-                                        onClick={e => e.stopPropagation()}
+                                        onClick={(e) => e.stopPropagation()}
                                         className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 data-[state=checked]:opacity-100"
                                     />
 
                                     <EntryIcon entry={entry} />
 
                                     <div className="flex-1 min-w-0">
-                                        <span className={`text-sm truncate block ${entry.type === 'dir' ? 'text-amber-300 font-medium' : 'text-slate-200'}`}>
+                                        <span
+                                            className={`text-sm truncate block ${entry.type === 'dir' ? 'text-amber-300 font-medium' : 'text-slate-200'}`}
+                                        >
                                             {entry.name}
                                         </span>
                                     </div>
@@ -709,7 +836,10 @@ export default function FileManagerPanel({
                                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                         {entry.type !== 'dir' && (
                                             <button
-                                                onClick={e => { e.stopPropagation(); download(entry); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    download(entry);
+                                                }}
                                                 className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-sky-400 transition-colors"
                                                 title="Download"
                                             >
@@ -717,14 +847,21 @@ export default function FileManagerPanel({
                                             </button>
                                         )}
                                         <button
-                                            onClick={e => { e.stopPropagation(); setRenaming(entry); setRenameVal(entry.name); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setRenaming(entry);
+                                                setRenameVal(entry.name);
+                                            }}
                                             className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-amber-400 transition-colors"
                                             title="Rename"
                                         >
                                             <Pencil className="w-3 h-3" />
                                         </button>
                                         <button
-                                            onClick={e => { e.stopPropagation(); setDeleteTarget([entry]); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeleteTarget([entry]);
+                                            }}
                                             className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors"
                                             title="Delete"
                                         >
@@ -738,17 +875,19 @@ export default function FileManagerPanel({
                 )}
             </div>
 
-            {/* ── Bulk action bar ── */}
+            {/*   Bulk action bar   */}
             {selected.size > 0 && (
-                <div className={`shrink-0 flex items-center justify-between gap-2 px-3 border-t border-slate-700 bg-slate-800/80
-                    ${isMobile ? 'py-3' : 'py-2'}`}>
+                <div
+                    className={`shrink-0 flex items-center justify-between gap-2 px-3 border-t border-slate-700 bg-slate-800/80
+                    ${isMobile ? 'py-3' : 'py-2'}`}
+                >
                     <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-slate-300`}>
                         {selected.size} selected
                     </span>
                     <Button
                         variant="destructive"
                         size={isMobile ? 'default' : 'sm'}
-                        onClick={() => setDeleteTarget(entries.filter(e => selected.has(e.path)))}
+                        onClick={() => setDeleteTarget(entries.filter((e) => selected.has(e.path)))}
                         className="gap-1"
                     >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -757,27 +896,38 @@ export default function FileManagerPanel({
                 </div>
             )}
 
-            {/* ── Upload queue ── */}
+            {/*   Upload queue   */}
             {activeUploads.length > 0 && (
                 <div className="shrink-0 border-t border-slate-700 bg-slate-800/50">
                     <button
                         className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-slate-400 hover:text-white"
-                        onClick={() => setUploadsExpanded(e => !e)}
+                        onClick={() => setUploadsExpanded((e) => !e)}
                     >
                         <span className="flex items-center gap-1.5">
-                            {pendingCount > 0 && <Loader2 className="w-3 h-3 animate-spin text-sky-400" />}
-                            Uploads ({uploads.filter(u => u.status === 'done').length}/{uploads.length})
+                            {pendingCount > 0 && (
+                                <Loader2 className="w-3 h-3 animate-spin text-sky-400" />
+                            )}
+                            Uploads ({uploads.filter((u) => u.status === 'done').length}/
+                            {uploads.length})
                         </span>
-                        <ChevronUp className={`w-3.5 h-3.5 transition-transform ${uploadsExpanded ? '' : 'rotate-180'}`} />
+                        <ChevronUp
+                            className={`w-3.5 h-3.5 transition-transform ${uploadsExpanded ? '' : 'rotate-180'}`}
+                        />
                     </button>
                     {uploadsExpanded && (
                         <div className="max-h-36 overflow-y-auto px-3 pb-2 space-y-1">
-                            {activeUploads.map(u => (
+                            {activeUploads.map((u) => (
                                 <div key={u.id} className="flex items-center gap-2">
                                     <div className="shrink-0 w-3.5">
-                                        {u.status === 'done' && <Check className="w-3.5 h-3.5 text-green-400" />}
-                                        {u.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
-                                        {u.status === 'uploading' && <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" />}
+                                        {u.status === 'done' && (
+                                            <Check className="w-3.5 h-3.5 text-green-400" />
+                                        )}
+                                        {u.status === 'error' && (
+                                            <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                                        )}
+                                        {u.status === 'uploading' && (
+                                            <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs text-slate-300 truncate">{u.name}</p>
@@ -792,7 +942,9 @@ export default function FileManagerPanel({
                                     </div>
                                     {u.status !== 'uploading' && (
                                         <button
-                                            onClick={() => setUploads(p => p.filter(x => x.id !== u.id))}
+                                            onClick={() =>
+                                                setUploads((p) => p.filter((x) => x.id !== u.id))
+                                            }
                                             className="p-0.5 text-slate-600 hover:text-white"
                                         >
                                             <X className="w-3 h-3" />
@@ -805,26 +957,33 @@ export default function FileManagerPanel({
                 </div>
             )}
 
-            {/* ── Status bar ── */}
+            {/*   Status bar   */}
             <div className="shrink-0 flex items-center justify-between px-3 py-1 border-t border-slate-800 bg-slate-900/60">
                 <span className="text-[10px] text-slate-600">
                     {visible.length} item{visible.length !== 1 ? 's' : ''}
-                    {!showHidden && entries.length !== visible.length ? ` · ${entries.length - visible.length} hidden` : ''}
+                    {!showHidden && entries.length !== visible.length
+                        ? ` · ${entries.length - visible.length} hidden`
+                        : ''}
                 </span>
-                <span className="text-[10px] text-slate-700 font-mono truncate max-w-[160px]">{currentPath}</span>
+                <span className="text-[10px] text-slate-700 font-mono truncate max-w-[160px]">
+                    {currentPath}
+                </span>
             </div>
 
-            {/* ── Hidden file input ── */}
+            {/*   Hidden file input   */}
             <input
                 ref={fileInputRef}
                 type="file"
                 multiple
                 accept="*/*"
                 className="hidden"
-                onChange={e => { if (e.target.files) uploadFiles(e.target.files); e.target.value = ''; }}
+                onChange={(e) => {
+                    if (e.target.files) uploadFiles(e.target.files);
+                    e.target.value = '';
+                }}
             />
 
-            {/* ── Mobile: entry action sheet ── */}
+            {/*   Mobile: entry action sheet   */}
             {mobileActionEntry && (
                 <BottomSheet
                     title={mobileActionEntry.name}
@@ -834,13 +993,19 @@ export default function FileManagerPanel({
                         <SheetAction
                             icon={Folder}
                             label="Open folder"
-                            onClick={() => { loadDir(mobileActionEntry.path); setMobileActionEntry(null); }}
+                            onClick={() => {
+                                loadDir(mobileActionEntry.path);
+                                setMobileActionEntry(null);
+                            }}
                         />
                     ) : (
                         <SheetAction
                             icon={Download}
                             label="Download"
-                            onClick={() => { download(mobileActionEntry); setMobileActionEntry(null); }}
+                            onClick={() => {
+                                download(mobileActionEntry);
+                                setMobileActionEntry(null);
+                            }}
                         />
                     )}
                     <SheetAction
@@ -856,26 +1021,42 @@ export default function FileManagerPanel({
                         icon={Trash2}
                         label="Delete"
                         variant="danger"
-                        onClick={() => { setDeleteTarget([mobileActionEntry]); setMobileActionEntry(null); }}
+                        onClick={() => {
+                            setDeleteTarget([mobileActionEntry]);
+                            setMobileActionEntry(null);
+                        }}
                     />
                 </BottomSheet>
             )}
 
-            {/* ── Modals ── */}
+            {/*   Modals   */}
 
             {showNewFolder && (
-                <Modal title="New Folder" onClose={() => { setShowNewFolder(false); setFolderName(''); }}>
+                <Modal
+                    title="New Folder"
+                    onClose={() => {
+                        setShowNewFolder(false);
+                        setFolderName('');
+                    }}
+                >
                     <div className="space-y-3">
                         <Input
                             autoFocus
                             value={folderName}
-                            onChange={e => setFolderName(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && createFolder()}
+                            onChange={(e) => setFolderName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && createFolder()}
                             placeholder="folder-name"
                             className="bg-secondary border-border text-sm"
                         />
                         <div className="flex gap-2 justify-end">
-                            <Button variant="secondary" size="sm" onClick={() => { setShowNewFolder(false); setFolderName(''); }}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => {
+                                    setShowNewFolder(false);
+                                    setFolderName('');
+                                }}
+                            >
                                 Cancel
                             </Button>
                             <Button
@@ -883,7 +1064,11 @@ export default function FileManagerPanel({
                                 onClick={createFolder}
                                 disabled={!folderName.trim() || folderLoading}
                             >
-                                {folderLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FolderPlus className="w-3.5 h-3.5" />}
+                                {folderLoading ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <FolderPlus className="w-3.5 h-3.5" />
+                                )}
                                 Create
                             </Button>
                         </div>
@@ -897,8 +1082,8 @@ export default function FileManagerPanel({
                         <Input
                             autoFocus
                             value={renameVal}
-                            onChange={e => setRenameVal(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && doRename()}
+                            onChange={(e) => setRenameVal(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && doRename()}
                             className="bg-secondary border-border text-sm"
                         />
                         <div className="flex gap-2 justify-end">
@@ -908,9 +1093,17 @@ export default function FileManagerPanel({
                             <Button
                                 size="sm"
                                 onClick={doRename}
-                                disabled={!renameVal.trim() || renameVal === renaming.name || renameLoading}
+                                disabled={
+                                    !renameVal.trim() ||
+                                    renameVal === renaming.name ||
+                                    renameLoading
+                                }
                             >
-                                {renameLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                                {renameLoading ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <Check className="w-3.5 h-3.5" />
+                                )}
                                 Rename
                             </Button>
                         </div>
@@ -924,17 +1117,35 @@ export default function FileManagerPanel({
                         <div className="flex gap-2.5 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                             <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
                             <p className="text-xs text-slate-300">
-                                Delete {deleteTarget.length === 1 ? `"${deleteTarget[0].name}"` : `${deleteTarget.length} items`}?
-                                {deleteTarget.some(e => e.type === 'dir') && ' Directories will be removed recursively.'}
-                                {' '}This cannot be undone.
+                                Delete{' '}
+                                {deleteTarget.length === 1
+                                    ? `"${deleteTarget[0].name}"`
+                                    : `${deleteTarget.length} items`}
+                                ?
+                                {deleteTarget.some((e) => e.type === 'dir') &&
+                                    ' Directories will be removed recursively.'}{' '}
+                                This cannot be undone.
                             </p>
                         </div>
                         <div className="flex gap-2 justify-end">
-                            <Button variant="secondary" size="sm" onClick={() => setDeleteTarget(null)}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setDeleteTarget(null)}
+                            >
                                 Cancel
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={doDelete} disabled={deleteLoading}>
-                                {deleteLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={doDelete}
+                                disabled={deleteLoading}
+                            >
+                                {deleteLoading ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                )}
                                 Delete
                             </Button>
                         </div>

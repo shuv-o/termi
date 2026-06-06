@@ -11,12 +11,14 @@ vi.mock('@/lib/db', () => ({
         passkey: { count: vi.fn() },
         session: { updateMany: vi.fn() },
         server: { deleteMany: vi.fn() },
-        $transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn({
-            user: { update: vi.fn() },
-            server: { deleteMany: vi.fn() },
-            session: { updateMany: vi.fn() },
-            auditLog: { create: vi.fn() },
-        })),
+        $transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+            fn({
+                user: { update: vi.fn() },
+                server: { deleteMany: vi.fn() },
+                session: { updateMany: vi.fn() },
+                auditLog: { create: vi.fn() },
+            }),
+        ),
     },
 }));
 

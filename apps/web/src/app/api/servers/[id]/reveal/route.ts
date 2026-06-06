@@ -81,7 +81,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { field, authPassword, authCode, passkeyResponse } = validation.data;
 
     if (!authPassword && !authCode && !passkeyResponse) {
-        return errorResponse('Re-authentication required: provide your password, 2FA code, or passkey', 400);
+        return errorResponse(
+            'Re-authentication required: provide your password, 2FA code, or passkey',
+            400,
+        );
     }
 
     // Re-authenticate
@@ -147,7 +150,8 @@ export async function POST(request: Request, { params }: RouteParams) {
                     id: passkey.credentialID,
                     publicKey: new Uint8Array(passkey.credentialPublicKey),
                     counter: Number(passkey.counter),
-                    transports: passkey.transports as import('@simplewebauthn/server').AuthenticatorTransportFuture[],
+                    transports:
+                        passkey.transports as import('@simplewebauthn/server').AuthenticatorTransportFuture[],
                 },
                 requireUserVerification: false,
             });

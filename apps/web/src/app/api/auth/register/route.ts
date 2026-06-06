@@ -6,22 +6,18 @@
 import { z } from 'zod';
 import { registerUser } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/auth/email-verification';
-import {
-    validateBody,
-    successResponse,
-    errorResponse,
-    getClientIP,
-} from '@/lib/api';
+import { validateBody, successResponse, errorResponse, getClientIP } from '@/lib/api';
 import { registerRateLimit } from '@/lib/rate-limit';
 
 const registerSchema = z.object({
     email: z.string().email('Invalid email address'),
-    password: z.string()
+    password: z
+        .string()
         .min(8, 'Password must be at least 8 characters')
         .max(128, 'Password too long')
         .regex(
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-            'Password must contain uppercase, lowercase, and a number'
+            'Password must contain uppercase, lowercase, and a number',
         ),
 });
 
@@ -51,13 +47,16 @@ export async function POST(request: Request) {
         // Send verification email (non-blocking)
         if (result.userId) {
             sendVerificationEmail(result.userId, email).catch((err) =>
-                console.error('Failed to send verification email:', err)
+                console.error('Failed to send verification email:', err),
             );
         }
 
         return successResponse(
-            { message: 'Account created successfully. Please verify your email.', userId: result.userId },
-            201
+            {
+                message: 'Account created successfully. Please verify your email.',
+                userId: result.userId,
+            },
+            201,
         );
     } catch (error) {
         console.error('Registration error:', error);

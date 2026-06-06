@@ -6,12 +6,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { listDirectory } from '@/lib/services/sftp.service';
-import {
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-    notFoundResponse,
-} from '@/lib/api';
+import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -30,15 +25,15 @@ export async function GET(request: Request, { params }: RouteParams) {
 
         const entries = await listDirectory(
             {
-                id:         server.id,
-                host:       server.host,
-                port:       server.port,
-                username:   server.username,
-                password:   server.password ?? undefined,
+                id: server.id,
+                host: server.host,
+                port: server.port,
+                username: server.username,
+                password: server.password ?? undefined,
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
             },
-            dirPath
+            dirPath,
         );
 
         return successResponse({ entries, path: dirPath });

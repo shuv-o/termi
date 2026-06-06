@@ -47,9 +47,10 @@ export async function GET(request: Request) {
         const { userId, email, isNewUser, hasMasterKey } = await findOrCreateGoogleUser(googleUser);
 
         const deviceInfo = request.headers.get('user-agent') || 'Unknown';
-        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-            || request.headers.get('x-real-ip')
-            || '0.0.0.0';
+        const ipAddress =
+            request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+            request.headers.get('x-real-ip') ||
+            '0.0.0.0';
 
         const sessionToken = await createSession(userId, email, deviceInfo, ipAddress);
 

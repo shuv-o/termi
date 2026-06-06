@@ -5,19 +5,18 @@
  * Run with: npx tsx prisma/seed.ts
  */
 
-import {PrismaPg} from '@prisma/adapter-pg'
-import 'dotenv/config'
-import {PrismaClient, Protocol} from "@/app/generated/prisma/client";
-import {encrypt, hashPassword, serializeEncrypted} from "@/lib/crypto";
+import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config';
+import { PrismaClient, Protocol } from '@/app/generated/prisma/client';
+import { encrypt, hashPassword, serializeEncrypted } from '@/lib/crypto';
 
 const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL,
-})
+});
 
 const prisma = new PrismaClient({
     adapter,
 });
-
 
 async function main() {
     console.log('🌱 Seeding database...');
@@ -26,7 +25,7 @@ async function main() {
     const passwordHash = await hashPassword('Demo@123');
 
     const user = await prisma.user.upsert({
-        where: {email: 'demo@termi.local'},
+        where: { email: 'demo@termi.local' },
         update: {},
         create: {
             email: 'demo@termi.local',
@@ -41,7 +40,7 @@ async function main() {
     // Create server groups
     const groups = await Promise.all([
         prisma.serverGroup.upsert({
-            where: {userId_name: {userId: user.id, name: 'Production'}},
+            where: { userId_name: { userId: user.id, name: 'Production' } },
             update: {},
             create: {
                 userId: user.id,
@@ -52,7 +51,7 @@ async function main() {
             },
         }),
         prisma.serverGroup.upsert({
-            where: {userId_name: {userId: user.id, name: 'Development'}},
+            where: { userId_name: { userId: user.id, name: 'Development' } },
             update: {},
             create: {
                 userId: user.id,
@@ -63,7 +62,7 @@ async function main() {
             },
         }),
         prisma.serverGroup.upsert({
-            where: {userId_name: {userId: user.id, name: 'Testing'}},
+            where: { userId_name: { userId: user.id, name: 'Testing' } },
             update: {},
             create: {
                 userId: user.id,

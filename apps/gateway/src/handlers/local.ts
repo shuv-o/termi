@@ -11,7 +11,7 @@ import { createRequire } from 'module';
 import os from 'os';
 import type { IPty, IPtyForkOptions } from 'node-pty';
 
-// ── node-pty (optional native module) ───────────────────────────────────────
+//   node-pty (optional native module)                    ─
 
 // Use createRequire so we can load the CJS node-pty package from ESM with
 // a graceful fallback if it was not compiled for this environment.
@@ -23,10 +23,12 @@ try {
     const nodePty = _require('node-pty');
     _ptySpawn = nodePty.spawn;
 } catch {
-    console.warn('[LocalHandler] node-pty not available — local terminal disabled. Run: npm ci --workspace=apps/gateway');
+    console.warn(
+        '[LocalHandler] node-pty not available — local terminal disabled. Run: npm ci --workspace=apps/gateway',
+    );
 }
 
-// ── Per-user session cap ─────────────────────────────────────────────────────
+//   Per-user session cap                           ─
 
 const MAX_LOCAL_PTYS_PER_USER = 3;
 const userPtyCounts = new Map<string, number>();
@@ -44,7 +46,7 @@ function decrementUser(userId: string): void {
     else userPtyCounts.set(userId, n - 1);
 }
 
-// ── Handler class ────────────────────────────────────────────────────────────
+//   Handler class
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -54,7 +56,10 @@ export class LocalHandler {
     private userId: string;
     private idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(private ws: WebSocket, userId: string) {
+    constructor(
+        private ws: WebSocket,
+        userId: string,
+    ) {
         this.userId = userId;
         this.spawn();
     }
@@ -63,7 +68,12 @@ export class LocalHandler {
         if (this.idleTimer) clearTimeout(this.idleTimer);
         this.idleTimer = setTimeout(() => {
             if (this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({ type: 'error', message: 'Session timed out due to inactivity' }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'error',
+                        message: 'Session timed out due to inactivity',
+                    }),
+                );
                 this.ws.close(4008, 'Idle timeout');
             }
             this.close();
@@ -72,20 +82,29 @@ export class LocalHandler {
 
     private spawn(): void {
         if (!_ptySpawn) {
-            this.ws.send(JSON.stringify({ type: 'error', message: 'Local terminal is not available on this server (node-pty missing)' }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Local terminal is not available on this server (node-pty missing)',
+                }),
+            );
             this.ws.close(4500, 'node-pty unavailable');
             return;
         }
 
         if (!incrementUser(this.userId)) {
-            this.ws.send(JSON.stringify({ type: 'error', message: `Too many local terminal sessions (max ${MAX_LOCAL_PTYS_PER_USER})` }));
+            this.ws.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: `Too many local terminal sessions (max ${MAX_LOCAL_PTYS_PER_USER})`,
+                }),
+            );
             this.ws.close(4029, 'Too Many Requests');
             return;
         }
 
-        const shell = process.platform === 'win32'
-            ? 'powershell.exe'
-            : (process.env.SHELL || '/bin/sh');
+        const shell =
+            process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || '/bin/sh';
 
         // Provide a minimal, sanitised environment — do NOT inherit process.env
         // which would expose secrets like GATEWAY_JWT_SECRET, DATABASE_URL etc.
@@ -93,7 +112,8 @@ export class LocalHandler {
             TERM: 'xterm-256color',
             COLORTERM: 'truecolor',
             HOME: process.env.HOME || os.homedir(),
-            PATH: process.env.PATH || '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+            PATH:
+                process.env.PATH || '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
             LANG: process.env.LANG || 'en_US.UTF-8',
             USER: process.env.USER || 'gateway',
             SHELL: shell,
@@ -110,7 +130,9 @@ export class LocalHandler {
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
             decrementUser(this.userId);
-            this.ws.send(JSON.stringify({ type: 'error', message: `Failed to spawn shell: ${message}` }));
+            this.ws.send(
+                JSON.stringify({ type: 'error', message: `Failed to spawn shell: ${message}` }),
+            );
             this.ws.close(4500, 'Spawn failed');
             return;
         }
@@ -118,10 +140,12 @@ export class LocalHandler {
         this.pty.onData((data: string) => {
             this.resetIdleTimer();
             if (this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({
-                    type: 'data',
-                    data: Buffer.from(data).toString('base64'),
-                }));
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'data',
+                        data: Buffer.from(data).toString('base64'),
+                    }),
+                );
             }
         });
 
@@ -157,9 +181,16 @@ export class LocalHandler {
     }
 
     private cleanup(): void {
-        if (this.idleTimer) { clearTimeout(this.idleTimer); this.idleTimer = null; }
+        if (this.idleTimer) {
+            clearTimeout(this.idleTimer);
+            this.idleTimer = null;
+        }
         if (this.pty) {
-            try { this.pty.kill(); } catch { /* ignore */ }
+            try {
+                this.pty.kill();
+            } catch {
+                /* ignore */
+            }
             this.pty = null;
         }
         decrementUser(this.userId);

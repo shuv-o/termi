@@ -31,7 +31,7 @@ export async function sendShareInvitation(
     serverId: string,
     inviterId: string,
     inviteeEmail: string,
-    permissions: 'manage' | 'connect' = 'connect'
+    permissions: 'manage' | 'connect' = 'connect',
 ): Promise<{ success: boolean; error?: string }> {
     // Verify inviter owns the server
     const server = await prisma.server.findFirst({
@@ -160,8 +160,19 @@ export async function getServerShares(serverId: string, ownerId: string) {
             orderBy: { createdAt: 'desc' },
         }),
         prisma.serverInvitation.findMany({
-            where: { serverId, inviterId: ownerId, status: 'PENDING', expiresAt: { gt: new Date() } },
-            select: { id: true, inviteeEmail: true, permissions: true, expiresAt: true, createdAt: true },
+            where: {
+                serverId,
+                inviterId: ownerId,
+                status: 'PENDING',
+                expiresAt: { gt: new Date() },
+            },
+            select: {
+                id: true,
+                inviteeEmail: true,
+                permissions: true,
+                expiresAt: true,
+                createdAt: true,
+            },
             orderBy: { createdAt: 'desc' },
         }),
     ]);
@@ -175,7 +186,7 @@ export async function getServerShares(serverId: string, ownerId: string) {
 
 export async function acceptInvitation(
     token: string,
-    userId: string
+    userId: string,
 ): Promise<{ success: boolean; error?: string; serverId?: string }> {
     const tokenHash = hashToken(token);
     const invitation = await prisma.serverInvitation.findFirst({
@@ -233,7 +244,7 @@ export async function acceptInvitation(
 
 export async function revokeShare(
     shareId: string,
-    ownerId: string
+    ownerId: string,
 ): Promise<{ success: boolean; error?: string }> {
     const share = await prisma.serverShare.findFirst({
         where: { id: shareId, ownerId },
@@ -266,9 +277,17 @@ export async function getSharedServers(userId: string) {
         include: {
             server: {
                 select: {
-                    id: true, name: true, description: true, protocol: true,
-                    tags: true, isFavorite: true, lastUsedAt: true, password: true,
-                    host: true, username: true, port: true,
+                    id: true,
+                    name: true,
+                    description: true,
+                    protocol: true,
+                    tags: true,
+                    isFavorite: true,
+                    lastUsedAt: true,
+                    password: true,
+                    host: true,
+                    username: true,
+                    port: true,
                     group: { select: { id: true, name: true, color: true } },
                 },
             },
@@ -277,7 +296,7 @@ export async function getSharedServers(userId: string) {
         orderBy: { createdAt: 'desc' },
     });
 
-    return shares.map(share => {
+    return shares.map((share) => {
         const { password, host, username, ...rest } = share.server;
         const creds = decryptCredentials({ host, username });
         return {
@@ -294,7 +313,7 @@ export async function getSharedServers(userId: string) {
 
 export async function revokeInvitation(
     invitationId: string,
-    inviterId: string
+    inviterId: string,
 ): Promise<{ success: boolean; error?: string }> {
     const invitation = await prisma.serverInvitation.findFirst({
         where: { id: invitationId, inviterId, status: 'PENDING' },

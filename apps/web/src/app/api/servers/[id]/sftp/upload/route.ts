@@ -7,12 +7,7 @@ import path from 'path';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { uploadBuffer } from '@/lib/services/sftp.service';
-import {
-    successResponse,
-    errorResponse,
-    unauthorizedResponse,
-    notFoundResponse,
-} from '@/lib/api';
+import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 // Hard cap: 500 MB per upload
 const MAX_UPLOAD_BYTES = 500 * 1024 * 1024;
@@ -42,7 +37,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Enforce upload size limit before reading into memory
     if (file.size > MAX_UPLOAD_BYTES) {
-        return errorResponse(`File too large. Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`, 413);
+        return errorResponse(
+            `File too large. Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`,
+            413,
+        );
     }
 
     // Sanitise the filename to prevent path traversal (e.g. "../../etc/passwd")
@@ -61,16 +59,16 @@ export async function POST(request: Request, { params }: RouteParams) {
 
         await uploadBuffer(
             {
-                id:         server.id,
-                host:       server.host,
-                port:       server.port,
-                username:   server.username,
-                password:   server.password ?? undefined,
+                id: server.id,
+                host: server.host,
+                port: server.port,
+                username: server.username,
+                password: server.password ?? undefined,
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
             },
             destPath,
-            buffer
+            buffer,
         );
 
         return successResponse({ uploaded: true, path: destPath });

@@ -18,8 +18,7 @@ function bytesToBase64(bytes: Uint8Array): string {
 }
 
 const MAX_AUTO_RETRIES = 5;
-const getBackoffMs = (attempt: number) =>
-    Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
+const getBackoffMs = (attempt: number) => Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
 
 interface SSHTerminalProps {
     sessionId: string;
@@ -55,7 +54,9 @@ export default function SSHTerminal({
     const fitAddon = useRef<FitAddon | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const statusRef = useRef<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
-    const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
+    const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>(
+        'connecting',
+    );
 
     const onDisconnectRef = useRef(onDisconnect);
     onDisconnectRef.current = onDisconnect;
@@ -86,7 +87,8 @@ export default function SSHTerminal({
     }, []);
 
     const connect = useCallback(async () => {
-        const gatewayBase = gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
+        const gatewayBase =
+            gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
         const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
         const ws = new WebSocket(wsUrl);
@@ -169,13 +171,17 @@ export default function SSHTerminal({
                     case 'disconnected':
                         intentionalCloseRef.current = true;
                         updateStatus('disconnected');
-                        terminalInstance.current?.write('\r\n\x1b[33mConnection closed.\x1b[0m\r\n');
+                        terminalInstance.current?.write(
+                            '\r\n\x1b[33mConnection closed.\x1b[0m\r\n',
+                        );
                         onDisconnectRef.current?.();
                         break;
 
                     case 'error':
                         updateStatus('error');
-                        terminalInstance.current?.write(`\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`);
+                        terminalInstance.current?.write(
+                            `\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`,
+                        );
                         onErrorRef.current?.(message.message);
                         break;
                 }
@@ -199,13 +205,17 @@ export default function SSHTerminal({
                 const delayMs = getBackoffMs(attempt);
                 const delaySec = Math.round(delayMs / 1000);
                 updateStatus('connecting');
-                terminalInstance.current?.writeln(`\r\n\x1b[33mConnection lost. Reconnecting in ${delaySec}s (attempt ${attempt + 1}/${MAX_AUTO_RETRIES})…\x1b[0m`);
+                terminalInstance.current?.writeln(
+                    `\r\n\x1b[33mConnection lost. Reconnecting in ${delaySec}s (attempt ${attempt + 1}/${MAX_AUTO_RETRIES})…\x1b[0m`,
+                );
                 retryTimerRef.current = setTimeout(() => {
                     connect().catch((err) => console.error('[SSHTerminal] reconnect error:', err));
                 }, delayMs);
             } else {
                 updateStatus('disconnected');
-                terminalInstance.current?.writeln(`\r\n\x1b[31mCould not reconnect after ${MAX_AUTO_RETRIES} attempts.\x1b[0m`);
+                terminalInstance.current?.writeln(
+                    `\r\n\x1b[31mCould not reconnect after ${MAX_AUTO_RETRIES} attempts.\x1b[0m`,
+                );
                 onSessionNotFoundRef.current?.();
             }
         };
@@ -341,8 +351,8 @@ export default function SSHTerminal({
                         status === 'connected'
                             ? 'bg-green-500'
                             : status === 'connecting'
-                                ? 'bg-yellow-500 animate-pulse'
-                                : 'bg-red-500'
+                              ? 'bg-yellow-500 animate-pulse'
+                              : 'bg-red-500'
                     }`}
                 />
                 <span className="text-xs text-muted-foreground capitalize">{status}</span>

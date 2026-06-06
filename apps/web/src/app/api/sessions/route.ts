@@ -12,7 +12,13 @@ export async function GET() {
     const sessions = await prisma.persistentSession.findMany({
         where: { userId: session.userId },
         orderBy: { updatedAt: 'asc' },
-        select: { sessionId: true, serverId: true, serverName: true, createdAt: true, updatedAt: true },
+        select: {
+            sessionId: true,
+            serverId: true,
+            serverName: true,
+            createdAt: true,
+            updatedAt: true,
+        },
     });
 
     return successResponse({ sessions });

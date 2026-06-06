@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
-import { KeyRound, Copy, Check, Eye, EyeOff, Fingerprint, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import {
+    KeyRound,
+    Copy,
+    Check,
+    Eye,
+    EyeOff,
+    Fingerprint,
+    Loader2,
+    AlertCircle,
+    RefreshCw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
@@ -81,7 +91,11 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
 
         let assertion: Awaited<ReturnType<typeof startAuthentication>>;
         try {
-            assertion = await startAuthentication({ optionsJSON: webAuthnOptions as Parameters<typeof startAuthentication>[0]['optionsJSON'] });
+            assertion = await startAuthentication({
+                optionsJSON: webAuthnOptions as Parameters<
+                    typeof startAuthentication
+                >[0]['optionsJSON'],
+            });
         } catch (err: unknown) {
             setErrorMsg(getWebAuthnErrorMessage(err));
             setStep('error');
@@ -165,12 +179,16 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                         <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
                             <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                             <div className="space-y-1">
-                                <p className="text-sm font-medium text-destructive">Authentication Failed</p>
+                                <p className="text-sm font-medium text-destructive">
+                                    Authentication Failed
+                                </p>
                                 <p className="text-sm text-destructive/80">{errorMsg}</p>
                             </div>
                         </div>
                         <div className="flex gap-3 justify-end">
-                            <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                            <Button variant="secondary" onClick={onClose}>
+                                Cancel
+                            </Button>
                             <Button onClick={handlePasskeyAuth}>
                                 <RefreshCw className="w-4 h-4" />
                                 Try Again
@@ -188,7 +206,9 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                             </label>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary border border-border">
                                 <code className="flex-1 text-sm font-mono break-all text-green-400 select-all min-w-0">
-                                    {showValue ? revealedValue : '•'.repeat(Math.min(revealedValue.length, 24))}
+                                    {showValue
+                                        ? revealedValue
+                                        : '•'.repeat(Math.min(revealedValue.length, 24))}
                                 </code>
                                 <Button
                                     variant="ghost"
@@ -197,21 +217,33 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                                     className="h-8 w-8 shrink-0"
                                     title={showValue ? 'Hide' : 'Show'}
                                 >
-                                    {showValue ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    {showValue ? (
+                                        <EyeOff className="w-4 h-4" />
+                                    ) : (
+                                        <Eye className="w-4 h-4" />
+                                    )}
                                 </Button>
                             </div>
                         </div>
 
                         <div className="flex gap-3 justify-end">
-                            <Button variant="secondary" onClick={onClose}>Close</Button>
+                            <Button variant="secondary" onClick={onClose}>
+                                Close
+                            </Button>
                             <Button
                                 onClick={copyToClipboard}
-                                className={copied ? 'bg-green-600 hover:bg-green-500 text-white' : ''}
+                                className={
+                                    copied ? 'bg-green-600 hover:bg-green-500 text-white' : ''
+                                }
                             >
                                 {copied ? (
-                                    <><Check className="w-4 h-4" /> Copied!</>
+                                    <>
+                                        <Check className="w-4 h-4" /> Copied!
+                                    </>
                                 ) : (
-                                    <><Copy className="w-4 h-4" /> Copy</>
+                                    <>
+                                        <Copy className="w-4 h-4" /> Copy
+                                    </>
                                 )}
                             </Button>
                         </div>

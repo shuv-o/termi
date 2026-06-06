@@ -5,7 +5,7 @@ const os = require('os');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// ── Environment loading ───────────────────────────────────────────────────────
+//   Environment loading                            ─
 
 function parseEnvFile(content) {
     for (const raw of content.split('\n')) {
@@ -23,7 +23,9 @@ function parseEnvFile(content) {
 // Dev: load the monorepo root .env
 const rootEnvPath = path.join(__dirname, '../../.env');
 if (fs.existsSync(rootEnvPath)) {
-    try { parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8')); } catch (_) {}
+    try {
+        parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8'));
+    } catch (_) {}
 }
 
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
@@ -36,13 +38,15 @@ try {
 } catch (e) {
     console.warn('[main] node-pty unavailable — local terminal disabled:', e.message);
     if (!app.isPackaged) {
-        console.warn('[main] Run "npm run setup:electron" to rebuild node-pty for this Electron version.');
+        console.warn(
+            '[main] Run "npm run setup:electron" to rebuild node-pty for this Electron version.',
+        );
     }
 }
 
 const localPtys = new Map();
 
-// ── Config loading ────────────────────────────────────────────────────────────
+//   Config loading
 
 function getConfigPath() {
     return path.join(app.getPath('userData'), 'termi.config.json');
@@ -53,12 +57,16 @@ function loadConfig() {
     if (!fs.existsSync(configPath)) return;
 
     if (process.platform !== 'win32') {
-        try { fs.chmodSync(configPath, 0o600); } catch (_) {}
+        try {
+            fs.chmodSync(configPath, 0o600);
+        } catch (_) {}
     } else {
         try {
             const { execSync } = require('child_process');
             const username = os.userInfo().username;
-            execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, { stdio: 'ignore' });
+            execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, {
+                stdio: 'ignore',
+            });
         } catch (_) {}
     }
 
@@ -72,7 +80,7 @@ function loadConfig() {
     }
 }
 
-// ── Service helpers ───────────────────────────────────────────────────────────
+//   Service helpers                              ─
 
 function getPaths() {
     if (app.isPackaged) {
@@ -92,12 +100,17 @@ function getPaths() {
 
 function startGuacd() {
     guacdProcess = spawn('docker', [
-        'run', '--rm', '-p', '4822:4822', '--name', 'guacd-desktop',
+        'run',
+        '--rm',
+        '-p',
+        '4822:4822',
+        '--name',
+        'guacd-desktop',
         'guacamole/guacd:1.5.5',
     ]);
-    guacdProcess.stderr.on('data', d => console.log('[guacd]', d.toString().trim()));
-    guacdProcess.on('error', err =>
-        console.warn('[guacd] Docker not available — RDP/VNC disabled:', err.message)
+    guacdProcess.stderr.on('data', (d) => console.log('[guacd]', d.toString().trim()));
+    guacdProcess.on('error', (err) =>
+        console.warn('[guacd] Docker not available — RDP/VNC disabled:', err.message),
     );
 }
 
@@ -111,12 +124,12 @@ function startGateway(paths) {
             ALLOWED_ORIGINS: 'http://localhost:22080,http://127.0.0.1:22080',
         },
     });
-    gatewayProcess.stdout.on('data', d => console.log('[gateway]', d.toString().trim()));
-    gatewayProcess.stderr.on('data', d => console.error('[gateway]', d.toString().trim()));
-    gatewayProcess.on('error', err => console.error('[gateway] Failed to start:', err.message));
+    gatewayProcess.stdout.on('data', (d) => console.log('[gateway]', d.toString().trim()));
+    gatewayProcess.stderr.on('data', (d) => console.error('[gateway]', d.toString().trim()));
+    gatewayProcess.on('error', (err) => console.error('[gateway] Failed to start:', err.message));
 }
 
-// ── Windows ───────────────────────────────────────────────────────────────────
+//   Windows                                  ─
 
 /** Tell the renderer (SPA) to navigate without a full page reload. */
 function navigateTo(routePath) {
@@ -130,32 +143,37 @@ function buildAppMenu() {
     const isMac = process.platform === 'darwin';
     const reconfigureItem = {
         label: 'Reconfigure…',
-        click: () => { app.relaunch(); app.quit(); },
+        click: () => {
+            app.relaunch();
+            app.quit();
+        },
     };
 
     const template = [
-        ...(isMac ? [{
-            label: app.name,
-            submenu: [
-                { role: 'about' },
-                reconfigureItem,
-                { type: 'separator' },
-                { role: 'services' },
-                { type: 'separator' },
-                { role: 'hide' },
-                { role: 'hideOthers' },
-                { role: 'unhide' },
-                { type: 'separator' },
-                { role: 'quit' },
-            ],
-        }] : [{
-            label: 'Termi',
-            submenu: [
-                reconfigureItem,
-                { type: 'separator' },
-                { role: 'quit' },
-            ],
-        }]),
+        ...(isMac
+            ? [
+                  {
+                      label: app.name,
+                      submenu: [
+                          { role: 'about' },
+                          reconfigureItem,
+                          { type: 'separator' },
+                          { role: 'services' },
+                          { type: 'separator' },
+                          { role: 'hide' },
+                          { role: 'hideOthers' },
+                          { role: 'unhide' },
+                          { type: 'separator' },
+                          { role: 'quit' },
+                      ],
+                  },
+              ]
+            : [
+                  {
+                      label: 'Termi',
+                      submenu: [reconfigureItem, { type: 'separator' }, { role: 'quit' }],
+                  },
+              ]),
         {
             label: 'Edit',
             submenu: [
@@ -173,12 +191,28 @@ function buildAppMenu() {
         {
             label: 'Go',
             submenu: [
-                { label: 'Servers',        accelerator: 'CmdOrCtrl+1', click: () => navigateTo('/panel') },
-                { label: 'Groups',         accelerator: 'CmdOrCtrl+2', click: () => navigateTo('/panel/groups') },
-                { label: 'Sessions',       accelerator: 'CmdOrCtrl+3', click: () => navigateTo('/panel/sessions') },
-                { label: 'Local Terminal', accelerator: 'CmdOrCtrl+4', click: () => navigateTo('/panel/local') },
+                { label: 'Servers', accelerator: 'CmdOrCtrl+1', click: () => navigateTo('/panel') },
+                {
+                    label: 'Groups',
+                    accelerator: 'CmdOrCtrl+2',
+                    click: () => navigateTo('/panel/groups'),
+                },
+                {
+                    label: 'Sessions',
+                    accelerator: 'CmdOrCtrl+3',
+                    click: () => navigateTo('/panel/sessions'),
+                },
+                {
+                    label: 'Local Terminal',
+                    accelerator: 'CmdOrCtrl+4',
+                    click: () => navigateTo('/panel/local'),
+                },
                 { type: 'separator' },
-                { label: 'Settings',       accelerator: isMac ? 'Cmd+,' : 'Ctrl+,', click: () => navigateTo('/panel/settings') },
+                {
+                    label: 'Settings',
+                    accelerator: isMac ? 'Cmd+,' : 'Ctrl+,',
+                    click: () => navigateTo('/panel/settings'),
+                },
             ],
         },
         {
@@ -200,9 +234,7 @@ function buildAppMenu() {
             submenu: [
                 { role: 'minimize' },
                 { role: 'zoom' },
-                ...(isMac
-                    ? [{ type: 'separator' }, { role: 'front' }]
-                    : [{ role: 'close' }]),
+                ...(isMac ? [{ type: 'separator' }, { role: 'front' }] : [{ role: 'close' }]),
             ],
         },
     ];
@@ -226,10 +258,12 @@ function createSetupWindow(errorMsg) {
     const fileUrl = new URL(`file://${path.join(__dirname, 'setup.html')}`);
     if (errorMsg) fileUrl.searchParams.set('error', errorMsg);
     setupWin.loadURL(fileUrl.toString());
-    setupWin.on('closed', () => { setupWin = null; });
+    setupWin.on('closed', () => {
+        setupWin = null;
+    });
 }
 
-// ── Static asset caching ──────────────────────────────────────────────────────
+//   Static asset caching
 
 let cachingConfigured = false;
 
@@ -257,7 +291,7 @@ function setupStaticAssetCaching() {
             }
             headers['Cache-Control'] = ['public, max-age=31536000, immutable'];
             callback({ responseHeaders: headers });
-        }
+        },
     );
 }
 
@@ -287,7 +321,7 @@ function createWindow(appUrl) {
             (details, callback) => {
                 details.requestHeaders['Origin'] = 'http://localhost:22080';
                 callback({ requestHeaders: details.requestHeaders });
-            }
+            },
         );
     }
 
@@ -297,7 +331,7 @@ function createWindow(appUrl) {
     });
 }
 
-// ── Startup logic ─────────────────────────────────────────────────────────────
+//   Startup logic                               ─
 
 async function startApp() {
     const remoteUrl = process.env.TERMI_REMOTE_URL;
@@ -311,11 +345,9 @@ async function startApp() {
     createWindow(remoteUrl);
 }
 
-// ── Setup IPC handlers ────────────────────────────────────────────────────────
+//   Setup IPC handlers
 
-ipcMain.handle('setup:generate-secret', () =>
-    crypto.randomBytes(32).toString('base64')
-);
+ipcMain.handle('setup:generate-secret', () => crypto.randomBytes(32).toString('base64'));
 
 ipcMain.handle('setup:check-docker', () => {
     const r = spawnSync('docker', ['info'], { timeout: 5000 });
@@ -324,15 +356,15 @@ ipcMain.handle('setup:check-docker', () => {
 
 ipcMain.handle('setup:get-config-path', () => getConfigPath());
 
-ipcMain.handle('setup:open-config-folder', () =>
-    shell.openPath(app.getPath('userData'))
-);
+ipcMain.handle('setup:open-config-folder', () => shell.openPath(app.getPath('userData')));
 
 ipcMain.handle('setup:save-config', (_e, config) => {
     const p = getConfigPath();
     fs.writeFileSync(p, JSON.stringify(config, null, 2), { mode: 0o600 });
     if (process.platform !== 'win32') {
-        try { fs.chmodSync(p, 0o600); } catch (_) {}
+        try {
+            fs.chmodSync(p, 0o600);
+        } catch (_) {}
     }
     return { ok: true };
 });
@@ -344,10 +376,11 @@ ipcMain.handle('setup:launch', async () => {
     await startApp();
 });
 
-// ── Local terminal IPC ────────────────────────────────────────────────────────
+//   Local terminal IPC
 
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
-    if (!nodePty) return { success: false, error: 'node-pty not available — run: npm run setup:electron' };
+    if (!nodePty)
+        return { success: false, error: 'node-pty not available — run: npm run setup:electron' };
 
     if (!id || typeof id !== 'string' || id.length > 255) {
         return { success: false, error: 'Invalid terminal ID' };
@@ -357,9 +390,7 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
     }
 
     const shell =
-        process.platform === 'win32'
-            ? 'powershell.exe'
-            : (process.env.SHELL || '/bin/bash');
+        process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || '/bin/bash';
 
     const safeHome = os.homedir();
     let safeCwd = safeHome;
@@ -383,7 +414,7 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
 
         localPtys.set(id, term);
 
-        term.onData(data => {
+        term.onData((data) => {
             if (win && !win.isDestroyed()) {
                 win.webContents.send('local-terminal:data', id, data);
             }
@@ -416,12 +447,14 @@ ipcMain.on('local-terminal:resize', (event, id, cols, rows) => {
 ipcMain.on('local-terminal:kill', (event, id) => {
     const term = localPtys.get(id);
     if (term) {
-        try { term.kill(); } catch (_) {}
+        try {
+            term.kill();
+        } catch (_) {}
         localPtys.delete(id);
     }
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
+//                                       ─
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -459,10 +492,14 @@ app.on('activate', () => {
 
 app.on('before-quit', () => {
     for (const [, term] of localPtys) {
-        try { term.kill(); } catch (_) {}
+        try {
+            term.kill();
+        } catch (_) {}
     }
     localPtys.clear();
     gatewayProcess?.kill();
     guacdProcess?.kill();
-    try { spawnSync('docker', ['stop', 'guacd-desktop']); } catch (_) {}
+    try {
+        spawnSync('docker', ['stop', 'guacd-desktop']);
+    } catch (_) {}
 });
