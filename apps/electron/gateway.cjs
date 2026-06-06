@@ -193,7 +193,7 @@ var require_permessage_deflate = __commonJS({
     var kBuffers = /* @__PURE__ */ Symbol("buffers");
     var kError = /* @__PURE__ */ Symbol("error");
     var zlibLimiter;
-    var PerMessageDeflate = class {
+    var PerMessageDeflate2 = class {
       /**
        * Creates a PerMessageDeflate instance.
        *
@@ -204,6 +204,9 @@ var require_permessage_deflate = __commonJS({
        *     acknowledge disabling of client context takeover
        * @param {Number} [options.concurrencyLimit=10] The number of concurrent
        *     calls to zlib
+       * @param {Boolean} [options.isServer=false] Create the instance in either
+       *     server or client mode
+       * @param {Number} [options.maxPayload=0] The maximum allowed message length
        * @param {(Boolean|Number)} [options.serverMaxWindowBits] Request/confirm the
        *     use of a custom server window size
        * @param {Boolean} [options.serverNoContextTakeover=false] Request/accept
@@ -214,15 +217,12 @@ var require_permessage_deflate = __commonJS({
        *     deflate
        * @param {Object} [options.zlibInflateOptions] Options to pass to zlib on
        *     inflate
-       * @param {Boolean} [isServer=false] Create the instance in either server or
-       *     client mode
-       * @param {Number} [maxPayload=0] The maximum allowed message length
        */
-      constructor(options, isServer, maxPayload) {
-        this._maxPayload = maxPayload | 0;
+      constructor(options) {
         this._options = options || {};
         this._threshold = this._options.threshold !== void 0 ? this._options.threshold : 1024;
-        this._isServer = !!isServer;
+        this._maxPayload = this._options.maxPayload | 0;
+        this._isServer = !!this._options.isServer;
         this._deflate = null;
         this._inflate = null;
         this.params = null;
@@ -531,7 +531,7 @@ var require_permessage_deflate = __commonJS({
         });
       }
     };
-    module2.exports = PerMessageDeflate;
+    module2.exports = PerMessageDeflate2;
     function deflateOnData(chunk) {
       this[kBuffers].push(chunk);
       this[kTotalLength] += chunk.length;
@@ -766,7 +766,7 @@ var require_receiver = __commonJS({
   "node_modules/ws/lib/receiver.js"(exports2, module2) {
     "use strict";
     var { Writable } = require("stream");
-    var PerMessageDeflate = require_permessage_deflate();
+    var PerMessageDeflate2 = require_permessage_deflate();
     var {
       BINARY_TYPES,
       EMPTY_BUFFER,
@@ -796,6 +796,10 @@ var require_receiver = __commonJS({
        *     extensions
        * @param {Boolean} [options.isServer=false] Specifies whether to operate in
        *     client or server mode
+       * @param {Number} [options.maxBufferedChunks=0] The maximum number of
+       *     buffered data chunks
+       * @param {Number} [options.maxFragments=0] The maximum number of message
+       *     fragments
        * @param {Number} [options.maxPayload=0] The maximum allowed message length
        * @param {Boolean} [options.skipUTF8Validation=false] Specifies whether or
        *     not to skip UTF-8 validation for text and close messages
@@ -806,6 +810,8 @@ var require_receiver = __commonJS({
         this._binaryType = options.binaryType || BINARY_TYPES[0];
         this._extensions = options.extensions || {};
         this._isServer = !!options.isServer;
+        this._maxBufferedChunks = options.maxBufferedChunks | 0;
+        this._maxFragments = options.maxFragments | 0;
         this._maxPayload = options.maxPayload | 0;
         this._skipUTF8Validation = !!options.skipUTF8Validation;
         this[kWebSocket] = void 0;
@@ -835,6 +841,18 @@ var require_receiver = __commonJS({
        */
       _write(chunk, encoding, cb) {
         if (this._opcode === 8 && this._state == GET_INFO) return cb();
+        if (this._maxBufferedChunks > 0 && this._buffers.length >= this._maxBufferedChunks) {
+          cb(
+            this.createError(
+              RangeError,
+              "Too many buffered chunks",
+              false,
+              1008,
+              "WS_ERR_TOO_MANY_BUFFERED_PARTS"
+            )
+          );
+          return;
+        }
         this._bufferedBytes += chunk.length;
         this._buffers.push(chunk);
         this.startLoop(cb);
@@ -933,7 +951,7 @@ var require_receiver = __commonJS({
           return;
         }
         const compressed = (buf[0] & 64) === 64;
-        if (compressed && !this._extensions[PerMessageDeflate.extensionName]) {
+        if (compressed && !this._extensions[PerMessageDeflate2.extensionName]) {
           const error = this.createError(
             RangeError,
             "RSV1 must be clear",
@@ -1164,6 +1182,17 @@ var require_receiver = __commonJS({
           return;
         }
         if (data.length) {
+          if (this._maxFragments > 0 && this._fragments.length >= this._maxFragments) {
+            const error = this.createError(
+              RangeError,
+              "Too many message fragments",
+              false,
+              1008,
+              "WS_ERR_TOO_MANY_BUFFERED_PARTS"
+            );
+            cb(error);
+            return;
+          }
           this._messageLength = this._totalPayloadLength;
           this._fragments.push(data);
         }
@@ -1177,7 +1206,7 @@ var require_receiver = __commonJS({
        * @private
        */
       decompress(data, cb) {
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
+        const perMessageDeflate = this._extensions[PerMessageDeflate2.extensionName];
         perMessageDeflate.decompress(data, this._fin, (err, buf) => {
           if (err) return cb(err);
           if (buf.length) {
@@ -1189,6 +1218,17 @@ var require_receiver = __commonJS({
                 false,
                 1009,
                 "WS_ERR_UNSUPPORTED_MESSAGE_LENGTH"
+              );
+              cb(error);
+              return;
+            }
+            if (this._maxFragments > 0 && this._fragments.length >= this._maxFragments) {
+              const error = this.createError(
+                RangeError,
+                "Too many message fragments",
+                false,
+                1008,
+                "WS_ERR_TOO_MANY_BUFFERED_PARTS"
               );
               cb(error);
               return;
@@ -1359,7 +1399,10 @@ var require_sender = __commonJS({
     "use strict";
     var { Duplex } = require("stream");
     var { randomFillSync } = require("crypto");
-    var PerMessageDeflate = require_permessage_deflate();
+    var {
+      types: { isUint8Array }
+    } = require("util");
+    var PerMessageDeflate2 = require_permessage_deflate();
     var { EMPTY_BUFFER, kWebSocket, NOOP } = require_constants();
     var { isBlob, isValidStatusCode } = require_validation();
     var { mask: applyMask, toBuffer } = require_buffer_util();
@@ -1512,8 +1555,10 @@ var require_sender = __commonJS({
           buf.writeUInt16BE(code, 0);
           if (typeof data === "string") {
             buf.write(data, 2);
-          } else {
+          } else if (isUint8Array(data)) {
             buf.set(data, 2);
+          } else {
+            throw new TypeError("Second argument must be a string or a Uint8Array");
           }
         }
         const options = {
@@ -1643,7 +1688,7 @@ var require_sender = __commonJS({
        * @public
        */
       send(data, options, cb) {
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
+        const perMessageDeflate = this._extensions[PerMessageDeflate2.extensionName];
         let opcode = options.binary ? 2 : 1;
         let rsv1 = options.compress;
         let byteLength;
@@ -1767,7 +1812,7 @@ var require_sender = __commonJS({
           this.sendFrame(_Sender.frame(data, options), cb);
           return;
         }
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
+        const perMessageDeflate = this._extensions[PerMessageDeflate2.extensionName];
         this._bufferedBytes += options[kByteLength];
         this._state = DEFLATING;
         perMessageDeflate.compress(data, options.fin, (_, buf) => {
@@ -2205,11 +2250,11 @@ var require_extension = __commonJS({
       return offers;
     }
     function format(extensions) {
-      return Object.keys(extensions).map((extension) => {
-        let configurations = extensions[extension];
+      return Object.keys(extensions).map((extension2) => {
+        let configurations = extensions[extension2];
         if (!Array.isArray(configurations)) configurations = [configurations];
         return configurations.map((params) => {
-          return [extension].concat(
+          return [extension2].concat(
             Object.keys(params).map((k) => {
               let values = params[k];
               if (!Array.isArray(values)) values = [values];
@@ -2235,7 +2280,7 @@ var require_websocket = __commonJS({
     var { randomBytes, createHash: createHash2 } = require("crypto");
     var { Duplex, Readable } = require("stream");
     var { URL: URL3 } = require("url");
-    var PerMessageDeflate = require_permessage_deflate();
+    var PerMessageDeflate2 = require_permessage_deflate();
     var Receiver2 = require_receiver();
     var Sender2 = require_sender();
     var { isBlob } = require_validation();
@@ -2394,6 +2439,10 @@ var require_websocket = __commonJS({
        *     multiple times in the same tick
        * @param {Function} [options.generateMask] The function used to generate the
        *     masking key
+       * @param {Number} [options.maxBufferedChunks=0] The maximum number of
+       *     buffered data chunks
+       * @param {Number} [options.maxFragments=0] The maximum number of message
+       *     fragments
        * @param {Number} [options.maxPayload=0] The maximum allowed message size
        * @param {Boolean} [options.skipUTF8Validation=false] Specifies whether or
        *     not to skip UTF-8 validation for text and close messages
@@ -2405,6 +2454,8 @@ var require_websocket = __commonJS({
           binaryType: this.binaryType,
           extensions: this._extensions,
           isServer: this._isServer,
+          maxBufferedChunks: options.maxBufferedChunks,
+          maxFragments: options.maxFragments,
           maxPayload: options.maxPayload,
           skipUTF8Validation: options.skipUTF8Validation
         });
@@ -2443,8 +2494,8 @@ var require_websocket = __commonJS({
           this.emit("close", this._closeCode, this._closeMessage);
           return;
         }
-        if (this._extensions[PerMessageDeflate.extensionName]) {
-          this._extensions[PerMessageDeflate.extensionName].cleanup();
+        if (this._extensions[PerMessageDeflate2.extensionName]) {
+          this._extensions[PerMessageDeflate2.extensionName].cleanup();
         }
         this._receiver.removeAllListeners();
         this._readyState = _WebSocket.CLOSED;
@@ -2606,7 +2657,7 @@ var require_websocket = __commonJS({
           fin: true,
           ...options
         };
-        if (!this._extensions[PerMessageDeflate.extensionName]) {
+        if (!this._extensions[PerMessageDeflate2.extensionName]) {
           opts.compress = false;
         }
         this._sender.send(data || EMPTY_BUFFER, opts, cb);
@@ -2704,6 +2755,8 @@ var require_websocket = __commonJS({
         autoPong: true,
         closeTimeout: CLOSE_TIMEOUT,
         protocolVersion: protocolVersions[1],
+        maxBufferedChunks: 1024 * 1024,
+        maxFragments: 128 * 1024,
         maxPayload: 100 * 1024 * 1024,
         skipUTF8Validation: false,
         perMessageDeflate: true,
@@ -2732,7 +2785,7 @@ var require_websocket = __commonJS({
       } else {
         try {
           parsedUrl = new URL3(address);
-        } catch (e) {
+        } catch {
           throw new SyntaxError(`Invalid URL: ${address}`);
         }
       }
@@ -2780,13 +2833,13 @@ var require_websocket = __commonJS({
       opts.path = parsedUrl.pathname + parsedUrl.search;
       opts.timeout = opts.handshakeTimeout;
       if (opts.perMessageDeflate) {
-        perMessageDeflate = new PerMessageDeflate(
-          opts.perMessageDeflate !== true ? opts.perMessageDeflate : {},
-          false,
-          opts.maxPayload
-        );
+        perMessageDeflate = new PerMessageDeflate2({
+          ...opts.perMessageDeflate,
+          isServer: false,
+          maxPayload: opts.maxPayload
+        });
         opts.headers["Sec-WebSocket-Extensions"] = format({
-          [PerMessageDeflate.extensionName]: perMessageDeflate.offer()
+          [PerMessageDeflate2.extensionName]: perMessageDeflate.offer()
         });
       }
       if (protocols.length) {
@@ -2929,23 +2982,25 @@ var require_websocket = __commonJS({
             return;
           }
           const extensionNames = Object.keys(extensions);
-          if (extensionNames.length !== 1 || extensionNames[0] !== PerMessageDeflate.extensionName) {
+          if (extensionNames.length !== 1 || extensionNames[0] !== PerMessageDeflate2.extensionName) {
             const message2 = "Server indicated an extension that was not requested";
             abortHandshake(websocket, socket, message2);
             return;
           }
           try {
-            perMessageDeflate.accept(extensions[PerMessageDeflate.extensionName]);
+            perMessageDeflate.accept(extensions[PerMessageDeflate2.extensionName]);
           } catch (err) {
             const message2 = "Invalid Sec-WebSocket-Extensions header";
             abortHandshake(websocket, socket, message2);
             return;
           }
-          websocket._extensions[PerMessageDeflate.extensionName] = perMessageDeflate;
+          websocket._extensions[PerMessageDeflate2.extensionName] = perMessageDeflate;
         }
         websocket.setSocket(socket, head, {
           allowSynchronousEvents: opts.allowSynchronousEvents,
           generateMask: opts.generateMask,
+          maxBufferedChunks: opts.maxBufferedChunks,
+          maxFragments: opts.maxFragments,
           maxPayload: opts.maxPayload,
           skipUTF8Validation: opts.skipUTF8Validation
         });
@@ -3260,9 +3315,9 @@ var require_websocket_server = __commonJS({
     var http = require("http");
     var { Duplex } = require("stream");
     var { createHash: createHash2 } = require("crypto");
-    var extension = require_extension();
-    var PerMessageDeflate = require_permessage_deflate();
-    var subprotocol = require_subprotocol();
+    var extension2 = require_extension();
+    var PerMessageDeflate2 = require_permessage_deflate();
+    var subprotocol2 = require_subprotocol();
     var WebSocket2 = require_websocket();
     var { CLOSE_TIMEOUT, GUID, kWebSocket } = require_constants();
     var keyRegex = /^[+/0-9A-Za-z]{22}==$/;
@@ -3288,6 +3343,10 @@ var require_websocket_server = __commonJS({
        *     called
        * @param {Function} [options.handleProtocols] A hook to handle protocols
        * @param {String} [options.host] The hostname where to bind the server
+       * @param {Number} [options.maxBufferedChunks=1048576] The maximum number of
+       *     buffered data chunks
+       * @param {Number} [options.maxFragments=131072] The maximum number of message
+       *     fragments
        * @param {Number} [options.maxPayload=104857600] The maximum allowed message
        *     size
        * @param {Boolean} [options.noServer=false] Enable no server mode
@@ -3309,6 +3368,8 @@ var require_websocket_server = __commonJS({
         options = {
           allowSynchronousEvents: true,
           autoPong: true,
+          maxBufferedChunks: 1024 * 1024,
+          maxFragments: 128 * 1024,
           maxPayload: 100 * 1024 * 1024,
           skipUTF8Validation: false,
           perMessageDeflate: false,
@@ -3485,7 +3546,7 @@ var require_websocket_server = __commonJS({
         let protocols = /* @__PURE__ */ new Set();
         if (secWebSocketProtocol !== void 0) {
           try {
-            protocols = subprotocol.parse(secWebSocketProtocol);
+            protocols = subprotocol2.parse(secWebSocketProtocol);
           } catch (err) {
             const message2 = "Invalid Sec-WebSocket-Protocol header";
             abortHandshakeOrEmitwsClientError(this, req, socket, 400, message2);
@@ -3495,16 +3556,16 @@ var require_websocket_server = __commonJS({
         const secWebSocketExtensions = req.headers["sec-websocket-extensions"];
         const extensions = {};
         if (this.options.perMessageDeflate && secWebSocketExtensions !== void 0) {
-          const perMessageDeflate = new PerMessageDeflate(
-            this.options.perMessageDeflate,
-            true,
-            this.options.maxPayload
-          );
+          const perMessageDeflate = new PerMessageDeflate2({
+            ...this.options.perMessageDeflate,
+            isServer: true,
+            maxPayload: this.options.maxPayload
+          });
           try {
-            const offers = extension.parse(secWebSocketExtensions);
-            if (offers[PerMessageDeflate.extensionName]) {
-              perMessageDeflate.accept(offers[PerMessageDeflate.extensionName]);
-              extensions[PerMessageDeflate.extensionName] = perMessageDeflate;
+            const offers = extension2.parse(secWebSocketExtensions);
+            if (offers[PerMessageDeflate2.extensionName]) {
+              perMessageDeflate.accept(offers[PerMessageDeflate2.extensionName]);
+              extensions[PerMessageDeflate2.extensionName] = perMessageDeflate;
             }
           } catch (err) {
             const message2 = "Invalid or unacceptable Sec-WebSocket-Extensions header";
@@ -3575,10 +3636,10 @@ var require_websocket_server = __commonJS({
             ws._protocol = protocol;
           }
         }
-        if (extensions[PerMessageDeflate.extensionName]) {
-          const params = extensions[PerMessageDeflate.extensionName].params;
-          const value = extension.format({
-            [PerMessageDeflate.extensionName]: [params]
+        if (extensions[PerMessageDeflate2.extensionName]) {
+          const params = extensions[PerMessageDeflate2.extensionName].params;
+          const value = extension2.format({
+            [PerMessageDeflate2.extensionName]: [params]
           });
           headers.push(`Sec-WebSocket-Extensions: ${value}`);
           ws._extensions = extensions;
@@ -3588,6 +3649,8 @@ var require_websocket_server = __commonJS({
         socket.removeListener("error", socketOnError);
         ws.setSocket(socket, head, {
           allowSynchronousEvents: this.options.allowSynchronousEvents,
+          maxBufferedChunks: this.options.maxBufferedChunks,
+          maxFragments: this.options.maxFragments,
           maxPayload: this.options.maxPayload,
           skipUTF8Validation: this.options.skipUTF8Validation
         });
@@ -3645,74 +3708,6 @@ var require_websocket_server = __commonJS({
   }
 });
 
-// node_modules/dotenv/package.json
-var require_package = __commonJS({
-  "node_modules/dotenv/package.json"(exports2, module2) {
-    module2.exports = {
-      name: "dotenv",
-      version: "17.2.3",
-      description: "Loads environment variables from .env file",
-      main: "lib/main.js",
-      types: "lib/main.d.ts",
-      exports: {
-        ".": {
-          types: "./lib/main.d.ts",
-          require: "./lib/main.js",
-          default: "./lib/main.js"
-        },
-        "./config": "./config.js",
-        "./config.js": "./config.js",
-        "./lib/env-options": "./lib/env-options.js",
-        "./lib/env-options.js": "./lib/env-options.js",
-        "./lib/cli-options": "./lib/cli-options.js",
-        "./lib/cli-options.js": "./lib/cli-options.js",
-        "./package.json": "./package.json"
-      },
-      scripts: {
-        "dts-check": "tsc --project tests/types/tsconfig.json",
-        lint: "standard",
-        pretest: "npm run lint && npm run dts-check",
-        test: "tap run tests/**/*.js --allow-empty-coverage --disable-coverage --timeout=60000",
-        "test:coverage": "tap run tests/**/*.js --show-full-coverage --timeout=60000 --coverage-report=text --coverage-report=lcov",
-        prerelease: "npm test",
-        release: "standard-version"
-      },
-      repository: {
-        type: "git",
-        url: "git://github.com/motdotla/dotenv.git"
-      },
-      homepage: "https://github.com/motdotla/dotenv#readme",
-      funding: "https://dotenvx.com",
-      keywords: [
-        "dotenv",
-        "env",
-        ".env",
-        "environment",
-        "variables",
-        "config",
-        "settings"
-      ],
-      readmeFilename: "README.md",
-      license: "BSD-2-Clause",
-      devDependencies: {
-        "@types/node": "^18.11.3",
-        decache: "^4.6.2",
-        sinon: "^14.0.1",
-        standard: "^17.0.0",
-        "standard-version": "^9.5.0",
-        tap: "^19.2.0",
-        typescript: "^4.8.4"
-      },
-      engines: {
-        node: ">=12"
-      },
-      browser: {
-        fs: false
-      }
-    };
-  }
-});
-
 // node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
@@ -3720,25 +3715,15 @@ var require_main = __commonJS({
     var path = require("path");
     var os2 = require("os");
     var crypto2 = require("crypto");
-    var packageJson = require_package();
-    var version = packageJson.version;
     var TIPS = [
-      "\u{1F510} encrypt with Dotenvx: https://dotenvx.com",
-      "\u{1F510} prevent committing .env to code: https://dotenvx.com/precommit",
-      "\u{1F510} prevent building .env in docker: https://dotenvx.com/prebuild",
-      "\u{1F4E1} add observability to secrets: https://dotenvx.com/ops",
-      "\u{1F465} sync secrets across teammates & machines: https://dotenvx.com/ops",
-      "\u{1F5C2}\uFE0F backup and recover secrets: https://dotenvx.com/ops",
-      "\u2705 audit secrets and track compliance: https://dotenvx.com/ops",
-      "\u{1F504} add secrets lifecycle management: https://dotenvx.com/ops",
-      "\u{1F511} add access controls to secrets: https://dotenvx.com/ops",
-      "\u{1F6E0}\uFE0F  run anywhere with `dotenvx run -- yourcommand`",
-      "\u2699\uFE0F  specify custom .env file path with { path: '/custom/path/.env' }",
-      "\u2699\uFE0F  enable debug logging with { debug: true }",
-      "\u2699\uFE0F  override existing env vars with { override: true }",
-      "\u2699\uFE0F  suppress all logs with { quiet: true }",
-      "\u2699\uFE0F  write to custom object with { processEnv: myObject }",
-      "\u2699\uFE0F  load multiple .env files with { path: ['.env.local', '.env'] }"
+      "\u25C8 encrypted .env [www.dotenvx.com]",
+      "\u25C8 secrets for agents [www.dotenvx.com]",
+      "\u2301 auth for agents [www.vestauth.com]",
+      "\u2318 custom filepath { path: '/custom/path/.env' }",
+      "\u2318 enable debugging { debug: true }",
+      "\u2318 override existing { override: true }",
+      "\u2318 suppress logs { quiet: true }",
+      "\u2318 multiple files { path: ['.env.local', '.env'] }"
     ];
     function _getRandomTip() {
       return TIPS[Math.floor(Math.random() * TIPS.length)];
@@ -3803,13 +3788,13 @@ var require_main = __commonJS({
       return DotenvModule.parse(decrypted);
     }
     function _warn(message2) {
-      console.error(`[dotenv@${version}][WARN] ${message2}`);
+      console.error(`\u26A0 ${message2}`);
     }
     function _debug(message2) {
-      console.log(`[dotenv@${version}][DEBUG] ${message2}`);
+      console.log(`\u2506 ${message2}`);
     }
     function _log(message2) {
-      console.log(`[dotenv@${version}] ${message2}`);
+      console.log(`\u25C7 ${message2}`);
     }
     function _dotenvKey(options) {
       if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
@@ -3880,7 +3865,7 @@ var require_main = __commonJS({
       const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || options && options.debug);
       const quiet = parseBoolean(process.env.DOTENV_CONFIG_QUIET || options && options.quiet);
       if (debug || !quiet) {
-        _log("Loading env from encrypted .env.vault");
+        _log("loading env from encrypted .env.vault");
       }
       const parsed = DotenvModule._parseVault(options);
       let processEnv = process.env;
@@ -3903,7 +3888,7 @@ var require_main = __commonJS({
         encoding = options.encoding;
       } else {
         if (debug) {
-          _debug("No encoding is specified. UTF-8 is used by default");
+          _debug("no encoding is specified (UTF-8 is used by default)");
         }
       }
       let optionPaths = [dotenvPath];
@@ -3925,7 +3910,7 @@ var require_main = __commonJS({
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`Failed to load ${path2} ${e.message}`);
+            _debug(`failed to load ${path2} ${e.message}`);
           }
           lastError = e;
         }
@@ -3942,12 +3927,12 @@ var require_main = __commonJS({
             shortPaths.push(relative);
           } catch (e) {
             if (debug) {
-              _debug(`Failed to load ${filePath} ${e.message}`);
+              _debug(`failed to load ${filePath} ${e.message}`);
             }
             lastError = e;
           }
         }
-        _log(`injecting env (${keysCount}) from ${shortPaths.join(",")} ${dim(`-- tip: ${_getRandomTip()}`)}`);
+        _log(`injected env (${keysCount}) from ${shortPaths.join(",")} ${dim(`// tip: ${_getRandomTip()}`)}`);
       }
       if (lastError) {
         return { parsed: parsedAll, error: lastError };
@@ -3961,7 +3946,7 @@ var require_main = __commonJS({
       }
       const vaultPath = _vaultPath(options);
       if (!vaultPath) {
-        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        _warn(`you set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}`);
         return DotenvModule.configDotenv(options);
       }
       return DotenvModule._configVault(options);
@@ -4044,8 +4029,11 @@ var require_main = __commonJS({
 
 // node_modules/ws/wrapper.mjs
 var import_stream = __toESM(require_stream(), 1);
+var import_extension = __toESM(require_extension(), 1);
+var import_permessage_deflate = __toESM(require_permessage_deflate(), 1);
 var import_receiver = __toESM(require_receiver(), 1);
 var import_sender = __toESM(require_sender(), 1);
+var import_subprotocol = __toESM(require_subprotocol(), 1);
 var import_websocket = __toESM(require_websocket(), 1);
 var import_websocket_server = __toESM(require_websocket_server(), 1);
 
@@ -4116,7 +4104,9 @@ var SSHHandler = class {
       this.connected = true;
       this.ssh.shell({ term: "xterm-256color", cols: 80, rows: 24 }, (err, stream) => {
         if (err) {
-          this.sink.onMessage("error", { message: "Failed to open shell: " + err.message });
+          this.sink.onMessage("error", {
+            message: "Failed to open shell: " + err.message
+          });
           this.close();
           return;
         }
@@ -4144,7 +4134,9 @@ var SSHHandler = class {
     try {
       this.ssh.connect(config);
     } catch (error) {
-      this.sink.onMessage("error", { message: "Connection failed: " + error.message });
+      this.sink.onMessage("error", {
+        message: "Connection failed: " + error.message
+      });
       this.close();
     }
   }
@@ -4282,11 +4274,13 @@ var SCPHandler = class {
         }
         return a.name.localeCompare(b.name);
       });
-      this.ws.send(JSON.stringify({
-        type: "list",
-        path,
-        files
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "list",
+          path,
+          files
+        })
+      );
     });
   }
   downloadFile(path) {
@@ -4302,21 +4296,25 @@ var SCPHandler = class {
       stream.on("data", (chunk) => {
         chunks.push(chunk);
         bytesRead += chunk.length;
-        this.ws.send(JSON.stringify({
-          type: "download-progress",
-          path,
-          bytesRead,
-          totalBytes: stats.size
-        }));
+        this.ws.send(
+          JSON.stringify({
+            type: "download-progress",
+            path,
+            bytesRead,
+            totalBytes: stats.size
+          })
+        );
       });
       stream.on("end", () => {
         const data = Buffer.concat(chunks);
-        this.ws.send(JSON.stringify({
-          type: "download-complete",
-          path,
-          data: data.toString("base64"),
-          size: stats.size
-        }));
+        this.ws.send(
+          JSON.stringify({
+            type: "download-complete",
+            path,
+            data: data.toString("base64"),
+            size: stats.size
+          })
+        );
       });
       stream.on("error", (err2) => {
         this.sendError("Download failed: " + err2.message);
@@ -4335,12 +4333,14 @@ var SCPHandler = class {
       const chunks = this.uploadChunks.get(path);
       const receivedCount = chunks.filter((c) => c).length;
       if (receivedCount < totalChunks) {
-        this.ws.send(JSON.stringify({
-          type: "upload-progress",
-          path,
-          chunksReceived: receivedCount,
-          totalChunks
-        }));
+        this.ws.send(
+          JSON.stringify({
+            type: "upload-progress",
+            path,
+            chunksReceived: receivedCount,
+            totalChunks
+          })
+        );
         return;
       }
       const fullData = Buffer.concat(chunks);
@@ -4357,11 +4357,13 @@ var SCPHandler = class {
       this.sendError("Upload failed: " + err.message);
     });
     stream.on("close", () => {
-      this.ws.send(JSON.stringify({
-        type: "upload-complete",
-        path,
-        size: data.length
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "upload-complete",
+          path,
+          size: data.length
+        })
+      );
     });
     stream.end(data);
   }
@@ -4372,10 +4374,12 @@ var SCPHandler = class {
         this.sendError("Failed to create directory: " + err.message);
         return;
       }
-      this.ws.send(JSON.stringify({
-        type: "mkdir-complete",
-        path
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "mkdir-complete",
+          path
+        })
+      );
     });
   }
   deleteFile(path) {
@@ -4391,10 +4395,12 @@ var SCPHandler = class {
           this.sendError("Delete failed: " + err2.message);
           return;
         }
-        this.ws.send(JSON.stringify({
-          type: "delete-complete",
-          path
-        }));
+        this.ws.send(
+          JSON.stringify({
+            type: "delete-complete",
+            path
+          })
+        );
       });
     });
   }
@@ -4405,11 +4411,13 @@ var SCPHandler = class {
         this.sendError("Rename failed: " + err.message);
         return;
       }
-      this.ws.send(JSON.stringify({
-        type: "rename-complete",
-        oldPath,
-        newPath
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "rename-complete",
+          oldPath,
+          newPath
+        })
+      );
     });
   }
   formatPermissions(mode) {
@@ -4466,7 +4474,10 @@ function parseInstruction(data) {
     const lengthMatch = remaining.match(/^(\d+)\.([^,;]*)/);
     if (!lengthMatch) break;
     const length = parseInt(lengthMatch[1], 10);
-    const value = remaining.substring(lengthMatch[1].length + 1, lengthMatch[1].length + 1 + length);
+    const value = remaining.substring(
+      lengthMatch[1].length + 1,
+      lengthMatch[1].length + 1 + length
+    );
     parts.push(value);
     remaining = remaining.substring(lengthMatch[1].length + 1 + length);
     if (remaining.startsWith(",")) {
@@ -4516,7 +4527,10 @@ var GuacamoleHandler = class {
     this.guacdSocket.on("close", () => {
       console.log("[Guacamole] guacd socket closed");
       if (this.buffer.length > 0) {
-        console.warn("[Guacamole] Unprocessed buffer on close (possible truncated error):", this.buffer.substring(0, 200));
+        console.warn(
+          "[Guacamole] Unprocessed buffer on close (possible truncated error):",
+          this.buffer.substring(0, 200)
+        );
       }
       if (this.closing) return;
       this.closing = true;
@@ -4527,27 +4541,18 @@ var GuacamoleHandler = class {
     });
     this.guacdSocket.on("data", (data) => {
       const chunk = data.toString();
-      console.log(`[Guacamole] guacd raw data (${chunk.length} chars): ${chunk.substring(0, 300)}`);
       this.buffer += chunk;
       while (this.buffer.includes(";")) {
         const endIndex = this.buffer.indexOf(";");
         const instruction = this.buffer.substring(0, endIndex + 1);
         this.buffer = this.buffer.substring(endIndex + 1);
-        console.log(`[Guacamole] Parsing instruction (${instruction.length} chars): ${instruction.substring(0, 200)}`);
         const parsed = parseInstruction(instruction);
-        console.log(`[Guacamole] Parse result: opcode=${parsed?.opcode ?? "NULL"} args=${parsed?.args.length ?? "N/A"} handshakeResolve=${!!this.handshakeResolve}`);
-        if (parsed) {
-          if (!["png", "jpeg", "webp", "blob", "video", "audio", "mouse", "nop", "sync", "size", "cursor", "move", "shade", "dispose", "cfill", "cstroke", "lstroke", "line", "arc", "pop", "push", "identity", "transform", "rect", "clip", "end"].includes(parsed.opcode)) {
-            console.log("[Guacamole] \u2190", parsed.opcode, parsed.args.length > 0 ? `(${parsed.args.length} args): first 5 = ${JSON.stringify(parsed.args.slice(0, 5))}` : "");
-          }
-          if (parsed.opcode === "error") {
-            const errMsg = parsed.args[0] ?? "";
-            const errCode = parsed.args[1] ?? "";
-            console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
-          }
+        if (parsed?.opcode === "error") {
+          const errMsg = parsed.args[0] ?? "";
+          const errCode = parsed.args[1] ?? "";
+          console.error(`[Guacamole] guacd ERROR code=${errCode} msg="${errMsg}"`);
         }
         if (parsed?.opcode === "args" && this.handshakeResolve) {
-          console.log(`[Guacamole] Got args instruction with ${parsed.args.length} params: ${JSON.stringify(parsed.args)}`);
           const resolve = this.handshakeResolve;
           this.handshakeResolve = null;
           this.handshakeReject = null;
@@ -4572,7 +4577,6 @@ var GuacamoleHandler = class {
       try {
         const data = message2.toString();
         if (data.match(/^\d+\./)) {
-          if (data.match(/^\d+\.key,/)) console.log("[Guacamole] \u2192 key to guacd:", data);
           this.guacdSocket.write(data);
         } else {
           const parsed = JSON.parse(data);
@@ -4588,15 +4592,15 @@ var GuacamoleHandler = class {
       }
     });
     this.ws.on("close", () => {
-      console.log("[Guacamole] WebSocket closed");
       this.guacdSocket.end();
     });
   }
   async connect(payload, protocol) {
     const guacdHost = getGuacdHost();
     const guacdPort = getGuacdPort();
-    console.log(`[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`);
-    console.log(`[Guacamole] Connecting to guacd at ${guacdHost}:${guacdPort}`);
+    console.log(
+      `[Guacamole] Starting ${protocol} connection to ${payload.host}:${payload.port}`
+    );
     try {
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -4604,7 +4608,6 @@ var GuacamoleHandler = class {
         }, 1e4);
         this.guacdSocket.connect(guacdPort, guacdHost, () => {
           clearTimeout(timeout);
-          console.log("[Guacamole] Connected to guacd");
           resolve();
         });
         this.guacdSocket.on("error", (err) => {
@@ -4613,14 +4616,14 @@ var GuacamoleHandler = class {
         });
       });
     } catch (err) {
-      const errorMsg = `Failed to connect to guacd daemon at ${guacdHost}:${guacdPort}: ${err.message}`;
+      const message2 = err instanceof Error ? err.message : String(err);
+      const errorMsg = `Failed to connect to guacd daemon at ${guacdHost}:${guacdPort}: ${message2}`;
       console.error("[Guacamole]", errorMsg);
       this.sendError(errorMsg);
       this.ws.close();
       return;
     }
     const guacProtocol = protocol === "rdp" ? "rdp" : "vnc";
-    console.log(`[Guacamole] Sending select instruction: ${guacProtocol}`);
     this.guacdSocket.write(encodeInstruction("select", guacProtocol));
     let expectedArgs;
     try {
@@ -4640,7 +4643,8 @@ var GuacamoleHandler = class {
         };
       });
     } catch (err) {
-      const errorMsg = `Failed to get args from guacd: ${err.message}`;
+      const message2 = err instanceof Error ? err.message : String(err);
+      const errorMsg = `Failed to get args from guacd: ${message2}`;
       console.error("[Guacamole]", errorMsg);
       this.sendError(errorMsg);
       this.ws.close();
@@ -4649,16 +4653,16 @@ var GuacamoleHandler = class {
     const connectionArgs = [];
     const paramMap = {
       // Basic connection
-      "hostname": payload.host,
-      "port": String(payload.port || (protocol === "rdp" ? 3389 : 5900)),
-      "username": payload.username || "",
-      "password": payload.password || "",
-      "domain": "",
-      "timeout": "",
+      hostname: payload.host,
+      port: String(payload.port || (protocol === "rdp" ? 3389 : 5900)),
+      username: payload.username || "",
+      password: payload.password || "",
+      domain: "",
+      timeout: "",
       // Display settings
-      "width": String(payload.displayWidth || 1024),
-      "height": String(payload.displayHeight || 768),
-      "dpi": "96",
+      width: String(payload.displayWidth || 1024),
+      height: String(payload.displayHeight || 768),
+      dpi: "96",
       // 32-bit colour → FreeRDP negotiates PIXEL_FORMAT_BGRA32.
       // This avoids the BGR24 "Cache Bitmap V2 + MemBlt" crash that was
       // seen with 24-bit depth, while the patched guacd image fixes the
@@ -4681,7 +4685,7 @@ var GuacamoleHandler = class {
       // Security mode from server config (defaults to 'any').
       // Use 'rdp' if the server doesn't support NLA or NLA silently times out (error 514).
       // Use 'nla' for servers that strictly require Network Level Authentication.
-      "security": payload.rdpSecurity || "any",
+      security: payload.rdpSecurity || "any",
       // ignore-cert: FreeRDP 2.x (guacd 1.5.x) cert bypass — skips all
       // certificate validation so self-signed RDP certs are accepted.
       "ignore-cert": "true",
@@ -4691,8 +4695,8 @@ var GuacamoleHandler = class {
       "cert-fingerprints": "",
       "disable-auth": "",
       "server-layout": "",
-      "timezone": "",
-      "console": "",
+      timezone: "",
+      console: "",
       "initial-program": "",
       "client-name": "",
       "preconnection-id": "",
@@ -4771,13 +4775,13 @@ var GuacamoleHandler = class {
       "force-lossless": "",
       "normalize-clipboard": "",
       // VNC-specific settings
-      "encodings": "",
+      encodings: "",
       // let guacd choose (zrle, copyrect, hextile, etc.)
       "swap-red-blue": "false",
       // only needed for some BGR-order VNC servers
-      "cursor": "",
+      cursor: "",
       // default: local rendering
-      "autoretry": "0",
+      autoretry: "0",
       // no auto-retry on connection failure (prevents lockouts)
       "clipboard-encoding": "",
       "dest-host": "",
@@ -4799,19 +4803,6 @@ var GuacamoleHandler = class {
         connectionArgs.push(paramMap[arg] ?? "");
       }
     }
-    console.log("[Guacamole] Sending", connectionArgs.length, "args to guacd");
-    console.log("[Guacamole] Connection params:", {
-      hostname: paramMap["hostname"],
-      port: paramMap["port"],
-      username: paramMap["username"] || "(empty)",
-      password: paramMap["password"] ? "(set)" : "(empty)",
-      width: paramMap["width"],
-      height: paramMap["height"],
-      "color-depth": paramMap["color-depth"],
-      "ignore-cert": paramMap["ignore-cert"],
-      security: paramMap["security"],
-      "disable-auth": paramMap["disable-auth"]
-    });
     const unmapped = expectedArgs.filter((a) => !/^VERSION_/.test(a) && !(a in paramMap));
     if (unmapped.length > 0) {
       console.warn("[Guacamole] Unmapped guacd args (sent as empty):", unmapped);
@@ -4819,22 +4810,31 @@ var GuacamoleHandler = class {
     const width = payload.displayWidth || 1024;
     const height = payload.displayHeight || 768;
     const dpi = 96;
-    this.guacdSocket.write(encodeInstruction("size", String(width), String(height), String(dpi)));
-    this.guacdSocket.write(encodeInstruction("audio", "audio/L16;rate=44100,channels=2", "audio/L16;rate=22050,channels=2"));
+    this.guacdSocket.write(
+      encodeInstruction("size", String(width), String(height), String(dpi))
+    );
+    this.guacdSocket.write(
+      encodeInstruction(
+        "audio",
+        "audio/L16;rate=44100,channels=2",
+        "audio/L16;rate=22050,channels=2"
+      )
+    );
     this.guacdSocket.write(encodeInstruction("video"));
     this.guacdSocket.write(encodeInstruction("image", "image/png", "image/jpeg", "image/webp"));
     this.guacdSocket.write(encodeInstruction("timezone", "UTC"));
     const connectBuf = encodeInstruction("connect", ...connectionArgs);
-    console.log(`[Guacamole] Sending connect instruction (${connectBuf.length} bytes): ${connectBuf.toString().substring(0, 200)}`);
     this.guacdSocket.write(connectBuf);
     this.ws.send(JSON.stringify({ type: "connected" }));
   }
   sendError(message2) {
     if (this.ws.readyState === import_websocket.default.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: "error",
-        message: message2
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "error",
+          message: message2
+        })
+      );
     }
   }
   close() {
@@ -4856,7 +4856,9 @@ try {
   const nodePty = _require("node-pty");
   _ptySpawn = nodePty.spawn;
 } catch {
-  console.warn("[LocalHandler] node-pty not available \u2014 local terminal disabled. Run: npm ci --workspace=apps/gateway");
+  console.warn(
+    "[LocalHandler] node-pty not available \u2014 local terminal disabled. Run: npm ci --workspace=apps/gateway"
+  );
 }
 var MAX_LOCAL_PTYS_PER_USER = 3;
 var userPtyCounts = /* @__PURE__ */ new Map();
@@ -4887,7 +4889,12 @@ var LocalHandler = class {
     if (this.idleTimer) clearTimeout(this.idleTimer);
     this.idleTimer = setTimeout(() => {
       if (this.ws.readyState === import_websocket.default.OPEN) {
-        this.ws.send(JSON.stringify({ type: "error", message: "Session timed out due to inactivity" }));
+        this.ws.send(
+          JSON.stringify({
+            type: "error",
+            message: "Session timed out due to inactivity"
+          })
+        );
         this.ws.close(4008, "Idle timeout");
       }
       this.close();
@@ -4895,12 +4902,22 @@ var LocalHandler = class {
   }
   spawn() {
     if (!_ptySpawn) {
-      this.ws.send(JSON.stringify({ type: "error", message: "Local terminal is not available on this server (node-pty missing)" }));
+      this.ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Local terminal is not available on this server (node-pty missing)"
+        })
+      );
       this.ws.close(4500, "node-pty unavailable");
       return;
     }
     if (!incrementUser(this.userId)) {
-      this.ws.send(JSON.stringify({ type: "error", message: `Too many local terminal sessions (max ${MAX_LOCAL_PTYS_PER_USER})` }));
+      this.ws.send(
+        JSON.stringify({
+          type: "error",
+          message: `Too many local terminal sessions (max ${MAX_LOCAL_PTYS_PER_USER})`
+        })
+      );
       this.ws.close(4029, "Too Many Requests");
       return;
     }
@@ -4923,18 +4940,23 @@ var LocalHandler = class {
         env: safeEnv
       });
     } catch (err) {
+      const message2 = err instanceof Error ? err.message : String(err);
       decrementUser(this.userId);
-      this.ws.send(JSON.stringify({ type: "error", message: `Failed to spawn shell: ${err.message}` }));
+      this.ws.send(
+        JSON.stringify({ type: "error", message: `Failed to spawn shell: ${message2}` })
+      );
       this.ws.close(4500, "Spawn failed");
       return;
     }
     this.pty.onData((data) => {
       this.resetIdleTimer();
       if (this.ws.readyState === import_websocket.default.OPEN) {
-        this.ws.send(JSON.stringify({
-          type: "data",
-          data: Buffer.from(data).toString("base64")
-        }));
+        this.ws.send(
+          JSON.stringify({
+            type: "data",
+            data: Buffer.from(data).toString("base64")
+          })
+        );
       }
     });
     this.pty.onExit(({ exitCode }) => {
@@ -6717,7 +6739,9 @@ var PersistentSessionStore = class {
     const now = Date.now();
     for (const [id, session] of this.sessions) {
       if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
-        console.log(`[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`);
+        console.log(
+          `[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`
+        );
         this.delete(id);
       }
     }
@@ -6803,12 +6827,14 @@ function createSink(session) {
 var server = (0, import_http.createServer)((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({
-      status: "healthy",
-      sshSessions: persistentSessions.size,
-      nonSshConnections: nonSshConnections.size,
-      uptime: process.uptime()
-    }));
+    res.end(
+      JSON.stringify({
+        status: "healthy",
+        sshSessions: persistentSessions.size,
+        nonSshConnections: nonSshConnections.size,
+        uptime: process.uptime()
+      })
+    );
     return;
   }
   res.writeHead(404);
@@ -6839,7 +6865,12 @@ wss.on("connection", (ws, req) => {
     return;
   }
   if (protocol === "local" && process.env.ALLOW_LOCAL_TERMINAL !== "true") {
-    ws.send(JSON.stringify({ type: "error", message: "Local terminal is not enabled on this server" }));
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        message: "Local terminal is not enabled on this server"
+      })
+    );
     ws.close(4403, "Forbidden");
     return;
   }
@@ -6886,7 +6917,12 @@ wss.on("connection", (ws, req) => {
       return;
     }
     if (protocol !== "local" && process.env.ALLOW_PRIVATE_NETWORKS !== "true" && await isPrivateHostAsync(tokenPayload.host)) {
-      ws.send(JSON.stringify({ type: "error", message: "Connection to private/internal hosts is not allowed" }));
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Connection to private/internal hosts is not allowed"
+        })
+      );
       ws.close(1008, "SSRF protection");
       return;
     }
@@ -6939,7 +6975,9 @@ wss.on("connection", (ws, req) => {
           if (ws.readyState !== import_websocket.default.OPEN) return;
           ws.send(JSON.stringify({ type: "ping" }));
           pongTimer = setTimeout(() => {
-            console.warn(`[gateway] SSH WS pong timeout for session ${resolvedSessionId} \u2014 closing`);
+            console.warn(
+              `[gateway] SSH WS pong timeout for session ${resolvedSessionId} \u2014 closing`
+            );
             ws.close(1001, "Heartbeat timeout");
           }, HEARTBEAT_TIMEOUT_MS);
         }, HEARTBEAT_INTERVAL_MS);
@@ -6956,7 +6994,9 @@ wss.on("connection", (ws, req) => {
       var startHeartbeat = startHeartbeat2, stopHeartbeat = stopHeartbeat2;
       const resolvedSessionId = sessionId || (0, import_crypto2.randomUUID)();
       if (!sessionId) {
-        console.warn(`[gateway] SSH connection missing sessionId \u2014 generated fallback ${resolvedSessionId}`);
+        console.warn(
+          `[gateway] SSH connection missing sessionId \u2014 generated fallback ${resolvedSessionId}`
+        );
       }
       const existing = persistentSessions.get(resolvedSessionId);
       if (existing) {
@@ -6972,15 +7012,19 @@ wss.on("connection", (ws, req) => {
         existing.attachedWs = ws;
         const buffered = existing.buffer.snapshot();
         if (buffered.length > 0) {
-          ws.send(JSON.stringify({
-            type: "buffer-replay",
-            data: Buffer.from(buffered).toString("base64")
-          }));
+          ws.send(
+            JSON.stringify({
+              type: "buffer-replay",
+              data: Buffer.from(buffered).toString("base64")
+            })
+          );
         }
         ws.send(JSON.stringify({ type: "shell-ready" }));
       } else {
         if (persistentSessions.isAtLimit(tokenPayload.userId)) {
-          const evicted = persistentSessions.evictOldestDetachedForUser(tokenPayload.userId);
+          const evicted = persistentSessions.evictOldestDetachedForUser(
+            tokenPayload.userId
+          );
           if (!evicted) {
             ws.send(JSON.stringify({ type: "error", message: "Too many connections" }));
             ws.close(4029, "Too Many Requests");
@@ -6991,8 +7035,9 @@ wss.on("connection", (ws, req) => {
           sessionId: resolvedSessionId,
           userId: tokenPayload.userId,
           serverId,
+          // Placeholder: the real handler is assigned on the next lines,
+          // once `sink` (which needs `session`) has been created.
           handler: null,
-          // set below after sink is created
           buffer: new RingBuffer(),
           lastActivityAt: Date.now(),
           createdAt: Date.now(),
@@ -7071,7 +7116,12 @@ wss.on("connection", (ws, req) => {
       const idleLimit = protocol === "rdp" || protocol === "vnc" ? CONNECTION_TIMEOUT * 2 : CONNECTION_TIMEOUT;
       timeoutId = setTimeout(() => {
         if (ws.readyState === import_websocket.default.OPEN) {
-          ws.send(JSON.stringify({ type: "error", message: "Connection timed out due to inactivity" }));
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              message: "Connection timed out due to inactivity"
+            })
+          );
           ws.close(4008, "Idle timeout");
         }
       }, idleLimit);
