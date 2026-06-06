@@ -294,13 +294,13 @@ termi/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Browser / PWA / Electron                  │
-│      Login · Dashboard · Terminal · File Manager · Monitor   │
+│                    Browser / PWA / Electron                 │
+│      Login · Dashboard · Terminal · File Manager · Monitor  │
 └───────────────────────────┬─────────────────────────────────┘
                             │ HTTP / REST
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                  Next.js Web App  (:22080)                   │
+│                  Next.js Web App  (:22080)                  │
 │       API Routes │ Auth │ AES-256-GCM Crypto │ Prisma ORM   │
 └──────────┬────────────────────────────────┬─────────────────┘
            │                                │
@@ -313,7 +313,7 @@ termi/
                                      │          │
                                  SSH / SCP   RDP / VNC
                                      │          │
-                              ┌──────┴──┐  ┌───┴──────────┐
+                              ┌──────┴──┐  ┌────┴──────────┐
                               │ SSH Host│  │  guacd :4822  │
                               └─────────┘  └───────┬───────┘
                                                    │
