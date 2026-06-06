@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=next.js)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 
@@ -181,7 +181,7 @@ npm run build:electron            # Package Electron app
 ```
 termi/
 ├── apps/
-│   ├── web/                    # Next.js 15 App Router
+│   ├── web/                    # Next.js 16 App Router
 │   │   ├── src/
 │   │   │   ├── app/            # Pages + API routes (App Router)
 │   │   │   │   ├── api/        # 53 REST endpoints

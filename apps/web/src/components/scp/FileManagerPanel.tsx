@@ -315,7 +315,7 @@ export default function FileManagerPanel({
     function toggle(path: string) {
         setSelected(p => {
             const n = new Set(p);
-            n.has(path) ? n.delete(path) : n.add(path);
+            if (n.has(path)) n.delete(path); else n.add(path);
             return n;
         });
     }

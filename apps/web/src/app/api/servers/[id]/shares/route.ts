@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/auth';
 import { getServerShares } from '@/lib/services/share.service';
-import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
+import { successResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 export async function GET(
     _request: Request,

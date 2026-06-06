@@ -1,7 +1,6 @@
-import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { getInvitationByToken, acceptInvitation } from '@/lib/services/share.service';
-import { validateBody, successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
+import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 export async function GET(
     _request: Request,

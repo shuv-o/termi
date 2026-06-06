@@ -3,7 +3,7 @@
  * DELETE /api/auth/sessions/:id - Revoke a session
  */
 
-import { getCurrentUser, getUserSessions, revokeSession, getSession } from '@/lib/auth';
+import { getCurrentUser, getUserSessions, getSession } from '@/lib/auth';
 import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 
 export async function GET() {

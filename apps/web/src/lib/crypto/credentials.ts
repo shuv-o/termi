@@ -14,7 +14,6 @@ import {
     encrypt,
     decrypt,
     deriveMasterKey,
-    EncryptedData,
     serializeEncrypted,
     deserializeEncrypted,
 } from './crypto';

@@ -5,15 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     FolderOpen, Plus, Pencil, Trash2, Server,
-    X, Check, Loader2, AlertTriangle, ChevronUp,
+    Check, Loader2, AlertTriangle, ChevronUp,
     ChevronDown, Terminal, Monitor, FolderClosed,
-    Layers, Tag, Globe, Lock, Search, ChevronRight,
+    Layers, Tag, Globe, Lock, Search,
     MoreVertical, ArrowRight, Boxes,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -294,8 +293,6 @@ function GroupDetailPanel({
     onDelete: (g: Group) => void;
     onConnect: (serverId: string, protocol: string) => void;
 }) {
-    const router = useRouter();
-
     if (!group) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center p-12">

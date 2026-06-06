@@ -33,11 +33,6 @@ function getDatabaseUrl(): string {
     throw new Error('Database not configured. Set DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME or DATABASE_URL.');
 }
 
-export function assertDatabaseSslInProduction(url?: string): void {
-    if (process.env.NODE_ENV !== 'production') return;
-    void (url ?? getDatabaseUrl()); // no-op: SSL enforcement removed
-}
-
 // ============================================================================
 // CLIENT SINGLETON (lazy – initialised on first access, not at import time)
 // ============================================================================

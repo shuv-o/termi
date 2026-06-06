@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Server, FolderOpen, Settings, LogOut, X,
+    Server, FolderOpen, Settings, LogOut,
     Plus, Search, Shield, Monitor, Mail,
     PanelLeftClose, PanelLeftOpen, ChevronDown, Laptop,
 } from 'lucide-react';

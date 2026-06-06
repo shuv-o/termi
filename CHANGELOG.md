@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Security
+- Updated `next` to 16.2.7, resolving advisories for CSP-nonce XSS, Middleware/Proxy redirect bypass and cache-poisoning, and Server Components DoS
+- Patched transitive dependencies via `npm audit fix` (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
+- Password-reset URLs (which contain a single-use token) are no longer written to server logs in production; the dev-only fallback now requires `NODE_ENV !== 'production'`
+
+### Removed
+- Dropped the dead `assertDatabaseSslInProduction` no-op helper and its stale unit tests (SSL enforcement had already been removed)
+
 ---
 
 ## [1.0.0] — 2025-06-05

@@ -781,13 +781,11 @@ export default function SessionsWorkspace() {
 
     const [showPicker, setShowPicker] = useState(false);
     const [mode, setMode] = useState<'terminal' | 'transfer'>('terminal');
-    const [isElectron, setIsElectron] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
 
     useEffect(() => {
-        setIsElectron(Boolean(window.electronAPI?.isElectron));
         // Default sidebar open only on desktop
         setSidebarOpen(window.innerWidth >= 1024);
     }, []);

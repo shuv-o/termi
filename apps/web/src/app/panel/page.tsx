@@ -40,8 +40,6 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
     DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 
@@ -136,41 +134,6 @@ function formatRelativeTime(dateStr: string | null): string {
     return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function MetricBar({ label, icon: Icon, percent, used, total, sub }: {
-    label: string;
-    icon?: React.ElementType;
-    percent: number;
-    used: string;
-    total?: string;
-    sub?: string;
-}) {
-    const color =
-        percent >= 90 ? 'bg-red-500' :
-        percent >= 70 ? 'bg-yellow-500' :
-        'bg-emerald-500';
-
-    return (
-        <div className="space-y-0.5">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                    {Icon && <Icon className="w-2.5 h-2.5 text-muted-foreground" />}
-                    <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
-                    {sub && <span className="text-[9px] text-muted-foreground/60 ml-1 hidden sm:inline">{sub}</span>}
-                </div>
-                <span className="text-[10px] text-muted-foreground tabular-nums">
-                    {total ? <>{used}<span className="text-muted-foreground/40"> / {total}</span></> : used}
-                </span>
-            </div>
-            <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                <div
-                    className={`h-full rounded-full transition-all duration-700 ${color}`}
-                    style={{ width: `${Math.min(100, percent)}%` }}
-                />
-            </div>
-            {sub && <p className="text-[9px] text-muted-foreground/40 truncate sm:hidden">{sub}</p>}
-        </div>
-    );
-}
 
 function CopyButton({ text, className }: { text: string; className?: string }) {
     const [copied, setCopied] = useState(false);

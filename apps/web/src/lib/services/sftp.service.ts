@@ -110,7 +110,7 @@ export async function listDirectory(config: SFTPConfig, dirPath: string): Promis
 
 export async function makeDirectory(config: SFTPConfig, dirPath: string): Promise<void> {
     return withPooledSFTP(config, (sftp) => new Promise<void>((resolve, reject) => {
-        sftp.mkdir(dirPath, (err) => { err ? reject(err) : resolve(); });
+        sftp.mkdir(dirPath, (err) => { if (err) reject(err); else resolve(); });
     }));
 }
 

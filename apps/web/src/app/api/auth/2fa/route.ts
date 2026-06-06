@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { getCurrentUser, enable2FA, disable2FA, enableEmailOTP } from '@/lib/auth';
+import { getCurrentUser, enable2FA, disable2FA } from '@/lib/auth';
 import { generateTOTPSecret } from '@/lib/auth/totp';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 

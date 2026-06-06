@@ -633,8 +633,11 @@ async function sendPasswordResetEmail(email: string, token: string): Promise<voi
         `,
     });
 
-    if (!process.env.SMTP_HOST) {
-        console.log('[PasswordReset] Reset URL:', resetUrl);
+    // Dev fallback only: when no SMTP is configured, surface the reset link in
+    // the server log so local setups can still reset. Never do this in
+    // production — the URL contains a single-use reset token.
+    if (!process.env.SMTP_HOST && process.env.NODE_ENV !== 'production') {
+        console.log('[PasswordReset] Reset URL (dev only):', resetUrl);
     }
 }
 
