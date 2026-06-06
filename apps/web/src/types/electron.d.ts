@@ -12,6 +12,8 @@ interface ElectronLocalTerminalAPI {
 
 interface ElectronAPI {
     isElectron: true;
+    /** Subscribe to navigation requests from the native app menu. Returns an unsubscribe fn. */
+    onNavigate?: (cb: (routePath: string) => void) => () => void;
     localTerminal: ElectronLocalTerminalAPI;
 }
 

@@ -118,6 +118,14 @@ function startGateway(paths) {
 
 // ── Windows ───────────────────────────────────────────────────────────────────
 
+/** Tell the renderer (SPA) to navigate without a full page reload. */
+function navigateTo(routePath) {
+    const target = win && !win.isDestroyed() ? win : BrowserWindow.getAllWindows()[0];
+    if (target && !target.isDestroyed()) {
+        target.webContents.send('app:navigate', routePath);
+    }
+}
+
 function buildAppMenu() {
     const isMac = process.platform === 'darwin';
     const reconfigureItem = {
@@ -160,6 +168,17 @@ function buildAppMenu() {
                 ...(isMac
                     ? [{ role: 'pasteAndMatchStyle' }, { role: 'delete' }, { role: 'selectAll' }]
                     : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }]),
+            ],
+        },
+        {
+            label: 'Go',
+            submenu: [
+                { label: 'Servers',        accelerator: 'CmdOrCtrl+1', click: () => navigateTo('/panel') },
+                { label: 'Groups',         accelerator: 'CmdOrCtrl+2', click: () => navigateTo('/panel/groups') },
+                { label: 'Sessions',       accelerator: 'CmdOrCtrl+3', click: () => navigateTo('/panel/sessions') },
+                { label: 'Local Terminal', accelerator: 'CmdOrCtrl+4', click: () => navigateTo('/panel/local') },
+                { type: 'separator' },
+                { label: 'Settings',       accelerator: isMac ? 'Cmd+,' : 'Ctrl+,', click: () => navigateTo('/panel/settings') },
             ],
         },
         {
@@ -210,8 +229,41 @@ function createSetupWindow(errorMsg) {
     setupWin.on('closed', () => { setupWin = null; });
 }
 
+// ── Static asset caching ──────────────────────────────────────────────────────
+
+let cachingConfigured = false;
+
+/**
+ * Next.js serves everything under /_next/static/ with a content hash in the
+ * filename, so those bytes never change. Rewrite their response headers to be
+ * permanently cacheable; Chromium's on-disk HTTP cache (persisted in userData)
+ * then serves them on later launches without hitting the network again.
+ *
+ * Skipped in dev so HMR / fast-refresh chunks aren't frozen.
+ */
+function setupStaticAssetCaching() {
+    if (IS_DEV || cachingConfigured) return;
+    cachingConfigured = true;
+
+    session.defaultSession.webRequest.onHeadersReceived(
+        { urls: ['*://*/_next/static/*'] },
+        (details, callback) => {
+            const headers = {};
+            for (const [k, v] of Object.entries(details.responseHeaders || {})) {
+                // Drop any existing cache directives; we set our own below.
+                const lk = k.toLowerCase();
+                if (lk === 'cache-control' || lk === 'expires' || lk === 'pragma') continue;
+                headers[k] = v;
+            }
+            headers['Cache-Control'] = ['public, max-age=31536000, immutable'];
+            callback({ responseHeaders: headers });
+        }
+    );
+}
+
 function createWindow(appUrl) {
     Menu.setApplicationMenu(buildAppMenu());
+    setupStaticAssetCaching();
 
     win = new BrowserWindow({
         width: 1400,

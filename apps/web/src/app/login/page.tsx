@@ -80,11 +80,30 @@ export default function LoginPage() {
     const [passkeySetupError, setPasskeySetupError] = useState('');
     const [webAuthnSupported, setWebAuthnSupported] = useState(false);
     const [isElectron, setIsElectron] = useState(false);
+    const [checkingSession, setCheckingSession] = useState(true);
 
     useEffect(() => {
         setWebAuthnSupported(browserSupportsWebAuthn());
         setIsElectron(!!window.electronAPI?.isElectron);
     }, []);
+
+    // If already signed in, skip the login form and go straight to the app.
+    useEffect(() => {
+        let cancelled = false;
+        fetch('/api/auth/me')
+            .then((r) => r.json())
+            .then((data) => {
+                if (cancelled) return;
+                if (data.success) {
+                    const nextUrl = searchParams.get('next');
+                    router.replace(nextUrl && nextUrl.startsWith('/') ? nextUrl : '/panel');
+                } else {
+                    setCheckingSession(false);
+                }
+            })
+            .catch(() => { if (!cancelled) setCheckingSession(false); });
+        return () => { cancelled = true; };
+    }, [router, searchParams]);
 
     useEffect(() => {
         if (searchParams.get('verified') === '1') setInfo('Email verified successfully. You can now sign in.');
@@ -235,6 +254,16 @@ export default function LoginPage() {
         finally { setResendLoading(false); }
     };
 
+
+    // ── Session check gate — avoids flashing the form for signed-in users ─────
+
+    if (checkingSession) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-background to-slate-950">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     // ── Passkey setup screen ──────────────────────────────────────────────────
 

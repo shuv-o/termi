@@ -2,6 +2,12 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     isElectron: true,
+    // Native menu → renderer navigation (see "Go" menu in main.js)
+    onNavigate: (cb) => {
+        const handler = (_e, routePath) => cb(routePath);
+        ipcRenderer.on('app:navigate', handler);
+        return () => ipcRenderer.removeListener('app:navigate', handler);
+    },
     localTerminal: {
         create: (id, opts) =>
             ipcRenderer.invoke('local-terminal:create', id, opts),

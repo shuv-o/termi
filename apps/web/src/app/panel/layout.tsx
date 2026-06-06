@@ -8,7 +8,7 @@ import {
     Plus, Search, Shield, Monitor, Mail,
     PanelLeftClose, PanelLeftOpen, ChevronDown, Laptop,
 } from 'lucide-react';
-import { SessionsProvider, useSessionsContext } from './sessions-context';
+import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import TerminalLogo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
@@ -65,41 +65,34 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const [verificationSent,      setVerificationSent]      = useState(false);
 
     const isSessionsPage = pathname === '/panel/sessions';
+    const isLocalPage    = pathname === '/panel/local';
 
-    // ── Sessions context (local terminal sidebar entry + Electron auto-open) ──
-    const {
-        addLocalSession, sessions, activeTabId: activeSessionTabId,
-        setActiveTabId: setActiveSessionTabId, sessionsRestored,
-    } = useSessionsContext();
-
-    /** Open an existing local session or create a new one, then navigate to sessions page. */
+    /** Navigate to the dedicated local-terminal page. */
     const handleOpenLocalTerminal = useCallback(() => {
-        const existing = sessions.find(s => s.type === 'local');
-        if (existing) {
-            setActiveSessionTabId(existing.tabId);
-        } else {
-            addLocalSession();
-        }
-        router.push('/panel/sessions');
-    }, [sessions, addLocalSession, setActiveSessionTabId, router]);
+        router.push('/panel/local');
+    }, [router]);
 
-    /** True only when a local session tab is the active tab and we're on the sessions page. */
-    const localTerminalActive =
-        pathname === '/panel/sessions' &&
-        sessions.some(s => s.type === 'local' && s.tabId === activeSessionTabId);
+    /** True when the dedicated local terminal page is open. */
+    const localTerminalActive = isLocalPage;
 
-    // ── Electron: auto-open local terminal after sessions are restored ──
+    // ── Electron: auto-open the local terminal once per app launch ──
     const autoOpenDoneRef = useRef(false);
     useEffect(() => {
-        if (!sessionsRestored || autoOpenDoneRef.current) return;
-        if (!window.electronAPI?.isElectron) return;
+        if (autoOpenDoneRef.current) return;
+        if (typeof window === 'undefined' || !window.electronAPI?.isElectron) return;
         const key = 'electron-local-auto-opened';
         if (sessionStorage.getItem(key)) return;
         autoOpenDoneRef.current = true;
         sessionStorage.setItem(key, '1');
-        if (!sessions.some(s => s.type === 'local')) addLocalSession();
-        router.push('/panel/sessions');
-    }, [sessionsRestored, sessions, addLocalSession, router]);
+        router.push('/panel/local');
+    }, [router]);
+
+    // ── Electron: navigate when the native "Go" menu is used ──
+    useEffect(() => {
+        const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+        if (!api?.onNavigate) return;
+        return api.onNavigate((routePath) => router.push(routePath));
+    }, [router]);
 
     function toggleCollapsed() {
         setCollapsed(prev => {
@@ -382,7 +375,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {!isSessionsPage && (
-                    <main className="p-4 lg:p-8 pb-24 lg:pb-8">{children}</main>
+                    <main className={isLocalPage ? 'p-4 lg:p-8' : 'p-4 lg:p-8 pb-24 lg:pb-8'}>{children}</main>
                 )}
             </div>
 

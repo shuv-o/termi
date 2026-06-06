@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import DownloadDesktopButton from '@/components/landing/DownloadButton';
 
 export const metadata: Metadata = {
     title: 'Termi - Secure Server Management',
@@ -102,6 +103,16 @@ export default function HomePage() {
                         <Button variant="secondary" size="lg" asChild>
                             <Link href="#features">Learn More</Link>
                         </Button>
+                    </div>
+
+                    {/* Desktop app download */}
+                    <div className="mt-10 flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-3 w-full max-w-xs">
+                            <div className="flex-1 h-px bg-slate-700/60" />
+                            <span className="text-xs uppercase tracking-wider text-slate-500">Or get the desktop app</span>
+                            <div className="flex-1 h-px bg-slate-700/60" />
+                        </div>
+                        <DownloadDesktopButton />
                     </div>
 
                     {/* Protocol badges */}
