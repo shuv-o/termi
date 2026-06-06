@@ -12,16 +12,17 @@ const config = [
   ...nextCoreWebVitals,
   ...nextTypescript,
   {
-    // The React Compiler rules (eslint-plugin-react-hooks v6, enabled by
-    // Next 16's flat config) flag several intentional patterns here:
+    // The React Compiler rules (eslint-plugin-react-hooks v6, pulled in by
+    // Next 16's flat config) only apply when the React Compiler is enabled,
+    // which this project does not use. They flag intentional patterns here —
     // prop-sync effects, dynamic icon-component lookups, a self-scheduling
-    // reconnect callback, and reads of stable refs during render. Keep them
-    // visible as warnings rather than build-breaking errors.
+    // reconnect callback, and reads of stable refs during render — so they
+    // are turned off rather than maintained as perpetual warnings.
     rules: {
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/refs': 'warn',
-      'react-hooks/static-components': 'warn',
-      'react-hooks/immutability': 'warn',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/immutability': 'off',
     },
   },
   {

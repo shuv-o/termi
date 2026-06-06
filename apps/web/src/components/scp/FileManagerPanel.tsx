@@ -221,7 +221,6 @@ function Modal({
 export default function FileManagerPanel({
     serverId,
     onClose,
-    fullPage = false,
     onSelectionChange,
 }: FileManagerPanelProps) {
     const isMobile = useIsMobile();

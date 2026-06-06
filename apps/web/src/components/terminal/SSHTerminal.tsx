@@ -94,7 +94,6 @@ export default function SSHTerminal({
         onWebSocketCreatedRef.current?.(ws);
 
         ws.onopen = async () => {
-            console.log('[SSHTerminal] WebSocket connected');
             let token: string;
             try {
                 if (!hasConnectedOnceRef.current) {
@@ -331,6 +330,7 @@ export default function SSHTerminal({
             ws?.close();
             terminal.dispose();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 'disableNativeKeyboard' must not re-trigger terminal setup/teardown
     }, [connect]);
 
     return (

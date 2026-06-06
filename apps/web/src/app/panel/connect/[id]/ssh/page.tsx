@@ -58,7 +58,7 @@ export default function SSHConnectionPage() {
     const [visualH, setVisualH] = useState(0);
 
     const handleDisconnect = useCallback(() => {
-        console.log('[SSHConnectionPage] Terminal disconnected');
+        // session ended — no-op placeholder for future session tracking
     }, []);
     const handleError = useCallback((err: string) => {
         console.error('Terminal error:', err);

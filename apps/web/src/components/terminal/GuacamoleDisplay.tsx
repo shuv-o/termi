@@ -145,7 +145,6 @@ export default function GuacamoleDisplay({
             display.onresize = fitDisplay;
             // Client state changes
             guacClient.onstatechange = (state: number) => {
-                console.log(`[Guacamole] State -> ${CLIENT_STATE_LABELS[state] ?? state}`);
                 setClientState(state);
                 if (state === 3 /* CONNECTED */) {
                     fitDisplay();

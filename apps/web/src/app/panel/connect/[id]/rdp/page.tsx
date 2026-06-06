@@ -286,7 +286,7 @@ export default function RDPConnectionPage() {
                     preferredWidth={resolution?.w}
                     preferredHeight={resolution?.h}
                     scale={zoom}
-                    onDisconnect={() => { console.log('RDP disconnected'); }}
+                    onDisconnect={() => { /* session ended */ }}
                     onError={(err) => { console.error('RDP error:', err); }}
                 />
 

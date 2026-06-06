@@ -282,7 +282,7 @@ export default function VNCConnectionPage() {
                     preferredWidth={resolution?.w}
                     preferredHeight={resolution?.h}
                     scale={zoom}
-                    onDisconnect={() => { console.log('VNC disconnected'); }}
+                    onDisconnect={() => { /* session ended */ }}
                     onError={(err) => { console.error('VNC error:', err); }}
                 />
 

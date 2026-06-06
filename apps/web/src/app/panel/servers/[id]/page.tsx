@@ -265,6 +265,7 @@ export default function ServerDetailsPage() {
         } finally {
             setLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 'form' is applied via functional setForm; excluding it avoids reloading on every keystroke
     }, [id, router]);
 
     useEffect(() => { loadAll(); }, [loadAll]);

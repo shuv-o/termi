@@ -546,6 +546,7 @@ export default function GroupsPage() {
         }
     }, [showToast, selectedId]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount
     useEffect(() => { loadGroups(); }, []);
 
     const loadDetail = useCallback(async (groupId: string) => {
@@ -567,6 +568,7 @@ export default function GroupsPage() {
     // Auto-load detail when selection changes
     useEffect(() => {
         if (selectedId) loadDetail(selectedId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the selection changes
     }, [selectedId]);
 
     const handleCreate = async (form: GroupFormData) => {

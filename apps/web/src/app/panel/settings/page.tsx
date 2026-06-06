@@ -137,7 +137,7 @@ function SecurityScore({ user, passkeys }: { user: User; passkeys: Passkey[] }) 
 
 interface NavItem { id: Section; label: string; icon: React.ElementType; badge?: string | number; }
 
-function SidebarNav({ active, onChange, user, passkeys, sessions }: {
+function SidebarNav({ active, onChange, passkeys, sessions }: {
     active: Section;
     onChange: (s: Section) => void;
     user: User | null;
@@ -370,10 +370,6 @@ function Section({ title, description, icon: Icon, iconBg, children }: {
             {children}
         </div>
     );
-}
-
-function Divider() {
-    return <div className="h-px bg-border/60 my-6" />;
 }
 
 // ─── Password strength ────────────────────────────────────────────────────────
@@ -1077,6 +1073,7 @@ export default function SettingsPage() {
                                     {setup2FA && (
                                         <div className="space-y-4">
                                             <div className="p-4 bg-secondary/50 rounded-xl text-center border border-border">
+                                                {/* eslint-disable-next-line @next/next/no-img-element -- QR is a runtime base64 data URL; next/image adds no benefit */}
                                                 {qrCode && <img src={qrCode} alt="2FA QR Code" className="mx-auto mb-4 rounded-lg" style={{ imageRendering: 'pixelated' }} />}
                                                 <p className="text-sm text-muted-foreground mb-2">Scan with your authenticator app</p>
                                                 <p className="text-xs text-muted-foreground/60 mb-2">Or enter this key manually:</p>
