@@ -326,7 +326,7 @@ export class SCPHandler {
                 ? this.sftp!.rmdir.bind(this.sftp)
                 : this.sftp!.unlink.bind(this.sftp);
 
-            deleteFunc(path, (err: any) => {
+            deleteFunc(path, (err: Error | null | undefined) => {
                 if (err) {
                     this.sendError('Delete failed: ' + err.message);
                     return;

@@ -92,7 +92,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const autoOpenDoneRef = useRef(false);
     useEffect(() => {
         if (!sessionsRestored || autoOpenDoneRef.current) return;
-        if (!(window as any).electronAPI?.isElectron) return;
+        if (!window.electronAPI?.isElectron) return;
         const key = 'electron-local-auto-opened';
         if (sessionStorage.getItem(key)) return;
         autoOpenDoneRef.current = true;

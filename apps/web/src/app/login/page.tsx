@@ -83,7 +83,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         setWebAuthnSupported(browserSupportsWebAuthn());
-        setIsElectron(!!(window as any).electronAPI?.isElectron);
+        setIsElectron(!!window.electronAPI?.isElectron);
     }, []);
 
     useEffect(() => {
@@ -102,7 +102,7 @@ export default function LoginPage() {
             .then((cred) => {
                 if (cred && cred.type === 'password') {
                     const pc = cred as PasswordCredential;
-                    setFormData({ email: pc.id, password: (pc as any).password || '' });
+                    setFormData({ email: pc.id, password: pc.password || '' });
                 }
             })
             .catch(() => {});
@@ -114,7 +114,7 @@ export default function LoginPage() {
         return () => clearInterval(t);
     }, [resendCooldown]);
 
-    function handleLoginSuccess(data: any) {
+    function handleLoginSuccess(data: { suggestPasskeySetup?: boolean }) {
         if (formData.email && typeof window !== 'undefined' && 'PasswordCredential' in window) {
             try {
                 const cred = new PasswordCredential({ id: formData.email, password: formData.password, name: formData.email });
@@ -183,11 +183,11 @@ export default function LoginPage() {
             const authData = await authRes.json();
             if (!authData.success) { setError(authData.error || 'Passkey authentication failed'); setPasskeyLoading(false); return; }
             router.push(searchParams.get('next') && searchParams.get('next')!.startsWith('/') ? searchParams.get('next')! : '/panel');
-        } catch (err: any) {
+        } catch (err: unknown) {
             clearTimeout(timeoutId);
             if (timedOut) {
                 setError('Passkey request timed out. Please try again or sign in with your password.');
-            } else if (err?.name !== 'NotAllowedError') {
+            } else if ((err as { name?: string })?.name !== 'NotAllowedError') {
                 setError('Passkey sign-in failed. Please try with your password.');
             }
             setPasskeyLoading(false);
@@ -211,11 +211,11 @@ export default function LoginPage() {
             const regData = await regRes.json();
             if (!regData.success) { setPasskeySetupError(regData.error || 'Passkey registration failed'); setPasskeySetupLoading(false); return; }
             router.push(searchParams.get('next') && searchParams.get('next')!.startsWith('/') ? searchParams.get('next')! : '/panel');
-        } catch (err: any) {
+        } catch (err: unknown) {
             clearTimeout(timeoutId);
             if (timedOut) {
                 setPasskeySetupError('Passkey setup timed out. Check for a Touch ID or system dialog on your screen, then try again.');
-            } else if (err?.name === 'NotAllowedError') {
+            } else if ((err as { name?: string })?.name === 'NotAllowedError') {
                 setPasskeySetupError('Passkey setup was cancelled.');
             } else {
                 setPasskeySetupError('Passkey setup failed. Please try again or skip.');

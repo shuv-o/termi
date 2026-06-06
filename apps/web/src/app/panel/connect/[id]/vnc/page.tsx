@@ -149,7 +149,7 @@ export default function VNCConnectionPage() {
         };
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     }, [resolution]);
 
     const selectValue = resolution

@@ -207,8 +207,9 @@ export class GuacamoleHandler {
                     reject(err);
                 });
             });
-        } catch (err: any) {
-            const errorMsg = `Failed to connect to guacd daemon at ${guacdHost}:${guacdPort}: ${err.message}`;
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            const errorMsg = `Failed to connect to guacd daemon at ${guacdHost}:${guacdPort}: ${message}`;
             console.error('[Guacamole]', errorMsg);
             this.sendError(errorMsg);
             this.ws.close();
@@ -239,8 +240,9 @@ export class GuacamoleHandler {
                     reject(err);
                 };
             });
-        } catch (err: any) {
-            const errorMsg = `Failed to get args from guacd: ${err.message}`;
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            const errorMsg = `Failed to get args from guacd: ${message}`;
             console.error('[Guacamole]', errorMsg);
             this.sendError(errorMsg);
             this.ws.close();

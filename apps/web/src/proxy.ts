@@ -8,11 +8,11 @@ export function proxy(request: NextRequest) {
 
     // Convert the gateway HTTP/WS URL to both ws: and wss: forms so CSP covers
     // both dev (ws://) and prod (wss://) without opening a wildcard.
-    let gatewayWsOrigin = gatewayUrl
+    const gatewayWsOrigin = gatewayUrl
         .replace(/^https:\/\//, 'wss://')
         .replace(/^http:\/\//, 'ws://');
     // Also allow the https/http origin for fetch-based health checks
-    let gatewayHttpOrigin = gatewayUrl
+    const gatewayHttpOrigin = gatewayUrl
         .replace(/^wss:\/\//, 'https://')
         .replace(/^ws:\/\//, 'http://');
 

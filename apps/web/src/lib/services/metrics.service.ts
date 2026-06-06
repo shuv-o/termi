@@ -92,7 +92,7 @@ const SSH_METRICS_CMD = [
     `printf '%s\\n' "$(dmidecode -t memory 2>/dev/null | grep -i 'configured.*speed' | grep -vE 'Unknown|0 MT' | head -1 | grep -oE '[0-9]+' | head -1)"`,
 ].join('; ');
 
-interface SSHConfig extends SSHPoolConfig {}
+type SSHConfig = SSHPoolConfig;
 
 export function getSSHMetrics(
     config: SSHConfig,

@@ -106,7 +106,7 @@ export default function UnlockEncryptionPage() {
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Unlock & Continue'}
                     </Button>
                     <Button type="button" variant="ghost" className="w-full" onClick={() => router.push('/panel')}>
-                        Skip for now (server connections won't work)
+                        Skip for now (server connections won&apos;t work)
                     </Button>
                     <div className="text-center">
                         <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setShowResetConfirm(true)}>

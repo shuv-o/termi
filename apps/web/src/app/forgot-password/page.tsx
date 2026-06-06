@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
                             <Mail className="w-6 h-6 text-green-400" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            If that email address has an account, we've sent a password reset link.
+                            If that email address has an account, we&apos;ve sent a password reset link.
                             Check your inbox.
                         </p>
                         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-xs text-yellow-300">
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <p className="text-sm text-muted-foreground text-center">
-                            Enter your email address and we'll send a reset link.
+                            Enter your email address and we&apos;ll send a reset link.
                         </p>
                         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
                             ⚠️ Warning: Resetting your password will permanently delete all stored server credentials (passwords, private keys). This cannot be undone.

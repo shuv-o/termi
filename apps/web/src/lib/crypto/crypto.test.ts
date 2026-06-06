@@ -33,67 +33,67 @@ describe('secureCompare', () => {
 describe('assertDatabaseSslInProduction', () => {
     it('does nothing in development', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'development';
         expect(() =>
             assertDatabaseSslInProduction('postgresql://user:pass@host/db')
         ).not.toThrow();
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 
     it('throws in production when sslmode is absent', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'production';
         expect(() =>
             assertDatabaseSslInProduction('postgresql://user:pass@host/db')
         ).toThrow('sslmode=require');
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 
     it('does not throw in production with sslmode=require', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'production';
         expect(() =>
             assertDatabaseSslInProduction('postgresql://user:pass@host/db?sslmode=require')
         ).not.toThrow();
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 
     it('does not throw in production with ssl=true', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'production';
         expect(() =>
             assertDatabaseSslInProduction('postgresql://user:pass@host/db?ssl=true')
         ).not.toThrow();
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 
     it('throws with a clear actionable message', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'production';
         expect(() =>
             assertDatabaseSslInProduction('postgresql://user:pass@host/db')
         ).toThrow(/DATABASE_URL.*sslmode=require/);
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 
     it('throws in production when DATABASE_URL is empty string', () => {
         const original = process.env.NODE_ENV;
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = 'production';
         expect(() =>
             assertDatabaseSslInProduction('')
         ).toThrow(/sslmode=require/);
-        // @ts-ignore
+        // @ts-expect-error -- NODE_ENV is readonly in /node; overriding for test
         process.env.NODE_ENV = original;
     });
 });

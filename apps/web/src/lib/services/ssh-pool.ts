@@ -298,7 +298,7 @@ export class SSHConnectionPool {
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
 declare global {
-    // eslint-disable-next-line no-var
+     
     var __sshPool: SSHConnectionPool | undefined;
 }
 

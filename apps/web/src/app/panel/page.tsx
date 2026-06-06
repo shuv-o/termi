@@ -442,7 +442,7 @@ function ShareModal({ server, onClose }: { server: ServerItem; onClose: () => vo
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2.5">
                         <Share2 className="w-4 h-4 text-primary" />
-                        Share "{server.name}"
+                        Share &quot;{server.name}&quot;
                     </DialogTitle>
                 </DialogHeader>
 

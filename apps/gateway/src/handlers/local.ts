@@ -9,6 +9,7 @@
 import { WebSocket } from 'ws';
 import { createRequire } from 'module';
 import os from 'os';
+import type { IPty, IPtyForkOptions } from 'node-pty';
 
 // ── node-pty (optional native module) ───────────────────────────────────────
 
@@ -16,7 +17,7 @@ import os from 'os';
 // a graceful fallback if it was not compiled for this environment.
 const _require = createRequire(import.meta.url);
 
-let _ptySpawn: ((shell: string, args: string[], opts: Record<string, unknown>) => any) | null = null;
+let _ptySpawn: ((shell: string, args: string[], opts: IPtyForkOptions) => IPty) | null = null;
 
 try {
     const nodePty = _require('node-pty');
@@ -48,7 +49,7 @@ function decrementUser(userId: string): void {
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 export class LocalHandler {
-    private pty: any = null;
+    private pty: IPty | null = null;
     private closing = false;
     private userId: string;
     private idleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -106,9 +107,10 @@ export class LocalHandler {
                 cwd: safeEnv.HOME,
                 env: safeEnv,
             });
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
             decrementUser(this.userId);
-            this.ws.send(JSON.stringify({ type: 'error', message: `Failed to spawn shell: ${err.message}` }));
+            this.ws.send(JSON.stringify({ type: 'error', message: `Failed to spawn shell: ${message}` }));
             this.ws.close(4500, 'Spawn failed');
             return;
         }

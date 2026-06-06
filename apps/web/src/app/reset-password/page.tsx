@@ -69,7 +69,7 @@ function ResetPasswordForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
                 <AlertTriangle className="w-4 h-4 inline mr-1" />
-                <strong>Security notice:</strong> Resetting your password will permanently delete your stored server credentials. You'll need to re-add your servers after reset.
+                <strong>Security notice:</strong> Resetting your password will permanently delete your stored server credentials. You&apos;ll need to re-add your servers after reset.
             </div>
 
             {success ? (

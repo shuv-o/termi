@@ -53,12 +53,12 @@ function setupElectronTerminal(
     onReadyRef: MutableRefObject<(() => void) | undefined>,
     onExitRef: MutableRefObject<((code: number) => void) | undefined>,
 ): () => void {
-    const api = (window as any).electronAPI?.localTerminal;
+    const api = window.electronAPI?.localTerminal;
     if (!api) { setStatus('error'); return () => {}; }
 
     const { cols, rows } = terminal;
 
-    api.create(tabId, { cols, rows }).then((result: any) => {
+    api.create(tabId, { cols, rows }).then((result) => {
         if (result.success) {
             setStatus('ready');
             onReadyRef.current?.();
@@ -182,7 +182,7 @@ export default function LocalTerminal({ tabId, connectionToken, gatewayUrl, onRe
     useEffect(() => {
         if (!containerRef.current) return;
 
-        const isElectron = Boolean((window as any).electronAPI?.isElectron);
+        const isElectron = Boolean(window.electronAPI?.isElectron);
         const hasWsPath = Boolean(connectionToken && gatewayUrl);
 
         if (!isElectron && !hasWsPath) {

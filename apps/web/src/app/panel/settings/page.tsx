@@ -492,7 +492,7 @@ export default function SettingsPage() {
         }
         void init();
         void loadPasskeys();
-        setIsElectron(!!(window as any).electronAPI?.isElectron);
+        setIsElectron(!!window.electronAPI?.isElectron);
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setPushPermission(Notification.permission);
         }

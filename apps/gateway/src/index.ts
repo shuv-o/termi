@@ -371,7 +371,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     sessionId: resolvedSessionId,
                     userId: tokenPayload.userId,
                     serverId,
-                    handler: null as any, // set below after sink is created
+                    // Placeholder: the real handler is assigned on the next lines,
+                    // once `sink` (which needs `session`) has been created.
+                    handler: null as unknown as PersistentSession['handler'],
                     buffer: new RingBuffer(),
                     lastActivityAt: Date.now(),
                     createdAt: Date.now(),

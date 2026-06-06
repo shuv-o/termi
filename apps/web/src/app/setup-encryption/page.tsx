@@ -76,7 +76,7 @@ export default function SetupEncryptionPage() {
                     </div>
                     <h1 className="text-2xl font-bold">Set Up Encryption</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
-                        Your server credentials will be encrypted with this passphrase. You'll enter it each time you sign in with Google.
+                        Your server credentials will be encrypted with this passphrase. You&apos;ll enter it each time you sign in with Google.
                     </p>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,7 +121,7 @@ export default function SetupEncryptionPage() {
                         {passphraseMatch && <p className="text-xs text-green-400 flex items-center gap-1"><Check className="w-3 h-3" /> Passphrases match</p>}
                     </div>
                     <div className="bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 text-xs text-sky-300">
-                        ℹ️ This passphrase cannot be recovered. If you forget it, you'll need to reset it — which will delete all your server credentials.
+                        ℹ️ This passphrase cannot be recovered. If you forget it, you&apos;ll need to reset it — which will delete all your server credentials.
                     </div>
                     {error && <p className="text-sm text-red-400">{error}</p>}
                     <Button type="submit" className="w-full" disabled={loading || passphrase.length < 8 || !passphraseMatch}>

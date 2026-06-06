@@ -13,7 +13,7 @@ import { sshPool, SSHPoolConfig } from './ssh-pool';
 // TYPES
 // ============================================================================
 
-export interface SFTPConfig extends SSHPoolConfig {}
+export type SFTPConfig = SSHPoolConfig;
 
 export interface RemoteEntry {
     name: string;
