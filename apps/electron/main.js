@@ -342,7 +342,11 @@ async function startApp() {
 
     if (process.env.RUN_LOCAL_GATEWAY === 'true') startGateway(getPaths());
     if (process.env.RUN_LOCAL_GUACD === 'true') startGuacd();
-    createWindow(remoteUrl);
+
+    // The desktop app has no use for the marketing landing page — open straight
+    // to login. (The login page redirects already-authenticated users to /panel.)
+    const startUrl = new URL('/login', remoteUrl).toString();
+    createWindow(startUrl);
 }
 
 //   Setup IPC handlers
