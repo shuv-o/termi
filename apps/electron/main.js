@@ -106,7 +106,7 @@ function startGuacd() {
         '4822:4822',
         '--name',
         'guacd-desktop',
-        'guacamole/guacd:1.5.5',
+        'guacamole/guacd: 1.6.0',
     ]);
     guacdProcess.stderr.on('data', (d) => console.log('[guacd]', d.toString().trim()));
     guacdProcess.on('error', (err) =>

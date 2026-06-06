@@ -125,7 +125,7 @@ open http://localhost:22080
 > **RDP / VNC**: also start guacd — on Apple Silicon, add `--platform linux/arm64`:
 >
 > ```bash
-> docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
+> docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
 > ```
 
 ---

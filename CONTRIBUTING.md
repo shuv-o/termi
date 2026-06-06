@@ -90,7 +90,7 @@ npm run test:e2e         # End-to-end tests (Playwright)
 
 ```bash
 # Start guacd (on Apple Silicon, add --platform linux/arm64)
-docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd:1.5.5
+docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
 ```
 
 Then add an RDP or VNC server in the dashboard.
