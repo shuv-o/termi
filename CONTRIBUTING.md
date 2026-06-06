@@ -13,8 +13,10 @@ Thank you for your interest in contributing! Termi is a community-driven project
 - [Making Changes](#making-changes)
 - [Commit Conventions](#commit-conventions)
 - [Submitting a Pull Request](#submitting-a-pull-request)
+- [Release Process (Maintainers)](#release-process-maintainers)
 - [Reporting Bugs](#reporting-bugs)
 - [Requesting Features](#requesting-features)
+- [Getting Help](#getting-help)
 - [Security Issues](#security-issues)
 
 ---
@@ -192,6 +194,21 @@ Pull requests are reviewed by maintainers. We aim to provide feedback within a f
 
 ---
 
+## Release Process (Maintainers)
+
+Termi uses SemVer tags and GitHub Releases.
+
+1. Ensure `CHANGELOG.md` has a section for the version (for example, `## [1.0.0]`).
+2. Ensure the repo is in a releasable state (CI passing on `main`).
+3. Create and push a version tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+4. The GitHub Actions workflow at `.github/workflows/release.yml` publishes the release and uses the matching changelog section as release notes.
+
+---
+
 ## Reporting Bugs
 
 Use the [Bug Report issue template](https://github.com/shuvoooo/termi/issues/new?template=bug_report.yml). Please include:
@@ -208,6 +225,12 @@ Use the [Bug Report issue template](https://github.com/shuvoooo/termi/issues/new
 Use the [Feature Request issue template](https://github.com/shuvoooo/termi/issues/new?template=feature_request.yml). Describe the problem you're solving and your proposed solution.
 
 For large changes or architectural decisions, open a [Discussion](https://github.com/shuvoooo/termi/discussions) first to get early feedback before writing code.
+
+---
+
+## Getting Help
+
+For setup questions, usage help, or troubleshooting guidance, use [SUPPORT.md](SUPPORT.md), then open a [GitHub Discussion](https://github.com/shuvoooo/termi/discussions).
 
 ---
 

@@ -5,6 +5,8 @@
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/shuvoooo/termi/actions/workflows/ci.yml/badge.svg)](https://github.com/shuvoooo/termi/actions/workflows/ci.yml)
+[![Release](https://github.com/shuvoooo/termi/actions/workflows/release.yml/badge.svg)](https://github.com/shuvoooo/termi/actions/workflows/release.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=next.js)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -317,6 +319,16 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 - Branching and commit conventions
 - Submitting pull requests
 - Reporting bugs and requesting features
+
+---
+
+## 🌍 Open Source & Community
+
+- Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Help & support channels: [SUPPORT.md](SUPPORT.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Release notes: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 

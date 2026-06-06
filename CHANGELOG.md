@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Added
+
+- Added open-source community health files: `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `.github/FUNDING.yml`, and `.github/CODEOWNERS`
+- Added automated GitHub release workflow (`.github/workflows/release.yml`) to publish version-tagged releases with notes sourced from `CHANGELOG.md`
+
 ### Security
 
 - Updated `next` to 16.2.7, resolving advisories for CSP-nonce XSS, Middleware/Proxy redirect bypass and cache-poisoning, and Server Components DoS
