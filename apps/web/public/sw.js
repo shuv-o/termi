@@ -20,18 +20,14 @@ const PRECACHE_URLS = [
     '/manifest.json',
 ];
 
-// ============================================================================
 // INSTALL — pre-cache shell assets
-// ============================================================================
 
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
     self.skipWaiting();
 });
 
-// ============================================================================
 // ACTIVATE — clean up old caches
-// ============================================================================
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
@@ -44,9 +40,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// ============================================================================
 // FETCH — caching strategies
-// ============================================================================
 
 self.addEventListener('fetch', (event) => {
     const { request } = event;
@@ -118,9 +112,7 @@ async function networkFirstWithOfflineFallback(request) {
     }
 }
 
-// ============================================================================
 // PUSH NOTIFICATIONS
-// ============================================================================
 
 self.addEventListener('push', (event) => {
     if (!event.data) return;
@@ -148,9 +140,7 @@ self.addEventListener('push', (event) => {
     event.waitUntil(self.registration.showNotification(payload.title || 'Termi Alert', options));
 });
 
-// ============================================================================
 // NOTIFICATION CLICK
-// ============================================================================
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();

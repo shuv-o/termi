@@ -114,11 +114,16 @@ export default function PrivacyPage() {
             </Section>
 
             <Section id="data-we-dont-collect" title="Data we don't collect">
-                <p>The Termi project does not operate any analytics, tracking, or telemetry. There is:</p>
+                <p>
+                    The Termi project does not operate any analytics, tracking, or telemetry. There
+                    is:
+                </p>
                 <ul>
                     <li>No analytics or behavioral tracking.</li>
                     <li>No advertising or third-party ad networks.</li>
-                    <li>No selling or sharing of personal data — there is no central party to do so.</li>
+                    <li>
+                        No selling or sharing of personal data — there is no central party to do so.
+                    </li>
                     <li>No phoning home — your instance does not transmit usage data to us.</li>
                 </ul>
             </Section>
@@ -126,8 +131,8 @@ export default function PrivacyPage() {
             <Section id="third-parties" title="Third-party services">
                 <p>
                     A default Termi deployment talks only to the servers you choose to connect to
-                    and the database you provide. Depending on the optional features you enable, your
-                    instance may additionally communicate with:
+                    and the database you provide. Depending on the optional features you enable,
+                    your instance may additionally communicate with:
                 </p>
                 <ul>
                     <li>
@@ -181,8 +186,8 @@ export default function PrivacyPage() {
 
             <Section id="changes" title="Changes to this policy">
                 <p>
-                    We may update this policy as Termi evolves. Material changes are reflected in the
-                    &ldquo;Last updated&rdquo; date above and tracked in the project&apos;s{' '}
+                    We may update this policy as Termi evolves. Material changes are reflected in
+                    the &ldquo;Last updated&rdquo; date above and tracked in the project&apos;s{' '}
                     <Link
                         href="https://github.com/shuvoooo/termi"
                         rel="noopener noreferrer"
@@ -196,7 +201,8 @@ export default function PrivacyPage() {
 
             <Section id="contact" title="Contact">
                 <p>
-                    Questions about this policy or about Termi&apos;s data handling? Open an issue on{' '}
+                    Questions about this policy or about Termi&apos;s data handling? Open an issue
+                    on{' '}
                     <Link
                         href="https://github.com/shuvoooo/termi"
                         rel="noopener noreferrer"
@@ -204,8 +210,7 @@ export default function PrivacyPage() {
                     >
                         GitHub
                     </Link>{' '}
-                    or email{' '}
-                    <a href="mailto:shuvo.punam@gmail.com">shuvo.punam@gmail.com</a>.
+                    or email <a href="mailto:shuvo.punam@gmail.com">shuvo.punam@gmail.com</a>.
                 </p>
             </Section>
         </LegalShell>

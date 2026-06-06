@@ -23,9 +23,7 @@ function createTransporter() {
     });
 }
 
-// ============================================================================
 // INVITE
-// ============================================================================
 
 export async function sendShareInvitation(
     serverId: string,
@@ -130,9 +128,7 @@ export async function sendShareInvitation(
     return { success: true };
 }
 
-// ============================================================================
 // LOOKUP
-// ============================================================================
 
 export async function getInvitationByToken(token: string) {
     const tokenHash = hashToken(token);
@@ -180,9 +176,7 @@ export async function getServerShares(serverId: string, ownerId: string) {
     return { shares, pending };
 }
 
-// ============================================================================
 // ACCEPT
-// ============================================================================
 
 export async function acceptInvitation(
     token: string,
@@ -238,9 +232,7 @@ export async function acceptInvitation(
     return { success: true, serverId: invitation.serverId };
 }
 
-// ============================================================================
 // REVOKE
-// ============================================================================
 
 export async function revokeShare(
     shareId: string,
@@ -265,9 +257,7 @@ export async function revokeShare(
     return { success: true };
 }
 
-// ============================================================================
 // SHARED SERVERS (for dashboard display)
-// ============================================================================
 
 export async function getSharedServers(userId: string) {
     const { decryptCredentials } = await import('@/lib/crypto');

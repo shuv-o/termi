@@ -9,9 +9,7 @@ import { PrismaClient } from '@/app/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
-// ============================================================================
 // STARTUP VALIDATION
-// ============================================================================
 
 /**
  * Build a PostgreSQL connection URL from split env vars.
@@ -36,9 +34,7 @@ function getDatabaseUrl(): string {
     );
 }
 
-// ============================================================================
 // CLIENT SINGLETON (lazy – initialised on first access, not at import time)
-// ============================================================================
 
 // Prevent multiple Prisma Client instances in development
 const globalForPrisma = globalThis as unknown as {

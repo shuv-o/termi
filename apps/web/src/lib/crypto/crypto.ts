@@ -20,9 +20,7 @@ import {
     timingSafeEqual,
 } from 'crypto';
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 // AES-256-GCM parameters
 const ALGORITHM = 'aes-256-gcm';
@@ -43,9 +41,7 @@ const PBKDF2_ITERATIONS = 600000; // OWASP 2023 recommendation
 const PBKDF2_DIGEST = 'sha256';
 const SALT_LENGTH = 32;
 
-// ============================================================================
 // ENCRYPTION KEY MANAGEMENT
-// ============================================================================
 
 /**
  * System encryption key derived from environment variable
@@ -87,9 +83,7 @@ export function hashDerivedKey(derivedKey: Buffer): string {
     return createHash('sha256').update(derivedKey).digest('hex');
 }
 
-// ============================================================================
 // AES-256-GCM ENCRYPTION
-// ============================================================================
 
 export interface EncryptedData {
     iv: string; // Base64 encoded IV
@@ -177,9 +171,7 @@ export function decryptJson<T>(encryptedData: EncryptedData, key?: Buffer): T {
     return JSON.parse(json) as T;
 }
 
-// ============================================================================
 // PASSWORD HASHING (using scrypt as cross-platform alternative to Argon2)
-// ============================================================================
 
 /**
  * Hash a password using scrypt
@@ -226,9 +218,7 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
     }
 }
 
-// ============================================================================
 // UTILITY FUNCTIONS
-// ============================================================================
 
 /**
  * Generate a secure random token (for session tokens, CSRF, etc.)

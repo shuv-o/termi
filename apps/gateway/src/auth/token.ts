@@ -8,9 +8,7 @@
 import * as jose from 'jose';
 import { createHash } from 'crypto';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface TokenPayload {
     userId: string;
@@ -30,9 +28,7 @@ export interface TokenPayload {
     exp: number;
 }
 
-// ============================================================================
 // KEY DERIVATION
-// ============================================================================
 
 function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
@@ -40,9 +36,7 @@ function getJWEKey(): Uint8Array {
     return new Uint8Array(createHash('sha256').update(secret).digest());
 }
 
-// ============================================================================
 // TOKEN VALIDATION
-// ============================================================================
 
 /**
  * Validate and decrypt a JWE connection token.

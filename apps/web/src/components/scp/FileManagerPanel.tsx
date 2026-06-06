@@ -35,9 +35,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface RemoteEntry {
     name: string;
@@ -68,9 +66,7 @@ export interface FileManagerPanelProps {
     onSelectionChange?: (selected: RemoteEntry[], currentPath: string) => void;
 }
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 function fmt(bytes: number): string {
     if (bytes === 0) return '—';
@@ -160,9 +156,7 @@ function parent(p: string) {
     return parts.length === 0 ? '/' : '/' + parts.join('/');
 }
 
-// ============================================================================
 // MOBILE HOOK
-// ============================================================================
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
@@ -175,9 +169,7 @@ function useIsMobile() {
     return isMobile;
 }
 
-// ============================================================================
 // BOTTOM SHEET  (mobile action menu)
-// ============================================================================
 
 function BottomSheet({
     title,
@@ -247,9 +239,7 @@ function SheetAction({
     );
 }
 
-// ============================================================================
 // MODAL  (desktop) — uses shadcn Dialog
-// ============================================================================
 
 function Modal({
     title,
@@ -272,9 +262,7 @@ function Modal({
     );
 }
 
-// ============================================================================
 // COMPONENT
-// ============================================================================
 
 export default function FileManagerPanel({
     serverId,

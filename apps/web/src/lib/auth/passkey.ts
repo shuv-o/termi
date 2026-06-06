@@ -19,9 +19,7 @@ import type {
 import { prisma } from '@/lib/db';
 import { createSession, getSession } from './session';
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 function getRpDetails() {
     // In development the Next.js server runs on localhost:22080. Using a remote
@@ -43,9 +41,7 @@ function getRpDetails() {
     };
 }
 
-// ============================================================================
 // REGISTRATION
-// ============================================================================
 
 /**
  * Generate WebAuthn registration options for an authenticated user.
@@ -163,9 +159,7 @@ export async function verifyPasskeyRegistration(
     return { success: true };
 }
 
-// ============================================================================
 // AUTHENTICATION
-// ============================================================================
 
 /**
  * Generate WebAuthn authentication options.
@@ -323,9 +317,7 @@ export async function verifyPasskeyAuthentication(
     };
 }
 
-// ============================================================================
 // MANAGEMENT
-// ============================================================================
 
 /** List all passkeys for the authenticated user */
 export async function listPasskeys(userId: string) {

@@ -13,9 +13,7 @@ import {
     ServerCredentials,
 } from '@/lib/crypto';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface CreateServerInput {
     userId: string;
@@ -76,9 +74,7 @@ export interface ServerListItem {
     } | null;
 }
 
-// ============================================================================
 // CREATE
-// ============================================================================
 
 export async function createServer(
     input: CreateServerInput,
@@ -156,9 +152,7 @@ export async function createServer(
     return server;
 }
 
-// ============================================================================
 // READ
-// ============================================================================
 
 export async function getServers(userId: string): Promise<ServerListItem[]> {
     const rows = await prisma.server.findMany({
@@ -316,9 +310,7 @@ export async function getServerForConnection(
     };
 }
 
-// ============================================================================
 // UPDATE
-// ============================================================================
 
 export async function updateServer(
     serverId: string,
@@ -422,9 +414,7 @@ export async function updateServer(
     return updated;
 }
 
-// ============================================================================
 // DELETE
-// ============================================================================
 
 export async function deleteServer(serverId: string, userId: string) {
     // Verify ownership
@@ -454,9 +444,7 @@ export async function deleteServer(serverId: string, userId: string) {
     return true;
 }
 
-// ============================================================================
 // SEARCH
-// ============================================================================
 
 export async function searchServers(
     userId: string,
@@ -511,9 +499,7 @@ export async function searchServers(
     });
 }
 
-// ============================================================================
 // TOGGLE FAVORITE
-// ============================================================================
 
 export async function toggleFavorite(serverId: string, userId: string) {
     const server = await prisma.server.findFirst({

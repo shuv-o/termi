@@ -10,9 +10,7 @@ import { cookies } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { generateSecureToken, hashToken } from '@/lib/crypto';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface SessionData {
     userId?: string;
@@ -32,9 +30,7 @@ export interface SessionData {
     tempMasterKey?: string;
 }
 
-// ============================================================================
 // CONFIGURATION
-// ============================================================================
 
 const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
 
@@ -72,9 +68,7 @@ const defaultSession: SessionData = {
     isLoggedIn: false,
 };
 
-// ============================================================================
 // SESSION FUNCTIONS
-// ============================================================================
 
 /**
  * Get the current session from cookies

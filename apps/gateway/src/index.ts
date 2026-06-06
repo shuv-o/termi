@@ -29,9 +29,7 @@ import {
 dotenv.config({ path: '../../.env' });
 dotenv.config();
 
-// ============================================================================
 // CONFIGURATION
-// ============================================================================
 
 const PORT = parseInt(process.env.GATEWAY_PORT || '22081', 10);
 const HOST = process.env.GATEWAY_HOST || '0.0.0.0';
@@ -46,9 +44,7 @@ const ALLOWED_ORIGINS: Set<string> = new Set(
 // Idle timeout for non-persistent (RDP/VNC/SCP) connections
 const CONNECTION_TIMEOUT = 300000; // 5 minutes
 
-// ============================================================================
 // SSRF GUARD
-// ============================================================================
 
 function isPrivateHost(host: string): boolean {
     let h = host.trim().toLowerCase();
@@ -101,9 +97,7 @@ async function isPrivateHostAsync(host: string): Promise<boolean> {
     }
 }
 
-// ============================================================================
 // SESSION STORES
-// ============================================================================
 
 /** Persistent SSH sessions (survive WS disconnect). */
 const persistentSessions = new PersistentSessionStore();
@@ -117,9 +111,7 @@ interface NonSshMeta {
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
-// ============================================================================
 // SSH SINK FACTORY
-// ============================================================================
 
 /**
  * Creates the SSHOutputSink for a PersistentSession.
@@ -149,9 +141,7 @@ function createSink(session: PersistentSession): SSHOutputSink {
     };
 }
 
-// ============================================================================
 // HTTP SERVER
-// ============================================================================
 
 const server = createServer((req, res) => {
     if (req.url === '/health') {
@@ -170,9 +160,7 @@ const server = createServer((req, res) => {
     res.end('Not Found');
 });
 
-// ============================================================================
 // WEBSOCKET SERVER
-// ============================================================================
 
 const wss = new WebSocketServer({ server, path: '/connect', maxPayload: 1024 * 1024 });
 
@@ -566,9 +554,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     ws.once('message', onAuthMessage);
 });
 
-// ============================================================================
 // START
-// ============================================================================
 
 server.listen(PORT, HOST, () => {
     console.log(`[gateway] Listening on ${HOST}:${PORT}`);

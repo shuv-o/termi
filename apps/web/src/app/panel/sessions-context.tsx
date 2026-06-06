@@ -11,9 +11,7 @@ import {
     type ReactNode,
 } from 'react';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'detached';
 
@@ -46,9 +44,7 @@ interface SessionsContextValue {
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
 }
 
-// ============================================================================
 // CONTEXT
-// ============================================================================
 
 const SessionsContext = createContext<SessionsContextValue | null>(null);
 
@@ -58,9 +54,7 @@ export function useSessionsContext() {
     return ctx;
 }
 
-// ============================================================================
 // DB HELPERS
-// ============================================================================
 
 async function dbRegisterSession(sessionId: string, serverId: string, serverName: string) {
     try {
@@ -100,9 +94,7 @@ async function dbRenewSession(oldSessionId: string, newSessionId: string) {
     }
 }
 
-// ============================================================================
 // PROVIDER
-// ============================================================================
 
 type SessionsProvider_AddSession = (serverId: string, serverName?: string) => Promise<void>;
 type SessionsProvider_AddLocalSession = () => void;

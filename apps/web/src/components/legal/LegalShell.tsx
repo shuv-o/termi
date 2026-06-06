@@ -56,8 +56,7 @@ export default function LegalShell({
                     <h1 className="text-3xl sm:text-4xl font-bold mb-3">{title}</h1>
                     <p className="text-lg text-slate-400 max-w-2xl">{description}</p>
                     <p className="text-sm text-slate-500 mt-6">
-                        Last updated:{' '}
-                        <time className="text-slate-300">{lastUpdated}</time>
+                        Last updated: <time className="text-slate-300">{lastUpdated}</time>
                     </p>
                 </div>
             </div>

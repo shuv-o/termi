@@ -9,15 +9,11 @@ import { randomInt, scryptSync, timingSafeEqual, randomBytes } from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 /** Generate a random 6-digit OTP */
 function generateOTP(): string {
@@ -44,9 +40,7 @@ function verifyOTPHash(code: string, stored: string): boolean {
     }
 }
 
-// ============================================================================
 // MAILER
-// ============================================================================
 
 function createTransporter() {
     // Support both SMTP and services like Gmail/Mailgun via env vars.
@@ -87,9 +81,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
     }
 }
 
-// ============================================================================
 // PUBLIC API
-// ============================================================================
 
 /**
  * Send an email OTP to the user and store the hash in DB.

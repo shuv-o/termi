@@ -9,8 +9,7 @@ export const metadata: Metadata = {
     alternates: { canonical: '/security' },
     openGraph: {
         title: 'Security Policy | Termi',
-        description:
-            "Termi's security model and how to responsibly report a vulnerability.",
+        description: "Termi's security model and how to responsibly report a vulnerability.",
         url: '/security',
         type: 'website',
     },
@@ -39,9 +38,9 @@ export default function SecurityPage() {
         >
             <Section id="reporting" title="Reporting a vulnerability">
                 <p>
-                    We take the security of Termi seriously. If you believe you have found a security
-                    vulnerability, please report it to us <strong>privately</strong> — do not open a
-                    public GitHub issue, discussion, or pull request for it.
+                    We take the security of Termi seriously. If you believe you have found a
+                    security vulnerability, please report it to us <strong>privately</strong> — do
+                    not open a public GitHub issue, discussion, or pull request for it.
                 </p>
                 <ul>
                     <li>
@@ -102,7 +101,8 @@ export default function SecurityPage() {
 
             <Section id="architecture" title="Security architecture">
                 <p>
-                    Termi runs as two independently deployable services plus a remote-desktop daemon:
+                    Termi runs as two independently deployable services plus a remote-desktop
+                    daemon:
                 </p>
                 <ul>
                     <li>
@@ -189,13 +189,12 @@ export default function SecurityPage() {
                 <ul>
                     <li>
                         <strong>SSRF protection</strong> — every user-supplied host is validated
-                        before a connection is attempted, blocking access to internal and
-                        link-local address ranges.
+                        before a connection is attempted, blocking access to internal and link-local
+                        address ranges.
                     </li>
                     <li>
-                        <strong>Content Security Policy</strong> — a strict, per-request
-                        nonce-based CSP and a full set of security headers are applied to every
-                        response.
+                        <strong>Content Security Policy</strong> — a strict, per-request nonce-based
+                        CSP and a full set of security headers are applied to every response.
                     </li>
                     <li>
                         <strong>Input validation</strong> — all API routes validate request bodies

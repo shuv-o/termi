@@ -201,10 +201,10 @@ Termi uses SemVer tags and GitHub Releases.
 1. Ensure `CHANGELOG.md` has a section for the version (for example, `## [1.0.0]`).
 2. Ensure the repo is in a releasable state (CI passing on `main`).
 3. Create and push a version tag:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
+    ```bash
+    git tag v1.0.0
+    git push origin v1.0.0
+    ```
 4. The GitHub Actions workflow at `.github/workflows/release.yml` publishes the release and uses the matching changelog section as release notes.
 
 ---

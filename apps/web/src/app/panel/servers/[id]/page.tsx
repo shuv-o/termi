@@ -34,9 +34,7 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 interface ServerInfo {
     id: string;
@@ -129,9 +127,7 @@ type BenchmarkPhase =
     | 'done'
     | 'error';
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 const protocolColors = {
     SSH: 'bg-green-500/15 text-green-400 border-green-500/30',
@@ -218,9 +214,7 @@ function StatPill({ label, value, sub }: { label: string; value: string; sub?: s
     );
 }
 
-// ============================================================================
 // MAIN PAGE
-// ============================================================================
 
 const INTERVALS = [
     { value: 1, label: 'Every 1 min' },

@@ -15,9 +15,7 @@
 
 import { Client, ConnectConfig } from 'ssh2';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface BenchmarkHardwareInfo {
     cpuModel: string;
@@ -104,9 +102,7 @@ interface SSHConfig {
     passphrase?: string;
 }
 
-// ============================================================================
 // PYTHON SCRIPTS (base64-encoded to avoid all shell quoting issues)
-// ============================================================================
 
 /**
  * Encodes a Python script as base64 and returns a shell command that
@@ -176,9 +172,7 @@ t.join(2)
 print(f'{65536 * 512 / 1024 / 1024 / elapsed:.0f}')
 `;
 
-// ============================================================================
 // PARSERS
-// ============================================================================
 
 /** Parse dd output: "... copied, 1.23 s, 773 MB/s" → MB/s */
 function parseDdMBps(output: string): number | null {
@@ -269,9 +263,7 @@ function parseHardwareInfo(output: string): BenchmarkHardwareInfo {
     };
 }
 
-// ============================================================================
 // SCORING
-// ============================================================================
 
 /**
  * Compute normalised 0–1000 scores for each subsystem and an overall score.
@@ -320,9 +312,7 @@ function computeScores(
     return { cpu: cpuScore, ram: ramScore, disk: diskScore, network: netScore, overall };
 }
 
-// ============================================================================
 // SSH HELPERS
-// ============================================================================
 
 function buildConnectConfig(config: SSHConfig): ConnectConfig {
     const c: ConnectConfig = {
@@ -365,9 +355,7 @@ function execSSH(client: Client, cmd: string, timeoutMs: number): Promise<string
     });
 }
 
-// ============================================================================
 // MAIN BENCHMARK RUNNER
-// ============================================================================
 
 const EMPTY_HARDWARE: BenchmarkHardwareInfo = {
     cpuModel: 'Unknown',

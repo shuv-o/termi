@@ -23,7 +23,7 @@ See [SECURITY.md](SECURITY.md) for the full policy.
 
 ## Supported Versions
 
-| Version | Supported |
-| --- | --- |
-| `main` branch (latest) | ✅ Active |
-| Older tagged releases | ⚠️ Best effort |
+| Version                | Supported      |
+| ---------------------- | -------------- |
+| `main` branch (latest) | ✅ Active      |
+| Older tagged releases  | ⚠️ Best effort |

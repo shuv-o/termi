@@ -19,9 +19,7 @@ import { verifyTOTP, generateRecoveryCodes, normalizeRecoveryCode } from './totp
 import { sendEmailOTP, verifyEmailOTP } from './email-otp';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface RegisterInput {
     email: string;
@@ -47,9 +45,7 @@ export interface AuthResult {
     suggestPasskeySetup?: boolean; // True when user has no passkeys yet
 }
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 const MAX_FAILED_ATTEMPTS = 10;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
@@ -74,9 +70,7 @@ function verifyRecoveryCodeHash(code: string, stored: string): boolean {
     }
 }
 
-// ============================================================================
 // REGISTRATION
-// ============================================================================
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     const { email, password } = input;
@@ -117,9 +111,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     return { success: true, userId: user.id, email: user.email };
 }
 
-// ============================================================================
 // LOGIN
-// ============================================================================
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
     const { email, password, deviceInfo, ipAddress } = input;
@@ -269,9 +261,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
     };
 }
 
-// ============================================================================
 // 2FA VERIFICATION (TOTP + Recovery + Email OTP)
-// ============================================================================
 
 export async function verify2FA(
     code: string,
@@ -379,9 +369,7 @@ export async function verify2FA(
     };
 }
 
-// ============================================================================
 // 2FA SETUP — TOTP
-// ============================================================================
 
 /**
  * Enable TOTP 2FA. Returns plaintext recovery codes (shown once to user).
@@ -421,9 +409,7 @@ export async function enable2FA(
     return { success: true, recoveryCodes: plainCodes };
 }
 
-// ============================================================================
 // 2FA SETUP — EMAIL OTP
-// ============================================================================
 
 /**
  * Enable Email OTP as 2FA method.
@@ -446,9 +432,7 @@ export async function enableEmailOTP(
     return { success: true };
 }
 
-// ============================================================================
 // 2FA DISABLE
-// ============================================================================
 
 export async function disable2FA(
     userId: string,
@@ -494,9 +478,7 @@ export async function disable2FA(
     return { success: true };
 }
 
-// ============================================================================
 // AUTH UTILITIES
-// ============================================================================
 
 export async function getCurrentUser() {
     const session = await getSession();
@@ -622,9 +604,7 @@ export async function changePassword(
     return { success: true };
 }
 
-// ============================================================================
 // PASSWORD RESET
-// ============================================================================
 
 async function sendPasswordResetEmail(email: string, token: string): Promise<void> {
     const nodemailer = await import('nodemailer');
@@ -750,9 +730,7 @@ export async function resetPassword(
     return { success: true };
 }
 
-// ============================================================================
 // ENCRYPTION KEY MANAGEMENT (Google OAuth users)
-// ============================================================================
 
 export async function setupEncryption(
     userId: string,

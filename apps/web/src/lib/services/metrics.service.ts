@@ -8,9 +8,7 @@
 import * as net from 'net';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface ServerMetrics {
     reachable: boolean;
@@ -35,9 +33,7 @@ export interface ServerMetrics {
     error?: string;
 }
 
-// ============================================================================
 // TCP REACHABILITY
-// ============================================================================
 
 export function checkReachability(
     host: string,
@@ -68,9 +64,7 @@ export function checkReachability(
     });
 }
 
-// ============================================================================
 // SSH METRICS
-// ============================================================================
 
 // One-shot bash command that collects all metrics.
 // Output: 7 lines

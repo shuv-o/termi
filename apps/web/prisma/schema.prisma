@@ -7,13 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================================================
 // USER & AUTHENTICATION
-// ============================================================================
 
 model User {
-  id           String @id @default(cuid())
-  email        String @unique
+  id           String  @id @default(cuid())
+  email        String  @unique
   passwordHash String? // scrypt hash — null for OAuth-only users
 
   // TOTP 2FA
@@ -55,20 +53,20 @@ model User {
   passkeyEnabled Boolean @default(false)
 
   // Relations
-  sessions            Session[]
-  servers             Server[]
-  serverGroups        ServerGroup[]
-  auditLogs           AuditLog[]
-  recoveryCodes       RecoveryCode[]
-  emailOTPs           EmailOTP[]
-  passkeys            Passkey[]
-  pushSubscriptions   PushSubscription[]
-  monitorConfigs      ServerMonitorConfig[]
-  oauthAccounts       OAuthAccount[]
-  persistentSessions  PersistentSession[]
-  sentInvitations     ServerInvitation[]    @relation("SentInvitations")
-  ownedShares         ServerShare[]         @relation("OwnedShares")
-  receivedShares      ServerShare[]         @relation("ReceivedShares")
+  sessions           Session[]
+  servers            Server[]
+  serverGroups       ServerGroup[]
+  auditLogs          AuditLog[]
+  recoveryCodes      RecoveryCode[]
+  emailOTPs          EmailOTP[]
+  passkeys           Passkey[]
+  pushSubscriptions  PushSubscription[]
+  monitorConfigs     ServerMonitorConfig[]
+  oauthAccounts      OAuthAccount[]
+  persistentSessions PersistentSession[]
+  sentInvitations    ServerInvitation[]    @relation("SentInvitations")
+  ownedShares        ServerShare[]         @relation("OwnedShares")
+  receivedShares     ServerShare[]         @relation("ReceivedShares")
 
   @@index([email])
   @@index([passwordResetToken])
@@ -103,9 +101,7 @@ model Session {
   @@index([expiresAt])
 }
 
-// ============================================================================
 // SERVER MANAGEMENT
-// ============================================================================
 
 model ServerGroup {
   id     String @id @default(cuid())
@@ -156,9 +152,9 @@ model Server {
   sshOptions Json? // Additional SSH options
 
   // For VNC/RDP specific settings
-  displayWidth  Int? @default(1920)
-  displayHeight Int? @default(1080)
-  colorDepth    Int? @default(24)
+  displayWidth  Int?    @default(1920)
+  displayHeight Int?    @default(1080)
+  colorDepth    Int?    @default(24)
   // RDP security mode: "any" (default), "rdp", "nla", "tls"
   // Use "rdp" to bypass NLA if the server doesn't support it or credentials fail silently
   rdpSecurity   String? @default("any")
@@ -173,8 +169,8 @@ model Server {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group         ServerGroup?          @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group         ServerGroup?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
   connections   Connection[]
   monitorConfig ServerMonitorConfig?
   healthRecords ServerHealthRecord[]
@@ -187,9 +183,7 @@ model Server {
   @@index([isFavorite])
 }
 
-// ============================================================================
 // CONNECTION TRACKING
-// ============================================================================
 
 model Connection {
   id        String @id @default(cuid())
@@ -218,14 +212,12 @@ model Connection {
   @@index([startedAt])
 }
 
-// ============================================================================
 // PERSISTENT TERMINAL SESSIONS (cross-device session continuity)
-// ============================================================================
 
 model PersistentSession {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
-  sessionId  String   @unique // stable UUID sent to the SSH gateway
+  sessionId  String @unique // stable UUID sent to the SSH gateway
   serverId   String
   serverName String
 
@@ -237,9 +229,7 @@ model PersistentSession {
   @@index([userId])
 }
 
-// ============================================================================
 // AUDIT LOGGING
-// ============================================================================
 
 model AuditLog {
   id     String  @id @default(cuid())
@@ -262,15 +252,13 @@ model AuditLog {
   @@index([createdAt])
 }
 
-// ============================================================================
 // OAUTH ACCOUNTS
-// ============================================================================
 
 model OAuthAccount {
   id                String        @id @default(cuid())
   userId            String
   provider          OAuthProvider // e.g., GOOGLE
-  providerAccountId String        // Provider's user ID (Google `sub`)
+  providerAccountId String // Provider's user ID (Google `sub`)
   email             String
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -281,9 +269,7 @@ model OAuthAccount {
   @@index([userId])
 }
 
-// ============================================================================
 // ENUMS
-// ============================================================================
 
 enum Protocol {
   SSH
@@ -305,20 +291,18 @@ enum TwoFactorMethod {
   EMAIL
 }
 
-// ============================================================================
 // PASSKEYS (WebAuthn / FIDO2)
-// ============================================================================
 
 model Passkey {
   id                  String    @id @default(cuid())
   userId              String
   name                String    @default("Passkey") // User-visible device name
-  credentialID        String    @unique             // Base64URL-encoded credential ID
-  credentialPublicKey Bytes                         // COSE-encoded public key
-  counter             BigInt    @default(0)         // Signature counter (replay protection)
-  deviceType          String                        // 'singleDevice' | 'multiDevice'
-  backedUp            Boolean   @default(false)     // Synced passkey?
-  transports          String[]                      // e.g. ["internal", "hybrid"]
+  credentialID        String    @unique // Base64URL-encoded credential ID
+  credentialPublicKey Bytes // COSE-encoded public key
+  counter             BigInt    @default(0) // Signature counter (replay protection)
+  deviceType          String // 'singleDevice' | 'multiDevice'
+  backedUp            Boolean   @default(false) // Synced passkey?
+  transports          String[] // e.g. ["internal", "hybrid"]
   createdAt           DateTime  @default(now())
   lastUsedAt          DateTime?
 
@@ -379,13 +363,11 @@ enum AuditAction {
   SERVER_SHARE_REVOKED
 }
 
-// ============================================================================
 // PUSH NOTIFICATIONS
-// ============================================================================
 
 model PushSubscription {
-  id       String @id @default(cuid())
-  userId   String
+  id     String @id @default(cuid())
+  userId String
 
   // Web Push subscription data
   endpoint  String @unique
@@ -403,9 +385,7 @@ model PushSubscription {
   @@index([userId])
 }
 
-// ============================================================================
 // SERVER MONITORING
-// ============================================================================
 
 model ServerMonitorConfig {
   id       String @id @default(cuid())
@@ -452,8 +432,8 @@ model ServerHealthRecord {
   serverId String
 
   // Result
-  reachable  Boolean
-  latencyMs  Int?
+  reachable Boolean
+  latencyMs Int?
 
   // SSH metrics (null for non-SSH servers)
   cpuPercent  Float?
@@ -467,9 +447,7 @@ model ServerHealthRecord {
   @@index([serverId, checkedAt])
 }
 
-// ============================================================================
 // RECOVERY CODES
-// ============================================================================
 
 model RecoveryCode {
   id        String    @id @default(cuid())
@@ -483,9 +461,7 @@ model RecoveryCode {
   @@index([userId])
 }
 
-// ============================================================================
 // EMAIL OTP
-// ============================================================================
 
 model EmailOTP {
   id        String    @id @default(cuid())
@@ -501,17 +477,13 @@ model EmailOTP {
   @@index([userId])
 }
 
-// ============================================================================
 // OAUTH PROVIDERS
-// ============================================================================
 
 enum OAuthProvider {
   GOOGLE
 }
 
-// ============================================================================
 // SERVER SHARING & INVITATIONS
-// ============================================================================
 
 enum InvitationStatus {
   PENDING
@@ -525,7 +497,7 @@ model ServerInvitation {
   token        String           @unique // crypto-random 32-byte hex, used in email link
   serverId     String
   inviterId    String
-  inviteeEmail String           // email of the person being invited
+  inviteeEmail String // email of the person being invited
   permissions  String           @default("manage") // "manage" | "connect"
   status       InvitationStatus @default(PENDING)
   expiresAt    DateTime

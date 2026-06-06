@@ -9,9 +9,7 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { generateSecureToken } from '@/lib/crypto';
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 const TOTP_ISSUER = 'Termi';
 const TOTP_ALGORITHM = 'SHA1';
@@ -22,9 +20,7 @@ const TOTP_PERIOD = 30;
 const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_CODE_LENGTH = 8;
 
-// ============================================================================
 // TOTP FUNCTIONS
-// ============================================================================
 
 /**
  * Generate a new TOTP secret for a user

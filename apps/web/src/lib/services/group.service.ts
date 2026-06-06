@@ -4,9 +4,7 @@
 
 import { prisma } from '@/lib/db';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface CreateGroupInput {
     userId: string;
@@ -24,9 +22,7 @@ export interface UpdateGroupInput {
     sortOrder?: number;
 }
 
-// ============================================================================
 // CREATE
-// ============================================================================
 
 export async function createServerGroup(input: CreateGroupInput) {
     const { userId, name, description, color, icon } = input;
@@ -70,9 +66,7 @@ export async function createServerGroup(input: CreateGroupInput) {
     return group;
 }
 
-// ============================================================================
 // READ
-// ============================================================================
 
 export async function getServerGroups(userId: string) {
     return prisma.serverGroup.findMany({
@@ -103,9 +97,7 @@ export async function getServerGroupById(groupId: string, userId: string) {
     });
 }
 
-// ============================================================================
 // UPDATE
-// ============================================================================
 
 export async function updateServerGroup(groupId: string, userId: string, input: UpdateGroupInput) {
     // Verify ownership
@@ -145,9 +137,7 @@ export async function updateServerGroup(groupId: string, userId: string, input: 
     return updated;
 }
 
-// ============================================================================
 // DELETE
-// ============================================================================
 
 export async function deleteServerGroup(groupId: string, userId: string) {
     // Verify ownership
@@ -178,9 +168,7 @@ export async function deleteServerGroup(groupId: string, userId: string) {
     return true;
 }
 
-// ============================================================================
 // REORDER
-// ============================================================================
 
 export async function reorderGroups(userId: string, groupIds: string[]) {
     // Update sort order for each group

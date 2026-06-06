@@ -58,9 +58,7 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
     };
 }
 
-// ============================================================================
 // PRE-CONFIGURED LIMITERS
-// ============================================================================
 
 /** 10 login attempts per 15 minutes per IP */
 export function loginRateLimit(ip: string): RateLimitResult {

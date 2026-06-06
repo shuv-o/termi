@@ -52,9 +52,7 @@ const VirtualKeyboard = dynamic(() => import('@/components/terminal/VirtualKeybo
     ssr: false,
 });
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 interface ServerItem {
     id: string;
@@ -64,9 +62,7 @@ interface ServerItem {
     host?: string;
 }
 
-// ============================================================================
 // STATUS HELPERS
-// ============================================================================
 
 function StatusDot({ status, size = 'sm' }: { status: SessionStatus; size?: 'sm' | 'md' }) {
     const cls = {
@@ -100,9 +96,7 @@ function statusColor(status: SessionStatus): string {
     }[status];
 }
 
-// ============================================================================
 // SERVER PICKER MODAL
-// ============================================================================
 
 function ServerPicker({
     onPick,
@@ -240,9 +234,7 @@ function ServerPicker({
     );
 }
 
-// ============================================================================
 // TRANSFER MODE — full interactive transfer UI
-// ============================================================================
 
 type TransferItemStatus = 'queued' | 'transferring' | 'done' | 'failed';
 
@@ -780,11 +772,9 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
     );
 }
 
-// ============================================================================
 // TERMINAL PANE — single session's terminal content
 // Kept as a separate component so the identity is stable (no remounting on
 // visibility toggles) and all sessions stay connected simultaneously.
-// ============================================================================
 
 function TerminalPane({
     session,
@@ -986,9 +976,7 @@ function TerminalPane({
     );
 }
 
-// ============================================================================
 // MAIN WORKSPACE
-// ============================================================================
 
 export default function SessionsWorkspace() {
     const {

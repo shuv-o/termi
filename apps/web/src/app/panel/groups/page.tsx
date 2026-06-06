@@ -50,9 +50,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 interface ServerInGroup {
     id: string;
@@ -80,9 +78,7 @@ interface GroupDetail extends Group {
     servers: ServerInGroup[];
 }
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 const PRESET_COLORS = [
     '#0ea5e9',
@@ -117,9 +113,7 @@ const protocolColors: Record<string, string> = {
 
 const protocolIcons = { SSH: Terminal, SCP: FolderOpen, RDP: Monitor, VNC: Monitor };
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 function getIconComponent(iconName: string | null) {
     if (!iconName) return FolderOpen;
@@ -146,9 +140,7 @@ function protocolBreakdown(servers: { protocol: string }[]) {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
 }
 
-// ============================================================================
 // MODAL – Create / Edit Group
-// ============================================================================
 
 interface GroupFormData {
     name: string;
@@ -354,9 +346,7 @@ function GroupModal({
     );
 }
 
-// ============================================================================
 // GROUP DETAIL PANEL
-// ============================================================================
 
 function GroupDetailPanel({
     group,
@@ -601,9 +591,7 @@ function GroupDetailPanel({
     );
 }
 
-// ============================================================================
 // MAIN PAGE
-// ============================================================================
 
 const EMPTY_FORM: GroupFormData = { name: '', description: '', color: '', icon: '' };
 

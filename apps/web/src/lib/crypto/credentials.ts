@@ -18,9 +18,7 @@ import {
     deserializeEncrypted,
 } from './crypto';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface ServerCredentials {
     host: string;
@@ -44,9 +42,7 @@ export interface EncryptionContext {
     masterKey?: Buffer; // Derived master key, if user has one
 }
 
-// ============================================================================
 // CREDENTIAL ENCRYPTION
-// ============================================================================
 
 /**
  * Encrypt server credentials for storage
@@ -138,9 +134,7 @@ export function reEncryptCredentials(
     return encryptCredentials(credentials, newContext);
 }
 
-// ============================================================================
 // MASTER KEY MANAGEMENT
-// ============================================================================
 
 /**
  * Create master key context for a user

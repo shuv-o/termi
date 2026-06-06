@@ -179,8 +179,9 @@ export default function DownloadDesktopButton() {
             {/* macOS is ad-hoc signed but not notarized — surface the first-launch step */}
             {os === 'mac' && (
                 <p className="max-w-sm text-center text-xs text-slate-500">
-                    On first launch, right-click Termi.app → <span className="text-slate-400">Open</span> to
-                    bypass the macOS verification prompt.{' '}
+                    On first launch, right-click Termi.app →{' '}
+                    <span className="text-slate-400">Open</span> to bypass the macOS verification
+                    prompt.{' '}
                     <a
                         href="https://github.com/shuvoooo/termi#macos--first-launch"
                         target="_blank"

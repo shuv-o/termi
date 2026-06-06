@@ -5,9 +5,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError, ZodSchema } from 'zod';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export interface ApiResponse<T = unknown> {
     success: boolean;
@@ -16,9 +14,7 @@ export interface ApiResponse<T = unknown> {
     errors?: Record<string, string[]>;
 }
 
-// ============================================================================
 // RESPONSE HELPERS
-// ============================================================================
 
 export function successResponse<T>(data: T, status: number = 200) {
     return NextResponse.json<ApiResponse<T>>({ success: true, data }, { status });
@@ -51,9 +47,7 @@ export function serverErrorResponse(message: string = 'Internal server error') {
     return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 500 });
 }
 
-// ============================================================================
 // VALIDATION
-// ============================================================================
 
 /**
  * Validate request body against a Zod schema
@@ -82,9 +76,7 @@ export async function validateBody<T>(
     }
 }
 
-// ============================================================================
 // REQUEST HELPERS
-// ============================================================================
 
 /**
  * Get client IP address from request.

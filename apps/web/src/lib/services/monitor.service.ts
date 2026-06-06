@@ -12,9 +12,7 @@ import { checkReachability, getSSHMetrics } from './metrics.service';
 import { sendServerDownAlert, sendServerUpAlert } from './alert.service';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 
-// ============================================================================
 // HEALTH CHECK RUNNER
-// ============================================================================
 
 /**
  * Run one health check pass for ALL servers that have monitoring enabled.
@@ -213,9 +211,7 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
     });
 }
 
-// ============================================================================
 // SINGLE SERVER CHECK (used by API)
-// ============================================================================
 
 export async function checkSingleServer(serverId: string): Promise<{
     reachable: boolean;

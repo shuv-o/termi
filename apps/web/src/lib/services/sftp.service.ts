@@ -9,9 +9,7 @@
 import { SFTPWrapper } from 'ssh2';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export type SFTPConfig = SSHPoolConfig;
 
@@ -25,9 +23,7 @@ export interface RemoteEntry {
     mode: number;
 }
 
-// ============================================================================
 // POOLED SFTP HELPER
-// ============================================================================
 
 /**
  * Acquire a pooled SSH connection, get (or reuse) the cached SFTP channel,
@@ -48,9 +44,7 @@ async function withPooledSFTP<T>(
     }
 }
 
-// ============================================================================
 // HELPERS
-// ============================================================================
 
 function entryType(mode: number): RemoteEntry['type'] {
     const t = mode & 0o170000;
@@ -88,9 +82,7 @@ function joinPath(...parts: string[]): string {
     );
 }
 
-// ============================================================================
 // LIST DIRECTORY
-// ============================================================================
 
 export async function listDirectory(config: SFTPConfig, dirPath: string): Promise<RemoteEntry[]> {
     return withPooledSFTP(
@@ -124,9 +116,7 @@ export async function listDirectory(config: SFTPConfig, dirPath: string): Promis
     );
 }
 
-// ============================================================================
 // MAKE DIRECTORY
-// ============================================================================
 
 export async function makeDirectory(config: SFTPConfig, dirPath: string): Promise<void> {
     return withPooledSFTP(
@@ -141,9 +131,7 @@ export async function makeDirectory(config: SFTPConfig, dirPath: string): Promis
     );
 }
 
-// ============================================================================
 // DELETE (file or directory — directory is recursive)
-// ============================================================================
 
 async function rmRecursive(sftp: SFTPWrapper, dirPath: string): Promise<void> {
     const entries = await new Promise<Array<{ filename: string; attrs: { mode?: number } }>>(
@@ -184,9 +172,7 @@ export async function deleteEntry(
     });
 }
 
-// ============================================================================
 // RENAME / MOVE
-// ============================================================================
 
 export async function renameEntry(
     config: SFTPConfig,
@@ -202,9 +188,7 @@ export async function renameEntry(
     );
 }
 
-// ============================================================================
 // DOWNLOAD (returns a Web ReadableStream — holds pool slot until stream ends)
-// ============================================================================
 
 export function createDownloadStream(
     config: SFTPConfig,
@@ -231,9 +215,7 @@ export function createDownloadStream(
     });
 }
 
-// ============================================================================
 // SERVER-TO-SERVER TRANSFER (pipes directly between two SFTP connections)
-// ============================================================================
 
 export interface TransferResult {
     ok: string[];
@@ -284,9 +266,7 @@ export async function transferFiles(
     return { ok, failed };
 }
 
-// ============================================================================
 // UPLOAD
-// ============================================================================
 
 export async function uploadBuffer(
     config: SFTPConfig,
