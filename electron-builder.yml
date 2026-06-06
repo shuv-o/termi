@@ -38,9 +38,11 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  # Notarize after signing. Reads APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD,
-  # and APPLE_TEAM_ID from environment variables.
-  notarize: true
+  # Notarization requires a paid Apple Developer ID, which this project does not
+  # have. The DMG is therefore ad-hoc signed but NOT notarized, so macOS shows a
+  # Gatekeeper warning on first launch. Users bypass it with right-click → Open
+  # or `xattr -dr com.apple.quarantine /Applications/Termi.app` (see README).
+  notarize: false
 
 win:
   target:

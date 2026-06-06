@@ -130,6 +130,40 @@ open http://localhost:22080
 
 ---
 
+## 💻 Desktop App Installation
+
+Download the desktop app for your platform and architecture from the landing page.
+Builds are provided for **macOS, Windows, and Linux** in both **x64** and **arm64**.
+
+### macOS — first launch
+
+The macOS build is **ad-hoc signed but not notarized** (the project has no paid
+Apple Developer ID). On first launch, macOS Gatekeeper shows:
+
+> _"Apple could not verify 'Termi.app' is free of malware…"_
+
+This is expected. To open the app anyway, use either method:
+
+**Option A — Right-click to open**
+
+1. In Finder, locate **Termi.app** (drag it to `/Applications` first).
+2. **Right-click** (or Control-click) the app → **Open**.
+3. Click **Open** in the dialog. macOS remembers this choice for future launches.
+
+**Option B — Remove the quarantine flag**
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Termi.app
+```
+
+Then open the app normally.
+
+### Windows
+
+SmartScreen may warn that the publisher is unknown. Click **More info → Run anyway**.
+
+---
+
 ## 🛠️ Development Setup
 
 ### Prerequisites

@@ -176,6 +176,22 @@ export default function DownloadDesktopButton() {
                 {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
             </button>
 
+            {/* macOS is ad-hoc signed but not notarized — surface the first-launch step */}
+            {os === 'mac' && (
+                <p className="max-w-sm text-center text-xs text-slate-500">
+                    On first launch, right-click Termi.app → <span className="text-slate-400">Open</span> to
+                    bypass the macOS verification prompt.{' '}
+                    <a
+                        href="https://github.com/shuvoooo/termi#macos--first-launch"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sky-400 hover:text-sky-300 underline underline-offset-2"
+                    >
+                        Learn more
+                    </a>
+                </p>
+            )}
+
             {/* Full matrix: every OS × architecture */}
             {showAll && (
                 <div className="w-full max-w-md space-y-3 rounded-xl border border-slate-700/60 bg-slate-900/40 p-4">

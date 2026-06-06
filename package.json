@@ -31,7 +31,7 @@
         "build:electron": "npm run build:gateway-bundle && electron-builder"
     },
     "dependencies": {
-        "node-pty": "^1.0.0"
+        "node-pty": "^1.1.0"
     },
     "devDependencies": {
         "@electron/rebuild": "^4.0.0",
