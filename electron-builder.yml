@@ -43,9 +43,13 @@ mac:
   notarize: true
 
 win:
-  target: nsis
+  target:
+    - target: nsis
+      arch: [x64, arm64]
   icon: build/icon.ico
 
 linux:
-  target: AppImage
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
   icon: build/icon.png

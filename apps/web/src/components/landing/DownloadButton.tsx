@@ -4,14 +4,25 @@ import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 
 type OS = 'mac' | 'windows' | 'linux';
+type Arch = 'arm64' | 'x64';
 
-const DOWNLOAD_URLS: Record<OS, string> = {
-    mac: 'https://termi.bucket.shuvoo.com/releases/termi-v1.0.0.dmg',
-    windows: 'https://termi.bucket.shuvoo.com/releases/termi-v1.0.0.exe',
-    linux: 'https://termi.bucket.shuvoo.com/releases/termi-v1.0.0.deb',
+//   Release artifact URLs                                       ─
+//   Files follow the `termi-<version>-<arch>.<ext>` convention.
+
+const RELEASE_BASE = 'https://termi.bucket.shuvoo.com/releases';
+const VERSION = 'v1.0.0';
+
+const FILE_EXT: Record<OS, string> = {
+    mac: 'dmg',
+    windows: 'exe',
+    linux: 'AppImage',
 };
 
-//   Brand glyphs (lucide has no brand icons)                 ─
+function downloadUrl(os: OS, arch: Arch): string {
+    return `${RELEASE_BASE}/termi-${VERSION}-${arch}.${FILE_EXT[os]}`;
+}
+
+//   Brand glyphs (lucide has no brand icons)                    ─
 
 function AppleIcon({ className }: { className?: string }) {
     return (
@@ -39,12 +50,31 @@ function LinuxIcon({ className }: { className?: string }) {
 
 const PLATFORMS: Record<
     OS,
-    { label: string; Icon: (p: { className?: string }) => React.ReactElement }
+    {
+        label: string;
+        Icon: (p: { className?: string }) => React.ReactElement;
+        archLabel: Record<Arch, string>;
+    }
 > = {
-    mac: { label: 'macOS', Icon: AppleIcon },
-    windows: { label: 'Windows', Icon: WindowsIcon },
-    linux: { label: 'Linux', Icon: LinuxIcon },
+    mac: {
+        label: 'macOS',
+        Icon: AppleIcon,
+        archLabel: { arm64: 'Apple Silicon', x64: 'Intel' },
+    },
+    windows: {
+        label: 'Windows',
+        Icon: WindowsIcon,
+        archLabel: { arm64: 'ARM64', x64: 'x64' },
+    },
+    linux: {
+        label: 'Linux',
+        Icon: LinuxIcon,
+        archLabel: { arm64: 'ARM64', x64: 'x64' },
+    },
 };
+
+const OS_ORDER: OS[] = ['mac', 'windows', 'linux'];
+const ARCH_ORDER: Arch[] = ['arm64', 'x64'];
 
 function detectOS(): OS {
     if (typeof navigator === 'undefined') return 'mac';
@@ -55,43 +85,136 @@ function detectOS(): OS {
     return 'linux';
 }
 
-export default function DownloadDesktopButton() {
-    // Default to macOS for the deterministic first render, then refine on mount.
-    const [os, setOs] = useState<OS>('mac');
-    useEffect(() => setOs(detectOS()), []);
+/** Best-effort renderer string from WebGL, used to spot Apple Silicon GPUs. */
+function webglRenderer(): string | null {
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = (canvas.getContext('webgl') ||
+            canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+        if (!gl) return null;
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        if (!ext) return null;
+        return String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) ?? '');
+    } catch {
+        return null;
+    }
+}
 
-    const others = (Object.keys(PLATFORMS) as OS[]).filter((k) => k !== os);
-    const { label, Icon } = PLATFORMS[os];
+/**
+ * Detect CPU architecture. Prefers the high-entropy User-Agent Client Hints
+ * (Chromium), falls back to UA string sniffing, and uses a WebGL renderer
+ * heuristic to catch Apple Silicon Macs (which still report "MacIntel").
+ */
+async function detectArch(os: OS): Promise<Arch> {
+    const uaData = (
+        navigator as Navigator & {
+            userAgentData?: {
+                getHighEntropyValues?: (h: string[]) => Promise<{ architecture?: string }>;
+            };
+        }
+    ).userAgentData;
+
+    if (uaData?.getHighEntropyValues) {
+        try {
+            const { architecture } = await uaData.getHighEntropyValues(['architecture']);
+            if (architecture === 'arm' || architecture === 'arm64') return 'arm64';
+            if (architecture === 'x86') return 'x64';
+        } catch {
+            /* fall through to heuristics */
+        }
+    }
+
+    const ua = navigator.userAgent.toLowerCase();
+    if (/aarch64|arm64|armv[78]|\barm\b/.test(ua)) return 'arm64';
+
+    if (os === 'mac') {
+        const renderer = webglRenderer();
+        if (renderer && /apple/i.test(renderer) && !/intel|amd|radeon|nvidia/i.test(renderer)) {
+            return 'arm64';
+        }
+    }
+
+    return 'x64';
+}
+
+export default function DownloadDesktopButton() {
+    // Deterministic first render, then refine on mount once we can read the
+    // navigator / WebGL context.
+    const [os, setOs] = useState<OS>('mac');
+    const [arch, setArch] = useState<Arch>('arm64');
+    const [showAll, setShowAll] = useState(false);
+
+    useEffect(() => {
+        const detected = detectOS();
+        setOs(detected);
+        detectArch(detected).then(setArch);
+    }, []);
+
+    const { label, Icon, archLabel } = PLATFORMS[os];
 
     return (
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-4">
+            {/* Primary, OS + architecture aware download */}
             <a
-                href={DOWNLOAD_URLS[os]}
+                href={downloadUrl(os, arch)}
                 download
                 className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary to-sky-600 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
             >
                 <Icon className="w-5 h-5" />
-                <span>Download for {label}</span>
+                <span>
+                    Download for {label}
+                    <span className="opacity-80"> ({archLabel[arch]})</span>
+                </span>
                 <Download className="w-4 h-4 opacity-80 group-hover:translate-y-0.5 transition-transform" />
             </a>
 
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span>Also for</span>
-                {others.map((k) => {
-                    const P = PLATFORMS[k];
-                    return (
-                        <a
-                            key={k}
-                            href={DOWNLOAD_URLS[k]}
-                            download
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-700/60 hover:border-slate-500 hover:text-white transition-colors"
-                        >
-                            <P.Icon className="w-3.5 h-3.5" />
-                            {P.label}
-                        </a>
-                    );
-                })}
-            </div>
+            <button
+                type="button"
+                onClick={() => setShowAll((v) => !v)}
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+                {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
+            </button>
+
+            {/* Full matrix: every OS × architecture */}
+            {showAll && (
+                <div className="w-full max-w-md space-y-3 rounded-xl border border-slate-700/60 bg-slate-900/40 p-4">
+                    {OS_ORDER.map((o) => {
+                        const P = PLATFORMS[o];
+                        return (
+                            <div
+                                key={o}
+                                className="flex items-center justify-between gap-3 text-sm"
+                            >
+                                <span className="inline-flex items-center gap-2 text-slate-300">
+                                    <P.Icon className="w-4 h-4" />
+                                    {P.label}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    {ARCH_ORDER.map((a) => {
+                                        const current = o === os && a === arch;
+                                        return (
+                                            <a
+                                                key={a}
+                                                href={downloadUrl(o, a)}
+                                                download
+                                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors ${
+                                                    current
+                                                        ? 'border-primary/60 bg-primary/10 text-white'
+                                                        : 'border-slate-700/60 text-slate-400 hover:border-slate-500 hover:text-white'
+                                                }`}
+                                            >
+                                                <Download className="w-3 h-3" />
+                                                {P.archLabel[a]}
+                                            </a>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }
