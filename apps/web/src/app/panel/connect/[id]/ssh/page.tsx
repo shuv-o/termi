@@ -13,6 +13,9 @@ import {
     X,
     KeyRound,
     Keyboard,
+    Plus,
+    Terminal as TerminalIcon,
+    Loader2,
 } from 'lucide-react';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
@@ -33,6 +36,13 @@ const VirtualKeyboard = dynamic(
     { ssr: false }
 );
 
+/** One SSH shell tab against the same server. */
+interface TermTab {
+    id: string;        // stable tab identity (React key)
+    sessionId: string; // unique gateway session — must differ per tab
+    token: string | null;
+}
+
 export default function SSHConnectionPage() {
     const params = useParams();
     const router = useRouter();
@@ -40,7 +50,6 @@ export default function SSHConnectionPage() {
 
     const [server, setServer] = useState<{ name: string; hasPassword?: boolean } | null>(null);
     const [revealField, setRevealField] = useState<RevealField | null>(null);
-    const [connectionToken, setConnectionToken] = useState<string | null>(null);
     const [gatewayUrl, setGatewayUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,33 +58,105 @@ export default function SSHConnectionPage() {
     const [showFiles, setShowFiles] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
+    // ── Tabs ──
+    const [tabs, setTabs] = useState<TermTab[]>([]);
+    const [activeId, setActiveId] = useState<string>('');
+
     const containerRef = useRef<HTMLDivElement>(null);
-    const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
-    const triggerReconnectRef = useRef<(() => void) | null>(null);
-    const sessionIdRef = useRef(crypto.randomUUID());
+    // Per-tab handlers so the shared toolbar / keyboard target the active tab.
+    const keyHandlers = useRef(new Map<string, (key: string) => void>());
+    const reconnectFns = useRef(new Map<string, () => void>());
+    const wsRefs = useRef(new Map<string, WebSocket>());
 
     // Tracks the actual visible height — shrinks when native keyboard opens
     const [visualH, setVisualH] = useState(0);
 
-    const handleDisconnect = useCallback(() => {
-        // session ended — no-op placeholder for future session tracking
-    }, []);
     const handleError = useCallback((err: string) => {
         console.error('Terminal error:', err);
     }, []);
 
-    const renewToken = useCallback(async (): Promise<string> => {
-        const res = await fetch('/api/connection/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ serverId, protocol: 'ssh' }),
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error('Failed to renew connection token');
-        const newToken = data.data.token as string;
-        setConnectionToken(newToken);
-        return newToken;
+    // ── Token helpers ──
+
+    const fetchToken = useCallback(async (): Promise<{ token: string; gatewayUrl: string | null } | null> => {
+        try {
+            const res = await fetch('/api/connection/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serverId, protocol: 'ssh' }),
+            });
+            const data = await res.json();
+            if (!data.success) return null;
+            return { token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null };
+        } catch {
+            return null;
+        }
     }, [serverId]);
+
+    /** Used by each terminal to refresh its credential token on reconnect. */
+    const renewToken = useCallback(async (): Promise<string> => {
+        const result = await fetchToken();
+        if (!result) throw new Error('Failed to renew connection token');
+        if (result.gatewayUrl) setGatewayUrl(result.gatewayUrl);
+        return result.token;
+    }, [fetchToken]);
+
+    // ── Tab actions ──
+
+    const activateTab = useCallback((id: string) => {
+        setActiveId(id);
+        // Let the now-visible terminal refit to its container.
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+    }, []);
+
+    const addTab = useCallback(async () => {
+        const id = crypto.randomUUID();
+        setTabs(prev => [...prev, { id, sessionId: crypto.randomUUID(), token: null }]);
+        setActiveId(id);
+        const result = await fetchToken();
+        if (result?.gatewayUrl) setGatewayUrl(result.gatewayUrl);
+        setTabs(prev => prev.map(t => (t.id === id ? { ...t, token: result?.token ?? null } : t)));
+    }, [fetchToken]);
+
+    const closeTab = useCallback((id: string) => {
+        // Tell the gateway to tear down this session before unmounting.
+        const ws = wsRefs.current.get(id);
+        if (ws?.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'close-session' }));
+        }
+        wsRefs.current.delete(id);
+        keyHandlers.current.delete(id);
+        reconnectFns.current.delete(id);
+
+        setTabs(prev => {
+            const remaining = prev.filter(t => t.id !== id);
+            if (remaining.length === 0) {
+                router.push('/panel');
+                return prev;
+            }
+            setActiveId(curr => (curr === id ? remaining[remaining.length - 1].id : curr));
+            return remaining;
+        });
+    }, [router]);
+
+    /** Gateway lost the session — start a fresh one for this tab. */
+    const renewTab = useCallback(async (id: string) => {
+        setTabs(prev => prev.map(t => (t.id === id ? { ...t, sessionId: crypto.randomUUID(), token: null } : t)));
+        const result = await fetchToken();
+        if (result?.gatewayUrl) setGatewayUrl(result.gatewayUrl);
+        setTabs(prev => prev.map(t => (t.id === id ? { ...t, token: result?.token ?? null } : t)));
+    }, [fetchToken]);
+
+    /** Disconnect everything and leave. */
+    const disconnectAll = useCallback(() => {
+        for (const ws of wsRefs.current.values()) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'close-session' }));
+            }
+        }
+        router.push('/panel');
+    }, [router]);
+
+    // ── Responsive / viewport ──
 
     useEffect(() => {
         const check = () => {
@@ -104,48 +185,46 @@ export default function SSHConnectionPage() {
         if (visualH > 0) window.dispatchEvent(new Event('resize'));
     }, [visualH]);
 
+    // ── Initial load: server info + first tab ──
+
     useEffect(() => {
+        let cancelled = false;
         async function initConnection() {
             try {
-                const [serverResponse, tokenResponse] = await Promise.all([
+                const [serverResponse, tokenResult] = await Promise.all([
                     fetch(`/api/servers/${serverId}`),
-                    fetch(`/api/connection/token`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ serverId, protocol: 'ssh' }),
-                    }),
+                    fetchToken(),
                 ]);
-
-                const [serverData, tokenData] = await Promise.all([
-                    serverResponse.json(),
-                    tokenResponse.json(),
-                ]);
+                const serverData = await serverResponse.json();
+                if (cancelled) return;
 
                 if (!serverData.success) {
                     setError('Server not found');
                     setLoading(false);
                     return;
                 }
-
-                if (!tokenData.success) {
+                if (!tokenResult) {
                     setError('Failed to get connection token');
                     setLoading(false);
                     return;
                 }
 
+                const id = crypto.randomUUID();
                 setServer(serverData.data.server);
-                setConnectionToken(tokenData.data.token);
-                setGatewayUrl(tokenData.data.gatewayUrl ?? null);
+                setGatewayUrl(tokenResult.gatewayUrl);
+                setTabs([{ id, sessionId: crypto.randomUUID(), token: tokenResult.token }]);
+                setActiveId(id);
                 setLoading(false);
             } catch (err) {
+                if (cancelled) return;
                 console.error('Connection error:', err);
                 setError('Failed to initialize connection');
                 setLoading(false);
             }
         }
-
         initConnection();
-    }, [serverId]);
+        return () => { cancelled = true; };
+    }, [serverId, fetchToken]);
 
     const toggleFullscreen = async () => {
         if (!document.fullscreenElement) {
@@ -165,7 +244,7 @@ export default function SSHConnectionPage() {
         );
     }
 
-    if (error || !connectionToken) {
+    if (error || tabs.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
@@ -224,7 +303,7 @@ export default function SSHConnectionPage() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => triggerReconnectRef.current?.()}
+                        onClick={() => reconnectFns.current.get(activeId)?.()}
                         title="Reconnect"
                     >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -254,7 +333,7 @@ export default function SSHConnectionPage() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
-                        onClick={() => router.push('/panel')}
+                        onClick={disconnectAll}
                         title="Disconnect"
                     >
                         <X className="w-3.5 h-3.5" />
@@ -262,23 +341,87 @@ export default function SSHConnectionPage() {
                 </div>
             </div>
 
-            {/* ── Main area: terminal + optional file panel ── */}
+            {/* ── Tab strip ── */}
+            <div className="flex items-center gap-1 px-3 lg:px-0 mb-2 shrink-0 overflow-x-auto no-scrollbar">
+                {tabs.map((tab, i) => {
+                    const isActive = tab.id === activeId;
+                    return (
+                        <div
+                            key={tab.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => activateTab(tab.id)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') activateTab(tab.id); }}
+                            className={`group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap cursor-pointer transition-colors select-none ${
+                                isActive
+                                    ? 'bg-primary/15 text-primary'
+                                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                            }`}
+                        >
+                            <TerminalIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span>Shell {i + 1}</span>
+                            {tabs.length > 1 && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
+                                    className="rounded p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                                    title="Close shell"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+                <button
+                    onClick={addTab}
+                    title="New shell"
+                    className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0 transition-colors"
+                >
+                    <Plus className="w-4 h-4" />
+                </button>
+            </div>
+
+            {/* ── Main area: terminal tabs + optional file panel ── */}
             <div className="flex flex-1 min-h-0 gap-2 px-3 lg:px-0">
-                {/* Terminal */}
-                <div className="flex-1 min-w-0 min-h-0">
-                    <SSHTerminal
-                        sessionId={sessionIdRef.current}
-                        serverId={serverId}
-                        connectionToken={connectionToken}
-                        renewToken={renewToken}
-                        gatewayUrl={gatewayUrl ?? undefined}
-                        disableNativeKeyboard={isMobile}
-                        onDisconnect={handleDisconnect}
-                        onError={handleError}
-                        onKeyHandlerReady={(handler) => { terminalKeyHandler.current = handler; }}
-                        onSessionNotFound={() => router.push('/panel')}
-                        onReconnectReady={(fn) => { triggerReconnectRef.current = fn; }}
-                    />
+                {/* Stacked terminal panes — all kept mounted, only active is visible */}
+                <div className="relative flex-1 min-w-0 min-h-0">
+                    {tabs.map((tab) => {
+                        const isActive = tab.id === activeId;
+                        return (
+                            <div
+                                key={tab.id}
+                                className="absolute inset-0"
+                                style={{
+                                    visibility: isActive ? 'visible' : 'hidden',
+                                    pointerEvents: isActive ? 'auto' : 'none',
+                                }}
+                            >
+                                {tab.token ? (
+                                    <SSHTerminal
+                                        sessionId={tab.sessionId}
+                                        serverId={serverId}
+                                        connectionToken={tab.token}
+                                        renewToken={renewToken}
+                                        gatewayUrl={gatewayUrl ?? undefined}
+                                        disableNativeKeyboard={isMobile}
+                                        onError={handleError}
+                                        onKeyHandlerReady={(handler) => { keyHandlers.current.set(tab.id, handler); }}
+                                        onWebSocketCreated={(ws) => {
+                                            if (ws) wsRefs.current.set(tab.id, ws);
+                                            else wsRefs.current.delete(tab.id);
+                                        }}
+                                        onSessionNotFound={() => renewTab(tab.id)}
+                                        onReconnectReady={(fn) => { reconnectFns.current.set(tab.id, fn); }}
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground gap-3">
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span className="text-sm">Establishing connection…</span>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* File manager panel — desktop: side panel | mobile: full overlay */}
@@ -303,7 +446,7 @@ export default function SSHConnectionPage() {
 
             {/* Virtual keyboard — always shown on mobile, toggleable on desktop */}
             {showKeyboard && (
-                <VirtualKeyboard onKey={(key) => { terminalKeyHandler.current?.(key); }} />
+                <VirtualKeyboard onKey={(key) => { keyHandlers.current.get(activeId)?.(key); }} />
             )}
 
             {/* Passkey credential reveal */}
