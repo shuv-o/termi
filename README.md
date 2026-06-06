@@ -293,31 +293,31 @@ termi/
 ## 📡 Architecture
 
 ```
-┌                               ┐
-│                  Browser / PWA / Electron                     │
-│   Login · Dashboard · Terminal · File Manager · Monitoring    │
-└            ─┬                  ┘
-                          │ HTTP / REST
-                          ▼
-┌                               ┐
-│               Next.js Web App  (:22080)                       │
-│   API Routes │ Auth │ AES-256 Crypto │ Prisma ORM            │
-└   ─┬               ┬           ─┘
-        │                              │
-        │ PostgreSQL                   │ POST /api/connection/token
-        ▼                              ▼
-  ┌     ┐               ┌                ─┐
-  │PostgreSQL│               │    WebSocket Gateway  (:22081)  │
-  └     ┘               │    JWE token validation         │
-                             └ ─┬      ─┬       ─┘
-                                 │             │
-                           SSH/SCP        RDP / VNC
-                                 │             │
-                         ┌   ─┴ ┐   ┌   ┴   ┐
-                         │ SSH Host │   │  guacd:4822  │
-                         └     ┘   └   ┬   ─┘
-                                               │
-                                        RDP / VNC Servers
+┌─────────────────────────────────────────────────────────────┐
+│                    Browser / PWA / Electron                  │
+│      Login · Dashboard · Terminal · File Manager · Monitor   │
+└───────────────────────────┬─────────────────────────────────┘
+                            │ HTTP / REST
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Next.js Web App  (:22080)                   │
+│       API Routes │ Auth │ AES-256-GCM Crypto │ Prisma ORM   │
+└──────────┬────────────────────────────────┬─────────────────┘
+           │                                │
+           │ SQL (pg)                       │ POST /api/connection/token
+           ▼                                ▼
+┌──────────────────┐      ┌─────────────────────────────────┐
+│   PostgreSQL DB  │      │   WebSocket Gateway  (:22081)   │
+└──────────────────┘      │       JWE token validation      │
+                          └──────────┬──────────┬───────────┘
+                                     │          │
+                                 SSH / SCP   RDP / VNC
+                                     │          │
+                              ┌──────┴──┐  ┌───┴──────────┐
+                              │ SSH Host│  │  guacd :4822  │
+                              └─────────┘  └───────┬───────┘
+                                                   │
+                                          RDP / VNC Servers
 ```
 
 **Connection flow:**
