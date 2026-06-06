@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -84,7 +84,7 @@ function PageShell({
     );
 }
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const formRef = useRef<HTMLFormElement>(null);
@@ -789,5 +789,21 @@ export default function LoginPage() {
                 </div>
             </div>
         </PageShell>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <PageShell>
+                    <div className="p-8">
+                        <div className="h-8 w-40 mx-auto bg-muted rounded animate-pulse" />
+                    </div>
+                </PageShell>
+            }
+        >
+            <LoginContent />
+        </Suspense>
     );
 }

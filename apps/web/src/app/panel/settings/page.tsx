@@ -1456,8 +1456,8 @@ export default function SettingsPage() {
                                     {setup2FA && (
                                         <div className="space-y-4">
                                             <div className="p-4 bg-secondary/50 rounded-xl text-center border border-border">
-                                                {/* eslint-disable-next-line @next/next/no-img-element -- QR is a runtime base64 data URL; next/image adds no benefit */}
                                                 {qrCode && (
+                                                    // eslint-disable-next-line @next/next/no-img-element -- QR is a runtime base64 data URL; next/image adds no benefit
                                                     <img
                                                         src={qrCode}
                                                         alt="2FA QR Code"

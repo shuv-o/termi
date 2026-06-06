@@ -645,9 +645,9 @@ export default function GroupsPage() {
         }
     }, [showToast, selectedId]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount
     useEffect(() => {
         loadGroups();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount
     }, []);
 
     const loadDetail = useCallback(

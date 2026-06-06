@@ -7,12 +7,13 @@
  * - Notification click → focus/open the app
  */
 
-const CACHE_NAME = 'termi-v2';
+const CACHE_NAME = 'termi-v3';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to pre-cache on install
 const PRECACHE_URLS = [
     OFFLINE_URL,
+    '/offline.js',
     '/icons/icon-192x192.png',
     '/icons/icon-512x512.png',
     '/favicon.ico',
@@ -68,6 +69,7 @@ self.addEventListener('fetch', (event) => {
         url.pathname.startsWith('/icons/') ||
         url.pathname.startsWith('/fonts/') ||
         url.pathname === '/manifest.json' ||
+        url.pathname === '/offline.js' ||
         url.pathname === '/favicon.ico' ||
         url.pathname === '/favicon.png'
     ) {

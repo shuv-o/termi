@@ -1261,9 +1261,9 @@ export default function DashboardPage() {
         );
     }, []);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchServers is stable; re-fetch only on search/filter changes
     useEffect(() => {
         fetchServers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchServers is stable; re-fetch only on search/filter changes
     }, [debouncedSearchQuery, filter]);
     useEffect(() => {
         fetch('/api/shared-servers')

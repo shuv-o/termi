@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Loader2, Check, X, Terminal, Shield, Zap, Globe } from 'lucide-react';
@@ -40,7 +40,7 @@ const features = [
     { icon: Globe, text: 'Access from anywhere, securely' },
 ];
 
-export default function RegisterPage() {
+function RegisterContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
@@ -314,5 +314,19 @@ export default function RegisterPage() {
                 </Card>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
+                    <div className="h-8 w-40 bg-muted rounded animate-pulse" />
+                </div>
+            }
+        >
+            <RegisterContent />
+        </Suspense>
     );
 }

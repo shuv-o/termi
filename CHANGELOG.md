@@ -8,24 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
-### Added
-
-- Added open-source community health files: `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `.github/FUNDING.yml`, and `.github/CODEOWNERS`
-- Added automated GitHub release workflow (`.github/workflows/release.yml`) to publish version-tagged releases with notes sourced from `CHANGELOG.md`
-
-### Security
-
-- Updated `next` to 16.2.7, resolving advisories for CSP-nonce XSS, Middleware/Proxy redirect bypass and cache-poisoning, and Server Components DoS
-- Patched transitive dependencies via `npm audit fix` (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
-- Password-reset URLs (which contain a single-use token) are no longer written to server logs in production; the dev-only fallback now requires `NODE_ENV !== 'production'`
-
-### Removed
-
-- Dropped the dead `assertDatabaseSslInProduction` no-op helper and its stale unit tests (SSL enforcement had already been removed)
+_Nothing yet._
 
 ---
 
-## [1.0.0] — 2025-06-05
+## [1.0.0] — 2026-06-06
 
 ### 🎉 Initial Public Release
 
@@ -109,6 +96,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - Virtual keyboard with Ctrl, Alt, Shift, Fn, Tab, and arrow keys
 - Touch-optimised terminal and file manager
 - Responsive design for all screen sizes
+- CSP-compliant offline page: "Retry Connection" runs a real connectivity probe and the page auto-reloads the moment the network returns
+- Suspense boundaries around `useSearchParams()` on the login and register pages
+- Privacy and Security policy pages
+- Multi-architecture desktop downloads (Apple Silicon + Intel, Windows x64/ARM64, Linux x64/ARM64) with automatic platform/arch detection
+
+**Open Source & Community**
+
+- Community health files: `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `.github/FUNDING.yml`, and `.github/CODEOWNERS`
+- Automated GitHub release workflow (`.github/workflows/release.yml`) publishing version-tagged releases with notes sourced from `CHANGELOG.md`
+
+**Security Hardening**
+
+- `next` updated to 16.2.7, resolving advisories for CSP-nonce XSS, Middleware/Proxy redirect bypass and cache-poisoning, and Server Components DoS
+- Patched transitive dependencies (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
+- Password-reset URLs (single-use tokens) are no longer written to server logs in production
 
 [Unreleased]: https://github.com/shuvoooo/termi/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/shuvoooo/termi/releases/tag/v1.0.0
