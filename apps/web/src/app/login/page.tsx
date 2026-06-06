@@ -152,18 +152,18 @@ export default function LoginPage() {
             setInfo('Password reset successfully. Please sign in with your new password.');
     }, [searchParams]);
 
-    useEffect(() => {
-        if (typeof window === 'undefined' || !('credentials' in navigator)) return;
-        navigator.credentials
-            .get({ password: true, mediation: 'optional' } as CredentialRequestOptions)
-            .then((cred) => {
-                if (cred && cred.type === 'password') {
-                    const pc = cred as PasswordCredential;
-                    setFormData({ email: pc.id, password: pc.password || '' });
-                }
-            })
-            .catch(() => {});
-    }, []);
+    // useEffect(() => {
+    //     if (typeof window === 'undefined' || !('credentials' in navigator)) return;
+    //     navigator.credentials
+    //         .get({ password: true, mediation: 'optional' } as CredentialRequestOptions)
+    //         .then((cred) => {
+    //             if (cred && cred.type === 'password') {
+    //                 const pc = cred as PasswordCredential;
+    //                 setFormData({ email: pc.id, password: pc.password || '' });
+    //             }
+    //         })
+    //         .catch(() => {});
+    // }, []);
 
     useEffect(() => {
         if (resendCooldown <= 0) return;
