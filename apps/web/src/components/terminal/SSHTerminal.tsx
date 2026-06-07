@@ -9,14 +9,6 @@ import '@xterm/xterm/css/xterm.css';
 
 const TEXT_ENCODER = new TextEncoder();
 
-function bytesToBase64(bytes: Uint8Array): string {
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-}
-
 const MAX_AUTO_RETRIES = 5;
 const getBackoffMs = (attempt: number) => Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
 
@@ -92,6 +84,7 @@ export default function SSHTerminal({
         const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
         const ws = new WebSocket(wsUrl);
+        ws.binaryType = 'arraybuffer'; // terminal output arrives as raw binary frames
         wsRef.current = ws;
         onWebSocketCreatedRef.current?.(ws);
 
@@ -119,6 +112,14 @@ export default function SSHTerminal({
 
         ws.onmessage = (event) => {
             if (wsRef.current !== ws) return;
+
+            // Binary frame == raw terminal output (live data or buffer replay).
+            // Write the bytes straight to xterm — no JSON/base64 decode.
+            if (typeof event.data !== 'string') {
+                terminalInstance.current?.write(new Uint8Array(event.data as ArrayBuffer));
+                return;
+            }
+
             try {
                 const message = JSON.parse(event.data);
 
@@ -134,15 +135,6 @@ export default function SSHTerminal({
                             fitAddon.current.fit();
                             const { cols, rows } = terminalInstance.current;
                             ws.send(JSON.stringify({ type: 'resize', cols, rows }));
-                        }
-                        break;
-
-                    case 'buffer-replay':
-                    case 'data':
-                        if (terminalInstance.current && message.data) {
-                            const binary = atob(message.data);
-                            const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-                            terminalInstance.current.write(bytes);
                         }
                         break;
 
@@ -302,9 +294,9 @@ export default function SSHTerminal({
 
         terminal.onData((data) => {
             if (wsRef.current?.readyState === WebSocket.OPEN) {
-                const bytes = TEXT_ENCODER.encode(data);
-                const encoded = bytesToBase64(bytes);
-                wsRef.current.send(JSON.stringify({ type: 'data', data: encoded }));
+                // Send keystrokes as a raw binary frame; the gateway treats any
+                // binary frame as terminal input. Control stays JSON (resize/pong).
+                wsRef.current.send(TEXT_ENCODER.encode(data));
             }
         });
 

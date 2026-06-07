@@ -203,32 +203,39 @@ export class SCPHandler {
             }
 
             const stream = this.sftp!.createReadStream(path);
-            const chunks: Buffer[] = [];
             let bytesRead = 0;
 
-            stream.on('data', (chunk: Buffer) => {
-                chunks.push(chunk);
-                bytesRead += chunk.length;
+            // Announce the transfer so the client can prepare to assemble chunks.
+            this.ws.send(JSON.stringify({ type: 'download-start', path, size: stats.size }));
 
-                // Send progress
+            // Stream the file in bounded chunks rather than buffering the whole
+            // thing in memory. Backpressure: pause the read until each frame has
+            // been handed to the socket (send callback), then resume — so a slow
+            // client cannot make the gateway accumulate the entire file in RAM.
+            stream.on('data', (chunk: Buffer) => {
+                if (this.ws.readyState !== WebSocket.OPEN) {
+                    stream.destroy();
+                    return;
+                }
+                bytesRead += chunk.length;
+                stream.pause();
                 this.ws.send(
                     JSON.stringify({
-                        type: 'download-progress',
+                        type: 'download-chunk',
                         path,
+                        data: chunk.toString('base64'),
                         bytesRead,
                         totalBytes: stats.size,
                     }),
+                    () => stream.resume(),
                 );
             });
 
             stream.on('end', () => {
-                const data = Buffer.concat(chunks);
-
                 this.ws.send(
                     JSON.stringify({
                         type: 'download-complete',
                         path,
-                        data: data.toString('base64'),
                         size: stats.size,
                     }),
                 );

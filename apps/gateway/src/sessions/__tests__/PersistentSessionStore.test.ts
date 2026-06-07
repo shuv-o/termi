@@ -15,6 +15,7 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         lastActivityAt: Date.now(),
         createdAt: Date.now(),
         attachedWs: null,
+        detachedAt: null,
         isClosing: false,
         ...overrides,
     };
@@ -111,8 +112,8 @@ describe('PersistentSessionStore', () => {
         expect(store.get('a')).toBeDefined();
     });
 
-    it('idle check evicts detached sessions past timeout', () => {
-        const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: null });
+    it('idle check evicts detached sessions past the grace period', () => {
+        const session = makeSession({ detachedAt: Date.now() - 2000, attachedWs: null });
         store.tryAdd(session);
         vi.advanceTimersByTime(60_000); // trigger idle check
         expect(store.get('sess-1')).toBeUndefined();
@@ -121,10 +122,23 @@ describe('PersistentSessionStore', () => {
 
     it('idle check does not evict attached sessions', () => {
         const ws = {} as any;
-        const session = makeSession({ lastActivityAt: Date.now() - 2000, attachedWs: ws });
+        const session = makeSession({ detachedAt: null, attachedWs: ws });
         store.tryAdd(session);
         vi.advanceTimersByTime(60_000);
         expect(store.get('sess-1')).toBeDefined();
+    });
+
+    it('idle check does not evict a session still within its grace window', () => {
+        // Grace window of 5 minutes; only 60s elapses before the check runs.
+        const graceStore = new PersistentSessionStore(5 * 60_000);
+        try {
+            const session = makeSession({ detachedAt: Date.now(), attachedWs: null });
+            graceStore.tryAdd(session);
+            vi.advanceTimersByTime(60_000);
+            expect(graceStore.get('sess-1')).toBeDefined();
+        } finally {
+            graceStore.destroy();
+        }
     });
 
     describe('tryAdd', () => {

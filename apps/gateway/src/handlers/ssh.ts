@@ -10,8 +10,8 @@ import { Client, ClientChannel } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
 
 export interface SSHOutputSink {
-    /** Called with base64-encoded SSH output data. */
-    onData(encoded: string): void;
+    /** Called with a raw chunk of SSH output bytes. */
+    onData(data: Buffer): void;
     /** Called with structured control messages (shell-ready, disconnected, error, closed). */
     onMessage(type: string, extra?: Record<string, unknown>): void;
 }
@@ -91,11 +91,11 @@ export class SSHHandler {
                 this.sink.onMessage('shell-ready');
 
                 stream.on('data', (data: Buffer) => {
-                    this.sink.onData(data.toString('base64'));
+                    this.sink.onData(data);
                 });
 
                 stream.stderr.on('data', (data: Buffer) => {
-                    this.sink.onData(data.toString('base64'));
+                    this.sink.onData(data);
                 });
 
                 stream.on('close', () => {

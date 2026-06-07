@@ -11,17 +11,35 @@ export interface PersistentSession {
     lastActivityAt: number;
     createdAt: number;
     attachedWs: WebSocket | null;
+    /**
+     * Timestamp (ms) at which the session became detached (no attached WS),
+     * or null while a browser is attached. The detached-grace eviction clock
+     * runs from this moment — independent of SSH output activity, so a noisy
+     * detached session (e.g. `tail -f`) is still reclaimed on schedule.
+     */
+    detachedAt: number | null;
     isClosing: boolean;
 }
 
 const MAX_CONNECTIONS_PER_USER = 5;
+
+/**
+ * How long a detached SSH session is kept alive (with its remote shell open)
+ * waiting for the browser to reattach. Lower = less pressure on remote servers
+ * from orphaned sessions; higher = longer reconnect window. Default 30 min,
+ * overridable via GATEWAY_DETACHED_TTL_MIN.
+ */
+const DEFAULT_DETACHED_TTL_MS = (() => {
+    const min = parseInt(process.env.GATEWAY_DETACHED_TTL_MIN || '', 10);
+    return Number.isFinite(min) && min > 0 ? min * 60_000 : 30 * 60_000;
+})();
 
 export class PersistentSessionStore {
     private readonly sessions = new Map<string, PersistentSession>();
     private readonly idleCheckInterval: ReturnType<typeof setInterval>;
     private readonly idleTimeoutMs: number;
 
-    constructor(idleTimeoutMs = 6 * 3600 * 1000) {
+    constructor(idleTimeoutMs = DEFAULT_DETACHED_TTL_MS) {
         this.idleTimeoutMs = idleTimeoutMs;
         this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 60_000);
     }
@@ -92,9 +110,12 @@ export class PersistentSessionStore {
     private evictIdleSessions(): void {
         const now = Date.now();
         for (const [id, session] of this.sessions) {
-            if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
+            // Evict on detached-grace expiry. The clock is the moment of
+            // detachment (detachedAt), NOT last output — so a detached session
+            // streaming output is still reclaimed once the grace window passes.
+            if (session.detachedAt !== null && now - session.detachedAt > this.idleTimeoutMs) {
                 console.log(
-                    `[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`,
+                    `[PersistentSessionStore] Evicting detached session ${id} (user ${session.userId}) after grace period`,
                 );
                 this.delete(id);
             }

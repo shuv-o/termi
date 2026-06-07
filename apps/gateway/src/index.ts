@@ -120,12 +120,13 @@ const nonSshConnections = new Map<WebSocket, NonSshMeta>();
  */
 function createSink(session: PersistentSession): SSHOutputSink {
     return {
-        onData(encoded: string) {
+        onData(data: Buffer) {
             if (session.isClosing) return;
-            session.lastActivityAt = Date.now();
-            session.buffer.append(Buffer.from(encoded, 'base64'));
+            session.buffer.append(data);
+            // Terminal output is sent as a raw binary frame — no base64/JSON
+            // overhead on the hot path. Control messages stay JSON (see onMessage).
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
-                session.attachedWs.send(JSON.stringify({ type: 'data', data: encoded }));
+                session.attachedWs.send(data, { binary: true });
             }
         },
         onMessage(type: string, extra?: Record<string, unknown>) {
@@ -354,16 +355,14 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 }
 
                 existing.attachedWs = ws;
+                existing.detachedAt = null; // reattached — stop the detached-grace clock
 
-                // Replay buffered output (non-destructive snapshot)
+                // Replay buffered output as a raw binary frame (non-destructive
+                // snapshot). The client writes any binary frame straight to the
+                // terminal, so replay and live output share one efficient path.
                 const buffered = existing.buffer.snapshot();
                 if (buffered.length > 0) {
-                    ws.send(
-                        JSON.stringify({
-                            type: 'buffer-replay',
-                            data: Buffer.from(buffered).toString('base64'),
-                        }),
-                    );
+                    ws.send(buffered, { binary: true });
                 }
 
                 // Signal ready (shell already open)
@@ -392,6 +391,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     lastActivityAt: Date.now(),
                     createdAt: Date.now(),
                     attachedWs: ws,
+                    detachedAt: null,
                     isClosing: false,
                 };
 
@@ -441,14 +441,23 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             startHeartbeat();
 
             //   WS message routing for SSH
-            ws.on('message', (data) => {
+            ws.on('message', (data: Buffer, isBinary: boolean) => {
                 const session = persistentSessions.get(resolvedSessionId);
                 if (!session) return;
 
+                // Binary frame == raw terminal input (keystrokes / pastes).
+                if (isBinary) {
+                    session.lastActivityAt = Date.now();
+                    session.handler.write(data);
+                    return;
+                }
+
+                // Text frame == JSON control message.
                 try {
                     const message = JSON.parse(data.toString());
                     switch (message.type) {
                         case 'data':
+                            // Legacy base64 input path (pre-binary clients).
                             if (message.data) {
                                 session.lastActivityAt = Date.now();
                                 session.handler.write(Buffer.from(message.data, 'base64'));
@@ -482,6 +491,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 const session = persistentSessions.get(resolvedSessionId);
                 if (session && session.attachedWs === ws) {
                     session.attachedWs = null;
+                    session.detachedAt = Date.now(); // start the detached-grace clock
                 }
             });
 
@@ -560,6 +570,12 @@ server.listen(PORT, HOST, () => {
     console.log(`[gateway] Listening on ${HOST}:${PORT}`);
 });
 
+// Listen errors (e.g. EADDRINUSE) happen before the server is useful — fail fast.
+server.on('error', (err) => {
+    console.error('[gateway] HTTP server error:', err);
+    process.exit(1);
+});
+
 let isShuttingDown = false;
 function shutdown(signal: string): void {
     if (isShuttingDown) return;
@@ -584,11 +600,18 @@ function shutdown(signal: string): void {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('uncaughtException', (err) => {
-    console.error('[gateway] Uncaught exception:', err);
-    shutdown('uncaughtException');
-});
+
+// A single stray rejection (e.g. a socket error that escaped a handler) must NOT
+// take down the whole gateway and every user's session with it. A rejected
+// promise does not corrupt global state, so log it and keep serving.
 process.on('unhandledRejection', (reason) => {
-    console.error('[gateway] Unhandled rejection:', reason);
-    shutdown('unhandledRejection');
+    console.error('[gateway] Unhandled rejection (continuing):', reason);
+});
+
+// uncaughtException can leave the process in an undefined state, but for a
+// long-running proxy serving many independent sessions, tearing everyone down
+// for one stray sync error is worse than continuing. We log loudly and keep
+// running; the per-connection error handlers already isolate most failures.
+process.on('uncaughtException', (err) => {
+    console.error('[gateway] Uncaught exception (continuing):', err);
 });
