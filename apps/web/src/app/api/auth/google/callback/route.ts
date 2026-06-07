@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { getSession, createSession } from '@/lib/auth/session';
 import { exchangeGoogleCode, findOrCreateGoogleUser } from '@/lib/auth/google-oauth';
+import { consumeOAuthStateCookie, oauthStateCookieDeletion } from '@/lib/auth/oauth-state';
 
 export async function GET(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
@@ -22,28 +23,26 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
     }
 
-    const session = await getSession();
+    // Read and decrypt the OAuth state cookie (SameSite=Lax — survives Google redirect)
+    const oauthState = await consumeOAuthStateCookie();
 
-    // Validate state nonce (CSRF protection)
-    if (!session.googleOAuthState || session.googleOAuthState !== state) {
-        session.googleOAuthState = undefined;
-        session.googleCodeVerifier = undefined;
-        await session.save();
-        return NextResponse.redirect(`${appUrl}/login?error=oauth_state`);
+    const deleteOAuthCookie = (response: NextResponse) => {
+        response.cookies.set(
+            oauthStateCookieDeletion.name,
+            '',
+            oauthStateCookieDeletion.options,
+        );
+        return response;
+    };
+
+    if (!oauthState || oauthState.state !== state) {
+        return deleteOAuthCookie(
+            NextResponse.redirect(`${appUrl}/login?error=oauth_state`),
+        );
     }
-
-    const codeVerifier = session.googleCodeVerifier;
-    if (!codeVerifier) {
-        return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
-    }
-
-    // Clear OAuth state immediately
-    session.googleOAuthState = undefined;
-    session.googleCodeVerifier = undefined;
-    await session.save();
 
     try {
-        const googleUser = await exchangeGoogleCode(code, codeVerifier);
+        const googleUser = await exchangeGoogleCode(code, oauthState.codeVerifier);
         const { userId, email, isNewUser, hasMasterKey } = await findOrCreateGoogleUser(googleUser);
 
         const deviceInfo = request.headers.get('user-agent') || 'Unknown';
@@ -54,20 +53,22 @@ export async function GET(request: Request) {
 
         const sessionToken = await createSession(userId, email, deviceInfo, ipAddress);
 
+        const session = await getSession();
         session.userId = userId;
         session.email = email;
         session.sessionToken = sessionToken;
         session.isLoggedIn = true;
-        // Note: masterKey is NOT set — Google users must unlock it separately
         await session.save();
 
-        // Determine where to redirect
-        if (isNewUser || !hasMasterKey) {
-            return NextResponse.redirect(`${appUrl}/setup-encryption`);
-        }
-        return NextResponse.redirect(`${appUrl}/unlock-encryption`);
+        const redirectUrl = isNewUser || !hasMasterKey
+            ? `${appUrl}/setup-encryption`
+            : `${appUrl}/unlock-encryption`;
+
+        return deleteOAuthCookie(NextResponse.redirect(redirectUrl));
     } catch (err) {
         console.error('Google OAuth callback error:', err);
-        return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
+        return deleteOAuthCookie(
+            NextResponse.redirect(`${appUrl}/login?error=oauth_failed`),
+        );
     }
 }
