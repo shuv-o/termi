@@ -615,7 +615,7 @@ export default function SettingsPage() {
     const [newPasskeyName, setNewPasskeyName] = useState('');
     const [showAddPasskey, setShowAddPasskey] = useState(false);
     const [passkeyError, setPasskeyError] = useState('');
-    const [isElectron, setIsElectron] = useState(false);
+
 
     //   Push notifications state
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
@@ -652,7 +652,6 @@ export default function SettingsPage() {
         }
         void init();
         void loadPasskeys();
-        setIsElectron(!!window.electronAPI?.isElectron);
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setPushPermission(Notification.permission);
         }
@@ -1775,13 +1774,7 @@ export default function SettingsPage() {
                                     </div>
                                 )}
 
-                                {isElectron ? (
-                                    <div className="flex items-start gap-2.5 p-4 rounded-xl bg-secondary/50 border border-border/50 text-sm text-muted-foreground">
-                                        <Info className="w-4 h-4 shrink-0 mt-0.5 text-primary/70" />
-                                        Passkeys are not available in the desktop app. Open Termi in
-                                        a web browser to add or use passkeys.
-                                    </div>
-                                ) : showAddPasskey ? (
+                                {showAddPasskey ? (
                                     <div className="space-y-3 p-4 rounded-xl bg-secondary/50 border border-border">
                                         <p className="text-sm font-medium">Name this passkey</p>
                                         <p className="text-xs text-muted-foreground">
@@ -1851,13 +1844,11 @@ export default function SettingsPage() {
                                     </Button>
                                 )}
 
-                                {!isElectron && (
-                                    <p className="text-xs text-muted-foreground/50 mt-4">
-                                        Requires a device with biometrics or hardware security key,
-                                        and a modern browser (Chrome 108+, Safari 16+, Firefox
-                                        119+).
-                                    </p>
-                                )}
+                                <p className="text-xs text-muted-foreground/50 mt-4">
+                                    Requires a device with biometrics or hardware security key,
+                                    and a modern browser (Chrome 108+, Safari 16+, Firefox
+                                    119+).
+                                </p>
                             </Section>
                         </Card>
                     )}

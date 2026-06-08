@@ -107,12 +107,10 @@ function LoginContent() {
     const [passkeySetupName, setPasskeySetupName] = useState('');
     const [passkeySetupError, setPasskeySetupError] = useState('');
     const [webAuthnSupported, setWebAuthnSupported] = useState(false);
-    const [isElectron, setIsElectron] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
 
     useEffect(() => {
         setWebAuthnSupported(browserSupportsWebAuthn());
-        setIsElectron(!!window.electronAPI?.isElectron);
     }, []);
 
     // If already signed in, skip the login form and go straight to the app.
@@ -185,9 +183,7 @@ function LoginContent() {
             }
         }
         const nextUrl = searchParams.get('next');
-        // Don't offer passkey setup in Electron — platform authenticator unavailable
-        if (data?.suggestPasskeySetup && webAuthnSupported && !isElectron)
-            setShowPasskeySetup(true);
+        if (data?.suggestPasskeySetup && webAuthnSupported) setShowPasskeySetup(true);
         else router.push(nextUrl && nextUrl.startsWith('/') ? nextUrl : '/panel');
     }
 
@@ -623,8 +619,7 @@ function LoginContent() {
                                 </Button>
                             </form>
 
-                            {/* Passkey sign-in — hidden in Electron (platform authenticator unavailable) */}
-                            {webAuthnSupported && !isElectron && (
+                            {webAuthnSupported && (
                                 <>
                                     <div className="my-4 flex items-center gap-3">
                                         <div className="flex-1 h-px bg-border" />
