@@ -11,6 +11,7 @@ files:
   - apps/electron/preload.js
   - apps/electron/setup-preload.js
   - apps/electron/setup.html
+  - apps/web/public/icons/icon-512x512.png
   - node_modules/node-pty/**/*
   - node_modules/ssh2/**/*
 
@@ -30,7 +31,7 @@ mac:
     - target: dmg
       arch: [x64, arm64]
   category: public.app-category.developer-tools
-  icon: build/icon.icns
+  icon: apps/web/public/icons/icon-512x512.png
   # Hardened runtime is required for notarization and for macOS to trust the
   # app as a WebAuthn/passkey client (Touch ID access).
   hardenedRuntime: true
@@ -48,10 +49,10 @@ win:
   target:
     - target: nsis
       arch: [x64, arm64]
-  icon: build/icon.ico
+  icon: apps/web/public/icons/icon-512x512.png
 
 linux:
   target:
     - target: AppImage
       arch: [x64, arm64]
-  icon: build/icon.png
+  icon: apps/web/public/icons/icon-512x512.png

@@ -46,6 +46,15 @@ try {
 
 const localPtys = new Map();
 
+function getWindowIconPath() {
+    const candidates = [
+        path.join(__dirname, '../../apps/web/public/icons/icon-512x512.png'),
+        path.join(__dirname, '../../apps/web/public/favicon.png'),
+        path.join(__dirname, '../../build/icon.png'),
+    ];
+    return candidates.find((candidate) => fs.existsSync(candidate)) || undefined;
+}
+
 //   Config loading
 
 function getConfigPath() {
@@ -106,7 +115,7 @@ function startGuacd() {
         '4822:4822',
         '--name',
         'guacd-desktop',
-        'guacamole/guacd: 1.6.0',
+        'guacamole/guacd:1.6.0',
     ]);
     guacdProcess.stderr.on('data', (d) => console.log('[guacd]', d.toString().trim()));
     guacdProcess.on('error', (err) =>
@@ -242,17 +251,18 @@ function buildAppMenu() {
 }
 
 function createSetupWindow(errorMsg) {
+    const iconPath = getWindowIconPath();
     setupWin = new BrowserWindow({
         width: 700,
         height: 580,
         resizable: false,
         title: 'Termi Setup',
-        icon: path.join(__dirname, '../../build/icon.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
             preload: path.join(__dirname, 'setup-preload.js'),
         },
+        ...(iconPath ? { icon: iconPath } : {}),
     });
 
     const fileUrl = new URL(`file://${path.join(__dirname, 'setup.html')}`);
@@ -298,17 +308,18 @@ function setupStaticAssetCaching() {
 function createWindow(appUrl) {
     Menu.setApplicationMenu(buildAppMenu());
     setupStaticAssetCaching();
+    const iconPath = getWindowIconPath();
 
     win = new BrowserWindow({
         width: 1400,
         height: 900,
         title: 'Termi',
-        icon: path.join(__dirname, '../../build/icon.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js'),
         },
+        ...(iconPath ? { icon: iconPath } : {}),
     });
 
     win.loadURL(appUrl);

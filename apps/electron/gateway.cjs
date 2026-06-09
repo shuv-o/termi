@@ -4042,7 +4042,7 @@ var import_http = require("http");
 var import_url = require("url");
 var import_crypto2 = require("crypto");
 var import_dotenv = __toESM(require_main(), 1);
-var import_net2 = require("net");
+var import_net3 = require("net");
 var import_promises = __toESM(require("dns/promises"), 1);
 
 // apps/gateway/src/handlers/ssh.ts
@@ -4113,10 +4113,10 @@ var SSHHandler = class {
         this.stream = stream;
         this.sink.onMessage("shell-ready");
         stream.on("data", (data) => {
-          this.sink.onData(data.toString("base64"));
+          this.sink.onData(data);
         });
         stream.stderr.on("data", (data) => {
-          this.sink.onData(data.toString("base64"));
+          this.sink.onData(data);
         });
         stream.on("close", () => {
           this.sink.onMessage("closed");
@@ -4291,27 +4291,31 @@ var SCPHandler = class {
         return;
       }
       const stream = this.sftp.createReadStream(path);
-      const chunks = [];
       let bytesRead = 0;
+      this.ws.send(JSON.stringify({ type: "download-start", path, size: stats.size }));
       stream.on("data", (chunk) => {
-        chunks.push(chunk);
+        if (this.ws.readyState !== import_websocket.default.OPEN) {
+          stream.destroy();
+          return;
+        }
         bytesRead += chunk.length;
+        stream.pause();
         this.ws.send(
           JSON.stringify({
-            type: "download-progress",
+            type: "download-chunk",
             path,
+            data: chunk.toString("base64"),
             bytesRead,
             totalBytes: stats.size
-          })
+          }),
+          () => stream.resume()
         );
       });
       stream.on("end", () => {
-        const data = Buffer.concat(chunks);
         this.ws.send(
           JSON.stringify({
             type: "download-complete",
             path,
-            data: data.toString("base64"),
             size: stats.size
           })
         );
@@ -4850,7 +4854,9 @@ var GuacamoleHandler = class {
 var import_module = require("module");
 var import_os = __toESM(require("os"), 1);
 var import_meta = {};
-var _require = (0, import_module.createRequire)(import_meta.url);
+var _require = (0, import_module.createRequire)(
+  typeof __filename !== "undefined" ? __filename : import_meta.url
+);
 var _ptySpawn = null;
 try {
   const nodePty = _require("node-pty");
@@ -4998,6 +5004,198 @@ var LocalHandler = class {
       this.pty = null;
     }
     decrementUser(this.userId);
+  }
+};
+
+// apps/gateway/src/handlers/telnet.ts
+var import_net2 = require("net");
+var IAC = 255;
+var WILL = 251;
+var WONT = 252;
+var DO = 253;
+var DONT = 254;
+var SB = 250;
+var SE = 240;
+var OPT_ECHO = 1;
+var OPT_SGA = 3;
+var OPT_TERMINAL_TYPE = 24;
+var OPT_NAWS = 31;
+var TelnetHandler = class {
+  socket;
+  connected = false;
+  closing = false;
+  sink;
+  iacBuffer = [];
+  cols = 80;
+  rows = 24;
+  constructor(token, sink) {
+    this.sink = sink;
+    this.socket = new import_net2.Socket();
+    this.setupSocket(token);
+  }
+  write(data) {
+    if (this.connected && !this.closing) {
+      this.socket.write(data);
+    }
+  }
+  resize(rows, cols) {
+    this.rows = rows;
+    this.cols = cols;
+    if (this.connected && !this.closing) {
+      this.sendNAWS();
+    }
+  }
+  close() {
+    if (this.closing) return;
+    this.closing = true;
+    this.connected = false;
+    this.socket.destroy();
+  }
+  isConnected() {
+    return this.connected;
+  }
+  setupSocket(token) {
+    this.socket.setTimeout(15e3);
+    this.socket.on("connect", () => {
+      this.socket.setTimeout(0);
+      this.connected = true;
+      this.sink.onMessage("shell-ready");
+    });
+    this.socket.on("data", (data) => {
+      this.processIncoming(data);
+    });
+    this.socket.on("close", () => {
+      if (!this.closing) {
+        this.sink.onMessage("disconnected");
+      }
+    });
+    this.socket.on("error", (err) => {
+      let msg = err.message;
+      if (err.code === "ECONNREFUSED") msg = "Connection refused \u2014 port is closed";
+      else if (err.code === "ENOTFOUND") msg = "Host not found \u2014 check the address";
+      else if (err.code === "ETIMEDOUT") msg = "Connection timed out";
+      else if (err.code === "ENETUNREACH") msg = "Network unreachable";
+      this.sink.onMessage("error", { message: "Telnet error: " + msg });
+    });
+    this.socket.on("timeout", () => {
+      this.sink.onMessage("error", { message: "Telnet connection timed out" });
+      this.close();
+    });
+    try {
+      this.socket.connect(token.port, token.host);
+    } catch (err) {
+      this.sink.onMessage("error", {
+        message: "Connection failed: " + err.message
+      });
+      this.close();
+    }
+  }
+  /**
+   * Parse incoming bytes, strip IAC sequences, negotiate options,
+   * and forward printable data to the sink.
+   */
+  processIncoming(data) {
+    const output = [];
+    let i = 0;
+    while (i < data.length) {
+      const byte = data[i];
+      if (this.iacBuffer.length > 0 || byte === IAC) {
+        this.iacBuffer.push(byte);
+        const result = this.consumeIAC();
+        if (result !== null) {
+          if (result.length > 0) output.push(...result);
+          this.iacBuffer = [];
+        }
+        i++;
+        continue;
+      }
+      output.push(byte);
+      i++;
+    }
+    if (output.length > 0) {
+      this.sink.onData(Buffer.from(output));
+    }
+  }
+  /**
+   * Attempt to consume the current iacBuffer as a complete IAC sequence.
+   * Returns null if more bytes are needed, or the bytes to emit (often []).
+   */
+  consumeIAC() {
+    const buf = this.iacBuffer;
+    if (buf.length === 0 || buf[0] !== IAC) return [];
+    if (buf.length < 2) return null;
+    const cmd = buf[1];
+    if (cmd === IAC) return [255];
+    if (cmd === WILL || cmd === WONT || cmd === DO || cmd === DONT) {
+      if (buf.length < 3) return null;
+      this.handleOption(cmd, buf[2]);
+      return [];
+    }
+    if (cmd === SB) {
+      for (let i = 2; i < buf.length - 1; i++) {
+        if (buf[i] === IAC && buf[i + 1] === SE) {
+          const opt = buf[2];
+          const payload = Buffer.from(buf.slice(3, i));
+          this.handleSubneg(opt, payload);
+          return [];
+        }
+      }
+      return null;
+    }
+    return [];
+  }
+  handleOption(cmd, opt) {
+    switch (cmd) {
+      case DO:
+        if (opt === OPT_NAWS) {
+          this.sendCmd(WILL, opt);
+          this.sendNAWS();
+        } else if (opt === OPT_TERMINAL_TYPE || opt === OPT_SGA) {
+          this.sendCmd(WILL, opt);
+        } else {
+          this.sendCmd(WONT, opt);
+        }
+        break;
+      case WILL:
+        if (opt === OPT_ECHO || opt === OPT_SGA) {
+          this.sendCmd(DO, opt);
+        } else {
+          this.sendCmd(DONT, opt);
+        }
+        break;
+      case WONT:
+      case DONT:
+        break;
+    }
+  }
+  handleSubneg(opt, payload) {
+    if (opt === OPT_TERMINAL_TYPE && payload.length > 0 && payload[0] === 1) {
+      const termType = Buffer.from("xterm-256color");
+      const response = Buffer.concat([
+        Buffer.from([IAC, SB, OPT_TERMINAL_TYPE, 0]),
+        // IS = 0
+        termType,
+        Buffer.from([IAC, SE])
+      ]);
+      this.socket.write(response);
+    }
+  }
+  sendCmd(cmd, opt) {
+    this.socket.write(Buffer.from([IAC, cmd, opt]));
+  }
+  sendNAWS() {
+    const raw = [
+      this.cols >> 8 & 255,
+      this.cols & 255,
+      this.rows >> 8 & 255,
+      this.rows & 255
+    ];
+    const escaped = [];
+    for (const b of raw) {
+      if (b === 255) escaped.push(255, 255);
+      else escaped.push(b);
+    }
+    this.socket.write(Buffer.from([IAC, SB, OPT_NAWS, ...escaped, IAC, SE]));
   }
 };
 
@@ -6606,7 +6804,7 @@ async function validateToken(token) {
     if (!payload.userId || !payload.serverId) {
       throw new Error("Invalid token payload");
     }
-    const VALID_PROTOCOLS = ["ssh", "scp", "rdp", "vnc", "local"];
+    const VALID_PROTOCOLS = ["ssh", "scp", "rdp", "vnc", "telnet", "local"];
     if (!payload.protocol || !VALID_PROTOCOLS.includes(payload.protocol)) {
       throw new Error("Invalid token protocol");
     }
@@ -6674,11 +6872,15 @@ var RingBuffer = class {
 
 // apps/gateway/src/sessions/PersistentSessionStore.ts
 var MAX_CONNECTIONS_PER_USER = 5;
+var DEFAULT_DETACHED_TTL_MS = (() => {
+  const min = parseInt(process.env.GATEWAY_DETACHED_TTL_MIN || "", 10);
+  return Number.isFinite(min) && min > 0 ? min * 6e4 : 30 * 6e4;
+})();
 var PersistentSessionStore = class {
   sessions = /* @__PURE__ */ new Map();
   idleCheckInterval;
   idleTimeoutMs;
-  constructor(idleTimeoutMs = 6 * 3600 * 1e3) {
+  constructor(idleTimeoutMs = DEFAULT_DETACHED_TTL_MS) {
     this.idleTimeoutMs = idleTimeoutMs;
     this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 6e4);
   }
@@ -6740,9 +6942,9 @@ var PersistentSessionStore = class {
   evictIdleSessions() {
     const now = Date.now();
     for (const [id, session] of this.sessions) {
-      if (session.attachedWs === null && now - session.lastActivityAt > this.idleTimeoutMs) {
+      if (session.detachedAt !== null && now - session.detachedAt > this.idleTimeoutMs) {
         console.log(
-          `[PersistentSessionStore] Evicting idle session ${id} (user ${session.userId})`
+          `[PersistentSessionStore] Evicting detached session ${id} (user ${session.userId}) after grace period`
         );
         this.delete(id);
       }
@@ -6795,7 +6997,7 @@ function isPrivateHost(host) {
 async function isPrivateHostAsync(host) {
   if (isPrivateHost(host)) return true;
   const stripped = host.trim().toLowerCase().replace(/^\[|]$/g, "").replace(/^::ffff:/i, "");
-  if ((0, import_net2.isIP)(stripped) !== 0) return false;
+  if ((0, import_net3.isIP)(stripped) !== 0) return false;
   try {
     const addrs = await import_promises.default.lookup(stripped, { all: true });
     return addrs.some((a) => isPrivateHost(a.address));
@@ -6807,12 +7009,11 @@ var persistentSessions = new PersistentSessionStore();
 var nonSshConnections = /* @__PURE__ */ new Map();
 function createSink(session) {
   return {
-    onData(encoded) {
+    onData(data) {
       if (session.isClosing) return;
-      session.lastActivityAt = Date.now();
-      session.buffer.append(Buffer.from(encoded, "base64"));
+      session.buffer.append(data);
       if (session.attachedWs?.readyState === import_websocket.default.OPEN) {
-        session.attachedWs.send(JSON.stringify({ type: "data", data: encoded }));
+        session.attachedWs.send(data, { binary: true });
       }
     },
     onMessage(type, extra) {
@@ -6861,7 +7062,7 @@ wss.on("connection", (ws, req) => {
     ws.close(4e3, "Bad Request");
     return;
   }
-  if (!["ssh", "scp", "rdp", "vnc", "local"].includes(protocol)) {
+  if (!["ssh", "scp", "rdp", "vnc", "telnet", "local"].includes(protocol)) {
     ws.send(JSON.stringify({ type: "error", message: "Invalid protocol" }));
     ws.close(4e3, "Bad Request");
     return;
@@ -7012,14 +7213,10 @@ wss.on("connection", (ws, req) => {
           existing.attachedWs.close(1e3, "Replaced");
         }
         existing.attachedWs = ws;
+        existing.detachedAt = null;
         const buffered = existing.buffer.snapshot();
         if (buffered.length > 0) {
-          ws.send(
-            JSON.stringify({
-              type: "buffer-replay",
-              data: Buffer.from(buffered).toString("base64")
-            })
-          );
+          ws.send(buffered, { binary: true });
         }
         ws.send(JSON.stringify({ type: "shell-ready" }));
       } else {
@@ -7044,6 +7241,7 @@ wss.on("connection", (ws, req) => {
           lastActivityAt: Date.now(),
           createdAt: Date.now(),
           attachedWs: ws,
+          detachedAt: null,
           isClosing: false
         };
         const sink = createSink(session);
@@ -7061,9 +7259,14 @@ wss.on("connection", (ws, req) => {
       let heartbeatTimer = null;
       let pongTimer = null;
       startHeartbeat2();
-      ws.on("message", (data) => {
+      ws.on("message", (data, isBinary) => {
         const session = persistentSessions.get(resolvedSessionId);
         if (!session) return;
+        if (isBinary) {
+          session.lastActivityAt = Date.now();
+          session.handler.write(data);
+          return;
+        }
         try {
           const message3 = JSON.parse(data.toString());
           switch (message3.type) {
@@ -7098,6 +7301,7 @@ wss.on("connection", (ws, req) => {
         const session = persistentSessions.get(resolvedSessionId);
         if (session && session.attachedWs === ws) {
           session.attachedWs = null;
+          session.detachedAt = Date.now();
         }
       });
       ws.on("error", (err) => {
@@ -7132,6 +7336,41 @@ wss.on("connection", (ws, req) => {
     ws.on("message", () => resetTimeout());
     if (protocol === "scp") {
       meta.handler = new SCPHandler(ws, tokenPayload);
+    } else if (protocol === "telnet") {
+      const sink = {
+        onData(data) {
+          if (ws.readyState === import_websocket.default.OPEN) {
+            ws.send(data, { binary: true });
+          }
+        },
+        onMessage(type, extra) {
+          if (ws.readyState === import_websocket.default.OPEN) {
+            ws.send(JSON.stringify({ type, ...extra }));
+          }
+        }
+      };
+      const telnetHandler = new TelnetHandler(tokenPayload, sink);
+      meta.handler = telnetHandler;
+      ws.on("message", (data, isBinary) => {
+        if (isBinary) {
+          resetTimeout();
+          telnetHandler.write(data);
+          return;
+        }
+        try {
+          const msg = JSON.parse(data.toString());
+          switch (msg.type) {
+            case "resize":
+              if (msg.cols && msg.rows) telnetHandler.resize(msg.rows, msg.cols);
+              break;
+            case "close-session":
+              telnetHandler.close();
+              ws.close(1e3, "Session closed");
+              break;
+          }
+        } catch {
+        }
+      });
     } else {
       const payloadWithDims = browserWidth > 0 && browserHeight > 0 ? { ...tokenPayload, displayWidth: browserWidth, displayHeight: browserHeight } : tokenPayload;
       meta.handler = new GuacamoleHandler(ws, payloadWithDims, protocol);
@@ -7152,6 +7391,10 @@ wss.on("connection", (ws, req) => {
 });
 server.listen(PORT, HOST, () => {
   console.log(`[gateway] Listening on ${HOST}:${PORT}`);
+});
+server.on("error", (err) => {
+  console.error("[gateway] HTTP server error:", err);
+  process.exit(1);
 });
 var isShuttingDown = false;
 function shutdown(signal) {
@@ -7175,11 +7418,9 @@ function shutdown(signal) {
 }
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("uncaughtException", (err) => {
-  console.error("[gateway] Uncaught exception:", err);
-  shutdown("uncaughtException");
-});
 process.on("unhandledRejection", (reason) => {
-  console.error("[gateway] Unhandled rejection:", reason);
-  shutdown("unhandledRejection");
+  console.error("[gateway] Unhandled rejection (continuing):", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[gateway] Uncaught exception (continuing):", err);
 });
