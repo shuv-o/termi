@@ -5,8 +5,8 @@ import { dirname, join } from 'node:path';
 
 // The Capacitor CLI evaluates this file in Node. It usually runs as CJS
 // (so __dirname exists); fall back to import.meta.url if ever loaded as ESM.
-const here =
-    typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
+// @ts-ignore
+const here = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
 
 // Server URL is baked at build time, mirroring the Electron shell.
 // Resolution order:

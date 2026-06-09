@@ -27,18 +27,12 @@ export async function GET(request: Request) {
     const oauthState = await consumeOAuthStateCookie();
 
     const deleteOAuthCookie = (response: NextResponse) => {
-        response.cookies.set(
-            oauthStateCookieDeletion.name,
-            '',
-            oauthStateCookieDeletion.options,
-        );
+        response.cookies.set(oauthStateCookieDeletion.name, '', oauthStateCookieDeletion.options);
         return response;
     };
 
     if (!oauthState || oauthState.state !== state) {
-        return deleteOAuthCookie(
-            NextResponse.redirect(`${appUrl}/login?error=oauth_state`),
-        );
+        return deleteOAuthCookie(NextResponse.redirect(`${appUrl}/login?error=oauth_state`));
     }
 
     try {
@@ -60,15 +54,14 @@ export async function GET(request: Request) {
         session.isLoggedIn = true;
         await session.save();
 
-        const redirectUrl = isNewUser || !hasMasterKey
-            ? `${appUrl}/setup-encryption`
-            : `${appUrl}/unlock-encryption`;
+        const redirectUrl =
+            isNewUser || !hasMasterKey
+                ? `${appUrl}/setup-encryption`
+                : `${appUrl}/unlock-encryption`;
 
         return deleteOAuthCookie(NextResponse.redirect(redirectUrl));
     } catch (err) {
         console.error('Google OAuth callback error:', err);
-        return deleteOAuthCookie(
-            NextResponse.redirect(`${appUrl}/login?error=oauth_failed`),
-        );
+        return deleteOAuthCookie(NextResponse.redirect(`${appUrl}/login?error=oauth_failed`));
     }
 }

@@ -354,7 +354,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                 {user.name && (
                                     <p className="text-sm font-medium truncate">{user.name}</p>
                                 )}
-                                <p className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}>
+                                <p
+                                    className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}
+                                >
                                     {user.email}
                                 </p>
                                 {user.totpEnabled && (
@@ -451,9 +453,13 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                     <div className="absolute right-0 top-full mt-2 w-52 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
                                         <div className="px-3 py-2.5 border-b border-border">
                                             {user.name && (
-                                                <p className="text-xs font-medium truncate">{user.name}</p>
+                                                <p className="text-xs font-medium truncate">
+                                                    {user.name}
+                                                </p>
                                             )}
-                                            <p className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}>
+                                            <p
+                                                className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}
+                                            >
                                                 {user.email}
                                             </p>
                                             {user.totpEnabled && (

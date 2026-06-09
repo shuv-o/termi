@@ -4,9 +4,7 @@
         "target": {
             "namespace": "android_app",
             "package_name": "com.shuvoo.termi",
-            "sha256_cert_fingerprints": [
-                "REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT"
-            ]
+            "sha256_cert_fingerprints": ["REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT"]
         }
     }
 ]

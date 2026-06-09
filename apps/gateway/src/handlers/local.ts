@@ -18,9 +18,7 @@ import type { IPty, IPtyForkOptions } from 'node-pty';
 // In the ESM source (dev) `import.meta.url` resolves; in the esbuild CJS
 // bundle used by the Electron app it is empty, so fall back to `__filename`
 // (which esbuild provides) to avoid createRequire throwing on startup.
-const _require = createRequire(
-    typeof __filename !== 'undefined' ? __filename : import.meta.url,
-);
+const _require = createRequire(typeof __filename !== 'undefined' ? __filename : import.meta.url);
 
 let _ptySpawn: ((shell: string, args: string[], opts: IPtyForkOptions) => IPty) | null = null;
 

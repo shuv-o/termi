@@ -617,7 +617,6 @@ export default function SettingsPage() {
     const [showAddPasskey, setShowAddPasskey] = useState(false);
     const [passkeyError, setPasskeyError] = useState('');
 
-
     //   Push notifications state
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
     const [pushSubscribed, setPushSubscribed] = useState(false);
@@ -888,7 +887,10 @@ export default function SettingsPage() {
     const handleSaveName = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = nameInput.trim();
-        if (!trimmed) { addToast('error', 'Name cannot be empty'); return; }
+        if (!trimmed) {
+            addToast('error', 'Name cannot be empty');
+            return;
+        }
         setSavingName(true);
         try {
             const res = await fetch('/api/auth/profile', {
@@ -1210,9 +1212,15 @@ export default function SettingsPage() {
                                 </div>
                                 <div className="min-w-0">
                                     {user.name && (
-                                        <p className="text-xs font-semibold truncate">{user.name}</p>
+                                        <p className="text-xs font-semibold truncate">
+                                            {user.name}
+                                        </p>
                                     )}
-                                    <p className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}>{user.email}</p>
+                                    <p
+                                        className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}
+                                    >
+                                        {user.email}
+                                    </p>
                                     <div className="flex items-center gap-1 mt-0.5">
                                         {user.isVerified ? (
                                             <span className="text-[10px] text-green-400 flex items-center gap-1">
@@ -1308,10 +1316,18 @@ export default function SettingsPage() {
                                     </div>
                                     <Button
                                         type="submit"
-                                        disabled={savingName || !nameInput.trim() || nameInput.trim() === (user.name ?? '')}
+                                        disabled={
+                                            savingName ||
+                                            !nameInput.trim() ||
+                                            nameInput.trim() === (user.name ?? '')
+                                        }
                                         className="shrink-0"
                                     >
-                                        {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                                        {savingName ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            'Save'
+                                        )}
                                     </Button>
                                 </form>
                             </Card>
@@ -1912,9 +1928,8 @@ export default function SettingsPage() {
                                 )}
 
                                 <p className="text-xs text-muted-foreground/50 mt-4">
-                                    Requires a device with biometrics or hardware security key,
-                                    and a modern browser (Chrome 108+, Safari 16+, Firefox
-                                    119+).
+                                    Requires a device with biometrics or hardware security key, and
+                                    a modern browser (Chrome 108+, Safari 16+, Firefox 119+).
                                 </p>
                             </Section>
                         </Card>

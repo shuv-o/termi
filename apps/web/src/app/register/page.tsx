@@ -141,9 +141,7 @@ function VerifyStep({
                 <Mail className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-2xl font-bold mb-1">Check your email</h1>
-            <p className="text-muted-foreground text-sm mb-2">
-                We sent a 6-digit code to
-            </p>
+            <p className="text-muted-foreground text-sm mb-2">We sent a 6-digit code to</p>
             <p className="font-medium text-sm mb-6 truncate max-w-full">{email}</p>
 
             <form onSubmit={handleSubmit} className="w-full space-y-5">
@@ -151,7 +149,9 @@ function VerifyStep({
                     {digits.map((d, i) => (
                         <input
                             key={i}
-                            ref={(el) => { inputRefs.current[i] = el; }}
+                            ref={(el) => {
+                                inputRefs.current[i] = el;
+                            }}
                             type="text"
                             inputMode="numeric"
                             maxLength={1}
@@ -169,11 +169,7 @@ function VerifyStep({
                     </div>
                 )}
 
-                <Button
-                    type="submit"
-                    disabled={loading || code.length < 6}
-                    className="w-full"
-                >
+                <Button type="submit" disabled={loading || code.length < 6} className="w-full">
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Email'}
                 </Button>
             </form>

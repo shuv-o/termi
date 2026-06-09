@@ -7,12 +7,21 @@
 import { z } from 'zod';
 import { verifyEmailOTP } from '@/lib/auth/email-otp';
 import { createSession, getSession } from '@/lib/auth/session';
-import { validateBody, successResponse, errorResponse, getClientIP, getDeviceInfo } from '@/lib/api';
+import {
+    validateBody,
+    successResponse,
+    errorResponse,
+    getClientIP,
+    getDeviceInfo,
+} from '@/lib/api';
 import { prisma } from '@/lib/db';
 
 const schema = z.object({
     userId: z.string().min(1),
-    code: z.string().length(6, 'Code must be 6 digits').regex(/^\d{6}$/, 'Code must be numeric'),
+    code: z
+        .string()
+        .length(6, 'Code must be 6 digits')
+        .regex(/^\d{6}$/, 'Code must be numeric'),
 });
 
 export async function POST(request: Request) {

@@ -1590,7 +1590,9 @@ export default function DashboardPage() {
                     {/* Protocol filter pills */}
                     {showProtocolFilters && (
                         <div className="flex items-center gap-2 flex-wrap">
-                            {(['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]).map((p) => {
+                            {(
+                                ['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]
+                            ).map((p) => {
                                 const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
                                 if (p !== 'all' && count === 0) return null;
                                 const active = protocolFilter === p;

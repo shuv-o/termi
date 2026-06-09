@@ -12,14 +12,14 @@ Termi is a fully installable PWA. This doc covers the two distribution paths:
 
 ## What's already wired
 
-| Piece | Location |
-|-------|----------|
-| Web App Manifest | `public/manifest.json` (maskable icons, shortcuts, `handle_links`, `launch_handler`) |
-| Service worker | `public/sw.js` (offline cache + web push) |
-| SW registration | `src/app/layout.tsx` (inline, nonce'd) |
-| iOS meta tags | `src/app/layout.tsx` → `appleWebApp` metadata |
-| In-app install prompt | `src/components/pwa/InstallPrompt.tsx` (Android button + iOS hint) |
-| **Digital Asset Links** | `public/.well-known/assetlinks.json` ← **must be edited, see below** |
+| Piece                   | Location                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| Web App Manifest        | `public/manifest.json` (maskable icons, shortcuts, `handle_links`, `launch_handler`) |
+| Service worker          | `public/sw.js` (offline cache + web push)                                            |
+| SW registration         | `src/app/layout.tsx` (inline, nonce'd)                                               |
+| iOS meta tags           | `src/app/layout.tsx` → `appleWebApp` metadata                                        |
+| In-app install prompt   | `src/components/pwa/InstallPrompt.tsx` (Android button + iOS hint)                   |
+| **Digital Asset Links** | `public/.well-known/assetlinks.json` ← **must be edited, see below**                 |
 
 ---
 

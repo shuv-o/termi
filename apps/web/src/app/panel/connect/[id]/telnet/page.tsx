@@ -4,15 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import {
-    ArrowLeft,
-    Maximize2,
-    Minimize2,
-    RotateCcw,
-    X,
-    Keyboard,
-    Loader2,
-} from 'lucide-react';
+import { ArrowLeft, Maximize2, Minimize2, RotateCcw, X, Keyboard, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const TelnetTerminal = dynamic(() => import('@/components/terminal/TelnetTerminal'), {
@@ -260,9 +252,7 @@ export default function TelnetConnectionPage() {
                 )}
             </div>
 
-            {showKeyboard && (
-                <VirtualKeyboard onKey={(key) => keyHandlerRef.current?.(key)} />
-            )}
+            {showKeyboard && <VirtualKeyboard onKey={(key) => keyHandlerRef.current?.(key)} />}
         </div>
     );
 }

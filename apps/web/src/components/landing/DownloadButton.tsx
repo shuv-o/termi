@@ -196,8 +196,8 @@ export default function DownloadDesktopButton() {
                 <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
                     <p>
                         On first launch, right-click Termi.app →{' '}
-                        <span className="text-slate-400">Open</span> to bypass the macOS verification
-                        prompt.
+                        <span className="text-slate-400">Open</span> to bypass the macOS
+                        verification prompt.
                     </p>
                     <p>
                         If macOS says the app is{' '}
