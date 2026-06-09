@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Copy, Check } from 'lucide-react';
 
 type OS = 'mac' | 'windows' | 'linux';
 type Arch = 'arm64' | 'x64';
@@ -11,6 +11,10 @@ type Arch = 'arm64' | 'x64';
 
 const RELEASE_BASE = 'https://termi.bucket.shuvoo.com/releases';
 const VERSION = 'v1.0.0';
+
+// macOS builds are ad-hoc signed but not notarized, so Gatekeeper quarantines
+// the download. This strips the quarantine flag so the app launches.
+const XATTR_CMD = 'xattr -dr com.apple.quarantine /Applications/Termi.app';
 
 const FILE_EXT: Record<OS, string> = {
     mac: 'dmg',
@@ -143,12 +147,23 @@ export default function DownloadDesktopButton() {
     const [os, setOs] = useState<OS>('mac');
     const [arch, setArch] = useState<Arch>('arm64');
     const [showAll, setShowAll] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const detected = detectOS();
         setOs(detected);
         detectArch(detected).then(setArch);
     }, []);
+
+    const copyXattr = async () => {
+        try {
+            await navigator.clipboard.writeText(XATTR_CMD);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            /* clipboard unavailable */
+        }
+    };
 
     const { label, Icon, archLabel } = PLATFORMS[os];
 
@@ -176,21 +191,43 @@ export default function DownloadDesktopButton() {
                 {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
             </button>
 
-            {/* macOS is ad-hoc signed but not notarized — surface the first-launch step */}
+            {/* macOS is ad-hoc signed but not notarized — surface the first-launch steps */}
             {os === 'mac' && (
-                <p className="max-w-sm text-center text-xs text-slate-500">
-                    On first launch, right-click Termi.app →{' '}
-                    <span className="text-slate-400">Open</span> to bypass the macOS verification
-                    prompt.{' '}
-                    <a
-                        href="https://github.com/shuvoooo/termi#macos--first-launch"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sky-400 hover:text-sky-300 underline underline-offset-2"
+                <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
+                    <p>
+                        On first launch, right-click Termi.app →{' '}
+                        <span className="text-slate-400">Open</span> to bypass the macOS verification
+                        prompt.
+                    </p>
+                    <p>
+                        If macOS says the app is{' '}
+                        <span className="text-slate-400">&ldquo;damaged&rdquo;</span>, run this in
+                        Terminal after moving it to Applications:
+                    </p>
+                    <button
+                        type="button"
+                        onClick={copyXattr}
+                        title="Copy to clipboard"
+                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2 text-left font-mono text-[11px] text-slate-300 transition-colors hover:border-slate-500"
                     >
-                        Learn more
-                    </a>
-                </p>
+                        <code className="flex-1 break-all">{XATTR_CMD}</code>
+                        {copied ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        ) : (
+                            <Copy className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover/cmd:text-slate-300" />
+                        )}
+                    </button>
+                    <p>
+                        <a
+                            href="https://github.com/shuvoooo/termi#macos--first-launch"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sky-400 underline underline-offset-2 hover:text-sky-300"
+                        >
+                            Learn more
+                        </a>
+                    </p>
+                </div>
             )}
 
             {/* Full matrix: every OS × architecture */}
