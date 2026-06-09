@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
 import {
     KeyRound,
@@ -12,6 +12,7 @@ import {
     Loader2,
     AlertCircle,
     RefreshCw,
+    Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -25,7 +26,7 @@ interface Props {
     onClose: () => void;
 }
 
-type Step = 'authenticating' | 'revealed' | 'error';
+type Step = 'authenticating' | 'password-fallback' | 'revealed' | 'error';
 
 const fieldLabel: Record<RevealField, string> = {
     password: 'Password',
@@ -54,16 +55,28 @@ function getWebAuthnErrorMessage(err: unknown): string {
 }
 
 export default function PasskeyRevealModal({ serverId, serverName, field, onClose }: Props) {
-    const [step, setStep] = useState<Step>('authenticating');
+    const isElectron =
+        typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
+
+    const [step, setStep] = useState<Step>(isElectron ? 'password-fallback' : 'authenticating');
     const [errorMsg, setErrorMsg] = useState('');
     const [revealedValue, setRevealedValue] = useState('');
     const [showValue, setShowValue] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const passwordRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        void handlePasskeyAuth();
+        if (!isElectron) void handlePasskeyAuth();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (step === 'password-fallback') {
+            setTimeout(() => passwordRef.current?.focus(), 50);
+        }
+    }, [step]);
 
     async function handlePasskeyAuth() {
         setStep('authenticating');
@@ -122,6 +135,33 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
         }
     }
 
+    async function handlePasswordReveal() {
+        if (!passwordInput.trim()) return;
+        setPasswordLoading(true);
+        setErrorMsg('');
+        try {
+            const res = await fetch(`/api/servers/${serverId}/reveal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field, authPassword: passwordInput }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) {
+                setErrorMsg(data.error || 'Authentication failed');
+                setStep('error');
+                return;
+            }
+            setRevealedValue(data.data.value);
+            setStep('revealed');
+        } catch {
+            setErrorMsg('Network error — could not reach the server');
+            setStep('error');
+        } finally {
+            setPasswordLoading(false);
+            setPasswordInput('');
+        }
+    }
+
     async function copyToClipboard() {
         let ok = false;
         try {
@@ -173,6 +213,45 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                     </div>
                 )}
 
+                {/* Step: password-fallback (Electron — passkeys not supported) */}
+                {step === 'password-fallback' && (
+                    <div className="space-y-4">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <p className="text-sm text-amber-300/90">
+                                Passkeys aren&apos;t available in the desktop app. Enter your
+                                account password to reveal this credential.
+                            </p>
+                        </div>
+                        <div>
+                            <label className="text-xs text-muted-foreground mb-1.5 block uppercase tracking-wider">
+                                Account Password
+                            </label>
+                            <input
+                                ref={passwordRef}
+                                type="password"
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handlePasswordReveal()}
+                                placeholder="Enter your password"
+                                className="w-full rounded-md bg-secondary border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                            />
+                        </div>
+                        <div className="flex gap-3 justify-end">
+                            <Button variant="secondary" onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handlePasswordReveal}
+                                disabled={!passwordInput.trim() || passwordLoading}
+                            >
+                                {passwordLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                Reveal
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Step: error */}
                 {step === 'error' && (
                     <div className="space-y-4">
@@ -189,7 +268,13 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                             <Button variant="secondary" onClick={onClose}>
                                 Cancel
                             </Button>
-                            <Button onClick={handlePasskeyAuth}>
+                            <Button
+                                onClick={() =>
+                                    isElectron
+                                        ? setStep('password-fallback')
+                                        : handlePasskeyAuth()
+                                }
+                            >
                                 <RefreshCw className="w-4 h-4" />
                                 Try Again
                             </Button>
