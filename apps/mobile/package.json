@@ -5,6 +5,7 @@
     "description": "Termi native mobile shell (Capacitor) — iOS & Android wrapper around the hosted PWA",
     "scripts": {
         "lint": "node -e \"console.log('No lint configured for @termi/mobile')\"",
+        "test": "node -e \"console.log('No unit tests configured for @termi/mobile')\"",
         "config": "node scripts/write-config.mjs",
         "sync": "npm run config && cap sync",
         "add:ios": "npm run config && cap add ios",
