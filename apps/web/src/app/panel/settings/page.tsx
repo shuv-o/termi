@@ -49,6 +49,7 @@ import { Card } from '@/components/ui/card';
 interface User {
     id: string;
     email: string;
+    name: string | null;
     totpEnabled: boolean;
     emailOtpEnabled: boolean;
     twoFactorMethod: 'NONE' | 'TOTP' | 'EMAIL';
@@ -634,6 +635,10 @@ export default function SettingsPage() {
     const [loadingSessions, setLoadingSessions] = useState(false);
     const [revokingAll, setRevokingAll] = useState(false);
 
+    //   Profile / name state
+    const [nameInput, setNameInput] = useState('');
+    const [savingName, setSavingName] = useState(false);
+
     //   Resend verification
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
@@ -643,7 +648,10 @@ export default function SettingsPage() {
             try {
                 const res = await fetch('/api/auth/me');
                 const data = await res.json();
-                if (data.success) setUser(data.data.user);
+                if (data.success) {
+                    setUser(data.data.user);
+                    setNameInput(data.data.user.name ?? '');
+                }
             } catch {
                 /* ignore */
             } finally {
@@ -872,6 +880,33 @@ export default function SettingsPage() {
             addToast('error', 'Failed to disable 2FA');
         } finally {
             setDisabling2FA(false);
+        }
+    };
+
+    //   Profile
+
+    const handleSaveName = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = nameInput.trim();
+        if (!trimmed) { addToast('error', 'Name cannot be empty'); return; }
+        setSavingName(true);
+        try {
+            const res = await fetch('/api/auth/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: trimmed }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setUser((u) => (u ? { ...u, name: trimmed } : null));
+                addToast('success', 'Name updated');
+            } else {
+                addToast('error', data.error || 'Failed to update name');
+            }
+        } catch {
+            addToast('error', 'Something went wrong');
+        } finally {
+            setSavingName(false);
         }
     };
 
@@ -1171,10 +1206,13 @@ export default function SettingsPage() {
                         <div className="mb-4 p-3 rounded-xl bg-card border border-border">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
-                                    {user.email[0].toUpperCase()}
+                                    {(user.name || user.email)[0].toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-xs font-medium truncate">{user.email}</p>
+                                    {user.name && (
+                                        <p className="text-xs font-semibold truncate">{user.name}</p>
+                                    )}
+                                    <p className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}>{user.email}</p>
                                     <div className="flex items-center gap-1 mt-0.5">
                                         {user.isVerified ? (
                                             <span className="text-[10px] text-green-400 flex items-center gap-1">
@@ -1248,6 +1286,35 @@ export default function SettingsPage() {
                     {activeSection === 'profile' && user && (
                         <div className="space-y-4">
                             <SecurityScore user={user} passkeys={passkeys} />
+
+                            {/* ── Name Card ── */}
+                            <Card className="p-5">
+                                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                                    Display Name
+                                </h2>
+                                <form onSubmit={handleSaveName} className="flex items-end gap-3">
+                                    <div className="flex-1 space-y-1.5">
+                                        <Label htmlFor="displayName">Full Name</Label>
+                                        <Input
+                                            id="displayName"
+                                            type="text"
+                                            value={nameInput}
+                                            onChange={(e) => setNameInput(e.target.value)}
+                                            placeholder="Your name"
+                                            className="bg-secondary border-border"
+                                            maxLength={100}
+                                            autoComplete="name"
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        disabled={savingName || !nameInput.trim() || nameInput.trim() === (user.name ?? '')}
+                                        className="shrink-0"
+                                    >
+                                        {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                                    </Button>
+                                </form>
+                            </Card>
 
                             <Card className="p-5">
                                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">

@@ -37,6 +37,7 @@ export type UserSumAggregateOutputType = {
 export type UserMinAggregateOutputType = {
   id: string | null
   email: string | null
+  name: string | null
   passwordHash: string | null
   totpSecret: string | null
   totpEnabled: boolean | null
@@ -61,6 +62,7 @@ export type UserMinAggregateOutputType = {
 export type UserMaxAggregateOutputType = {
   id: string | null
   email: string | null
+  name: string | null
   passwordHash: string | null
   totpSecret: string | null
   totpEnabled: boolean | null
@@ -85,6 +87,7 @@ export type UserMaxAggregateOutputType = {
 export type UserCountAggregateOutputType = {
   id: number
   email: number
+  name: number
   passwordHash: number
   totpSecret: number
   totpEnabled: number
@@ -119,6 +122,7 @@ export type UserSumAggregateInputType = {
 export type UserMinAggregateInputType = {
   id?: true
   email?: true
+  name?: true
   passwordHash?: true
   totpSecret?: true
   totpEnabled?: true
@@ -143,6 +147,7 @@ export type UserMinAggregateInputType = {
 export type UserMaxAggregateInputType = {
   id?: true
   email?: true
+  name?: true
   passwordHash?: true
   totpSecret?: true
   totpEnabled?: true
@@ -167,6 +172,7 @@ export type UserMaxAggregateInputType = {
 export type UserCountAggregateInputType = {
   id?: true
   email?: true
+  name?: true
   passwordHash?: true
   totpSecret?: true
   totpEnabled?: true
@@ -278,6 +284,7 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type UserGroupByOutputType = {
   id: string
   email: string
+  name: string | null
   passwordHash: string | null
   totpSecret: string | null
   totpEnabled: boolean
@@ -325,6 +332,7 @@ export type UserWhereInput = {
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
+  name?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   totpSecret?: Prisma.StringNullableFilter<"User"> | string | null
   totpEnabled?: Prisma.BoolFilter<"User"> | boolean
@@ -363,6 +371,7 @@ export type UserWhereInput = {
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   totpSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
@@ -404,6 +413,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
+  name?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   totpSecret?: Prisma.StringNullableFilter<"User"> | string | null
   totpEnabled?: Prisma.BoolFilter<"User"> | boolean
@@ -442,6 +452,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   totpSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
@@ -474,6 +485,7 @@ export type UserScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
+  name?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   totpSecret?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   totpEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -498,6 +510,7 @@ export type UserScalarWhereWithAggregatesInput = {
 export type UserCreateInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -536,6 +549,7 @@ export type UserCreateInput = {
 export type UserUncheckedCreateInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -574,6 +588,7 @@ export type UserUncheckedCreateInput = {
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -612,6 +627,7 @@ export type UserUpdateInput = {
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -650,6 +666,7 @@ export type UserUncheckedUpdateInput = {
 export type UserCreateManyInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -674,6 +691,7 @@ export type UserCreateManyInput = {
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -698,6 +716,7 @@ export type UserUpdateManyMutationInput = {
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -722,6 +741,7 @@ export type UserUncheckedUpdateManyInput = {
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
@@ -750,6 +770,7 @@ export type UserAvgOrderByAggregateInput = {
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
@@ -774,6 +795,7 @@ export type UserMaxOrderByAggregateInput = {
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
@@ -1042,6 +1064,7 @@ export type UserUpdateOneRequiredWithoutReceivedSharesNestedInput = {
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1079,6 +1102,7 @@ export type UserCreateWithoutSessionsInput = {
 export type UserUncheckedCreateWithoutSessionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1132,6 +1156,7 @@ export type UserUpdateToOneWithWhereWithoutSessionsInput = {
 export type UserUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1169,6 +1194,7 @@ export type UserUpdateWithoutSessionsInput = {
 export type UserUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1206,6 +1232,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
 export type UserCreateWithoutServerGroupsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1243,6 +1270,7 @@ export type UserCreateWithoutServerGroupsInput = {
 export type UserUncheckedCreateWithoutServerGroupsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1296,6 +1324,7 @@ export type UserUpdateToOneWithWhereWithoutServerGroupsInput = {
 export type UserUpdateWithoutServerGroupsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1333,6 +1362,7 @@ export type UserUpdateWithoutServerGroupsInput = {
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1370,6 +1400,7 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
 export type UserCreateWithoutServersInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1407,6 +1438,7 @@ export type UserCreateWithoutServersInput = {
 export type UserUncheckedCreateWithoutServersInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1460,6 +1492,7 @@ export type UserUpdateToOneWithWhereWithoutServersInput = {
 export type UserUpdateWithoutServersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1497,6 +1530,7 @@ export type UserUpdateWithoutServersInput = {
 export type UserUncheckedUpdateWithoutServersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1534,6 +1568,7 @@ export type UserUncheckedUpdateWithoutServersInput = {
 export type UserCreateWithoutPersistentSessionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1571,6 +1606,7 @@ export type UserCreateWithoutPersistentSessionsInput = {
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1624,6 +1660,7 @@ export type UserUpdateToOneWithWhereWithoutPersistentSessionsInput = {
 export type UserUpdateWithoutPersistentSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1661,6 +1698,7 @@ export type UserUpdateWithoutPersistentSessionsInput = {
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1698,6 +1736,7 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
 export type UserCreateWithoutAuditLogsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1735,6 +1774,7 @@ export type UserCreateWithoutAuditLogsInput = {
 export type UserUncheckedCreateWithoutAuditLogsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1788,6 +1828,7 @@ export type UserUpdateToOneWithWhereWithoutAuditLogsInput = {
 export type UserUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1825,6 +1866,7 @@ export type UserUpdateWithoutAuditLogsInput = {
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1862,6 +1904,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
 export type UserCreateWithoutOauthAccountsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1899,6 +1942,7 @@ export type UserCreateWithoutOauthAccountsInput = {
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -1952,6 +1996,7 @@ export type UserUpdateToOneWithWhereWithoutOauthAccountsInput = {
 export type UserUpdateWithoutOauthAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1989,6 +2034,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2026,6 +2072,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
 export type UserCreateWithoutPasskeysInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2063,6 +2110,7 @@ export type UserCreateWithoutPasskeysInput = {
 export type UserUncheckedCreateWithoutPasskeysInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2116,6 +2164,7 @@ export type UserUpdateToOneWithWhereWithoutPasskeysInput = {
 export type UserUpdateWithoutPasskeysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2153,6 +2202,7 @@ export type UserUpdateWithoutPasskeysInput = {
 export type UserUncheckedUpdateWithoutPasskeysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2190,6 +2240,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
 export type UserCreateWithoutPushSubscriptionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2227,6 +2278,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2280,6 +2332,7 @@ export type UserUpdateToOneWithWhereWithoutPushSubscriptionsInput = {
 export type UserUpdateWithoutPushSubscriptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2317,6 +2370,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2354,6 +2408,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
 export type UserCreateWithoutMonitorConfigsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2391,6 +2446,7 @@ export type UserCreateWithoutMonitorConfigsInput = {
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2444,6 +2500,7 @@ export type UserUpdateToOneWithWhereWithoutMonitorConfigsInput = {
 export type UserUpdateWithoutMonitorConfigsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2481,6 +2538,7 @@ export type UserUpdateWithoutMonitorConfigsInput = {
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2518,6 +2576,7 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
 export type UserCreateWithoutRecoveryCodesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2555,6 +2614,7 @@ export type UserCreateWithoutRecoveryCodesInput = {
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2608,6 +2668,7 @@ export type UserUpdateToOneWithWhereWithoutRecoveryCodesInput = {
 export type UserUpdateWithoutRecoveryCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2645,6 +2706,7 @@ export type UserUpdateWithoutRecoveryCodesInput = {
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2682,6 +2744,7 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
 export type UserCreateWithoutEmailOTPsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2719,6 +2782,7 @@ export type UserCreateWithoutEmailOTPsInput = {
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2772,6 +2836,7 @@ export type UserUpdateToOneWithWhereWithoutEmailOTPsInput = {
 export type UserUpdateWithoutEmailOTPsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2809,6 +2874,7 @@ export type UserUpdateWithoutEmailOTPsInput = {
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2846,6 +2912,7 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
 export type UserCreateWithoutSentInvitationsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2883,6 +2950,7 @@ export type UserCreateWithoutSentInvitationsInput = {
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -2936,6 +3004,7 @@ export type UserUpdateToOneWithWhereWithoutSentInvitationsInput = {
 export type UserUpdateWithoutSentInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2973,6 +3042,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3010,6 +3080,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
 export type UserCreateWithoutOwnedSharesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -3047,6 +3118,7 @@ export type UserCreateWithoutOwnedSharesInput = {
 export type UserUncheckedCreateWithoutOwnedSharesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -3089,6 +3161,7 @@ export type UserCreateOrConnectWithoutOwnedSharesInput = {
 export type UserCreateWithoutReceivedSharesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -3126,6 +3199,7 @@ export type UserCreateWithoutReceivedSharesInput = {
 export type UserUncheckedCreateWithoutReceivedSharesInput = {
   id?: string
   email: string
+  name?: string | null
   passwordHash?: string | null
   totpSecret?: string | null
   totpEnabled?: boolean
@@ -3179,6 +3253,7 @@ export type UserUpdateToOneWithWhereWithoutOwnedSharesInput = {
 export type UserUpdateWithoutOwnedSharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3216,6 +3291,7 @@ export type UserUpdateWithoutOwnedSharesInput = {
 export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3264,6 +3340,7 @@ export type UserUpdateToOneWithWhereWithoutReceivedSharesInput = {
 export type UserUpdateWithoutReceivedSharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3301,6 +3378,7 @@ export type UserUpdateWithoutReceivedSharesInput = {
 export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3486,6 +3564,7 @@ export type UserCountOutputTypeCountReceivedSharesArgs<ExtArgs extends runtime.T
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  name?: boolean
   passwordHash?: boolean
   totpSecret?: boolean
   totpEnabled?: boolean
@@ -3525,6 +3604,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  name?: boolean
   passwordHash?: boolean
   totpSecret?: boolean
   totpEnabled?: boolean
@@ -3549,6 +3629,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  name?: boolean
   passwordHash?: boolean
   totpSecret?: boolean
   totpEnabled?: boolean
@@ -3573,6 +3654,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type UserSelectScalar = {
   id?: boolean
   email?: boolean
+  name?: boolean
   passwordHash?: boolean
   totpSecret?: boolean
   totpEnabled?: boolean
@@ -3594,7 +3676,7 @@ export type UserSelectScalar = {
   passkeyEnabled?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "totpSecret" | "totpEnabled" | "emailOtpEnabled" | "twoFactorMethod" | "masterKeyHash" | "masterKeySalt" | "passwordResetToken" | "passwordResetExpiresAt" | "isActive" | "isVerified" | "emailVerificationToken" | "emailVerificationExpiresAt" | "failedLoginCount" | "lockoutUntil" | "createdAt" | "updatedAt" | "lastLoginAt" | "passkeyEnabled", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "totpSecret" | "totpEnabled" | "emailOtpEnabled" | "twoFactorMethod" | "masterKeyHash" | "masterKeySalt" | "passwordResetToken" | "passwordResetExpiresAt" | "isActive" | "isVerified" | "emailVerificationToken" | "emailVerificationExpiresAt" | "failedLoginCount" | "lockoutUntil" | "createdAt" | "updatedAt" | "lastLoginAt" | "passkeyEnabled", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   servers?: boolean | Prisma.User$serversArgs<ExtArgs>
@@ -3636,6 +3718,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     email: string
+    name: string | null
     passwordHash: string | null
     totpSecret: string | null
     totpEnabled: boolean
@@ -4094,6 +4177,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
+  readonly name: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly totpSecret: Prisma.FieldRef<"User", 'String'>
   readonly totpEnabled: Prisma.FieldRef<"User", 'Boolean'>

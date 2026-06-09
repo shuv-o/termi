@@ -18,6 +18,7 @@ export async function GET() {
             user: {
                 id: user.id,
                 email: user.email,
+                name: user.name ?? null,
                 totpEnabled: user.totpEnabled,
                 emailOtpEnabled: user.emailOtpEnabled,
                 twoFactorMethod: user.twoFactorMethod,

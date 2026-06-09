@@ -24,7 +24,7 @@ import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 export interface RegisterInput {
     email: string;
     password: string;
-    // masterKey removed — now auto-derived from password
+    name?: string;
 }
 
 export interface LoginInput {
@@ -73,7 +73,7 @@ function verifyRecoveryCodeHash(code: string, stored: string): boolean {
 // REGISTRATION
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
-    const { email, password } = input;
+    const { email, password, name } = input;
 
     const existing = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
@@ -94,6 +94,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     const user = await prisma.user.create({
         data: {
             email: email.toLowerCase(),
+            name: name?.trim() || null,
             passwordHash,
             masterKeyHash,
             masterKeySalt,
@@ -495,6 +496,7 @@ export async function getCurrentUser() {
         select: {
             id: true,
             email: true,
+            name: true,
             totpEnabled: true,
             emailOtpEnabled: true,
             twoFactorMethod: true,

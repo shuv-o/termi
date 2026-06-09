@@ -5,11 +5,12 @@
 
 import { z } from 'zod';
 import { registerUser } from '@/lib/auth';
-import { sendVerificationEmail } from '@/lib/auth/email-verification';
+import { sendEmailOTP } from '@/lib/auth/email-otp';
 import { validateBody, successResponse, errorResponse, getClientIP } from '@/lib/api';
 import { registerRateLimit } from '@/lib/rate-limit';
 
 const registerSchema = z.object({
+    name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
     email: z.string().email('Invalid email address'),
     password: z
         .string()
@@ -35,26 +36,27 @@ export async function POST(request: Request) {
         return validation.error;
     }
 
-    const { email, password } = validation.data;
+    const { name, email, password } = validation.data;
 
     try {
-        const result = await registerUser({ email, password });
+        const result = await registerUser({ name, email, password });
 
         if (!result.success) {
             return errorResponse(result.error || 'Registration failed');
         }
 
-        // Send verification email (non-blocking)
+        // Send 6-digit OTP for email verification (non-blocking on error)
         if (result.userId) {
-            sendVerificationEmail(result.userId, email).catch((err) =>
-                console.error('Failed to send verification email:', err),
+            sendEmailOTP(result.userId, email, ipAddress).catch((err) =>
+                console.error('Failed to send signup OTP:', err),
             );
         }
 
         return successResponse(
             {
-                message: 'Account created successfully. Please verify your email.',
+                message: 'Account created. Check your email for a 6-digit verification code.',
                 userId: result.userId,
+                email: result.email,
             },
             201,
         );

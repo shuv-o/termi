@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input';
 interface User {
     id: string;
     email: string;
+    name: string | null;
     totpEnabled: boolean;
     hasMasterKey: boolean;
     isVerified: boolean;
@@ -322,18 +323,23 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     className={`p-3 border-t border-border shrink-0 space-y-1 ${collapsed ? 'flex flex-col items-center' : ''}`}
                 >
                     {collapsed ? (
-                        <CollapseTooltip label={user.email}>
+                        <CollapseTooltip label={user.name || user.email}>
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default">
-                                {user.email[0].toUpperCase()}
+                                {(user.name || user.email)[0].toUpperCase()}
                             </div>
                         </CollapseTooltip>
                     ) : (
                         <div className="flex items-center gap-3 mb-1">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0">
-                                {user.email[0].toUpperCase()}
+                                {(user.name || user.email)[0].toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{user.email}</p>
+                                {user.name && (
+                                    <p className="text-sm font-medium truncate">{user.name}</p>
+                                )}
+                                <p className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}>
+                                    {user.email}
+                                </p>
                                 {user.totpEnabled && (
                                     <span className="flex items-center gap-1 text-xs text-emerald-400">
                                         <Shield className="w-3 h-3" /> 2FA
@@ -412,7 +418,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                 className="flex items-center gap-1 p-1 rounded-lg hover:bg-secondary transition-colors"
                             >
                                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs">
-                                    {user.email[0].toUpperCase()}
+                                    {(user.name || user.email)[0].toUpperCase()}
                                 </div>
                                 <ChevronDown
                                     className={`w-3 h-3 text-muted-foreground transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
@@ -427,7 +433,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                     />
                                     <div className="absolute right-0 top-full mt-2 w-52 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
                                         <div className="px-3 py-2.5 border-b border-border">
-                                            <p className="text-xs font-medium truncate">
+                                            {user.name && (
+                                                <p className="text-xs font-medium truncate">{user.name}</p>
+                                            )}
+                                            <p className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}>
                                                 {user.email}
                                             </p>
                                             {user.totpEnabled && (
