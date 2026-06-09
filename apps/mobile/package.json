@@ -1,0 +1,26 @@
+{
+    "name": "@termi/mobile",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Termi native mobile shell (Capacitor) — iOS & Android wrapper around the hosted PWA",
+    "scripts": {
+        "config": "node scripts/write-config.mjs",
+        "sync": "npm run config && cap sync",
+        "add:ios": "npm run config && cap add ios",
+        "add:android": "npm run config && cap add android",
+        "open:ios": "cap open ios",
+        "open:android": "cap open android",
+        "run:ios": "npm run sync && cap run ios",
+        "run:android": "npm run sync && cap run android"
+    },
+    "dependencies": {
+        "@capacitor/android": "^8.4.0",
+        "@capacitor/app": "^8.1.0",
+        "@capacitor/core": "^8.4.0",
+        "@capacitor/ios": "^8.4.0",
+        "@capacitor/status-bar": "^8.0.2"
+    },
+    "devDependencies": {
+        "@capacitor/cli": "^8.4.0"
+    }
+}

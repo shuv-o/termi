@@ -28,7 +28,13 @@
         "electron:dev": "ELECTRON_DEV=1 electron .",
         "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
         "build:electron:config": "node -e \"require('fs').writeFileSync('apps/electron/build-config.json', JSON.stringify({ remoteUrl: process.env.TERMI_REMOTE_URL || 'https://termi.shuvoo.com' }, null, 2) + '\\n')\"",
-        "build:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder"
+        "build:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder",
+        "mobile:config": "npm run config --workspace=apps/mobile",
+        "mobile:sync": "npm run sync --workspace=apps/mobile",
+        "mobile:add:ios": "npm run add:ios --workspace=apps/mobile",
+        "mobile:add:android": "npm run add:android --workspace=apps/mobile",
+        "mobile:open:ios": "npm run open:ios --workspace=apps/mobile",
+        "mobile:open:android": "npm run open:android --workspace=apps/mobile"
     },
     "dependencies": {
         "node-pty": "^1.1.0"

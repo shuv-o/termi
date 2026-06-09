@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import './globals.css';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
+import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://github.com/shuvoooo/termi'),
@@ -106,6 +107,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <body className="min-h-screen bg-background text-white antialiased">
                 {children}
                 <InstallPrompt />
+                <CapacitorBridge />
                 <script
                     type="application/ld+json"
                     nonce={nonce}

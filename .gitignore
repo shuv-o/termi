@@ -11,6 +11,11 @@ build/
 # Electron build-time config (server URL baked in at build)
 apps/electron/build-config.json
 
+# Capacitor mobile shell — build-time config + generated native projects
+apps/mobile/build-config.json
+apps/mobile/ios/
+apps/mobile/android/
+
 # Environment files
 .env
 .env.local
