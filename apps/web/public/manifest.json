@@ -89,5 +89,9 @@
             ]
         }
     ],
-    "prefer_related_applications": false
+    "prefer_related_applications": false,
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": ["navigate-existing", "auto"]
+    }
 }

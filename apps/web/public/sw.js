@@ -7,7 +7,7 @@
  * - Notification click → focus/open the app
  */
 
-const CACHE_NAME = 'termi-v3';
+const CACHE_NAME = 'termi-v4';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to pre-cache on install
