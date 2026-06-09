@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
+import { validateBody, successResponse, unauthorizedResponse } from '@/lib/api';
 import { prisma } from '@/lib/db';
 
 const schema = z.object({

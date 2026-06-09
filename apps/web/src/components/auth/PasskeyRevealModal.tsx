@@ -55,8 +55,7 @@ function getWebAuthnErrorMessage(err: unknown): string {
 }
 
 export default function PasskeyRevealModal({ serverId, serverName, field, onClose }: Props) {
-    const isElectron =
-        typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
+    const isElectron = typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
 
     const [step, setStep] = useState<Step>(isElectron ? 'password-fallback' : 'authenticating');
     const [errorMsg, setErrorMsg] = useState('');
@@ -270,9 +269,7 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
                             </Button>
                             <Button
                                 onClick={() =>
-                                    isElectron
-                                        ? setStep('password-fallback')
-                                        : handlePasskeyAuth()
+                                    isElectron ? setStep('password-fallback') : handlePasskeyAuth()
                                 }
                             >
                                 <RefreshCw className="w-4 h-4" />

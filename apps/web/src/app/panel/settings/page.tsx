@@ -669,7 +669,6 @@ export default function SettingsPage() {
                 })
                 .catch(() => {});
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Load auth sessions when that section is active
@@ -678,7 +677,7 @@ export default function SettingsPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeSection]);
 
-    const loadPasskeys = useCallback(async () => {
+    const loadPasskeys = async () => {
         setLoadingPasskeys(true);
         try {
             const res = await fetch('/api/auth/passkey');
@@ -689,7 +688,7 @@ export default function SettingsPage() {
         } finally {
             setLoadingPasskeys(false);
         }
-    }, []);
+    };
 
     const loadAuthSessions = useCallback(async () => {
         setLoadingSessions(true);
