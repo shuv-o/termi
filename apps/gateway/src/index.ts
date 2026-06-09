@@ -19,6 +19,7 @@ import { SSHHandler, type SSHOutputSink } from './handlers/ssh.js';
 import { SCPHandler } from './handlers/scp.js';
 import { GuacamoleHandler } from './handlers/guacamole.js';
 import { LocalHandler } from './handlers/local.js';
+import { TelnetHandler } from './handlers/telnet.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
 import {
@@ -105,9 +106,9 @@ const persistentSessions = new PersistentSessionStore();
 /** Active non-SSH WebSocket connections (for cleanup on error/close). */
 interface NonSshMeta {
     userId: string;
-    protocol: 'scp' | 'rdp' | 'vnc' | 'local';
+    protocol: 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local';
     serverId: string;
-    handler?: SCPHandler | GuacamoleHandler | LocalHandler;
+    handler?: SCPHandler | GuacamoleHandler | LocalHandler | TelnetHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
@@ -175,7 +176,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     // token is NO LONGER in the URL — it arrives in the first WS message
-    const protocol = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
+    const protocol = url.searchParams.get('protocol') as 'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local';
     const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
     const browserWidth = parseInt(url.searchParams.get('width') || '0', 10) || 0;
@@ -187,7 +188,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
-    if (!['ssh', 'scp', 'rdp', 'vnc', 'local'].includes(protocol)) {
+    if (!['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local'].includes(protocol)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Invalid protocol' }));
         ws.close(4000, 'Bad Request');
         return;
@@ -503,11 +504,11 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return; // SSH handled
         }
 
-        //   Non-SSH: SCP / RDP / VNC (unchanged behaviour)          ─
+        //   Non-SSH: SCP / RDP / VNC / Telnet                      ─
 
         const meta: NonSshMeta = {
             userId: tokenPayload.userId,
-            protocol: protocol as 'scp' | 'rdp' | 'vnc',
+            protocol: protocol as 'scp' | 'rdp' | 'vnc' | 'telnet',
             serverId,
         };
         nonSshConnections.set(ws, meta);
@@ -538,6 +539,46 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
         if (protocol === 'scp') {
             meta.handler = new SCPHandler(ws, tokenPayload);
+        } else if (protocol === 'telnet') {
+            //   Telnet: raw TCP with IAC negotiation, binary I/O like SSH
+
+            const sink: SSHOutputSink = {
+                onData(data: Buffer) {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(data, { binary: true });
+                    }
+                },
+                onMessage(type: string, extra?: Record<string, unknown>) {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type, ...extra }));
+                    }
+                },
+            };
+
+            const telnetHandler = new TelnetHandler(tokenPayload, sink);
+            meta.handler = telnetHandler;
+
+            ws.on('message', (data: Buffer, isBinary: boolean) => {
+                if (isBinary) {
+                    resetTimeout();
+                    telnetHandler.write(data);
+                    return;
+                }
+                try {
+                    const msg = JSON.parse(data.toString());
+                    switch (msg.type) {
+                        case 'resize':
+                            if (msg.cols && msg.rows) telnetHandler.resize(msg.rows, msg.cols);
+                            break;
+                        case 'close-session':
+                            telnetHandler.close();
+                            ws.close(1000, 'Session closed');
+                            break;
+                    }
+                } catch {
+                    /* ignore malformed control messages */
+                }
+            });
         } else {
             // Override stored display dimensions with the browser's actual viewport
             const payloadWithDims =

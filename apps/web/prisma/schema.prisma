@@ -276,6 +276,7 @@ enum Protocol {
   SCP
   RDP
   VNC
+  TELNET
 }
 
 enum ConnectionStatus {

@@ -16,7 +16,7 @@ import { connectionTestRateLimit } from '@/lib/rate-limit';
 const schema = z.object({
     host: z.string().min(1),
     port: z.number().int().min(1).max(65535),
-    protocol: z.enum(['SSH', 'SCP', 'RDP', 'VNC']).default('SSH'),
+    protocol: z.enum(['SSH', 'SCP', 'RDP', 'VNC', 'TELNET']).default('SSH'),
     username: z.string().optional(),
     password: z.string().optional(),
     privateKey: z.string().optional(),
@@ -191,6 +191,7 @@ export async function POST(request: Request) {
     }
 
     const isSSH = protocol === 'SSH' || protocol === 'SCP';
+    // TELNET uses TCP check only (no SSH auth)
 
     if (isSSH && username) {
         const result = await sshAuthTest({

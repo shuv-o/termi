@@ -58,7 +58,7 @@ interface ServerInGroup {
     host: string;
     port: number;
     username: string;
-    protocol: 'SSH' | 'SCP' | 'RDP' | 'VNC';
+    protocol: 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';
     isFavorite: boolean;
     lastUsedAt: string | null;
 }
@@ -111,7 +111,7 @@ const protocolColors: Record<string, string> = {
     VNC: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
 };
 
-const protocolIcons = { SSH: Terminal, SCP: FolderOpen, RDP: Monitor, VNC: Monitor };
+const protocolIcons: Record<string, typeof Terminal> = { SSH: Terminal, SCP: FolderOpen, RDP: Monitor, VNC: Monitor, TELNET: Terminal };
 
 // HELPERS
 

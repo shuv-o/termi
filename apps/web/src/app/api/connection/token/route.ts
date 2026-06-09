@@ -26,7 +26,7 @@ const tokenSchema = z.discriminatedUnion('protocol', [
         serverId: z.string().optional(),
     }),
     z.object({
-        protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc']),
+        protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc', 'telnet']),
         serverId: z.string(),
     }),
 ]);

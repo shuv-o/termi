@@ -13,7 +13,8 @@ export const Protocol = {
   SSH: 'SSH',
   SCP: 'SCP',
   RDP: 'RDP',
-  VNC: 'VNC'
+  VNC: 'VNC',
+  TELNET: 'TELNET'
 } as const
 
 export type Protocol = (typeof Protocol)[keyof typeof Protocol]

@@ -78,7 +78,7 @@ interface ServerItem {
     id: string;
     name: string;
     description?: string;
-    protocol: 'SSH' | 'SCP' | 'RDP' | 'VNC';
+    protocol: 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';
     tags: string[];
     isFavorite: boolean;
     hasPassword: boolean;
@@ -105,7 +105,7 @@ interface ServerMetrics {
 }
 
 type ViewMode = 'grid' | 'list';
-type ProtocolFilter = 'all' | 'SSH' | 'SCP' | 'RDP' | 'VNC';
+type ProtocolFilter = 'all' | 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';
 
 type SortField =
     | 'name'
@@ -144,6 +144,7 @@ const protocolIcons = {
     SCP: FolderOpen,
     RDP: Monitor,
     VNC: Monitor,
+    TELNET: Terminal,
 };
 
 const protocolVariants: Record<string, string> = {
@@ -151,6 +152,7 @@ const protocolVariants: Record<string, string> = {
     SCP: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
     RDP: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
     VNC: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+    TELNET: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
 };
 
 function formatBytes(bytes: number): string {
@@ -1424,6 +1426,7 @@ export default function DashboardPage() {
             SCP: base.filter((s) => s.protocol === 'SCP').length,
             RDP: base.filter((s) => s.protocol === 'RDP').length,
             VNC: base.filter((s) => s.protocol === 'VNC').length,
+            TELNET: base.filter((s) => s.protocol === 'TELNET').length,
         };
     }, [servers, filter, activeTag]);
 
@@ -1432,6 +1435,7 @@ export default function DashboardPage() {
         SCP: protocolCounts.SCP,
         RDP: protocolCounts.RDP,
         VNC: protocolCounts.VNC,
+        TELNET: protocolCounts.TELNET,
     }).some((c) => c > 0);
 
     return (
@@ -1586,7 +1590,7 @@ export default function DashboardPage() {
                     {/* Protocol filter pills */}
                     {showProtocolFilters && (
                         <div className="flex items-center gap-2 flex-wrap">
-                            {(['all', 'SSH', 'SCP', 'RDP', 'VNC'] as ProtocolFilter[]).map((p) => {
+                            {(['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]).map((p) => {
                                 const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
                                 if (p !== 'all' && count === 0) return null;
                                 const active = protocolFilter === p;
@@ -1603,6 +1607,9 @@ export default function DashboardPage() {
                                     VNC: active
                                         ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
                                         : 'text-muted-foreground border-border hover:border-orange-500/30 hover:text-orange-400',
+                                    TELNET: active
+                                        ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
+                                        : 'text-muted-foreground border-border hover:border-cyan-500/30 hover:text-cyan-400',
                                     all: active
                                         ? 'bg-primary/15 text-primary border-primary/30'
                                         : 'text-muted-foreground border-border hover:text-foreground',

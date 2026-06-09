@@ -13,7 +13,7 @@ import { createHash } from 'crypto';
 export interface TokenPayload {
     userId: string;
     serverId: string;
-    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'local';
+    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local';
     // host/username are present for remote protocols, absent for 'local'
     host: string;
     port: number;
@@ -53,7 +53,7 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             throw new Error('Invalid token payload');
         }
 
-        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'local'] as const;
+        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local'] as const;
         if (
             !payload.protocol ||
             !VALID_PROTOCOLS.includes(payload.protocol as (typeof VALID_PROTOCOLS)[number])

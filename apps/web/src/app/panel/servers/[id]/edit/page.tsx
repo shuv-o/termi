@@ -48,9 +48,10 @@ const protocols = [
     { value: 'SCP', label: 'SCP', icon: FolderOpen, desc: 'File Transfer' },
     { value: 'RDP', label: 'RDP', icon: Monitor, desc: 'Remote Desktop' },
     { value: 'VNC', label: 'VNC', icon: Tv, desc: 'Virtual Console' },
+    { value: 'TELNET', label: 'Telnet', icon: Terminal, desc: 'Telnet Terminal' },
 ] as const;
 
-const defaultPorts = { SSH: 22, SCP: 22, RDP: 3389, VNC: 5900 };
+const defaultPorts = { SSH: 22, SCP: 22, RDP: 3389, VNC: 5900, TELNET: 23 };
 
 const protoColors = {
     SSH: {
@@ -72,6 +73,11 @@ const protoColors = {
         pill: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
         ring: 'ring-orange-500/40 border-orange-500/60',
         badge: 'bg-orange-500/15 text-orange-400',
+    },
+    TELNET: {
+        pill: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+        ring: 'ring-cyan-500/40 border-cyan-500/60',
+        badge: 'bg-cyan-500/15 text-cyan-400',
     },
 };
 
@@ -303,7 +309,7 @@ export default function EditServerPage() {
                                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                                     Protocol
                                 </p>
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                                     {protocols.map((p) => {
                                         const isActive = form.protocol === p.value;
                                         const c = protoColors[p.value];
