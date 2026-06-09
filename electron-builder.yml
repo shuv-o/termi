@@ -3,28 +3,19 @@ productName: Termi
 directories:
   output: dist
 
-# Only the Electron entry points go into the asar.
-# The bundled gateway is placed as an extraResource so it can be spawned
-# as a child process (asar-packed files cannot be spawned directly).
+# Only the Electron entry points go into the asar. The desktop app is a thin
+# native shell around the hosted Termi server (web + gateway + guacd all live
+# there); the only local capability is the terminal, which uses node-pty.
 files:
   - apps/electron/main.js
   - apps/electron/preload.js
-  - apps/electron/setup-preload.js
-  - apps/electron/setup.html
+  - apps/electron/build-config.json
   - apps/web/public/icons/icon-512x512.png
   - node_modules/node-pty/**/*
-  - node_modules/ssh2/**/*
 
 # Native addons cannot be loaded from inside an asar archive — unpack them.
-# The gateway child process also uses these via NODE_PATH pointing here.
 asarUnpack:
   - node_modules/node-pty/**/*
-  - node_modules/ssh2/**/*
-
-extraResources:
-  # Gateway bundled to CJS by the build:gateway-bundle script
-  - from: apps/electron/gateway.cjs
-    to: gateway.cjs
 
 mac:
   target:

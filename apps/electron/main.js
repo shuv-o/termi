@@ -1,36 +1,32 @@
 const { app, BrowserWindow, shell, ipcMain, session, Menu } = require('electron');
-const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const crypto = require('crypto');
-
-//   Environment loading                            ─
-
-function parseEnvFile(content) {
-    for (const raw of content.split('\n')) {
-        const line = raw.trim();
-        if (!line || line.startsWith('#')) continue;
-        const eq = line.indexOf('=');
-        if (eq < 0) continue;
-        const key = line.slice(0, eq).trim();
-        let val = line.slice(eq + 1).trim();
-        if (/^["'][\s\S]*["']$/.test(val)) val = val.slice(1, -1);
-        if (key && !(key in process.env)) process.env[key] = val;
-    }
-}
-
-// Dev: load the monorepo root .env
-const rootEnvPath = path.join(__dirname, '../../.env');
-if (fs.existsSync(rootEnvPath)) {
-    try {
-        parseEnvFile(fs.readFileSync(rootEnvPath, 'utf8'));
-    } catch (_) {}
-}
 
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
-let guacdProcess, gatewayProcess, win, setupWin;
+let win;
+
+//   Remote server URL (baked at build time)                ─
+
+// The hosted Termi deployment serves the web UI and proxies SSH/SCP/RDP/VNC
+// through its own gateway + guacd. This desktop app is just a native shell
+// around that remote app, plus a local terminal. Resolution order:
+//   1. TERMI_REMOTE_URL env var (used by the dev scripts)
+//   2. build-config.json written next to main.js at build time
+//   3. the hardcoded default below
+function getRemoteUrl() {
+    if (process.env.TERMI_REMOTE_URL) return process.env.TERMI_REMOTE_URL;
+    try {
+        const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'build-config.json'), 'utf8'));
+        if (cfg.remoteUrl) return cfg.remoteUrl;
+    } catch (_) {}
+    return 'https://termi.shuvoo.com';
+}
+
+const REMOTE_URL = getRemoteUrl();
+
+//   node-pty (optional native module)                      ─
 
 let nodePty;
 try {
@@ -55,90 +51,7 @@ function getWindowIconPath() {
     return candidates.find((candidate) => fs.existsSync(candidate)) || undefined;
 }
 
-//   Config loading
-
-function getConfigPath() {
-    return path.join(app.getPath('userData'), 'termi.config.json');
-}
-
-function loadConfig() {
-    const configPath = getConfigPath();
-    if (!fs.existsSync(configPath)) return;
-
-    if (process.platform !== 'win32') {
-        try {
-            fs.chmodSync(configPath, 0o600);
-        } catch (_) {}
-    } else {
-        try {
-            const { execSync } = require('child_process');
-            const username = os.userInfo().username;
-            execSync(`icacls "${configPath}" /inheritance:r /grant:r "${username}:F"`, {
-                stdio: 'ignore',
-            });
-        } catch (_) {}
-    }
-
-    try {
-        const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        for (const [k, v] of Object.entries(cfg)) {
-            if (typeof v === 'string' && !(k in process.env)) process.env[k] = v;
-        }
-    } catch (e) {
-        console.error('[config] Failed to parse termi.config.json:', e.message);
-    }
-}
-
-//   Service helpers                              ─
-
-function getPaths() {
-    if (app.isPackaged) {
-        const r = process.resourcesPath;
-        return {
-            gateway: path.join(r, 'gateway.cjs'),
-            // Native modules (node-pty, ssh2) are unpacked from the asar here
-            nodePath: path.join(r, 'app.asar.unpacked', 'node_modules'),
-        };
-    }
-    return {
-        gateway: path.join(__dirname, 'gateway.cjs'),
-        // In dev, use the workspace root node_modules (workspaces hoist deps)
-        nodePath: path.join(__dirname, '../../node_modules'),
-    };
-}
-
-function startGuacd() {
-    guacdProcess = spawn('docker', [
-        'run',
-        '--rm',
-        '-p',
-        '4822:4822',
-        '--name',
-        'guacd-desktop',
-        'guacamole/guacd:1.6.0',
-    ]);
-    guacdProcess.stderr.on('data', (d) => console.log('[guacd]', d.toString().trim()));
-    guacdProcess.on('error', (err) =>
-        console.warn('[guacd] Docker not available — RDP/VNC disabled:', err.message),
-    );
-}
-
-function startGateway(paths) {
-    gatewayProcess = spawn(process.execPath, [paths.gateway], {
-        env: {
-            ...process.env,
-            NODE_PATH: paths.nodePath,
-            GATEWAY_PORT: process.env.GATEWAY_PORT || '22081',
-            GATEWAY_HOST: '127.0.0.1',
-            ALLOWED_ORIGINS: 'http://localhost:22080,http://127.0.0.1:22080',
-        },
-    });
-    gatewayProcess.stdout.on('data', (d) => console.log('[gateway]', d.toString().trim()));
-    gatewayProcess.stderr.on('data', (d) => console.error('[gateway]', d.toString().trim()));
-    gatewayProcess.on('error', (err) => console.error('[gateway] Failed to start:', err.message));
-}
-
-//   Windows                                  ─
+//   Windows                                                ─
 
 /** Tell the renderer (SPA) to navigate without a full page reload. */
 function navigateTo(routePath) {
@@ -150,13 +63,6 @@ function navigateTo(routePath) {
 
 function buildAppMenu() {
     const isMac = process.platform === 'darwin';
-    const reconfigureItem = {
-        label: 'Reconfigure…',
-        click: () => {
-            app.relaunch();
-            app.quit();
-        },
-    };
 
     const template = [
         ...(isMac
@@ -165,7 +71,6 @@ function buildAppMenu() {
                       label: app.name,
                       submenu: [
                           { role: 'about' },
-                          reconfigureItem,
                           { type: 'separator' },
                           { role: 'services' },
                           { type: 'separator' },
@@ -177,12 +82,7 @@ function buildAppMenu() {
                       ],
                   },
               ]
-            : [
-                  {
-                      label: 'Termi',
-                      submenu: [reconfigureItem, { type: 'separator' }, { role: 'quit' }],
-                  },
-              ]),
+            : []),
         {
             label: 'Edit',
             submenu: [
@@ -200,6 +100,23 @@ function buildAppMenu() {
         {
             label: 'Go',
             submenu: [
+                {
+                    label: 'Back',
+                    accelerator: isMac ? 'Cmd+[' : 'Alt+Left',
+                    click: () => {
+                        const wc = win && !win.isDestroyed() ? win.webContents : undefined;
+                        if (wc?.navigationHistory.canGoBack()) wc.navigationHistory.goBack();
+                    },
+                },
+                {
+                    label: 'Forward',
+                    accelerator: isMac ? 'Cmd+]' : 'Alt+Right',
+                    click: () => {
+                        const wc = win && !win.isDestroyed() ? win.webContents : undefined;
+                        if (wc?.navigationHistory.canGoForward()) wc.navigationHistory.goForward();
+                    },
+                },
+                { type: 'separator' },
                 { label: 'Servers', accelerator: 'CmdOrCtrl+1', click: () => navigateTo('/panel') },
                 {
                     label: 'Groups',
@@ -250,30 +167,7 @@ function buildAppMenu() {
     return Menu.buildFromTemplate(template);
 }
 
-function createSetupWindow(errorMsg) {
-    const iconPath = getWindowIconPath();
-    setupWin = new BrowserWindow({
-        width: 700,
-        height: 580,
-        resizable: false,
-        title: 'Termi Setup',
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'setup-preload.js'),
-        },
-        ...(iconPath ? { icon: iconPath } : {}),
-    });
-
-    const fileUrl = new URL(`file://${path.join(__dirname, 'setup.html')}`);
-    if (errorMsg) fileUrl.searchParams.set('error', errorMsg);
-    setupWin.loadURL(fileUrl.toString());
-    setupWin.on('closed', () => {
-        setupWin = null;
-    });
-}
-
-//   Static asset caching
+//   Static asset caching                                   ─
 
 let cachingConfigured = false;
 
@@ -342,56 +236,14 @@ function createWindow(appUrl) {
     });
 }
 
-//   Startup logic                               ─
-
-async function startApp() {
-    const remoteUrl = process.env.TERMI_REMOTE_URL;
-    if (!remoteUrl) {
-        createSetupWindow('TERMI_REMOTE_URL is not set');
-        return;
-    }
-
-    if (process.env.RUN_LOCAL_GATEWAY === 'true') startGateway(getPaths());
-    if (process.env.RUN_LOCAL_GUACD === 'true') startGuacd();
-
+function startApp() {
     // The desktop app has no use for the marketing landing page — open straight
     // to login. (The login page redirects already-authenticated users to /panel.)
-    const startUrl = new URL('/login', remoteUrl).toString();
+    const startUrl = new URL('/login', REMOTE_URL).toString();
     createWindow(startUrl);
 }
 
-//   Setup IPC handlers
-
-ipcMain.handle('setup:generate-secret', () => crypto.randomBytes(32).toString('base64'));
-
-ipcMain.handle('setup:check-docker', () => {
-    const r = spawnSync('docker', ['info'], { timeout: 5000 });
-    return { available: r.status === 0 };
-});
-
-ipcMain.handle('setup:get-config-path', () => getConfigPath());
-
-ipcMain.handle('setup:open-config-folder', () => shell.openPath(app.getPath('userData')));
-
-ipcMain.handle('setup:save-config', (_e, config) => {
-    const p = getConfigPath();
-    fs.writeFileSync(p, JSON.stringify(config, null, 2), { mode: 0o600 });
-    if (process.platform !== 'win32') {
-        try {
-            fs.chmodSync(p, 0o600);
-        } catch (_) {}
-    }
-    return { ok: true };
-});
-
-ipcMain.handle('setup:launch', async () => {
-    if (setupWin && !setupWin.isDestroyed()) setupWin.close();
-    // Reload config that was just saved into process.env
-    loadConfig();
-    await startApp();
-});
-
-//   Local terminal IPC
+//   Local terminal IPC                                     ─
 
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
     if (!nodePty)
@@ -469,7 +321,7 @@ ipcMain.on('local-terminal:kill', (event, id) => {
     }
 });
 
-//                                       ─
+//   App lifecycle                                          ─
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -484,15 +336,8 @@ app.on('second-instance', () => {
     }
 });
 
-app.whenReady().then(async () => {
-    loadConfig();
-
-    if (!process.env.TERMI_REMOTE_URL) {
-        createSetupWindow();
-        return;
-    }
-
-    await startApp();
+app.whenReady().then(() => {
+    startApp();
 });
 
 app.on('window-all-closed', () => {
@@ -500,9 +345,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0 && process.env.TERMI_REMOTE_URL) {
-        startApp();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) startApp();
 });
 
 app.on('before-quit', () => {
@@ -512,9 +355,4 @@ app.on('before-quit', () => {
         } catch (_) {}
     }
     localPtys.clear();
-    gatewayProcess?.kill();
-    guacdProcess?.kill();
-    try {
-        spawnSync('docker', ['stop', 'guacd-desktop']);
-    } catch (_) {}
 });

@@ -8,6 +8,9 @@ out/
 dist/
 build/
 
+# Electron build-time config (server URL baked in at build)
+apps/electron/build-config.json
+
 # Environment files
 .env
 .env.local

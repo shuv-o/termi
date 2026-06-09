@@ -16,6 +16,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     ChevronDown,
+    ChevronLeft,
     Laptop,
 } from 'lucide-react';
 import { SessionsProvider } from './sessions-context';
@@ -83,6 +84,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const handleOpenLocalTerminal = useCallback(() => {
         router.push('/panel/local');
     }, [router]);
+
+    /** Go back through the navigation history (Electron desktop app). */
+    const handleBack = useCallback(() => {
+        if (typeof window !== 'undefined') window.history.back();
+    }, []);
 
     /** True when the dedicated local terminal page is open. */
     const localTerminalActive = isLocalPage;
@@ -202,17 +208,28 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             </span>
                         </Link>
                     )}
-                    <button
-                        onClick={toggleCollapsed}
-                        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
-                    >
-                        {collapsed ? (
-                            <PanelLeftOpen className="w-4 h-4" />
-                        ) : (
-                            <PanelLeftClose className="w-4 h-4" />
+                    <div className="flex items-center gap-1 shrink-0">
+                        {isElectron && !collapsed && (
+                            <button
+                                onClick={handleBack}
+                                title="Back (Cmd/Alt+←)"
+                                className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
                         )}
-                    </button>
+                        <button
+                            onClick={toggleCollapsed}
+                            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                            className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+                        >
+                            {collapsed ? (
+                                <PanelLeftOpen className="w-4 h-4" />
+                            ) : (
+                                <PanelLeftClose className="w-4 h-4" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Search */}
