@@ -106,8 +106,8 @@ export class LocalHandler {
             return;
         }
 
-        const shell =
-            process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || '/bin/sh';
+        const isWindows = process.platform === 'win32';
+        const shell = isWindows ? 'powershell.exe' : process.env.SHELL || '/bin/sh';
 
         // Provide a minimal, sanitised environment — do NOT inherit process.env
         // which would expose secrets like GATEWAY_JWT_SECRET, DATABASE_URL etc.
@@ -122,8 +122,12 @@ export class LocalHandler {
             SHELL: shell,
         };
 
+        // Spawn as a login shell so profile files (~/.zprofile, /etc/profile, etc.)
+        // are sourced and the user's full PATH (nvm, brew, npm global, etc.) is available.
+        const shellArgs = isWindows ? [] : ['-l'];
+
         try {
-            this.pty = _ptySpawn(shell, [], {
+            this.pty = _ptySpawn(shell, shellArgs, {
                 name: 'xterm-256color',
                 cols: 80,
                 rows: 24,

@@ -256,8 +256,8 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
         return { success: false, error: 'Terminal already exists with that ID' };
     }
 
-    const shell =
-        process.platform === 'win32' ? 'powershell.exe' : process.env.SHELL || '/bin/bash';
+    const isWindows = process.platform === 'win32';
+    const shell = isWindows ? 'powershell.exe' : process.env.SHELL || '/bin/bash';
 
     const safeHome = os.homedir();
     let safeCwd = safeHome;
@@ -270,8 +270,13 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
         }
     }
 
+    // Login shell so profile files (~/.zprofile etc.) are sourced, giving the
+    // full user PATH (Homebrew, nvm, npm globals, etc.) — apps launched from the
+    // macOS Dock only inherit the minimal launchd PATH otherwise.
+    const shellArgs = isWindows ? [] : ['-l'];
+
     try {
-        const term = nodePty.spawn(shell, [], {
+        const term = nodePty.spawn(shell, shellArgs, {
             name: 'xterm-256color',
             cols: cols || 80,
             rows: rows || 24,
