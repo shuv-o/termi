@@ -16,6 +16,10 @@ import {
     CheckCircle2,
     X,
     Save,
+    Copy,
+    Check,
+    User,
+    KeyRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +66,35 @@ export default function KeychainPage() {
     const [showPassphrase, setShowPassphrase] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState('');
+    // copied[entryId] = 'user' | 'pass' | null — which field just got copied
+    const [copied, setCopied] = useState<Record<string, 'user' | 'pass' | null>>({});
+
+    const markCopied = (id: string, field: 'user' | 'pass') => {
+        setCopied((prev) => ({ ...prev, [id]: field }));
+        setTimeout(() => setCopied((prev) => ({ ...prev, [id]: null })), 2000);
+    };
+
+    const copyUsername = (entry: KeychainEntry) => {
+        navigator.clipboard.writeText(entry.username).then(() => markCopied(entry.id, 'user'));
+    };
+
+    const copyPassword = async (entry: KeychainEntry) => {
+        try {
+            const res = await fetch(`/api/keychain/${entry.id}`);
+            const data = await res.json();
+            if (data.success) {
+                const secret = entry.hasPrivateKey
+                    ? data.data.entry.privateKey
+                    : data.data.entry.password;
+                if (secret) {
+                    await navigator.clipboard.writeText(secret);
+                    markCopied(entry.id, 'pass');
+                }
+            }
+        } catch {
+            // ignore
+        }
+    };
 
     const update = (fields: Partial<EntryForm>) => setForm((f) => ({ ...f, ...fields }));
 
@@ -484,9 +517,24 @@ export default function KeychainPage() {
 
                                     <div className="min-w-0">
                                         <p className="truncate text-base font-semibold">{entry.label}</p>
-                                        <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
-                                            {entry.username}
-                                        </p>
+                                        {/* Username row with copy button */}
+                                        <div className="mt-1 flex items-center gap-1.5 min-w-0">
+                                            <User className="w-3 h-3 text-muted-foreground shrink-0" />
+                                            <p className="flex-1 truncate font-mono text-xs text-muted-foreground">
+                                                {entry.username}
+                                            </p>
+                                            <button
+                                                onClick={() => copyUsername(entry)}
+                                                title="Copy username"
+                                                className="shrink-0 p-1 rounded hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                                            >
+                                                {copied[entry.id] === 'user' ? (
+                                                    <Check className="w-3 h-3 text-emerald-400" />
+                                                ) : (
+                                                    <Copy className="w-3 h-3" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-4">
@@ -494,6 +542,24 @@ export default function KeychainPage() {
                                             Added {new Date(entry.createdAt).toLocaleDateString()}
                                         </p>
                                         <div className="flex items-center gap-1">
+                                            {/* Copy password / SSH key */}
+                                            {(entry.hasPassword || entry.hasPrivateKey) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary"
+                                                    onClick={() => copyPassword(entry)}
+                                                    title={entry.hasPrivateKey ? 'Copy SSH key' : 'Copy password'}
+                                                >
+                                                    {copied[entry.id] === 'pass' ? (
+                                                        <Check className="w-4 h-4 text-emerald-400" />
+                                                    ) : entry.hasPrivateKey ? (
+                                                        <KeyRound className="w-4 h-4" />
+                                                    ) : (
+                                                        <KeyRound className="w-4 h-4" />
+                                                    )}
+                                                </Button>
+                                            )}
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
