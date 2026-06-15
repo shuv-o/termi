@@ -22,6 +22,8 @@ import {
     WifiOff,
     Globe,
     SplitSquareHorizontal,
+    PanelLeft,
+    PanelTop,
     Monitor,
     Wifi,
     ArrowRightLeft,
@@ -995,10 +997,22 @@ export default function SessionsWorkspace() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
+    const [layoutMode, setLayoutMode] = useState<'sidebar' | 'tabbar'>('tabbar');
 
     useEffect(() => {
         // Default sidebar open only on desktop
         setSidebarOpen(window.innerWidth >= 1024);
+        // Restore saved layout preference
+        const saved = localStorage.getItem('sessions-layout');
+        if (saved === 'sidebar' || saved === 'tabbar') setLayoutMode(saved);
+    }, []);
+
+    const toggleLayoutMode = useCallback(() => {
+        setLayoutMode((m) => {
+            const next = m === 'sidebar' ? 'tabbar' : 'sidebar';
+            localStorage.setItem('sessions-layout', next);
+            return next;
+        });
     }, []);
 
     const [allServers, setAllServers] = useState<ServerItem[]>([]);
@@ -1043,15 +1057,33 @@ export default function SessionsWorkspace() {
         <div className={`flex flex-col ${containerHeight}`}>
             {/*   Top toolbar   */}
             <div className="shrink-0 flex items-center gap-1.5 px-2 py-2 bg-card border-b border-border">
+                {/* Layout mode toggle: sidebar ↔ tabbar */}
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setSidebarOpen((o) => !o)}
+                    onClick={toggleLayoutMode}
                     className="h-8 w-8 shrink-0"
-                    title={sidebarOpen ? 'Hide session list' : 'Show session list'}
+                    title={layoutMode === 'sidebar' ? 'Switch to tab bar layout' : 'Switch to sidebar layout'}
                 >
-                    <SplitSquareHorizontal className="w-4 h-4" />
+                    {layoutMode === 'sidebar' ? (
+                        <PanelTop className="w-4 h-4" />
+                    ) : (
+                        <PanelLeft className="w-4 h-4" />
+                    )}
                 </Button>
+
+                {/* Sidebar open/close — only in sidebar mode */}
+                {layoutMode === 'sidebar' && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSidebarOpen((o) => !o)}
+                        className="h-8 w-8 shrink-0"
+                        title={sidebarOpen ? 'Hide session list' : 'Show session list'}
+                    >
+                        <SplitSquareHorizontal className="w-4 h-4" />
+                    </Button>
+                )}
 
                 <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
                     <Monitor className="w-4 h-4" />
@@ -1116,7 +1148,8 @@ export default function SessionsWorkspace() {
                 </Button>
             </div>
 
-            {/*   Session tab bar   */}
+            {/*   Session tab bar — shown only in tabbar layout mode   */}
+            {layoutMode === 'tabbar' && (
             <div className="shrink-0 flex items-stretch border-b border-border bg-card/60 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {sessions.map((session) => {
                     const isTabActive = activeTabId === session.tabId && mode === 'terminal';
@@ -1165,19 +1198,20 @@ export default function SessionsWorkspace() {
                     <Laptop className="w-3.5 h-3.5" />
                 </button>
             </div>
+            )}
 
             {/*   Body: sidebar + content   */}
             <div className="flex flex-1 min-h-0 relative">
                 {/* Mobile backdrop */}
-                {sidebarOpen && (
+                {layoutMode === 'sidebar' && sidebarOpen && (
                     <div
                         className="lg:hidden fixed inset-0 z-10 bg-black/60 backdrop-blur-sm"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
 
-                {/*   Session sidebar   */}
-                {sidebarOpen && (
+                {/*   Session sidebar — shown only in sidebar layout mode   */}
+                {layoutMode === 'sidebar' && sidebarOpen && (
                     <aside className="fixed inset-y-0 left-0 z-20 w-72 flex flex-col border-r border-border bg-card lg:relative lg:inset-auto lg:w-64 lg:shrink-0 lg:z-auto lg:bg-card/40">
                         <div className="p-2 border-b border-border">
                             <div className="relative">
