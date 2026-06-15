@@ -36,9 +36,9 @@ interface User {
 
 const navigation = [
     { name: 'Servers', href: '/panel', icon: Server },
-    { name: 'Groups', href: '/panel/groups', icon: FolderOpen },
     { name: 'Sessions', href: '/panel/sessions', icon: Monitor },
     { name: 'Keychain', href: '/panel/keychain', icon: BookKey },
+    { name: 'Groups', href: '/panel/groups', icon: FolderOpen },
     { name: 'Settings', href: '/panel/settings', icon: Settings },
 ];
 
