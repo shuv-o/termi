@@ -35,8 +35,10 @@ import {
     Clock,
     Zap,
     Keyboard,
+    KeyRound,
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
+import type { RevealField } from '@/components/auth/PasskeyRevealModal';
 import { useSessionsContext, type Session, type SessionStatus } from './sessions-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +55,9 @@ const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'
 const VirtualKeyboard = dynamic(() => import('@/components/terminal/VirtualKeyboard'), {
     ssr: false,
 });
+const PasskeyRevealModal = dynamic(() => import('@/components/auth/PasskeyRevealModal'), {
+    ssr: false,
+});
 
 // TYPES
 
@@ -62,6 +67,7 @@ interface ServerItem {
     protocol: string;
     description?: string;
     host?: string;
+    hasPassword?: boolean;
 }
 
 // STATUS HELPERS
@@ -838,6 +844,7 @@ function TerminalPane({
     session,
     isActive,
     mode,
+    hasPassword,
     updateSessionStatus,
     setSessionError,
     setSessionWs,
@@ -845,10 +852,12 @@ function TerminalPane({
     renewSession,
     toggleFiles,
     removeSession,
+    onCopyPassword,
 }: {
     session: Session;
     isActive: boolean;
     mode: 'terminal' | 'transfer';
+    hasPassword: boolean;
     updateSessionStatus: (tabId: string, status: SessionStatus) => void;
     setSessionError: (tabId: string, error: string | null) => void;
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
@@ -856,6 +865,7 @@ function TerminalPane({
     renewSession: (tabId: string, serverId: string) => Promise<void>;
     toggleFiles: (tabId: string) => void;
     removeSession: (tabId: string) => void;
+    onCopyPassword: () => void;
 }) {
     const [showKeyboard, setShowKeyboard] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -1087,6 +1097,18 @@ function TerminalPane({
                 <div className="flex items-center gap-1 shrink-0">
                     {session.type !== 'local' && (
                         <>
+                            {/* Copy password — same pattern as /connect/[id]/ssh */}
+                            {hasPassword && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={onCopyPassword}
+                                    className="h-7 w-7"
+                                    title="Copy password"
+                                >
+                                    <KeyRound className="w-3.5 h-3.5" />
+                                </Button>
+                            )}
                             <Button
                                 variant={session.showFiles ? 'default' : 'ghost'}
                                 size="icon"
@@ -1298,6 +1320,7 @@ export default function SessionsWorkspace() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
     const [layoutMode, setLayoutMode] = useState<'sidebar' | 'tabbar'>('tabbar');
+    const [revealTarget, setRevealTarget] = useState<{ serverId: string; serverName: string } | null>(null);
 
     useEffect(() => {
         // Default sidebar open only on desktop
@@ -1670,23 +1693,43 @@ export default function SessionsWorkspace() {
                      * Visibility is toggled with CSS — components never unmount while
                      * a session exists, so WebSocket connections stay alive.
                      */}
-                    {sessions.map((session) => (
-                        <TerminalPane
-                            key={session.tabId}
-                            session={session}
-                            isActive={!showPicker && activeTabId === session.tabId}
-                            mode={mode}
-                            updateSessionStatus={updateSessionStatus}
-                            setSessionError={setSessionError}
-                            setSessionWs={setSessionWs}
-                            reconnectSession={reconnectSession}
-                            renewSession={renewSession}
-                            toggleFiles={toggleFiles}
-                            removeSession={removeSession}
-                        />
-                    ))}
+                    {sessions.map((session) => {
+                        const serverMeta = allServers.find((s) => s.id === session.serverId);
+                        return (
+                            <TerminalPane
+                                key={session.tabId}
+                                session={session}
+                                isActive={!showPicker && activeTabId === session.tabId}
+                                mode={mode}
+                                hasPassword={serverMeta?.hasPassword ?? false}
+                                updateSessionStatus={updateSessionStatus}
+                                setSessionError={setSessionError}
+                                setSessionWs={setSessionWs}
+                                reconnectSession={reconnectSession}
+                                renewSession={renewSession}
+                                toggleFiles={toggleFiles}
+                                removeSession={removeSession}
+                                onCopyPassword={() =>
+                                    setRevealTarget({
+                                        serverId: session.serverId,
+                                        serverName: session.serverName,
+                                    })
+                                }
+                            />
+                        );
+                    })}
                 </div>
             </div>
+
+            {/* Copy-password modal — same PasskeyRevealModal used in /connect/[id]/ssh */}
+            {revealTarget && (
+                <PasskeyRevealModal
+                    serverId={revealTarget.serverId}
+                    serverName={revealTarget.serverName}
+                    field="password"
+                    onClose={() => setRevealTarget(null)}
+                />
+            )}
         </div>
     );
 }
