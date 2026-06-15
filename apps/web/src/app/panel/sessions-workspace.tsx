@@ -1480,14 +1480,14 @@ export default function SessionsWorkspace() {
                         <div
                             key={session.tabId}
                             onClick={() => switchTab(session.tabId)}
-                            className={`group relative flex items-center gap-1.5 px-3 py-2 cursor-pointer shrink-0 border-r border-border transition-colors max-w-[180px] min-w-0 ${
+                            className={`group relative flex items-center gap-1.5 px-3 py-2 cursor-pointer shrink-0 border-r border-border/50 transition-all max-w-[200px] min-w-[100px] select-none ${
                                 isTabActive
-                                    ? 'bg-background text-foreground border-b-2 border-b-primary -mb-px'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                                    ? 'bg-background text-foreground border-t-2 border-t-primary -mt-px font-semibold shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-t-2 border-t-transparent -mt-px'
                             }`}
                         >
                             <StatusDot status={session.status} />
-                            <span className="text-xs font-medium truncate flex-1 min-w-0">
+                            <span className="text-xs truncate flex-1 min-w-0">
                                 {session.serverName}
                             </span>
                             <button
@@ -1495,7 +1495,11 @@ export default function SessionsWorkspace() {
                                     e.stopPropagation();
                                     removeSession(session.tabId);
                                 }}
-                                className="p-0.5 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1"
+                                className={`p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
+                                    isTabActive
+                                        ? 'opacity-50 hover:opacity-100 text-muted-foreground'
+                                        : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
+                                }`}
                                 title="Close tab"
                             >
                                 <X className="w-3 h-3" />
