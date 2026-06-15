@@ -101,11 +101,9 @@ function statusColor(status: SessionStatus): string {
 function ServerPicker({
     onPick,
     onClose,
-    exclude = [],
 }: {
     onPick: (server: ServerItem) => void;
     onClose: () => void;
-    exclude?: string[];
 }) {
     const [servers, setServers] = useState<ServerItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -128,13 +126,11 @@ function ServerPicker({
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose]);
 
-    const filtered = servers
-        .filter((s) => !exclude.includes(s.id))
-        .filter(
-            (s) =>
-                s.name.toLowerCase().includes(query.toLowerCase()) ||
-                (s.host ?? '').toLowerCase().includes(query.toLowerCase()),
-        );
+    const filtered = servers.filter(
+        (s) =>
+            s.name.toLowerCase().includes(query.toLowerCase()) ||
+            (s.host ?? '').toLowerCase().includes(query.toLowerCase()),
+    );
     const sshServers = filtered.filter((s) => s.protocol === 'SSH');
     const otherServers = filtered.filter((s) => s.protocol !== 'SSH');
 
@@ -1105,29 +1101,6 @@ export default function SessionsWorkspace() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setShowPicker(true)}
-                    className="h-8 w-8"
-                    title="Open new server session"
-                >
-                    <Plus className="w-4 h-4" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                        addLocalSession();
-                        setMode('terminal');
-                    }}
-                    className="h-8 w-8 text-violet-400 hover:text-violet-300"
-                    title="Open local terminal"
-                >
-                    <Laptop className="w-4 h-4" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
                     onClick={() => {
                         setIsFullscreen((f) => !f);
                         setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
@@ -1141,6 +1114,56 @@ export default function SessionsWorkspace() {
                         <Maximize2 className="w-4 h-4" />
                     )}
                 </Button>
+            </div>
+
+            {/*   Session tab bar   */}
+            <div className="shrink-0 flex items-stretch border-b border-border bg-card/60 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {sessions.map((session) => {
+                    const isTabActive = activeTabId === session.tabId && mode === 'terminal';
+                    return (
+                        <div
+                            key={session.tabId}
+                            onClick={() => switchTab(session.tabId)}
+                            className={`group relative flex items-center gap-1.5 px-3 py-2 cursor-pointer shrink-0 border-r border-border transition-colors max-w-[180px] min-w-0 ${
+                                isTabActive
+                                    ? 'bg-background text-foreground border-b-2 border-b-primary -mb-px'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                            }`}
+                        >
+                            <StatusDot status={session.status} />
+                            <span className="text-xs font-medium truncate flex-1 min-w-0">
+                                {session.serverName}
+                            </span>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeSession(session.tabId);
+                                }}
+                                className="p-0.5 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1"
+                                title="Close tab"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </div>
+                    );
+                })}
+                <button
+                    onClick={() => setShowPicker(true)}
+                    className="flex items-center justify-center px-3 py-2 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors border-r border-border"
+                    title="New server session"
+                >
+                    <Plus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                    onClick={() => {
+                        addLocalSession();
+                        setMode('terminal');
+                    }}
+                    className="flex items-center justify-center px-3 py-2 shrink-0 text-violet-400 hover:text-violet-300 hover:bg-secondary/60 transition-colors"
+                    title="New local terminal"
+                >
+                    <Laptop className="w-3.5 h-3.5" />
+                </button>
             </div>
 
             {/*   Body: sidebar + content   */}
@@ -1310,7 +1333,7 @@ export default function SessionsWorkspace() {
                 </div>
             </div>
 
-            {/* Server picker */}
+            {/* Server picker — no exclude, same server can be opened in multiple tabs */}
             {showPicker && (
                 <ServerPicker
                     onClose={() => setShowPicker(false)}
@@ -1319,7 +1342,6 @@ export default function SessionsWorkspace() {
                         addSession(server.id, server.name);
                         setMode('terminal');
                     }}
-                    exclude={sessions.filter((s) => s.type === 'remote').map((s) => s.serverId)}
                 />
             )}
         </div>
