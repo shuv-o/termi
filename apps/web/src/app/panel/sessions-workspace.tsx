@@ -98,7 +98,73 @@ function statusColor(status: SessionStatus): string {
     }[status];
 }
 
-// SERVER PICKER MODAL
+// SERVER PICKER MODAL — grid view
+
+const protocolMeta: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+    SSH: {
+        icon: <Terminal className="w-5 h-5" />,
+        color: 'text-green-400',
+        bg: 'bg-green-500/15 border-green-500/20',
+    },
+    RDP: {
+        icon: <Monitor className="w-5 h-5" />,
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/15 border-blue-500/20',
+    },
+    VNC: {
+        icon: <Globe className="w-5 h-5" />,
+        color: 'text-purple-400',
+        bg: 'bg-purple-500/15 border-purple-500/20',
+    },
+};
+
+function ServerPickerCard({
+    server,
+    onClick,
+    disabled,
+}: {
+    server: ServerItem;
+    onClick: () => void;
+    disabled?: boolean;
+}) {
+    const meta = protocolMeta[server.protocol] ?? {
+        icon: <Server className="w-5 h-5" />,
+        color: 'text-muted-foreground',
+        bg: 'bg-secondary/60 border-border',
+    };
+
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            className={`group relative flex flex-col gap-2.5 p-3 rounded-xl border text-left transition-all
+                ${disabled
+                    ? 'opacity-40 cursor-not-allowed border-border bg-secondary/30'
+                    : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/60 hover:shadow-md active:scale-95'
+                }`}
+        >
+            {/* Icon */}
+            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}>
+                {meta.icon}
+            </div>
+
+            {/* Name */}
+            <div className="min-w-0 w-full">
+                <p className="text-sm font-medium truncate leading-tight">{server.name}</p>
+                {server.host && (
+                    <p className="text-[11px] text-muted-foreground truncate mt-0.5 font-mono">
+                        {server.host}
+                    </p>
+                )}
+            </div>
+
+            {/* Protocol badge */}
+            <span className={`self-start text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}>
+                {server.protocol}
+            </span>
+        </button>
+    );
+}
 
 function ServerPicker({
     onPick,
@@ -143,9 +209,10 @@ function ServerPicker({
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[70vh]">
+            <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[80vh]">
+                {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-                    <h3 className="font-semibold">Open Terminal Session</h3>
+                    <h3 className="font-semibold">New Session</h3>
                     <button
                         onClick={onClose}
                         className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
@@ -153,77 +220,67 @@ function ServerPicker({
                         <X className="w-4 h-4" />
                     </button>
                 </div>
-                <div className="p-4 shrink-0">
+
+                {/* Search */}
+                <div className="px-4 pt-4 pb-2 shrink-0">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                             autoFocus
                             type="text"
-                            placeholder="Search by name or host…"
+                            placeholder="Search servers…"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            className="pl-9 bg-secondary border-border text-sm"
+                            className="pl-9 bg-secondary border-transparent focus:border-border text-sm"
                         />
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-2 pb-4">
+
+                {/* Grid */}
+                <div className="flex-1 overflow-y-auto px-4 pb-4">
                     {loading ? (
-                        <div className="flex justify-center py-8">
+                        <div className="flex justify-center py-12">
                             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         </div>
-                    ) : sshServers.length === 0 && otherServers.length === 0 ? (
-                        <p className="text-center text-sm text-muted-foreground py-8">
+                    ) : filtered.length === 0 ? (
+                        <p className="text-center text-sm text-muted-foreground py-12">
                             No servers found
                         </p>
                     ) : (
                         <>
                             {sshServers.length > 0 && (
-                                <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground px-3 py-2">
-                                    SSH Servers
-                                </p>
+                                <>
+                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-2 pb-2">
+                                        SSH Servers
+                                    </p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {sshServers.map((s) => (
+                                            <ServerPickerCard
+                                                key={s.id}
+                                                server={s}
+                                                onClick={() => onPick(s)}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
-                            {sshServers.map((s) => (
-                                <button
-                                    key={s.id}
-                                    onClick={() => onPick(s)}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary text-left transition-colors group"
-                                >
-                                    <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
-                                        <Terminal className="w-4 h-4 text-green-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm truncate">{s.name}</p>
-                                        {s.description && (
-                                            <p className="text-xs text-muted-foreground truncate">
-                                                {s.description}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </button>
-                            ))}
                             {otherServers.length > 0 && (
-                                <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground px-3 py-2 mt-1">
-                                    Other Protocols (SSH only)
-                                </p>
+                                <>
+                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-4 pb-2">
+                                        Other Protocols
+                                    </p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {otherServers.map((s) => (
+                                            <ServerPickerCard
+                                                key={s.id}
+                                                server={s}
+                                                onClick={() => {}}
+                                                disabled
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
-                            {otherServers.map((s) => (
-                                <button
-                                    key={s.id}
-                                    disabled
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left opacity-40 cursor-not-allowed"
-                                >
-                                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                                        <Server className="w-4 h-4 text-muted-foreground" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm truncate">{s.name}</p>
-                                    </div>
-                                    <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-md shrink-0">
-                                        {s.protocol}
-                                    </span>
-                                </button>
-                            ))}
                         </>
                     )}
                 </div>
