@@ -79,6 +79,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     const isSessionsPage = pathname === '/panel/sessions';
     const isLocalPage = pathname === '/panel/local';
+    const isConnectPage = pathname.startsWith('/panel/connect/');
 
     /** Navigate to the dedicated local-terminal page. */
     const handleOpenLocalTerminal = useCallback(() => {
@@ -486,11 +487,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     <SessionsWorkspace />
                 </div>
 
-                {!isSessionsPage && (
+                {!isSessionsPage && !isConnectPage && (
                     <main className={isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'}>
                         {children}
                     </main>
                 )}
+                {isConnectPage && <>{children}</>}
             </div>
 
             {/*   Mobile bottom navigation bar              ─ */}

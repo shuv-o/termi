@@ -324,44 +324,38 @@ function FleetStats({
     ] as const;
 
     return (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 xl:grid-cols-6 mb-8">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 xl:grid-cols-6 mb-5">
             {statCards.map((stat) => {
                 const Icon = stat.icon;
                 return (
                     <Card
                         key={stat.label}
-                        className={`min-h-[100px] sm:min-h-[126px] border border-border border-l-2 bg-card p-3 sm:p-4 ${stat.borderClassName} hover:shadow-md hover:border-border/80 transition-all duration-200`}
+                        className={`border border-border border-l-2 bg-card p-3 ${stat.borderClassName} hover:shadow-md hover:border-border/80 transition-all duration-200`}
                     >
-                        <div className="flex h-full flex-col justify-between gap-3 sm:gap-4">
-                            <div className="flex items-start justify-between gap-2">
-                                <div>
-                                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                        {stat.label}
-                                    </p>
-                                    {stat.label === 'Online' && offline > 0 && (
-                                        <p className="mt-0.5 text-[10px] sm:text-[11px] text-red-400">
-                                            {offline} offline
-                                        </p>
-                                    )}
-                                    {stat.label === 'Online' && offline === 0 && unknown > 0 && (
-                                        <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted-foreground/70">
-                                            {unknown} checking…
-                                        </p>
-                                    )}
-                                </div>
-                                <div
-                                    className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-border/50 ${stat.iconWrapperClassName}`}
-                                >
-                                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.iconClassName}`} />
-                                </div>
+                        <div className="flex items-center gap-2.5">
+                            <div
+                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/50 ${stat.iconWrapperClassName}`}
+                            >
+                                <Icon className={`h-3.5 w-3.5 ${stat.iconClassName}`} />
                             </div>
-                            {stat.value == null ? (
-                                <Skeleton className="h-7 w-16 sm:h-9 sm:w-20" />
-                            ) : (
-                                <p className={`text-2xl sm:text-3xl font-bold tabular-nums ${stat.valueClassName}`}>
-                                    {stat.value}
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground leading-none">
+                                    {stat.label}
                                 </p>
-                            )}
+                                {stat.label === 'Online' && offline > 0 && (
+                                    <p className="text-[10px] text-red-400">{offline} offline</p>
+                                )}
+                                {stat.label === 'Online' && offline === 0 && unknown > 0 && (
+                                    <p className="text-[10px] text-muted-foreground/70">{unknown} checking…</p>
+                                )}
+                                {stat.value == null ? (
+                                    <Skeleton className="mt-1 h-5 w-12" />
+                                ) : (
+                                    <p className={`text-lg sm:text-xl font-bold tabular-nums leading-tight mt-0.5 ${stat.valueClassName}`}>
+                                        {stat.value}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </Card>
                 );
@@ -641,6 +635,7 @@ function GridCard({
     m,
     mLoading,
     hasSession,
+    onOpen,
     onFavorite,
     onEdit,
     onDelete,
@@ -654,6 +649,7 @@ function GridCard({
     m: ServerMetrics | null;
     mLoading: boolean;
     hasSession: boolean;
+    onOpen: () => void;
     onFavorite: () => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -674,36 +670,36 @@ function GridCard({
             : '';
 
     return (
-        <Card className="group flex min-h-[280px] sm:min-h-[320px] flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
+        <Card className="group flex flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
             <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
 
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-3 p-3.5 cursor-pointer" onClick={onOpen}>
                     <div className="flex items-start gap-3">
                         <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${protocolVariants[server.protocol]}`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${protocolVariants[server.protocol]}`}
                         >
                             <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-start gap-2 min-w-0">
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="truncate text-base font-semibold leading-tight">
+                                    <h3 className="truncate text-sm font-semibold leading-tight">
                                         {server.name}
                                     </h3>
-                                    <p className="mt-1 truncate font-mono text-xs text-muted-foreground/80">
+                                    <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground/80">
                                         {server.host}
                                         <span className="text-muted-foreground/50">:{server.port}</span>
                                     </p>
                                 </div>
                                 {mLoading ? (
-                                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
+                                    <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
                                 ) : m?.reachable === true ? (
-                                    <span className="mt-1 shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                                    <span className="mt-0.5 shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
                                         {m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
                                     </span>
                                 ) : m?.reachable === false ? (
-                                    <span className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400">
-                                        <WifiOff className="h-3 w-3" />
+                                    <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                                        <WifiOff className="h-2.5 w-2.5" />
                                         Offline
                                     </span>
                                 ) : null}
@@ -712,36 +708,36 @@ function GridCard({
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={onFavorite}
-                            className={`mt-0.5 h-8 w-8 shrink-0 rounded-lg transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
+                            onClick={(e) => { e.stopPropagation(); onFavorite(); }}
+                            className={`h-7 w-7 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
                         >
-                            <Star className={`h-4 w-4 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
+                            <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                         </Button>
                     </div>
 
-                    <div className="rounded-xl border border-border/60 bg-secondary/30 px-3 py-2.5">
+                    <div className="rounded-lg border border-border/60 bg-secondary/30 px-2.5 py-2">
                         <div className="flex items-center gap-2">
-                            <span className="truncate font-mono text-xs text-foreground/75">
+                            <span className="truncate font-mono text-[11px] text-foreground/75">
                                 {server.username}@{server.host}
                             </span>
                             <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
                         </div>
                         {server.description && (
-                            <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                            <p className="mt-1.5 line-clamp-1 text-[11px] text-muted-foreground">
                                 {server.description}
                             </p>
                         )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
                         >
                             {server.protocol}
                         </span>
                         {server.group && (
                             <span
-                                className="inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium"
+                                className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
                                 style={{
                                     backgroundColor: `${server.group.color}20`,
                                     color: server.group.color || undefined,
@@ -758,14 +754,14 @@ function GridCard({
                                     e.stopPropagation();
                                     onTagClick(tag);
                                 }}
-                                className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                                className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
                             >
                                 {tag}
                             </button>
                         ))}
                     </div>
 
-                    <div className="mt-auto space-y-3">
+                    <div className="mt-auto space-y-2">
                         {hasMetrics && (
                             <div className="grid grid-cols-3 gap-2">
                                 {m!.cpu != null && (
@@ -841,13 +837,24 @@ function GridCard({
                     </div>
             </div>
 
-            <div className="flex items-center gap-2 border-t border-border/60 bg-secondary/20 px-4 py-3">
-                    <Button onClick={onConnect} size="sm" className="h-9 flex-1 justify-center text-xs">
+            <div className="flex items-center gap-1.5 border-t border-border/60 bg-secondary/20 px-3 py-2.5">
+                    <Button onClick={(e) => { e.stopPropagation(); onConnect(); }} size="sm" className="h-8 flex-1 justify-center text-xs">
                         Connect
                     </Button>
+                    {server.protocol === 'SSH' && (
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); onSessions(); }}
+                            className="h-8 w-8 shrink-0"
+                            title={hasSession ? 'Open Session' : 'Add to Sessions'}
+                        >
+                            <Layers className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0">
+                            <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -857,12 +864,6 @@ function GridCard({
                                     <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
                                 </Link>
                             </DropdownMenuItem>
-                            {server.protocol === 'SSH' && (
-                                <DropdownMenuItem onClick={onSessions} className="gap-2">
-                                    <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-                                    {hasSession ? 'Open Session' : 'Add to Sessions'}
-                                </DropdownMenuItem>
-                            )}
                             <DropdownMenuItem onClick={onEdit} className="gap-2">
                                 <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
                             </DropdownMenuItem>
@@ -1040,7 +1041,7 @@ function ListRow({
             </div>
 
             <div
-                className="flex shrink-0 items-center gap-2"
+                className="flex shrink-0 items-center gap-1.5"
                 onClick={(e) => e.stopPropagation()}
             >
                 <Button
@@ -1051,6 +1052,17 @@ function ListRow({
                 >
                     <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                 </Button>
+                {server.protocol === 'SSH' && (
+                    <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={onSessions}
+                        className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all"
+                        title={hasSession ? 'Open Session' : 'Add to Sessions'}
+                    >
+                        <Layers className="h-3.5 w-3.5" />
+                    </Button>
+                )}
                 <Button onClick={onConnect} size="sm" className="h-8 px-3 text-xs">
                     Connect
                 </Button>
@@ -1079,12 +1091,6 @@ function ListRow({
                         <DropdownMenuItem onClick={onShare} className="gap-2">
                             <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
                         </DropdownMenuItem>
-                        {server.protocol === 'SSH' && (
-                            <DropdownMenuItem onClick={onSessions} className="gap-2">
-                                <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-                                {hasSession ? 'Open Session' : 'Add to Sessions'}
-                            </DropdownMenuItem>
-                        )}
                         {server.hasPassword && (
                             <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
                                 <KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Copy
@@ -1403,8 +1409,8 @@ export default function DashboardPage() {
 
     return (
         <>
-            <div className="space-y-6 sm:space-y-8">
-                <div className="mx-auto max-w-screen-2xl space-y-6 sm:space-y-8">
+            <div className="space-y-4 sm:space-y-6">
+                <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-5">
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">

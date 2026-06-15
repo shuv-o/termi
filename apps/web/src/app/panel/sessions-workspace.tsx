@@ -206,7 +206,7 @@ function InlineSessionPicker({
     const otherServers = filtered.filter((s) => s.protocol !== 'SSH');
 
     return (
-        <div className="absolute inset-0 flex flex-col bg-background overflow-hidden">
+        <div className="absolute inset-0 z-10 flex flex-col bg-background overflow-hidden">
             {/* Inline header */}
             <div className="shrink-0 flex items-center gap-3 px-5 py-4 border-b border-border bg-card/40">
                 <div className="flex-1">
@@ -1223,8 +1223,8 @@ function TerminalPane({
                                         key={shell.id}
                                         className="absolute inset-0"
                                         style={{
-                                            visibility: isShellActive ? 'visible' : 'hidden',
-                                            pointerEvents: isShellActive ? 'auto' : 'none',
+                                            visibility: isActive && isShellActive ? 'visible' : 'hidden',
+                                            pointerEvents: isActive && isShellActive ? 'auto' : 'none',
                                         }}
                                     >
                                         {!shell.token ? (

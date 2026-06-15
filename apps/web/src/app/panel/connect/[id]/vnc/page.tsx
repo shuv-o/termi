@@ -157,7 +157,7 @@ export default function VNCConnectionPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[calc(100dvh-8rem)]">
+            <div className="flex items-center justify-center h-dvh lg:h-screen">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -165,7 +165,7 @@ export default function VNCConnectionPage() {
 
     if (error || !connectionToken) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100dvh-8rem)] gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back to Dashboard</Link>
@@ -287,14 +287,14 @@ export default function VNCConnectionPage() {
     );
 
     return (
-        <div ref={containerRef} className="flex flex-col h-[calc(100dvh-8rem)]">
+        <div ref={containerRef} className="flex flex-col h-[calc(100dvh-3.5rem-4rem)] lg:h-dvh">
             {!isFullscreen && (
-                <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
+                <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
                     {toolbar}
                 </div>
             )}
 
-            <div className="flex-1 min-h-0 bg-card rounded-lg overflow-hidden relative">
+            <div className="flex-1 min-h-0 bg-black overflow-hidden relative">
                 <GuacamoleDisplay
                     key={`${connectionToken}-${reconnectKey}`}
                     serverId={serverId}
