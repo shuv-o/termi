@@ -11,10 +11,12 @@ import {
     Github,
     Linkedin,
     Mail,
+    LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
+import { getSession } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
     title: 'Termi - Secure Server Management',
@@ -32,7 +34,10 @@ export const metadata: Metadata = {
     },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+    const session = await getSession();
+    const isLoggedIn = session.isLoggedIn === true;
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
             {/* Header */}
@@ -68,12 +73,23 @@ export default function HomePage() {
                         </nav>
 
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="sm" asChild>
-                                <Link href="/login">Login</Link>
-                            </Button>
-                            <Button size="sm" asChild>
-                                <Link href="/register">Get Started</Link>
-                            </Button>
+                            {isLoggedIn ? (
+                                <Button size="sm" asChild className="glow-hover">
+                                    <Link href="/panel">
+                                        <LayoutDashboard className="w-4 h-4 mr-1" />
+                                        Dashboard
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <>
+                                    <Button variant="ghost" size="sm" asChild>
+                                        <Link href="/login">Login</Link>
+                                    </Button>
+                                    <Button size="sm" asChild>
+                                        <Link href="/register">Get Started</Link>
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -103,12 +119,22 @@ export default function HomePage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Button size="lg" asChild className="glow-hover group">
-                            <Link href="/register">
-                                Start Free
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </Button>
+                        {isLoggedIn ? (
+                            <Button size="lg" asChild className="glow-hover group">
+                                <Link href="/panel">
+                                    <LayoutDashboard className="w-5 h-5 mr-1" />
+                                    Go to Dashboard
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button size="lg" asChild className="glow-hover group">
+                                <Link href="/register">
+                                    Start Free
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </Button>
+                        )}
                         <Button variant="secondary" size="lg" asChild>
                             <Link href="#features">Learn More</Link>
                         </Button>
@@ -264,9 +290,18 @@ export default function HomePage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Button size="lg" asChild>
-                            <Link href="/register">Create Account</Link>
-                        </Button>
+                        {isLoggedIn ? (
+                            <Button size="lg" asChild className="glow-hover">
+                                <Link href="/panel">
+                                    <LayoutDashboard className="w-5 h-5 mr-1" />
+                                    Go to Dashboard
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button size="lg" asChild>
+                                <Link href="/register">Create Account</Link>
+                            </Button>
+                        )}
                         <Button variant="secondary" size="lg" asChild>
                             <Link href="https://github.com/shuvoooo/termi">View on GitHub</Link>
                         </Button>
