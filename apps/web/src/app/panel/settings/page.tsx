@@ -1126,8 +1126,8 @@ export default function SettingsPage() {
     const passwordsMatch = !passwordForm.confirm || passwordForm.new === passwordForm.confirm;
 
     return (
-        <div className="max-w-5xl mx-auto pb-16">
-            <div className="mb-6">
+        <div className="mx-auto max-w-screen-2xl pb-16">
+            <div className="mb-8 max-w-4xl">
                 <h1 className="text-2xl font-bold">Settings</h1>
                 <p className="text-muted-foreground text-sm mt-1">
                     Manage your account, security, and preferences
@@ -1136,7 +1136,7 @@ export default function SettingsPage() {
 
             {/* Unverified banner */}
             {user && !user.isVerified && (
-                <div className="mb-6 flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-sm">
+                <div className="mb-6 flex max-w-4xl items-center justify-between gap-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm">
                     <div className="flex items-center gap-2 text-yellow-300">
                         <Info className="w-4 h-4 shrink-0" />
                         Your email address is not verified.
@@ -1165,7 +1165,7 @@ export default function SettingsPage() {
 
             {/* Recovery codes overlay */}
             {recoveryCodes.length > 0 && (
-                <div className="mb-6 p-5 rounded-xl bg-yellow-500/5 border border-yellow-500/30">
+                <div className="mb-6 max-w-4xl rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-5">
                     <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="w-5 h-5 text-yellow-400" />
                         <h2 className="font-semibold text-yellow-400">Save your recovery codes</h2>
@@ -1200,55 +1200,63 @@ export default function SettingsPage() {
                 </div>
             )}
 
-            <div className="flex gap-6">
+            <div className="xl:grid xl:grid-cols-[240px_minmax(0,1fr)] xl:gap-10">
                 {/*   Sidebar (desktop only)   */}
-                <aside className="hidden lg:flex flex-col w-52 shrink-0">
+                <aside className="hidden xl:block">
                     {user && (
-                        <div className="mb-4 p-3 rounded-xl bg-card border border-border">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
-                                    {(user.name || user.email)[0].toUpperCase()}
-                                </div>
-                                <div className="min-w-0">
-                                    {user.name && (
-                                        <p className="text-xs font-semibold truncate">
-                                            {user.name}
-                                        </p>
-                                    )}
-                                    <p
-                                        className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}
-                                    >
-                                        {user.email}
-                                    </p>
-                                    <div className="flex items-center gap-1 mt-0.5">
-                                        {user.isVerified ? (
-                                            <span className="text-[10px] text-green-400 flex items-center gap-1">
-                                                <CheckCircle className="w-2.5 h-2.5" />
-                                                Verified
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] text-yellow-400">
-                                                Unverified
-                                            </span>
+                        <div className="sticky top-24 space-y-4">
+                            <div className="rounded-2xl border border-border bg-card p-4">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    Settings
+                                </p>
+                                <div className="mt-4 flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                                        {(user.name || user.email)[0].toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        {user.name && (
+                                            <p className="text-sm font-semibold truncate">
+                                                {user.name}
+                                            </p>
                                         )}
+                                        <p
+                                            className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}
+                                        >
+                                            {user.email}
+                                        </p>
+                                        <div className="mt-1 flex items-center gap-1">
+                                            {user.isVerified ? (
+                                                <span className="flex items-center gap-1 text-[10px] text-green-400">
+                                                    <CheckCircle className="w-2.5 h-2.5" />
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] text-yellow-400">
+                                                    Unverified
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="rounded-2xl border border-border bg-card p-2">
+                                <SidebarNav
+                                    active={activeSection}
+                                    onChange={setActiveSection}
+                                    user={user}
+                                    passkeys={passkeys}
+                                    sessions={authSessions}
+                                />
+                            </div>
                         </div>
                     )}
-                    <SidebarNav
-                        active={activeSection}
-                        onChange={setActiveSection}
-                        user={user}
-                        passkeys={passkeys}
-                        sessions={authSessions}
-                    />
                 </aside>
 
                 {/*   Content   */}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 max-w-4xl">
                     {/*   Mobile section picker   */}
-                    <div className="lg:hidden mb-4 -mx-1">
+                    <div className="xl:hidden mb-4 -mx-1">
                         <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
                             {(
                                 [
@@ -1295,7 +1303,7 @@ export default function SettingsPage() {
                             <SecurityScore user={user} passkeys={passkeys} />
 
                             {/* ── Name Card ── */}
-                            <Card className="p-5">
+                            <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                                     Display Name
                                 </h2>
@@ -1331,7 +1339,7 @@ export default function SettingsPage() {
                                 </form>
                             </Card>
 
-                            <Card className="p-5">
+                            <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                                     Account Details
                                 </h2>
@@ -1429,7 +1437,7 @@ export default function SettingsPage() {
                                 </div>
                             </Card>
 
-                            <Card className="p-5">
+                            <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                                     Quick Actions
                                 </h2>
@@ -1483,7 +1491,7 @@ export default function SettingsPage() {
                     {activeSection === 'security' && (
                         <div className="space-y-4">
                             {/*   2FA   */}
-                            <Card className="p-5">
+                            <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                                 <Section
                                     title="Two-Factor Authentication"
                                     description="Require a second verification step when signing in."
@@ -1678,7 +1686,7 @@ export default function SettingsPage() {
 
                             {/*   Change Password   */}
                             {!user?.isGoogleUser && (
-                                <Card className="p-5">
+                                <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                                     <Section
                                         title="Change Password"
                                         description="Update your account password. Use a strong, unique password."
@@ -1827,7 +1835,7 @@ export default function SettingsPage() {
 
                     {/* ══════════════ PASSKEYS ══════════════ */}
                     {activeSection === 'passkeys' && (
-                        <Card className="p-5">
+                        <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                             <Section
                                 title="Passkeys"
                                 description="Sign in with biometrics or a security key — no password needed."
@@ -1936,7 +1944,7 @@ export default function SettingsPage() {
 
                     {/* ══════════════ ENCRYPTION ══════════════ */}
                     {activeSection === 'encryption' && (
-                        <Card className="p-5">
+                        <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                             <Section
                                 title="Credential Encryption"
                                 description="How your stored server credentials are protected at rest."
@@ -2052,7 +2060,7 @@ export default function SettingsPage() {
 
                     {/* ══════════════ NOTIFICATIONS ══════════════ */}
                     {activeSection === 'notifications' && (
-                        <Card className="p-5">
+                        <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                             <Section
                                 title="Push Notifications"
                                 description="Get browser notifications for server down/up alerts on this device."
@@ -2158,7 +2166,7 @@ export default function SettingsPage() {
 
                     {/* ══════════════ SESSIONS ══════════════ */}
                     {activeSection === 'sessions' && (
-                        <Card className="p-5">
+                        <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                             <Section
                                 title="Active Sessions"
                                 description="Devices and browsers that are currently signed in to your account."
@@ -2228,7 +2236,7 @@ export default function SettingsPage() {
 
                     {/* ══════════════ DANGER ZONE ══════════════ */}
                     {activeSection === 'danger' && (
-                        <Card className="p-5 border-red-500/20">
+                        <Card className="border border-red-500/20 p-6 transition-all duration-200 hover:border-red-500/30">
                             <Section
                                 title="Danger Zone"
                                 description="Irreversible actions that permanently affect your account."

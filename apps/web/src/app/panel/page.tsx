@@ -259,113 +259,113 @@ function FleetStats({
 
     if (servers.length === 0) return null;
 
+    const statCards = [
+        {
+            label: 'Total Servers',
+            value: String(servers.length),
+            icon: Server,
+            iconClassName: 'text-primary',
+            iconWrapperClassName: 'bg-primary/10',
+            borderClassName: 'border-l-primary/60',
+            valueClassName: 'text-foreground',
+        },
+        {
+            label: 'Online',
+            value: metricsReady || online > 0 || offline > 0 ? String(online) : null,
+            icon: Wifi,
+            iconClassName: 'text-emerald-400',
+            iconWrapperClassName: 'bg-emerald-500/10',
+            borderClassName: 'border-l-emerald-400',
+            valueClassName: 'text-emerald-400',
+        },
+        {
+            label: 'Avg Latency',
+            value: avgLatency != null ? `${avgLatency}ms` : null,
+            icon: Zap,
+            iconClassName: avgLatency != null && avgLatency >= 150 ? 'text-red-400' : 'text-sky-400',
+            iconWrapperClassName: 'bg-sky-500/10',
+            borderClassName: 'border-l-sky-400',
+            valueClassName:
+                avgLatency == null
+                    ? 'text-foreground'
+                    : avgLatency < 50
+                      ? 'text-emerald-400'
+                      : avgLatency < 150
+                        ? 'text-yellow-400'
+                        : 'text-red-400',
+        },
+        {
+            label: 'High CPU',
+            value: String(highCpu),
+            icon: Cpu,
+            iconClassName: highCpu > 0 ? 'text-amber-400' : 'text-violet-400',
+            iconWrapperClassName: 'bg-violet-500/10',
+            borderClassName: 'border-l-violet-400',
+            valueClassName: highCpu > 0 ? 'text-amber-400' : 'text-foreground',
+        },
+        {
+            label: 'High RAM',
+            value: String(highRam),
+            icon: MemoryStick,
+            iconClassName: 'text-amber-400',
+            iconWrapperClassName: 'bg-amber-500/10',
+            borderClassName: 'border-l-amber-400',
+            valueClassName: highRam > 0 ? 'text-amber-400' : 'text-foreground',
+        },
+        {
+            label: 'Active Sessions',
+            value: String(activeSessions),
+            icon: Layers,
+            iconClassName: 'text-primary',
+            iconWrapperClassName: 'bg-primary/10',
+            borderClassName: 'border-l-primary/60',
+            valueClassName: activeSessions > 0 ? 'text-primary' : 'text-foreground',
+        },
+    ] as const;
+
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <Server className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        Total
-                    </span>
-                </div>
-                <p className="text-2xl font-bold tabular-nums">{servers.length}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">servers</p>
-            </Card>
-
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        Online
-                    </span>
-                </div>
-                {metricsReady || online > 0 || offline > 0 ? (
-                    <>
-                        <p className="text-2xl font-bold tabular-nums text-emerald-400">{online}</p>
-                        {offline > 0 && (
-                            <p className="text-[10px] text-red-400 mt-0.5">{offline} offline</p>
-                        )}
-                        {offline === 0 && unknown === 0 && (
-                            <p className="text-[10px] text-muted-foreground mt-0.5">
-                                all reachable
-                            </p>
-                        )}
-                        {unknown > 0 && offline === 0 && (
-                            <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                                {unknown} checking…
-                            </p>
-                        )}
-                    </>
-                ) : (
-                    <Skeleton className="h-6 w-8 mt-0.5" />
-                )}
-            </Card>
-
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <Zap className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        Avg Latency
-                    </span>
-                </div>
-                {avgLatency != null ? (
-                    <>
-                        <p
-                            className={`text-2xl font-bold tabular-nums ${avgLatency < 50 ? 'text-emerald-400' : avgLatency < 150 ? 'text-yellow-400' : 'text-red-400'}`}
-                        >
-                            {avgLatency}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">ms</p>
-                    </>
-                ) : (
-                    <Skeleton className="h-6 w-12 mt-0.5" />
-                )}
-            </Card>
-
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <Cpu className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        High CPU
-                    </span>
-                </div>
-                <p
-                    className={`text-2xl font-bold tabular-nums ${highCpu > 0 ? 'text-amber-400' : 'text-muted-foreground'}`}
-                >
-                    {highCpu}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">≥ 80%</p>
-            </Card>
-
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <MemoryStick className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        High RAM
-                    </span>
-                </div>
-                <p
-                    className={`text-2xl font-bold tabular-nums ${highRam > 0 ? 'text-amber-400' : 'text-muted-foreground'}`}
-                >
-                    {highRam}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">≥ 80%</p>
-            </Card>
-
-            <Card className="p-3 bg-card border-border">
-                <div className="flex items-center gap-2 mb-1">
-                    <Layers className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                        Sessions
-                    </span>
-                </div>
-                <p
-                    className={`text-2xl font-bold tabular-nums ${activeSessions > 0 ? 'text-primary' : 'text-muted-foreground'}`}
-                >
-                    {activeSessions}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">active</p>
-            </Card>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6 mb-8">
+            {statCards.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                    <Card
+                        key={stat.label}
+                        className={`min-h-[126px] border border-border border-l-2 bg-card p-4 ${stat.borderClassName} hover:shadow-md hover:border-border/80 transition-all duration-200`}
+                    >
+                        <div className="flex h-full flex-col justify-between gap-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                        {stat.label}
+                                    </p>
+                                    {stat.label === 'Online' && offline > 0 && (
+                                        <p className="mt-1 text-[11px] text-red-400">
+                                            {offline} offline
+                                        </p>
+                                    )}
+                                    {stat.label === 'Online' && offline === 0 && unknown > 0 && (
+                                        <p className="mt-1 text-[11px] text-muted-foreground/70">
+                                            {unknown} checking…
+                                        </p>
+                                    )}
+                                </div>
+                                <div
+                                    className={`flex h-10 w-10 items-center justify-center rounded-xl border border-border/50 ${stat.iconWrapperClassName}`}
+                                >
+                                    <Icon className={`h-4 w-4 ${stat.iconClassName}`} />
+                                </div>
+                            </div>
+                            {stat.value == null ? (
+                                <Skeleton className="h-9 w-20" />
+                            ) : (
+                                <p className={`text-3xl font-bold tabular-nums ${stat.valueClassName}`}>
+                                    {stat.value}
+                                </p>
+                            )}
+                        </div>
+                    </Card>
+                );
+            })}
         </div>
     );
 }
@@ -674,242 +674,216 @@ function GridCard({
             : '';
 
     return (
-        <Card className="group flex flex-col overflow-hidden bg-card border-border hover:border-border/80 hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
+        <Card className="group flex min-h-[320px] flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
             <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
 
-            <div className="p-3 flex-1 space-y-2">
-                {/* Header */}
-                <div className="flex items-center gap-2">
-                    <div
-                        className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}
-                    >
-                        <Icon className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <h3 className="font-semibold truncate text-sm leading-tight">
-                                {server.name}
-                            </h3>
-                            {mLoading ? (
-                                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-pulse shrink-0" />
-                            ) : m?.reachable === true ? (
-                                m.latencyMs != null && (
-                                    <span className="text-[10px] text-emerald-400 tabular-nums shrink-0">
-                                        {m.latencyMs}ms
-                                    </span>
-                                )
-                            ) : m?.reachable === false ? (
-                                <WifiOff className="w-3 h-3 text-red-400 shrink-0" />
-                            ) : null}
+            <div className="flex flex-1 flex-col gap-4 p-4">
+                    <div className="flex items-start gap-3">
+                        <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${protocolVariants[server.protocol]}`}
+                        >
+                            <Icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] text-muted-foreground/70 font-mono truncate">
-                            {server.description || `${server.username}@${server.host}`}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-0.5 shrink-0">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-start gap-2 min-w-0">
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="truncate text-base font-semibold leading-tight">
+                                        {server.name}
+                                    </h3>
+                                    <p className="mt-1 truncate font-mono text-xs text-muted-foreground/80">
+                                        {server.host}
+                                        <span className="text-muted-foreground/50">:{server.port}</span>
+                                    </p>
+                                </div>
+                                {mLoading ? (
+                                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
+                                ) : m?.reachable === true ? (
+                                    <span className="mt-1 shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                                        {m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
+                                    </span>
+                                ) : m?.reachable === false ? (
+                                    <span className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400">
+                                        <WifiOff className="h-3 w-3" />
+                                        Offline
+                                    </span>
+                                ) : null}
+                            </div>
+                        </div>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={onFavorite}
-                            className={`h-6 w-6 transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
+                            className={`mt-0.5 h-8 w-8 shrink-0 rounded-lg transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
                         >
-                            <Star
-                                className={`w-3 h-3 ${server.isFavorite ? 'fill-yellow-400' : ''}`}
-                            />
+                            <Star className={`h-4 w-4 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-foreground [@media(hover:none)]:opacity-100"
-                                >
-                                    <MoreVertical className="w-3 h-3" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44 bg-card border-border">
-                                <DropdownMenuItem asChild>
-                                    <Link
-                                        href={`/panel/servers/${server.id}`}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <Activity className="w-3.5 h-3.5 text-muted-foreground" />{' '}
-                                        Details
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={onEdit} className="gap-2">
-                                    <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={onShare} className="gap-2">
-                                    <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
-                                </DropdownMenuItem>
-                                {server.hasPassword && (
-                                    <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
-                                        <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />{' '}
-                                        Copy Password
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator className="bg-border" />
-                                <DropdownMenuItem
-                                    onClick={onDelete}
-                                    className="gap-2 text-destructive focus:text-destructive"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" /> Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     </div>
-                </div>
 
-                {/* Connection info */}
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-secondary/60 border border-border/50 min-w-0">
-                    <span className="text-[10px] text-foreground/70 font-mono truncate flex-1">
-                        {server.host}
-                        <span className="text-muted-foreground/40">:{server.port}</span>
-                    </span>
-                    <CopyButton text={`${server.host}:${server.port}`} />
-                </div>
+                    <div className="rounded-xl border border-border/60 bg-secondary/30 px-3 py-2.5">
+                        <div className="flex items-center gap-2">
+                            <span className="truncate font-mono text-xs text-foreground/75">
+                                {server.username}@{server.host}
+                            </span>
+                            <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
+                        </div>
+                        {server.description && (
+                            <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                                {server.description}
+                            </p>
+                        )}
+                    </div>
 
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-1">
-                    <span
-                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${protocolVariants[server.protocol]}`}
-                    >
-                        {server.protocol}
-                    </span>
-                    {server.group && (
+                    <div className="flex flex-wrap items-center gap-2">
                         <span
-                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
-                            style={{
-                                backgroundColor: `${server.group.color}20`,
-                                color: server.group.color || undefined,
-                                borderColor: `${server.group.color}40`,
-                            }}
+                            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
                         >
-                            {server.group.name}
+                            {server.protocol}
                         </span>
-                    )}
-                    {server.tags.slice(0, 2).map((tag) => (
-                        <button
-                            key={tag}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onTagClick(tag);
-                            }}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
-                        >
-                            {tag}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Metrics — 3-col CPU / RAM / Disk */}
-                {hasMetrics && (
-                    <div className="grid grid-cols-3 gap-1.5">
-                        {m!.cpu != null && (
-                            <div className="space-y-0.5">
-                                <div className="flex items-center justify-between text-[10px]">
-                                    <span className="text-muted-foreground/60">CPU</span>
-                                    <span
-                                        className={`tabular-nums font-medium ${m!.cpu >= 90 ? 'text-red-400' : m!.cpu >= 70 ? 'text-yellow-400' : 'text-emerald-400'}`}
-                                    >
-                                        {m!.cpu}%
-                                    </span>
-                                </div>
-                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full rounded-full transition-all duration-700 ${m!.cpu >= 90 ? 'bg-red-500' : m!.cpu >= 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
-                                        style={{ width: `${Math.min(100, m!.cpu)}%` }}
-                                    />
-                                </div>
-                            </div>
+                        {server.group && (
+                            <span
+                                className="inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium"
+                                style={{
+                                    backgroundColor: `${server.group.color}20`,
+                                    color: server.group.color || undefined,
+                                    borderColor: `${server.group.color}40`,
+                                }}
+                            >
+                                {server.group.name}
+                            </span>
                         )}
-                        {m!.ram && (
-                            <div className="space-y-0.5">
-                                <div className="flex items-center justify-between text-[10px]">
-                                    <span className="text-muted-foreground/60">RAM</span>
-                                    <span
-                                        className={`tabular-nums font-medium ${m!.ram.percent >= 90 ? 'text-red-400' : m!.ram.percent >= 70 ? 'text-yellow-400' : 'text-sky-400'}`}
-                                    >
-                                        {Math.round(m!.ram.percent)}%
-                                    </span>
-                                </div>
-                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full rounded-full transition-all duration-700 ${m!.ram.percent >= 90 ? 'bg-red-500' : m!.ram.percent >= 70 ? 'bg-yellow-500' : 'bg-sky-500'}`}
-                                        style={{ width: `${Math.min(100, m!.ram.percent)}%` }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        {m!.disk && (
-                            <div className="space-y-0.5">
-                                <div className="flex items-center justify-between text-[10px]">
-                                    <span className="text-muted-foreground/60">Disk</span>
-                                    <span
-                                        className={`tabular-nums font-medium ${m!.disk.percent >= 90 ? 'text-red-400' : m!.disk.percent >= 70 ? 'text-yellow-400' : 'text-muted-foreground'}`}
-                                    >
-                                        {Math.round(m!.disk.percent)}%
-                                    </span>
-                                </div>
-                                <div className="h-0.5 bg-secondary rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full rounded-full transition-all duration-700 ${m!.disk.percent >= 90 ? 'bg-red-500' : m!.disk.percent >= 70 ? 'bg-yellow-500' : 'bg-muted-foreground/30'}`}
-                                        style={{ width: `${Math.min(100, m!.disk.percent)}%` }}
-                                    />
-                                </div>
-                            </div>
-                        )}
+                        {server.tags.slice(0, 2).map((tag) => (
+                            <button
+                                key={tag}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onTagClick(tag);
+                                }}
+                                className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                            >
+                                {tag}
+                            </button>
+                        ))}
                     </div>
-                )}
 
-                {/* Footer info */}
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
-                    <Clock className="w-2.5 h-2.5 shrink-0" />
-                    <span>{formatRelativeTime(server.lastUsedAt)}</span>
-                    {m?.network && (
-                        <>
-                            <span className="text-muted-foreground/30 mx-0.5">·</span>
-                            <ArrowDown className="w-2 h-2 text-emerald-500/60" />
-                            <span className="tabular-nums">{formatBytes(m.network.rxBytes)}</span>
-                            <ArrowUp className="w-2 h-2 text-sky-400/60" />
-                            <span className="tabular-nums">{formatBytes(m.network.txBytes)}</span>
-                        </>
-                    )}
-                </div>
-            </div>
+                    <div className="mt-auto space-y-3">
+                        {hasMetrics && (
+                            <div className="grid grid-cols-3 gap-2">
+                                {m!.cpu != null && (
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <span className="text-muted-foreground/60">CPU</span>
+                                            <span
+                                                className={`tabular-nums font-medium ${m!.cpu >= 90 ? 'text-red-400' : m!.cpu >= 70 ? 'text-yellow-400' : 'text-emerald-400'}`}
+                                            >
+                                                {m!.cpu}%
+                                            </span>
+                                        </div>
+                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-700 ${m!.cpu >= 90 ? 'bg-red-500' : m!.cpu >= 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
+                                                style={{ width: `${Math.min(100, m!.cpu)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                {m!.ram && (
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <span className="text-muted-foreground/60">RAM</span>
+                                            <span
+                                                className={`tabular-nums font-medium ${m!.ram.percent >= 90 ? 'text-red-400' : m!.ram.percent >= 70 ? 'text-yellow-400' : 'text-sky-400'}`}
+                                            >
+                                                {Math.round(m!.ram.percent)}%
+                                            </span>
+                                        </div>
+                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-700 ${m!.ram.percent >= 90 ? 'bg-red-500' : m!.ram.percent >= 70 ? 'bg-yellow-500' : 'bg-sky-500'}`}
+                                                style={{ width: `${Math.min(100, m!.ram.percent)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                {m!.disk && (
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <span className="text-muted-foreground/60">Disk</span>
+                                            <span
+                                                className={`tabular-nums font-medium ${m!.disk.percent >= 90 ? 'text-red-400' : m!.disk.percent >= 70 ? 'text-yellow-400' : 'text-muted-foreground'}`}
+                                            >
+                                                {Math.round(m!.disk.percent)}%
+                                            </span>
+                                        </div>
+                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-700 ${m!.disk.percent >= 90 ? 'bg-red-500' : m!.disk.percent >= 70 ? 'bg-yellow-500' : 'bg-muted-foreground/30'}`}
+                                                style={{ width: `${Math.min(100, m!.disk.percent)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-            <div className="px-3 py-2 border-t border-border/60 bg-secondary/20 flex gap-1.5">
-                <Button onClick={onConnect} size="sm" className="flex-1 justify-center text-xs h-7">
-                    Connect
-                </Button>
-                {server.hasPassword && (
-                    <Button
-                        onClick={onCopyPassword}
-                        variant="secondary"
-                        size="icon"
-                        className="h-7 w-7 shrink-0"
-                        title="Copy password (passkey required)"
-                    >
-                        <KeyRound className="w-3 h-3" />
-                    </Button>
-                )}
-                {server.protocol === 'SSH' && (
-                    <Button
-                        onClick={onSessions}
-                        variant="secondary"
-                        size="icon"
-                        className={`h-7 w-7 shrink-0 transition-colors ${hasSession ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30' : 'text-muted-foreground hover:text-foreground'}`}
-                        title={hasSession ? 'Session active — open in Sessions' : 'Add to Sessions'}
-                    >
-                        <div className="relative">
-                            <Layers className="w-3 h-3" />
-                            {hasSession && (
-                                <span className="absolute -top-0.5 -right-0.5 w-1 h-1 rounded-full bg-emerald-400" />
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+                            <Clock className="h-3 w-3 shrink-0" />
+                            <span>{formatRelativeTime(server.lastUsedAt)}</span>
+                            {m?.network && (
+                                <>
+                                    <span className="mx-0.5 text-muted-foreground/30">·</span>
+                                    <ArrowDown className="h-2.5 w-2.5 text-emerald-500/60" />
+                                    <span className="tabular-nums">{formatBytes(m.network.rxBytes)}</span>
+                                    <ArrowUp className="h-2.5 w-2.5 text-sky-400/60" />
+                                    <span className="tabular-nums">{formatBytes(m.network.txBytes)}</span>
+                                </>
                             )}
                         </div>
+                    </div>
+            </div>
+
+            <div className="flex items-center gap-2 border-t border-border/60 bg-secondary/20 px-4 py-3">
+                    <Button onClick={onConnect} size="sm" className="h-9 flex-1 justify-center text-xs">
+                        Connect
                     </Button>
-                )}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                            <DropdownMenuItem asChild>
+                                <Link href={`/panel/servers/${server.id}`} className="flex items-center gap-2">
+                                    <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
+                                </Link>
+                            </DropdownMenuItem>
+                            {server.protocol === 'SSH' && (
+                                <DropdownMenuItem onClick={onSessions} className="gap-2">
+                                    <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+                                    {hasSession ? 'Open Session' : 'Add to Sessions'}
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={onEdit} className="gap-2">
+                                <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={onShare} className="gap-2">
+                                <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
+                            </DropdownMenuItem>
+                            {server.hasPassword && (
+                                <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
+                                    <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />
+                                    Copy Password
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator className="bg-border" />
+                            <DropdownMenuItem
+                                onClick={onDelete}
+                                className="gap-2 text-destructive focus:text-destructive"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
             </div>
         </Card>
     );
@@ -922,6 +896,7 @@ function ListRow({
     m,
     mLoading,
     hasSession,
+    onOpen,
     onFavorite,
     onEdit,
     onDelete,
@@ -935,6 +910,7 @@ function ListRow({
     m: ServerMetrics | null;
     mLoading: boolean;
     hasSession: boolean;
+    onOpen: () => void;
     onFavorite: () => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -945,170 +921,150 @@ function ListRow({
     onShare: () => void;
 }) {
     const Icon = protocolIcons[server.protocol];
+    const statusTone = mLoading
+        ? 'text-muted-foreground'
+        : m?.reachable === true
+          ? 'text-emerald-400'
+          : m?.reachable === false
+            ? 'text-red-400'
+            : 'text-muted-foreground';
+    const statusLabel = mLoading
+        ? 'Checking'
+        : m?.reachable === true
+          ? m.latencyMs != null
+              ? `${m.latencyMs}ms`
+              : 'Online'
+          : m?.reachable === false
+            ? 'Offline'
+            : 'Unknown';
 
     return (
-        <div className="group flex items-center gap-3 px-4 py-3 border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors">
+        <div
+            className="group flex h-14 cursor-pointer items-center gap-4 border-b border-border/50 px-4 transition-colors hover:bg-secondary/40"
+            onClick={onOpen}
+        >
             <div
-                className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${protocolVariants[server.protocol]}`}
             >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="h-4 w-4" />
             </div>
 
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-[1.3]">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">{server.name}</span>
-                    <StatusIndicator metrics={m} loading={mLoading} />
+                    <span className="truncate text-sm font-medium">{server.name}</span>
+                    {server.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
                 </div>
-                <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[11px] text-muted-foreground font-mono truncate">
-                        {server.username}@{server.host}
+                <div className="hidden 2xl:flex items-center gap-2 mt-0.5">
+                    <span className="truncate text-[11px] text-muted-foreground">
+                        {server.username}
                     </span>
-                    <span className="text-[10px] text-muted-foreground/40 shrink-0">
-                        :{server.port}
-                    </span>
-                    <CopyButton text={`${server.host}:${server.port}`} />
+                    {(server.group || server.tags[0]) && <span className="text-muted-foreground/30">·</span>}
+                    {server.group && (
+                        <span
+                            className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                            style={{
+                                backgroundColor: `${server.group.color}20`,
+                                color: server.group.color || undefined,
+                                borderColor: `${server.group.color}40`,
+                            }}
+                        >
+                            {server.group.name}
+                        </span>
+                    )}
+                    {server.tags[0] && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onTagClick(server.tags[0]);
+                            }}
+                            className="inline-flex items-center rounded-full border border-border bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                        >
+                            {server.tags[0]}
+                        </button>
+                    )}
                 </div>
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5 shrink-0">
-                {server.group && (
-                    <span
-                        className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border"
-                        style={{
-                            backgroundColor: `${server.group.color}20`,
-                            color: server.group.color || undefined,
-                            borderColor: `${server.group.color}40`,
-                        }}
-                    >
-                        {server.group.name}
-                    </span>
-                )}
-                {server.tags.slice(0, 2).map((tag) => (
-                    <button
-                        key={tag}
-                        onClick={() => onTagClick(tag)}
-                        className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
-                    >
-                        {tag}
-                    </button>
-                ))}
+            <div className="min-w-0 hidden flex-1 items-center gap-2 md:flex">
+                <span className="truncate font-mono text-xs text-muted-foreground/80">
+                    {server.host}
+                </span>
+                <span className="shrink-0 text-[11px] text-muted-foreground/50">:{server.port}</span>
+                <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
             </div>
 
-            {server.protocol === 'SSH' && m && m.reachable && !m.error && (
-                <div className="hidden xl:flex items-center gap-4 shrink-0">
-                    {m.cpu != null && (
-                        <div className="flex flex-col items-end gap-0.5">
-                            <div className="flex items-center gap-1 text-[10px] tabular-nums">
-                                <Cpu className="w-3 h-3 text-muted-foreground/50" />
-                                <span
-                                    className={
-                                        m.cpu >= 90
-                                            ? 'text-red-400'
-                                            : m.cpu >= 70
-                                              ? 'text-yellow-400'
-                                              : 'text-muted-foreground'
-                                    }
-                                >
-                                    {m.cpu}%
-                                </span>
-                            </div>
-                            {m.cpuModel && (
-                                <span
-                                    className="text-[9px] text-muted-foreground/40 truncate max-w-[160px]"
-                                    title={m.cpuModel}
-                                >
-                                    {m.cpuModel}
-                                </span>
-                            )}
-                        </div>
-                    )}
-                    {m.ram && (
-                        <div className="flex flex-col items-end gap-0.5">
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground tabular-nums">
-                                <MemoryStick className="w-3 h-3 text-muted-foreground/50" />
-                                {formatBytes(m.ram.usedBytes)}
-                                <span className="text-muted-foreground/30">
-                                    /{formatBytes(m.ram.totalBytes)}
-                                </span>
-                            </div>
-                            {m.ram.speedMhz && (
-                                <span className="text-[9px] text-muted-foreground/40">
-                                    {m.ram.speedMhz} MT/s
-                                </span>
-                            )}
-                        </div>
-                    )}
-                    {m.disk && (
-                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground tabular-nums">
-                            <HardDrive className="w-3 h-3 text-muted-foreground/50" />
-                            {formatBytes(m.disk.usedBytes)}
-                            <span className="text-muted-foreground/30">
-                                /{formatBytes(m.disk.totalBytes)}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            )}
+            <div className="hidden w-28 shrink-0 items-center lg:flex">
+                <span
+                    className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
+                >
+                    {server.protocol}
+                </span>
+            </div>
 
-            <div className="hidden md:flex items-center gap-1 text-[10px] text-muted-foreground/40 w-16 shrink-0 justify-end">
+            <div className={`hidden w-28 shrink-0 items-center gap-2 xl:flex ${statusTone}`}>
+                <StatusIndicator metrics={m} loading={mLoading} />
+                <span className="text-xs font-medium">{statusLabel}</span>
+            </div>
+
+            <div className="hidden w-24 shrink-0 items-center text-xs text-muted-foreground 2xl:flex">
                 {formatRelativeTime(server.lastUsedAt)}
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="hidden min-w-0 flex-1 items-center gap-3 2xl:flex">
+                {server.protocol === 'SSH' && m && m.reachable && !m.error ? (
+                    <>
+                        {m.cpu != null && (
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground tabular-nums">
+                                <Cpu className="h-3 w-3 text-muted-foreground/50" />
+                                <span>{m.cpu}%</span>
+                            </div>
+                        )}
+                        {m.ram && (
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground tabular-nums">
+                                <MemoryStick className="h-3 w-3 text-muted-foreground/50" />
+                                <span>{Math.round(m.ram.percent)}%</span>
+                            </div>
+                        )}
+                        {m.disk && (
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground tabular-nums">
+                                <HardDrive className="h-3 w-3 text-muted-foreground/50" />
+                                <span>{Math.round(m.disk.percent)}%</span>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <span className="text-[11px] text-muted-foreground/60">
+                        {server.group?.name || server.description || 'No extra details'}
+                    </span>
+                )}
+            </div>
+
+            <div
+                className="flex shrink-0 items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onFavorite}
-                    className={`h-9 w-9 sm:h-7 sm:w-7 transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'}`}
+                    className={`h-8 w-8 rounded-lg transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'}`}
                 >
-                    <Star className={`w-3.5 h-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
+                    <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
                 </Button>
-                {server.hasPassword && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onCopyPassword}
-                        className="h-9 w-9 sm:h-7 sm:w-7 text-muted-foreground/50 hover:text-primary [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
-                        title="Copy password (passkey required)"
-                    >
-                        <KeyRound className="w-3.5 h-3.5" />
-                    </Button>
-                )}
-                <Button onClick={onConnect} size="sm" className="text-xs h-9 sm:h-7 px-3 sm:px-2.5">
+                <Button onClick={onConnect} size="sm" className="h-8 px-3 text-xs">
                     Connect
                 </Button>
-                {server.protocol === 'SSH' && (
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={onSessions}
-                        className={`h-9 sm:h-7 px-2.5 text-xs gap-1.5 transition-all ${
-                            hasSession
-                                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
-                                : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title={hasSession ? 'Session active — open in Sessions' : 'Add to Sessions'}
-                    >
-                        <div className="relative">
-                            <Layers className="w-3.5 h-3.5" />
-                            {hasSession && (
-                                <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            )}
-                        </div>
-                        <span className="hidden sm:inline">Sessions</span>
-                    </Button>
-                )}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 sm:h-7 sm:w-7 text-muted-foreground/50 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-foreground"
+                            className="h-8 w-8 rounded-lg text-muted-foreground/50 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-foreground"
                         >
-                            <MoreVertical className="w-3.5 h-3.5" />
+                            <MoreVertical className="h-3.5 w-3.5" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-44 bg-card border-border">
+                    <DropdownMenuContent align="end" className="w-48 bg-card border-border">
                         <DropdownMenuItem asChild>
                             <Link
                                 href={`/panel/servers/${server.id}`}
@@ -1123,6 +1079,12 @@ function ListRow({
                         <DropdownMenuItem onClick={onShare} className="gap-2">
                             <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
                         </DropdownMenuItem>
+                        {server.protocol === 'SSH' && (
+                            <DropdownMenuItem onClick={onSessions} className="gap-2">
+                                <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+                                {hasSession ? 'Open Session' : 'Add to Sessions'}
+                            </DropdownMenuItem>
+                        )}
                         {server.hasPassword && (
                             <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
                                 <KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Copy
@@ -1402,6 +1364,7 @@ export default function DashboardPage() {
         m: metrics[server.id] ?? null,
         mLoading: metricsLoading[server.id] ?? false,
         hasSession: sessions.some((s) => s.serverId === server.id),
+        onOpen: () => router.push(`/panel/servers/${server.id}`),
         onFavorite: () => toggleFavorite(server.id),
         onEdit: () => router.push(`/panel/servers/${server.id}/edit`),
         onDelete: () => setDeleteConfirm(server),
@@ -1440,351 +1403,363 @@ export default function DashboardPage() {
 
     return (
         <>
-            <div className="max-w-6xl mx-auto">
-                {/*   Header   */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                    <div>
-                        <h1 className="text-xl font-bold">Servers</h1>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                            {servers.length > 0
-                                ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
-                                : 'Manage and connect to your servers'}
-                        </p>
+            <div className="space-y-8">
+                <div className="mx-auto max-w-screen-2xl space-y-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                Fleet overview
+                            </p>
+                            <h1 className="mt-1 text-2xl font-bold">Servers</h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                {servers.length > 0
+                                    ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
+                                    : 'Manage and connect to your servers'}
+                            </p>
+                        </div>
+                        <Button asChild className="h-10 px-4">
+                            <Link href="/panel/servers/new">
+                                <Plus className="w-4 h-4" /> Add Server
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/panel/servers/new">
-                            <Plus className="w-4 h-4" /> Add Server
-                        </Link>
-                    </Button>
-                </div>
 
-                {/*   Fleet Overview Stats   */}
-                <FleetStats
-                    servers={servers}
-                    metrics={metrics}
-                    metricsLoading={metricsLoading}
-                    sessions={sessions}
-                />
-
-                {/*   Fleet Alerts   */}
-                {!loading && (
-                    <FleetAlerts
+                    <FleetStats
                         servers={servers}
                         metrics={metrics}
-                        onSelectServer={(id) => router.push(`/panel/servers/${id}`)}
+                        metricsLoading={metricsLoading}
+                        sessions={sessions}
                     />
-                )}
 
-                {/*   Search + Filters   */}
-                <div className="flex flex-col gap-3 mb-5">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                type="text"
-                                placeholder="Search servers..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 pr-9 text-sm h-9 bg-secondary border-border"
-                            />
-                            {searchQuery !== debouncedSearchQuery && (
-                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 animate-spin" />
-                            )}
-                        </div>
+                    {!loading && (
+                        <FleetAlerts
+                            servers={servers}
+                            metrics={metrics}
+                            onSelectServer={(id) => router.push(`/panel/servers/${id}`)}
+                        />
+                    )}
+                </div>
 
-                        <div className="flex gap-2 shrink-0 flex-wrap">
-                            <Button
-                                onClick={() => setFilter('all')}
-                                variant={filter === 'all' ? 'default' : 'secondary'}
-                                size="sm"
-                                className="h-9 px-3 text-xs"
-                            >
-                                All
-                            </Button>
-                            <Button
-                                onClick={() => setFilter('favorites')}
-                                variant={filter === 'favorites' ? 'default' : 'secondary'}
-                                size="sm"
-                                className="h-9 px-3 text-xs"
-                            >
-                                <Star className="w-3.5 h-3.5" /> Starred
-                            </Button>
-
-                            <div className="w-px bg-border self-stretch" />
-
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="h-9 px-3 text-xs gap-1.5 max-w-[164px]"
-                                    >
-                                        <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
-                                        <span className="truncate hidden sm:inline">
-                                            {currentSortLabel}
-                                        </span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    align="end"
-                                    className="w-56 bg-card border-border"
-                                >
-                                    <DropdownMenuLabel className="text-xs text-muted-foreground">
-                                        Sort by
-                                    </DropdownMenuLabel>
-                                    {SORT_OPTIONS.map((opt) => {
-                                        const active =
-                                            sort.field === opt.field && sort.dir === opt.dir;
-                                        return (
-                                            <DropdownMenuItem
-                                                key={`${opt.field}-${opt.dir}`}
-                                                onClick={() => applySort(opt.field, opt.dir)}
-                                                className={`gap-2 text-xs ${active ? 'text-primary' : ''}`}
-                                            >
-                                                {active ? (
-                                                    <Check className="w-3 h-3 shrink-0" />
-                                                ) : (
-                                                    <span className="w-3 shrink-0" />
-                                                )}
-                                                {opt.label}
-                                            </DropdownMenuItem>
-                                        );
-                                    })}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-
-                            <div className="w-px bg-border self-stretch" />
-
-                            <div className="flex rounded-lg border border-border overflow-hidden">
-                                <button
-                                    onClick={() => switchView('grid')}
-                                    className={`px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                                    title="Grid view"
-                                >
-                                    <LayoutGrid className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => switchView('list')}
-                                    className={`px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                                    title="List view"
-                                >
-                                    <List className="w-4 h-4" />
-                                </button>
+                <div className="-mx-4 sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
+                    <div className="mx-auto max-w-screen-2xl space-y-3">
+                        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                            <div className="relative w-full max-w-sm">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    type="text"
+                                    placeholder="Search servers..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="h-10 bg-secondary pl-9 pr-9 text-sm"
+                                />
+                                {searchQuery !== debouncedSearchQuery && (
+                                    <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground/50" />
+                                )}
                             </div>
 
-                            <Button
-                                variant="secondary"
-                                size="icon"
-                                onClick={() => {
-                                    fetchServers();
-                                    fetchMetrics(servers, true);
-                                }}
-                                className="h-9 w-9"
-                                title="Refresh"
-                            >
-                                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                            </Button>
-                        </div>
-                    </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Button
+                                    onClick={() => setFilter('all')}
+                                    variant={filter === 'all' ? 'default' : 'secondary'}
+                                    size="sm"
+                                    className="h-9 px-3 text-xs"
+                                >
+                                    All
+                                </Button>
+                                <Button
+                                    onClick={() => setFilter('favorites')}
+                                    variant={filter === 'favorites' ? 'default' : 'secondary'}
+                                    size="sm"
+                                    className="h-9 px-3 text-xs"
+                                >
+                                    <Star className="w-3.5 h-3.5" /> Starred
+                                </Button>
 
-                    {/* Protocol filter pills */}
-                    {showProtocolFilters && (
-                        <div className="flex items-center gap-2 flex-wrap">
-                            {(
-                                ['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]
-                            ).map((p) => {
-                                const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
-                                if (p !== 'all' && count === 0) return null;
-                                const active = protocolFilter === p;
-                                const colorMap: Record<string, string> = {
-                                    SSH: active
-                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                                        : 'text-muted-foreground border-border hover:border-emerald-500/30 hover:text-emerald-400',
-                                    SCP: active
-                                        ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'
-                                        : 'text-muted-foreground border-border hover:border-blue-500/30 hover:text-blue-400',
-                                    RDP: active
-                                        ? 'bg-purple-500/20 text-purple-400 border-purple-500/40'
-                                        : 'text-muted-foreground border-border hover:border-purple-500/30 hover:text-purple-400',
-                                    VNC: active
-                                        ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
-                                        : 'text-muted-foreground border-border hover:border-orange-500/30 hover:text-orange-400',
-                                    TELNET: active
-                                        ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
-                                        : 'text-muted-foreground border-border hover:border-cyan-500/30 hover:text-cyan-400',
-                                    all: active
-                                        ? 'bg-primary/15 text-primary border-primary/30'
-                                        : 'text-muted-foreground border-border hover:text-foreground',
-                                };
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setProtocolFilter(p)}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all ${colorMap[p]}`}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            className="h-9 max-w-[180px] gap-1.5 px-3 text-xs"
+                                        >
+                                            <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
+                                            <span className="hidden truncate sm:inline">
+                                                {currentSortLabel}
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-56 bg-card border-border"
                                     >
-                                        {p === 'all' ? 'All protocols' : p}
-                                        <span className="tabular-nums opacity-60">{count}</span>
-                                    </button>
-                                );
-                            })}
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">
+                                            Sort by
+                                        </DropdownMenuLabel>
+                                        {SORT_OPTIONS.map((opt) => {
+                                            const active =
+                                                sort.field === opt.field && sort.dir === opt.dir;
+                                            return (
+                                                <DropdownMenuItem
+                                                    key={`${opt.field}-${opt.dir}`}
+                                                    onClick={() => applySort(opt.field, opt.dir)}
+                                                    className={`gap-2 text-xs ${active ? 'text-primary' : ''}`}
+                                                >
+                                                    {active ? (
+                                                        <Check className="w-3 h-3 shrink-0" />
+                                                    ) : (
+                                                        <span className="w-3 shrink-0" />
+                                                    )}
+                                                    {opt.label}
+                                                </DropdownMenuItem>
+                                            );
+                                        })}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
-                            {/* Active tag filter chip */}
-                            {activeTag && (
-                                <>
-                                    <div className="w-px h-4 bg-border" />
+                                <div className="flex overflow-hidden rounded-lg border border-border">
+                                    <button
+                                        onClick={() => switchView('grid')}
+                                        className={`px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                        title="Grid view"
+                                    >
+                                        <LayoutGrid className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => switchView('list')}
+                                        className={`px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                        title="List view"
+                                    >
+                                        <List className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                <Button
+                                    variant="secondary"
+                                    size="icon"
+                                    onClick={() => {
+                                        fetchServers();
+                                        fetchMetrics(servers, true);
+                                    }}
+                                    className="h-9 w-9"
+                                    title="Refresh"
+                                >
+                                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {showProtocolFilters && (
+                            <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+                                {(
+                                    ['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]
+                                ).map((p) => {
+                                    const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
+                                    if (p !== 'all' && count === 0) return null;
+                                    const active = protocolFilter === p;
+                                    const colorMap: Record<string, string> = {
+                                        SSH: active
+                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                            : 'text-muted-foreground border-border hover:border-emerald-500/30 hover:text-emerald-400',
+                                        SCP: active
+                                            ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'
+                                            : 'text-muted-foreground border-border hover:border-blue-500/30 hover:text-blue-400',
+                                        RDP: active
+                                            ? 'bg-purple-500/20 text-purple-400 border-purple-500/40'
+                                            : 'text-muted-foreground border-border hover:border-purple-500/30 hover:text-purple-400',
+                                        VNC: active
+                                            ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
+                                            : 'text-muted-foreground border-border hover:border-orange-500/30 hover:text-orange-400',
+                                        TELNET: active
+                                            ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
+                                            : 'text-muted-foreground border-border hover:border-cyan-500/30 hover:text-cyan-400',
+                                        all: active
+                                            ? 'bg-primary/15 text-primary border-primary/30'
+                                            : 'text-muted-foreground border-border hover:text-foreground',
+                                    };
+
+                                    return (
+                                        <button
+                                            key={p}
+                                            onClick={() => setProtocolFilter(p)}
+                                            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-all ${colorMap[p]}`}
+                                        >
+                                            {p === 'all' ? 'All protocols' : p}
+                                            <span className="tabular-nums opacity-60">{count}</span>
+                                        </button>
+                                    );
+                                })}
+
+                                {activeTag && (
                                     <button
                                         onClick={() => setActiveTag(null)}
-                                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium bg-primary/15 text-primary border-primary/30 transition-all"
+                                        className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-[11px] font-medium text-primary transition-all"
                                     >
                                         <Tag className="w-3 h-3" />
                                         {activeTag}
                                         <X className="w-3 h-3" />
                                     </button>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                )}
+                            </div>
+                        )}
 
-                    {/* Tag filter bar (when there are tags and no active tag filter) */}
-                    {allTags.length > 0 && !activeTag && (
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <Tag className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                            {allTags.map((tag) => (
-                                <button
-                                    key={tag}
-                                    onClick={() => setActiveTag(tag)}
-                                    className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-muted-foreground border border-border hover:bg-secondary/80 hover:text-foreground transition-colors"
-                                >
-                                    {tag}
-                                </button>
+                        {allTags.length > 0 && !activeTag && (
+                            <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+                                <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+                                {allTags.map((tag) => (
+                                    <button
+                                        key={tag}
+                                        onClick={() => setActiveTag(tag)}
+                                        className="shrink-0 rounded-full border border-border bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                                    >
+                                        {tag}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mx-auto max-w-screen-2xl">
+                    {loading ? (
+                        viewMode === 'grid' ? (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    <Card key={i} className="min-h-[320px] border-border p-4">
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="h-10 w-10 rounded-xl" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-28" />
+                                                <Skeleton className="h-3 w-20" />
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 space-y-3">
+                                            <Skeleton className="h-16 w-full rounded-xl" />
+                                            <Skeleton className="h-5 w-2/3" />
+                                            <Skeleton className="h-20 w-full rounded-xl" />
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <Card className="overflow-hidden border-border">
+                                <div className="border-b border-border/60 bg-secondary/20 px-4 py-3">
+                                    <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                        <div className="w-9 shrink-0" />
+                                        <div className="flex-[1.3]">Name</div>
+                                        <div className="hidden flex-1 md:block">Host</div>
+                                        <div className="hidden w-28 lg:block">Protocol</div>
+                                        <div className="hidden w-28 xl:block">Status</div>
+                                        <div className="hidden w-24 2xl:block">Last Used</div>
+                                        <div className="hidden flex-1 2xl:block">Details</div>
+                                        <div className="w-28 shrink-0 text-right">Actions</div>
+                                    </div>
+                                </div>
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <div
+                                        key={i}
+                                        className="flex h-14 items-center gap-4 border-b border-border/50 px-4 last:border-0"
+                                    >
+                                        <Skeleton className="h-9 w-9 rounded-lg" />
+                                        <Skeleton className="h-4 flex-[1.3]" />
+                                        <Skeleton className="hidden h-4 flex-1 md:block" />
+                                        <Skeleton className="hidden h-4 w-20 lg:block" />
+                                        <Skeleton className="hidden h-4 w-16 xl:block" />
+                                        <Skeleton className="hidden h-4 w-16 2xl:block" />
+                                        <Skeleton className="hidden h-4 flex-1 2xl:block" />
+                                        <Skeleton className="ml-auto h-8 w-24" />
+                                    </div>
+                                ))}
+                            </Card>
+                        )
+                    ) : sortedServers.length === 0 ? (
+                        <Card className="flex min-h-[420px] items-center justify-center border-border">
+                            <div className="mx-auto max-w-md px-6 text-center">
+                                {servers.length === 0 ? (
+                                    <>
+                                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
+                                            <Server className="h-10 w-10 text-muted-foreground/35" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold">Build your fleet</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            Add your first server to create a clean, searchable fleet view.
+                                        </p>
+                                        <Button asChild className="mt-6 h-10 px-4">
+                                            <Link href="/panel/servers/new">
+                                                <Plus className="w-4 h-4" /> Add your first server
+                                            </Link>
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
+                                            <Search className="h-10 w-10 text-muted-foreground/35" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold">No matching servers</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            Broaden your search or reset the active filters to see more servers.
+                                        </p>
+                                        <Button
+                                            variant="secondary"
+                                            className="mt-6 h-10 px-4"
+                                            onClick={() => {
+                                                setProtocolFilter('all');
+                                                setActiveTag(null);
+                                                setSearchQuery('');
+                                                setDebouncedSearchQuery('');
+                                                setFilter('all');
+                                            }}
+                                        >
+                                            Clear filters
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </Card>
+                    ) : viewMode === 'grid' ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                            {sortedServers.map((server) => (
+                                <GridCard key={server.id} {...sharedProps(server)} />
                             ))}
                         </div>
+                    ) : (
+                        <Card className="overflow-hidden border-border">
+                            <div className="border-b border-border/60 bg-secondary/20 px-4 py-3">
+                                <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    <div className="w-9 shrink-0" />
+                                    <div className="flex-[1.3]">Name</div>
+                                    <div className="hidden flex-1 md:block">Host</div>
+                                    <div className="hidden w-28 lg:block">Protocol</div>
+                                    <div className="hidden w-28 xl:block">Status</div>
+                                    <div className="hidden w-24 2xl:block">Last Used</div>
+                                    <div className="hidden flex-1 2xl:block">Details</div>
+                                    <div className="w-28 shrink-0 text-right">Actions</div>
+                                </div>
+                            </div>
+                            {sortedServers.map((server) => (
+                                <ListRow key={server.id} {...sharedProps(server)} />
+                            ))}
+                        </Card>
                     )}
                 </div>
 
-                {/*   Server List   */}
-                {loading ? (
-                    viewMode === 'grid' ? (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <Card key={i} className="p-3 bg-card border-border">
-                                    <div className="flex items-center gap-2">
-                                        <Skeleton className="w-7 h-7 rounded-md" />
-                                        <div className="flex-1 space-y-1.5">
-                                            <Skeleton className="h-3.5 w-24" />
-                                            <Skeleton className="h-2.5 w-16" />
-                                        </div>
-                                    </div>
-                                    <div className="mt-2.5 space-y-1.5">
-                                        <Skeleton className="h-6 w-full rounded" />
-                                        <Skeleton className="h-3.5 w-1/2" />
-                                    </div>
-                                </Card>
-                            ))}
+                {sharedServers.length > 0 && (
+                    <div className="mx-auto max-w-screen-2xl space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Share2 className="w-4 h-4 text-primary" />
+                            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                Shared with me
+                            </h2>
+                            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary">
+                                {sharedServers.length}
+                            </span>
                         </div>
-                    ) : (
-                        <Card className="overflow-hidden bg-card border-border">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div
-                                    key={i}
-                                    className="flex items-center gap-3 px-4 py-3 border-b border-border/50 last:border-0"
-                                >
-                                    <Skeleton className="w-8 h-8 rounded-md" />
-                                    <div className="flex-1 space-y-1.5">
-                                        <Skeleton className="h-3.5 w-32" />
-                                        <Skeleton className="h-3 w-20" />
-                                    </div>
-                                    <Skeleton className="h-7 w-16" />
-                                </div>
-                            ))}
-                        </Card>
-                    )
-                ) : sortedServers.length === 0 ? (
-                    servers.length === 0 ? (
-                        <Card className="p-16 text-center bg-card border-border">
-                            <Server className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-                            <h3 className="font-medium mb-1.5">No servers yet</h3>
-                            <p className="text-sm text-muted-foreground mb-6">
-                                Add your first server to get started
-                            </p>
-                            <Button asChild>
-                                <Link href="/panel/servers/new">
-                                    <Plus className="w-4 h-4" /> Add Server
-                                </Link>
-                            </Button>
-                        </Card>
-                    ) : (
-                        <Card className="p-12 text-center bg-card border-border">
-                            <Search className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-                            <h3 className="font-medium mb-1">No matching servers</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Try adjusting your filters or search
-                            </p>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => {
-                                    setProtocolFilter('all');
-                                    setActiveTag(null);
-                                    setSearchQuery('');
-                                    setDebouncedSearchQuery('');
-                                    setFilter('all');
-                                }}
-                            >
-                                Clear filters
-                            </Button>
-                        </Card>
-                    )
-                ) : viewMode === 'grid' ? (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                        {sortedServers.map((server) => (
-                            <GridCard key={server.id} {...sharedProps(server)} />
-                        ))}
-                    </div>
-                ) : (
-                    <Card className="overflow-hidden bg-card border-border">
-                        <div className="flex items-center gap-3 px-4 py-2 border-b border-border/60 bg-secondary/20">
-                            <div className="w-8 shrink-0" />
-                            <div className="flex-1 text-[11px] text-muted-foreground/50 font-medium uppercase tracking-wider">
-                                Server
-                            </div>
-                            <div className="hidden lg:block w-32 text-[11px] text-muted-foreground/50 font-medium uppercase tracking-wider shrink-0">
-                                Group / Tags
-                            </div>
-                            <div className="hidden xl:block w-48 text-[11px] text-muted-foreground/50 font-medium uppercase tracking-wider shrink-0">
-                                Metrics
-                            </div>
-                            <div className="hidden md:block w-16 text-[11px] text-muted-foreground/50 font-medium uppercase tracking-wider shrink-0 text-right">
-                                Last Used
-                            </div>
-                            <div className="w-32 shrink-0" />
-                        </div>
-                        {sortedServers.map((server) => (
-                            <ListRow key={server.id} {...sharedProps(server)} />
-                        ))}
-                    </Card>
-                )}
-            </div>
-
-            {/*   Shared with me   */}
-            {sharedServers.length > 0 && (
-                <div className="max-w-6xl mx-auto mt-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Share2 className="w-4 h-4 text-primary" />
-                        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                            Shared with me
-                        </h2>
-                        <span className="text-xs bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                            {sharedServers.length}
-                        </span>
-                    </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                         {sharedServers.map((server) => {
                             const Icon = protocolIcons[server.protocol];
                             return (
                                 <Card
                                     key={server.id}
-                                    className="flex flex-col overflow-hidden bg-card border-border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200"
+                                    className="flex flex-col overflow-hidden border border-border border-primary/20 bg-card transition-all duration-200 hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md"
                                 >
                                     <div className="p-4 flex-1 space-y-3">
                                         <div className="flex items-start gap-3">
@@ -1848,9 +1823,10 @@ export default function DashboardPage() {
                                 </Card>
                             );
                         })}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             <AlertDialog
                 open={!!deleteConfirm}

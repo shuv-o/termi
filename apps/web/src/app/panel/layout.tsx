@@ -9,7 +9,6 @@ import {
     Settings,
     LogOut,
     Plus,
-    Search,
     Shield,
     Monitor,
     Mail,
@@ -24,7 +23,6 @@ import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import TerminalLogo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 interface User {
     id: string;
@@ -180,32 +178,33 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     if (!user) return null;
 
-    const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-64';
-    const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-64';
+    const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-64 2xl:w-72';
+    const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-64 2xl:pl-72';
 
     return (
         <div className="min-h-screen bg-background">
             {/*   Desktop sidebar                      */}
             <aside
                 className={`
-                hidden lg:flex flex-col
+                hidden lg:flex flex-col relative
                 fixed top-0 left-0 bottom-0
                 bg-card border-r border-border z-50
                 ${sidebarW}
                 transition-[width] duration-200 ease-in-out
             `}
             >
+                <div className="h-0.5 w-full bg-gradient-to-r from-primary via-violet-500 to-transparent absolute top-0 left-0" />
                 {/* Header */}
                 <div
-                    className={`flex items-center h-16 px-3 border-b border-border shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}
+                    className={`flex items-center h-14 px-2.5 border-b border-border shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}
                 >
                     {!collapsed && (
                         <Link
                             href="/panel"
-                            className="flex items-center gap-3 overflow-hidden min-w-0"
+                            className="flex items-center gap-2.5 overflow-hidden min-w-0"
                         >
-                            <TerminalLogo width={32} height={32} className="rounded-lg shrink-0" />
-                            <span className="text-lg font-bold gradient-text whitespace-nowrap overflow-hidden">
+                            <TerminalLogo width={30} height={30} className="rounded-lg shrink-0" />
+                            <span className="text-base font-bold gradient-text whitespace-nowrap overflow-hidden">
                                 Termi
                             </span>
                         </Link>
@@ -234,26 +233,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     </div>
                 </div>
 
-                {/* Search */}
-                <div
-                    className={`px-3 pt-3 overflow-hidden transition-all duration-200 ${collapsed ? 'max-h-0 opacity-0 pt-0' : 'max-h-20 opacity-100'}`}
-                >
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            type="text"
-                            placeholder="Search servers..."
-                            className="pl-9 text-sm h-9 bg-secondary border-border"
-                            tabIndex={collapsed ? -1 : 0}
-                        />
-                    </div>
-                </div>
-
                 {/* Add Server */}
                 <div
                     className={`px-3 pt-3 overflow-hidden transition-all duration-200 ${collapsed ? 'max-h-0 opacity-0 pt-0' : 'max-h-16 opacity-100'}`}
                 >
-                    <Button asChild className="w-full" tabIndex={collapsed ? -1 : 0}>
+                    <Button asChild className="w-full h-10 rounded-xl" tabIndex={collapsed ? -1 : 0}>
                         <Link href="/panel/servers/new">
                             <Plus className="w-4 h-4" />
                             Add Server
@@ -278,7 +262,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 )}
 
                 {/* Nav */}
-                <nav className="flex-1 px-2 pt-3 space-y-0.5">
+                <nav className="flex-1 px-2 pt-3 space-y-1">
                     {/* Local Terminal (Electron only) */}
                     {isElectron &&
                         (collapsed ? (
@@ -286,24 +270,30 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                 <button
                                     onClick={handleOpenLocalTerminal}
                                     title="Local Terminal"
-                                    className={`flex items-center justify-center py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                    className={`relative flex items-center justify-center py-2.5 rounded-xl text-sm font-medium transition-colors select-none w-full ${
                                         localTerminalActive
-                                            ? 'bg-primary/20 text-primary'
+                                            ? 'bg-primary/15 text-primary'
                                             : 'text-violet-400 hover:bg-accent hover:text-violet-300'
                                     }`}
                                 >
+                                    {localTerminalActive && (
+                                        <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
+                                    )}
                                     <Laptop className="w-5 h-5 shrink-0" />
                                 </button>
                             </CollapseTooltip>
                         ) : (
                             <button
                                 onClick={handleOpenLocalTerminal}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none w-full ${
+                                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors select-none w-full ${
                                     localTerminalActive
-                                        ? 'bg-primary/20 text-primary'
+                                        ? 'bg-primary/15 text-primary'
                                         : 'text-violet-400 hover:bg-accent hover:text-violet-300'
                                 }`}
                             >
+                                {localTerminalActive && (
+                                    <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
+                                )}
                                 <Laptop className="w-5 h-5 shrink-0" />
                                 <span className="truncate">Local Terminal</span>
                             </button>
@@ -313,9 +303,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         const isActive =
                             pathname === item.href ||
                             (item.href !== '/panel' && pathname.startsWith(item.href));
-                        const cls = `flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-colors select-none ${
+                        const cls = `relative flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-colors select-none ${
                             isActive
-                                ? 'bg-primary/20 text-primary'
+                                ? 'bg-primary/15 text-primary'
                                 : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                         } ${collapsed ? 'justify-center px-0 w-full' : 'px-3'}`;
 
@@ -323,6 +313,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             return (
                                 <CollapseTooltip key={item.name} label={item.name}>
                                     <Link href={item.href} className={cls} title={item.name}>
+                                        {isActive && (
+                                            <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
+                                        )}
                                         <item.icon className="w-5 h-5 shrink-0" />
                                     </Link>
                                 </CollapseTooltip>
@@ -330,6 +323,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                         return (
                             <Link key={item.name} href={item.href} className={cls}>
+                                {isActive && (
+                                    <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
+                                )}
                                 <item.icon className="w-5 h-5 shrink-0" />
                                 <span className="truncate">{item.name}</span>
                             </Link>
@@ -339,53 +335,52 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                 {/* Footer */}
                 <div
-                    className={`p-3 border-t border-border shrink-0 space-y-1 ${collapsed ? 'flex flex-col items-center' : ''}`}
+                    className={`p-3 border-t border-border shrink-0 ${collapsed ? 'flex flex-col items-center gap-2' : ''}`}
                 >
                     {collapsed ? (
                         <CollapseTooltip label={user.name || user.email}>
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default shadow-sm">
                                 {(user.name || user.email)[0].toUpperCase()}
                             </div>
                         </CollapseTooltip>
                     ) : (
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0">
+                        <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0 shadow-sm">
                                 {(user.name || user.email)[0].toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                {user.name && (
-                                    <p className="text-sm font-medium truncate">{user.name}</p>
-                                )}
-                                <p
-                                    className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}
-                                >
-                                    {user.email}
+                                <p className="text-sm font-medium truncate">
+                                    {user.name || user.email}
                                 </p>
-                                {user.totpEnabled && (
-                                    <span className="flex items-center gap-1 text-xs text-emerald-400">
-                                        <Shield className="w-3 h-3" /> 2FA
+                                {user.name && (
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        {user.email}
+                                    </p>
+                                )}
+                                {!user.name && user.totpEnabled && (
+                                    <span className="flex items-center gap-1 text-[11px] text-emerald-400">
+                                        <Shield className="w-3 h-3" /> 2FA enabled
                                     </span>
                                 )}
                             </div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300"
+                                title="Sign Out"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
                         </div>
                     )}
-                    {collapsed ? (
+                    {collapsed && (
                         <CollapseTooltip label="Sign Out">
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center justify-center w-9 h-9 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors mt-1"
+                                className="flex items-center justify-center w-9 h-9 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
                             >
                                 <LogOut className="w-4 h-4" />
                             </button>
                         </CollapseTooltip>
-                    ) : (
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            onClick={handleLogout}
-                        >
-                            <LogOut className="w-4 h-4" /> Sign Out
-                        </Button>
                     )}
                 </div>
             </aside>
