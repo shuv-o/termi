@@ -98,7 +98,7 @@ function statusColor(status: SessionStatus): string {
     }[status];
 }
 
-// SERVER PICKER MODAL — grid view
+// INLINE SESSION PICKER — renders inside the main content area, not as a modal
 
 const protocolMeta: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
     SSH: {
@@ -143,12 +143,9 @@ function ServerPickerCard({
                     : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/60 hover:shadow-md active:scale-95'
                 }`}
         >
-            {/* Icon */}
             <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}>
                 {meta.icon}
             </div>
-
-            {/* Name */}
             <div className="min-w-0 w-full">
                 <p className="text-sm font-medium truncate leading-tight">{server.name}</p>
                 {server.host && (
@@ -157,8 +154,6 @@ function ServerPickerCard({
                     </p>
                 )}
             </div>
-
-            {/* Protocol badge */}
             <span className={`self-start text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}>
                 {server.protocol}
             </span>
@@ -166,12 +161,14 @@ function ServerPickerCard({
     );
 }
 
-function ServerPicker({
+function InlineSessionPicker({
     onPick,
     onClose,
+    canClose,
 }: {
     onPick: (server: ServerItem) => void;
     onClose: () => void;
+    canClose: boolean;
 }) {
     const [servers, setServers] = useState<ServerItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -188,11 +185,11 @@ function ServerPicker({
 
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape' && canClose) onClose();
         }
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
+    }, [onClose, canClose]);
 
     const filtered = servers.filter(
         (s) =>
@@ -203,87 +200,87 @@ function ServerPicker({
     const otherServers = filtered.filter((s) => s.protocol !== 'SSH');
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
-            }}
-        >
-            <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[80vh]">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-                    <h3 className="font-semibold">New Session</h3>
+        <div className="absolute inset-0 flex flex-col bg-background overflow-hidden">
+            {/* Inline header */}
+            <div className="shrink-0 flex items-center gap-3 px-5 py-4 border-b border-border bg-card/40">
+                <div className="flex-1">
+                    <h2 className="text-base font-semibold">New Session</h2>
+                    <p className="text-xs text-muted-foreground">Pick a server to connect to</p>
+                </div>
+                {canClose && (
                     <button
                         onClick={onClose}
-                        className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
+                        className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                        title="Close"
                     >
                         <X className="w-4 h-4" />
                     </button>
-                </div>
+                )}
+            </div>
 
-                {/* Search */}
-                <div className="px-4 pt-4 pb-2 shrink-0">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            autoFocus
-                            type="text"
-                            placeholder="Search servers…"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            className="pl-9 bg-secondary border-transparent focus:border-border text-sm"
-                        />
+            {/* Search */}
+            <div className="shrink-0 px-5 pt-4 pb-2">
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        autoFocus
+                        type="text"
+                        placeholder="Search servers…"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="pl-9 bg-secondary border-transparent focus:border-border text-sm"
+                    />
+                </div>
+            </div>
+
+            {/* Grid */}
+            <div className="flex-1 overflow-y-auto px-5 pb-6">
+                {loading ? (
+                    <div className="flex justify-center py-16">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                     </div>
-                </div>
-
-                {/* Grid */}
-                <div className="flex-1 overflow-y-auto px-4 pb-4">
-                    {loading ? (
-                        <div className="flex justify-center py-12">
-                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                        </div>
-                    ) : filtered.length === 0 ? (
-                        <p className="text-center text-sm text-muted-foreground py-12">
-                            No servers found
-                        </p>
-                    ) : (
-                        <>
-                            {sshServers.length > 0 && (
-                                <>
-                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-2 pb-2">
-                                        SSH Servers
-                                    </p>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                        {sshServers.map((s) => (
-                                            <ServerPickerCard
-                                                key={s.id}
-                                                server={s}
-                                                onClick={() => onPick(s)}
-                                            />
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                            {otherServers.length > 0 && (
-                                <>
-                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-4 pb-2">
-                                        Other Protocols
-                                    </p>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                        {otherServers.map((s) => (
-                                            <ServerPickerCard
-                                                key={s.id}
-                                                server={s}
-                                                onClick={() => {}}
-                                                disabled
-                                            />
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </>
-                    )}
-                </div>
+                ) : filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
+                        <Server className="w-8 h-8 opacity-30" />
+                        <p className="text-sm">No servers found</p>
+                    </div>
+                ) : (
+                    <>
+                        {sshServers.length > 0 && (
+                            <>
+                                <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-2 pb-2">
+                                    SSH Servers
+                                </p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                                    {sshServers.map((s) => (
+                                        <ServerPickerCard
+                                            key={s.id}
+                                            server={s}
+                                            onClick={() => onPick(s)}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                        {otherServers.length > 0 && (
+                            <>
+                                <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground pt-4 pb-2">
+                                    Other Protocols
+                                </p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                                    {otherServers.map((s) => (
+                                        <ServerPickerCard
+                                            key={s.id}
+                                            server={s}
+                                            onClick={() => {}}
+                                            disabled
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );
@@ -1238,8 +1235,12 @@ export default function SessionsWorkspace() {
                     );
                 })}
                 <button
-                    onClick={() => setShowPicker(true)}
-                    className="flex items-center justify-center px-3 py-2 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors border-r border-border"
+                    onClick={() => setShowPicker((p) => !p)}
+                    className={`flex items-center justify-center px-3 py-2 shrink-0 transition-colors border-r border-border ${
+                        showPicker
+                            ? 'text-primary bg-primary/10'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                    }`}
                     title="New server session"
                 >
                     <Plus className="w-3.5 h-3.5" />
@@ -1339,8 +1340,12 @@ export default function SessionsWorkspace() {
 
                         <div className="p-2 border-t border-border space-y-1">
                             <button
-                                onClick={() => setShowPicker(true)}
-                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                                onClick={() => setShowPicker((p) => !p)}
+                                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors ${
+                                    showPicker
+                                        ? 'text-primary bg-primary/10'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                                }`}
                             >
                                 <Plus className="w-3.5 h-3.5" /> New session
                             </button>
@@ -1365,12 +1370,25 @@ export default function SessionsWorkspace() {
 
                 {/*   Main content panel   */}
                 <div className="flex-1 min-w-0 min-h-0 relative">
+                    {/* Inline session picker — replaces content when open */}
+                    {showPicker && (
+                        <InlineSessionPicker
+                            canClose={sessions.length > 0}
+                            onClose={() => setShowPicker(false)}
+                            onPick={(server) => {
+                                setShowPicker(false);
+                                addSession(server.id, server.name);
+                                setMode('terminal');
+                            }}
+                        />
+                    )}
+
                     {/* Transfer mode */}
-                    {mode === 'transfer' && <TransferMode servers={sshServers} />}
+                    {!showPicker && mode === 'transfer' && <TransferMode servers={sshServers} />}
 
                     {/*   Terminal mode   */}
                     {/* Empty state when no sessions exist */}
-                    {mode === 'terminal' && sessions.length === 0 && (
+                    {!showPicker && mode === 'terminal' && sessions.length === 0 && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center p-8">
                             <div className="w-20 h-20 rounded-2xl bg-secondary border border-border flex items-center justify-center">
                                 <Terminal className="w-9 h-9 text-muted-foreground/60" />
@@ -1410,7 +1428,7 @@ export default function SessionsWorkspace() {
                         <TerminalPane
                             key={session.tabId}
                             session={session}
-                            isActive={activeTabId === session.tabId}
+                            isActive={!showPicker && activeTabId === session.tabId}
                             mode={mode}
                             updateSessionStatus={updateSessionStatus}
                             setSessionError={setSessionError}
@@ -1423,18 +1441,6 @@ export default function SessionsWorkspace() {
                     ))}
                 </div>
             </div>
-
-            {/* Server picker — no exclude, same server can be opened in multiple tabs */}
-            {showPicker && (
-                <ServerPicker
-                    onClose={() => setShowPicker(false)}
-                    onPick={(server) => {
-                        setShowPicker(false);
-                        addSession(server.id, server.name);
-                        setMode('terminal');
-                    }}
-                />
-            )}
         </div>
     );
 }
