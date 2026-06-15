@@ -186,7 +186,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             {/*   Desktop sidebar                      */}
             <aside
                 className={`
-                hidden lg:flex flex-col relative
+                hidden lg:flex flex-col
                 fixed top-0 left-0 bottom-0
                 bg-card border-r border-border z-50
                 ${sidebarW}
@@ -482,7 +482,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 </header>
 
                 {/* Page content */}
-                <div className={isSessionsPage ? 'p-4 sm:p-5 lg:p-8' : 'hidden'}>
+                <div className={isSessionsPage ? '' : 'hidden'}>
                     <SessionsWorkspace />
                 </div>
 

@@ -1340,10 +1340,10 @@ export default function SessionsWorkspace() {
     );
 
     // Mobile: subtract top bar (3.5rem = h-14) + bottom nav (4rem = h-16)
-    // Desktop (lg+): full viewport height, sidebar handled by padding-left
+    // Desktop (lg+): full viewport height; parent container has no extra padding
     const containerHeight = isFullscreen
         ? 'h-screen fixed inset-0 z-[100] bg-background'
-        : 'h-[calc(100vh-7.5rem)] lg:h-screen -m-4 sm:-m-5 lg:-m-8';
+        : 'h-[calc(100vh-7.5rem)] lg:h-screen';
 
     return (
         <div className={`flex flex-col ${containerHeight}`}>
