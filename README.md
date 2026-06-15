@@ -162,6 +162,15 @@ Then open the app normally.
 
 SmartScreen may warn that the publisher is unknown. Click **More info → Run anyway**.
 
+### Linux
+
+The Linux build is distributed as an **AppImage** — no installation required.
+
+```bash
+chmod +x termi.AppImage
+./termi.AppImage
+```
+
 ---
 
 ## 🛠️ Development Setup

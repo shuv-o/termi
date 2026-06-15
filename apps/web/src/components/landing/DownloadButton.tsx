@@ -15,6 +15,7 @@ const VERSION = 'v1.0.0';
 // macOS builds are ad-hoc signed but not notarized, so Gatekeeper quarantines
 // the download. This strips the quarantine flag so the app launches.
 const XATTR_CMD = 'xattr -dr com.apple.quarantine /Applications/Termi.app';
+const LINUX_CMD = 'chmod +x termi.AppImage\n./termi.AppImage';
 
 const FILE_EXT: Record<OS, string> = {
     mac: 'dmg',
@@ -227,6 +228,34 @@ export default function DownloadDesktopButton() {
                             Learn more
                         </a>
                     </p>
+                </div>
+            )}
+
+            {/* Linux AppImage — must be made executable before first run */}
+            {os === 'linux' && (
+                <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
+                    <p>After downloading, make the file executable and run it:</p>
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await navigator.clipboard.writeText(LINUX_CMD);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                            } catch {
+                                /* clipboard unavailable */
+                            }
+                        }}
+                        title="Copy to clipboard"
+                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2 text-left font-mono text-[11px] text-slate-300 transition-colors hover:border-slate-500"
+                    >
+                        <code className="flex-1 whitespace-pre">{LINUX_CMD}</code>
+                        {copied ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        ) : (
+                            <Copy className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover/cmd:text-slate-300" />
+                        )}
+                    </button>
                 </div>
             )}
 

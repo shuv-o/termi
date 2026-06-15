@@ -39,7 +39,7 @@ mac:
 win:
   target:
     - target: nsis
-      arch: [x64, arm64]
+      arch: [x64]
   icon: apps/web/public/icons/icon-512x512.png
 
 linux:

@@ -101,11 +101,7 @@ export class SSHHandler {
                     'aes128-cbc',
                     '3des-cbc',
                 ],
-                hmac: [
-                    'hmac-sha2-256',
-                    'hmac-sha2-512',
-                    'hmac-sha1',
-                ],
+                hmac: ['hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'],
             },
         };
 
