@@ -18,6 +18,7 @@ import {
     ChevronDown,
     ChevronLeft,
     Laptop,
+    BookKey,
 } from 'lucide-react';
 import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
@@ -39,6 +40,7 @@ const navigation = [
     { name: 'Servers', href: '/panel', icon: Server },
     { name: 'Groups', href: '/panel/groups', icon: FolderOpen },
     { name: 'Sessions', href: '/panel/sessions', icon: Monitor },
+    { name: 'Keychain', href: '/panel/keychain', icon: BookKey },
     { name: 'Settings', href: '/panel/settings', icon: Settings },
 ];
 

@@ -112,6 +112,11 @@ export type RecoveryCode = Prisma.RecoveryCodeModel
  */
 export type EmailOTP = Prisma.EmailOTPModel
 /**
+ * Model KeychainCredential
+ * 
+ */
+export type KeychainCredential = Prisma.KeychainCredentialModel
+/**
  * Model ServerInvitation
  * 
  */

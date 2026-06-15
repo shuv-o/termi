@@ -23,6 +23,9 @@ import {
     Globe,
     Activity,
     Tv,
+    KeyRound,
+    BookKey,
+    Save,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,11 +39,20 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Group {
     id: string;
     name: string;
     color: string | null;
+}
+
+interface KeychainEntry {
+    id: string;
+    label: string;
+    username: string;
+    hasPassword: boolean;
+    hasPrivateKey: boolean;
 }
 
 const protocols = [
@@ -98,6 +110,13 @@ export default function EditServerPage() {
     const [testResult, setTestResult] = useState<{ latency?: number; error?: string } | null>(null);
     const [tagInput, setTagInput] = useState('');
 
+    // Keychain state
+    const [keychainEntries, setKeychainEntries] = useState<KeychainEntry[]>([]);
+    const [credSource, setCredSource] = useState<'new' | 'keychain'>('new');
+    const [selectedKeychainId, setSelectedKeychainId] = useState('');
+    const [saveToKeychain, setSaveToKeychain] = useState(false);
+    const [keychainLabel, setKeychainLabel] = useState('');
+
     const [storedCreds, setStoredCreds] = useState({
         hasPassword: false,
         hasPrivateKey: false,
@@ -127,8 +146,9 @@ export default function EditServerPage() {
         Promise.all([
             fetch(`/api/servers/${id}`).then((r) => r.json()),
             fetch('/api/groups').then((r) => r.json()),
+            fetch('/api/keychain').then((r) => r.json()),
         ])
-            .then(([serverData, groupData]) => {
+            .then(([serverData, groupData, keychainData]) => {
                 if (!serverData.success) {
                     router.push('/panel');
                     return;
@@ -158,12 +178,33 @@ export default function EditServerPage() {
                     rdpSecurity: (s.rdpSecurity ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
                 });
                 if (groupData.success) setGroups(groupData.data.groups);
+                if (keychainData.success) setKeychainEntries(keychainData.data.entries);
             })
             .catch(() => router.push('/panel'))
             .finally(() => setPageLoading(false));
     }, [id, router]);
 
     const update = (fields: Partial<typeof form>) => setForm((f) => ({ ...f, ...fields }));
+
+    const applyKeychain = async (keychainId: string) => {
+        if (!keychainId) return;
+        try {
+            const res = await fetch(`/api/keychain/${keychainId}`);
+            const data = await res.json();
+            if (data.success) {
+                const entry = data.data.entry;
+                update({
+                    username: entry.username,
+                    password: entry.password ?? '',
+                    privateKey: entry.privateKey ?? '',
+                    passphrase: entry.passphrase ?? '',
+                    authMethod: entry.privateKey ? 'key' : 'password',
+                });
+            }
+        } catch {
+            // silently ignore
+        }
+    };
 
     const handleProtocolChange = (p: keyof typeof defaultPorts) => {
         update({ protocol: p, port: defaultPorts[p] });
@@ -228,6 +269,34 @@ export default function EditServerPage() {
         setError('');
         setSaving(true);
         try {
+            // Optionally save credentials to keychain before updating server
+            if (credSource === 'new' && saveToKeychain && keychainLabel.trim()) {
+                try {
+                    await fetch('/api/keychain', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            label: keychainLabel.trim(),
+                            username: form.username,
+                            password:
+                                form.authMethod === 'password' && form.password.trim()
+                                    ? form.password
+                                    : undefined,
+                            privateKey:
+                                form.authMethod === 'key' && form.privateKey.trim()
+                                    ? form.privateKey
+                                    : undefined,
+                            passphrase:
+                                form.authMethod === 'key' && form.passphrase.trim()
+                                    ? form.passphrase
+                                    : undefined,
+                        }),
+                    });
+                } catch {
+                    // keychain save failure is non-fatal
+                }
+            }
+
             const payload: Record<string, unknown> = {
                 name: form.name,
                 description: form.description || undefined,
@@ -435,143 +504,267 @@ export default function EditServerPage() {
                         {/* Authentication */}
                         <Card>
                             <CardContent className="p-4 space-y-3">
-                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Authentication
-                                </p>
-
-                                {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
-                                    <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
-                                        {(['password', 'key'] as const).map((method) => (
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Authentication
+                                    </p>
+                                    {/* Credential source toggle */}
+                                    <div className="flex gap-1 p-1 bg-background/60 rounded-lg border border-border/50">
+                                        {(['new', 'keychain'] as const).map((src) => (
                                             <button
-                                                key={method}
+                                                key={src}
                                                 type="button"
-                                                onClick={() => update({ authMethod: method })}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                                    form.authMethod === method
+                                                onClick={() => {
+                                                    setCredSource(src);
+                                                    if (src === 'new') setSelectedKeychainId('');
+                                                }}
+                                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                                                    credSource === src
                                                         ? 'bg-primary text-primary-foreground shadow-sm'
                                                         : 'text-muted-foreground hover:text-foreground'
                                                 }`}
                                             >
-                                                {method === 'password' ? (
-                                                    <Lock className="w-3 h-3" />
+                                                {src === 'keychain' ? (
+                                                    <BookKey className="w-3 h-3" />
                                                 ) : (
-                                                    <Key className="w-3 h-3" />
+                                                    <KeyRound className="w-3 h-3" />
                                                 )}
-                                                {method === 'password' ? 'Password' : 'SSH Key'}
+                                                {src === 'keychain' ? 'Keychain' : 'New'}
                                             </button>
                                         ))}
                                     </div>
-                                )}
+                                </div>
 
-                                {form.authMethod === 'password' && storedCreds.hasPassword && (
-                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
-                                        <Lock className="w-3 h-3 text-green-500/70" />
-                                        Password saved — leave blank to keep it, or enter a new one
-                                        to replace it
-                                    </div>
-                                )}
-                                {form.authMethod === 'key' && storedCreds.hasPrivateKey && (
-                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
-                                        <Key className="w-3 h-3 text-green-500/70" />
-                                        Private key saved — leave blank to keep it, or paste a new
-                                        key to replace it
-                                    </div>
-                                )}
-
-                                {form.authMethod === 'password' && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">
-                                            New Password{' '}
-                                            <span className="text-muted-foreground/50">
-                                                (leave blank to keep existing)
-                                            </span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={form.password}
-                                                onChange={(e) =>
-                                                    update({ password: e.target.value })
-                                                }
-                                                className="bg-secondary border-border text-sm h-9 pr-10"
-                                                placeholder="••••••••"
-                                                autoComplete="new-password"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="w-4 h-4" />
-                                                ) : (
-                                                    <Eye className="w-4 h-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {form.authMethod === 'key' && (
-                                    <div className="space-y-3">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs">
-                                                New Private Key{' '}
-                                                <span className="text-muted-foreground/50">
-                                                    (leave blank to keep existing)
-                                                </span>
-                                            </Label>
-                                            <Textarea
-                                                value={form.privateKey}
-                                                onChange={(e) =>
-                                                    update({ privateKey: e.target.value })
-                                                }
-                                                className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
-                                                placeholder={
-                                                    '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
-                                                }
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs">
-                                                Passphrase{' '}
-                                                <span className="text-muted-foreground/50">
-                                                    {storedCreds.hasPassphrase
-                                                        ? '(leave blank to keep existing)'
-                                                        : '(if encrypted)'}
-                                                </span>
-                                            </Label>
-                                            <div className="relative">
-                                                <Input
-                                                    type={showPassphrase ? 'text' : 'password'}
-                                                    value={form.passphrase}
-                                                    onChange={(e) =>
-                                                        update({ passphrase: e.target.value })
-                                                    }
-                                                    className="bg-secondary border-border text-sm h-9 pr-10"
-                                                    placeholder="••••••••"
-                                                    autoComplete="new-password"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() =>
-                                                        setShowPassphrase(!showPassphrase)
-                                                    }
-                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                {/* ── Keychain picker ── */}
+                                {credSource === 'keychain' && (
+                                    <div className="space-y-2">
+                                        {keychainEntries.length === 0 ? (
+                                            <p className="text-xs text-muted-foreground py-2 text-center">
+                                                No keychain entries yet.{' '}
+                                                <Link
+                                                    href="/panel/keychain"
+                                                    className="underline text-primary"
                                                 >
-                                                    {showPassphrase ? (
-                                                        <EyeOff className="w-4 h-4" />
-                                                    ) : (
-                                                        <Eye className="w-4 h-4" />
-                                                    )}
-                                                </Button>
+                                                    Create one
+                                                </Link>{' '}
+                                                first.
+                                            </p>
+                                        ) : (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">Select keychain entry</Label>
+                                                <Select
+                                                    value={selectedKeychainId || 'none'}
+                                                    onValueChange={(v) => {
+                                                        const id = v === 'none' ? '' : v;
+                                                        setSelectedKeychainId(id);
+                                                        if (id) applyKeychain(id);
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                                                        <SelectValue placeholder="Choose a keychain entry…" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-card border-border">
+                                                        <SelectItem value="none">
+                                                            — Choose an entry —
+                                                        </SelectItem>
+                                                        {keychainEntries.map((kc) => (
+                                                            <SelectItem key={kc.id} value={kc.id}>
+                                                                <span className="font-medium">
+                                                                    {kc.label}
+                                                                </span>
+                                                                <span className="ml-2 text-muted-foreground text-xs">
+                                                                    {kc.username}
+                                                                </span>
+                                                                <span className="ml-1.5 text-[10px] text-muted-foreground/60">
+                                                                    {kc.hasPrivateKey
+                                                                        ? '(SSH key)'
+                                                                        : '(password)'}
+                                                                </span>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {selectedKeychainId && (
+                                                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                                        Credentials loaded from keychain
+                                                    </p>
+                                                )}
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
+                                )}
+
+                                {/* ── Manual entry ── */}
+                                {credSource === 'new' && (
+                                    <>
+                                        {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
+                                            <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
+                                                {(['password', 'key'] as const).map((method) => (
+                                                    <button
+                                                        key={method}
+                                                        type="button"
+                                                        onClick={() => update({ authMethod: method })}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                                            form.authMethod === method
+                                                                ? 'bg-primary text-primary-foreground shadow-sm'
+                                                                : 'text-muted-foreground hover:text-foreground'
+                                                        }`}
+                                                    >
+                                                        {method === 'password' ? (
+                                                            <Lock className="w-3 h-3" />
+                                                        ) : (
+                                                            <Key className="w-3 h-3" />
+                                                        )}
+                                                        {method === 'password' ? 'Password' : 'SSH Key'}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {form.authMethod === 'password' && storedCreds.hasPassword && (
+                                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
+                                                <Lock className="w-3 h-3 text-green-500/70" />
+                                                Password saved — leave blank to keep it, or enter a new one
+                                                to replace it
+                                            </div>
+                                        )}
+                                        {form.authMethod === 'key' && storedCreds.hasPrivateKey && (
+                                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 border border-border/50">
+                                                <Key className="w-3 h-3 text-green-500/70" />
+                                                Private key saved — leave blank to keep it, or paste a new
+                                                key to replace it
+                                            </div>
+                                        )}
+
+                                        {form.authMethod === 'password' && (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">
+                                                    New Password{' '}
+                                                    <span className="text-muted-foreground/50">
+                                                        (leave blank to keep existing)
+                                                    </span>
+                                                </Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        value={form.password}
+                                                        onChange={(e) =>
+                                                            update({ password: e.target.value })
+                                                        }
+                                                        className="bg-secondary border-border text-sm h-9 pr-10"
+                                                        placeholder="••••••••"
+                                                        autoComplete="new-password"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="w-4 h-4" />
+                                                        ) : (
+                                                            <Eye className="w-4 h-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {form.authMethod === 'key' && (
+                                            <div className="space-y-3">
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-xs">
+                                                        New Private Key{' '}
+                                                        <span className="text-muted-foreground/50">
+                                                            (leave blank to keep existing)
+                                                        </span>
+                                                    </Label>
+                                                    <Textarea
+                                                        value={form.privateKey}
+                                                        onChange={(e) =>
+                                                            update({ privateKey: e.target.value })
+                                                        }
+                                                        className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
+                                                        placeholder={
+                                                            '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-xs">
+                                                        Passphrase{' '}
+                                                        <span className="text-muted-foreground/50">
+                                                            {storedCreds.hasPassphrase
+                                                                ? '(leave blank to keep existing)'
+                                                                : '(if encrypted)'}
+                                                        </span>
+                                                    </Label>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type={showPassphrase ? 'text' : 'password'}
+                                                            value={form.passphrase}
+                                                            onChange={(e) =>
+                                                                update({ passphrase: e.target.value })
+                                                            }
+                                                            className="bg-secondary border-border text-sm h-9 pr-10"
+                                                            placeholder="••••••••"
+                                                            autoComplete="new-password"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                setShowPassphrase(!showPassphrase)
+                                                            }
+                                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                        >
+                                                            {showPassphrase ? (
+                                                                <EyeOff className="w-4 h-4" />
+                                                            ) : (
+                                                                <Eye className="w-4 h-4" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Save to Keychain */}
+                                        <div className="pt-2 border-t border-border/60 space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    id="edit-save-keychain"
+                                                    checked={saveToKeychain}
+                                                    onCheckedChange={(v) =>
+                                                        setSaveToKeychain(v === true)
+                                                    }
+                                                    className="h-4 w-4"
+                                                />
+                                                <label
+                                                    htmlFor="edit-save-keychain"
+                                                    className="text-xs text-muted-foreground cursor-pointer flex items-center gap-1.5"
+                                                >
+                                                    <Save className="w-3 h-3" />
+                                                    Save these credentials to Keychain
+                                                </label>
+                                            </div>
+                                            {saveToKeychain && (
+                                                <Input
+                                                    type="text"
+                                                    value={keychainLabel}
+                                                    onChange={(e) =>
+                                                        setKeychainLabel(e.target.value)
+                                                    }
+                                                    className="bg-secondary border-border text-sm h-9"
+                                                    placeholder="Label (e.g. root@production)"
+                                                />
+                                            )}
+                                        </div>
+                                    </>
                                 )}
                             </CardContent>
                         </Card>

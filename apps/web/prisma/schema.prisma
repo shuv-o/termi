@@ -15,6 +15,7 @@ model User {
   name         String?
   passwordHash String? // scrypt hash — null for OAuth-only users
 
+
   // TOTP 2FA
   totpSecret  String? // Encrypted TOTP secret
   totpEnabled Boolean @default(false)
@@ -65,9 +66,10 @@ model User {
   monitorConfigs     ServerMonitorConfig[]
   oauthAccounts      OAuthAccount[]
   persistentSessions PersistentSession[]
-  sentInvitations    ServerInvitation[]    @relation("SentInvitations")
-  ownedShares        ServerShare[]         @relation("OwnedShares")
-  receivedShares     ServerShare[]         @relation("ReceivedShares")
+  sentInvitations      ServerInvitation[]     @relation("SentInvitations")
+  ownedShares          ServerShare[]          @relation("OwnedShares")
+  receivedShares       ServerShare[]          @relation("ReceivedShares")
+  keychainCredentials  KeychainCredential[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -363,6 +365,11 @@ enum AuditAction {
   SERVER_INVITE_ACCEPTED
   SERVER_INVITE_DECLINED
   SERVER_SHARE_REVOKED
+
+  // Keychain events
+  KEYCHAIN_CREATED
+  KEYCHAIN_UPDATED
+  KEYCHAIN_DELETED
 }
 
 // PUSH NOTIFICATIONS
@@ -483,6 +490,29 @@ model EmailOTP {
 
 enum OAuthProvider {
   GOOGLE
+}
+
+// KEYCHAIN – reusable credential sets
+
+model KeychainCredential {
+  id     String @id @default(cuid())
+  userId String
+
+  // Friendly label shown in pickers
+  label String
+
+  // Credentials (all encrypted with AES-256-GCM)
+  username   String  // Encrypted
+  password   String? // Encrypted (optional – password auth)
+  privateKey String? // Encrypted (optional – SSH key auth)
+  passphrase String? // Encrypted (optional – key passphrase)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // SERVER SHARING & INVITATIONS

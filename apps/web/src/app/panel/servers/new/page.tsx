@@ -25,6 +25,9 @@ import {
     Tv,
     Upload,
     FileKey,
+    KeyRound,
+    BookKey,
+    Save,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,11 +41,20 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Group {
     id: string;
     name: string;
     color: string | null;
+}
+
+interface KeychainEntry {
+    id: string;
+    label: string;
+    username: string;
+    hasPassword: boolean;
+    hasPrivateKey: boolean;
 }
 
 const protocols = [
@@ -99,6 +111,13 @@ export default function NewServerPage() {
     const [testResult, setTestResult] = useState<{ latency?: number; error?: string } | null>(null);
     const [tagInput, setTagInput] = useState('');
 
+    // Keychain state
+    const [keychainEntries, setKeychainEntries] = useState<KeychainEntry[]>([]);
+    const [credSource, setCredSource] = useState<'new' | 'keychain'>('new');
+    const [selectedKeychainId, setSelectedKeychainId] = useState('');
+    const [saveToKeychain, setSaveToKeychain] = useState(false);
+    const [keychainLabel, setKeychainLabel] = useState('');
+
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -125,9 +144,37 @@ export default function NewServerPage() {
                 if (d.success) setGroups(d.data.groups);
             })
             .catch(() => {});
+
+        fetch('/api/keychain')
+            .then((r) => r.json())
+            .then((d) => {
+                if (d.success) setKeychainEntries(d.data.entries);
+            })
+            .catch(() => {});
     }, []);
 
     const update = (fields: Partial<typeof form>) => setForm((f) => ({ ...f, ...fields }));
+
+    const applyKeychain = async (keychainId: string) => {
+        if (!keychainId) return;
+        try {
+            const res = await fetch(`/api/keychain/${keychainId}`);
+            const data = await res.json();
+            if (data.success) {
+                const entry = data.data.entry;
+                update({
+                    username: entry.username,
+                    password: entry.password ?? '',
+                    privateKey: entry.privateKey ?? '',
+                    passphrase: entry.passphrase ?? '',
+                    authMethod: entry.privateKey ? 'key' : 'password',
+                });
+                if (entry.privateKey) setKeyInputMethod('paste');
+            }
+        } catch {
+            // silently ignore – user can still enter manually
+        }
+    };
 
     const handleProtocolChange = (protocol: keyof typeof defaultPorts) => {
         update({ protocol, port: defaultPorts[protocol] });
@@ -190,6 +237,28 @@ export default function NewServerPage() {
         setError('');
         setLoading(true);
         try {
+            // Optionally save credentials to keychain before creating server
+            if (credSource === 'new' && saveToKeychain && keychainLabel.trim()) {
+                try {
+                    await fetch('/api/keychain', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            label: keychainLabel.trim(),
+                            username: form.username,
+                            password:
+                                form.authMethod === 'password' ? form.password : undefined,
+                            privateKey:
+                                form.authMethod === 'key' ? form.privateKey : undefined,
+                            passphrase:
+                                form.authMethod === 'key' ? form.passphrase : undefined,
+                        }),
+                    });
+                } catch {
+                    // keychain save failure is non-fatal
+                }
+            }
+
             const res = await fetch('/api/servers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -386,205 +455,329 @@ export default function NewServerPage() {
                         {/* Authentication */}
                         <Card>
                             <CardContent className="p-4 space-y-3">
-                                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Authentication
-                                </p>
-
-                                {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
-                                    <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
-                                        {(['password', 'key'] as const).map((method) => (
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Authentication
+                                    </p>
+                                    {/* Credential source toggle */}
+                                    <div className="flex gap-1 p-1 bg-background/60 rounded-lg border border-border/50">
+                                        {(['new', 'keychain'] as const).map((src) => (
                                             <button
-                                                key={method}
+                                                key={src}
                                                 type="button"
-                                                onClick={() => update({ authMethod: method })}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                                    form.authMethod === method
+                                                onClick={() => {
+                                                    setCredSource(src);
+                                                    if (src === 'new') setSelectedKeychainId('');
+                                                }}
+                                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                                                    credSource === src
                                                         ? 'bg-primary text-primary-foreground shadow-sm'
                                                         : 'text-muted-foreground hover:text-foreground'
                                                 }`}
                                             >
-                                                {method === 'password' ? (
-                                                    <Lock className="w-3 h-3" />
+                                                {src === 'keychain' ? (
+                                                    <BookKey className="w-3 h-3" />
                                                 ) : (
-                                                    <Key className="w-3 h-3" />
+                                                    <KeyRound className="w-3 h-3" />
                                                 )}
-                                                {method === 'password' ? 'Password' : 'SSH Key'}
+                                                {src === 'keychain' ? 'Keychain' : 'New'}
                                             </button>
                                         ))}
                                     </div>
-                                )}
+                                </div>
 
-                                {form.authMethod === 'password' && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">Password</Label>
-                                        <div className="relative">
-                                            <Input
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={form.password}
-                                                onChange={(e) =>
-                                                    update({ password: e.target.value })
-                                                }
-                                                className="bg-secondary border-border text-sm h-9 pr-10"
-                                                placeholder="••••••••"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="w-4 h-4" />
-                                                ) : (
-                                                    <Eye className="w-4 h-4" />
+                                {/* ── Keychain picker ── */}
+                                {credSource === 'keychain' && (
+                                    <div className="space-y-2">
+                                        {keychainEntries.length === 0 ? (
+                                            <p className="text-xs text-muted-foreground py-2 text-center">
+                                                No keychain entries yet.{' '}
+                                                <Link
+                                                    href="/panel/keychain"
+                                                    className="underline text-primary"
+                                                >
+                                                    Create one
+                                                </Link>{' '}
+                                                first.
+                                            </p>
+                                        ) : (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">Select keychain entry</Label>
+                                                <Select
+                                                    value={selectedKeychainId || 'none'}
+                                                    onValueChange={(v) => {
+                                                        const id = v === 'none' ? '' : v;
+                                                        setSelectedKeychainId(id);
+                                                        if (id) applyKeychain(id);
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                                                        <SelectValue placeholder="Choose a keychain entry…" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-card border-border">
+                                                        <SelectItem value="none">
+                                                            — Choose an entry —
+                                                        </SelectItem>
+                                                        {keychainEntries.map((kc) => (
+                                                            <SelectItem key={kc.id} value={kc.id}>
+                                                                <span className="font-medium">
+                                                                    {kc.label}
+                                                                </span>
+                                                                <span className="ml-2 text-muted-foreground text-xs">
+                                                                    {kc.username}
+                                                                </span>
+                                                                <span className="ml-1.5 text-[10px] text-muted-foreground/60">
+                                                                    {kc.hasPrivateKey
+                                                                        ? '(SSH key)'
+                                                                        : '(password)'}
+                                                                </span>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {selectedKeychainId && (
+                                                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                                        Credentials loaded from keychain
+                                                    </p>
                                                 )}
-                                            </Button>
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
-                                {form.authMethod === 'key' && (
-                                    <div className="space-y-3">
-                                        <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
-                                            {(['paste', 'file'] as const).map((m) => (
-                                                <button
-                                                    key={m}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setKeyInputMethod(m);
-                                                        if (m === 'paste') {
-                                                            setKeyFileName(null);
-                                                            update({ privateKey: '' });
-                                                        }
-                                                    }}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                                        keyInputMethod === m
-                                                            ? 'bg-secondary text-foreground shadow-sm'
-                                                            : 'text-muted-foreground hover:text-foreground'
-                                                    }`}
-                                                >
-                                                    {m === 'paste' ? (
-                                                        <Key className="w-3 h-3" />
-                                                    ) : (
-                                                        <Upload className="w-3 h-3" />
-                                                    )}
-                                                    {m === 'paste' ? 'Paste Key' : 'Upload File'}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {keyInputMethod === 'paste' ? (
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs">Private Key</Label>
-                                                <Textarea
-                                                    value={form.privateKey}
-                                                    onChange={(e) =>
-                                                        update({ privateKey: e.target.value })
-                                                    }
-                                                    className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
-                                                    placeholder={
-                                                        '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
-                                                    }
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs">
-                                                    Key File (.pem, .ppk)
-                                                </Label>
-                                                <label
-                                                    className={`flex flex-col items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed cursor-pointer transition-colors py-6 px-4 ${
-                                                        keyFileName
-                                                            ? 'border-green-500/40 bg-green-500/5 hover:bg-green-500/8'
-                                                            : 'border-border bg-secondary/40 hover:border-border/80 hover:bg-accent/20'
-                                                    }`}
-                                                >
-                                                    <input
-                                                        type="file"
-                                                        accept=".pem,.ppk,application/x-pem-file"
-                                                        className="sr-only"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (!file) return;
-                                                            setKeyFileName(file.name);
-                                                            const reader = new FileReader();
-                                                            reader.onload = (ev) => {
-                                                                update({
-                                                                    privateKey:
-                                                                        (ev.target
-                                                                            ?.result as string) ??
-                                                                        '',
-                                                                });
-                                                            };
-                                                            reader.readAsText(file);
-                                                        }}
-                                                    />
-                                                    {keyFileName ? (
-                                                        <>
-                                                            <FileKey className="w-5 h-5 text-green-400" />
-                                                            <span className="text-xs font-medium text-green-400 text-center break-all">
-                                                                {keyFileName}
-                                                            </span>
-                                                            <span className="text-[10px] text-muted-foreground">
-                                                                Click to replace
-                                                            </span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Upload className="w-5 h-5 text-muted-foreground" />
-                                                            <span className="text-xs text-muted-foreground text-center">
-                                                                Click to select a{' '}
-                                                                <span className="font-mono">
-                                                                    .pem
-                                                                </span>{' '}
-                                                                or{' '}
-                                                                <span className="font-mono">
-                                                                    .ppk
-                                                                </span>{' '}
-                                                                file
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </label>
+                                {/* ── Manual entry ── */}
+                                {credSource === 'new' && (
+                                    <>
+                                        {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
+                                            <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
+                                                {(['password', 'key'] as const).map((method) => (
+                                                    <button
+                                                        key={method}
+                                                        type="button"
+                                                        onClick={() => update({ authMethod: method })}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                                            form.authMethod === method
+                                                                ? 'bg-primary text-primary-foreground shadow-sm'
+                                                                : 'text-muted-foreground hover:text-foreground'
+                                                        }`}
+                                                    >
+                                                        {method === 'password' ? (
+                                                            <Lock className="w-3 h-3" />
+                                                        ) : (
+                                                            <Key className="w-3 h-3" />
+                                                        )}
+                                                        {method === 'password' ? 'Password' : 'SSH Key'}
+                                                    </button>
+                                                ))}
                                             </div>
                                         )}
 
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs">
-                                                Passphrase{' '}
-                                                <span className="text-muted-foreground/50">
-                                                    (if encrypted)
-                                                </span>
-                                            </Label>
-                                            <div className="relative">
-                                                <Input
-                                                    type={showPassphrase ? 'text' : 'password'}
-                                                    value={form.passphrase}
-                                                    onChange={(e) =>
-                                                        update({ passphrase: e.target.value })
-                                                    }
-                                                    className="bg-secondary border-border text-sm h-9 pr-10"
-                                                    placeholder="••••••••"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() =>
-                                                        setShowPassphrase(!showPassphrase)
-                                                    }
-                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                                >
-                                                    {showPassphrase ? (
-                                                        <EyeOff className="w-4 h-4" />
-                                                    ) : (
-                                                        <Eye className="w-4 h-4" />
-                                                    )}
-                                                </Button>
+                                        {form.authMethod === 'password' && (
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs">Password</Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        value={form.password}
+                                                        onChange={(e) =>
+                                                            update({ password: e.target.value })
+                                                        }
+                                                        className="bg-secondary border-border text-sm h-9 pr-10"
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="w-4 h-4" />
+                                                        ) : (
+                                                            <Eye className="w-4 h-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </div>
+                                        )}
+
+                                        {form.authMethod === 'key' && (
+                                            <div className="space-y-3">
+                                                <div className="flex gap-1 p-1 bg-background/60 rounded-lg w-fit border border-border/50">
+                                                    {(['paste', 'file'] as const).map((m) => (
+                                                        <button
+                                                            key={m}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setKeyInputMethod(m);
+                                                                if (m === 'paste') {
+                                                                    setKeyFileName(null);
+                                                                    update({ privateKey: '' });
+                                                                }
+                                                            }}
+                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                                                keyInputMethod === m
+                                                                    ? 'bg-secondary text-foreground shadow-sm'
+                                                                    : 'text-muted-foreground hover:text-foreground'
+                                                            }`}
+                                                        >
+                                                            {m === 'paste' ? (
+                                                                <Key className="w-3 h-3" />
+                                                            ) : (
+                                                                <Upload className="w-3 h-3" />
+                                                            )}
+                                                            {m === 'paste' ? 'Paste Key' : 'Upload File'}
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                {keyInputMethod === 'paste' ? (
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs">Private Key</Label>
+                                                        <Textarea
+                                                            value={form.privateKey}
+                                                            onChange={(e) =>
+                                                                update({ privateKey: e.target.value })
+                                                            }
+                                                            className="bg-secondary border-border text-xs font-mono min-h-[110px] resize-none leading-relaxed"
+                                                            placeholder={
+                                                                '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
+                                                            }
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs">
+                                                            Key File (.pem, .ppk)
+                                                        </Label>
+                                                        <label
+                                                            className={`flex flex-col items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed cursor-pointer transition-colors py-6 px-4 ${
+                                                                keyFileName
+                                                                    ? 'border-green-500/40 bg-green-500/5 hover:bg-green-500/8'
+                                                                    : 'border-border bg-secondary/40 hover:border-border/80 hover:bg-accent/20'
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="file"
+                                                                accept=".pem,.ppk,application/x-pem-file"
+                                                                className="sr-only"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (!file) return;
+                                                                    setKeyFileName(file.name);
+                                                                    const reader = new FileReader();
+                                                                    reader.onload = (ev) => {
+                                                                        update({
+                                                                            privateKey:
+                                                                                (ev.target
+                                                                                    ?.result as string) ??
+                                                                                '',
+                                                                        });
+                                                                    };
+                                                                    reader.readAsText(file);
+                                                                }}
+                                                            />
+                                                            {keyFileName ? (
+                                                                <>
+                                                                    <FileKey className="w-5 h-5 text-green-400" />
+                                                                    <span className="text-xs font-medium text-green-400 text-center break-all">
+                                                                        {keyFileName}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-muted-foreground">
+                                                                        Click to replace
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Upload className="w-5 h-5 text-muted-foreground" />
+                                                                    <span className="text-xs text-muted-foreground text-center">
+                                                                        Click to select a{' '}
+                                                                        <span className="font-mono">
+                                                                            .pem
+                                                                        </span>{' '}
+                                                                        or{' '}
+                                                                        <span className="font-mono">
+                                                                            .ppk
+                                                                        </span>{' '}
+                                                                        file
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                )}
+
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-xs">
+                                                        Passphrase{' '}
+                                                        <span className="text-muted-foreground/50">
+                                                            (if encrypted)
+                                                        </span>
+                                                    </Label>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type={showPassphrase ? 'text' : 'password'}
+                                                            value={form.passphrase}
+                                                            onChange={(e) =>
+                                                                update({ passphrase: e.target.value })
+                                                            }
+                                                            className="bg-secondary border-border text-sm h-9 pr-10"
+                                                            placeholder="••••••••"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                setShowPassphrase(!showPassphrase)
+                                                            }
+                                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                        >
+                                                            {showPassphrase ? (
+                                                                <EyeOff className="w-4 h-4" />
+                                                            ) : (
+                                                                <Eye className="w-4 h-4" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Save to Keychain */}
+                                        <div className="pt-2 border-t border-border/60 space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    id="save-keychain"
+                                                    checked={saveToKeychain}
+                                                    onCheckedChange={(v) =>
+                                                        setSaveToKeychain(v === true)
+                                                    }
+                                                    className="h-4 w-4"
+                                                />
+                                                <label
+                                                    htmlFor="save-keychain"
+                                                    className="text-xs text-muted-foreground cursor-pointer flex items-center gap-1.5"
+                                                >
+                                                    <Save className="w-3 h-3" />
+                                                    Save these credentials to Keychain
+                                                </label>
+                                            </div>
+                                            {saveToKeychain && (
+                                                <Input
+                                                    type="text"
+                                                    value={keychainLabel}
+                                                    onChange={(e) =>
+                                                        setKeychainLabel(e.target.value)
+                                                    }
+                                                    className="bg-secondary border-border text-sm h-9"
+                                                    placeholder="Label (e.g. root@production)"
+                                                />
+                                            )}
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                             </CardContent>
                         </Card>

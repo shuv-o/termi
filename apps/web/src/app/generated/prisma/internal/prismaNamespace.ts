@@ -398,6 +398,7 @@ export const ModelName = {
   ServerHealthRecord: 'ServerHealthRecord',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
+  KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare'
 } as const
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "keychainCredential" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1455,6 +1456,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KeychainCredential: {
+      payload: Prisma.$KeychainCredentialPayload<ExtArgs>
+      fields: Prisma.KeychainCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KeychainCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KeychainCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.KeychainCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KeychainCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.KeychainCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.KeychainCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.KeychainCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KeychainCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.KeychainCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        update: {
+          args: Prisma.KeychainCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.KeychainCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KeychainCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KeychainCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.KeychainCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KeychainCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.KeychainCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKeychainCredential>
+        }
+        groupBy: {
+          args: Prisma.KeychainCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KeychainCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KeychainCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KeychainCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
     ServerInvitation: {
       payload: Prisma.$ServerInvitationPayload<ExtArgs>
       fields: Prisma.ServerInvitationFieldRefs
@@ -1879,6 +1954,21 @@ export const EmailOTPScalarFieldEnum = {
 export type EmailOTPScalarFieldEnum = (typeof EmailOTPScalarFieldEnum)[keyof typeof EmailOTPScalarFieldEnum]
 
 
+export const KeychainCredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  username: 'username',
+  password: 'password',
+  privateKey: 'privateKey',
+  passphrase: 'passphrase',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KeychainCredentialScalarFieldEnum = (typeof KeychainCredentialScalarFieldEnum)[keyof typeof KeychainCredentialScalarFieldEnum]
+
+
 export const ServerInvitationScalarFieldEnum = {
   id: 'id',
   token: 'token',
@@ -2265,6 +2355,7 @@ export type GlobalOmitConfig = {
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
+  keychainCredential?: Prisma.KeychainCredentialOmit
   serverInvitation?: Prisma.ServerInvitationOmit
   serverShare?: Prisma.ServerShareOmit
 }
