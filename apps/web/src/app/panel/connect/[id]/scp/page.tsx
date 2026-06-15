@@ -26,7 +26,7 @@ export default function SCPPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+            <div className="flex items-center justify-center h-dvh lg:h-screen">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
@@ -34,7 +34,7 @@ export default function SCPPage() {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
                 <AlertCircle className="w-10 h-10 text-destructive" />
                 <p className="text-destructive">{error}</p>
                 <Button asChild>
@@ -45,9 +45,9 @@ export default function SCPPage() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
+        <div className="flex flex-col h-[calc(100dvh-3.5rem-4rem)] lg:h-dvh">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-3 shrink-0">
+            <div className="flex items-center gap-3 px-3 py-2 shrink-0 border-b border-border bg-card">
                 <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                     <Link href="/panel">
                         <ArrowLeft className="w-5 h-5" />
@@ -60,7 +60,7 @@ export default function SCPPage() {
             </div>
 
             {/* Full-height panel */}
-            <div className="flex-1 min-h-0 rounded-xl border border-border overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden">
                 <FileManagerPanel serverId={serverId} />
             </div>
         </div>

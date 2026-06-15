@@ -252,7 +252,7 @@ export default function SSHConnectionPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+            <div className="flex items-center justify-center h-dvh lg:h-screen">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -260,7 +260,7 @@ export default function SSHConnectionPage() {
 
     if (error || tabs.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back to Dashboard</Link>
@@ -283,11 +283,11 @@ export default function SSHConnectionPage() {
                           zIndex: 50,
                           height: visualH > 0 ? `${visualH}px` : '100dvh',
                       }
-                    : { height: 'calc(100dvh - 8rem)' }
+                    : { height: '100dvh' }
             }
         >
             {/*   Header   */}
-            <div className="flex items-center justify-between gap-2 mb-2 px-3 pt-2 shrink-0 lg:px-0 lg:pt-0 lg:mb-3">
+            <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
                 <div className="flex items-center gap-2 min-w-0">
                     <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
                         <Link href="/panel">
@@ -353,7 +353,10 @@ export default function SSHConnectionPage() {
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => setShowKeyboard(!showKeyboard)}
+                        onClick={() => {
+                            setShowKeyboard((k) => !k);
+                            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                        }}
                         title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
                     >
                         <Keyboard className="w-3.5 h-3.5" />
@@ -372,7 +375,7 @@ export default function SSHConnectionPage() {
             </div>
 
             {/*   Tab strip   */}
-            <div className="flex items-center gap-1 px-3 lg:px-0 mb-2 shrink-0 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 px-3 py-1.5 shrink-0 overflow-x-auto no-scrollbar border-b border-border bg-card/50">
                 {tabs.map((tab, i) => {
                     const isActive = tab.id === activeId;
                     return (
@@ -417,7 +420,7 @@ export default function SSHConnectionPage() {
             </div>
 
             {/*   Main area: terminal tabs + optional file panel   */}
-            <div className="flex flex-1 min-h-0 gap-2 px-3 lg:px-0">
+            <div className="flex flex-1 min-h-0">
                 {/* Stacked terminal panes — all kept mounted, only active is visible */}
                 <div className="relative flex-1 min-w-0 min-h-0">
                     {tabs.map((tab) => {
@@ -466,14 +469,14 @@ export default function SSHConnectionPage() {
                 {/* File manager panel — desktop: side panel | mobile: full overlay */}
                 {showFiles && (
                     <>
-                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col rounded-xl border border-border overflow-hidden">
+                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
                             <FileManagerPanel
                                 serverId={serverId}
                                 onClose={() => setShowFiles(false)}
                             />
                         </div>
 
-                        <div className="md:hidden absolute inset-0 z-20 rounded-xl overflow-hidden border border-border">
+                        <div className="md:hidden absolute inset-0 z-20 overflow-hidden border border-border">
                             <FileManagerPanel
                                 serverId={serverId}
                                 onClose={() => setShowFiles(false)}

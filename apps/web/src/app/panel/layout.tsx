@@ -383,6 +383,18 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             </button>
                         </CollapseTooltip>
                     )}
+                    {!collapsed && (
+                        <div className="mt-2.5 text-center">
+                            <a
+                                href="https://shuvoo.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+                            >
+                                Developed by Shuvo
+                            </a>
+                        </div>
+                    )}
                 </div>
             </aside>
 

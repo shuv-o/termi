@@ -80,14 +80,17 @@ export default function VNCConnectionPage() {
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     }, []);
 
+    // Show toolbar briefly on fullscreen enter so the user sees controls, then auto-hide.
+    // Always restore when leaving fullscreen.
     useEffect(() => {
         if (!isFullscreen) {
             setToolbarVisible(true);
             if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
             return;
         }
-        setToolbarVisible(false);
-    }, [isFullscreen]);
+        setToolbarVisible(true);
+        scheduleHide();
+    }, [isFullscreen, scheduleHide]);
 
     useEffect(() => {
         async function initConnection() {
@@ -312,8 +315,8 @@ export default function VNCConnectionPage() {
                     }}
                 />
 
-                {/* Pill — always visible in fullscreen; click to show controls */}
-                {isFullscreen && (
+                {/* Pill — visible in fullscreen only when toolbar is hidden */}
+                {isFullscreen && !toolbarVisible && (
                     <button
                         onClick={() => setToolbarVisible(true)}
                         onMouseEnter={cancelHide}

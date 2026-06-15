@@ -1139,7 +1139,10 @@ function TerminalPane({
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => setShowKeyboard((k) => !k)}
+                        onClick={() => {
+                            setShowKeyboard((k) => !k);
+                            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                        }}
                         title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
                     >
                         <Keyboard className="w-3.5 h-3.5" />

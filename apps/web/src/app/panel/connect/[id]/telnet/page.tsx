@@ -126,7 +126,7 @@ export default function TelnetConnectionPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+            <div className="flex items-center justify-center h-dvh lg:h-screen">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -134,7 +134,7 @@ export default function TelnetConnectionPage() {
 
     if (error || !token) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back to Dashboard</Link>
@@ -157,11 +157,11 @@ export default function TelnetConnectionPage() {
                           zIndex: 50,
                           height: visualH > 0 ? `${visualH}px` : '100dvh',
                       }
-                    : { height: 'calc(100dvh - 8rem)' }
+                    : { height: '100dvh' }
             }
         >
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 mb-2 px-3 pt-2 shrink-0 lg:px-0 lg:pt-0 lg:mb-3">
+            <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
                 <div className="flex items-center gap-2 min-w-0">
                     <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
                         <Link href="/panel">
@@ -205,7 +205,10 @@ export default function TelnetConnectionPage() {
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => setShowKeyboard(!showKeyboard)}
+                        onClick={() => {
+                            setShowKeyboard((k) => !k);
+                            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                        }}
                         title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
                     >
                         <Keyboard className="w-3.5 h-3.5" />
@@ -224,7 +227,7 @@ export default function TelnetConnectionPage() {
             </div>
 
             {/* Terminal */}
-            <div className="flex-1 min-h-0 px-3 lg:px-0">
+            <div className="flex-1 min-h-0">
                 {token ? (
                     <TelnetTerminal
                         serverId={serverId}
