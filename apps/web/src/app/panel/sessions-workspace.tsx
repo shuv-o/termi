@@ -1020,20 +1020,70 @@ function TerminalPane({
                 pointerEvents: isActive && mode === 'terminal' ? 'auto' : 'none',
             }}
         >
-            {/* Per-session toolbar */}
-            <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-border bg-card/30">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* Per-session toolbar — server name + inline shell tabs + action buttons */}
+            <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 min-h-0 overflow-hidden">
+                {/* Server identity */}
+                <div className="flex items-center gap-2 shrink-0">
                     {session.type === 'local' ? (
                         <Laptop className="w-4 h-4 text-violet-400 shrink-0" />
                     ) : (
                         <Terminal className="w-4 h-4 text-muted-foreground shrink-0" />
                     )}
-                    <span className="font-medium text-sm truncate">{session.serverName}</span>
+                    <span className="font-medium text-sm whitespace-nowrap">{session.serverName}</span>
                     <StatusDot status={session.status} />
-                    <span className={`text-xs ${statusColor(session.status)} hidden sm:inline`}>
+                    <span className={`text-xs ${statusColor(session.status)} hidden sm:inline whitespace-nowrap`}>
                         {statusLabel(session.status)}
                     </span>
                 </div>
+
+                {/* Shell tabs — inline, right after the server name */}
+                {session.type === 'remote' && session.status !== 'detached' && shells.length > 0 && (
+                    <div className="flex items-stretch flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-2 border-l border-border/40 pl-2">
+                        {shells.map((shell, i) => {
+                            const isShellActive = shell.id === activeShellId;
+                            return (
+                                <div
+                                    key={shell.id}
+                                    onClick={() => activateShell(shell.id)}
+                                    className={`group flex items-center gap-1.5 px-2.5 py-1 cursor-pointer transition-colors shrink-0 rounded-md text-xs font-medium whitespace-nowrap select-none ${
+                                        isShellActive
+                                            ? 'bg-background/70 text-foreground ring-1 ring-border/60'
+                                            : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+                                    }`}
+                                >
+                                    <Terminal className="w-3 h-3 shrink-0" />
+                                    <span>Shell {i + 1}</span>
+                                    {shells.length > 1 && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                closeShell(shell.id);
+                                            }}
+                                            className="ml-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all"
+                                            title="Close shell"
+                                        >
+                                            <X className="w-2.5 h-2.5" />
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                        <button
+                            onClick={addShell}
+                            className="flex items-center justify-center px-1.5 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md transition-colors"
+                            title="New shell"
+                        >
+                            <Plus className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                )}
+
+                {/* Spacer when no shell tabs (local session) */}
+                {(session.type !== 'remote' || session.status === 'detached' || shells.length === 0) && (
+                    <div className="flex-1" />
+                )}
+
+                {/* Action buttons */}
                 <div className="flex items-center gap-1 shrink-0">
                     {session.type !== 'local' && (
                         <>
@@ -1079,48 +1129,6 @@ function TerminalPane({
                     </Button>
                 </div>
             </div>
-
-            {/* Shell tab strip — only for remote multi-shell sessions */}
-            {session.type === 'remote' && session.status !== 'detached' && shells.length > 0 && (
-                <div className="shrink-0 flex items-center border-b border-border bg-card/20 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {shells.map((shell, i) => {
-                        const isShellActive = shell.id === activeShellId;
-                        return (
-                            <div
-                                key={shell.id}
-                                onClick={() => activateShell(shell.id)}
-                                className={`group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1.5 cursor-pointer transition-colors shrink-0 border-r border-border/50 text-xs font-medium whitespace-nowrap select-none ${
-                                    isShellActive
-                                        ? 'bg-background/60 text-foreground border-b-2 border-b-primary -mb-px'
-                                        : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
-                                }`}
-                            >
-                                <Terminal className="w-3 h-3 shrink-0" />
-                                <span>Shell {i + 1}</span>
-                                {shells.length > 1 && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            closeShell(shell.id);
-                                        }}
-                                        className="ml-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all"
-                                        title="Close shell"
-                                    >
-                                        <X className="w-2.5 h-2.5" />
-                                    </button>
-                                )}
-                            </div>
-                        );
-                    })}
-                    <button
-                        onClick={addShell}
-                        className="flex items-center justify-center w-7 h-full px-1.5 py-1.5 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-                        title="New shell"
-                    >
-                        <Plus className="w-3.5 h-3.5" />
-                    </button>
-                </div>
-            )}
 
             {/* Terminal + optional file panel */}
             <div className="flex flex-1 min-h-0">
