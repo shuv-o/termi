@@ -1105,7 +1105,7 @@ export default function SessionsWorkspace() {
     // Desktop (lg+): full viewport height, sidebar handled by padding-left
     const containerHeight = isFullscreen
         ? 'h-screen fixed inset-0 z-[100] bg-background'
-        : 'h-[calc(100vh-7.5rem)] lg:h-screen -m-4 lg:-m-8';
+        : 'h-[calc(100vh-7.5rem)] lg:h-screen -m-4 sm:-m-5 lg:-m-8';
 
     return (
         <div className={`flex flex-col ${containerHeight}`}>

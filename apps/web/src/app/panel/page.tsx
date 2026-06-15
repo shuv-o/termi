@@ -324,41 +324,41 @@ function FleetStats({
     ] as const;
 
     return (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6 mb-8">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 xl:grid-cols-6 mb-8">
             {statCards.map((stat) => {
                 const Icon = stat.icon;
                 return (
                     <Card
                         key={stat.label}
-                        className={`min-h-[126px] border border-border border-l-2 bg-card p-4 ${stat.borderClassName} hover:shadow-md hover:border-border/80 transition-all duration-200`}
+                        className={`min-h-[100px] sm:min-h-[126px] border border-border border-l-2 bg-card p-3 sm:p-4 ${stat.borderClassName} hover:shadow-md hover:border-border/80 transition-all duration-200`}
                     >
-                        <div className="flex h-full flex-col justify-between gap-4">
-                            <div className="flex items-start justify-between gap-3">
+                        <div className="flex h-full flex-col justify-between gap-3 sm:gap-4">
+                            <div className="flex items-start justify-between gap-2">
                                 <div>
-                                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                                         {stat.label}
                                     </p>
                                     {stat.label === 'Online' && offline > 0 && (
-                                        <p className="mt-1 text-[11px] text-red-400">
+                                        <p className="mt-0.5 text-[10px] sm:text-[11px] text-red-400">
                                             {offline} offline
                                         </p>
                                     )}
                                     {stat.label === 'Online' && offline === 0 && unknown > 0 && (
-                                        <p className="mt-1 text-[11px] text-muted-foreground/70">
+                                        <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted-foreground/70">
                                             {unknown} checking…
                                         </p>
                                     )}
                                 </div>
                                 <div
-                                    className={`flex h-10 w-10 items-center justify-center rounded-xl border border-border/50 ${stat.iconWrapperClassName}`}
+                                    className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-border/50 ${stat.iconWrapperClassName}`}
                                 >
-                                    <Icon className={`h-4 w-4 ${stat.iconClassName}`} />
+                                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.iconClassName}`} />
                                 </div>
                             </div>
                             {stat.value == null ? (
-                                <Skeleton className="h-9 w-20" />
+                                <Skeleton className="h-7 w-16 sm:h-9 sm:w-20" />
                             ) : (
-                                <p className={`text-3xl font-bold tabular-nums ${stat.valueClassName}`}>
+                                <p className={`text-2xl sm:text-3xl font-bold tabular-nums ${stat.valueClassName}`}>
                                     {stat.value}
                                 </p>
                             )}
@@ -674,7 +674,7 @@ function GridCard({
             : '';
 
     return (
-        <Card className="group flex min-h-[320px] flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
+        <Card className="group flex min-h-[280px] sm:min-h-[320px] flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
             <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
 
             <div className="flex flex-1 flex-col gap-4 p-4">
@@ -1403,23 +1403,23 @@ export default function DashboardPage() {
 
     return (
         <>
-            <div className="space-y-8">
-                <div className="mx-auto max-w-screen-2xl space-y-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-6 sm:space-y-8">
+                <div className="mx-auto max-w-screen-2xl space-y-6 sm:space-y-8">
+                    <div className="flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                                 Fleet overview
                             </p>
-                            <h1 className="mt-1 text-2xl font-bold">Servers</h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Servers</h1>
+                            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                                 {servers.length > 0
                                     ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
                                     : 'Manage and connect to your servers'}
                             </p>
                         </div>
-                        <Button asChild className="h-10 px-4">
+                        <Button asChild className="h-9 sm:h-10 px-3 sm:px-4 shrink-0">
                             <Link href="/panel/servers/new">
-                                <Plus className="w-4 h-4" /> Add Server
+                                <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Server</span>
                             </Link>
                         </Button>
                     </div>
@@ -1440,29 +1440,29 @@ export default function DashboardPage() {
                     )}
                 </div>
 
-                <div className="-mx-4 sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
-                    <div className="mx-auto max-w-screen-2xl space-y-3">
-                        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                            <div className="relative w-full max-w-sm">
+                <div className="-mx-4 sticky top-14 lg:top-0 z-10 border-b border-border bg-background/95 px-4 py-2.5 sm:py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
+                    <div className="mx-auto max-w-screen-2xl space-y-2.5 sm:space-y-3">
+                        <div className="flex items-center gap-2 xl:gap-3">
+                            <div className="relative flex-1 max-w-xs sm:max-w-sm">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     type="text"
                                     placeholder="Search servers..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="h-10 bg-secondary pl-9 pr-9 text-sm"
+                                    className="h-9 bg-secondary pl-9 pr-9 text-sm"
                                 />
                                 {searchQuery !== debouncedSearchQuery && (
                                     <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground/50" />
                                 )}
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
                                 <Button
                                     onClick={() => setFilter('all')}
                                     variant={filter === 'all' ? 'default' : 'secondary'}
                                     size="sm"
-                                    className="h-9 px-3 text-xs"
+                                    className="h-9 px-3 text-xs hidden sm:flex"
                                 >
                                     All
                                 </Button>
@@ -1470,9 +1470,9 @@ export default function DashboardPage() {
                                     onClick={() => setFilter('favorites')}
                                     variant={filter === 'favorites' ? 'default' : 'secondary'}
                                     size="sm"
-                                    className="h-9 px-3 text-xs"
+                                    className="h-9 px-2.5 sm:px-3 text-xs gap-1.5"
                                 >
-                                    <Star className="w-3.5 h-3.5" /> Starred
+                                    <Star className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Starred</span>
                                 </Button>
 
                                 <DropdownMenu>
@@ -1480,7 +1480,7 @@ export default function DashboardPage() {
                                         <Button
                                             variant="secondary"
                                             size="sm"
-                                            className="h-9 max-w-[180px] gap-1.5 px-3 text-xs"
+                                            className="h-9 max-w-[180px] gap-1.5 px-2.5 sm:px-3 text-xs"
                                         >
                                             <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
                                             <span className="hidden truncate sm:inline">
@@ -1519,14 +1519,14 @@ export default function DashboardPage() {
                                 <div className="flex overflow-hidden rounded-lg border border-border">
                                     <button
                                         onClick={() => switchView('grid')}
-                                        className={`px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                        className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
                                         title="Grid view"
                                     >
                                         <LayoutGrid className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => switchView('list')}
-                                        className={`px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                        className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
                                         title="List view"
                                     >
                                         <List className="w-4 h-4" />

@@ -186,7 +186,7 @@ export default function KeychainPage() {
 
     return (
         <div className="space-y-6">
-            <div className="-mx-4 sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
+            <div className="-mx-4 sticky top-14 lg:top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
                 <div className="mx-auto flex max-w-screen-2xl items-center gap-3">
                     <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-xl">
                         <Link href="/panel">

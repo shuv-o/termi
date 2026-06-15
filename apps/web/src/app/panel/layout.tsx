@@ -482,12 +482,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 </header>
 
                 {/* Page content */}
-                <div className={isSessionsPage ? 'p-4 lg:p-8' : 'hidden'}>
+                <div className={isSessionsPage ? 'p-4 sm:p-5 lg:p-8' : 'hidden'}>
                     <SessionsWorkspace />
                 </div>
 
                 {!isSessionsPage && (
-                    <main className={isLocalPage ? 'p-4 lg:p-8' : 'p-4 lg:p-8 pb-24 lg:pb-8'}>
+                    <main className={isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'}>
                         {children}
                     </main>
                 )}
