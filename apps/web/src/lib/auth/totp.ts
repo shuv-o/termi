@@ -7,7 +7,7 @@
 
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
-import { generateSecureToken } from '@/lib/crypto';
+import { randomBytes } from 'crypto';
 
 // CONSTANTS
 
@@ -100,16 +100,22 @@ export function verifyTOTP(secret: string, code: string, window: number = 1): bo
  * These should be stored hashed, not in plain text
  */
 export function generateRecoveryCodes(): string[] {
+    // Unambiguous 32-char alphabet (A–Z minus I/O, digits 2–9) — exactly 32
+    // symbols so each random byte maps to a character with zero modulo bias
+    // (256 % 32 === 0).
+    const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const codes: string[] = [];
 
     for (let i = 0; i < RECOVERY_CODE_COUNT; i++) {
-        // Generate code in format: XXXX-XXXX
-        const code = generateSecureToken(RECOVERY_CODE_LENGTH / 2)
-            .replace(/[^a-zA-Z0-9]/g, '')
-            .substring(0, RECOVERY_CODE_LENGTH)
-            .toUpperCase();
-
-        codes.push(`${code.slice(0, 4)}-${code.slice(4, 8)}`);
+        // Draw exactly RECOVERY_CODE_LENGTH characters so the code is always
+        // well-formed (the old base64url-strip approach yielded 5–6 chars).
+        const bytes = randomBytes(RECOVERY_CODE_LENGTH);
+        let code = '';
+        for (let j = 0; j < RECOVERY_CODE_LENGTH; j++) {
+            code += ALPHABET[bytes[j] % ALPHABET.length];
+        }
+        // Format: XXXX-XXXX
+        codes.push(`${code.slice(0, 4)}-${code.slice(4, RECOVERY_CODE_LENGTH)}`);
     }
 
     return codes;

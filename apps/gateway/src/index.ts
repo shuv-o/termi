@@ -47,6 +47,24 @@ const CONNECTION_TIMEOUT = 300000; // 5 minutes
 
 // SSRF GUARD
 
+function ip4ToInt(ip: string): number {
+    return ip.split('.').reduce((acc, octet) => (acc << 8) | parseInt(octet, 10), 0) >>> 0;
+}
+
+// Private / reserved IPv4 CIDR ranges (kept in sync with apps/web ssrf.ts).
+const BLOCKED_V4_RANGES: Array<[number, number]> = [
+    [ip4ToInt('0.0.0.0'), ip4ToInt('0.255.255.255')], // 0.0.0.0/8
+    [ip4ToInt('10.0.0.0'), ip4ToInt('10.255.255.255')], // 10.0.0.0/8
+    [ip4ToInt('100.64.0.0'), ip4ToInt('100.127.255.255')], // 100.64.0.0/10 (CGNAT)
+    [ip4ToInt('127.0.0.0'), ip4ToInt('127.255.255.255')], // 127.0.0.0/8 (loopback)
+    [ip4ToInt('169.254.0.0'), ip4ToInt('169.254.255.255')], // 169.254.0.0/16 (link-local / metadata)
+    [ip4ToInt('172.16.0.0'), ip4ToInt('172.31.255.255')], // 172.16.0.0/12
+    [ip4ToInt('192.0.0.0'), ip4ToInt('192.0.0.255')], // 192.0.0.0/24
+    [ip4ToInt('192.168.0.0'), ip4ToInt('192.168.255.255')], // 192.168.0.0/16
+    [ip4ToInt('198.18.0.0'), ip4ToInt('198.19.255.255')], // 198.18.0.0/15 (benchmarking)
+    [ip4ToInt('224.0.0.0'), ip4ToInt('255.255.255.255')], // multicast + reserved
+];
+
 function isPrivateHost(host: string): boolean {
     let h = host.trim().toLowerCase();
     // Strip IPv6 brackets: [::1] → ::1
@@ -59,18 +77,15 @@ function isPrivateHost(host: string): boolean {
     }
     if (h === 'localhost') return true;
     if (h === 'metadata.google.internal') return true;
-    if (h === '::1') return true;
+    if (h === '::1' || h === '::') return true;
     if (h === '168.63.129.16') return true; // Azure Instance Metadata Service
-    if (h === '0.0.0.0') return true;
-    if (h.startsWith('127.')) return true;
-    if (h.startsWith('10.')) return true;
-    if (h.startsWith('192.168.')) return true;
-    if (h.startsWith('169.254.')) return true;
-    const parts = h.split('.');
-    if (parts.length === 4 && parts[0] === '172') {
-        const second = parseInt(parts[1], 10);
-        if (second >= 16 && second <= 31) return true;
+
+    // IPv4: integer range check covers every private/reserved block.
+    if (isIP(h) === 4) {
+        const int = ip4ToInt(h);
+        if (BLOCKED_V4_RANGES.some(([start, end]) => int >= start && int <= end)) return true;
     }
+
     if (h.startsWith('fe80:')) return true;
     if ((h.startsWith('fc') || h.startsWith('fd')) && h.includes(':')) return true;
     return false;

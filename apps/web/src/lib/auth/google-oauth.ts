@@ -122,6 +122,16 @@ export async function findOrCreateGoogleUser(
         };
     }
 
+    // Beyond this point we match/create accounts by EMAIL. The email claim is
+    // only trustworthy when Google asserts it is verified — otherwise an
+    // attacker controlling an unverified-email Google account could link to (and
+    // log in as) a victim's existing password account. Returning users (Case B
+    // above) are matched by the immutable provider account id, so they are
+    // unaffected by this guard.
+    if (!googleInfo.emailVerified) {
+        throw new Error('GOOGLE_EMAIL_UNVERIFIED');
+    }
+
     // Case C: existing user with same email
     const existingUser = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
@@ -162,7 +172,7 @@ export async function findOrCreateGoogleUser(
             data: {
                 email: email.toLowerCase(),
                 passwordHash: null, // Google-only user
-                isVerified: googleInfo.emailVerified,
+                isVerified: true, // guaranteed verified by the guard above
                 oauthAccounts: {
                     create: {
                         provider: OAuthProvider.GOOGLE,

@@ -146,6 +146,10 @@ function LoginContent() {
             setError('Authentication error. Please try again.');
         if (searchParams.get('error') === 'oauth_cancelled')
             setInfo('Google sign-in was cancelled.');
+        if (searchParams.get('error') === 'oauth_email_unverified')
+            setError(
+                'Your Google account email is not verified. Verify it with Google, or sign in with your password.',
+            );
         if (searchParams.get('reset') === '1')
             setInfo('Password reset successfully. Please sign in with your new password.');
     }, [searchParams]);

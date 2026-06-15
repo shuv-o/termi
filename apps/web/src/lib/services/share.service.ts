@@ -11,6 +11,16 @@ import { hashToken } from '@/lib/crypto';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+/** Escape user-controlled values before interpolating them into email HTML. */
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function createTransporter() {
     if (!process.env.SMTP_HOST) {
         return nodemailer.createTransport({ streamTransport: true, newline: 'unix' });
@@ -95,6 +105,11 @@ export async function sendShareInvitation(
     const inviteUrl = `${appUrl}/invitations/${token}`; // raw token in URL, hash stored in DB
     const from = process.env.SMTP_FROM || '"Termi" <noreply@termi.app>';
 
+    // User-controlled fields are escaped before being placed in HTML to prevent
+    // markup/link injection in the delivered email.
+    const inviterEmailHtml = escapeHtml(inviterUser.email);
+    const serverNameHtml = escapeHtml(server.name);
+
     const transporter = createTransporter();
     await transporter.sendMail({
         from,
@@ -104,9 +119,9 @@ export async function sendShareInvitation(
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px;background:#0f1117;color:#e2e8f0;border-radius:12px">
           <h2 style="margin:0 0 8px;font-size:22px;color:#fff">Server Invitation</h2>
           <p style="margin:0 0 20px;color:#94a3b8">
-            <strong style="color:#a78bfa">${inviterUser.email}</strong> has invited you to
+            <strong style="color:#a78bfa">${inviterEmailHtml}</strong> has invited you to
             <strong>${permissions === 'manage' ? 'manage' : 'connect to'}</strong>
-            the server <strong style="color:#fff">${server.name}</strong> on Termi.
+            the server <strong style="color:#fff">${serverNameHtml}</strong> on Termi.
           </p>
           <a href="${inviteUrl}" style="display:inline-block;background:#6366f1;color:white;padding:13px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;margin:0 0 24px">
             Accept Invitation

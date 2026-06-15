@@ -62,6 +62,13 @@ export async function GET(request: Request) {
         return deleteOAuthCookie(NextResponse.redirect(redirectUrl));
     } catch (err) {
         console.error('Google OAuth callback error:', err);
+        // Google returned an unverified email — refuse to link/register and tell
+        // the user why, rather than showing a generic failure.
+        if (err instanceof Error && err.message === 'GOOGLE_EMAIL_UNVERIFIED') {
+            return deleteOAuthCookie(
+                NextResponse.redirect(`${appUrl}/login?error=oauth_email_unverified`),
+            );
+        }
         return deleteOAuthCookie(NextResponse.redirect(`${appUrl}/login?error=oauth_failed`));
     }
 }

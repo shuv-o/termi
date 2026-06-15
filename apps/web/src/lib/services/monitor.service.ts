@@ -213,14 +213,28 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
 
 // SINGLE SERVER CHECK (used by API)
 
-export async function checkSingleServer(serverId: string): Promise<{
+export async function checkSingleServer(
+    serverId: string,
+    userId: string,
+): Promise<{
     reachable: boolean;
     latencyMs?: number;
 }> {
-    const server = await prisma.server.findUnique({
-        where: { id: serverId },
-        select: { host: true, port: true },
+    // Scope the lookup to the requesting user — never check a server they don't own.
+    const server = await prisma.server.findFirst({
+        where: { id: serverId, userId },
+        select: { host: true, username: true, port: true },
     });
     if (!server) return { reachable: false };
-    return checkReachability(server.host, server.port, 5000);
+
+    // host is stored AES-encrypted; checkReachability needs the real hostname.
+    let host: string;
+    try {
+        ({ host } = decryptCredentials({ host: server.host, username: server.username }));
+    } catch (err) {
+        console.error(`[Monitor] Failed to decrypt host for server ${serverId}:`, err);
+        return { reachable: false };
+    }
+
+    return checkReachability(host, server.port, 5000);
 }

@@ -61,8 +61,12 @@ export class SCPHandler {
 
                 this.ws.send(JSON.stringify({ type: 'sftp-ready' }));
 
-                // List home directory by default
-                this.listDirectory('/');
+                // List the user's home directory by default. Resolve it via
+                // realpath('.') (SFTP starts in $HOME) and fall back to '/' only
+                // if resolution fails.
+                sftp.realpath('.', (err, home) => {
+                    this.listDirectory(err || !home ? '/' : home);
+                });
             });
         });
 
@@ -169,9 +173,10 @@ export class SCPHandler {
             const files: FileEntry[] = list.map((item) => ({
                 name: item.filename,
                 type: item.attrs.isDirectory() ? 'directory' : 'file',
-                size: item.attrs.size,
-                modified: new Date(item.attrs.mtime * 1000),
-                permissions: this.formatPermissions(item.attrs.mode),
+                size: item.attrs.size ?? 0,
+                // Guard against undefined mtime, which would yield an Invalid Date.
+                modified: new Date((item.attrs.mtime ?? 0) * 1000),
+                permissions: this.formatPermissions(item.attrs.mode ?? 0),
             }));
 
             // Sort: directories first, then alphabetically
@@ -247,43 +252,58 @@ export class SCPHandler {
         });
     }
 
-    private uploadChunks = new Map<string, Buffer[]>();
+    private uploadChunks = new Map<string, { chunks: Buffer[]; received: number; total: number }>();
 
     private uploadFile(path: string, data: string, chunk = 0, totalChunks = 1): void {
         if (!this.sftp) return;
 
         const buffer = Buffer.from(data, 'base64');
 
-        // Handle chunked uploads
-        if (totalChunks > 1) {
-            if (!this.uploadChunks.has(path)) {
-                this.uploadChunks.set(path, []);
-            }
-            this.uploadChunks.get(path)![chunk] = buffer;
-
-            // Check if all chunks received
-            const chunks = this.uploadChunks.get(path)!;
-            const receivedCount = chunks.filter((c) => c).length;
-
-            if (receivedCount < totalChunks) {
-                this.ws.send(
-                    JSON.stringify({
-                        type: 'upload-progress',
-                        path,
-                        chunksReceived: receivedCount,
-                        totalChunks,
-                    }),
-                );
-                return;
-            }
-
-            // All chunks received, combine
-            const fullData = Buffer.concat(chunks);
-            this.uploadChunks.delete(path);
-            this.writeFile(path, fullData);
-        } else {
+        // Single-shot upload
+        if (totalChunks <= 1) {
             this.writeFile(path, buffer);
+            return;
         }
+
+        // Reject malformed chunk metadata so a bad/out-of-range index can't
+        // corrupt assembly (e.g. leave a hole that makes Buffer.concat throw).
+        if (!Number.isInteger(chunk) || chunk < 0 || chunk >= totalChunks) {
+            this.uploadChunks.delete(path);
+            this.sendError(`Invalid chunk index ${chunk} for ${totalChunks} total chunks`);
+            return;
+        }
+
+        let entry = this.uploadChunks.get(path);
+        // (Re)start if this is the first chunk for the path or the client changed
+        // totalChunks mid-stream.
+        if (!entry || entry.total !== totalChunks) {
+            entry = { chunks: new Array<Buffer>(totalChunks), received: 0, total: totalChunks };
+            this.uploadChunks.set(path, entry);
+        }
+
+        // Count each index only once — duplicate re-sends must not inflate the
+        // received count past the number of distinct chunks actually present.
+        if (!entry.chunks[chunk]) {
+            entry.chunks[chunk] = buffer;
+            entry.received++;
+        }
+
+        if (entry.received < totalChunks) {
+            this.ws.send(
+                JSON.stringify({
+                    type: 'upload-progress',
+                    path,
+                    chunksReceived: entry.received,
+                    totalChunks,
+                }),
+            );
+            return;
+        }
+
+        // Every distinct index is now present, so the array has no holes.
+        const fullData = Buffer.concat(entry.chunks);
+        this.uploadChunks.delete(path);
+        this.writeFile(path, fullData);
     }
 
     private writeFile(path: string, data: Buffer): void {

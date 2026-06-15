@@ -232,8 +232,10 @@ export function getSSHMetrics(config: SSHConfig, timeoutMs = 12000): Promise<Ser
                 });
             })
             .catch((err) => {
+                // The SSH connection itself failed — the host is not reachable
+                // over SSH, so report reachable: false (callers branch on this).
                 resolve({
-                    reachable: true,
+                    reachable: false,
                     error: `SSH connect error: ${err instanceof Error ? err.message : String(err)}`,
                 });
             });

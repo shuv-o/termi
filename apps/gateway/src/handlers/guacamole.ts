@@ -203,19 +203,27 @@ export class GuacamoleHandler {
 
         try {
             await new Promise<void>((resolve, reject) => {
+                const onConnectError = (err: Error) => {
+                    clearTimeout(timeout);
+                    reject(err);
+                };
                 const timeout = setTimeout(() => {
+                    this.guacdSocket.off('error', onConnectError);
                     reject(new Error('Connection to guacd timed out'));
                 }, 10000);
 
                 this.guacdSocket.connect(guacdPort, guacdHost, () => {
                     clearTimeout(timeout);
+                    // Hand error handling back to the persistent listener in
+                    // setupSocket(); leaving this connect-scoped one attached would
+                    // accumulate a no-op reject listener for the socket's lifetime.
+                    this.guacdSocket.off('error', onConnectError);
                     resolve();
                 });
 
-                this.guacdSocket.on('error', (err) => {
-                    clearTimeout(timeout);
-                    reject(err);
-                });
+                // Use .once so a single connect failure rejects without leaving
+                // a dangling listener behind.
+                this.guacdSocket.once('error', onConnectError);
             });
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);

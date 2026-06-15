@@ -30,9 +30,24 @@ export interface TokenPayload {
 
 // KEY DERIVATION
 
+// Key derivation MUST stay byte-for-byte identical to the web app's
+// getJWEKey (apps/web/.../api/connection/token/route.ts), otherwise tokens
+// encrypted by the web app will fail to decrypt here. In particular, an unset
+// or placeholder secret in development must derive from the SAME fallback
+// string on both sides.
+const PLACEHOLDER_SECRET = 'gateway-secret-key-change-in-production';
+
 function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
-    if (!secret) throw new Error('GATEWAY_JWT_SECRET is required');
+    if (!secret || secret === PLACEHOLDER_SECRET) {
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error(
+                'GATEWAY_JWT_SECRET must be set to a strong random value in production',
+            );
+        }
+        // Dev fallback — must match the web app's dev fallback exactly.
+        return new Uint8Array(createHash('sha256').update('dev-gateway-secret').digest());
+    }
     return new Uint8Array(createHash('sha256').update(secret).digest());
 }
 

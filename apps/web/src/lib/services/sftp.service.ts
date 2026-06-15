@@ -194,23 +194,46 @@ export function createDownloadStream(
     config: SFTPConfig,
     filePath: string,
 ): ReadableStream<Uint8Array> {
+    // Track the live read stream + pool key so an early cancel (client aborts
+    // the download) can tear them down. Without this, a cancelled stream leaves
+    // the pool slot held forever (refCount never hits 0 → connection leak).
+    let activeReadStream: import('stream').Readable | null = null;
+    let activeKey: string | null = null;
+    let released = false;
+
+    const release = () => {
+        if (released) return;
+        released = true;
+        if (activeKey) sshPool.release(activeKey);
+    };
+
     return new ReadableStream<Uint8Array>({
         start(controller) {
             sshPool
                 .acquireSFTP(config)
                 .then(({ sftp, key }) => {
+                    activeKey = key;
                     const rs = sftp.createReadStream(filePath);
+                    activeReadStream = rs;
                     rs.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
                     rs.on('end', () => {
-                        sshPool.release(key);
+                        release();
                         controller.close();
                     });
                     rs.on('error', (err: Error) => {
-                        sshPool.release(key);
+                        release();
                         controller.error(err);
                     });
                 })
-                .catch((err) => controller.error(err));
+                .catch((err) => {
+                    release();
+                    controller.error(err);
+                });
+        },
+        cancel() {
+            // Reader went away — destroy the SFTP read stream and free the pool slot.
+            activeReadStream?.destroy();
+            release();
         },
     });
 }
@@ -245,8 +268,15 @@ export async function transferFiles(
                 await new Promise<void>((resolve, reject) => {
                     const rs = fromAcq.sftp.createReadStream(srcPath);
                     const ws = toAcq.sftp.createWriteStream(destPath);
-                    rs.on('error', reject);
-                    ws.on('error', reject);
+                    const fail = (err: Error) => {
+                        // Tear down both ends so a read failure doesn't leave a
+                        // half-written file or a dangling write stream behind.
+                        rs.destroy();
+                        ws.destroy();
+                        reject(err);
+                    };
+                    rs.on('error', fail);
+                    ws.on('error', fail);
                     ws.on('close', resolve);
                     rs.pipe(ws as NodeJS.WritableStream);
                 });
