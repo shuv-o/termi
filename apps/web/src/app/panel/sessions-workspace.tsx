@@ -824,9 +824,15 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
     );
 }
 
-// TERMINAL PANE — single session's terminal content
+// TERMINAL PANE — single session's terminal content with multi-shell support.
 // Kept as a separate component so the identity is stable (no remounting on
 // visibility toggles) and all sessions stay connected simultaneously.
+
+interface ShellTab {
+    id: string;        // React key, stable across re-renders
+    sessionId: string; // unique gateway session — each shell gets its own
+    token: string | null;
+}
 
 function TerminalPane({
     session,
@@ -853,7 +859,32 @@ function TerminalPane({
 }) {
     const [showKeyboard, setShowKeyboard] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const terminalKeyHandler = useRef<((key: string) => void) | null>(null);
+
+    // ── Multi-shell state (remote only) ──────────────────────────────────────
+    const [shells, setShells] = useState<ShellTab[]>([]);
+    const [activeShellId, setActiveShellId] = useState('');
+    const shellsInitialized = useRef(false);
+
+    // Per-shell key-handlers and WS refs
+    const keyHandlers = useRef(new Map<string, (key: string) => void>());
+    const wsRefs = useRef(new Map<string, WebSocket>());
+
+    // Initialize the first shell once the session token arrives
+    useEffect(() => {
+        if (shellsInitialized.current || !session.token || session.type !== 'remote') return;
+        shellsInitialized.current = true;
+        const shellId = crypto.randomUUID();
+        setShells([{ id: shellId, sessionId: session.sessionId, token: session.token }]);
+        setActiveShellId(shellId);
+    }, [session.token, session.sessionId, session.type]);
+
+    // Keep shell[0] token in sync with context (reconnect / renew updates it)
+    useEffect(() => {
+        setShells((prev) => {
+            if (!prev[0]) return prev;
+            return prev.map((s, i) => (i === 0 ? { ...s, token: session.token } : s));
+        });
+    }, [session.token]);
 
     useEffect(() => {
         const check = () => {
@@ -865,6 +896,121 @@ function TerminalPane({
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
     }, []);
+
+    // ── Shell actions ─────────────────────────────────────────────────────────
+
+    const activateShell = useCallback((shellId: string) => {
+        setActiveShellId(shellId);
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+    }, []);
+
+    const addShell = useCallback(async () => {
+        const shellId = crypto.randomUUID();
+        const sessionId = crypto.randomUUID();
+        setShells((prev) => [...prev, { id: shellId, sessionId, token: null }]);
+        setActiveShellId(shellId);
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+        try {
+            const res = await fetch('/api/connection/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serverId: session.serverId, protocol: 'ssh' }),
+            });
+            const data = await res.json();
+            setShells((prev) =>
+                prev.map((s) =>
+                    s.id === shellId ? { ...s, token: data.data?.token ?? null } : s,
+                ),
+            );
+        } catch {
+            // token stays null → shows "Establishing connection…" loading state
+        }
+    }, [session.serverId]);
+
+    const closeShell = useCallback(
+        (shellId: string) => {
+            // Tell gateway to tear down this shell's session
+            const ws = wsRefs.current.get(shellId);
+            if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'close-session' }));
+            }
+            wsRefs.current.delete(shellId);
+            keyHandlers.current.delete(shellId);
+
+            setShells((prev) => {
+                const remaining = prev.filter((s) => s.id !== shellId);
+                if (remaining.length === 0) {
+                    // Last shell closed → remove the whole session
+                    removeSession(session.tabId);
+                    return prev;
+                }
+                setActiveShellId((curr) =>
+                    curr === shellId ? remaining[remaining.length - 1].id : curr,
+                );
+                return remaining;
+            });
+        },
+        [removeSession, session.tabId],
+    );
+
+    const reconnectShell = useCallback(
+        (shellId: string, isFirst: boolean) => {
+            if (isFirst) {
+                reconnectSession(session.tabId, session.serverId);
+            } else {
+                // Directly re-fetch token for this shell
+                const sessionId = crypto.randomUUID();
+                setShells((prev) =>
+                    prev.map((s) => (s.id === shellId ? { ...s, sessionId, token: null } : s)),
+                );
+                fetch('/api/connection/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serverId: session.serverId, protocol: 'ssh' }),
+                })
+                    .then((r) => r.json())
+                    .then((data) => {
+                        setShells((prev) =>
+                            prev.map((s) =>
+                                s.id === shellId ? { ...s, token: data.data?.token ?? null } : s,
+                            ),
+                        );
+                    })
+                    .catch(() => {});
+            }
+        },
+        [reconnectSession, session.tabId, session.serverId],
+    );
+
+    const renewShell = useCallback(
+        (shellId: string, isFirst: boolean) => {
+            if (isFirst) {
+                renewSession(session.tabId, session.serverId);
+            } else {
+                const sessionId = crypto.randomUUID();
+                setShells((prev) =>
+                    prev.map((s) => (s.id === shellId ? { ...s, sessionId, token: null } : s)),
+                );
+                fetch('/api/connection/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serverId: session.serverId, protocol: 'ssh' }),
+                })
+                    .then((r) => r.json())
+                    .then((data) => {
+                        setShells((prev) =>
+                            prev.map((s) =>
+                                s.id === shellId ? { ...s, token: data.data?.token ?? null } : s,
+                            ),
+                        );
+                    })
+                    .catch(() => {});
+            }
+        },
+        [renewSession, session.tabId, session.serverId],
+    );
+
+    const activeShellIndex = shells.findIndex((s) => s.id === activeShellId);
 
     return (
         <div
@@ -903,9 +1049,11 @@ function TerminalPane({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => reconnectSession(session.tabId, session.serverId)}
+                                onClick={() =>
+                                    reconnectShell(activeShellId, activeShellIndex === 0)
+                                }
                                 className="h-7 w-7"
-                                title="Reconnect"
+                                title="Reconnect shell"
                             >
                                 <RotateCcw className="w-3.5 h-3.5" />
                             </Button>
@@ -932,9 +1080,51 @@ function TerminalPane({
                 </div>
             </div>
 
+            {/* Shell tab strip — only for remote multi-shell sessions */}
+            {session.type === 'remote' && session.status !== 'detached' && shells.length > 0 && (
+                <div className="shrink-0 flex items-center border-b border-border bg-card/20 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {shells.map((shell, i) => {
+                        const isShellActive = shell.id === activeShellId;
+                        return (
+                            <div
+                                key={shell.id}
+                                onClick={() => activateShell(shell.id)}
+                                className={`group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1.5 cursor-pointer transition-colors shrink-0 border-r border-border/50 text-xs font-medium whitespace-nowrap select-none ${
+                                    isShellActive
+                                        ? 'bg-background/60 text-foreground border-b-2 border-b-primary -mb-px'
+                                        : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+                                }`}
+                            >
+                                <Terminal className="w-3 h-3 shrink-0" />
+                                <span>Shell {i + 1}</span>
+                                {shells.length > 1 && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeShell(shell.id);
+                                        }}
+                                        className="ml-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all"
+                                        title="Close shell"
+                                    >
+                                        <X className="w-2.5 h-2.5" />
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })}
+                    <button
+                        onClick={addShell}
+                        className="flex items-center justify-center w-7 h-full px-1.5 py-1.5 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+                        title="New shell"
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            )}
+
             {/* Terminal + optional file panel */}
             <div className="flex flex-1 min-h-0">
-                <div className="flex-1 min-w-0 min-h-0">
+                <div className="flex-1 min-w-0 min-h-0 relative">
                     {session.type === 'local' ? (
                         <LocalTerminal
                             tabId={session.tabId}
@@ -980,29 +1170,77 @@ function TerminalPane({
                                 <RotateCcw className="w-3.5 h-3.5" /> Retry connection
                             </Button>
                         </div>
-                    ) : !session.token ? (
-                        <div className="flex items-center justify-center h-full bg-card/20">
-                            <div className="flex items-center gap-3 text-muted-foreground">
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span className="text-sm">Establishing connection…</span>
-                            </div>
-                        </div>
                     ) : (
-                        <SSHTerminal
-                            sessionId={session.sessionId}
-                            serverId={session.serverId}
-                            connectionToken={session.token}
-                            gatewayUrl={session.gatewayUrl ?? undefined}
-                            disableNativeKeyboard={isMobile}
-                            onDisconnect={() => updateSessionStatus(session.tabId, 'disconnected')}
-                            onError={(err) => setSessionError(session.tabId, err)}
-                            onKeyHandlerReady={(handler) => {
-                                terminalKeyHandler.current = handler;
-                                updateSessionStatus(session.tabId, 'connected');
-                            }}
-                            onWebSocketCreated={(ws) => setSessionWs(session.tabId, ws)}
-                            onSessionNotFound={() => renewSession(session.tabId, session.serverId)}
-                        />
+                        /* All shells stacked — only active one visible */
+                        <>
+                            {shells.length === 0 && (
+                                <div className="flex items-center justify-center h-full bg-card/20">
+                                    <div className="flex items-center gap-3 text-muted-foreground">
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span className="text-sm">Establishing connection…</span>
+                                    </div>
+                                </div>
+                            )}
+                            {shells.map((shell, i) => {
+                                const isShellActive = shell.id === activeShellId;
+                                const isFirst = i === 0;
+                                return (
+                                    <div
+                                        key={shell.id}
+                                        className="absolute inset-0"
+                                        style={{
+                                            visibility: isShellActive ? 'visible' : 'hidden',
+                                            pointerEvents: isShellActive ? 'auto' : 'none',
+                                        }}
+                                    >
+                                        {!shell.token ? (
+                                            <div className="flex items-center justify-center h-full bg-card/20">
+                                                <div className="flex items-center gap-3 text-muted-foreground">
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                    <span className="text-sm">Establishing connection…</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <SSHTerminal
+                                                sessionId={shell.sessionId}
+                                                serverId={session.serverId}
+                                                connectionToken={shell.token}
+                                                gatewayUrl={session.gatewayUrl ?? undefined}
+                                                disableNativeKeyboard={isMobile}
+                                                onDisconnect={() => {
+                                                    if (isFirst)
+                                                        updateSessionStatus(
+                                                            session.tabId,
+                                                            'disconnected',
+                                                        );
+                                                }}
+                                                onError={(err) => {
+                                                    if (isFirst)
+                                                        setSessionError(session.tabId, err);
+                                                }}
+                                                onKeyHandlerReady={(handler) => {
+                                                    keyHandlers.current.set(shell.id, handler);
+                                                    if (isFirst)
+                                                        updateSessionStatus(
+                                                            session.tabId,
+                                                            'connected',
+                                                        );
+                                                }}
+                                                onWebSocketCreated={(ws) => {
+                                                    if (ws) wsRefs.current.set(shell.id, ws);
+                                                    else wsRefs.current.delete(shell.id);
+                                                    // Context WS tracking covers shell[0] only
+                                                    if (isFirst) setSessionWs(session.tabId, ws);
+                                                }}
+                                                onSessionNotFound={() =>
+                                                    renewShell(shell.id, isFirst)
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </>
                     )}
                 </div>
 
@@ -1020,7 +1258,7 @@ function TerminalPane({
             {showKeyboard && session.type !== 'local' && (
                 <VirtualKeyboard
                     onKey={(key) => {
-                        terminalKeyHandler.current?.(key);
+                        keyHandlers.current.get(activeShellId)?.(key);
                     }}
                 />
             )}
