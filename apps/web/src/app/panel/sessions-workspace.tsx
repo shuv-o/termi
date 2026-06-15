@@ -1048,20 +1048,20 @@ function TerminalPane({
 
                 {/* Shell tabs — inline, right after the server name */}
                 {session.type === 'remote' && session.status !== 'detached' && shells.length > 0 && (
-                    <div className="flex items-stretch flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-2 border-l border-border/40 pl-2">
+                    <div className="flex items-center flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-2 border-l border-border/40 pl-2 gap-0.5">
                         {shells.map((shell, i) => {
                             const isShellActive = shell.id === activeShellId;
                             return (
                                 <div
                                     key={shell.id}
                                     onClick={() => activateShell(shell.id)}
-                                    className={`group flex items-center gap-1.5 px-2.5 py-1 cursor-pointer transition-colors shrink-0 rounded-md text-xs font-medium whitespace-nowrap select-none ${
+                                    className={`group flex items-center gap-1.5 px-2.5 py-1 cursor-pointer transition-all shrink-0 rounded-md text-xs whitespace-nowrap select-none ${
                                         isShellActive
-                                            ? 'bg-background/70 text-foreground ring-1 ring-border/60'
-                                            : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+                                            ? 'bg-primary/15 text-primary ring-1 ring-primary/30 font-semibold'
+                                            : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium'
                                     }`}
                                 >
-                                    <Terminal className="w-3 h-3 shrink-0" />
+                                    <Terminal className={`w-3 h-3 shrink-0 ${isShellActive ? 'text-primary' : ''}`} />
                                     <span>Shell {i + 1}</span>
                                     {shells.length > 1 && (
                                         <button
@@ -1069,7 +1069,11 @@ function TerminalPane({
                                                 e.stopPropagation();
                                                 closeShell(shell.id);
                                             }}
-                                            className="ml-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all"
+                                            className={`ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-all ${
+                                                isShellActive
+                                                    ? 'opacity-40 hover:opacity-100 text-primary'
+                                                    : 'opacity-0 group-hover:opacity-60'
+                                            }`}
                                             title="Close shell"
                                         >
                                             <X className="w-2.5 h-2.5" />
@@ -1080,7 +1084,7 @@ function TerminalPane({
                         })}
                         <button
                             onClick={addShell}
-                            className="flex items-center justify-center px-1.5 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md transition-colors"
+                            className="flex items-center justify-center w-6 h-6 ml-0.5 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                             title="New shell"
                         >
                             <Plus className="w-3.5 h-3.5" />
