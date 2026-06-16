@@ -282,7 +282,8 @@ function FleetStats({
             label: 'Avg Latency',
             value: avgLatency != null ? `${avgLatency}ms` : null,
             icon: Zap,
-            iconClassName: avgLatency != null && avgLatency >= 150 ? 'text-red-400' : 'text-sky-400',
+            iconClassName:
+                avgLatency != null && avgLatency >= 150 ? 'text-red-400' : 'text-sky-400',
             iconWrapperClassName: 'bg-sky-500/10',
             borderClassName: 'border-l-sky-400',
             valueClassName:
@@ -346,12 +347,16 @@ function FleetStats({
                                     <p className="text-[10px] text-red-400">{offline} offline</p>
                                 )}
                                 {stat.label === 'Online' && offline === 0 && unknown > 0 && (
-                                    <p className="text-[10px] text-muted-foreground/70">{unknown} checking…</p>
+                                    <p className="text-[10px] text-muted-foreground/70">
+                                        {unknown} checking…
+                                    </p>
                                 )}
                                 {stat.value == null ? (
                                     <Skeleton className="mt-1 h-5 w-12" />
                                 ) : (
-                                    <p className={`text-lg sm:text-xl font-bold tabular-nums leading-tight mt-0.5 ${stat.valueClassName}`}>
+                                    <p
+                                        className={`text-lg sm:text-xl font-bold tabular-nums leading-tight mt-0.5 ${stat.valueClassName}`}
+                                    >
                                         {stat.value}
                                     </p>
                                 )}
@@ -674,217 +679,239 @@ function GridCard({
             <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
 
             <div className="flex flex-1 flex-col gap-3 p-3.5 cursor-pointer" onClick={onOpen}>
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${protocolVariants[server.protocol]}`}
-                        >
-                            <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-start gap-2 min-w-0">
-                                <div className="min-w-0 flex-1">
-                                    <h3 className="truncate text-sm font-semibold leading-tight">
-                                        {server.name}
-                                    </h3>
-                                    <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground/80">
-                                        {server.host}
-                                        <span className="text-muted-foreground/50">:{server.port}</span>
-                                    </p>
-                                </div>
-                                {mLoading ? (
-                                    <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
-                                ) : m?.reachable === true ? (
-                                    <span className="mt-0.5 shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
-                                        {m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
-                                    </span>
-                                ) : m?.reachable === false ? (
-                                    <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                                        <WifiOff className="h-2.5 w-2.5" />
-                                        Offline
-                                    </span>
-                                ) : null}
+                <div className="flex items-start gap-3">
+                    <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${protocolVariants[server.protocol]}`}
+                    >
+                        <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 min-w-0">
+                            <div className="min-w-0 flex-1">
+                                <h3 className="truncate text-sm font-semibold leading-tight">
+                                    {server.name}
+                                </h3>
+                                <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground/80">
+                                    {server.host}
+                                    <span className="text-muted-foreground/50">:{server.port}</span>
+                                </p>
                             </div>
+                            {mLoading ? (
+                                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
+                            ) : m?.reachable === true ? (
+                                <span className="mt-0.5 shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
+                                    {m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
+                                </span>
+                            ) : m?.reachable === false ? (
+                                <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                                    <WifiOff className="h-2.5 w-2.5" />
+                                    Offline
+                                </span>
+                            ) : null}
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => { e.stopPropagation(); onFavorite(); }}
-                            className={`h-7 w-7 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
-                        >
-                            <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
-                        </Button>
                     </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onFavorite();
+                        }}
+                        className={`h-7 w-7 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
+                    >
+                        <Star
+                            className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`}
+                        />
+                    </Button>
+                </div>
 
-                    <div className="rounded-lg border border-border/60 bg-secondary/30 px-2.5 py-2">
-                        <div className="flex items-center gap-2">
-                            <span className="truncate font-mono text-[11px] text-foreground/75">
-                                {server.username}@{server.host}
-                            </span>
-                            <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
-                        </div>
-                        {server.description && (
-                            <p className="mt-1.5 line-clamp-1 text-[11px] text-muted-foreground">
-                                {server.description}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
-                        >
-                            {server.protocol}
+                <div className="rounded-lg border border-border/60 bg-secondary/30 px-2.5 py-2">
+                    <div className="flex items-center gap-2">
+                        <span className="truncate font-mono text-[11px] text-foreground/75">
+                            {server.username}@{server.host}
                         </span>
-                        {server.group && (
-                            <span
-                                className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
-                                style={{
-                                    backgroundColor: `${server.group.color}20`,
-                                    color: server.group.color || undefined,
-                                    borderColor: `${server.group.color}40`,
-                                }}
-                            >
-                                {server.group.name}
-                            </span>
-                        )}
-                        {server.tags.slice(0, 2).map((tag) => (
-                            <button
-                                key={tag}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onTagClick(tag);
-                                }}
-                                className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
-                            >
-                                {tag}
-                            </button>
-                        ))}
+                        <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
                     </div>
+                    {server.description && (
+                        <p className="mt-1.5 line-clamp-1 text-[11px] text-muted-foreground">
+                            {server.description}
+                        </p>
+                    )}
+                </div>
 
-                    <div className="mt-auto space-y-2">
-                        {hasMetrics && (
-                            <div className="grid grid-cols-3 gap-2">
-                                {m!.cpu != null && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center justify-between text-[10px]">
-                                            <span className="text-muted-foreground/60">CPU</span>
-                                            <span
-                                                className={`tabular-nums font-medium ${m!.cpu >= 90 ? 'text-red-400' : m!.cpu >= 70 ? 'text-yellow-400' : 'text-emerald-400'}`}
-                                            >
-                                                {m!.cpu}%
-                                            </span>
-                                        </div>
-                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-700 ${m!.cpu >= 90 ? 'bg-red-500' : m!.cpu >= 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
-                                                style={{ width: `${Math.min(100, m!.cpu)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                {m!.ram && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center justify-between text-[10px]">
-                                            <span className="text-muted-foreground/60">RAM</span>
-                                            <span
-                                                className={`tabular-nums font-medium ${m!.ram.percent >= 90 ? 'text-red-400' : m!.ram.percent >= 70 ? 'text-yellow-400' : 'text-sky-400'}`}
-                                            >
-                                                {Math.round(m!.ram.percent)}%
-                                            </span>
-                                        </div>
-                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-700 ${m!.ram.percent >= 90 ? 'bg-red-500' : m!.ram.percent >= 70 ? 'bg-yellow-500' : 'bg-sky-500'}`}
-                                                style={{ width: `${Math.min(100, m!.ram.percent)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                {m!.disk && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center justify-between text-[10px]">
-                                            <span className="text-muted-foreground/60">Disk</span>
-                                            <span
-                                                className={`tabular-nums font-medium ${m!.disk.percent >= 90 ? 'text-red-400' : m!.disk.percent >= 70 ? 'text-yellow-400' : 'text-muted-foreground'}`}
-                                            >
-                                                {Math.round(m!.disk.percent)}%
-                                            </span>
-                                        </div>
-                                        <div className="h-1 overflow-hidden rounded-full bg-secondary">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-700 ${m!.disk.percent >= 90 ? 'bg-red-500' : m!.disk.percent >= 70 ? 'bg-yellow-500' : 'bg-muted-foreground/30'}`}
-                                                style={{ width: `${Math.min(100, m!.disk.percent)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
+                    >
+                        {server.protocol}
+                    </span>
+                    {server.group && (
+                        <span
+                            className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                            style={{
+                                backgroundColor: `${server.group.color}20`,
+                                color: server.group.color || undefined,
+                                borderColor: `${server.group.color}40`,
+                            }}
+                        >
+                            {server.group.name}
+                        </span>
+                    )}
+                    {server.tags.slice(0, 2).map((tag) => (
+                        <button
+                            key={tag}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onTagClick(tag);
+                            }}
+                            className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                        >
+                            {tag}
+                        </button>
+                    ))}
+                </div>
 
-                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
-                            <Clock className="h-3 w-3 shrink-0" />
-                            <span>{formatRelativeTime(server.lastUsedAt)}</span>
-                            {m?.network && (
-                                <>
-                                    <span className="mx-0.5 text-muted-foreground/30">·</span>
-                                    <ArrowDown className="h-2.5 w-2.5 text-emerald-500/60" />
-                                    <span className="tabular-nums">{formatBytes(m.network.rxBytes)}</span>
-                                    <ArrowUp className="h-2.5 w-2.5 text-sky-400/60" />
-                                    <span className="tabular-nums">{formatBytes(m.network.txBytes)}</span>
-                                </>
+                <div className="mt-auto space-y-2">
+                    {hasMetrics && (
+                        <div className="grid grid-cols-3 gap-2">
+                            {m!.cpu != null && (
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between text-[10px]">
+                                        <span className="text-muted-foreground/60">CPU</span>
+                                        <span
+                                            className={`tabular-nums font-medium ${m!.cpu >= 90 ? 'text-red-400' : m!.cpu >= 70 ? 'text-yellow-400' : 'text-emerald-400'}`}
+                                        >
+                                            {m!.cpu}%
+                                        </span>
+                                    </div>
+                                    <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-700 ${m!.cpu >= 90 ? 'bg-red-500' : m!.cpu >= 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
+                                            style={{ width: `${Math.min(100, m!.cpu)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {m!.ram && (
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between text-[10px]">
+                                        <span className="text-muted-foreground/60">RAM</span>
+                                        <span
+                                            className={`tabular-nums font-medium ${m!.ram.percent >= 90 ? 'text-red-400' : m!.ram.percent >= 70 ? 'text-yellow-400' : 'text-sky-400'}`}
+                                        >
+                                            {Math.round(m!.ram.percent)}%
+                                        </span>
+                                    </div>
+                                    <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-700 ${m!.ram.percent >= 90 ? 'bg-red-500' : m!.ram.percent >= 70 ? 'bg-yellow-500' : 'bg-sky-500'}`}
+                                            style={{ width: `${Math.min(100, m!.ram.percent)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {m!.disk && (
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between text-[10px]">
+                                        <span className="text-muted-foreground/60">Disk</span>
+                                        <span
+                                            className={`tabular-nums font-medium ${m!.disk.percent >= 90 ? 'text-red-400' : m!.disk.percent >= 70 ? 'text-yellow-400' : 'text-muted-foreground'}`}
+                                        >
+                                            {Math.round(m!.disk.percent)}%
+                                        </span>
+                                    </div>
+                                    <div className="h-1 overflow-hidden rounded-full bg-secondary">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-700 ${m!.disk.percent >= 90 ? 'bg-red-500' : m!.disk.percent >= 70 ? 'bg-yellow-500' : 'bg-muted-foreground/30'}`}
+                                            style={{ width: `${Math.min(100, m!.disk.percent)}%` }}
+                                        />
+                                    </div>
+                                </div>
                             )}
                         </div>
+                    )}
+
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span>{formatRelativeTime(server.lastUsedAt)}</span>
+                        {m?.network && (
+                            <>
+                                <span className="mx-0.5 text-muted-foreground/30">·</span>
+                                <ArrowDown className="h-2.5 w-2.5 text-emerald-500/60" />
+                                <span className="tabular-nums">
+                                    {formatBytes(m.network.rxBytes)}
+                                </span>
+                                <ArrowUp className="h-2.5 w-2.5 text-sky-400/60" />
+                                <span className="tabular-nums">
+                                    {formatBytes(m.network.txBytes)}
+                                </span>
+                            </>
+                        )}
                     </div>
+                </div>
             </div>
 
             <div className="flex items-center gap-1.5 border-t border-border/60 bg-secondary/20 px-3 py-2.5">
-                    <Button onClick={(e) => { e.stopPropagation(); onConnect(); }} size="sm" className="h-8 flex-1 justify-center text-xs">
-                        Connect
+                <Button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onConnect();
+                    }}
+                    size="sm"
+                    className="h-8 flex-1 justify-center text-xs"
+                >
+                    Connect
+                </Button>
+                {server.protocol === 'SSH' && (
+                    <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSessions();
+                        }}
+                        className="h-8 w-8 shrink-0"
+                        title={hasSession ? 'Open Session' : 'Add to Sessions'}
+                    >
+                        <Layers className="h-3.5 w-3.5" />
                     </Button>
-                    {server.protocol === 'SSH' && (
-                        <Button
-                            variant="secondary"
-                            size="icon"
-                            onClick={(e) => { e.stopPropagation(); onSessions(); }}
-                            className="h-8 w-8 shrink-0"
-                            title={hasSession ? 'Open Session' : 'Add to Sessions'}
-                        >
-                            <Layers className="h-3.5 w-3.5" />
+                )}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0">
+                            <MoreVertical className="h-4 w-4" />
                         </Button>
-                    )}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-card border-border">
-                            <DropdownMenuItem asChild>
-                                <Link href={`/panel/servers/${server.id}`} className="flex items-center gap-2">
-                                    <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={onEdit} className="gap-2">
-                                <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={onShare} className="gap-2">
-                                <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
-                            </DropdownMenuItem>
-                            {server.hasPassword && (
-                                <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
-                                    <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />
-                                    Copy Password
-                                </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator className="bg-border" />
-                            <DropdownMenuItem
-                                onClick={onDelete}
-                                className="gap-2 text-destructive focus:text-destructive"
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                        <DropdownMenuItem asChild>
+                            <Link
+                                href={`/panel/servers/${server.id}`}
+                                className="flex items-center gap-2"
                             >
-                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                                <Activity className="w-3.5 h-3.5 text-muted-foreground" /> Details
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onEdit} className="gap-2">
+                            <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onShare} className="gap-2">
+                            <Share2 className="w-3.5 h-3.5 text-muted-foreground" /> Share
+                        </DropdownMenuItem>
+                        {server.hasPassword && (
+                            <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
+                                <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />
+                                Copy Password
                             </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        )}
+                        <DropdownMenuSeparator className="bg-border" />
+                        <DropdownMenuItem
+                            onClick={onDelete}
+                            className="gap-2 text-destructive focus:text-destructive"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </Card>
     );
@@ -953,13 +980,17 @@ function ListRow({
             <div className="min-w-0 flex-[1.3]">
                 <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-medium">{server.name}</span>
-                    {server.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
+                    {server.isFavorite && (
+                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    )}
                 </div>
                 <div className="hidden 2xl:flex items-center gap-2 mt-0.5">
                     <span className="truncate text-[11px] text-muted-foreground">
                         {server.username}
                     </span>
-                    {(server.group || server.tags[0]) && <span className="text-muted-foreground/30">·</span>}
+                    {(server.group || server.tags[0]) && (
+                        <span className="text-muted-foreground/30">·</span>
+                    )}
                     {server.group && (
                         <span
                             className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
@@ -990,7 +1021,9 @@ function ListRow({
                 <span className="truncate font-mono text-xs text-muted-foreground/80">
                     {server.host}
                 </span>
-                <span className="shrink-0 text-[11px] text-muted-foreground/50">:{server.port}</span>
+                <span className="shrink-0 text-[11px] text-muted-foreground/50">
+                    :{server.port}
+                </span>
                 <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
             </div>
 
@@ -1425,7 +1458,8 @@ export default function DashboardPage() {
                         </div>
                         <Button asChild className="h-9 sm:h-10 px-3 sm:px-4 shrink-0">
                             <Link href="/panel/servers/new">
-                                <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Server</span>
+                                <Plus className="w-4 h-4" />{' '}
+                                <span className="hidden sm:inline">Add Server</span>
                             </Link>
                         </Button>
                     </div>
@@ -1478,7 +1512,8 @@ export default function DashboardPage() {
                                     size="sm"
                                     className="h-9 px-2.5 sm:px-3 text-xs gap-1.5"
                                 >
-                                    <Star className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Starred</span>
+                                    <Star className="w-3.5 h-3.5" />{' '}
+                                    <span className="hidden sm:inline">Starred</span>
                                 </Button>
 
                                 <DropdownMenu>
@@ -1549,7 +1584,9 @@ export default function DashboardPage() {
                                     className="h-9 w-9"
                                     title="Refresh"
                                 >
-                                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                                    <RefreshCw
+                                        className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+                                    />
                                 </Button>
                             </div>
                         </div>
@@ -1557,9 +1594,17 @@ export default function DashboardPage() {
                         {showProtocolFilters && (
                             <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
                                 {(
-                                    ['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'] as ProtocolFilter[]
+                                    [
+                                        'all',
+                                        'SSH',
+                                        'SCP',
+                                        'RDP',
+                                        'VNC',
+                                        'TELNET',
+                                    ] as ProtocolFilter[]
                                 ).map((p) => {
-                                    const count = p === 'all' ? protocolCounts.all : protocolCounts[p];
+                                    const count =
+                                        p === 'all' ? protocolCounts.all : protocolCounts[p];
                                     if (p !== 'all' && count === 0) return null;
                                     const active = protocolFilter === p;
                                     const colorMap: Record<string, string> = {
@@ -1687,7 +1732,8 @@ export default function DashboardPage() {
                                         </div>
                                         <h3 className="text-xl font-semibold">Build your fleet</h3>
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            Add your first server to create a clean, searchable fleet view.
+                                            Add your first server to create a clean, searchable
+                                            fleet view.
                                         </p>
                                         <Button asChild className="mt-6 h-10 px-4">
                                             <Link href="/panel/servers/new">
@@ -1700,9 +1746,12 @@ export default function DashboardPage() {
                                         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
                                             <Search className="h-10 w-10 text-muted-foreground/35" />
                                         </div>
-                                        <h3 className="text-xl font-semibold">No matching servers</h3>
+                                        <h3 className="text-xl font-semibold">
+                                            No matching servers
+                                        </h3>
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            Broaden your search or reset the active filters to see more servers.
+                                            Broaden your search or reset the active filters to see
+                                            more servers.
                                         </p>
                                         <Button
                                             variant="secondary"
@@ -1760,75 +1809,75 @@ export default function DashboardPage() {
                             </span>
                         </div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                        {sharedServers.map((server) => {
-                            const Icon = protocolIcons[server.protocol];
-                            return (
-                                <Card
-                                    key={server.id}
-                                    className="flex flex-col overflow-hidden border border-border border-primary/20 bg-card transition-all duration-200 hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md"
-                                >
-                                    <div className="p-4 flex-1 space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <div
-                                                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}
-                                            >
-                                                <Icon className="w-4 h-4" />
+                            {sharedServers.map((server) => {
+                                const Icon = protocolIcons[server.protocol];
+                                return (
+                                    <Card
+                                        key={server.id}
+                                        className="flex flex-col overflow-hidden border border-border border-primary/20 bg-card transition-all duration-200 hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md"
+                                    >
+                                        <div className="p-4 flex-1 space-y-3">
+                                            <div className="flex items-start gap-3">
+                                                <div
+                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${protocolVariants[server.protocol]}`}
+                                                >
+                                                    <Icon className="w-4 h-4" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold truncate text-sm leading-tight">
+                                                        {server.name}
+                                                    </h3>
+                                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                                        <span className="text-[10px] text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">
+                                                            Shared by {server.sharedBy}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-semibold truncate text-sm leading-tight">
-                                                    {server.name}
-                                                </h3>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-[10px] text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">
-                                                        Shared by {server.sharedBy}
+                                            <div className="rounded-md bg-secondary/60 border border-border/50 px-2.5 py-2 space-y-1.5">
+                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                    <Server className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                                                    <span className="text-[11px] text-foreground/80 font-mono truncate">
+                                                        {server.host}
+                                                    </span>
+                                                    <span className="text-[10px] text-muted-foreground/50 shrink-0">
+                                                        :{server.port}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                    <User className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                                                    <span className="text-[11px] text-muted-foreground font-mono truncate">
+                                                        {server.username}
                                                     </span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="rounded-md bg-secondary/60 border border-border/50 px-2.5 py-2 space-y-1.5">
-                                            <div className="flex items-center gap-1.5 min-w-0">
-                                                <Server className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-                                                <span className="text-[11px] text-foreground/80 font-mono truncate">
-                                                    {server.host}
+                                            <div className="flex flex-wrap items-center gap-1">
+                                                <span
+                                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${protocolVariants[server.protocol]}`}
+                                                >
+                                                    {server.protocol}
                                                 </span>
-                                                <span className="text-[10px] text-muted-foreground/50 shrink-0">
-                                                    :{server.port}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5 min-w-0">
-                                                <User className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-                                                <span className="text-[11px] text-muted-foreground font-mono truncate">
-                                                    {server.username}
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                                                    {server.permissions}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-1">
-                                            <span
-                                                className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${protocolVariants[server.protocol]}`}
+                                        <div className="px-4 pb-4">
+                                            <Button
+                                                size="sm"
+                                                className="w-full text-xs"
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/panel/connect/${server.id}/${server.protocol.toLowerCase()}`,
+                                                    )
+                                                }
                                             >
-                                                {server.protocol}
-                                            </span>
-                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
-                                                {server.permissions}
-                                            </span>
+                                                Connect
+                                            </Button>
                                         </div>
-                                    </div>
-                                    <div className="px-4 pb-4">
-                                        <Button
-                                            size="sm"
-                                            className="w-full text-xs"
-                                            onClick={() =>
-                                                router.push(
-                                                    `/panel/connect/${server.id}/${server.protocol.toLowerCase()}`,
-                                                )
-                                            }
-                                        >
-                                            Connect
-                                        </Button>
-                                    </div>
-                                </Card>
-                            );
-                        })}
+                                    </Card>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

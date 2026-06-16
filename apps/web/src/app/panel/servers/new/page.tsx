@@ -246,12 +246,9 @@ export default function NewServerPage() {
                         body: JSON.stringify({
                             label: keychainLabel.trim(),
                             username: form.username,
-                            password:
-                                form.authMethod === 'password' ? form.password : undefined,
-                            privateKey:
-                                form.authMethod === 'key' ? form.privateKey : undefined,
-                            passphrase:
-                                form.authMethod === 'key' ? form.passphrase : undefined,
+                            password: form.authMethod === 'password' ? form.password : undefined,
+                            privateKey: form.authMethod === 'key' ? form.privateKey : undefined,
+                            passphrase: form.authMethod === 'key' ? form.passphrase : undefined,
                         }),
                     });
                 } catch {
@@ -558,7 +555,6 @@ export default function NewServerPage() {
                                 </CardContent>
                             </Card>
                         )}
-
                     </div>
 
                     {/*   RIGHT: Auth + Advanced + Preview + Test + Actions   */}
@@ -601,14 +597,19 @@ export default function NewServerPage() {
                                         {keychainEntries.length === 0 ? (
                                             <p className="py-2 text-center text-xs text-muted-foreground">
                                                 No keychain entries yet.{' '}
-                                                <Link href="/panel/keychain" className="text-primary underline">
+                                                <Link
+                                                    href="/panel/keychain"
+                                                    className="text-primary underline"
+                                                >
                                                     Create one
                                                 </Link>{' '}
                                                 first.
                                             </p>
                                         ) : (
                                             <div className="space-y-1.5">
-                                                <Label className="text-xs">Select keychain entry</Label>
+                                                <Label className="text-xs">
+                                                    Select keychain entry
+                                                </Label>
                                                 <Select
                                                     value={selectedKeychainId || 'none'}
                                                     onValueChange={(v) => {
@@ -626,12 +627,16 @@ export default function NewServerPage() {
                                                         </SelectItem>
                                                         {keychainEntries.map((kc) => (
                                                             <SelectItem key={kc.id} value={kc.id}>
-                                                                <span className="font-medium">{kc.label}</span>
+                                                                <span className="font-medium">
+                                                                    {kc.label}
+                                                                </span>
                                                                 <span className="ml-2 text-xs text-muted-foreground">
                                                                     {kc.username}
                                                                 </span>
                                                                 <span className="ml-1.5 text-[10px] text-muted-foreground/60">
-                                                                    {kc.hasPrivateKey ? '(SSH key)' : '(password)'}
+                                                                    {kc.hasPrivateKey
+                                                                        ? '(SSH key)'
+                                                                        : '(password)'}
                                                                 </span>
                                                             </SelectItem>
                                                         ))}
@@ -656,7 +661,9 @@ export default function NewServerPage() {
                                                     <button
                                                         key={method}
                                                         type="button"
-                                                        onClick={() => update({ authMethod: method })}
+                                                        onClick={() =>
+                                                            update({ authMethod: method })
+                                                        }
                                                         className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
                                                             form.authMethod === method
                                                                 ? 'bg-primary text-primary-foreground shadow-sm'
@@ -668,7 +675,9 @@ export default function NewServerPage() {
                                                         ) : (
                                                             <Key className="w-3 h-3" />
                                                         )}
-                                                        {method === 'password' ? 'Password' : 'SSH Key'}
+                                                        {method === 'password'
+                                                            ? 'Password'
+                                                            : 'SSH Key'}
                                                     </button>
                                                 ))}
                                             </div>
@@ -691,7 +700,9 @@ export default function NewServerPage() {
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        onClick={() =>
+                                                            setShowPassword(!showPassword)
+                                                        }
                                                         className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                                     >
                                                         {showPassword ? (
@@ -729,18 +740,24 @@ export default function NewServerPage() {
                                                             ) : (
                                                                 <Upload className="w-3 h-3" />
                                                             )}
-                                                            {m === 'paste' ? 'Paste Key' : 'Upload File'}
+                                                            {m === 'paste'
+                                                                ? 'Paste Key'
+                                                                : 'Upload File'}
                                                         </button>
                                                     ))}
                                                 </div>
 
                                                 {keyInputMethod === 'paste' ? (
                                                     <div className="space-y-1.5">
-                                                        <Label className="text-xs">Private Key</Label>
+                                                        <Label className="text-xs">
+                                                            Private Key
+                                                        </Label>
                                                         <Textarea
                                                             value={form.privateKey}
                                                             onChange={(e) =>
-                                                                update({ privateKey: e.target.value })
+                                                                update({
+                                                                    privateKey: e.target.value,
+                                                                })
                                                             }
                                                             className="min-h-[140px] resize-none bg-secondary font-mono text-xs leading-relaxed"
                                                             placeholder={
@@ -750,7 +767,9 @@ export default function NewServerPage() {
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-1.5">
-                                                        <Label className="text-xs">Key File (.pem, .ppk)</Label>
+                                                        <Label className="text-xs">
+                                                            Key File (.pem, .ppk)
+                                                        </Label>
                                                         <label
                                                             className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors ${
                                                                 keyFileName
@@ -763,14 +782,16 @@ export default function NewServerPage() {
                                                                 accept=".pem,.ppk,application/x-pem-file"
                                                                 className="sr-only"
                                                                 onChange={(e) => {
-                                                                    const file = e.target.files?.[0];
+                                                                    const file =
+                                                                        e.target.files?.[0];
                                                                     if (!file) return;
                                                                     setKeyFileName(file.name);
                                                                     const reader = new FileReader();
                                                                     reader.onload = (ev) => {
                                                                         update({
                                                                             privateKey:
-                                                                                (ev.target?.result as string) ??
+                                                                                (ev.target
+                                                                                    ?.result as string) ??
                                                                                 '',
                                                                         });
                                                                     };
@@ -791,7 +812,15 @@ export default function NewServerPage() {
                                                                 <>
                                                                     <Upload className="w-5 h-5 text-muted-foreground" />
                                                                     <span className="text-center text-xs text-muted-foreground">
-                                                                        Click to select a <span className="font-mono">.pem</span> or <span className="font-mono">.ppk</span> file
+                                                                        Click to select a{' '}
+                                                                        <span className="font-mono">
+                                                                            .pem
+                                                                        </span>{' '}
+                                                                        or{' '}
+                                                                        <span className="font-mono">
+                                                                            .ppk
+                                                                        </span>{' '}
+                                                                        file
                                                                     </span>
                                                                 </>
                                                             )}
@@ -801,14 +830,21 @@ export default function NewServerPage() {
 
                                                 <div className="space-y-1.5">
                                                     <Label className="text-xs">
-                                                        Passphrase <span className="text-muted-foreground/50">(if encrypted)</span>
+                                                        Passphrase{' '}
+                                                        <span className="text-muted-foreground/50">
+                                                            (if encrypted)
+                                                        </span>
                                                     </Label>
                                                     <div className="relative">
                                                         <Input
-                                                            type={showPassphrase ? 'text' : 'password'}
+                                                            type={
+                                                                showPassphrase ? 'text' : 'password'
+                                                            }
                                                             value={form.passphrase}
                                                             onChange={(e) =>
-                                                                update({ passphrase: e.target.value })
+                                                                update({
+                                                                    passphrase: e.target.value,
+                                                                })
                                                             }
                                                             className="h-9 bg-secondary pr-10 text-sm"
                                                             placeholder="••••••••"
@@ -891,7 +927,9 @@ export default function NewServerPage() {
                                         <Input
                                             type="text"
                                             value={form.description}
-                                            onChange={(e) => update({ description: e.target.value })}
+                                            onChange={(e) =>
+                                                update({ description: e.target.value })
+                                            }
                                             className="h-9 bg-secondary text-sm"
                                             placeholder="Production web server"
                                         />
@@ -935,7 +973,9 @@ export default function NewServerPage() {
                                                             type="button"
                                                             onClick={() =>
                                                                 update({
-                                                                    tags: form.tags.filter((t) => t !== tag),
+                                                                    tags: form.tags.filter(
+                                                                        (t) => t !== tag,
+                                                                    ),
                                                                 })
                                                             }
                                                             className="text-muted-foreground transition-colors hover:text-destructive"

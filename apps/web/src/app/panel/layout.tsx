@@ -278,7 +278,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 <div
                     className={`px-3 pt-3 overflow-hidden transition-all duration-200 ${collapsed ? 'max-h-0 opacity-0 pt-0' : 'max-h-16 opacity-100'}`}
                 >
-                    <Button asChild className="w-full h-10 rounded-xl" tabIndex={collapsed ? -1 : 0}>
+                    <Button
+                        asChild
+                        className="w-full h-10 rounded-xl"
+                        tabIndex={collapsed ? -1 : 0}
+                    >
                         <Link href="/panel/servers/new">
                             <Plus className="w-4 h-4" />
                             Add Server
@@ -568,7 +572,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {!isSessionsPage && !isConnectPage && (
-                    <main className={isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'}>
+                    <main
+                        className={
+                            isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'
+                        }
+                    >
                         {children}
                     </main>
                 )}

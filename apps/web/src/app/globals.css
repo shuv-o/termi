@@ -300,6 +300,22 @@ html {
         background: #0284c7 !important;
         color: #fff;
     }
+    /* Caps lock engaged — distinct from the one-shot shift (active) state */
+    .vk-key-lock {
+        background: #059669 !important;
+        color: #fff;
+    }
+    .vk-key-lock:active {
+        background: #047857 !important;
+    }
+    /* Enter — accented so it is easy to find and hit */
+    .vk-key-enter {
+        background: #0369a1;
+        color: #fff;
+    }
+    .vk-key-enter:active {
+        background: #075985;
+    }
     .vk-key-danger {
         color: #f87171;
     }

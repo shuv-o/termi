@@ -607,7 +607,6 @@ export default function EditServerPage() {
                                 </CardContent>
                             </Card>
                         )}
-
                     </div>
 
                     {/*   RIGHT: Auth + Advanced + Preview + Test + Actions   */}
@@ -650,14 +649,19 @@ export default function EditServerPage() {
                                         {keychainEntries.length === 0 ? (
                                             <p className="py-2 text-center text-xs text-muted-foreground">
                                                 No keychain entries yet.{' '}
-                                                <Link href="/panel/keychain" className="text-primary underline">
+                                                <Link
+                                                    href="/panel/keychain"
+                                                    className="text-primary underline"
+                                                >
                                                     Create one
                                                 </Link>{' '}
                                                 first.
                                             </p>
                                         ) : (
                                             <div className="space-y-1.5">
-                                                <Label className="text-xs">Select keychain entry</Label>
+                                                <Label className="text-xs">
+                                                    Select keychain entry
+                                                </Label>
                                                 <Select
                                                     value={selectedKeychainId || 'none'}
                                                     onValueChange={(v) => {
@@ -675,12 +679,16 @@ export default function EditServerPage() {
                                                         </SelectItem>
                                                         {keychainEntries.map((kc) => (
                                                             <SelectItem key={kc.id} value={kc.id}>
-                                                                <span className="font-medium">{kc.label}</span>
+                                                                <span className="font-medium">
+                                                                    {kc.label}
+                                                                </span>
                                                                 <span className="ml-2 text-xs text-muted-foreground">
                                                                     {kc.username}
                                                                 </span>
                                                                 <span className="ml-1.5 text-[10px] text-muted-foreground/60">
-                                                                    {kc.hasPrivateKey ? '(SSH key)' : '(password)'}
+                                                                    {kc.hasPrivateKey
+                                                                        ? '(SSH key)'
+                                                                        : '(password)'}
                                                                 </span>
                                                             </SelectItem>
                                                         ))}
@@ -705,7 +713,9 @@ export default function EditServerPage() {
                                                     <button
                                                         key={method}
                                                         type="button"
-                                                        onClick={() => update({ authMethod: method })}
+                                                        onClick={() =>
+                                                            update({ authMethod: method })
+                                                        }
                                                         className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
                                                             form.authMethod === method
                                                                 ? 'bg-primary text-primary-foreground shadow-sm'
@@ -717,22 +727,27 @@ export default function EditServerPage() {
                                                         ) : (
                                                             <Key className="w-3 h-3" />
                                                         )}
-                                                        {method === 'password' ? 'Password' : 'SSH Key'}
+                                                        {method === 'password'
+                                                            ? 'Password'
+                                                            : 'SSH Key'}
                                                     </button>
                                                 ))}
                                             </div>
                                         )}
 
-                                        {form.authMethod === 'password' && storedCreds.hasPassword && (
-                                            <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
-                                                <Lock className="w-3 h-3 text-green-500/70" />
-                                                Password saved — leave blank to keep it, or enter a new one to replace it
-                                            </div>
-                                        )}
+                                        {form.authMethod === 'password' &&
+                                            storedCreds.hasPassword && (
+                                                <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
+                                                    <Lock className="w-3 h-3 text-green-500/70" />
+                                                    Password saved — leave blank to keep it, or
+                                                    enter a new one to replace it
+                                                </div>
+                                            )}
                                         {form.authMethod === 'key' && storedCreds.hasPrivateKey && (
                                             <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
                                                 <Key className="w-3 h-3 text-green-500/70" />
-                                                Private key saved — leave blank to keep it, or paste a new key to replace it
+                                                Private key saved — leave blank to keep it, or paste
+                                                a new key to replace it
                                             </div>
                                         )}
 
@@ -759,7 +774,9 @@ export default function EditServerPage() {
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        onClick={() =>
+                                                            setShowPassword(!showPassword)
+                                                        }
                                                         className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                                     >
                                                         {showPassword ? (
@@ -803,10 +820,14 @@ export default function EditServerPage() {
                                                     </Label>
                                                     <div className="relative">
                                                         <Input
-                                                            type={showPassphrase ? 'text' : 'password'}
+                                                            type={
+                                                                showPassphrase ? 'text' : 'password'
+                                                            }
                                                             value={form.passphrase}
                                                             onChange={(e) =>
-                                                                update({ passphrase: e.target.value })
+                                                                update({
+                                                                    passphrase: e.target.value,
+                                                                })
                                                             }
                                                             className="h-9 bg-secondary pr-10 text-sm"
                                                             placeholder="••••••••"
@@ -889,7 +910,9 @@ export default function EditServerPage() {
                                         <Input
                                             type="text"
                                             value={form.description}
-                                            onChange={(e) => update({ description: e.target.value })}
+                                            onChange={(e) =>
+                                                update({ description: e.target.value })
+                                            }
                                             className="h-9 bg-secondary text-sm"
                                             placeholder="Production web server"
                                         />
@@ -932,7 +955,9 @@ export default function EditServerPage() {
                                                             type="button"
                                                             onClick={() =>
                                                                 update({
-                                                                    tags: form.tags.filter((t) => t !== tag),
+                                                                    tags: form.tags.filter(
+                                                                        (t) => t !== tag,
+                                                                    ),
                                                                 })
                                                             }
                                                             className="text-muted-foreground transition-colors hover:text-destructive"

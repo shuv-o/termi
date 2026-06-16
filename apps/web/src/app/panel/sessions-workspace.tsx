@@ -144,12 +144,15 @@ function ServerPickerCard({
             onClick={onClick}
             disabled={disabled}
             className={`group relative flex flex-col gap-2.5 p-3 rounded-xl border text-left transition-all
-                ${disabled
-                    ? 'opacity-40 cursor-not-allowed border-border bg-secondary/30'
-                    : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/60 hover:shadow-md active:scale-95'
+                ${
+                    disabled
+                        ? 'opacity-40 cursor-not-allowed border-border bg-secondary/30'
+                        : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/60 hover:shadow-md active:scale-95'
                 }`}
         >
-            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}>
+            <div
+                className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}
+            >
                 {meta.icon}
             </div>
             <div className="min-w-0 w-full">
@@ -160,7 +163,9 @@ function ServerPickerCard({
                     </p>
                 )}
             </div>
-            <span className={`self-start text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}>
+            <span
+                className={`self-start text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}
+            >
                 {server.protocol}
             </span>
         </button>
@@ -835,7 +840,7 @@ function TransferMode({ servers }: { servers: ServerItem[] }) {
 // visibility toggles) and all sessions stay connected simultaneously.
 
 interface ShellTab {
-    id: string;        // React key, stable across re-renders
+    id: string; // React key, stable across re-renders
     sessionId: string; // unique gateway session — each shell gets its own
     token: string | null;
 }
@@ -928,9 +933,7 @@ function TerminalPane({
             });
             const data = await res.json();
             setShells((prev) =>
-                prev.map((s) =>
-                    s.id === shellId ? { ...s, token: data.data?.token ?? null } : s,
-                ),
+                prev.map((s) => (s.id === shellId ? { ...s, token: data.data?.token ?? null } : s)),
             );
         } catch {
             // token stays null → shows "Establishing connection…" loading state
@@ -1039,63 +1042,71 @@ function TerminalPane({
                     ) : (
                         <Terminal className="w-4 h-4 text-muted-foreground shrink-0" />
                     )}
-                    <span className="font-medium text-sm whitespace-nowrap">{session.serverName}</span>
+                    <span className="font-medium text-sm whitespace-nowrap">
+                        {session.serverName}
+                    </span>
                     <StatusDot status={session.status} />
-                    <span className={`text-xs ${statusColor(session.status)} hidden sm:inline whitespace-nowrap`}>
+                    <span
+                        className={`text-xs ${statusColor(session.status)} hidden sm:inline whitespace-nowrap`}
+                    >
                         {statusLabel(session.status)}
                     </span>
                 </div>
 
                 {/* Shell tabs — inline, right after the server name */}
-                {session.type === 'remote' && session.status !== 'detached' && shells.length > 0 && (
-                    <div className="flex items-center flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-2 border-l border-border/40 pl-2 gap-0.5">
-                        {shells.map((shell, i) => {
-                            const isShellActive = shell.id === activeShellId;
-                            return (
-                                <div
-                                    key={shell.id}
-                                    onClick={() => activateShell(shell.id)}
-                                    className={`group flex items-center gap-1.5 px-2.5 py-1 cursor-pointer transition-all shrink-0 rounded-md text-xs whitespace-nowrap select-none ${
-                                        isShellActive
-                                            ? 'bg-primary/15 text-primary ring-1 ring-primary/30 font-semibold'
-                                            : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium'
-                                    }`}
-                                >
-                                    <Terminal className={`w-3 h-3 shrink-0 ${isShellActive ? 'text-primary' : ''}`} />
-                                    <span>Shell {i + 1}</span>
-                                    {shells.length > 1 && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                closeShell(shell.id);
-                                            }}
-                                            className={`ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-all ${
-                                                isShellActive
-                                                    ? 'opacity-40 hover:opacity-100 text-primary'
-                                                    : 'opacity-0 group-hover:opacity-60'
-                                            }`}
-                                            title="Close shell"
-                                        >
-                                            <X className="w-2.5 h-2.5" />
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
-                        <button
-                            onClick={addShell}
-                            className="flex items-center justify-center w-6 h-6 ml-0.5 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
-                            title="New shell"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                )}
+                {session.type === 'remote' &&
+                    session.status !== 'detached' &&
+                    shells.length > 0 && (
+                        <div className="flex items-center flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-2 border-l border-border/40 pl-2 gap-0.5">
+                            {shells.map((shell, i) => {
+                                const isShellActive = shell.id === activeShellId;
+                                return (
+                                    <div
+                                        key={shell.id}
+                                        onClick={() => activateShell(shell.id)}
+                                        className={`group flex items-center gap-1.5 px-2.5 py-1 cursor-pointer transition-all shrink-0 rounded-md text-xs whitespace-nowrap select-none ${
+                                            isShellActive
+                                                ? 'bg-primary/15 text-primary ring-1 ring-primary/30 font-semibold'
+                                                : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium'
+                                        }`}
+                                    >
+                                        <Terminal
+                                            className={`w-3 h-3 shrink-0 ${isShellActive ? 'text-primary' : ''}`}
+                                        />
+                                        <span>Shell {i + 1}</span>
+                                        {shells.length > 1 && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    closeShell(shell.id);
+                                                }}
+                                                className={`ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-all ${
+                                                    isShellActive
+                                                        ? 'opacity-40 hover:opacity-100 text-primary'
+                                                        : 'opacity-0 group-hover:opacity-60'
+                                                }`}
+                                                title="Close shell"
+                                            >
+                                                <X className="w-2.5 h-2.5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                            <button
+                                onClick={addShell}
+                                className="flex items-center justify-center w-6 h-6 ml-0.5 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                                title="New shell"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
 
                 {/* Spacer when no shell tabs (local session) */}
-                {(session.type !== 'remote' || session.status === 'detached' || shells.length === 0) && (
-                    <div className="flex-1" />
-                )}
+                {(session.type !== 'remote' ||
+                    session.status === 'detached' ||
+                    shells.length === 0) && <div className="flex-1" />}
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-1 shrink-0">
@@ -1226,15 +1237,19 @@ function TerminalPane({
                                         key={shell.id}
                                         className="absolute inset-0"
                                         style={{
-                                            visibility: isActive && isShellActive ? 'visible' : 'hidden',
-                                            pointerEvents: isActive && isShellActive ? 'auto' : 'none',
+                                            visibility:
+                                                isActive && isShellActive ? 'visible' : 'hidden',
+                                            pointerEvents:
+                                                isActive && isShellActive ? 'auto' : 'none',
                                         }}
                                     >
                                         {!shell.token ? (
                                             <div className="flex items-center justify-center h-full bg-card/20">
                                                 <div className="flex items-center gap-3 text-muted-foreground">
                                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                                    <span className="text-sm">Establishing connection…</span>
+                                                    <span className="text-sm">
+                                                        Establishing connection…
+                                                    </span>
                                                 </div>
                                             </div>
                                         ) : (
@@ -1327,7 +1342,10 @@ export default function SessionsWorkspace() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
     const [layoutMode, setLayoutMode] = useState<'sidebar' | 'tabbar'>('tabbar');
-    const [revealTarget, setRevealTarget] = useState<{ serverId: string; serverName: string } | null>(null);
+    const [revealTarget, setRevealTarget] = useState<{
+        serverId: string;
+        serverName: string;
+    } | null>(null);
 
     useEffect(() => {
         // Default sidebar open only on desktop
@@ -1393,7 +1411,11 @@ export default function SessionsWorkspace() {
                     size="icon"
                     onClick={toggleLayoutMode}
                     className="h-8 w-8 shrink-0"
-                    title={layoutMode === 'sidebar' ? 'Switch to tab bar layout' : 'Switch to sidebar layout'}
+                    title={
+                        layoutMode === 'sidebar'
+                            ? 'Switch to tab bar layout'
+                            : 'Switch to sidebar layout'
+                    }
                 >
                     {layoutMode === 'sidebar' ? (
                         <PanelTop className="w-4 h-4" />
@@ -1480,62 +1502,62 @@ export default function SessionsWorkspace() {
 
             {/*   Session tab bar — shown only in tabbar layout mode   */}
             {layoutMode === 'tabbar' && (
-            <div className="shrink-0 flex items-stretch border-b border-border bg-card/60 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {sessions.map((session) => {
-                    const isTabActive = activeTabId === session.tabId && mode === 'terminal';
-                    return (
-                        <div
-                            key={session.tabId}
-                            onClick={() => switchTab(session.tabId)}
-                            className={`group relative flex items-center gap-1.5 px-3 py-2 cursor-pointer shrink-0 border-r border-border/50 transition-all max-w-[200px] min-w-[100px] select-none ${
-                                isTabActive
-                                    ? 'bg-background text-foreground border-t-2 border-t-primary -mt-px font-semibold shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-t-2 border-t-transparent -mt-px'
-                            }`}
-                        >
-                            <StatusDot status={session.status} />
-                            <span className="text-xs truncate flex-1 min-w-0">
-                                {session.serverName}
-                            </span>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeSession(session.tabId);
-                                }}
-                                className={`p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
+                <div className="shrink-0 flex items-stretch border-b border-border bg-card/60 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {sessions.map((session) => {
+                        const isTabActive = activeTabId === session.tabId && mode === 'terminal';
+                        return (
+                            <div
+                                key={session.tabId}
+                                onClick={() => switchTab(session.tabId)}
+                                className={`group relative flex items-center gap-1.5 px-3 py-2 cursor-pointer shrink-0 border-r border-border/50 transition-all max-w-[200px] min-w-[100px] select-none ${
                                     isTabActive
-                                        ? 'opacity-50 hover:opacity-100 text-muted-foreground'
-                                        : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
+                                        ? 'bg-background text-foreground border-t-2 border-t-primary -mt-px font-semibold shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-t-2 border-t-transparent -mt-px'
                                 }`}
-                                title="Close tab"
                             >
-                                <X className="w-3 h-3" />
-                            </button>
-                        </div>
-                    );
-                })}
-                <button
-                    onClick={() => setShowPicker((p) => !p)}
-                    className={`flex items-center justify-center px-3 py-2 shrink-0 transition-colors border-r border-border ${
-                        showPicker
-                            ? 'text-primary bg-primary/10'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-                    }`}
-                    title="New server session"
-                >
-                    <Plus className="w-3.5 h-3.5" />
-                </button>
-                <button
-                    onClick={() => {
-                        addLocalSession();
-                        setMode('terminal');
-                    }}
-                    className="flex items-center justify-center px-3 py-2 shrink-0 text-violet-400 hover:text-violet-300 hover:bg-secondary/60 transition-colors"
-                    title="New local terminal"
-                >
-                    <Laptop className="w-3.5 h-3.5" />
-                </button>
-            </div>
+                                <StatusDot status={session.status} />
+                                <span className="text-xs truncate flex-1 min-w-0">
+                                    {session.serverName}
+                                </span>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeSession(session.tabId);
+                                    }}
+                                    className={`p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
+                                        isTabActive
+                                            ? 'opacity-50 hover:opacity-100 text-muted-foreground'
+                                            : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
+                                    }`}
+                                    title="Close tab"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </div>
+                        );
+                    })}
+                    <button
+                        onClick={() => setShowPicker((p) => !p)}
+                        className={`flex items-center justify-center px-3 py-2 shrink-0 transition-colors border-r border-border ${
+                            showPicker
+                                ? 'text-primary bg-primary/10'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                        }`}
+                        title="New server session"
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                        onClick={() => {
+                            addLocalSession();
+                            setMode('terminal');
+                        }}
+                        className="flex items-center justify-center px-3 py-2 shrink-0 text-violet-400 hover:text-violet-300 hover:bg-secondary/60 transition-colors"
+                        title="New local terminal"
+                    >
+                        <Laptop className="w-3.5 h-3.5" />
+                    </button>
+                </div>
             )}
 
             {/*   Body: sidebar + content   */}
