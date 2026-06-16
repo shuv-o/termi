@@ -74,6 +74,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [isElectron, setIsElectron] = useState(false);
 
+    // True while the on-screen keyboard is open (mobile/PWA). A fixed
+    // bottom-0 element stays pinned to the layout viewport, which the keyboard
+    // does not shrink — so it would otherwise float on top of the keyboard.
+    const [keyboardOpen, setKeyboardOpen] = useState(false);
+
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
 
@@ -140,6 +145,22 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (typeof window === 'undefined') return;
         setIsElectron(Boolean(window.electronAPI?.isElectron));
+    }, []);
+
+    //   Detect the on-screen keyboard via the VisualViewport API so we can
+    //   hide the fixed bottom nav while typing (otherwise it overlaps the
+    //   keyboard on iOS/Android PWAs).
+    useEffect(() => {
+        const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+        if (!vv) return;
+        const onResize = () => {
+            // The keyboard is open when the visual viewport is meaningfully
+            // shorter than the layout viewport (innerHeight does not shrink).
+            setKeyboardOpen(window.innerHeight - vv.height > 150);
+        };
+        vv.addEventListener('resize', onResize);
+        onResize();
+        return () => vv.removeEventListener('resize', onResize);
     }, []);
 
     useEffect(() => {
@@ -555,7 +576,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             </div>
 
             {/*   Mobile bottom navigation bar              ─ */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
+            <nav
+                className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 transition-transform duration-200 ${
+                    keyboardOpen ? 'translate-y-full pointer-events-none' : 'translate-y-0'
+                }`}
+            >
                 {/* Frosted glass background — bleeds to the screen edges, behind
                     the safe-area insets, so the bar fills the home-indicator area */}
                 <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/60" />
