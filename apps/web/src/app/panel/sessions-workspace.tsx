@@ -1,45 +1,43 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import {
-    Plus,
-    X,
-    ArrowLeftRight,
-    Terminal,
-    FolderOpen,
-    RotateCcw,
-    Loader2,
     AlertCircle,
-    ArrowRight,
     ArrowLeft,
-    Server,
-    Laptop,
-    Maximize2,
-    Minimize2,
-    Search,
-    ChevronRight,
-    WifiOff,
-    Globe,
-    SplitSquareHorizontal,
-    PanelLeft,
-    PanelTop,
-    Monitor,
-    Wifi,
+    ArrowLeftRight,
+    ArrowRight,
     ArrowRightLeft,
-    RefreshCw,
+    CheckCircle2,
     ChevronDown,
     ChevronUp,
-    FileX,
-    CheckCircle2,
     Clock,
-    Zap,
+    FileX,
+    FolderOpen,
+    Globe,
     Keyboard,
     KeyRound,
+    Laptop,
+    Loader2,
+    Maximize2,
+    Minimize2,
+    Monitor,
+    PanelLeft,
+    PanelTop,
+    Plus,
+    RefreshCw,
+    RotateCcw,
+    Search,
+    Server,
+    SplitSquareHorizontal,
+    Terminal,
+    Wifi,
+    WifiOff,
+    X,
+    Zap,
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
-import type { RevealField } from '@/components/auth/PasskeyRevealModal';
-import { useSessionsContext, type Session, type SessionStatus } from './sessions-context';
+import { type Session, type SessionStatus, useSessionsContext } from './sessions-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -198,6 +196,7 @@ function InlineSessionPicker({
         function onKey(e: KeyboardEvent) {
             if (e.key === 'Escape' && canClose) onClose();
         }
+
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose, canClose]);
