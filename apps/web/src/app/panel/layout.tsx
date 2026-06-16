@@ -81,15 +81,30 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const isLocalPage = pathname === '/panel/local';
     const isConnectPage = pathname.startsWith('/panel/connect/');
 
+    // A "root" page maps directly to a primary nav item (or the local
+    // terminal). Anything deeper (server detail, settings sub-page, connect…)
+    // is a sub-page that needs a back affordance on mobile/PWA.
+    const isRootPage = navigation.some((n) => n.href === pathname) || isLocalPage;
+
     /** Navigate to the dedicated local-terminal page. */
     const handleOpenLocalTerminal = useCallback(() => {
         router.push('/panel/local');
     }, [router]);
 
-    /** Go back through the navigation history (Electron desktop app). */
+    /**
+     * Go back through the navigation history. Used by the Electron desktop
+     * app and the mobile/PWA top-bar back button. In an iOS standalone PWA
+     * there is no browser chrome, so this is the only way back — fall back to
+     * the panel root when there is no in-app history (e.g. deep link / reload).
+     */
     const handleBack = useCallback(() => {
-        if (typeof window !== 'undefined') window.history.back();
-    }, []);
+        if (typeof window === 'undefined') return;
+        if (window.history.length > 1) {
+            router.back();
+        } else {
+            router.push('/panel');
+        }
+    }, [router]);
 
     /** True when the dedicated local terminal page is open. */
     const localTerminalActive = isLocalPage;
@@ -181,6 +196,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-64 2xl:w-72';
     const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-64 2xl:pl-72';
+
+    // Email banner is the top-most element on mobile, so it (rather than the
+    // sticky header) carries the safe-area inset when shown.
+    const showBanner = !user.isVerified && !user.isGoogleUser;
 
     return (
         <div className="min-h-screen bg-background">
@@ -401,8 +420,15 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             {/*   Main content                      ─ */}
             <div className={`${contentPl} transition-[padding] duration-200 ease-in-out`}>
                 {/* Email verification banner */}
-                {user && !user.isVerified && !user.isGoogleUser && (
-                    <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2.5 flex items-center justify-between gap-3">
+                {showBanner && (
+                    <div
+                        className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2.5 flex items-center justify-between gap-3"
+                        style={{
+                            paddingTop: 'max(0.625rem, env(safe-area-inset-top, 0px))',
+                            paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+                            paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+                        }}
+                    >
                         <div className="flex items-center gap-2 text-sm text-yellow-300 min-w-0">
                             <Mail className="w-4 h-4 shrink-0" />
                             <span className="truncate">
@@ -424,12 +450,33 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 )}
 
                 {/*   Mobile top bar   */}
-                <header className="lg:hidden sticky top-0 z-30 h-14 bg-card/90 backdrop-blur-md border-b border-border">
-                    <div className="flex items-center justify-between h-full px-4">
-                        <Link href="/panel" className="flex items-center gap-2.5">
-                            <TerminalLogo width={26} height={26} className="rounded-md" />
-                            <span className="font-bold text-sm">Termi</span>
-                        </Link>
+                <header
+                    className="lg:hidden sticky top-0 z-30 bg-card/90 backdrop-blur-md border-b border-border"
+                    style={{
+                        // The banner (when shown) already pushes content below
+                        // the status bar / Dynamic Island, so only the header
+                        // carries the top inset when there is no banner.
+                        paddingTop: showBanner ? undefined : 'env(safe-area-inset-top, 0px)',
+                        paddingLeft: 'env(safe-area-inset-left, 0px)',
+                        paddingRight: 'env(safe-area-inset-right, 0px)',
+                    }}
+                >
+                    <div className="flex items-center justify-between h-14 px-4">
+                        {isRootPage ? (
+                            <Link href="/panel" className="flex items-center gap-2.5">
+                                <TerminalLogo width={26} height={26} className="rounded-md" />
+                                <span className="font-bold text-sm">Termi</span>
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={handleBack}
+                                aria-label="Go back"
+                                className="flex items-center gap-1 -ml-1.5 pr-2 py-1.5 rounded-lg text-foreground hover:bg-secondary active:scale-95 transition-transform"
+                            >
+                                <ChevronLeft className="w-5 h-5 shrink-0" />
+                                <span className="text-sm font-medium">Back</span>
+                            </button>
+                        )}
 
                         {/* Current page title */}
                         <span className="text-sm font-medium text-muted-foreground capitalize">
@@ -508,14 +555,19 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             </div>
 
             {/*   Mobile bottom navigation bar              ─ */}
-            <nav
-                className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-            >
-                {/* Frosted glass background */}
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
+                {/* Frosted glass background — bleeds to the screen edges, behind
+                    the safe-area insets, so the bar fills the home-indicator area */}
                 <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/60" />
 
-                <div className="relative flex items-center justify-around h-16 px-3">
+                <div
+                    className="relative flex items-center justify-around h-16 px-3"
+                    style={{
+                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                        paddingLeft: 'max(0.75rem, env(safe-area-inset-left, 0px))',
+                        paddingRight: 'max(0.75rem, env(safe-area-inset-right, 0px))',
+                    }}
+                >
                     {navigation.map((item) => {
                         const isActive =
                             pathname === item.href ||
