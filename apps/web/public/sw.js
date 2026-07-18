@@ -7,7 +7,7 @@
  * - Notification click → focus/open the app
  */
 
-const CACHE_NAME = 'termi-v4';
+const CACHE_NAME = 'termi-v5';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to pre-cache on install
@@ -54,12 +54,22 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Static assets — cache-first, but EXCLUDE /_next/static/chunks/ because
-    // Turbopack reuses chunk filenames across rebuilds (content changes, URL stays
-    // the same). Caching those files permanently would serve stale JS to users.
+    // JS/CSS chunks — stale-while-revalidate. A production `next build` gives
+    // these content-hashed filenames, so serving the cached copy instantly and
+    // refreshing in the background is safe: a new deploy ships new filenames,
+    // which miss the cache and fetch fresh. (Cache-first is avoided here only
+    // because Turbopack reuses chunk names in dev — SWR self-heals on the next
+    // load, whereas cache-first would pin stale dev JS until the cache cleared.)
+    if (url.pathname.startsWith('/_next/static/chunks/')) {
+        event.respondWith(staleWhileRevalidate(request));
+        return;
+    }
+
+    // Other static assets — cache-first. These URLs are either content-hashed
+    // (/_next/static/media) or stable public files, so the first hit fills the
+    // cache and every later request is served from disk, instantly and offline.
     if (
-        (url.pathname.startsWith('/_next/static/') &&
-            !url.pathname.startsWith('/_next/static/chunks/')) ||
+        url.pathname.startsWith('/_next/static/') ||
         url.pathname.startsWith('/icons/') ||
         url.pathname.startsWith('/fonts/') ||
         url.pathname === '/manifest.json' ||
@@ -91,6 +101,23 @@ async function cacheFirst(request) {
     } catch {
         return new Response('Network error', { status: 503 });
     }
+}
+
+async function staleWhileRevalidate(request) {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(request);
+
+    // Kick off a background refresh regardless of a cache hit, so the next load
+    // gets the latest bytes without this one ever waiting on the network.
+    const network = fetch(request)
+        .then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+        })
+        .catch(() => null);
+
+    // Serve the cached copy immediately if we have it; otherwise wait on network.
+    return cached || (await network) || new Response('Network error', { status: 503 });
 }
 
 async function networkFirstWithOfflineFallback(request) {

@@ -573,9 +573,14 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                 {!isSessionsPage && !isConnectPage && (
                     <main
-                        className={
+                        // Re-key on the path so each navigation replays the fade;
+                        // scoped to ordinary pages only — the sessions workspace
+                        // and connect views are rendered elsewhere and never
+                        // re-animate, protecting their live terminals.
+                        key={pathname}
+                        className={`animate-fade-in ${
                             isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'
-                        }
+                        }`}
                     >
                         {children}
                     </main>

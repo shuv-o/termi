@@ -232,6 +232,43 @@ html {
     }
 }
 
+@keyframes termi-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/*
+ * Page content fade-in. Applied to the main content area on navigation so pages
+ * ease in rather than snapping — short and slight, so it reads as polish, not a
+ * delay. Terminal/session views deliberately do NOT use this: they stay mounted
+ * across navigation and must not re-animate.
+ */
+.animate-fade-in {
+    animation: termi-fade-in 180ms ease-out both;
+}
+
+/*
+ * Route loading fallbacks (loading.tsx). Held invisible for a moment so a fast
+ * navigation swaps straight to the real page with no spinner flash; only a load
+ * slow enough to actually wait for fades the placeholder in.
+ */
+.route-loader {
+    animation: termi-fade-in 200ms ease-out 120ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .route-loader {
+        animation: none;
+    }
+}
+
 /* ============================================================================
    MOBILE VIRTUAL KEYBOARD
    ============================================================================ */

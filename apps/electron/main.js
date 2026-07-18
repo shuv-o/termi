@@ -237,10 +237,36 @@ function buildAppMenu() {
 let cachingConfigured = false;
 
 /**
- * Next.js serves everything under /_next/static/ with a content hash in the
- * filename, so those bytes never change. Rewrite their response headers to be
- * permanently cacheable; Chromium's on-disk HTTP cache (persisted in userData)
- * then serves them on later launches without hitting the network again.
+ * Static asset URL patterns and how long each may be cached.
+ *
+ * `immutable` is reserved for content-addressed files — anything under
+ * /_next/static/ carries a hash in its name, so the bytes behind a given URL
+ * never change and can be frozen forever. Everything else (icons, fonts,
+ * optimised images) keeps a stable URL across deploys, so it gets a long but
+ * finite TTL: cached hard for a day, then revalidated. That is the difference
+ * between "instant on every request" and "never picks up a changed logo".
+ */
+const CACHE_RULES = [
+    { urls: ['*://*/_next/static/*'], value: 'public, max-age=31536000, immutable' },
+    {
+        // Public assets and Next's optimised image endpoint. Long-lived but not
+        // immutable, so a redeploy that changes one is still eventually seen.
+        urls: [
+            '*://*/_next/image*',
+            '*://*/icons/*',
+            '*://*/fonts/*',
+            '*://*/favicon.ico',
+            '*://*/favicon.png',
+        ],
+        value: 'public, max-age=86400, stale-while-revalidate=604800',
+    },
+];
+
+/**
+ * Rewrite response headers so Chromium's on-disk HTTP cache (persisted in
+ * userData) serves static assets on later launches without hitting the network.
+ * Next.js already sets good headers for /_next/static, but not for public files
+ * like icons and fonts — this makes the whole static surface cache uniformly.
  *
  * Skipped in dev so HMR / fast-refresh chunks aren't frozen.
  */
@@ -248,20 +274,22 @@ function setupStaticAssetCaching() {
     if (IS_DEV || cachingConfigured) return;
     cachingConfigured = true;
 
-    session.defaultSession.webRequest.onHeadersReceived(
-        { urls: ['*://*/_next/static/*'] },
-        (details, callback) => {
-            const headers = {};
-            for (const [k, v] of Object.entries(details.responseHeaders || {})) {
-                // Drop any existing cache directives; we set our own below.
-                const lk = k.toLowerCase();
-                if (lk === 'cache-control' || lk === 'expires' || lk === 'pragma') continue;
-                headers[k] = v;
-            }
-            headers['Cache-Control'] = ['public, max-age=31536000, immutable'];
-            callback({ responseHeaders: headers });
-        },
-    );
+    for (const rule of CACHE_RULES) {
+        session.defaultSession.webRequest.onHeadersReceived(
+            { urls: rule.urls },
+            (details, callback) => {
+                const headers = {};
+                for (const [k, v] of Object.entries(details.responseHeaders || {})) {
+                    // Drop any existing cache directives; we set our own below.
+                    const lk = k.toLowerCase();
+                    if (lk === 'cache-control' || lk === 'expires' || lk === 'pragma') continue;
+                    headers[k] = v;
+                }
+                headers['Cache-Control'] = [rule.value];
+                callback({ responseHeaders: headers });
+            },
+        );
+    }
 }
 
 function createWindow(appUrl) {
@@ -273,12 +301,25 @@ function createWindow(appUrl) {
         width: 1400,
         height: 900,
         title: 'Termi',
+        // Paint the window in the app's own dark background from the very first
+        // frame. Electron's default is white, so without this the window flashes
+        // white on launch and on every full reload before the page paints — the
+        // "blinking" the app otherwise shows against a dark UI.
+        backgroundColor: '#0f172a',
+        // Don't show the window until the renderer has something to paint;
+        // otherwise the empty (dark) frame appears a beat before the content.
+        show: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js'),
         },
         ...(iconPath ? { icon: iconPath } : {}),
+    });
+
+    // First paint is ready — reveal the window. macOS fades it in for us.
+    win.once('ready-to-show', () => {
+        if (win && !win.isDestroyed()) win.show();
     });
 
     win.loadURL(appUrl);
