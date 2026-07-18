@@ -11,6 +11,7 @@ import {
     PassphraseRequiredError,
 } from './import';
 import { buildExportFile, buildPayload, buildSpreadsheet, type StoredServer } from './export';
+import { SAMPLE_CSV, SAMPLE_JSON, SAMPLE_COLUMNS, SAMPLE_ROWS } from './samples';
 import type { ExportPayload } from './format';
 // Imported statically so the test encrypts through the same path the app does.
 // (The system key is read lazily on first use, so importing before `beforeAll`
@@ -332,6 +333,54 @@ describe('parseCsv', () => {
             ['a', 'b'],
             ['1', '2'],
         ]);
+    });
+});
+
+// The samples shown in the import dialog must stay importable — a broken
+// example is worse than none. These parse the exact strings the UI advertises.
+describe('import samples', () => {
+    it('parses the CSV template the dialog offers', () => {
+        const parsed = parseCsvExport(SAMPLE_CSV);
+
+        expect(parsed.servers.map((s) => s.name)).toEqual(['prod-web', 'db-primary', 'gateway']);
+        expect(parsed.servers[0]).toMatchObject({
+            host: 'web.example.com',
+            port: 22,
+            protocol: 'SSH',
+            username: 'deploy',
+            groupName: 'Production',
+            tags: ['web', 'prod'],
+        });
+        // A non-default port in the sample must survive.
+        expect(parsed.servers.find((s) => s.name === 'gateway')?.port).toBe(2222);
+        // Groups are derived from the rows.
+        expect(parsed.groups.map((g) => g.name).sort()).toEqual(['Network', 'Production']);
+    });
+
+    it('parses the JSON template the dialog offers', () => {
+        const parsed = parseExportFile(JSON.parse(SAMPLE_JSON));
+
+        expect(parsed.servers).toHaveLength(1);
+        expect(parsed.servers[0]).toMatchObject({
+            name: 'prod-web',
+            host: 'web.example.com',
+            protocol: 'SSH',
+            port: 22,
+            username: 'deploy',
+        });
+    });
+
+    it('keeps the structured sample (used for the Excel template) in sync with the CSV', () => {
+        // The .xlsx template is built server-side from SAMPLE_COLUMNS/SAMPLE_ROWS;
+        // if those drift from SAMPLE_CSV, the three tabs would describe different
+        // servers. Build a CSV from the structured data and parse it back.
+        const columns = SAMPLE_COLUMNS.map((header) => ({ header }));
+        const csv = buildCsv(columns, SAMPLE_ROWS).toString('utf8');
+
+        const fromStructured = parseCsvExport(csv);
+        const fromCsvString = parseCsvExport(SAMPLE_CSV);
+
+        expect(fromStructured.servers).toEqual(fromCsvString.servers);
     });
 });
 

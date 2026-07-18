@@ -22,12 +22,18 @@ import {
     CheckCircle2,
     AlertTriangle,
     XCircle,
+    ChevronDown,
+    ChevronRight,
+    FileDown,
+    Copy,
+    Check,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SAMPLE_CSV, SAMPLE_JSON, SAMPLE_COLUMNS, SAMPLE_ROWS } from '@/lib/transfer/samples';
 
 interface Props {
     onClose: () => void;
@@ -57,6 +63,63 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const [result, setResult] = useState<ImportResult | null>(null);
+
+    // Format-help panel
+    const [showFormat, setShowFormat] = useState(false);
+    const [sampleTab, setSampleTab] = useState<'csv' | 'json' | 'xlsx'>('csv');
+    const [copied, setCopied] = useState(false);
+
+    // Only the text formats have something to copy; Excel is binary.
+    const sampleText = sampleTab === 'json' ? SAMPLE_JSON : SAMPLE_CSV;
+
+    async function copySample() {
+        try {
+            await navigator.clipboard.writeText(sampleText);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {
+            // Clipboard blocked (insecure context / permissions) — the sample is
+            // visible on screen to copy by hand, so this is not worth surfacing.
+        }
+    }
+
+    /**
+     * Download a ready-to-edit template.
+     *
+     * Text formats are built here; .xlsx is binary and must come from the server
+     * (the browser cannot assemble a spreadsheet), so it is fetched instead.
+     */
+    async function downloadSample() {
+        if (sampleTab === 'xlsx') {
+            try {
+                const res = await fetch('/api/servers/import/template?format=xlsx');
+                if (!res.ok) throw new Error();
+                triggerDownload(await res.blob(), 'termi-import-template.xlsx');
+            } catch {
+                setError('Could not download the Excel template. Try CSV instead.');
+            }
+            return;
+        }
+
+        const isCsv = sampleTab === 'csv';
+        triggerDownload(
+            new Blob([sampleText], {
+                type: isCsv ? 'text/csv;charset=utf-8' : 'application/json',
+            }),
+            isCsv ? 'termi-import-template.csv' : 'termi-import-template.json',
+        );
+    }
+
+    function triggerDownload(blob: Blob, filename: string) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
 
     async function onFileChosen(file: File) {
         setError('');
@@ -230,6 +293,108 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                         )}
                     </button>
 
+                    {/*   Format help   */}
+                    <div className="rounded-lg border border-border">
+                        <button
+                            onClick={() => setShowFormat((s) => !s)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            {showFormat ? (
+                                <ChevronDown className="w-4 h-4 shrink-0" />
+                            ) : (
+                                <ChevronRight className="w-4 h-4 shrink-0" />
+                            )}
+                            <span>What should the file look like?</span>
+                        </button>
+
+                        {showFormat && (
+                            <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
+                                <p className="text-xs text-muted-foreground">
+                                    Import a file you exported from Termi, or build your own.
+                                    <span className="text-foreground">
+                                        {' '}
+                                        Only <code>Name</code> and <code>Host</code> are required
+                                    </span>{' '}
+                                    — protocol defaults to SSH, port to the protocol&apos;s default,
+                                    and username to <code>root</code>.
+                                </p>
+
+                                <div className="flex items-center gap-1">
+                                    <TabButton
+                                        active={sampleTab === 'csv'}
+                                        onClick={() => setSampleTab('csv')}
+                                    >
+                                        CSV
+                                    </TabButton>
+                                    <TabButton
+                                        active={sampleTab === 'json'}
+                                        onClick={() => setSampleTab('json')}
+                                    >
+                                        JSON
+                                    </TabButton>
+                                    <TabButton
+                                        active={sampleTab === 'xlsx'}
+                                        onClick={() => setSampleTab('xlsx')}
+                                    >
+                                        Excel
+                                    </TabButton>
+
+                                    <div className="ml-auto flex items-center gap-1">
+                                        {/* Excel is binary — nothing to copy. */}
+                                        {sampleTab !== 'xlsx' && (
+                                            <button
+                                                onClick={copySample}
+                                                title="Copy sample"
+                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                            >
+                                                {copied ? (
+                                                    <Check className="w-3.5 h-3.5 text-green-500" />
+                                                ) : (
+                                                    <Copy className="w-3.5 h-3.5" />
+                                                )}
+                                                {copied ? 'Copied' : 'Copy'}
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={downloadSample}
+                                            title="Download as a template file"
+                                            className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                        >
+                                            <FileDown className="w-3.5 h-3.5" />
+                                            Template
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {sampleTab === 'xlsx' ? (
+                                    <SampleTable />
+                                ) : (
+                                    <pre className="text-[11px] leading-relaxed p-2.5 rounded bg-secondary/50 overflow-x-auto">
+                                        <code>{sampleText}</code>
+                                    </pre>
+                                )}
+
+                                {sampleTab === 'xlsx' ? (
+                                    <p className="text-[11px] text-muted-foreground">
+                                        Download the template, fill it in Excel, then{' '}
+                                        <span className="text-foreground">
+                                            save it as CSV to import
+                                        </span>{' '}
+                                        — Termi reads spreadsheets as CSV. Leave the{' '}
+                                        <code>Password</code> / <code>Private Key</code> columns
+                                        blank unless you need them.
+                                    </p>
+                                ) : (
+                                    <p className="text-[11px] text-muted-foreground">
+                                        To include secrets, add <code>Password</code>,{' '}
+                                        <code>Private Key</code>, <code>Key Passphrase</code> and{' '}
+                                        <code>Notes</code> columns.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {isEncrypted && (
                         <div className="space-y-1.5">
                             <Label
@@ -299,6 +464,74 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                 </div>
             </DialogContent>
         </Dialog>
+    );
+}
+
+/**
+ * Preview of the spreadsheet template as a scrollable table.
+ *
+ * Only the identifying columns are shown — the credential columns exist in the
+ * downloaded file but are empty and pushing them into this preview would just
+ * be a row of blanks. The full column list is stated in the caption.
+ */
+function SampleTable() {
+    // Name, Host, Protocol, Port, Username, Group, Tags — the first seven.
+    const shownCols = SAMPLE_COLUMNS.slice(0, 7);
+
+    return (
+        <div className="overflow-x-auto rounded border border-border">
+            <table className="w-full text-[11px] border-collapse">
+                <thead>
+                    <tr className="bg-secondary/70">
+                        {shownCols.map((col) => (
+                            <th
+                                key={col}
+                                className="px-2 py-1.5 text-left font-semibold whitespace-nowrap border-b border-border"
+                            >
+                                {col}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {SAMPLE_ROWS.map((row, r) => (
+                        <tr key={r} className="odd:bg-transparent even:bg-secondary/30">
+                            {shownCols.map((_, c) => (
+                                <td
+                                    key={c}
+                                    className="px-2 py-1.5 whitespace-nowrap text-muted-foreground"
+                                >
+                                    {String(row[c] ?? '')}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function TabButton({
+    active,
+    onClick,
+    children,
+}: {
+    active: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                active
+                    ? 'bg-primary/15 text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+            }`}
+        >
+            {children}
+        </button>
     );
 }
 

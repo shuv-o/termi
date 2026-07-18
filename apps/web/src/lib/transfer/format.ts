@@ -64,7 +64,9 @@ const serverSchema = z.object({
 });
 
 export const exportPayloadSchema = z.object({
-    groups: z.array(groupSchema).max(500),
+    // Optional so a hand-authored payload can list servers alone; groups are
+    // re-derived from each server's `groupName` on import regardless.
+    groups: z.array(groupSchema).max(500).default([]),
     servers: z.array(serverSchema).max(MAX_IMPORT_SERVERS),
 });
 
@@ -98,9 +100,12 @@ export type ExportKdf = z.infer<typeof kdfSchema>;
 const baseFields = {
     format: z.literal(EXPORT_FORMAT),
     version: z.literal(EXPORT_VERSION),
-    exportedAt: z.string(),
-    includesCredentials: z.boolean(),
-    serverCount: z.number().int().min(0),
+    // These three are informational — Termi's own exports always write them, but
+    // they are optional on import so a file can be hand-authored from just
+    // `format`, `version`, `encrypted` and `payload`.
+    exportedAt: z.string().optional(),
+    includesCredentials: z.boolean().optional(),
+    serverCount: z.number().int().min(0).optional(),
 };
 
 /**
