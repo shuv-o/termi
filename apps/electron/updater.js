@@ -11,13 +11,23 @@
 // prompts the user to restart and apply it.
 //
 // Platform notes:
-//   • Windows (NSIS) and Linux (AppImage) update without code signing.
-//   • macOS REQUIRES a code-signed + notarized build with a matching signature;
-//     Squirrel.Mac silently refuses unsigned updates. Unsigned mac builds still
-//     run — they just never self-update (see apps/electron/PASSKEYS.md for the
-//     same signing setup).
+//   • Windows (NSIS) and Linux (AppImage) update without code signing: they
+//     download in the background and apply on restart.
+//   • macOS REQUIRES a code-signed + notarized build. Squirrel.Mac silently
+//     refuses unsigned updates — quitAndInstall() just does nothing, with no
+//     error and no dialog. So on macOS we do NOT auto-download or offer
+//     "Restart to install" (that button would appear to do nothing). Instead,
+//     when a newer version exists we point the user at the download page to
+//     install the new .dmg by hand. See apps/electron/PASSKEYS.md for the
+//     signing setup that would let us restore true self-update here.
 
-const { app, dialog, ipcMain, BrowserWindow } = require('electron');
+const { app, dialog, ipcMain, shell, BrowserWindow } = require('electron');
+
+// macOS cannot apply unsigned updates, so it gets the manual-download path.
+const IS_MAC = process.platform === 'darwin';
+
+// Where to send macOS users to download a build by hand.
+const RELEASES_URL = 'https://github.com/shuvoooo/termi/releases/latest';
 
 // How often to re-check while the app stays open.
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -59,6 +69,28 @@ function promptInstall(info) {
 }
 
 /**
+ * macOS path: a newer version exists but we can't apply it in-place (unsigned
+ * builds). Offer to open the download page so the user installs it by hand.
+ * Deliberately does NOT mention "restart" — nothing gets installed locally.
+ */
+function promptManualDownload(info) {
+    const w = mainWindow();
+    const opts = {
+        type: 'info',
+        buttons: ['Download', 'Later'],
+        defaultId: 0,
+        cancelId: 1,
+        title: 'Update available',
+        message: `Termi ${info?.version || ''} is available.`,
+        detail: 'Download the new version and drag it into Applications to update. Open the download page now?',
+    };
+    const choice = w ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts);
+    choice.then(({ response }) => {
+        if (response === 0) shell.openExternal(RELEASES_URL);
+    });
+}
+
+/**
  * Wire up electron-updater. No-op in dev / unpackaged builds (there is no
  * app-update.yml and no signed artifact to compare against).
  *
@@ -79,8 +111,10 @@ function initAutoUpdater({ isDev } = {}) {
         return;
     }
 
-    autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
+    // macOS can't apply unsigned updates, so don't download one it can't use —
+    // just detect the new version and send the user to the download page.
+    autoUpdater.autoDownload = !IS_MAC;
+    autoUpdater.autoInstallOnAppQuit = !IS_MAC;
     // We prompt the user ourselves, so don't let electron-updater relaunch on its own.
     autoUpdater.logger = { info: log, warn: log, error: log, debug: () => {} };
 
@@ -88,6 +122,9 @@ function initAutoUpdater({ isDev } = {}) {
     autoUpdater.on('update-available', (info) => {
         log('update available:', info.version);
         emit('updater:status', { state: 'available', version: info.version });
+        // On macOS this is the end of the line for the automated flow: prompt the
+        // manual download here, since no 'update-downloaded' will follow.
+        if (IS_MAC) promptManualDownload(info);
     });
     autoUpdater.on('update-not-available', () => emit('updater:status', { state: 'none' }));
     autoUpdater.on('download-progress', (p) =>
@@ -135,8 +172,13 @@ function registerIpc() {
         }
     });
 
-    // Apply a downloaded update immediately.
+    // Apply a downloaded update immediately. On macOS there is nothing to apply
+    // (unsigned builds can't self-update), so open the download page instead.
     ipcMain.handle('updater:install', () => {
+        if (IS_MAC) {
+            shell.openExternal(RELEASES_URL);
+            return true;
+        }
         if (autoUpdater && updateDownloaded) {
             autoUpdater.quitAndInstall(false, true);
             return true;
