@@ -21,10 +21,10 @@ import {
     Globe,
 } from 'lucide-react';
 import {
-    startRegistration,
-    startAuthentication,
-    browserSupportsWebAuthn,
-} from '@simplewebauthn/browser';
+    webauthnRegister,
+    webauthnAuthenticate,
+    isPasskeySupported,
+} from '@/lib/webauthn/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -110,7 +110,20 @@ function LoginContent() {
     const [checkingSession, setCheckingSession] = useState(true);
 
     useEffect(() => {
-        setWebAuthnSupported(browserSupportsWebAuthn());
+        // Async: on macOS desktop this asks the main process whether the native
+        // passkey bridge actually loaded, rather than trusting Chromium's
+        // (broken-in-Electron) navigator.credentials.
+        let cancelled = false;
+        isPasskeySupported()
+            .then((supported) => {
+                if (!cancelled) setWebAuthnSupported(supported);
+            })
+            .catch(() => {
+                if (!cancelled) setWebAuthnSupported(false);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     // If already signed in, skip the login form and go straight to the app.
@@ -255,12 +268,17 @@ function LoginContent() {
     const handlePasskeySignIn = async () => {
         setError('');
         setPasskeyLoading(true);
-        // Track whether the 30s server timeout fired so we can distinguish it
-        // from an intentional user cancel (both surface as NotAllowedError).
+        // The ceremony is raced against this timer rather than merely flagged by
+        // it: a hung ceremony never settles, so without a rejecting timeout the
+        // catch block never runs and the button spins forever.
         let timedOut = false;
-        const timeoutId = setTimeout(() => {
-            timedOut = true;
-        }, 32000);
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        const timeout = new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(() => {
+                timedOut = true;
+                reject(new Error('passkey-timeout'));
+            }, 32000);
+        });
         try {
             const optRes = await fetch('/api/auth/passkey/authenticate-options', {
                 method: 'POST',
@@ -274,7 +292,10 @@ function LoginContent() {
                 setPasskeyLoading(false);
                 return;
             }
-            const assertion = await startAuthentication({ optionsJSON: optData.data });
+            const assertion = await Promise.race([
+                webauthnAuthenticate(optData.data),
+                timeout,
+            ]);
             clearTimeout(timeoutId);
             const authRes = await fetch('/api/auth/passkey/authenticate', {
                 method: 'POST',
@@ -308,10 +329,15 @@ function LoginContent() {
     const handlePasskeySetup = async () => {
         setPasskeySetupError('');
         setPasskeySetupLoading(true);
+        // Raced, not just flagged — see handlePasskeySignIn.
         let timedOut = false;
-        const timeoutId = setTimeout(() => {
-            timedOut = true;
-        }, 32000);
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        const timeout = new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(() => {
+                timedOut = true;
+                reject(new Error('passkey-timeout'));
+            }, 32000);
+        });
         try {
             const optRes = await fetch('/api/auth/passkey/register-options');
             const optData = await optRes.json();
@@ -321,7 +347,10 @@ function LoginContent() {
                 setPasskeySetupLoading(false);
                 return;
             }
-            const registrationResponse = await startRegistration({ optionsJSON: optData.data });
+            const registrationResponse = await Promise.race([
+                webauthnRegister(optData.data),
+                timeout,
+            ]);
             clearTimeout(timeoutId);
             const regRes = await fetch('/api/auth/passkey/register', {
                 method: 'POST',
