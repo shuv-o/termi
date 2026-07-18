@@ -1,7 +1,14 @@
 import type { MetadataRoute } from 'next';
 
+import { getSiteUrl } from '@/lib/site';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://github.com/shuvoooo/termi';
+    // Each self-hosted deployment has its own domain — the sitemap must list
+    // that instance's own pages, not the maintainer's. The previous fallback
+    // (when NEXT_PUBLIC_APP_URL was unset) pointed at the GitHub repo instead
+    // of a real site; getSiteUrl() falls back to this project's own domain,
+    // which is at least a working page.
+    const baseUrl = getSiteUrl();
 
     return [
         {

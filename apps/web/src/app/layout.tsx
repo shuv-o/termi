@@ -3,12 +3,14 @@ import { headers } from 'next/headers';
 import './globals.css';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
+import { getSiteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
     // Resolves relative OG/twitter image URLs and the canonical link tag. This
-    // must be the site people actually land on when they click a shared link —
-    // pointing it at the GitHub repo instead broke both of those.
-    metadataBase: new URL('https://termi.shuvoo.com'),
+    // must be the site people actually land on when they click a shared link,
+    // and — since Termi is self-hosted — that's a different domain for every
+    // deployment (NEXT_PUBLIC_APP_URL), not always this project's own site.
+    metadataBase: new URL(getSiteUrl()),
     title: {
         default: 'Termi - Secure Server Management',
         template: '%s | Termi',
@@ -60,7 +62,7 @@ export const metadata: Metadata = {
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
         type: 'website',
-        url: 'https://termi.shuvoo.com',
+        url: getSiteUrl(),
         siteName: 'Termi',
         locale: 'en_US',
     },
