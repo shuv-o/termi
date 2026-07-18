@@ -21,7 +21,21 @@ export interface PersistentSession {
     isClosing: boolean;
 }
 
-const MAX_CONNECTIONS_PER_USER = 5;
+/**
+ * Per-user cap on concurrent persistent sessions. 0 (the default) means
+ * unlimited — users open as many terminals as they like.
+ *
+ * This is a resource backstop, not an entitlement: every session holds an open
+ * SSH connection to the remote host plus a 256 KB RingBuffer. Detached sessions
+ * are still reclaimed after the grace period (GATEWAY_DETACHED_TTL_MIN)
+ * whatever this is set to, so unlimited does not mean sessions accumulate
+ * forever. Set GATEWAY_MAX_CONNECTIONS_PER_USER to a positive integer to
+ * re-impose a cap.
+ */
+const DEFAULT_MAX_CONNECTIONS_PER_USER = (() => {
+    const n = parseInt(process.env.GATEWAY_MAX_CONNECTIONS_PER_USER || '', 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+})();
 
 /**
  * How long a detached SSH session is kept alive (with its remote shell open)
@@ -38,9 +52,15 @@ export class PersistentSessionStore {
     private readonly sessions = new Map<string, PersistentSession>();
     private readonly idleCheckInterval: ReturnType<typeof setInterval>;
     private readonly idleTimeoutMs: number;
+    /** 0 = unlimited. See DEFAULT_MAX_CONNECTIONS_PER_USER. */
+    private readonly maxConnectionsPerUser: number;
 
-    constructor(idleTimeoutMs = DEFAULT_DETACHED_TTL_MS) {
+    constructor(
+        idleTimeoutMs = DEFAULT_DETACHED_TTL_MS,
+        maxConnectionsPerUser = DEFAULT_MAX_CONNECTIONS_PER_USER,
+    ) {
         this.idleTimeoutMs = idleTimeoutMs;
+        this.maxConnectionsPerUser = maxConnectionsPerUser;
         this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 60_000);
     }
 
@@ -54,7 +74,7 @@ export class PersistentSessionStore {
      * JavaScript is single-threaded — no async gap between check and insert.
      */
     tryAdd(session: PersistentSession): boolean {
-        if (this.countByUser(session.userId) >= MAX_CONNECTIONS_PER_USER) return false;
+        if (this.isAtLimit(session.userId)) return false;
         this.sessions.set(session.sessionId, session);
         return true;
     }
@@ -104,7 +124,8 @@ export class PersistentSessionStore {
     }
 
     isAtLimit(userId: string): boolean {
-        return this.countByUser(userId) >= MAX_CONNECTIONS_PER_USER;
+        if (this.maxConnectionsPerUser <= 0) return false; // unlimited
+        return this.countByUser(userId) >= this.maxConnectionsPerUser;
     }
 
     private evictIdleSessions(): void {

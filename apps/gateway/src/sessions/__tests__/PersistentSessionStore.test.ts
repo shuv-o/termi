@@ -149,27 +149,45 @@ describe('PersistentSessionStore', () => {
             expect(store.get('sess-1')).toBe(session);
         });
 
-        it('returns false and does not add when at limit', () => {
-            // Fill up to MAX_CONNECTIONS_PER_USER (5)
-            for (let i = 0; i < 5; i++) {
-                store.tryAdd(makeSession({ sessionId: `sess-${i}`, userId: 'user-1' }));
+        it('is unlimited by default', () => {
+            // No per-user cap unless GATEWAY_MAX_CONNECTIONS_PER_USER is set.
+            for (let i = 0; i < 50; i++) {
+                expect(
+                    store.tryAdd(makeSession({ sessionId: `sess-${i}`, userId: 'user-1' })),
+                ).toBe(true);
             }
-            const extra = makeSession({ sessionId: 'sess-extra', userId: 'user-1' });
-            const result = store.tryAdd(extra);
-            expect(result).toBe(false);
-            expect(store.get('sess-extra')).toBeUndefined();
+            expect(store.isAtLimit('user-1')).toBe(false);
+            expect(store.countByUser('user-1')).toBe(50);
+        });
+
+        it('returns false and does not add when at an explicit limit', () => {
+            const capped = new PersistentSessionStore(1000, 5);
+            try {
+                for (let i = 0; i < 5; i++) {
+                    capped.tryAdd(makeSession({ sessionId: `sess-${i}`, userId: 'user-1' }));
+                }
+                const extra = makeSession({ sessionId: 'sess-extra', userId: 'user-1' });
+                expect(capped.tryAdd(extra)).toBe(false);
+                expect(capped.get('sess-extra')).toBeUndefined();
+            } finally {
+                capped.destroy();
+            }
         });
 
         it('counts only sessions for the same user', () => {
-            // Fill up user-1 to limit
-            for (let i = 0; i < 5; i++) {
-                store.tryAdd(makeSession({ sessionId: `sess-u1-${i}`, userId: 'user-1' }));
+            const capped = new PersistentSessionStore(1000, 5);
+            try {
+                // Fill up user-1 to limit
+                for (let i = 0; i < 5; i++) {
+                    capped.tryAdd(makeSession({ sessionId: `sess-u1-${i}`, userId: 'user-1' }));
+                }
+                // user-2 should still be able to add
+                const user2Session = makeSession({ sessionId: 'sess-u2-1', userId: 'user-2' });
+                expect(capped.tryAdd(user2Session)).toBe(true);
+                expect(capped.get('sess-u2-1')).toBe(user2Session);
+            } finally {
+                capped.destroy();
             }
-            // user-2 should still be able to add
-            const user2Session = makeSession({ sessionId: 'sess-u2-1', userId: 'user-2' });
-            const result = store.tryAdd(user2Session);
-            expect(result).toBe(true);
-            expect(store.get('sess-u2-1')).toBe(user2Session);
         });
     });
 });
