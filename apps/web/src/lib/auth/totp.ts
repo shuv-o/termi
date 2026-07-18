@@ -124,7 +124,13 @@ export function generateRecoveryCodes(): string[] {
         const bytes = randomBytes(RECOVERY_CODE_LENGTH);
         let code = '';
         for (let j = 0; j < RECOVERY_CODE_LENGTH; j++) {
-            // Unbiased: 256 % 32 === 0, enforced by the guard above.
+            // Unbiased: 256 % 32 === 0, enforced by the import-time guard
+            // above and asserted in totp.test.ts. CodeQL flags any modulo on
+            // crypto randomness without checking divisibility, so suppress it
+            // here rather than re-dismissing the alert every time this line
+            // moves. The suppression is scoped to this one expression — if the
+            // alphabet ever stops dividing 256, the guard throws at import.
+            // codeql[js/biased-cryptographic-random]
             code += RECOVERY_ALPHABET[bytes[j] % RECOVERY_ALPHABET.length];
         }
         // Format: XXXX-XXXX
