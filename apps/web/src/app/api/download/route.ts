@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { errorResponse, notFoundResponse, successResponse } from '@/lib/api';
+import { githubFetch } from '@/lib/github';
 
 /**
  * Desktop download resolver.
@@ -14,11 +15,13 @@ import { errorResponse, notFoundResponse, successResponse } from '@/lib/api';
  *   GET /api/download?os=mac&arch=arm64  → 302 to the matching asset
  */
 
-const GITHUB_LATEST_RELEASE =
-    'https://api.github.com/repos/shuvoooo/termi/releases/latest';
+const GITHUB_LATEST_RELEASE = 'https://api.github.com/repos/shuvoooo/termi/releases/latest';
 
-/** Cache the GitHub lookup; unauthenticated API allows 60 req/h per IP. */
-const REVALIDATE_SECONDS = 600;
+/**
+ * Cache the GitHub lookup. Releases change rarely, so this stays generous even
+ * with a token — a new release appearing a couple of minutes late is harmless.
+ */
+const CACHE_TTL = { authenticated: 120, anonymous: 600 };
 
 const OS_VALUES = ['mac', 'windows', 'linux'] as const;
 const ARCH_VALUES = ['arm64', 'x64'] as const;
@@ -47,14 +50,7 @@ interface ReleaseInfo {
 }
 
 async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
-    const res = await fetch(GITHUB_LATEST_RELEASE, {
-        headers: {
-            Accept: 'application/vnd.github+json',
-            // GitHub rejects API requests without a User-Agent.
-            'User-Agent': 'termi-web',
-        },
-        next: { revalidate: REVALIDATE_SECONDS },
-    });
+    const res = await githubFetch(GITHUB_LATEST_RELEASE, CACHE_TTL);
 
     if (!res.ok) return null;
 
@@ -97,10 +93,7 @@ function findAsset(assets: GitHubAsset[], os: OS, arch: Arch): GitHubAsset | nul
     return candidates[0] ?? null;
 }
 
-function parseParam<T extends string>(
-    value: string | null,
-    allowed: readonly T[],
-): T | null {
+function parseParam<T extends string>(value: string | null, allowed: readonly T[]): T | null {
     if (!value) return null;
     const lower = value.toLowerCase() as T;
     return allowed.includes(lower) ? lower : null;

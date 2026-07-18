@@ -287,23 +287,23 @@ termi/
 
 ### Optional Variables
 
-| Variable                 | Default               | Description                                           |
-| ------------------------ | --------------------- | ----------------------------------------------------- |
-| `GUACD_HOST`             | `localhost`           | guacd host for RDP/VNC                                |
-| `GUACD_PORT`             | `4822`                | guacd port                                            |
-| `ALLOW_PRIVATE_NETWORKS` | `false`               | Allow connections to private/internal IPs             |
-| `TRUSTED_PROXY`          | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik) |
-| `ALLOWED_ORIGINS`        | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                          |
-| `ALLOW_LOCAL_TERMINAL`   | `false`               | Enable local PTY terminal on the gateway host         |
-| `GATEWAY_DETACHED_TTL_MIN` | `30`                | Minutes a detached SSH session is kept alive for reconnect |
-| `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`         | Concurrent sessions per user; `0` = unlimited         |
-| `GOOGLE_CLIENT_ID`       | —                     | Google OAuth client ID                                |
-| `GOOGLE_CLIENT_SECRET`   | —                     | Google OAuth client secret                            |
-| `SMTP_HOST`              | —                     | SMTP host for email (verification, alerts, invites)   |
-| `SMTP_USER`              | —                     | SMTP username                                         |
-| `SMTP_PASS`              | —                     | SMTP password                                         |
-| `VAPID_PUBLIC_KEY`       | —                     | Web push VAPID public key                             |
-| `VAPID_PRIVATE_KEY`      | —                     | Web push VAPID private key                            |
+| Variable                           | Default               | Description                                                |
+| ---------------------------------- | --------------------- | ---------------------------------------------------------- |
+| `GUACD_HOST`                       | `localhost`           | guacd host for RDP/VNC                                     |
+| `GUACD_PORT`                       | `4822`                | guacd port                                                 |
+| `ALLOW_PRIVATE_NETWORKS`           | `false`               | Allow connections to private/internal IPs                  |
+| `TRUSTED_PROXY`                    | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik)      |
+| `ALLOWED_ORIGINS`                  | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                               |
+| `ALLOW_LOCAL_TERMINAL`             | `false`               | Enable local PTY terminal on the gateway host              |
+| `GATEWAY_DETACHED_TTL_MIN`         | `30`                  | Minutes a detached SSH session is kept alive for reconnect |
+| `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`                   | Concurrent sessions per user; `0` = unlimited              |
+| `GOOGLE_CLIENT_ID`                 | —                     | Google OAuth client ID                                     |
+| `GOOGLE_CLIENT_SECRET`             | —                     | Google OAuth client secret                                 |
+| `SMTP_HOST`                        | —                     | SMTP host for email (verification, alerts, invites)        |
+| `SMTP_USER`                        | —                     | SMTP username                                              |
+| `SMTP_PASS`                        | —                     | SMTP password                                              |
+| `VAPID_PUBLIC_KEY`                 | —                     | Web push VAPID public key                                  |
+| `VAPID_PRIVATE_KEY`                | —                     | Web push VAPID private key                                 |
 
 > See [`.env.example`](.env.example) for the full list with descriptions.
 

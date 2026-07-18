@@ -20,13 +20,7 @@ import {
 
 // Re-export the Edge-safe config so existing importers of '@/lib/auth/session'
 // keep working unchanged.
-export {
-    SESSION_TTL,
-    DESKTOP_SESSION_TTL,
-    DESKTOP_UA_MARKER,
-    isDesktopDevice,
-    sessionOptions,
-};
+export { SESSION_TTL, DESKTOP_SESSION_TTL, DESKTOP_UA_MARKER, isDesktopDevice, sessionOptions };
 export type { SessionData };
 
 // Default session state

@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getIronSession } from 'iron-session';
-import {
-    sessionOptions,
-    isDesktopDevice,
-    type SessionData,
-} from '@/lib/auth/session-config';
+import { sessionOptions, isDesktopDevice, type SessionData } from '@/lib/auth/session-config';
 
 // Slide the desktop session cookie at most once per hour. Each save re-issues
 // the cookie with a fresh 30-day maxAge, so any interaction within the window

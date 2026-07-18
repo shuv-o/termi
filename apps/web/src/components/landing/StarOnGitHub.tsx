@@ -3,6 +3,7 @@ import { Star, GitFork, Github } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { githubFetch } from '@/lib/github';
 
 /**
  * "Star us on GitHub" card for the landing page.
@@ -15,8 +16,14 @@ import { Card } from '@/components/ui/card';
 const GITHUB_REPO_API = 'https://api.github.com/repos/shuvoooo/termi';
 const GITHUB_REPO_URL = 'https://github.com/shuvoooo/termi';
 
-/** Unauthenticated GitHub API allows 60 req/h per IP; cache well inside that. */
-const REVALIDATE_SECONDS = 3600;
+/**
+ * How stale the star count may get.
+ *
+ * With a GITHUB_TOKEN the ceiling is 5000 req/h, so 30s is cheap and the count
+ * is effectively live. Without one we share the 60 req/h anonymous limit, so
+ * 300s (12 req/h per instance) leaves headroom to scale out.
+ */
+const CACHE_TTL = { authenticated: 30, anonymous: 300 };
 
 interface RepoStats {
     stars: number;
@@ -25,14 +32,7 @@ interface RepoStats {
 
 async function fetchRepoStats(): Promise<RepoStats | null> {
     try {
-        const res = await fetch(GITHUB_REPO_API, {
-            headers: {
-                Accept: 'application/vnd.github+json',
-                // GitHub rejects API requests without a User-Agent.
-                'User-Agent': 'termi-web',
-            },
-            next: { revalidate: REVALIDATE_SECONDS },
-        });
+        const res = await githubFetch(GITHUB_REPO_API, CACHE_TTL);
 
         if (!res.ok) return null;
 

@@ -3,11 +3,11 @@
 WebAuthn/passkey behaviour differs by platform inside Electron, so Termi routes
 each platform to whatever actually works:
 
-| Platform | Mechanism | Extra setup |
-|---|---|---|
-| **Windows** (10/11) | Chromium's built-in WebAuthn (Windows Hello / security keys) | None |
-| **Linux** | Chromium's built-in WebAuthn (USB security keys) | None |
-| **macOS** | Native bridge → [`electron-webauthn`](https://github.com/iamEvanYT/electron-webauthn) → Apple AuthenticationServices (Touch ID / iCloud Keychain) | Code signing + entitlements + AASA (below) |
+| Platform            | Mechanism                                                                                                                                         | Extra setup                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Windows** (10/11) | Chromium's built-in WebAuthn (Windows Hello / security keys)                                                                                      | None                                       |
+| **Linux**           | Chromium's built-in WebAuthn (USB security keys)                                                                                                  | None                                       |
+| **macOS**           | Native bridge → [`electron-webauthn`](https://github.com/iamEvanYT/electron-webauthn) → Apple AuthenticationServices (Touch ID / iCloud Keychain) | Code signing + entitlements + AASA (below) |
 
 If the macOS native bridge is unavailable (module not built, or app not signed
 with the right entitlements), the reveal flow automatically falls back to the
@@ -50,9 +50,10 @@ entitlements and a matching Apple App Site Association file.
 4. **Apple App Site Association:** set `APPLE_TEAM_ID` (and optionally
    `APPLE_APP_BUNDLE_ID`) in the web deployment env. Then
    `https://<domain>/.well-known/apple-app-site-association` serves:
-   ```json
-   { "webcredentials": { "apps": ["TEAMID.com.shuvoo.termi"] } }
-   ```
+
+    ```json
+    { "webcredentials": { "apps": ["TEAMID.com.shuvoo.termi"] } }
+    ```
 
 5. **Build:** `TERMI_REMOTE_URL=https://termi.shuvoo.com npm run build:electron`
    with signing configured (`CSC_LINK` / `CSC_KEY_PASSWORD` or an installed

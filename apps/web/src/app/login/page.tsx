@@ -20,11 +20,7 @@ import {
     Zap,
     Globe,
 } from 'lucide-react';
-import {
-    webauthnRegister,
-    webauthnAuthenticate,
-    isPasskeySupported,
-} from '@/lib/webauthn/client';
+import { webauthnRegister, webauthnAuthenticate, isPasskeySupported } from '@/lib/webauthn/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -292,10 +288,7 @@ function LoginContent() {
                 setPasskeyLoading(false);
                 return;
             }
-            const assertion = await Promise.race([
-                webauthnAuthenticate(optData.data),
-                timeout,
-            ]);
+            const assertion = await Promise.race([webauthnAuthenticate(optData.data), timeout]);
             clearTimeout(timeoutId);
             const authRes = await fetch('/api/auth/passkey/authenticate', {
                 method: 'POST',
