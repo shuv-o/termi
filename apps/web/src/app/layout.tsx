@@ -5,7 +5,10 @@ import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://github.com/shuvoooo/termi'),
+    // Resolves relative OG/twitter image URLs and the canonical link tag. This
+    // must be the site people actually land on when they click a shared link —
+    // pointing it at the GitHub repo instead broke both of those.
+    metadataBase: new URL('https://termi.shuvoo.com'),
     title: {
         default: 'Termi - Secure Server Management',
         template: '%s | Termi',
@@ -57,7 +60,7 @@ export const metadata: Metadata = {
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
         type: 'website',
-        url: 'https://github.com/shuvoooo/termi',
+        url: 'https://termi.shuvoo.com',
         siteName: 'Termi',
         locale: 'en_US',
     },
@@ -80,6 +83,11 @@ export const metadata: Metadata = {
         },
     },
     category: 'technology',
+    // Without an explicit canonical, search engines have to guess which URL is
+    // authoritative when the same page is reachable under multiple hosts/paths.
+    alternates: {
+        canonical: '/',
+    },
 };
 
 export const viewport: Viewport = {

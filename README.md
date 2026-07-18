@@ -4,6 +4,7 @@
 
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
+[![GitHub stars](https://img.shields.io/github/stars/shuvoooo/termi?style=social)](https://github.com/shuvoooo/termi/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/shuvoooo/termi/actions/workflows/ci.yml/badge.svg)](https://github.com/shuvoooo/termi/actions/workflows/ci.yml)
 [![Release](https://github.com/shuvoooo/termi/actions/workflows/release.yml/badge.svg)](https://github.com/shuvoooo/termi/actions/workflows/release.yml)
@@ -14,7 +15,40 @@
 
 [![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/shuvoo)
 
+**[🌐 Website](https://termi.shuvoo.com)** · **[📖 Wiki](https://github.com/shuvoooo/termi/wiki)** · **[⬇️ Download](https://github.com/shuvoooo/termi/releases/latest)** · **[💬 Discussions](https://github.com/shuvoooo/termi/discussions)**
+
 </div>
+
+> **⭐ If Termi is useful to you, please star the repo.** It costs nothing, takes two seconds, and is the main way other developers find this project — more effective than a clone, since a fork or a clone doesn't show up anywhere public. See [Why star instead of just cloning?](#-why-star-instead-of-just-cloning)
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshot-hero.png" alt="Termi landing page — self-hosted SSH, SCP, RDP and VNC access from your browser" width="100%">
+</p>
+<p align="center">
+  <img src=".github/assets/screenshot-features.png" alt="Termi feature overview — SSH terminal, file manager, remote desktop, encrypted credential vault, 2FA, mobile support" width="100%">
+</p>
+
+---
+
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Desktop App Installation](#-desktop-app-installation)
+- [Development Setup](#️-development-setup)
+- [Project Structure](#️-project-structure)
+- [Configuration](#️-configuration)
+- [Architecture](#-architecture)
+- [Security](#-security)
+- [Contributing](#-contributing)
+- [Open Source & Community](#-open-source--community)
+- [Why star instead of just cloning?](#-why-star-instead-of-just-cloning)
+- [Star History](#-star-history)
+- [License](#-license)
 
 ---
 
@@ -382,6 +416,31 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 - Help & support channels: [SUPPORT.md](SUPPORT.md)
 - Security policy: [SECURITY.md](SECURITY.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
+- Full documentation: [Wiki](https://github.com/shuvoooo/termi/wiki)
+
+---
+
+## ⭐ Why star instead of just cloning?
+
+Cloning gets you the code. **Starring is the only action that shows up publicly** — it's what surfaces Termi in GitHub's trending pages, in search ranking, and in other developers' recommendations. A clone or a fork is invisible outside your own account; a star is a two-second, zero-cost signal that tells the next person searching "self-hosted SSH client" that this project is worth a look.
+
+If you've already cloned or forked Termi and it's useful to you, this is the one extra click that actually helps the project grow:
+
+**[⭐ Star Termi on GitHub](https://github.com/shuvoooo/termi)**
+
+Stars also directly inform what gets built next — they're the closest thing this project has to a roadmap signal from real users.
+
+---
+
+## ⭐ Star History
+
+<a href="https://star-history.com/#shuvoooo/termi&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuvoooo/termi&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuvoooo/termi&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuvoooo/termi&type=Date" />
+  </picture>
+</a>
 
 ---
 

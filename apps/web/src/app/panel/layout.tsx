@@ -23,6 +23,7 @@ import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import { useCachedFetch, clearCache } from '@/lib/hooks/useCachedFetch';
 import TerminalLogo from '@/components/common/Logo';
+import StarNudge from '@/components/common/StarNudge';
 import { Button } from '@/components/ui/button';
 
 interface User {
@@ -33,6 +34,7 @@ interface User {
     hasMasterKey: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
+    createdAt: string;
 }
 
 const navigation = [
@@ -67,6 +69,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     // cached user paints instantly and revalidates in the background.
     const { data: meData, error: meError } = useCachedFetch<{ user: User }>('/api/auth/me');
     const user = meData?.user ?? null;
+
+    // Same cache key the (unfiltered) dashboard server list uses, so this is
+    // typically a free cache hit rather than an extra request — only used here
+    // to know whether the user has saved a server, for the star nudge below.
+    const { data: serversData } = useCachedFetch<{ servers: unknown[] }>('/api/servers');
+    const serverCount = serversData?.servers.length ?? 0;
 
     // Desktop collapsed sidebar state
     const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -665,6 +673,8 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     )}
                 </div>
             </nav>
+
+            <StarNudge userCreatedAt={user.createdAt} serverCount={serverCount} />
         </div>
     );
 }

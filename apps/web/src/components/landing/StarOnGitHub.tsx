@@ -87,6 +87,11 @@ export default async function StarOnGitHub() {
                                 nothing, helps other developers find the project, and keeps it
                                 moving forward.
                             </p>
+                            <p className="text-slate-500 text-sm max-w-xl mt-2">
+                                Just want to bookmark it? A star is lighter than a fork — and
+                                it&apos;s the only one that shows up in search and helps others find
+                                Termi too.
+                            </p>
 
                             {/* Hidden at zero — "0 stars" under a "please star
                                 us" ask reads worse than no number at all. */}
