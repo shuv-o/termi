@@ -12,6 +12,17 @@ _Nothing yet._
 
 ---
 
+## [1.0.3] — 2026-07-18
+
+First release to actually ship desktop installers. v1.0.2 built them but uploaded nothing.
+
+### Fixed
+
+- Release builds uploaded no installers: `release.yml` publishes a non-draft release for the tag, while electron-builder defaults to `releaseType: draft` and silently skipped every asset (while still exiting 0). Now set to `releaseType: release`.
+- macOS builds failed with `<repo dir> not a file` — an undefined GitHub secret renders as an empty string, so `CSC_LINK=""` was treated as a certificate path. The signing env vars are no longer set unconditionally.
+
+---
+
 ## [1.0.2] — 2026-07-18
 
 ### Added
