@@ -40,9 +40,17 @@ mac:
       arch: [x64, arm64]
   category: public.app-category.developer-tools
   icon: apps/web/public/icons/icon-512x512.png
-  # Hardened runtime is required for notarization and for macOS to trust the
-  # app as a WebAuthn/passkey client (Touch ID access).
-  hardenedRuntime: true
+  # Hardened runtime is required for notarization and for the native passkey
+  # bridge — but both of those already need a real Developer ID, which this
+  # project does not have (notarize: false below, ad-hoc signing in CI), so
+  # macOS passkeys already fall back to password today.
+  #
+  # Keeping it true actively breaks the build: it makes electron-builder pass
+  # `--timestamp` to `codesign --sign -`, and ad-hoc signatures cannot be
+  # timestamped. The arm64 target signs every nested binary, so it reliably
+  # times out against Apple's timestamp server. Re-enable this together with
+  # real signing, not before.
+  hardenedRuntime: false
   # Suppress local Gatekeeper check — notarization handles this post-build.
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist

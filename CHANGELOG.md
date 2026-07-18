@@ -12,6 +12,14 @@ _Nothing yet._
 
 ---
 
+## [1.0.4] — 2026-07-18
+
+### Fixed
+
+- macOS Apple Silicon builds failed in CI: `hardenedRuntime: true` makes electron-builder pass `--timestamp` to `codesign --sign -`, but ad-hoc signatures cannot be timestamped. The arm64 target signs every nested binary, so it reliably timed out against Apple's timestamp server. Hardened runtime now stays off until real code signing is configured — it already required a Developer ID the project does not have, so notarization and the native passkey bridge are unaffected.
+
+---
+
 ## [1.0.3] — 2026-07-18
 
 First release to actually ship desktop installers. v1.0.2 built them but uploaded nothing.
