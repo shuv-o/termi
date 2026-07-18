@@ -9,6 +9,10 @@ publish:
   provider: github
   owner: shuvoooo
   repo: termi
+  # release.yml publishes a (non-draft) release for the same tag. electron-builder
+  # defaults to releaseType: draft and will SKIP every upload if the existing
+  # release is already published — so match it explicitly.
+  releaseType: release
 
 # Only the Electron entry points go into the asar. The desktop app is a thin
 # native shell around the hosted Termi server (web + gateway + guacd all live
