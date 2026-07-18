@@ -42,6 +42,15 @@
         "electron-webauthn": "~1.2.0",
         "node-pty": "^1.1.0"
     },
+    "overrides": {
+        "shell-quote": "^1.8.4",
+        "form-data": "^4.0.6",
+        "hono": "^4.12.25",
+        "@hono/node-server": "^1.19.13",
+        "undici": "^6.27.0",
+        "postcss": "^8.5.10",
+        "esbuild": "^0.28.1"
+    },
     "build": {
         "appId": "com.shuvoo.termi",
         "productName": "Termi",
@@ -95,7 +104,7 @@
         "concurrently": "^9.2.1",
         "electron": "41.3.0",
         "electron-builder": "26.8.1",
-        "esbuild": "^0.27.4",
+        "esbuild": "^0.28.1",
         "eslint-config-prettier": "^10.1.8",
         "prettier": "^3.8.3",
         "typescript": "^5.9.3"
