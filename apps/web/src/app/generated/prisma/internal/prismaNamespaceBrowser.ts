@@ -65,6 +65,7 @@ export const ModelName = {
   ServerHealthRecord: 'ServerHealthRecord',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
+  CommandSnippet: 'CommandSnippet',
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare'
@@ -321,6 +322,21 @@ export const EmailOTPScalarFieldEnum = {
 } as const
 
 export type EmailOTPScalarFieldEnum = (typeof EmailOTPScalarFieldEnum)[keyof typeof EmailOTPScalarFieldEnum]
+
+
+export const CommandSnippetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  command: 'command',
+  icon: 'icon',
+  runImmediately: 'runImmediately',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommandSnippetScalarFieldEnum = (typeof CommandSnippetScalarFieldEnum)[keyof typeof CommandSnippetScalarFieldEnum]
 
 
 export const KeychainCredentialScalarFieldEnum = {

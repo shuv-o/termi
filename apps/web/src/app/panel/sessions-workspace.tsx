@@ -33,6 +33,7 @@ import {
     Terminal,
     Wifi,
     WifiOff,
+    Wrench,
     X,
     Zap,
 } from 'lucide-react';
@@ -51,6 +52,9 @@ import {
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
 const VirtualKeyboard = dynamic(() => import('@/components/terminal/VirtualKeyboard'), {
+    ssr: false,
+});
+const TerminalToolbar = dynamic(() => import('@/components/terminal/TerminalToolbar'), {
     ssr: false,
 });
 const PasskeyRevealModal = dynamic(() => import('@/components/auth/PasskeyRevealModal'), {
@@ -872,6 +876,7 @@ function TerminalPane({
     onCopyPassword: () => void;
 }) {
     const [showKeyboard, setShowKeyboard] = useState(false);
+    const [showToolbar, setShowToolbar] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
     // ── Multi-shell state (remote only) ──────────────────────────────────────
@@ -1145,6 +1150,20 @@ function TerminalPane({
                             </Button>
                         </>
                     )}
+                    {session.type !== 'local' && (
+                        <Button
+                            variant={showToolbar ? 'default' : 'ghost'}
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                                setShowToolbar((t) => !t);
+                                setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                            }}
+                            title={showToolbar ? 'Hide quick tools' : 'Quick tools'}
+                        >
+                            <Wrench className="w-3.5 h-3.5" />
+                        </Button>
+                    )}
                     <Button
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
@@ -1304,6 +1323,19 @@ function TerminalPane({
                     </div>
                 )}
             </div>
+
+            {/* Quick-tools strip — SSH only, sits above the keyboard */}
+            {showToolbar && session.type !== 'local' && (
+                <TerminalToolbar
+                    onKey={(key) => {
+                        keyHandlers.current.get(activeShellId)?.(key);
+                    }}
+                    onClose={() => {
+                        setShowToolbar(false);
+                        setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                    }}
+                />
+            )}
 
             {/* Virtual keyboard */}
             {showKeyboard && session.type !== 'local' && (

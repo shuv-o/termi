@@ -85,6 +85,22 @@ export function credentialRevealRateLimit(userId: string): RateLimitResult {
     return rateLimit(`reveal:${userId}`, 3, 5 * 60 * 1000);
 }
 
+/**
+ * 5 server exports per hour per user.
+ *
+ * Tighter than most limits here: one successful export hands over every
+ * credential the account holds, so this is the blast radius of a stolen
+ * session, not merely of a noisy client.
+ */
+export function serverExportRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`server-export:${userId}`, 5, 60 * 60 * 1000);
+}
+
+/** 10 server imports per hour per user */
+export function serverImportRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`server-import:${userId}`, 10, 60 * 60 * 1000);
+}
+
 /** 10 passkey authentication attempts per 5 minutes per IP */
 export function passkeyAuthRateLimit(ip: string): RateLimitResult {
     return rateLimit(`passkey-auth:${ip}`, 10, 5 * 60 * 1000);

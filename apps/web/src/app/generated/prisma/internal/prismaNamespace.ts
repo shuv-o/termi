@@ -398,6 +398,7 @@ export const ModelName = {
   ServerHealthRecord: 'ServerHealthRecord',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
+  CommandSnippet: 'CommandSnippet',
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare'
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "keychainCredential" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1456,6 +1457,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CommandSnippet: {
+      payload: Prisma.$CommandSnippetPayload<ExtArgs>
+      fields: Prisma.CommandSnippetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CommandSnippetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CommandSnippetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        findFirst: {
+          args: Prisma.CommandSnippetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CommandSnippetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        findMany: {
+          args: Prisma.CommandSnippetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>[]
+        }
+        create: {
+          args: Prisma.CommandSnippetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        createMany: {
+          args: Prisma.CommandSnippetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CommandSnippetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>[]
+        }
+        delete: {
+          args: Prisma.CommandSnippetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        update: {
+          args: Prisma.CommandSnippetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        deleteMany: {
+          args: Prisma.CommandSnippetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CommandSnippetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CommandSnippetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>[]
+        }
+        upsert: {
+          args: Prisma.CommandSnippetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommandSnippetPayload>
+        }
+        aggregate: {
+          args: Prisma.CommandSnippetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCommandSnippet>
+        }
+        groupBy: {
+          args: Prisma.CommandSnippetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommandSnippetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CommandSnippetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommandSnippetCountAggregateOutputType> | number
+        }
+      }
+    }
     KeychainCredential: {
       payload: Prisma.$KeychainCredentialPayload<ExtArgs>
       fields: Prisma.KeychainCredentialFieldRefs
@@ -1954,6 +2029,21 @@ export const EmailOTPScalarFieldEnum = {
 export type EmailOTPScalarFieldEnum = (typeof EmailOTPScalarFieldEnum)[keyof typeof EmailOTPScalarFieldEnum]
 
 
+export const CommandSnippetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  command: 'command',
+  icon: 'icon',
+  runImmediately: 'runImmediately',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommandSnippetScalarFieldEnum = (typeof CommandSnippetScalarFieldEnum)[keyof typeof CommandSnippetScalarFieldEnum]
+
+
 export const KeychainCredentialScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2355,6 +2445,7 @@ export type GlobalOmitConfig = {
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
+  commandSnippet?: Prisma.CommandSnippetOmit
   keychainCredential?: Prisma.KeychainCredentialOmit
   serverInvitation?: Prisma.ServerInvitationOmit
   serverShare?: Prisma.ServerShareOmit

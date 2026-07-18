@@ -13,6 +13,7 @@ import {
     X,
     KeyRound,
     Keyboard,
+    Wrench,
     Plus,
     Terminal as TerminalIcon,
     Loader2,
@@ -28,6 +29,10 @@ const PasskeyRevealModal = dynamic(() => import('@/components/auth/PasskeyReveal
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 
 const VirtualKeyboard = dynamic(() => import('@/components/terminal/VirtualKeyboard'), {
+    ssr: false,
+});
+
+const TerminalToolbar = dynamic(() => import('@/components/terminal/TerminalToolbar'), {
     ssr: false,
 });
 
@@ -50,6 +55,7 @@ export default function SSHConnectionPage() {
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showKeyboard, setShowKeyboard] = useState(false);
+    const [showToolbar, setShowToolbar] = useState(false);
     const [showFiles, setShowFiles] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -350,6 +356,19 @@ export default function SSHConnectionPage() {
                     </Button>
 
                     <Button
+                        variant={showToolbar ? 'default' : 'ghost'}
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => {
+                            setShowToolbar((t) => !t);
+                            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                        }}
+                        title={showToolbar ? 'Hide quick tools' : 'Quick tools'}
+                    >
+                        <Wrench className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
                         variant={showKeyboard ? 'default' : 'ghost'}
                         size="icon"
                         className="h-7 w-7"
@@ -485,6 +504,19 @@ export default function SSHConnectionPage() {
                     </>
                 )}
             </div>
+
+            {/* Quick-tools strip — sits above the keyboard when both are shown */}
+            {showToolbar && (
+                <TerminalToolbar
+                    onKey={(key) => {
+                        keyHandlers.current.get(activeId)?.(key);
+                    }}
+                    onClose={() => {
+                        setShowToolbar(false);
+                        setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+                    }}
+                />
+            )}
 
             {/* Virtual keyboard — always shown on mobile, toggleable on desktop */}
             {showKeyboard && (

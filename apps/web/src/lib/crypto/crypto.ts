@@ -64,9 +64,17 @@ function getSystemKey(): Buffer {
 /**
  * Derive an encryption key from user's master password
  * Uses PBKDF2 with high iteration count for slow key derivation
+ *
+ * @param iterations - Override the iteration count. Only for reading data that
+ *                     recorded its own cost parameters (export files); stored
+ *                     credentials always use the current default.
  */
-export function deriveMasterKey(masterPassword: string, salt: Buffer): Buffer {
-    return pbkdf2Sync(masterPassword, salt, PBKDF2_ITERATIONS, KEY_LENGTH, PBKDF2_DIGEST);
+export function deriveMasterKey(
+    masterPassword: string,
+    salt: Buffer,
+    iterations: number = PBKDF2_ITERATIONS,
+): Buffer {
+    return pbkdf2Sync(masterPassword, salt, iterations, KEY_LENGTH, PBKDF2_DIGEST);
 }
 
 /**

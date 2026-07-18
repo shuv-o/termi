@@ -7,7 +7,6 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import { verifyPassword } from '@/lib/crypto';
 import { prisma } from '@/lib/db';
 import {
     validateBody,
@@ -20,45 +19,16 @@ import {
 } from '@/lib/api';
 import { credentialRevealRateLimit } from '@/lib/rate-limit';
 import { decryptCredentials } from '@/lib/crypto/credentials';
-import { getSession } from '@/lib/auth/session';
-import {
-    verifyAuthenticationResponse,
-    type AuthenticationResponseJSON,
-} from '@simplewebauthn/server';
-
-const passkeyResponseSchema = z.object({
-    id: z.string(),
-    rawId: z.string(),
-    response: z.object({
-        authenticatorData: z.string(),
-        clientDataJSON: z.string(),
-        signature: z.string(),
-        userHandle: z.string().optional().nullable(),
-    }),
-    type: z.literal('public-key'),
-    clientExtensionResults: z.record(z.string(), z.unknown()).optional(),
-    authenticatorAttachment: z.string().optional().nullable(),
-});
+import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
 
 const revealSchema = z.object({
     field: z.enum(['password', 'privateKey', 'passphrase']),
-    // One of these must be present
-    authPassword: z.string().optional(),
-    authCode: z.string().optional(), // TOTP or email OTP
-    passkeyResponse: passkeyResponseSchema.optional(), // WebAuthn assertion
+    // One of the re-auth proofs must be present.
+    ...reauthFields,
 });
 
 interface RouteParams {
     params: Promise<{ id: string }>;
-}
-
-function getRpDetails() {
-    if (process.env.NODE_ENV === 'development') {
-        return { rpID: 'localhost', origins: ['http://localhost:22080', 'http://127.0.0.1:22080'] };
-    }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';
-    const url = new URL(appUrl);
-    return { rpID: url.hostname, origins: [url.origin] };
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
@@ -78,101 +48,16 @@ export async function POST(request: Request, { params }: RouteParams) {
     const validation = await validateBody(request, revealSchema);
     if ('error' in validation) return validation.error;
 
-    const { field, authPassword, authCode, passkeyResponse } = validation.data;
+    const { field, ...auth } = validation.data;
 
-    if (!authPassword && !authCode && !passkeyResponse) {
+    if (!hasReauthProof(auth)) {
         return errorResponse(
             'Re-authentication required: provide your password, 2FA code, or passkey',
             400,
         );
     }
 
-    // Re-authenticate
-    let authenticated = false;
-
-    if (authPassword) {
-        const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { passwordHash: true },
-        });
-        if (!dbUser || !dbUser.passwordHash) return unauthorizedResponse();
-        authenticated = await verifyPassword(dbUser.passwordHash, authPassword);
-    } else if (authCode) {
-        const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { totpSecret: true, totpEnabled: true, twoFactorMethod: true },
-        });
-        if (!dbUser) return unauthorizedResponse();
-
-        if (dbUser.twoFactorMethod === 'EMAIL') {
-            const { verifyEmailOTP } = await import('@/lib/auth/email-otp');
-            authenticated = await verifyEmailOTP(user.id, authCode);
-        } else if (dbUser.twoFactorMethod === 'TOTP' && dbUser.totpSecret) {
-            const { decryptCredentialField } = await import('@/lib/crypto/credentials');
-            const { verifyTOTP } = await import('@/lib/auth/totp');
-            const totpSecret = decryptCredentialField(dbUser.totpSecret);
-            authenticated = verifyTOTP(totpSecret, authCode);
-        }
-    } else if (passkeyResponse) {
-        // WebAuthn passkey re-authentication
-        const session = await getSession();
-        const challenge = session.passkeyChallenge;
-
-        if (!challenge) {
-            return errorResponse('Passkey challenge not found or expired. Please try again.', 400);
-        }
-
-        const passkey = await prisma.passkey.findUnique({
-            where: { credentialID: (passkeyResponse as AuthenticationResponseJSON).id },
-            select: {
-                id: true,
-                userId: true,
-                credentialID: true,
-                credentialPublicKey: true,
-                counter: true,
-                transports: true,
-            },
-        });
-
-        if (!passkey || passkey.userId !== user.id) {
-            return errorResponse('Passkey not found or does not belong to your account', 401);
-        }
-
-        const { rpID, origins } = getRpDetails();
-
-        try {
-            const { verified, authenticationInfo } = await verifyAuthenticationResponse({
-                response: passkeyResponse as AuthenticationResponseJSON,
-                expectedChallenge: challenge,
-                expectedOrigin: origins,
-                expectedRPID: rpID,
-                credential: {
-                    id: passkey.credentialID,
-                    publicKey: new Uint8Array(passkey.credentialPublicKey),
-                    counter: Number(passkey.counter),
-                    transports:
-                        passkey.transports as import('@simplewebauthn/server').AuthenticatorTransportFuture[],
-                },
-                requireUserVerification: false,
-            });
-
-            if (verified) {
-                // Clear challenge immediately before any other DB operations
-                // to prevent replay attacks if the subsequent update fails
-                session.passkeyChallenge = undefined;
-                await session.save();
-
-                authenticated = true;
-                // Update counter (replay protection)
-                await prisma.passkey.update({
-                    where: { id: passkey.id },
-                    data: { counter: authenticationInfo.newCounter, lastUsedAt: new Date() },
-                });
-            }
-        } catch (err) {
-            console.error('Passkey reveal verification error:', err);
-        }
-    }
+    const authenticated = await verifyReauth(user.id, auth);
 
     if (!authenticated) {
         await prisma.auditLog.create({

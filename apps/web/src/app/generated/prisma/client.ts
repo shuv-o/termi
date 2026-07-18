@@ -112,6 +112,15 @@ export type RecoveryCode = Prisma.RecoveryCodeModel
  */
 export type EmailOTP = Prisma.EmailOTPModel
 /**
+ * Model CommandSnippet
+ * A one-tap command for the terminal toolbar.
+ * 
+ * Not encrypted: unlike a keychain entry these are commands the user types
+ * into their own shell, not secrets. Anything sensitive belongs in a
+ * credential field — the UI says so at the point of entry.
+ */
+export type CommandSnippet = Prisma.CommandSnippetModel
+/**
  * Model KeychainCredential
  * 
  */

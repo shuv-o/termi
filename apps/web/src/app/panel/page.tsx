@@ -11,6 +11,9 @@ import {
     Plus,
     Star,
     MoreVertical,
+    ChevronDown,
+    Download,
+    Upload,
     Search,
     RefreshCw,
     Layers,
@@ -71,6 +74,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const PasskeyRevealModal = dynamic(() => import('@/components/auth/PasskeyRevealModal'), {
+    ssr: false,
+});
+
+const ExportServersDialog = dynamic(() => import('@/components/servers/ExportServersDialog'), {
+    ssr: false,
+});
+
+const ImportServersDialog = dynamic(() => import('@/components/servers/ImportServersDialog'), {
     ssr: false,
 });
 
@@ -1170,6 +1181,8 @@ export default function DashboardPage() {
         field: RevealField;
     } | null>(null);
     const [shareTarget, setShareTarget] = useState<ServerItem | null>(null);
+    const [showExport, setShowExport] = useState(false);
+    const [showImport, setShowImport] = useState(false);
     const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({
         field: 'name',
         dir: 'asc',
@@ -1456,12 +1469,42 @@ export default function DashboardPage() {
                                     : 'Manage and connect to your servers'}
                             </p>
                         </div>
-                        <Button asChild className="h-9 sm:h-10 px-3 sm:px-4 shrink-0">
-                            <Link href="/panel/servers/new">
-                                <Plus className="w-4 h-4" />{' '}
-                                <span className="hidden sm:inline">Add Server</span>
-                            </Link>
-                        </Button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="h-9 sm:h-10 px-2.5 sm:px-3"
+                                        title="Import or export servers"
+                                    >
+                                        <ArrowUpDown className="w-4 h-4" />
+                                        <span className="hidden md:inline">Transfer</span>
+                                        <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Bulk transfer</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => setShowImport(true)}>
+                                        <Upload className="w-4 h-4" />
+                                        Import servers
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setShowExport(true)}
+                                        disabled={servers.length === 0}
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Export servers
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <Button asChild className="h-9 sm:h-10 px-3 sm:px-4">
+                                <Link href="/panel/servers/new">
+                                    <Plus className="w-4 h-4" />{' '}
+                                    <span className="hidden sm:inline">Add Server</span>
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
 
                     <FleetStats
@@ -1933,6 +1976,15 @@ export default function DashboardPage() {
 
             {shareTarget && (
                 <ShareModal server={shareTarget} onClose={() => setShareTarget(null)} />
+            )}
+
+            {showExport && <ExportServersDialog onClose={() => setShowExport(false)} />}
+
+            {showImport && (
+                <ImportServersDialog
+                    onClose={() => setShowImport(false)}
+                    onImported={fetchServers}
+                />
             )}
         </>
     );

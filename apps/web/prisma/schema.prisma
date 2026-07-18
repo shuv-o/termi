@@ -70,6 +70,7 @@ model User {
   ownedShares          ServerShare[]          @relation("OwnedShares")
   receivedShares       ServerShare[]          @relation("ReceivedShares")
   keychainCredentials  KeychainCredential[]
+  commandSnippets      CommandSnippet[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -370,6 +371,16 @@ enum AuditAction {
   KEYCHAIN_CREATED
   KEYCHAIN_UPDATED
   KEYCHAIN_DELETED
+
+  // Bulk transfer events — every export is a credential-exposure event and is
+  // logged whether or not it succeeded.
+  SERVERS_EXPORTED
+  SERVERS_IMPORTED
+
+  // Command snippet events
+  SNIPPET_CREATED
+  SNIPPET_UPDATED
+  SNIPPET_DELETED
 }
 
 // PUSH NOTIFICATIONS
@@ -493,6 +504,33 @@ enum OAuthProvider {
 }
 
 // KEYCHAIN – reusable credential sets
+
+/// A one-tap command for the terminal toolbar.
+///
+/// Not encrypted: unlike a keychain entry these are commands the user types
+/// into their own shell, not secrets. Anything sensitive belongs in a
+/// credential field — the UI says so at the point of entry.
+model CommandSnippet {
+  id     String @id @default(cuid())
+  userId String
+
+  label   String // Button text
+  command String // Sent to the active shell verbatim
+  icon    String? // lucide icon identifier
+
+  /// When true the command is followed by a newline (executes immediately).
+  /// When false it is typed into the prompt for the user to review and confirm.
+  runImmediately Boolean @default(false)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
 
 model KeychainCredential {
   id     String @id @default(cuid())
