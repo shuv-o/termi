@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
+import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
@@ -280,6 +281,9 @@ export default async function HomePage() {
                     </div>
                 </div>
             </section>
+
+            {/* Star on GitHub */}
+            <StarOnGitHub />
 
             {/* CTA Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8">
