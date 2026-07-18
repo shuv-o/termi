@@ -342,6 +342,18 @@ app.on('second-instance', () => {
 });
 
 app.whenReady().then(() => {
+    // Tag every request from the desktop app with a distinctive User-Agent.
+    // The web server (session.ts / proxy.ts) recognises the "TermiDesktop"
+    // marker and grants a 30-day rolling session instead of the 7-day web one.
+    try {
+        const baseUA = session.defaultSession.getUserAgent();
+        if (!baseUA.includes('TermiDesktop')) {
+            session.defaultSession.setUserAgent(`${baseUA} TermiDesktop/${app.getVersion()}`);
+        }
+    } catch (e) {
+        console.warn('[main] failed to set desktop User-Agent:', e.message);
+    }
+
     startApp();
 });
 

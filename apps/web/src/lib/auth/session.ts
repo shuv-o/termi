@@ -5,63 +5,29 @@
  * Session data is encrypted and stored in an HTTP-only cookie.
  */
 
-import { SessionOptions, getIronSession, IronSession } from 'iron-session';
+import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { generateSecureToken, hashToken } from '@/lib/crypto';
+import {
+    SESSION_TTL,
+    DESKTOP_SESSION_TTL,
+    DESKTOP_UA_MARKER,
+    isDesktopDevice,
+    sessionOptions,
+    type SessionData,
+} from './session-config';
 
-// TYPES
-
-export interface SessionData {
-    userId?: string;
-    email?: string;
-    sessionToken?: string;
-    isLoggedIn: boolean;
-    requires2FA?: boolean;
-    tempUserId?: string; // For 2FA flow
-    masterKey?: string; // Encrypted master key for session
-    lastActivity?: number;
-    passkeyChallenge?: string; // Base64URL challenge for WebAuthn registration/auth
-    passkeyAuthUserId?: string; // userId resolved during passkey auth options (before assertion verified)
-    // Temporary fields used during Google OAuth dance (cleared after callback)
-    googleOAuthState?: string;
-    googleCodeVerifier?: string;
-    // Temporary masterKey during 2FA pending state
-    tempMasterKey?: string;
-}
-
-// CONFIGURATION
-
-const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
-
-function getSessionSecret(): string {
-    const secret = process.env.SESSION_SECRET;
-    if (!secret || secret.length < 32) {
-        if (
-            process.env.NODE_ENV === 'production' &&
-            process.env.NEXT_PHASE !== 'phase-production-build'
-        ) {
-            throw new Error(
-                'SESSION_SECRET must be set and at least 32 characters long. ' +
-                    'Generate one with: openssl rand -base64 32',
-            );
-        }
-        // Dev fallback and build-time placeholder — never used in production at runtime
-        return 'dev-only-fallback-secret-at-least-32-chars!!';
-    }
-    return secret;
-}
-
-export const sessionOptions: SessionOptions = {
-    password: getSessionSecret(),
-    cookieName: 'termi_session',
-    cookieOptions: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: SESSION_TTL,
-    },
+// Re-export the Edge-safe config so existing importers of '@/lib/auth/session'
+// keep working unchanged.
+export {
+    SESSION_TTL,
+    DESKTOP_SESSION_TTL,
+    DESKTOP_UA_MARKER,
+    isDesktopDevice,
+    sessionOptions,
 };
+export type { SessionData };
 
 // Default session state
 const defaultSession: SessionData = {
@@ -98,8 +64,9 @@ export async function createSession(
     const token = generateSecureToken(32);
     const tokenHash = hashToken(token);
 
-    // Calculate expiry
-    const expiresAt = new Date(Date.now() + SESSION_TTL * 1000);
+    // Calculate expiry — desktop (Electron) sessions get a longer, rolling window
+    const ttl = isDesktopDevice(deviceInfo) ? DESKTOP_SESSION_TTL : SESSION_TTL;
+    const expiresAt = new Date(Date.now() + ttl * 1000);
 
     // Store session in database
     await prisma.session.create({
@@ -144,6 +111,7 @@ export async function validateSession(token: string): Promise<{ userId: string }
             userId: true,
             expiresAt: true,
             isRevoked: true,
+            deviceInfo: true,
         },
     });
 
@@ -169,10 +137,17 @@ export async function validateSession(token: string): Promise<{ userId: string }
         return null;
     }
 
-    // Update last active time
+    // Update last active time. For desktop (Electron) sessions this is also a
+    // rolling refresh: any interaction slides expiry another 30 days forward.
+    const now = new Date();
     await prisma.session.update({
         where: { id: session.id },
-        data: { lastActiveAt: new Date() },
+        data: {
+            lastActiveAt: now,
+            ...(isDesktopDevice(session.deviceInfo)
+                ? { expiresAt: new Date(now.getTime() + DESKTOP_SESSION_TTL * 1000) }
+                : {}),
+        },
     });
 
     return { userId: session.userId };

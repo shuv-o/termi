@@ -1,7 +1,43 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getIronSession } from 'iron-session';
+import {
+    sessionOptions,
+    isDesktopDevice,
+    type SessionData,
+} from '@/lib/auth/session-config';
 
-export function proxy(request: NextRequest) {
+// Slide the desktop session cookie at most once per hour. Each save re-issues
+// the cookie with a fresh 30-day maxAge, so any interaction within the window
+// keeps the Electron user signed in for another 30 days.
+const DESKTOP_COOKIE_SLIDE_INTERVAL_MS = 60 * 60 * 1000;
+
+/**
+ * For Electron desktop requests, refresh the iron-session cookie so its 30-day
+ * lifetime rolls forward on activity. The authoritative DB expiry is slid
+ * separately in validateSession(); this only keeps the cookie itself alive.
+ * Best-effort — any failure must never block the request.
+ */
+async function slideDesktopSession(request: NextRequest, response: NextResponse) {
+    if (!isDesktopDevice(request.headers.get('user-agent'))) return;
+    // Auth routes (login / logout / 2FA) own the session cookie themselves —
+    // never write a competing Set-Cookie for them.
+    if (request.nextUrl.pathname.startsWith('/api/auth/')) return;
+    try {
+        const session = await getIronSession<SessionData>(request, response, sessionOptions);
+        if (!session.isLoggedIn) return;
+        const now = Date.now();
+        if (session.lastActivity && now - session.lastActivity < DESKTOP_COOKIE_SLIDE_INTERVAL_MS) {
+            return;
+        }
+        session.lastActivity = now;
+        await session.save(); // re-issues Set-Cookie with a fresh 30-day maxAge
+    } catch {
+        // ignore — never block a request over a cookie refresh
+    }
+}
+
+export async function proxy(request: NextRequest) {
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
     const isDev = process.env.NODE_ENV !== 'production';
     const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
@@ -55,6 +91,9 @@ export function proxy(request: NextRequest) {
     );
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+
+    // Roll the desktop (Electron) session cookie forward on any interaction.
+    await slideDesktopSession(request, response);
 
     return response;
 }
