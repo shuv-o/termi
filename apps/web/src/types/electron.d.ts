@@ -33,10 +33,41 @@ interface ElectronPasskeyAPI {
     >;
 }
 
+/** Background state of the shell auto-updater, pushed from the main process. */
+type ElectronUpdaterStatus =
+    | { state: 'checking' }
+    | { state: 'available'; version: string }
+    | { state: 'none' }
+    | { state: 'downloaded'; version: string }
+    | { state: 'error'; message: string };
+
+interface ElectronUpdaterProgress {
+    percent: number;
+    transferred: number;
+    total: number;
+    bytesPerSecond: number;
+}
+
+/** Auto-update bridge (GitHub Releases). Present in packaged desktop builds. */
+interface ElectronUpdaterAPI {
+    /** Trigger an immediate update check. */
+    check: () => Promise<{ success: boolean; version?: string; error?: string }>;
+    /** Apply a downloaded update now (quits and relaunches). Resolves false if none is ready. */
+    install: () => Promise<boolean>;
+    /** The running app version. */
+    getVersion: () => Promise<string>;
+    /** Subscribe to updater status changes. Returns an unsubscribe fn. */
+    onStatus: (cb: (status: ElectronUpdaterStatus) => void) => () => void;
+    /** Subscribe to download progress. Returns an unsubscribe fn. */
+    onProgress: (cb: (progress: ElectronUpdaterProgress) => void) => () => void;
+}
+
 interface ElectronAPI {
     isElectron: true;
     /** The host OS platform, e.g. 'darwin' | 'win32' | 'linux' (from process.platform). */
     platform?: NodeJS.Platform;
+    /** Auto-update bridge (packaged builds only). */
+    updater?: ElectronUpdaterAPI;
     /** Subscribe to navigation requests from the native app menu. Returns an unsubscribe fn. */
     onNavigate?: (cb: (routePath: string) => void) => () => void;
     localTerminal: ElectronLocalTerminalAPI;

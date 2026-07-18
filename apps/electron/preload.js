@@ -10,6 +10,24 @@ contextBridge.exposeInMainWorld('electronAPI', {
         create: (optionsJSON) => ipcRenderer.invoke('passkey:create', optionsJSON),
         get: (optionsJSON) => ipcRenderer.invoke('passkey:get', optionsJSON),
     },
+    // Auto-update bridge — lets an in-app UI trigger/observe shell updates.
+    // The core UX (download + restart prompt) is handled natively in the main
+    // process, so wiring these in the renderer is optional.
+    updater: {
+        check: () => ipcRenderer.invoke('updater:check'),
+        install: () => ipcRenderer.invoke('updater:install'),
+        getVersion: () => ipcRenderer.invoke('updater:getVersion'),
+        onStatus: (cb) => {
+            const handler = (_e, status) => cb(status);
+            ipcRenderer.on('updater:status', handler);
+            return () => ipcRenderer.removeListener('updater:status', handler);
+        },
+        onProgress: (cb) => {
+            const handler = (_e, progress) => cb(progress);
+            ipcRenderer.on('updater:progress', handler);
+            return () => ipcRenderer.removeListener('updater:progress', handler);
+        },
+    },
     // Native menu → renderer navigation (see "Go" menu in main.js)
     onNavigate: (cb) => {
         const handler = (_e, routePath) => cb(routePath);

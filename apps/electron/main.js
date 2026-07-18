@@ -2,6 +2,7 @@ const { app, BrowserWindow, shell, ipcMain, session, Menu } = require('electron'
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { initAutoUpdater, checkForUpdatesInteractive } = require('./updater');
 
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
@@ -116,6 +117,10 @@ function buildAppMenu() {
                       label: app.name,
                       submenu: [
                           { role: 'about' },
+                          {
+                              label: 'Check for Updates…',
+                              click: () => checkForUpdatesInteractive(),
+                          },
                           { type: 'separator' },
                           { role: 'services' },
                           { type: 'separator' },
@@ -208,6 +213,21 @@ function buildAppMenu() {
                 ...(isMac ? [{ type: 'separator' }, { role: 'front' }] : [{ role: 'close' }]),
             ],
         },
+        // macOS puts "Check for Updates…" in the app menu above; other platforms
+        // get a Help menu with the same action.
+        ...(isMac
+            ? []
+            : [
+                  {
+                      label: 'Help',
+                      submenu: [
+                          {
+                              label: 'Check for Updates…',
+                              click: () => checkForUpdatesInteractive(),
+                          },
+                      ],
+                  },
+              ]),
     ];
     return Menu.buildFromTemplate(template);
 }
@@ -528,6 +548,9 @@ app.whenReady().then(() => {
     }
 
     startApp();
+
+    // Start checking GitHub Releases for shell updates (no-op in dev).
+    initAutoUpdater({ isDev: IS_DEV });
 });
 
 app.on('window-all-closed', () => {
