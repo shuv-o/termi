@@ -1,6 +1,6 @@
 {
     "name": "termi",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
@@ -57,12 +57,26 @@
             "entitlements": "apps/electron/entitlements.mac.plist",
             "entitlementsInherit": "apps/electron/entitlements.mac.inherit.plist",
             "target": [
-                { "target": "dmg", "arch": ["arm64", "x64"] },
-                { "target": "zip", "arch": ["arm64", "x64"] }
+                {
+                    "target": "dmg",
+                    "arch": [
+                        "arm64",
+                        "x64"
+                    ]
+                },
+                {
+                    "target": "zip",
+                    "arch": [
+                        "arm64",
+                        "x64"
+                    ]
+                }
             ]
         },
         "win": {
-            "target": ["nsis"]
+            "target": [
+                "nsis"
+            ]
         },
         "nsis": {
             "oneClick": false,
@@ -70,7 +84,9 @@
             "allowToChangeInstallationDirectory": true
         },
         "linux": {
-            "target": ["AppImage"],
+            "target": [
+                "AppImage"
+            ],
             "category": "Utility"
         }
     },
