@@ -42,6 +42,51 @@ try {
 
 const localPtys = new Map();
 
+//   Native passkey / WebAuthn (macOS only)                 ─
+
+// Chromium's navigator.credentials is broken inside Electron on macOS, so we
+// bridge passkey ceremonies to Apple's AuthenticationServices via the native
+// `electron-webauthn` addon (an ESM-only package backed by an N-API binary, so
+// it needs no electron-rebuild). On Windows/Linux the renderer uses the browser's
+// own WebAuthn and this module is never loaded.
+let electronWebauthnPromise;
+function loadElectronWebauthn() {
+    if (process.platform !== 'darwin') return Promise.resolve(null);
+    if (!electronWebauthnPromise) {
+        // Dynamic import: the package is ESM, so a synchronous require() would be
+        // fragile across Electron/Node versions.
+        electronWebauthnPromise = import('electron-webauthn')
+            .then((m) => m.default ?? m)
+            .catch((e) => {
+                console.warn(
+                    '[main] electron-webauthn unavailable — native macOS passkeys disabled:',
+                    e.message,
+                );
+                return null;
+            });
+    }
+    return electronWebauthnPromise;
+}
+
+/** base64url string → Uint8Array (WebAuthn options use base64url). */
+function b64urlToBytes(s) {
+    return new Uint8Array(Buffer.from(String(s), 'base64url'));
+}
+
+/** The origin the page is actually served from — must match the server's
+ * expectedOrigin / rpID when it verifies the ceremony. */
+function currentPageOrigin() {
+    try {
+        const url = win && !win.isDestroyed() ? win.webContents.getURL() : '';
+        if (url) return new URL(url).origin;
+    } catch (_) {}
+    try {
+        return new URL(REMOTE_URL).origin;
+    } catch (_) {
+        return REMOTE_URL;
+    }
+}
+
 function getWindowIconPath() {
     const candidates = [
         path.join(__dirname, '../../apps/web/public/icons/icon-512x512.png'),
@@ -323,6 +368,134 @@ ipcMain.on('local-terminal:kill', (event, id) => {
             term.kill();
         } catch (_) {}
         localPtys.delete(id);
+    }
+});
+
+//   Native passkey IPC (macOS)                             ─
+
+ipcMain.handle('passkey:isAvailable', async () => !!(await loadElectronWebauthn()));
+
+ipcMain.handle('passkey:create', async (_event, optionsJSON) => {
+    const electronWebauthn = await loadElectronWebauthn();
+    if (!electronWebauthn) {
+        return {
+            success: false,
+            error: 'NotSupportedError',
+            message: 'Native passkeys unavailable',
+        };
+    }
+    try {
+        const o = optionsJSON || {};
+        // Convert the server's base64url options JSON into W3C
+        // PublicKeyCredentialCreationOptions (BufferSource fields).
+        const publicKey = {
+            challenge: b64urlToBytes(o.challenge),
+            rp: o.rp,
+            user: {
+                id: b64urlToBytes(o.user.id),
+                name: o.user.name,
+                displayName: o.user.displayName,
+            },
+            pubKeyCredParams: o.pubKeyCredParams,
+            timeout: o.timeout,
+            attestation: o.attestation,
+            authenticatorSelection: o.authenticatorSelection,
+            excludeCredentials: (o.excludeCredentials || []).map((c) => ({
+                type: c.type,
+                id: b64urlToBytes(c.id),
+                transports: c.transports,
+            })),
+            extensions: o.extensions,
+        };
+        const origin = currentPageOrigin();
+        const result = await electronWebauthn.createCredential(publicKey, {
+            currentOrigin: origin,
+            topFrameOrigin: origin,
+            nativeWindowHandle: win.getNativeWindowHandle(),
+        });
+        if (!result.success) {
+            return { success: false, error: result.error, message: result.errorObject?.message };
+        }
+        const d = result.data;
+        // Map the native (already base64url) result to RegistrationResponseJSON,
+        // the exact shape @simplewebauthn/server expects.
+        return {
+            success: true,
+            data: {
+                id: d.credentialId,
+                rawId: d.credentialId,
+                type: 'public-key',
+                authenticatorAttachment: 'platform',
+                response: {
+                    clientDataJSON: d.clientDataJSON,
+                    attestationObject: d.attestationObject,
+                    transports: d.transports,
+                    authenticatorData: d.authData,
+                    publicKey: d.publicKey,
+                    publicKeyAlgorithm: d.publicKeyAlgorithm,
+                },
+                clientExtensionResults: d.extensions?.credProps
+                    ? { credProps: d.extensions.credProps }
+                    : {},
+            },
+        };
+    } catch (e) {
+        return { success: false, error: 'UnknownError', message: e.message };
+    }
+});
+
+ipcMain.handle('passkey:get', async (_event, optionsJSON) => {
+    const electronWebauthn = await loadElectronWebauthn();
+    if (!electronWebauthn) {
+        return {
+            success: false,
+            error: 'NotSupportedError',
+            message: 'Native passkeys unavailable',
+        };
+    }
+    try {
+        const o = optionsJSON || {};
+        const publicKey = {
+            challenge: b64urlToBytes(o.challenge),
+            rpId: o.rpId,
+            timeout: o.timeout,
+            userVerification: o.userVerification,
+            allowCredentials: (o.allowCredentials || []).map((c) => ({
+                type: c.type,
+                id: b64urlToBytes(c.id),
+                transports: c.transports,
+            })),
+            extensions: o.extensions,
+        };
+        const origin = currentPageOrigin();
+        const result = await electronWebauthn.getCredential(publicKey, {
+            currentOrigin: origin,
+            topFrameOrigin: origin,
+            nativeWindowHandle: win.getNativeWindowHandle(),
+        });
+        if (!result.success) {
+            return { success: false, error: result.error, message: result.errorObject?.message };
+        }
+        const d = result.data;
+        // Map to AuthenticationResponseJSON for @simplewebauthn/server.
+        return {
+            success: true,
+            data: {
+                id: d.credentialId,
+                rawId: d.credentialId,
+                type: 'public-key',
+                authenticatorAttachment: 'platform',
+                response: {
+                    clientDataJSON: d.clientDataJSON,
+                    authenticatorData: d.authenticatorData,
+                    signature: d.signature,
+                    userHandle: d.userHandle || undefined,
+                },
+                clientExtensionResults: {},
+            },
+        };
+    } catch (e) {
+        return { success: false, error: 'UnknownError', message: e.message };
     }
 });
 

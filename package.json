@@ -37,7 +37,17 @@
         "mobile:open:android": "npm run open:android --workspace=apps/mobile"
     },
     "dependencies": {
+        "electron-webauthn": "~1.2.0",
         "node-pty": "^1.1.0"
+    },
+    "build": {
+        "appId": "com.shuvoo.termi",
+        "productName": "Termi",
+        "mac": {
+            "hardenedRuntime": true,
+            "entitlements": "apps/electron/entitlements.mac.plist",
+            "entitlementsInherit": "apps/electron/entitlements.mac.inherit.plist"
+        }
     },
     "devDependencies": {
         "@electron/rebuild": "^4.0.0",

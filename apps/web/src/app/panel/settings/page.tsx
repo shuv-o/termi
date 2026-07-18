@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { startRegistration } from '@simplewebauthn/browser';
+import { webauthnRegister, isPasskeySupported } from '@/lib/webauthn/client';
 import {
     Shield,
     Key,
@@ -955,6 +955,11 @@ export default function SettingsPage() {
             timedOut = true;
         }, 32000);
         try {
+            if (!(await isPasskeySupported())) {
+                clearTimeout(timeoutId);
+                throw new Error('Passkeys are not available on this device');
+            }
+
             const optRes = await fetch('/api/auth/passkey/register-options');
             const optData = await optRes.json();
             if (!optRes.ok || !optData.success) {
@@ -964,7 +969,7 @@ export default function SettingsPage() {
 
             let registration;
             try {
-                registration = await startRegistration({ optionsJSON: optData.data });
+                registration = await webauthnRegister(optData.data);
                 clearTimeout(timeoutId);
             } catch (err: unknown) {
                 clearTimeout(timeoutId);

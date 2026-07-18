@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { startAuthentication } from '@simplewebauthn/browser';
+import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+import { webauthnAuthenticate, isPasskeySupported } from '@/lib/webauthn/client';
 import {
     KeyRound,
     Copy,
@@ -68,20 +69,33 @@ export default function PasskeyRevealModal({
     onClose,
     autoCopy = false,
 }: Props) {
-    const isElectron = typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
-
-    const [step, setStep] = useState<Step>(isElectron ? 'password-fallback' : 'authenticating');
+    const [step, setStep] = useState<Step>('authenticating');
     const [errorMsg, setErrorMsg] = useState('');
     const [revealedValue, setRevealedValue] = useState('');
     const [showValue, setShowValue] = useState(false);
     const [copied, setCopied] = useState(false);
     const [passwordInput, setPasswordInput] = useState('');
     const [passwordLoading, setPasswordLoading] = useState(false);
+    // null = capability not checked yet; true/false = passkeys usable here.
+    const [passkeySupported, setPasskeySupported] = useState<boolean | null>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const autoCopiedRef = useRef(false);
 
+    // Decide up front whether to run a passkey ceremony or fall back to the
+    // account-password prompt (macOS desktop without the native module, or a
+    // browser with no authenticator).
     useEffect(() => {
-        if (!isElectron) void handlePasskeyAuth();
+        let cancelled = false;
+        (async () => {
+            const supported = await isPasskeySupported();
+            if (cancelled) return;
+            setPasskeySupported(supported);
+            if (supported) void handlePasskeyAuth();
+            else setStep('password-fallback');
+        })();
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -129,13 +143,11 @@ export default function PasskeyRevealModal({
             return;
         }
 
-        let assertion: Awaited<ReturnType<typeof startAuthentication>>;
+        let assertion: Awaited<ReturnType<typeof webauthnAuthenticate>>;
         try {
-            assertion = await startAuthentication({
-                optionsJSON: webAuthnOptions as Parameters<
-                    typeof startAuthentication
-                >[0]['optionsJSON'],
-            });
+            assertion = await webauthnAuthenticate(
+                webAuthnOptions as PublicKeyCredentialRequestOptionsJSON,
+            );
         } catch (err: unknown) {
             setErrorMsg(getWebAuthnErrorMessage(err));
             setStep('error');
@@ -241,14 +253,14 @@ export default function PasskeyRevealModal({
                     </div>
                 )}
 
-                {/* Step: password-fallback (Electron — passkeys not supported) */}
+                {/* Step: password-fallback (no usable passkey on this device) */}
                 {step === 'password-fallback' && (
                     <div className="space-y-4">
                         <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                             <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                             <p className="text-sm text-amber-300/90">
-                                Passkeys aren&apos;t available in the desktop app. Enter your
-                                account password to reveal this credential.
+                                No passkey is available on this device. Enter your account password
+                                to reveal this credential.
                             </p>
                         </div>
                         <div>
@@ -298,7 +310,9 @@ export default function PasskeyRevealModal({
                             </Button>
                             <Button
                                 onClick={() =>
-                                    isElectron ? setStep('password-fallback') : handlePasskeyAuth()
+                                    passkeySupported === false
+                                        ? setStep('password-fallback')
+                                        : handlePasskeyAuth()
                                 }
                             >
                                 <RefreshCw className="w-4 h-4" />

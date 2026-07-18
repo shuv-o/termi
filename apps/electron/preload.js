@@ -2,6 +2,14 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     isElectron: true,
+    platform: process.platform,
+    // Native passkey bridge — used on macOS where Chromium's WebAuthn is broken
+    // inside Electron. On Windows/Linux the renderer uses the browser WebAuthn.
+    passkey: {
+        isAvailable: () => ipcRenderer.invoke('passkey:isAvailable'),
+        create: (optionsJSON) => ipcRenderer.invoke('passkey:create', optionsJSON),
+        get: (optionsJSON) => ipcRenderer.invoke('passkey:get', optionsJSON),
+    },
     // Native menu → renderer navigation (see "Go" menu in main.js)
     onNavigate: (cb) => {
         const handler = (_e, routePath) => cb(routePath);
