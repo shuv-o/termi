@@ -198,14 +198,35 @@ Pull requests are reviewed by maintainers. We aim to provide feedback within a f
 
 Termi uses SemVer tags and GitHub Releases.
 
-1. Ensure `CHANGELOG.md` has a section for the version (for example, `## [1.0.0]`).
+1. Ensure `CHANGELOG.md` has a section for the version (for example, `## [1.0.5]`).
 2. Ensure the repo is in a releasable state (CI passing on `main`).
-3. Create and push a version tag:
+3. Bump the version in the root `package.json`. **It must match the tag exactly**, or electron-updater ignores the release and desktop apps never see it.
     ```bash
-    git tag v1.0.0
-    git push origin v1.0.0
+    npm version 1.0.5 --no-git-tag-version
+    git commit -am "release: v1.0.5"
     ```
-4. The GitHub Actions workflow at `.github/workflows/release.yml` publishes the release and uses the matching changelog section as release notes.
+4. Create and push the tag. Push it by name — `--tags` pushes every local tag, which can resurrect ones deleted from the remote:
+    ```bash
+    git tag v1.0.5
+    git push origin main v1.0.5
+    ```
+5. Two workflows fire on the tag:
+    - `release.yml` publishes the release, using the matching changelog section as release notes.
+    - `electron-build.yml` builds the desktop app on macOS, Windows and Linux, and uploads the installers plus the `latest*.yml` auto-update metadata.
+6. **Build and upload the macOS arm64 DMG by hand.** It is not built in CI — electron-builder passes `--timestamp` to `codesign --sign -`, and ad-hoc signatures cannot be timestamped, so the arm64 target times out against Apple's timestamp server on GitHub runners. It builds fine on an Apple Silicon machine:
+    ```bash
+    npx electron-builder --mac --arm64
+    gh release upload v1.0.5 \
+        dist/Termi-1.0.5-arm64.dmg dist/Termi-1.0.5-arm64.dmg.blockmap \
+        dist/Termi-1.0.5-arm64-mac.zip dist/Termi-1.0.5-arm64-mac.zip.blockmap
+    ```
+    Skipping this ships a release with no native Apple Silicon build; CI will not warn you.
+
+### Release notes
+
+- Do not delete the `latest*.yml` assets. Windows and Linux read them to detect updates — removing them silently disables auto-update. The `.blockmap` files enable delta downloads.
+- GitHub always attaches "Source code (zip/tar.gz)". These are generated from the tag and cannot be removed.
+- macOS builds are ad-hoc signed but not notarized, so they cannot self-update. Windows and Linux self-update normally. An Apple Developer ID would resolve notarization, macOS auto-update and the arm64 CI build together.
 
 ---
 

@@ -248,16 +248,24 @@ termi/
 │   │       ├  handlers/       # SSH, SCP, Guacamole (RDP/VNC), Local PTY
 │   │       └  auth/           # JWE token validation
 │   │
-│   └  electron/               # Desktop app wrapper
-│       ├  main.js             # Electron main process + node-pty IPC
-│       └  preload.js          # Secure context bridge
+│   ├  electron/               # Desktop app wrapper
+│   │   ├  main.js             # Electron main process + node-pty IPC
+│   │   ├  preload.js          # Secure context bridge
+│   │   └  updater.js          # Auto-update via GitHub Releases
+│   │
+│   └  mobile/                 # Capacitor iOS/Android shell
 │
+├  .github/workflows/          # CI, release notes, desktop builds
 ├  traefik/                    # Reverse-proxy configuration
 ├  docker-compose.yml
 ├  docker-compose.local.yml    # Local development with Docker
-├  electron-builder.yml        # Desktop app build config
+├  electron-builder.yml        # Desktop build config (authoritative)
 └  .env.example
 ```
+
+> The desktop and mobile apps are thin shells around the hosted web app, so UI
+> changes reach them without a new release. The desktop app checks GitHub
+> Releases for shell updates on launch and every 6 hours.
 
 ---
 
@@ -287,6 +295,8 @@ termi/
 | `TRUSTED_PROXY`          | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik) |
 | `ALLOWED_ORIGINS`        | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                          |
 | `ALLOW_LOCAL_TERMINAL`   | `false`               | Enable local PTY terminal on the gateway host         |
+| `GATEWAY_DETACHED_TTL_MIN` | `30`                | Minutes a detached SSH session is kept alive for reconnect |
+| `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`         | Concurrent sessions per user; `0` = unlimited         |
 | `GOOGLE_CLIENT_ID`       | —                     | Google OAuth client ID                                |
 | `GOOGLE_CLIENT_SECRET`   | —                     | Google OAuth client secret                            |
 | `SMTP_HOST`              | —                     | SMTP host for email (verification, alerts, invites)   |
