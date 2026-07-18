@@ -12,6 +12,27 @@ _Nothing yet._
 
 ---
 
+## [1.0.2] — 2026-07-18
+
+### Added
+
+- **Desktop auto-update** — the Electron app now checks GitHub Releases on launch and every 6 hours, downloads updates in the background, and prompts to restart. A "Check for Updates…" item was added to the app menu (macOS) and a new Help menu (Windows/Linux).
+- Desktop releases now publish installers for every platform: `.dmg` and `.zip` (macOS), `.exe` (Windows, NSIS), and `.AppImage` (Linux).
+
+### Fixed
+
+- Packaged desktop builds crashed on launch because `updater.js` was missing from the app bundle.
+- Release builds produced no installers: `electron-builder.yml` takes precedence over the `build` field in `package.json`, so the publish and target configuration was being ignored.
+- Upload progress rows used `Math.random()` for ids, so collisions could desync progress bars. Now uses `crypto.randomUUID()`.
+- CI workflow now scopes `GITHUB_TOKEN` to `contents: read` (least privilege).
+
+### Security
+
+- `nodemailer` 8.0.4 → 9.0.3 — the `raw` message option could bypass `disableFileAccess`/`disableUrlAccess` ([GHSA](https://github.com/advisories)). This codebase does not use `raw`, so it was not exploitable here.
+- Patched transitive dependencies via npm `overrides`: `shell-quote` ≥1.8.4, `form-data` ≥4.0.6, `undici` ≥6.27.0.
+
+---
+
 ## [1.0.0] — 2026-06-06
 
 ### 🎉 Initial Public Release
