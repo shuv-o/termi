@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import Link from 'next/link';
 import {
     ArrowLeft,
@@ -231,10 +232,14 @@ export default function ServerDetailsPage() {
     const router = useRouter();
     const { id } = useParams<{ id: string }>();
 
-    const [server, setServer] = useState<ServerInfo | null>(null);
+    // The server record is cached, so coming back from the edit page (or from a
+    // connection) shows it immediately instead of spinning on a refetch.
+    const { data: serverData, error: serverError } = useCachedFetch<{ server: ServerInfo }>(
+        id ? `/api/servers/${id}` : null,
+    );
+    const server = serverData?.server ?? null;
     const [monitorConfig, setMonitorConfig] = useState<MonitorConfig | null>(null);
     const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([]);
-    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -251,25 +256,18 @@ export default function ServerDetailsPage() {
         failureThreshold: 3,
     });
 
+    // Monitor config and health history load alongside the cached server record.
     const loadAll = useCallback(async () => {
         try {
-            const [serverRes, monitorRes, historyRes] = await Promise.all([
-                fetch(`/api/servers/${id}`),
+            const [monitorRes, historyRes] = await Promise.all([
                 fetch(`/api/servers/${id}/monitor`),
                 fetch(`/api/servers/${id}/health-history?limit=50`),
             ]);
 
-            const [serverData, monitorData, historyData] = await Promise.all([
-                serverRes.json(),
+            const [monitorData, historyData] = await Promise.all([
                 monitorRes.json(),
                 historyRes.json(),
             ]);
-
-            if (!serverData.success) {
-                router.push('/panel');
-                return;
-            }
-            setServer(serverData.data.server);
 
             if (monitorData.success && monitorData.data.config) {
                 const cfg = monitorData.data.config as MonitorConfig;
@@ -288,12 +286,15 @@ export default function ServerDetailsPage() {
                 setHealthRecords(historyData.data.records);
             }
         } catch {
-            router.push('/panel');
-        } finally {
-            setLoading(false);
+            /* monitoring data is supplementary — the page still works without it */
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps -- 'form' is applied via functional setForm; excluding it avoids reloading on every keystroke
-    }, [id, router]);
+    }, [id]);
+
+    // A missing/forbidden server means there is nothing to show here.
+    useEffect(() => {
+        if (serverError) router.push('/panel');
+    }, [serverError, router]);
 
     useEffect(() => {
         loadAll();
@@ -382,15 +383,13 @@ export default function ServerDetailsPage() {
 
     const isSSH = server?.protocol === 'SSH';
 
-    if (loading) {
+    if (!server) {
         return (
             <div className="flex items-center justify-center h-48">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
         );
     }
-
-    if (!server) return null;
 
     const ProtoIcon = protocolIcons[server.protocol];
     const protoColor = protocolColors[server.protocol];

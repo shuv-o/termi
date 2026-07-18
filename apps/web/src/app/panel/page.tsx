@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -48,6 +48,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSessionsContext } from './sessions-context';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import dynamic from 'next/dynamic';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
 import { Button } from '@/components/ui/button';
@@ -149,6 +150,16 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 const METRICS_TTL = 30_000;
+
+/**
+ * Server metrics, cached at module scope so they survive this page unmounting.
+ *
+ * Previously this was a `useRef` inside the component, which meant navigating
+ * away and back threw every reading away and re-showed empty metric tiles while
+ * they refetched. Keeping it here lets a return visit paint the last known
+ * values instantly and refresh only what has gone stale.
+ */
+const metricsCache: Record<string, { data: ServerMetrics; fetchedAt: number }> = {};
 
 const protocolIcons = {
     SSH: Terminal,
@@ -1161,14 +1172,45 @@ export default function DashboardPage() {
     const router = useRouter();
     const { addSession, sessions } = useSessionsContext();
 
-    const [servers, setServers] = useState<ServerItem[]>([]);
-    const [sharedServers, setSharedServers] = useState<
-        (ServerItem & { sharedBy: string; permissions: string })[]
-    >([]);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
     const [filter, setFilter] = useState<'all' | 'favorites'>('all');
+
+    // Search and favourites filtering happen server-side, so each combination is
+    // its own cache entry. Repeating a search you've already run is instant, and
+    // returning to the dashboard shows the last list immediately while it
+    // refreshes in the background.
+    const serversUrl = useMemo(() => {
+        const params = new URLSearchParams();
+        if (debouncedSearchQuery) params.set('q', debouncedSearchQuery);
+        if (filter === 'favorites') params.set('favorites', 'true');
+        const qs = params.toString();
+        return `/api/servers${qs ? `?${qs}` : ''}`;
+    }, [debouncedSearchQuery, filter]);
+
+    const {
+        data: serversData,
+        isLoading: loading,
+        refresh: fetchServers,
+        mutate: mutateServers,
+    } = useCachedFetch<{ servers: ServerItem[] }>(serversUrl);
+
+    const servers = useMemo(() => serversData?.servers ?? [], [serversData]);
+
+    /** Local list edits (favourite toggle, delete) write straight to the cache. */
+    const setServers = useCallback(
+        (updater: ServerItem[] | ((prev: ServerItem[]) => ServerItem[])) => {
+            mutateServers((prev) => ({
+                servers: typeof updater === 'function' ? updater(prev?.servers ?? []) : updater,
+            }));
+        },
+        [mutateServers],
+    );
+
+    const { data: sharedData } = useCachedFetch<{
+        servers: (ServerItem & { sharedBy: string; permissions: string })[];
+    }>('/api/shared-servers');
+    const sharedServers = useMemo(() => sharedData?.servers ?? [], [sharedData]);
     const [protocolFilter, setProtocolFilter] = useState<ProtocolFilter>('all');
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -1187,7 +1229,6 @@ export default function DashboardPage() {
         field: 'name',
         dir: 'asc',
     });
-    const metricsCacheRef = useRef<Record<string, { data: ServerMetrics; fetchedAt: number }>>({});
 
     useEffect(() => {
         const v = localStorage.getItem('panel-view') as ViewMode | null;
@@ -1216,35 +1257,19 @@ export default function DashboardPage() {
         localStorage.setItem('panel-sort', JSON.stringify({ field, dir }));
     };
 
-    const fetchServers = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams();
-            if (debouncedSearchQuery) params.set('q', debouncedSearchQuery);
-            if (filter === 'favorites') params.set('favorites', 'true');
-            const response = await fetch(`/api/servers?${params}`);
-            const data = await response.json();
-            if (data.success) setServers(data.data.servers);
-        } catch (error) {
-            console.error('Failed to fetch servers:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const fetchMetrics = useCallback(async (serverList: ServerItem[], force = false) => {
         if (serverList.length === 0) return;
         const now = Date.now();
 
         serverList.forEach((s) => {
-            const cached = metricsCacheRef.current[s.id];
+            const cached = metricsCache[s.id];
             if (cached && now - cached.fetchedAt < METRICS_TTL) {
                 setMetrics((prev) => ({ ...prev, [s.id]: cached.data }));
             }
         });
 
         const toFetch = serverList.filter((s) => {
-            const cached = metricsCacheRef.current[s.id];
+            const cached = metricsCache[s.id];
             return force || !cached || now - cached.fetchedAt >= METRICS_TTL;
         });
         if (toFetch.length === 0) return;
@@ -1262,7 +1287,7 @@ export default function DashboardPage() {
                     const res = await fetch(`/api/servers/${server.id}/metrics`);
                     const data = await res.json();
                     if (data.success) {
-                        metricsCacheRef.current[server.id] = {
+                        metricsCache[server.id] = {
                             data: data.data.metrics,
                             fetchedAt: Date.now(),
                         };
@@ -1277,21 +1302,11 @@ export default function DashboardPage() {
         );
     }, []);
 
+    // Servers and shared servers are fetched by useCachedFetch above, which
+    // revalidates on navigation and focus — no fetch-on-mount effects needed.
     useEffect(() => {
-        fetchServers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchServers is stable; re-fetch only on search/filter changes
-    }, [debouncedSearchQuery, filter]);
-    useEffect(() => {
-        fetch('/api/shared-servers')
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) setSharedServers(d.data.servers);
-            })
-            .catch(() => {});
-    }, []);
-    useEffect(() => {
-        if (!loading && servers.length > 0) fetchMetrics(servers);
-    }, [loading, servers, fetchMetrics]);
+        if (servers.length > 0) fetchMetrics(servers);
+    }, [servers, fetchMetrics]);
     useEffect(() => {
         if (servers.length === 0) return;
         const id = setInterval(() => fetchMetrics(servers), METRICS_TTL);

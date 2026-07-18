@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import {
     ArrowLeft,
     BookKey,
@@ -55,8 +56,17 @@ const emptyForm = (): EntryForm => ({
 });
 
 export default function KeychainPage() {
-    const [entries, setEntries] = useState<KeychainEntry[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Cached so returning to the keychain shows the list instantly instead of
+    // re-fetching behind a spinner; it revalidates in the background.
+    const {
+        data: keychainData,
+        isLoading: loading,
+        refresh: fetchEntries,
+        mutate: mutateEntries,
+    } = useCachedFetch<{ entries: KeychainEntry[] }>('/api/keychain');
+    const entries = keychainData?.entries ?? [];
+    const setEntries = (updater: (prev: KeychainEntry[]) => KeychainEntry[]) =>
+        mutateEntries((prev) => ({ entries: updater(prev?.entries ?? []) }));
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
     const [form, setForm] = useState<EntryForm>(emptyForm());
@@ -97,22 +107,6 @@ export default function KeychainPage() {
     };
 
     const update = (fields: Partial<EntryForm>) => setForm((f) => ({ ...f, ...fields }));
-
-    const fetchEntries = async () => {
-        try {
-            const res = await fetch('/api/keychain');
-            const data = await res.json();
-            if (data.success) setEntries(data.data.entries);
-        } catch {
-            // ignore
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchEntries();
-    }, []);
 
     const flash = (msg: string) => {
         setSuccessMsg(msg);

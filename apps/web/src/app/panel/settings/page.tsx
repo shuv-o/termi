@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { webauthnRegister, isPasskeySupported } from '@/lib/webauthn/client';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import {
     Shield,
     Key,
@@ -571,8 +572,27 @@ function PasswordStrength({ password }: { password: string }) {
 //  ─ Main Page
 
 export default function SettingsPage() {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    // Share the layout's cached user instead of re-fetching /api/auth/me. Writes
+    // go through the cache so an edit here (name, 2FA, passkey) also updates the
+    // shell's avatar immediately, with no extra round-trip.
+    const {
+        data: meData,
+        isLoading: userLoading,
+        mutate: mutateMe,
+    } = useCachedFetch<{ user: User }>('/api/auth/me');
+    const user = meData?.user ?? null;
+    const setUser = useCallback(
+        (updater: User | null | ((u: User | null) => User | null)) => {
+            mutateMe((prev) => {
+                const current = prev?.user ?? null;
+                const next = typeof updater === 'function' ? updater(current) : updater;
+                // Settings only ever edits an existing user, never clears it.
+                return { user: (next ?? current) as User };
+            });
+        },
+        [mutateMe],
+    );
+
     const [activeSection, setActiveSection] = useState<Section>('profile');
     const [toasts, setToasts] = useState<Toast[]>([]);
     const toastIdRef = useRef(0);
@@ -642,22 +662,16 @@ export default function SettingsPage() {
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
 
+    // Seed the editable name field from the cached user, once it's available.
+    const nameSeeded = useRef(false);
     useEffect(() => {
-        async function init() {
-            try {
-                const res = await fetch('/api/auth/me');
-                const data = await res.json();
-                if (data.success) {
-                    setUser(data.data.user);
-                    setNameInput(data.data.user.name ?? '');
-                }
-            } catch {
-                /* ignore */
-            } finally {
-                setLoading(false);
-            }
+        if (user && !nameSeeded.current) {
+            setNameInput(user.name ?? '');
+            nameSeeded.current = true;
         }
-        void init();
+    }, [user]);
+
+    useEffect(() => {
         void loadPasskeys();
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setPushPermission(Notification.permission);
@@ -1119,7 +1133,9 @@ export default function SettingsPage() {
 
     //   Render
 
-    if (loading) {
+    // Only the very first visit (nothing cached) shows a spinner; arriving here
+    // from elsewhere in the panel reuses the already-loaded user instantly.
+    if (userLoading && !user) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-7 h-7 animate-spin text-primary" />

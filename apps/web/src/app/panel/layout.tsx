@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
+import { useCachedFetch, clearCache } from '@/lib/hooks/useCachedFetch';
 import TerminalLogo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 
@@ -61,8 +62,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    // The signed-in user comes from a shared cache, so navigating between panel
+    // pages never re-fetches it or flashes the shell behind a spinner — the
+    // cached user paints instantly and revalidates in the background.
+    const { data: meData, error: meError } = useCachedFetch<{ user: User }>('/api/auth/me');
+    const user = meData?.user ?? null;
 
     // Desktop collapsed sidebar state
     const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -163,25 +167,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         return () => vv.removeEventListener('resize', onResize);
     }, []);
 
+    // A failed /api/auth/me (expired session, network) means we're not signed in.
     useEffect(() => {
-        async function fetchUser() {
-            try {
-                const response = await fetch('/api/auth/me');
-                const data = await response.json();
-                if (!data.success) {
-                    router.push('/login');
-                    return;
-                }
-                setUser(data.data.user);
-            } catch {
-                router.push('/login');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchUser();
-    }, [router]);
+        if (meError) router.push('/login');
+    }, [meError, router]);
 
     useEffect(() => {
         if (isSessionsPage) {
@@ -192,6 +181,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
+        clearCache(); // drop cached user/servers so a re-login starts clean
         router.push('/login');
     };
 
@@ -205,7 +195,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         }
     };
 
-    if (loading) {
+    // Only block on the very first load, when nothing is cached yet. On every
+    // later navigation `user` is already present, so the shell paints instantly.
+    if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -357,7 +349,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         if (collapsed)
                             return (
                                 <CollapseTooltip key={item.name} label={item.name}>
-                                    <Link href={item.href} className={cls} title={item.name}>
+                                    <Link
+                                        href={item.href}
+                                        prefetch
+                                        className={cls}
+                                        title={item.name}
+                                    >
                                         {isActive && (
                                             <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
                                         )}
@@ -367,7 +364,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             );
 
                         return (
-                            <Link key={item.name} href={item.href} className={cls}>
+                            <Link key={item.name} href={item.href} prefetch className={cls}>
                                 {isActive && (
                                     <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />
                                 )}

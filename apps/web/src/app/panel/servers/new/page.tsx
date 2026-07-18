@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import Link from 'next/link';
 import {
     ArrowLeft,
@@ -99,7 +100,10 @@ type TestStatus = 'idle' | 'testing' | 'success' | 'failed';
 
 export default function NewServerPage() {
     const router = useRouter();
-    const [groups, setGroups] = useState<Group[]>([]);
+    // Shared cache with the Groups/Keychain pages — usually already warm, so
+    // the dropdowns are populated the moment this form opens.
+    const { data: groupsData } = useCachedFetch<{ groups: Group[] }>('/api/groups');
+    const groups = groupsData?.groups ?? [];
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -112,7 +116,8 @@ export default function NewServerPage() {
     const [tagInput, setTagInput] = useState('');
 
     // Keychain state
-    const [keychainEntries, setKeychainEntries] = useState<KeychainEntry[]>([]);
+    const { data: keychainData } = useCachedFetch<{ entries: KeychainEntry[] }>('/api/keychain');
+    const keychainEntries = keychainData?.entries ?? [];
     const [credSource, setCredSource] = useState<'new' | 'keychain'>('new');
     const [selectedKeychainId, setSelectedKeychainId] = useState('');
     const [saveToKeychain, setSaveToKeychain] = useState(false);
@@ -137,21 +142,7 @@ export default function NewServerPage() {
         rdpSecurity: 'any' as 'any' | 'rdp' | 'nla' | 'tls',
     });
 
-    useEffect(() => {
-        fetch('/api/groups')
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) setGroups(d.data.groups);
-            })
-            .catch(() => {});
-
-        fetch('/api/keychain')
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) setKeychainEntries(d.data.entries);
-            })
-            .catch(() => {});
-    }, []);
+    // groups + keychain come from the shared cache above.
 
     const update = (fields: Partial<typeof form>) => setForm((f) => ({ ...f, ...fields }));
 

@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import FileManagerPanel, { type RemoteEntry } from '@/components/scp/FileManagerPanel';
 import { type Session, type SessionStatus, useSessionsContext } from './sessions-context';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -183,18 +184,13 @@ function InlineSessionPicker({
     onClose: () => void;
     canClose: boolean;
 }) {
-    const [servers, setServers] = useState<ServerItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Shares the dashboard's server-list cache, so opening the picker shows the
+    // list instantly instead of spinning through another /api/servers round-trip.
+    const { data: serversData, isLoading: loading } = useCachedFetch<{ servers: ServerItem[] }>(
+        '/api/servers',
+    );
+    const servers = useMemo(() => serversData?.servers ?? [], [serversData]);
     const [query, setQuery] = useState('');
-
-    useEffect(() => {
-        fetch('/api/servers')
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) setServers(d.data.servers);
-            })
-            .finally(() => setLoading(false));
-    }, []);
 
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
@@ -1394,15 +1390,9 @@ export default function SessionsWorkspace() {
         });
     }, []);
 
-    const [allServers, setAllServers] = useState<ServerItem[]>([]);
-
-    useEffect(() => {
-        fetch('/api/servers')
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) setAllServers(d.data.servers);
-            });
-    }, []);
+    // Same cached list as the picker/dashboard — one shared fetch, not three.
+    const { data: allServersData } = useCachedFetch<{ servers: ServerItem[] }>('/api/servers');
+    const allServers = useMemo(() => allServersData?.servers ?? [], [allServersData]);
 
     const sshServers = useMemo(() => allServers.filter((s) => s.protocol === 'SSH'), [allServers]);
 

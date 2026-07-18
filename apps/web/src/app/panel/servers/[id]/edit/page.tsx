@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import Link from 'next/link';
 import {
     ArrowLeft,
@@ -99,7 +100,10 @@ export default function EditServerPage() {
     const router = useRouter();
     const { id } = useParams<{ id: string }>();
 
-    const [groups, setGroups] = useState<Group[]>([]);
+    // Groups and keychain entries share their cache with the Groups/Keychain
+    // pages, so opening this form reuses lists that are usually already loaded.
+    const { data: groupsData } = useCachedFetch<{ groups: Group[] }>('/api/groups');
+    const groups = groupsData?.groups ?? [];
     const [pageLoading, setPageLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -111,7 +115,8 @@ export default function EditServerPage() {
     const [tagInput, setTagInput] = useState('');
 
     // Keychain state
-    const [keychainEntries, setKeychainEntries] = useState<KeychainEntry[]>([]);
+    const { data: keychainData } = useCachedFetch<{ entries: KeychainEntry[] }>('/api/keychain');
+    const keychainEntries = keychainData?.entries ?? [];
     const [credSource, setCredSource] = useState<'new' | 'keychain'>('new');
     const [selectedKeychainId, setSelectedKeychainId] = useState('');
     const [saveToKeychain, setSaveToKeychain] = useState(false);
@@ -143,12 +148,9 @@ export default function EditServerPage() {
     });
 
     useEffect(() => {
-        Promise.all([
-            fetch(`/api/servers/${id}`).then((r) => r.json()),
-            fetch('/api/groups').then((r) => r.json()),
-            fetch('/api/keychain').then((r) => r.json()),
-        ])
-            .then(([serverData, groupData, keychainData]) => {
+        fetch(`/api/servers/${id}`)
+            .then((r) => r.json())
+            .then((serverData) => {
                 if (!serverData.success) {
                     router.push('/panel');
                     return;
@@ -177,8 +179,6 @@ export default function EditServerPage() {
                     displayHeight: s.displayHeight ?? 1080,
                     rdpSecurity: (s.rdpSecurity ?? 'any') as 'any' | 'rdp' | 'nla' | 'tls',
                 });
-                if (groupData.success) setGroups(groupData.data.groups);
-                if (keychainData.success) setKeychainEntries(keychainData.data.entries);
             })
             .catch(() => router.push('/panel'))
             .finally(() => setPageLoading(false));

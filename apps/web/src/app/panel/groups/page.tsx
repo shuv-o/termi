@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import {
     FolderOpen,
     Plus,
@@ -603,9 +604,24 @@ const EMPTY_FORM: GroupFormData = { name: '', description: '', color: '', icon: 
 
 export default function GroupsPage() {
     const router = useRouter();
-    const [groups, setGroups] = useState<Group[]>([]);
+    // Cached: revisiting Groups paints the list immediately and revalidates
+    // quietly, rather than replaying the skeleton on every navigation.
+    const {
+        data: groupsData,
+        isLoading: loading,
+        mutate: mutateGroups,
+    } = useCachedFetch<{ groups: Group[] }>('/api/groups');
+    const groups = useMemo(() => groupsData?.groups ?? [], [groupsData]);
+    const setGroups = useCallback(
+        (updater: Group[] | ((prev: Group[]) => Group[])) => {
+            mutateGroups((prev) => ({
+                groups: typeof updater === 'function' ? updater(prev?.groups ?? []) : updater,
+            }));
+        },
+        [mutateGroups],
+    );
+
     const [details, setDetails] = useState<Record<string, GroupDetail>>({});
-    const [loading, setLoading] = useState(true);
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [search, setSearch] = useState('');
@@ -620,29 +636,13 @@ export default function GroupsPage() {
         setTimeout(() => setToast(null), 3500);
     }, []);
 
-    const loadGroups = useCallback(async () => {
-        try {
-            const res = await fetch('/api/groups');
-            const data = await res.json();
-            if (data.success) {
-                setGroups(data.data.groups);
-                // Auto-select first group on first load
-                if (data.data.groups.length > 0 && !selectedId) {
-                    const first = data.data.groups[0];
-                    setSelectedId(first.id);
-                }
-            }
-        } catch {
-            showToast('error', 'Failed to load groups');
-        } finally {
-            setLoading(false);
-        }
-    }, [showToast, selectedId]);
-
+    // Auto-select the first group once the list is available (and whenever the
+    // current selection disappears, e.g. after a delete).
     useEffect(() => {
-        loadGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount
-    }, []);
+        if (groups.length > 0 && !groups.some((g) => g.id === selectedId)) {
+            setSelectedId(groups[0].id);
+        }
+    }, [groups, selectedId]);
 
     const loadDetail = useCallback(
         async (groupId: string) => {
@@ -763,7 +763,7 @@ export default function GroupsPage() {
                 showToast('error', 'Failed to reorder groups');
             }
         },
-        [groups, showToast],
+        [groups, showToast, setGroups],
     );
 
     const handleConnect = useCallback(
