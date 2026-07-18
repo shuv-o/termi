@@ -62,6 +62,9 @@ interface ElectronUpdaterAPI {
     onProgress: (cb: (progress: ElectronUpdaterProgress) => void) => () => void;
 }
 
+/** Commands dispatched by the native "Shell" menu (see apps/electron/main.js). */
+type AppCommand = 'shell:new' | 'shell:close' | 'shell:next' | 'shell:prev' | 'palette:open';
+
 interface ElectronAPI {
     isElectron: true;
     /** The host OS platform, e.g. 'darwin' | 'win32' | 'linux' (from process.platform). */
@@ -70,6 +73,8 @@ interface ElectronAPI {
     updater?: ElectronUpdaterAPI;
     /** Subscribe to navigation requests from the native app menu. Returns an unsubscribe fn. */
     onNavigate?: (cb: (routePath: string) => void) => () => void;
+    /** Subscribe to app commands from the native "Shell" menu. Returns an unsubscribe fn. */
+    onCommand?: (cb: (command: AppCommand) => void) => () => void;
     localTerminal: ElectronLocalTerminalAPI;
     /** Native passkey bridge (macOS only). */
     passkey?: ElectronPasskeyAPI;

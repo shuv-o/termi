@@ -3,6 +3,8 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const { initAutoUpdater, checkForUpdatesInteractive } = require('./updater');
+const { getWindowState, trackWindowState } = require('./window-state');
+const { attachContextMenu } = require('./context-menu');
 
 const IS_DEV = !app.isPackaged || process.env.ELECTRON_DEV === '1';
 
@@ -107,6 +109,21 @@ function navigateTo(routePath) {
     }
 }
 
+/**
+ * Fire an app-level command in the renderer (new shell, close shell, …).
+ *
+ * These live in the native menu rather than as renderer key handlers so they
+ * appear next to their shortcut in the menu bar — how a desktop user discovers
+ * them — and so they keep working while focus is inside a terminal, which
+ * swallows most keystrokes.
+ */
+function sendCommand(command) {
+    const target = win && !win.isDestroyed() ? win : BrowserWindow.getAllWindows()[0];
+    if (target && !target.isDestroyed()) {
+        target.webContents.send('app:command', command);
+    }
+}
+
 function buildAppMenu() {
     const isMac = process.platform === 'darwin';
 
@@ -145,6 +162,42 @@ function buildAppMenu() {
                 ...(isMac
                     ? [{ role: 'pasteAndMatchStyle' }, { role: 'delete' }, { role: 'selectAll' }]
                     : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }]),
+            ],
+        },
+        {
+            // Terminal-centric commands, handled by the renderer. Cmd/Ctrl+1-4
+            // are already bound to page navigation in "Go" below, so shell tabs
+            // cycle with bracket keys instead of numbers, and closing a shell is
+            // Shift+W so it doesn't shadow the standard "close window".
+            label: 'Shell',
+            submenu: [
+                {
+                    label: 'New Shell',
+                    accelerator: 'CmdOrCtrl+T',
+                    click: () => sendCommand('shell:new'),
+                },
+                {
+                    label: 'Close Shell',
+                    accelerator: 'CmdOrCtrl+Shift+W',
+                    click: () => sendCommand('shell:close'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Next Shell',
+                    accelerator: 'CmdOrCtrl+Shift+]',
+                    click: () => sendCommand('shell:next'),
+                },
+                {
+                    label: 'Previous Shell',
+                    accelerator: 'CmdOrCtrl+Shift+[',
+                    click: () => sendCommand('shell:prev'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Quick Open Server…',
+                    accelerator: 'CmdOrCtrl+K',
+                    click: () => sendCommand('palette:open'),
+                },
             ],
         },
         {
@@ -292,14 +345,43 @@ function setupStaticAssetCaching() {
     }
 }
 
+/**
+ * Hosts this window may navigate to in place.
+ *
+ * The app's own origin, plus the identity providers whose sign-in flow is a
+ * full-page redirect ("Sign in with Google" navigates the current window to
+ * accounts.google.com and back). Sending those to the external browser would
+ * strand the user there: they'd authenticate in Safari and the app would never
+ * receive the session.
+ */
+const AUTH_NAV_HOSTS = new Set([
+    'accounts.google.com',
+    'accounts.youtube.com', // Google occasionally bounces consent through here
+    'oauth2.googleapis.com',
+]);
+
+function isAllowedNavigation(target) {
+    try {
+        if (target.origin === new URL(REMOTE_URL).origin) return true;
+    } catch {
+        return false;
+    }
+    return AUTH_NAV_HOSTS.has(target.hostname);
+}
+
 function createWindow(appUrl) {
     Menu.setApplicationMenu(buildAppMenu());
     setupStaticAssetCaching();
     const iconPath = getWindowIconPath();
 
+    // Reopen where the user left off, not at a fixed default in the middle of
+    // the screen. `isMaximized` is applied after creation (see below).
+    const { isMaximized, ...bounds } = getWindowState();
+
     win = new BrowserWindow({
-        width: 1400,
-        height: 900,
+        ...bounds,
+        minWidth: 800,
+        minHeight: 600,
         title: 'Termi',
         // Paint the window in the app's own dark background from the very first
         // frame. Electron's default is white, so without this the window flashes
@@ -316,6 +398,14 @@ function createWindow(appUrl) {
         },
         ...(iconPath ? { icon: iconPath } : {}),
     });
+
+    if (isMaximized) win.maximize();
+
+    // Persist size/position/maximised state as the user changes them.
+    trackWindowState(win);
+
+    // Native right-click menu (copy/paste/select-all, link handling).
+    attachContextMenu(win, { isDev: IS_DEV });
 
     // First paint is ready — reveal the window. macOS fades it in for us.
     win.once('ready-to-show', () => {
@@ -340,6 +430,34 @@ function createWindow(appUrl) {
         shell.openExternal(url);
         return { action: 'deny' };
     });
+
+    // Keep the shell pinned to its own origin.
+    //
+    // setWindowOpenHandler above only covers *new* windows. Without this, an
+    // in-place navigation — a redirect, a target-less link, injected markup —
+    // could move this window to an arbitrary site while the preload bridge
+    // (passkeys, local terminal IPC) is still attached to it. Off-origin
+    // destinations are handed to the real browser instead, where they belong.
+    win.webContents.on('will-navigate', (event, url) => {
+        let target;
+        try {
+            target = new URL(url);
+        } catch {
+            event.preventDefault();
+            return;
+        }
+
+        if (isAllowedNavigation(target)) return;
+
+        event.preventDefault();
+        // Only hand real web pages to the browser; never custom schemes.
+        if (target.protocol === 'https:' || target.protocol === 'http:') {
+            shell.openExternal(url);
+        }
+    });
+
+    // The preload bridge must never be attached to a page we didn't ship.
+    win.webContents.on('will-attach-webview', (event) => event.preventDefault());
 }
 
 function startApp() {

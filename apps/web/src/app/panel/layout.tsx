@@ -137,6 +137,18 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         return api.onNavigate((routePath) => router.push(routePath));
     }, [router]);
 
+    //   Electron: shell commands target the sessions workspace, which is only
+    //   visible on /panel/sessions — bring it into view before it handles them.
+    useEffect(() => {
+        const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+        if (!api?.onCommand) return;
+        return api.onCommand((command) => {
+            if (command.startsWith('shell:') || command === 'palette:open') {
+                router.push('/panel/sessions');
+            }
+        });
+    }, [router]);
+
     function toggleCollapsed() {
         setCollapsed((prev) => {
             const next = !prev;

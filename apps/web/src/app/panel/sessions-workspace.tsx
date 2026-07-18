@@ -1025,6 +1025,38 @@ function TerminalPane({
 
     const activeShellIndex = shells.findIndex((s) => s.id === activeShellId);
 
+    // Native "Shell" menu commands (Cmd+T, Cmd+Shift+W, Cmd+Shift+[ / ]).
+    // Only the visible session panel reacts, and local terminals have no
+    // gateway shells to manage.
+    useEffect(() => {
+        const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+        if (!api?.onCommand) return;
+        if (!isActive || session.type === 'local') return;
+
+        return api.onCommand((command) => {
+            switch (command) {
+                case 'shell:new':
+                    void addShell();
+                    break;
+                case 'shell:close':
+                    // Keep the last shell open — closing it would leave an empty
+                    // session panel with nothing to show.
+                    if (shells.length > 1 && activeShellId) closeShell(activeShellId);
+                    break;
+                case 'shell:next':
+                case 'shell:prev': {
+                    if (shells.length < 2) break;
+                    const delta = command === 'shell:next' ? 1 : -1;
+                    // Wrap around, so the shortcuts cycle rather than dead-end.
+                    const next = (activeShellIndex + delta + shells.length) % shells.length;
+                    setActiveShellId(shells[next].id);
+                    setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+                    break;
+                }
+            }
+        });
+    }, [isActive, session.type, shells, activeShellId, activeShellIndex, addShell, closeShell]);
+
     return (
         <div
             className="absolute inset-0 flex flex-col"
@@ -1364,6 +1396,17 @@ export default function SessionsWorkspace() {
     } = useSessionsContext();
 
     const [showPicker, setShowPicker] = useState(false);
+
+    // Cmd/Ctrl+K from the native menu opens the server picker — the quickest
+    // path from "I want that box" to a shell on it.
+    useEffect(() => {
+        const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+        if (!api?.onCommand) return;
+        return api.onCommand((command) => {
+            if (command === 'palette:open') setShowPicker(true);
+        });
+    }, []);
+
     const [mode, setMode] = useState<'terminal' | 'transfer'>('terminal');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);

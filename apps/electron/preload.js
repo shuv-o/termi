@@ -34,6 +34,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.on('app:navigate', handler);
         return () => ipcRenderer.removeListener('app:navigate', handler);
     },
+    // Native menu → app commands (see "Shell" menu in main.js): 'shell:new',
+    // 'shell:close', 'shell:next', 'shell:prev', 'palette:open'.
+    onCommand: (cb) => {
+        const handler = (_e, command) => cb(command);
+        ipcRenderer.on('app:command', handler);
+        return () => ipcRenderer.removeListener('app:command', handler);
+    },
     localTerminal: {
         create: (id, opts) => ipcRenderer.invoke('local-terminal:create', id, opts),
         write: (id, data) => ipcRenderer.send('local-terminal:write', id, data),
