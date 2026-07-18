@@ -24,6 +24,13 @@ interface Props {
     serverName: string;
     field: RevealField;
     onClose: () => void;
+    /**
+     * When true, the credential is copied to the clipboard automatically as soon
+     * as it is revealed (after passkey / password verification), and the modal
+     * closes shortly after. Used by the "Copy Password" action. If the clipboard
+     * write fails, the revealed value stays on screen for a manual copy.
+     */
+    autoCopy?: boolean;
 }
 
 type Step = 'authenticating' | 'password-fallback' | 'revealed' | 'error';
@@ -54,7 +61,13 @@ function getWebAuthnErrorMessage(err: unknown): string {
     }
 }
 
-export default function PasskeyRevealModal({ serverId, serverName, field, onClose }: Props) {
+export default function PasskeyRevealModal({
+    serverId,
+    serverName,
+    field,
+    onClose,
+    autoCopy = false,
+}: Props) {
     const isElectron = typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
 
     const [step, setStep] = useState<Step>(isElectron ? 'password-fallback' : 'authenticating');
@@ -65,11 +78,26 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
     const [passwordInput, setPasswordInput] = useState('');
     const [passwordLoading, setPasswordLoading] = useState(false);
     const passwordRef = useRef<HTMLInputElement>(null);
+    const autoCopiedRef = useRef(false);
 
     useEffect(() => {
         if (!isElectron) void handlePasskeyAuth();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Auto-copy once the credential is revealed (only for the "Copy" intent).
+    useEffect(() => {
+        if (!autoCopy || step !== 'revealed' || !revealedValue || autoCopiedRef.current) return;
+        autoCopiedRef.current = true;
+        void (async () => {
+            const ok = await copyToClipboard();
+            // On success the value is on the clipboard — close after showing the
+            // "Copied!" confirmation. On failure, leave the modal open so the
+            // user can reveal and copy manually.
+            if (ok) setTimeout(onClose, 1200);
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [step, revealedValue, autoCopy]);
 
     useEffect(() => {
         if (step === 'password-fallback') {
@@ -161,7 +189,7 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
         }
     }
 
-    async function copyToClipboard() {
+    async function copyToClipboard(): Promise<boolean> {
         let ok = false;
         try {
             await navigator.clipboard.writeText(revealedValue);
@@ -173,6 +201,7 @@ export default function PasskeyRevealModal({ serverId, serverName, field, onClos
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
+        return ok;
     }
 
     return (

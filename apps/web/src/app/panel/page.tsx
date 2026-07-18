@@ -1927,6 +1927,7 @@ export default function DashboardPage() {
                     serverName={revealTarget.server.name}
                     field={revealTarget.field}
                     onClose={() => setRevealTarget(null)}
+                    autoCopy
                 />
             )}
 
