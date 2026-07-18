@@ -3,12 +3,21 @@ productName: Termi
 directories:
   output: dist
 
+# Auto-update metadata (latest*.yml) and installers are published to GitHub
+# Releases; installed apps read those files to self-update.
+publish:
+  provider: github
+  owner: shuvoooo
+  repo: termi
+
 # Only the Electron entry points go into the asar. The desktop app is a thin
 # native shell around the hosted Termi server (web + gateway + guacd all live
 # there); the only local capability is the terminal, which uses node-pty.
+# NOTE: main.js requires ./updater at startup — omitting it crashes the app.
 files:
   - apps/electron/main.js
   - apps/electron/preload.js
+  - apps/electron/updater.js
   - apps/electron/build-config.json
   - apps/web/public/icons/icon-512x512.png
   - node_modules/node-pty/**/*
@@ -20,6 +29,10 @@ asarUnpack:
 mac:
   target:
     - target: dmg
+      arch: [x64, arm64]
+    # Squirrel.Mac updates from a zip, not a dmg — required for latest-mac.yml
+    # to describe a usable update (see the notarize note below).
+    - target: zip
       arch: [x64, arm64]
   category: public.app-category.developer-tools
   icon: apps/web/public/icons/icon-512x512.png

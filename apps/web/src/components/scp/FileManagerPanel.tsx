@@ -456,7 +456,8 @@ export default function FileManagerPanel({
     function uploadFiles(files: FileList | File[]) {
         setUploadsExpanded(true);
         Array.from(files).forEach((file) => {
-            const uid = Math.random().toString(36).slice(2);
+            // Collision-free id for tracking this upload's progress row.
+            const uid = crypto.randomUUID();
             setUploads((p) => [
                 ...p,
                 { id: uid, name: file.name, size: file.size, progress: 0, status: 'uploading' },

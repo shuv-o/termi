@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege for GITHUB_TOKEN: CI only ever reads the repo.
+permissions:
+  contents: read
+
 jobs:
   lint-typecheck:
     name: Lint & Type Check
