@@ -1,0 +1,61 @@
+name: Build Desktop Apps
+
+# Builds the Electron desktop shell for macOS, Windows and Linux and publishes
+# the installers + auto-update metadata (latest*.yml) to the GitHub Release for
+# the pushed tag. Installed apps read those files to self-update.
+#
+# Trigger: push a version tag, e.g.
+#   npm version 1.0.1 --no-git-tag-version   # bump package.json
+#   git commit -am "release: v1.0.1" && git tag v1.0.1 && git push --tags
+#
+# The tag (v1.0.1) MUST match the version in package.json, or electron-updater
+# won't recognise the release.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build & publish desktop app
+        run: npm run publish:electron
+        env:
+          # electron-builder uploads artifacts to the GitHub Release via this token.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERMI_REMOTE_URL: ${{ vars.TERMI_REMOTE_URL }}
+
+          # --- macOS code signing + notarization (REQUIRED for mac auto-update) ---
+          # Squirrel.Mac refuses unsigned updates. Set these repo secrets to sign:
+          #   CSC_LINK: base64 of your "Developer ID Application" .p12
+          #   CSC_KEY_PASSWORD: the .p12 password
+          #   APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID: for notarization
+          # If unset, the mac build is produced UNSIGNED and will not self-update.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          # --- Windows code signing (optional; avoids SmartScreen warnings) ---
+          # Reuses CSC_LINK/CSC_KEY_PASSWORD with a Windows code-signing cert.
