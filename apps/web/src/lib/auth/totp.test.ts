@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateRecoveryCodes, normalizeRecoveryCode } from './totp';
+import { generateRecoveryCodes, normalizeRecoveryCode, RECOVERY_ALPHABET } from './totp';
 
 describe('generateRecoveryCodes', () => {
     it('generates 10 codes', () => {
@@ -26,6 +26,17 @@ describe('generateRecoveryCodes', () => {
     it('produces unique codes across a batch', () => {
         const codes = generateRecoveryCodes();
         expect(new Set(codes).size).toBe(codes.length);
+    });
+
+    it('uses an alphabet that divides 256 evenly (no modulo bias)', () => {
+        // generateRecoveryCodes maps each random byte with
+        // `byte % RECOVERY_ALPHABET.length`. That is only uniform while the
+        // alphabet divides the 256 byte values evenly — at 32 symbols it does.
+        // Changing the alphabet to a non-divisor would bias early characters
+        // toward the front of the alphabet and weaken every recovery code.
+        expect(RECOVERY_ALPHABET.length).toBe(32);
+        expect(256 % RECOVERY_ALPHABET.length).toBe(0);
+        expect(new Set(RECOVERY_ALPHABET).size).toBe(RECOVERY_ALPHABET.length);
     });
 });
 

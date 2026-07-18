@@ -20,6 +20,22 @@ const TOTP_PERIOD = 30;
 const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_CODE_LENGTH = 8;
 
+/**
+ * Unambiguous recovery-code alphabet: A–Z without I/O, digits 2–9. Exactly 32
+ * symbols, which is what makes the `% RECOVERY_ALPHABET.length` mapping below
+ * unbiased — 256 possible byte values divide evenly into 32 buckets.
+ */
+export const RECOVERY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+// The zero-bias property holds only while the alphabet divides 256 evenly.
+// Fail loudly at import time if someone shortens or extends it, rather than
+// silently skewing every recovery code that follows.
+if (256 % RECOVERY_ALPHABET.length !== 0) {
+    throw new Error(
+        `RECOVERY_ALPHABET must divide 256 evenly to avoid modulo bias; got length ${RECOVERY_ALPHABET.length}`,
+    );
+}
+
 // TOTP FUNCTIONS
 
 /**
@@ -100,10 +116,6 @@ export function verifyTOTP(secret: string, code: string, window: number = 1): bo
  * These should be stored hashed, not in plain text
  */
 export function generateRecoveryCodes(): string[] {
-    // Unambiguous 32-char alphabet (A–Z minus I/O, digits 2–9) — exactly 32
-    // symbols so each random byte maps to a character with zero modulo bias
-    // (256 % 32 === 0).
-    const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const codes: string[] = [];
 
     for (let i = 0; i < RECOVERY_CODE_COUNT; i++) {
@@ -112,7 +124,8 @@ export function generateRecoveryCodes(): string[] {
         const bytes = randomBytes(RECOVERY_CODE_LENGTH);
         let code = '';
         for (let j = 0; j < RECOVERY_CODE_LENGTH; j++) {
-            code += ALPHABET[bytes[j] % ALPHABET.length];
+            // Unbiased: 256 % 32 === 0, enforced by the guard above.
+            code += RECOVERY_ALPHABET[bytes[j] % RECOVERY_ALPHABET.length];
         }
         // Format: XXXX-XXXX
         codes.push(`${code.slice(0, 4)}-${code.slice(4, RECOVERY_CODE_LENGTH)}`);
