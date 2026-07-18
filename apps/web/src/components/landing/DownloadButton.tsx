@@ -7,24 +7,30 @@ type OS = 'mac' | 'windows' | 'linux';
 type Arch = 'arm64' | 'x64';
 
 //   Release artifact URLs                                       ─
-//   Files follow the `termi-<version>-<arch>.<ext>` convention.
-
-const RELEASE_BASE = 'https://termi.bucket.shuvoo.com/releases';
-const VERSION = 'v1.0.0';
+//   /api/download resolves the newest GitHub release server-side and 302s to
+//   the asset, so these links never need bumping on release.
 
 // macOS builds are ad-hoc signed but not notarized, so Gatekeeper quarantines
 // the download. This strips the quarantine flag so the app launches.
 const XATTR_CMD = 'xattr -dr com.apple.quarantine /Applications/Termi.app';
 const LINUX_CMD = 'chmod +x termi.AppImage\n./termi.AppImage';
 
-const FILE_EXT: Record<OS, string> = {
-    mac: 'dmg',
-    windows: 'exe',
-    linux: 'AppImage',
-};
-
 function downloadUrl(os: OS, arch: Arch): string {
-    return `${RELEASE_BASE}/termi-${VERSION}-${arch}.${FILE_EXT[os]}`;
+    return `/api/download?os=${os}&arch=${arch}`;
+}
+
+/** One OS/arch build published in the latest release. */
+interface Build {
+    os: OS;
+    arch: Arch;
+    name: string;
+    size: number;
+}
+
+interface ReleaseMeta {
+    version: string;
+    releaseUrl: string;
+    builds: Build[];
 }
 
 //   Brand glyphs (lucide has no brand icons)                    ─
@@ -149,12 +155,35 @@ export default function DownloadDesktopButton() {
     const [arch, setArch] = useState<Arch>('arm64');
     const [showAll, setShowAll] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [release, setRelease] = useState<ReleaseMeta | null>(null);
 
     useEffect(() => {
         const detected = detectOS();
         setOs(detected);
         detectArch(detected).then(setArch);
     }, []);
+
+    // Which builds the newest release actually ships. Failure is non-fatal —
+    // the buttons still work, they just lose the version label and the
+    // availability filter.
+    useEffect(() => {
+        let cancelled = false;
+        fetch('/api/download')
+            .then((r) => (r.ok ? r.json() : null))
+            .then((body) => {
+                if (!cancelled && body?.data) setRelease(body.data as ReleaseMeta);
+            })
+            .catch(() => {
+                /* keep the un-annotated buttons */
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    /** Before metadata arrives, assume a build exists rather than hiding it. */
+    const hasBuild = (o: OS, a: Arch) =>
+        !release || release.builds.some((b) => b.os === o && b.arch === a);
 
     const copyXattr = async () => {
         try {
@@ -184,13 +213,25 @@ export default function DownloadDesktopButton() {
                 <Download className="w-4 h-4 opacity-80 group-hover:translate-y-0.5 transition-transform" />
             </a>
 
-            <button
-                type="button"
-                onClick={() => setShowAll((v) => !v)}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
-            >
-                {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
-            </button>
+            <div className="flex flex-col items-center gap-1">
+                <button
+                    type="button"
+                    onClick={() => setShowAll((v) => !v)}
+                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
+                    {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
+                </button>
+                {release && (
+                    <a
+                        href={release.releaseUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-slate-500 transition-colors hover:text-slate-300"
+                    >
+                        Latest release: {release.version}
+                    </a>
+                )}
+            </div>
 
             {/* macOS is ad-hoc signed but not notarized — surface the first-launch steps */}
             {os === 'mac' && (
@@ -274,7 +315,7 @@ export default function DownloadDesktopButton() {
                                     {P.label}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    {ARCH_ORDER.map((a) => {
+                                    {ARCH_ORDER.filter((a) => hasBuild(o, a)).map((a) => {
                                         const current = o === os && a === arch;
                                         return (
                                             <a
@@ -292,6 +333,11 @@ export default function DownloadDesktopButton() {
                                             </a>
                                         );
                                     })}
+                                    {!ARCH_ORDER.some((a) => hasBuild(o, a)) && (
+                                        <span className="text-xs text-slate-600">
+                                            Not available yet
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         );

@@ -31,13 +31,23 @@ asarUnpack:
   - node_modules/node-pty/**/*
 
 mac:
+  # arm64 is deliberately absent. electron-builder passes `--timestamp` to
+  # `codesign --sign -`, and ad-hoc signatures cannot be timestamped — the
+  # arm64 target signs every nested binary, so it reliably times out (30s)
+  # against Apple's timestamp server on GitHub's macOS runners. It builds
+  # fine locally, so arm64 DMGs are produced with:
+  #   npx electron-builder --mac --arm64
+  #   gh release upload vX.Y.Z dist/Termi-X.Y.Z-arm64.dmg ...
+  # Restore arch: [x64, arm64] once a real Developer ID is configured.
   target:
     - target: dmg
-      arch: [x64, arm64]
+      arch: [x64]
+    # arch: [x64, arm64]
     # Squirrel.Mac updates from a zip, not a dmg — required for latest-mac.yml
     # to describe a usable update (see the notarize note below).
     - target: zip
-      arch: [x64, arm64]
+      arch: [x64]
+    # arch: [x64, arm64]
   category: public.app-category.developer-tools
   icon: apps/web/public/icons/icon-512x512.png
   # Hardened runtime is required for notarization and for the native passkey
