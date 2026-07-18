@@ -12,6 +12,18 @@ _Nothing yet._
 
 ---
 
+## [1.0.5] — 2026-07-18
+
+### Changed
+
+- **Removed the per-user concurrent connection limit.** Users were capped at 5 concurrent SSH sessions; beyond that the gateway evicted their oldest detached session, and rejected the connection outright when none was detached. The cap is now unlimited by default and configurable via `GATEWAY_MAX_CONNECTIONS_PER_USER`.
+
+### Fixed
+
+- Landing page download buttons pointed at a hardcoded bucket URL pinned to v1.0.0, so every download served a stale build. Downloads now resolve to the newest GitHub release via `/api/download`, and the page no longer advertises Windows ARM64, which is not built.
+
+---
+
 ## [1.0.4] — 2026-07-18
 
 ### Fixed
