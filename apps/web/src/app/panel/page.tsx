@@ -409,7 +409,7 @@ function FleetAlerts({
     });
     const total = offline.length + highLoad.length;
 
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
 
     if (total === 0) return null;
 
