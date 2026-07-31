@@ -620,12 +620,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             : 'translate-y-0'
                     }`}
                     style={{
-                        bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.9rem))',
+                        bottom: 'max(0.625rem, calc(env(safe-area-inset-bottom, 0px) + 0.375rem))',
                         paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
                         paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
                     }}
                 >
-                    <div className="relative flex items-center gap-0.5 h-[50px] px-1.5 rounded-[24px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
+                    <div className="relative flex items-center gap-1 h-[58px] px-2 rounded-[27px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
                         {/* Glass sheen — a faint highlight along the top edge of the
                         capsule so the bar reads as glass, not a flat panel */}
                         <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -638,17 +638,17 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex flex-col items-center justify-center gap-0.5 w-[54px] h-[42px] rounded-[16px] transition-all active:scale-90 duration-150 ${
+                                    className={`flex flex-col items-center justify-center gap-0.5 w-[60px] h-[48px] rounded-[18px] transition-all active:scale-90 duration-150 ${
                                         isActive ? 'bg-primary/15' : ''
                                     }`}
                                 >
                                     <item.icon
-                                        className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                                        className={`w-[20px] h-[20px] shrink-0 transition-colors ${
                                             isActive ? 'text-primary' : 'text-muted-foreground/55'
                                         }`}
                                     />
                                     <span
-                                        className={`text-[9px] leading-none tracking-tight transition-colors ${
+                                        className={`text-[9.5px] leading-none tracking-tight transition-colors ${
                                             isActive
                                                 ? 'font-semibold text-primary'
                                                 : 'font-medium text-muted-foreground/55'
@@ -664,19 +664,19 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         {isElectron && (
                             <button
                                 onClick={handleOpenLocalTerminal}
-                                className={`flex flex-col items-center justify-center gap-0.5 w-[54px] h-[42px] rounded-[16px] transition-all active:scale-90 duration-150 ${
+                                className={`flex flex-col items-center justify-center gap-0.5 w-[60px] h-[48px] rounded-[18px] transition-all active:scale-90 duration-150 ${
                                     localTerminalActive ? 'bg-violet-500/15' : ''
                                 }`}
                             >
                                 <Laptop
-                                    className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                                    className={`w-[20px] h-[20px] shrink-0 transition-colors ${
                                         localTerminalActive
                                             ? 'text-violet-400'
                                             : 'text-violet-400/50'
                                     }`}
                                 />
                                 <span
-                                    className={`text-[9px] leading-none tracking-tight transition-colors ${
+                                    className={`text-[9.5px] leading-none tracking-tight transition-colors ${
                                         localTerminalActive
                                             ? 'font-semibold text-violet-400'
                                             : 'font-medium text-violet-400/50'
