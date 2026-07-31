@@ -32,6 +32,15 @@ export default function VirtualKeyboard({ onKey }: VirtualKeyboardProps) {
     // Uppercase when a one-shot shift is armed or caps lock is engaged.
     const upper = shift || capsLock;
 
+    // This is dynamically imported (`ssr: false`), so on its very first mount
+    // the toggling page's own resize dispatch can fire before this chunk has
+    // even finished loading — the terminal above never learns it just lost
+    // this keyboard's height, and briefly overlaps it. Firing here instead,
+    // right when the keyboard actually lands in the layout, closes that race.
+    useEffect(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, []);
+
     const send = useCallback(
         (key: string) => {
             let k = key;

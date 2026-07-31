@@ -151,6 +151,15 @@ export default function TerminalToolbar({ onKey, onClose }: Props) {
         loadSnippets();
     }, [loadSnippets]);
 
+    // This is dynamically imported (`ssr: false`), so on its very first mount
+    // the toggling page's own resize dispatch can fire before this chunk has
+    // even finished loading — the terminal above never learns it just lost
+    // this strip's height, and briefly overlaps it. Firing here instead,
+    // right when the strip actually lands in the layout, closes that race.
+    useEffect(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, []);
+
     /** Type a command, optionally pressing Enter for the user. */
     const send = useCallback(
         (command: string, run: boolean) => {

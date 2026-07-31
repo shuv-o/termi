@@ -220,6 +220,22 @@ html {
     margin: 0 auto;
 }
 
+/* Mobile/tablet: the fit addon rarely divides the viewport into a whole
+   number of columns, and centering that leftover sliver (the desktop look)
+   reads as unwanted space flanking the terminal on a narrow screen. Below
+   the desktop breakpoint, drop the side padding and left-align instead, so
+   any leftover collapses to a single sliver on the right rather than a gap
+   on both sides. */
+@media (max-width: 1023px) {
+    .xterm {
+        padding: 8px 0;
+    }
+
+    .xterm-screen {
+        margin: 0;
+    }
+}
+
 /* ============================================================================
    ANIMATIONS
    ============================================================================ */
