@@ -596,7 +596,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         // re-animate, protecting their live terminals.
                         key={pathname}
                         className={`animate-fade-in ${
-                            isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8'
+                            isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 lg:pb-8'
                         }`}
                     >
                         {children}
@@ -605,24 +605,24 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 {isConnectPage && <>{children}</>}
             </div>
 
-            {/*   Mobile bottom navigation bar              ─ */}
+            {/*   Mobile bottom navigation bar — floating "Liquid Glass" capsule,
+                clear of every edge, rather than a bar docked flush to the
+                screen bottom.                          ─ */}
             <nav
-                className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 transition-transform duration-200 ${
-                    keyboardOpen ? 'translate-y-full pointer-events-none' : 'translate-y-0'
+                className={`lg:hidden fixed inset-x-0 z-40 flex justify-center transition-transform duration-200 ${
+                    keyboardOpen ? 'translate-y-[calc(100%+2rem)] pointer-events-none' : 'translate-y-0'
                 }`}
+                style={{
+                    bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.9rem))',
+                    paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+                    paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+                }}
             >
-                {/* Frosted glass background — bleeds to the screen edges, behind
-                    the safe-area insets, so the bar fills the home-indicator area */}
-                <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/60" />
+                <div className="relative flex items-center gap-1 h-[60px] px-2 rounded-full bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
+                    {/* Glass sheen — a faint highlight along the top edge of the
+                        capsule so the bar reads as glass, not a flat panel */}
+                    <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
-                <div
-                    className="relative flex items-center justify-around h-16 px-3"
-                    style={{
-                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                        paddingLeft: 'max(0.75rem, env(safe-area-inset-left, 0px))',
-                        paddingRight: 'max(0.75rem, env(safe-area-inset-right, 0px))',
-                    }}
-                >
                     {navigation.map((item) => {
                         const isActive =
                             pathname === item.href ||
@@ -631,11 +631,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
+                                className="flex items-center justify-center transition-transform active:scale-90 min-w-0"
                             >
                                 {isActive ? (
                                     /* Active: pill with icon + label inside */
-                                    <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary shadow-[0_0_14px_3px_rgba(14,165,233,0.30)]">
+                                    <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary shadow-[0_0_14px_3px_rgba(14,165,233,0.30)]">
                                         <item.icon className="w-[17px] h-[17px] text-white shrink-0" />
                                         <span className="text-[12px] font-semibold text-white leading-none">
                                             {item.name}
@@ -643,7 +643,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                                     </div>
                                 ) : (
                                     /* Inactive: icon only */
-                                    <div className="flex items-center justify-center w-10 h-[34px]">
+                                    <div className="flex items-center justify-center w-11 h-11">
                                         <item.icon className="w-[20px] h-[20px] text-muted-foreground/50" />
                                     </div>
                                 )}
@@ -655,17 +655,17 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     {isElectron && (
                         <button
                             onClick={handleOpenLocalTerminal}
-                            className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-90 min-w-0"
+                            className="flex items-center justify-center transition-transform active:scale-90 min-w-0"
                         >
                             {localTerminalActive ? (
-                                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-600 shadow-[0_0_14px_3px_rgba(124,58,237,0.30)]">
+                                <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-violet-600 shadow-[0_0_14px_3px_rgba(124,58,237,0.30)]">
                                     <Laptop className="w-[17px] h-[17px] text-white shrink-0" />
                                     <span className="text-[12px] font-semibold text-white leading-none">
                                         Local
                                     </span>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center w-10 h-[34px]">
+                                <div className="flex items-center justify-center w-11 h-11">
                                     <Laptop className="w-[20px] h-[20px] text-violet-400/60" />
                                 </div>
                             )}
