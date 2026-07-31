@@ -607,78 +607,87 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
             {/*   Mobile bottom navigation bar — floating "Liquid Glass" capsule,
                 clear of every edge, rather than a bar docked flush to the
-                screen bottom.                          ─ */}
-            <nav
-                className={`lg:hidden fixed inset-x-0 z-40 flex justify-center transition-transform duration-200 ${
-                    keyboardOpen ? 'translate-y-[calc(100%+2rem)] pointer-events-none' : 'translate-y-0'
-                }`}
-                style={{
-                    bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.9rem))',
-                    paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
-                    paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
-                }}
-            >
-                <div className="relative flex items-center gap-0.5 h-[50px] px-1.5 rounded-[24px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
-                    {/* Glass sheen — a faint highlight along the top edge of the
+                screen bottom. Omitted entirely on the terminal views (connect
+                pages and the sessions workspace) — the terminal is the whole
+                point of those screens, so it gets the full viewport with no
+                nav bar reserving margin underneath it.        ─ */}
+            {!isConnectPage && !isSessionsPage && (
+                <nav
+                    className={`lg:hidden fixed inset-x-0 z-40 flex justify-center transition-transform duration-200 ${
+                        keyboardOpen
+                            ? 'translate-y-[calc(100%+2rem)] pointer-events-none'
+                            : 'translate-y-0'
+                    }`}
+                    style={{
+                        bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.9rem))',
+                        paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+                        paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+                    }}
+                >
+                    <div className="relative flex items-center gap-0.5 h-[50px] px-1.5 rounded-[24px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
+                        {/* Glass sheen — a faint highlight along the top edge of the
                         capsule so the bar reads as glass, not a flat panel */}
-                    <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
-                    {navigation.map((item) => {
-                        const isActive =
-                            pathname === item.href ||
-                            (item.href !== '/panel' && pathname.startsWith(item.href));
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
+                        {navigation.map((item) => {
+                            const isActive =
+                                pathname === item.href ||
+                                (item.href !== '/panel' && pathname.startsWith(item.href));
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`flex flex-col items-center justify-center gap-0.5 w-[54px] h-[42px] rounded-[16px] transition-all active:scale-90 duration-150 ${
+                                        isActive ? 'bg-primary/15' : ''
+                                    }`}
+                                >
+                                    <item.icon
+                                        className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                                            isActive ? 'text-primary' : 'text-muted-foreground/55'
+                                        }`}
+                                    />
+                                    <span
+                                        className={`text-[9px] leading-none tracking-tight transition-colors ${
+                                            isActive
+                                                ? 'font-semibold text-primary'
+                                                : 'font-medium text-muted-foreground/55'
+                                        }`}
+                                    >
+                                        {item.name}
+                                    </span>
+                                </Link>
+                            );
+                        })}
+
+                        {/* Local Terminal (mobile, Electron only) */}
+                        {isElectron && (
+                            <button
+                                onClick={handleOpenLocalTerminal}
                                 className={`flex flex-col items-center justify-center gap-0.5 w-[54px] h-[42px] rounded-[16px] transition-all active:scale-90 duration-150 ${
-                                    isActive ? 'bg-primary/15' : ''
+                                    localTerminalActive ? 'bg-violet-500/15' : ''
                                 }`}
                             >
-                                <item.icon
+                                <Laptop
                                     className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                                        isActive ? 'text-primary' : 'text-muted-foreground/55'
+                                        localTerminalActive
+                                            ? 'text-violet-400'
+                                            : 'text-violet-400/50'
                                     }`}
                                 />
                                 <span
                                     className={`text-[9px] leading-none tracking-tight transition-colors ${
-                                        isActive
-                                            ? 'font-semibold text-primary'
-                                            : 'font-medium text-muted-foreground/55'
+                                        localTerminalActive
+                                            ? 'font-semibold text-violet-400'
+                                            : 'font-medium text-violet-400/50'
                                     }`}
                                 >
-                                    {item.name}
+                                    Local
                                 </span>
-                            </Link>
-                        );
-                    })}
-
-                    {/* Local Terminal (mobile, Electron only) */}
-                    {isElectron && (
-                        <button
-                            onClick={handleOpenLocalTerminal}
-                            className={`flex flex-col items-center justify-center gap-0.5 w-[54px] h-[42px] rounded-[16px] transition-all active:scale-90 duration-150 ${
-                                localTerminalActive ? 'bg-violet-500/15' : ''
-                            }`}
-                        >
-                            <Laptop
-                                className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                                    localTerminalActive ? 'text-violet-400' : 'text-violet-400/50'
-                                }`}
-                            />
-                            <span
-                                className={`text-[9px] leading-none tracking-tight transition-colors ${
-                                    localTerminalActive
-                                        ? 'font-semibold text-violet-400'
-                                        : 'font-medium text-violet-400/50'
-                                }`}
-                            >
-                                Local
-                            </span>
-                        </button>
-                    )}
-                </div>
-            </nav>
+                            </button>
+                        )}
+                    </div>
+                </nav>
+            )}
 
             <StarNudge userCreatedAt={user.createdAt} serverCount={serverCount} />
         </div>
