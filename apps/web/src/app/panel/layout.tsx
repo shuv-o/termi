@@ -608,10 +608,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             {/*   Mobile bottom navigation bar — floating "Liquid Glass" capsule,
                 clear of every edge, rather than a bar docked flush to the
                 screen bottom. Omitted entirely on the terminal views (connect
-                pages and the sessions workspace) — the terminal is the whole
-                point of those screens, so it gets the full viewport with no
-                nav bar reserving margin underneath it.        ─ */}
-            {!isConnectPage && !isSessionsPage && (
+                pages, the sessions workspace, and the dedicated local
+                terminal) — the terminal is the whole point of those screens,
+                so it gets the full viewport with no nav bar reserving margin
+                underneath it.                          ─ */}
+            {!isConnectPage && !isSessionsPage && !isLocalPage && (
                 <nav
                     className={`lg:hidden fixed inset-x-0 z-40 flex justify-center transition-transform duration-200 ${
                         keyboardOpen
