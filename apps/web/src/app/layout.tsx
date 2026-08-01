@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
-import './globals.css';
+import '../styles/globals.css';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 import { getSiteUrl } from '@/lib/site';
