@@ -33,7 +33,10 @@ export function ProtocolSelector({
         <Card className={CARD_CLASS}>
             <CardContent className="p-4">
                 <p className={`${SECTION_LABEL} mb-3`}>Protocol</p>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {/* Below `sm`, a 3-per-row grid leaves an awkward 3+2 last row, so
+                    it scrolls horizontally as a single strip instead; `sm:` and up
+                    have the room for a clean 5-across grid. */}
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
                     {protocols.map((p) => {
                         const isActive = value === p.value;
                         const c = protoColors[p.value];
@@ -43,7 +46,7 @@ export function ProtocolSelector({
                                 key={p.value}
                                 type="button"
                                 onClick={() => onChange(p.value)}
-                                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 ${
+                                className={`flex w-[84px] shrink-0 flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 sm:w-auto ${
                                     isActive
                                         ? `${c.pill} ${c.ring} ring-1`
                                         : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground hover:bg-accent/30'

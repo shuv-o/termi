@@ -3,57 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import {
-    ArrowLeft,
-    BookKey,
-    Plus,
-    Trash2,
-    Pencil,
-    Eye,
-    EyeOff,
-    Lock,
-    Key,
-    Loader2,
-    CheckCircle2,
-    X,
-    Save,
-    Copy,
-    Check,
-    User,
-    KeyRound,
-} from 'lucide-react';
+import { ArrowLeft, BookKey, CheckCircle2, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 
-interface KeychainEntry {
-    id: string;
-    label: string;
-    username: string;
-    hasPassword: boolean;
-    hasPrivateKey: boolean;
-    createdAt: string;
-}
-
-interface EntryForm {
-    label: string;
-    username: string;
-    authMethod: 'password' | 'key';
-    password: string;
-    privateKey: string;
-    passphrase: string;
-}
-
-const emptyForm = (): EntryForm => ({
-    label: '',
-    username: '',
-    authMethod: 'password',
-    password: '',
-    privateKey: '',
-    passphrase: '',
-});
+import { KeychainEntryCard } from './_components/KeychainEntryCard';
+import { KeychainEntryModal } from './_components/KeychainEntryModal';
+import { emptyForm, type EntryForm, type KeychainEntry } from './_components/types';
 
 export default function KeychainPage() {
     // Cached so returning to the keychain shows the list instantly instead of
@@ -67,14 +23,12 @@ export default function KeychainPage() {
     const entries = keychainData?.entries ?? [];
     const setEntries = (updater: (prev: KeychainEntry[]) => KeychainEntry[]) =>
         mutateEntries((prev) => ({ entries: updater(prev?.entries ?? []) }));
+
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
     const [form, setForm] = useState<EntryForm>(emptyForm());
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showPassphrase, setShowPassphrase] = useState(false);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState('');
     // copied[entryId] = 'user' | 'pass' | null — which field just got copied
     const [copied, setCopied] = useState<Record<string, 'user' | 'pass' | null>>({});
@@ -117,16 +71,12 @@ export default function KeychainPage() {
         setEditId(null);
         setForm(emptyForm());
         setFormError('');
-        setShowPassword(false);
-        setShowPassphrase(false);
         setShowForm(true);
     };
 
     const openEdit = async (id: string) => {
         setEditId(id);
         setFormError('');
-        setShowPassword(false);
-        setShowPassphrase(false);
         try {
             const res = await fetch(`/api/keychain/${id}`);
             const data = await res.json();
@@ -199,15 +149,12 @@ export default function KeychainPage() {
     };
 
     const handleDelete = async (id: string) => {
-        setDeletingId(id);
         try {
             await fetch(`/api/keychain/${id}`, { method: 'DELETE' });
             setEntries((prev) => prev.filter((e) => e.id !== id));
             flash('Keychain entry deleted');
         } catch {
             // ignore
-        } finally {
-            setDeletingId(null);
         }
     };
 
@@ -248,222 +195,6 @@ export default function KeychainPage() {
                     </div>
                 )}
 
-                {showForm && (
-                    <Card className="mx-auto mb-6 max-w-4xl border-border hover:border-border/80 transition-all duration-200">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                        {editId ? 'Update entry' : 'Create entry'}
-                                    </p>
-                                    <h2 className="mt-1 text-lg font-semibold">
-                                        {editId ? 'Edit Keychain Entry' : 'New Keychain Entry'}
-                                    </h2>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowForm(false)}
-                                    className="text-muted-foreground hover:text-foreground"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSave} className="space-y-6">
-                                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)]">
-                                    <div className="space-y-6">
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                                                    Label <span className="text-red-400">*</span>
-                                                </Label>
-                                                <Input
-                                                    value={form.label}
-                                                    onChange={(e) =>
-                                                        update({ label: e.target.value })
-                                                    }
-                                                    className="h-10 bg-secondary text-sm"
-                                                    placeholder="e.g. root@production"
-                                                />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                                                    Username <span className="text-red-400">*</span>
-                                                </Label>
-                                                <Input
-                                                    value={form.username}
-                                                    onChange={(e) =>
-                                                        update({ username: e.target.value })
-                                                    }
-                                                    className="h-10 bg-secondary text-sm"
-                                                    placeholder="root"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {form.authMethod === 'password' ? (
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                                                    Password
-                                                    {editId && (
-                                                        <span className="ml-1 text-muted-foreground/50 normal-case tracking-normal">
-                                                            (leave blank to keep)
-                                                        </span>
-                                                    )}
-                                                </Label>
-                                                <div className="relative">
-                                                    <Input
-                                                        type={showPassword ? 'text' : 'password'}
-                                                        value={form.password}
-                                                        onChange={(e) =>
-                                                            update({ password: e.target.value })
-                                                        }
-                                                        className="h-10 bg-secondary pr-10 text-sm"
-                                                        placeholder="••••••••"
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                            setShowPassword(!showPassword)
-                                                        }
-                                                        className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                                    >
-                                                        {showPassword ? (
-                                                            <EyeOff className="w-4 h-4" />
-                                                        ) : (
-                                                            <Eye className="w-4 h-4" />
-                                                        )}
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                                                    Private key
-                                                    {editId && (
-                                                        <span className="ml-1 text-muted-foreground/50 normal-case tracking-normal">
-                                                            (leave blank to keep)
-                                                        </span>
-                                                    )}
-                                                </Label>
-                                                <Textarea
-                                                    value={form.privateKey}
-                                                    onChange={(e) =>
-                                                        update({ privateKey: e.target.value })
-                                                    }
-                                                    className="min-h-[220px] resize-none bg-secondary font-mono text-xs leading-relaxed"
-                                                    placeholder={
-                                                        '-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----'
-                                                    }
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-4 rounded-2xl border border-border/60 bg-secondary/20 p-4">
-                                        <div>
-                                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                                Authentication
-                                            </p>
-                                            <div className="mt-3 flex gap-1 rounded-xl border border-border/50 bg-background/60 p-1">
-                                                {(['password', 'key'] as const).map((m) => (
-                                                    <button
-                                                        key={m}
-                                                        type="button"
-                                                        onClick={() => update({ authMethod: m })}
-                                                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                                                            form.authMethod === m
-                                                                ? 'bg-primary text-primary-foreground shadow-sm'
-                                                                : 'text-muted-foreground hover:text-foreground'
-                                                        }`}
-                                                    >
-                                                        {m === 'password' ? (
-                                                            <Lock className="w-3 h-3" />
-                                                        ) : (
-                                                            <Key className="w-3 h-3" />
-                                                        )}
-                                                        {m === 'password' ? 'Password' : 'SSH Key'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {form.authMethod === 'key' && (
-                                            <div className="space-y-1.5">
-                                                <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                                                    Passphrase{' '}
-                                                    <span className="normal-case tracking-normal text-muted-foreground/50">
-                                                        (if encrypted)
-                                                    </span>
-                                                </Label>
-                                                <div className="relative">
-                                                    <Input
-                                                        type={showPassphrase ? 'text' : 'password'}
-                                                        value={form.passphrase}
-                                                        onChange={(e) =>
-                                                            update({ passphrase: e.target.value })
-                                                        }
-                                                        className="h-10 bg-secondary pr-10 text-sm"
-                                                        placeholder="••••••••"
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                            setShowPassphrase(!showPassphrase)
-                                                        }
-                                                        className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                                    >
-                                                        {showPassphrase ? (
-                                                            <EyeOff className="w-4 h-4" />
-                                                        ) : (
-                                                            <Eye className="w-4 h-4" />
-                                                        )}
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="rounded-xl border border-border/50 bg-background/70 p-4 text-sm text-muted-foreground">
-                                            Termi encrypts these credentials before storing them.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {formError && (
-                                    <p className="text-sm text-destructive">{formError}</p>
-                                )}
-
-                                <div className="flex justify-end gap-2 pt-1">
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => setShowForm(false)}
-                                        className="h-10 px-4"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={saving}
-                                        className="h-10 gap-1.5 px-4"
-                                    >
-                                        {saving ? (
-                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                        ) : (
-                                            <Save className="w-3.5 h-3.5" />
-                                        )}
-                                        {editId ? 'Update' : 'Save'}
-                                    </Button>
-                                </div>
-                            </form>
-                        </CardContent>
-                    </Card>
-                )}
-
                 {loading ? (
                     <div className="flex h-32 items-center justify-center">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -494,116 +225,30 @@ export default function KeychainPage() {
                 ) : (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {entries.map((entry) => (
-                            <Card
+                            <KeychainEntryCard
                                 key={entry.id}
-                                className="border-border hover:border-border/80 hover:shadow-md transition-all duration-200"
-                            >
-                                <CardContent className="flex h-full flex-col gap-4 p-5">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div
-                                            className={`flex h-11 w-11 items-center justify-center rounded-xl border shrink-0 ${
-                                                entry.hasPrivateKey
-                                                    ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-                                                    : 'border-primary/30 bg-primary/10 text-primary'
-                                            }`}
-                                        >
-                                            {entry.hasPrivateKey ? (
-                                                <Key className="w-5 h-5" />
-                                            ) : (
-                                                <Lock className="w-5 h-5" />
-                                            )}
-                                        </div>
-                                        <span
-                                            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium ${
-                                                entry.hasPrivateKey
-                                                    ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-                                                    : 'border-primary/30 bg-primary/10 text-primary'
-                                            }`}
-                                        >
-                                            {entry.hasPrivateKey ? 'SSH key' : 'Password'}
-                                        </span>
-                                    </div>
-
-                                    <div className="min-w-0">
-                                        <p className="truncate text-base font-semibold">
-                                            {entry.label}
-                                        </p>
-                                        {/* Username row with copy button */}
-                                        <div className="mt-1 flex items-center gap-1.5 min-w-0">
-                                            <User className="w-3 h-3 text-muted-foreground shrink-0" />
-                                            <p className="flex-1 truncate font-mono text-xs text-muted-foreground">
-                                                {entry.username}
-                                            </p>
-                                            <button
-                                                onClick={() => copyUsername(entry)}
-                                                title="Copy username"
-                                                className="shrink-0 p-1 rounded hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-                                            >
-                                                {copied[entry.id] === 'user' ? (
-                                                    <Check className="w-3 h-3 text-emerald-400" />
-                                                ) : (
-                                                    <Copy className="w-3 h-3" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-4">
-                                        <p className="text-[11px] text-muted-foreground">
-                                            Added {new Date(entry.createdAt).toLocaleDateString()}
-                                        </p>
-                                        <div className="flex items-center gap-1">
-                                            {/* Copy password / SSH key */}
-                                            {(entry.hasPassword || entry.hasPrivateKey) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary"
-                                                    onClick={() => copyPassword(entry)}
-                                                    title={
-                                                        entry.hasPrivateKey
-                                                            ? 'Copy SSH key'
-                                                            : 'Copy password'
-                                                    }
-                                                >
-                                                    {copied[entry.id] === 'pass' ? (
-                                                        <Check className="w-4 h-4 text-emerald-400" />
-                                                    ) : entry.hasPrivateKey ? (
-                                                        <KeyRound className="w-4 h-4" />
-                                                    ) : (
-                                                        <KeyRound className="w-4 h-4" />
-                                                    )}
-                                                </Button>
-                                            )}
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground"
-                                                onClick={() => openEdit(entry.id)}
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive"
-                                                onClick={() => handleDelete(entry.id)}
-                                                disabled={deletingId === entry.id}
-                                            >
-                                                {deletingId === entry.id ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="w-4 h-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                entry={entry}
+                                copiedField={copied[entry.id] ?? null}
+                                onCopyUsername={() => copyUsername(entry)}
+                                onCopySecret={() => copyPassword(entry)}
+                                onEdit={() => openEdit(entry.id)}
+                                onDelete={() => handleDelete(entry.id)}
+                            />
                         ))}
                     </div>
                 )}
             </div>
+
+            <KeychainEntryModal
+                open={showForm}
+                editing={!!editId}
+                form={form}
+                onChange={update}
+                saving={saving}
+                error={formError}
+                onSubmit={handleSave}
+                onClose={() => setShowForm(false)}
+            />
         </div>
     );
 }

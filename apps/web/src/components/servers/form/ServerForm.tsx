@@ -77,7 +77,7 @@ export function ServerForm({
             </div>
 
             <form onSubmit={onSubmit} method="POST" action="#">
-                <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:gap-6">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:gap-6">
                     <div className="space-y-4">
                         <ProtocolSelector value={form.protocol} onChange={changeProtocol} />
                         <IdentityCard
@@ -87,11 +87,16 @@ export function ServerForm({
                             onConnectionFieldChange={resetTest}
                         />
                         <DisplaySettingsCard form={form} update={update} />
+                        {/* Lives here (not the sidebar) so the left column keeps
+                            pace with the right one for protocols — SSH, SCP,
+                            Telnet — that skip the display-settings card above;
+                            otherwise the left column ends after Username and
+                            leaves a tall empty gap next to Auth/Preview/Test. */}
+                        <AdvancedCard form={form} update={update} />
                     </div>
 
-                    <div className="space-y-4 self-start xl:sticky xl:top-6">
+                    <div className="space-y-4 self-start lg:sticky lg:top-6">
                         <AuthCard state={state} mode={mode} storedCreds={storedCreds} />
-                        <AdvancedCard form={form} update={update} />
                         <PreviewCard
                             form={form}
                             groups={groups}
