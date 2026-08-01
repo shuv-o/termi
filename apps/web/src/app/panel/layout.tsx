@@ -7,10 +7,12 @@ import StarNudge from '@/components/common/StarNudge';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
 import { MobileBottomNav, MobileTopBar, VerifyEmailBanner } from './_shell/MobileChrome';
 import { usePanelShell } from './_shell/usePanelShell';
+import { useRouteFade } from './_shell/useRouteFade';
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
     const shell = usePanelShell();
     const { user, pathname, collapsed, isSessionsPage, isLocalPage, isConnectPage } = shell;
+    const fading = useRouteFade(pathname);
 
     // Only block on the very first load, when nothing is cached yet. On every
     // later navigation `user` is already present, so the shell paints instantly.
@@ -68,14 +70,13 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
                 {!isSessionsPage && !isConnectPage && (
                     <main
-                        // Re-key on the path so each navigation replays the fade;
-                        // scoped to ordinary pages only — the sessions workspace
-                        // and connect views are rendered elsewhere and never
-                        // re-animate, protecting their live terminals.
-                        key={pathname}
-                        className={`animate-fade-in ${
-                            isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 lg:pb-8'
-                        }`}
+                        // No `key={pathname}` here deliberately: re-keying would
+                        // unmount/remount the whole page subtree on every nav
+                        // (a real blank frame), rather than just updating it.
+                        // `useRouteFade` gets the same fade cue without that.
+                        className={`transition-[opacity,transform] duration-150 ease-out ${
+                            fading ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
+                        } ${isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 lg:pb-8'}`}
                     >
                         {children}
                     </main>
