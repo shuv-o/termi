@@ -252,10 +252,15 @@ export function TerminalPane({
                                         key={shell.id}
                                         className="absolute inset-0"
                                         style={{
+                                            // Must gate on `visible` (which includes the
+                                            // terminal/transfer mode), not just `isActive`:
+                                            // CSS lets a descendant's `visibility: visible`
+                                            // override the pane's `hidden`, which would paint
+                                            // the terminal over Transfer mode's file panels.
                                             visibility:
-                                                isActive && isShellActive ? 'visible' : 'hidden',
+                                                visible && isShellActive ? 'visible' : 'hidden',
                                             pointerEvents:
-                                                isActive && isShellActive ? 'auto' : 'none',
+                                                visible && isShellActive ? 'auto' : 'none',
                                         }}
                                     >
                                         {!shell.token ? (
