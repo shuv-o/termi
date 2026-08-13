@@ -293,7 +293,14 @@ export default function SSHConnectionPage() {
             }
         >
             {/*   Header   */}
-            <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
+            <div
+                className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card"
+                style={{
+                    paddingTop: 'max(0.5rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))',
+                    paddingLeft: 'max(0.75rem, env(safe-area-inset-left, 0px))',
+                    paddingRight: 'max(0.75rem, env(safe-area-inset-right, 0px))',
+                }}
+            >
                 <div className="flex items-center gap-2 min-w-0">
                     <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
                         <Link href="/panel">
