@@ -47,7 +47,18 @@ export function WorkspaceTopBar({
     onToggleFullscreen: () => void;
 }) {
     return (
-        <div className="shrink-0 flex items-center gap-1.5 px-2 py-2 bg-card border-b border-border">
+        <div
+            className="shrink-0 flex items-center gap-1.5 px-2 py-2 bg-card border-b border-border"
+            style={
+                isFullscreen
+                    ? {
+                          paddingTop: 'max(0.5rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))',
+                          paddingLeft: 'max(0.5rem, env(safe-area-inset-left, 0px))',
+                          paddingRight: 'max(0.5rem, env(safe-area-inset-right, 0px))',
+                      }
+                    : undefined
+            }
+        >
             <Button
                 variant="ghost"
                 size="icon"
