@@ -6,9 +6,11 @@ import {
     BookKey,
     FolderOpen,
     Key,
+    Keyboard,
     Laptop,
     Lock,
     Monitor,
+    Play,
     Plus,
     Server,
     Settings as SettingsIcon,
@@ -28,6 +30,8 @@ import {
 import { DialogTitle } from '@/components/ui/dialog';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { protocolIcons } from '@/lib/protocol-style';
+import type { Snippet } from '@/components/terminal/TerminalToolbar';
+import { useSessionsContext } from '../sessions-context';
 import type { ServerItem } from '../_dashboard/types';
 import type { Group } from '../groups/_components/types';
 import type { KeychainEntry } from '../keychain/_components/types';
@@ -54,6 +58,7 @@ const SETTINGS_SECTIONS = [
  */
 export function CommandPalette() {
     const router = useRouter();
+    const { activeTabId, sendToSession } = useSessionsContext();
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -80,10 +85,14 @@ export function CommandPalette() {
     const { data: keychainData } = useCachedFetch<{ entries: KeychainEntry[] }>(
         open ? '/api/keychain' : null,
     );
+    const { data: snippetsData } = useCachedFetch<{ snippets: Snippet[] }>(
+        open ? '/api/snippets' : null,
+    );
 
     const servers = serversData?.servers ?? [];
     const groups = groupsData?.groups ?? [];
     const entries = keychainData?.entries ?? [];
+    const snippets = snippetsData?.snippets ?? [];
 
     const go = useCallback(
         (href: string) => {
@@ -91,6 +100,19 @@ export function CommandPalette() {
             router.push(href);
         },
         [router],
+    );
+
+    // Types it into the active session's active shell if one exists; otherwise
+    // falls back to the clipboard so the action never silently does nothing.
+    const runSnippet = useCallback(
+        (snippet: Snippet) => {
+            setOpen(false);
+            const text = snippet.runImmediately ? `${snippet.command}\r` : snippet.command;
+            if (!sendToSession(activeTabId, text)) {
+                navigator.clipboard.writeText(snippet.command).catch(() => {});
+            }
+        },
+        [activeTabId, sendToSession],
     );
 
     return (
@@ -213,6 +235,27 @@ export function CommandPalette() {
                                     <span className="truncate">{entry.label}</span>
                                     <CommandShortcut className="font-mono">
                                         {entry.username}
+                                    </CommandShortcut>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </>
+                )}
+
+                {snippets.length > 0 && (
+                    <>
+                        <CommandSeparator />
+                        <CommandGroup heading="Snippets">
+                            {snippets.map((snippet) => (
+                                <CommandItem
+                                    key={snippet.id}
+                                    value={`${snippet.label} ${snippet.command} snippet run`}
+                                    onSelect={() => runSnippet(snippet)}
+                                >
+                                    {snippet.runImmediately ? <Play /> : <Keyboard />}
+                                    <span className="truncate">{snippet.label}</span>
+                                    <CommandShortcut className="truncate max-w-[200px] font-mono">
+                                        {snippet.command}
                                     </CommandShortcut>
                                 </CommandItem>
                             ))}

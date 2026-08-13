@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
 import { TerminalPaneHeader } from './TerminalPaneHeader';
 import { useShells } from './useShells';
-import type { Session, SessionStatus } from '../../sessions-context';
+import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
 
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
@@ -109,6 +109,8 @@ export function TerminalPane({
     const [showToolbar, setShowToolbar] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
+    const { registerSendHandler } = useSessionsContext();
+
     const {
         shells,
         activeShellId,
@@ -122,6 +124,16 @@ export function TerminalPane({
         wsRefs,
         nudgeResize,
     } = useShells(session, removeSession);
+
+    // Let code outside the terminal tree (the command palette) type into this
+    // pane's active shell — same mechanism the in-pane toolbar/keyboard use.
+    // Local terminals have no gateway shell to target, so skip those.
+    useEffect(() => {
+        if (session.type === 'local') return;
+        registerSendHandler(session.tabId, (key) => keyHandlers.current.get(activeShellId)?.(key));
+        return () => registerSendHandler(session.tabId, null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session.tabId, session.type, activeShellId, registerSendHandler]);
 
     useEffect(() => {
         const check = () => {

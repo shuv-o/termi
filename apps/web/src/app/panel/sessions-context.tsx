@@ -42,6 +42,15 @@ interface SessionsContextValue {
     updateSessionStatus: (tabId: string, status: SessionStatus) => void;
     setSessionError: (tabId: string, error: string | null) => void;
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
+    /**
+     * Lets a session's terminal pane register "type this into my active
+     * shell" — the same function the in-pane toolbar/keyboard already use —
+     * so code mounted outside the terminal tree (the command palette) can
+     * reach it too. Pass `null` to unregister (on unmount).
+     */
+    registerSendHandler: (tabId: string, handler: ((key: string) => void) | null) => void;
+    /** Returns false (no-op) if that tab has no registered handler — e.g. it isn't a connected remote session. */
+    sendToSession: (tabId: string | null, text: string) => boolean;
 }
 
 // CONTEXT
@@ -107,6 +116,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     // Map of tabId → active WebSocket, used to send close-session before removing
     const wsRefs = useRef(new Map<string, WebSocket>());
+    // Map of tabId → "type this into my active shell", registered by whichever
+    // TerminalPane owns that tab (remote sessions only — see TerminalPane.tsx).
+    const sendHandlers = useRef(new Map<string, (key: string) => void>());
     // Always-current snapshot of sessions (avoids stale closure reads)
     const sessionsRef = useRef<Session[]>([]);
     useEffect(() => {
@@ -347,6 +359,22 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         );
     }, []);
 
+    const registerSendHandler = useCallback(
+        (tabId: string, handler: ((key: string) => void) | null) => {
+            if (handler) sendHandlers.current.set(tabId, handler);
+            else sendHandlers.current.delete(tabId);
+        },
+        [],
+    );
+
+    const sendToSession = useCallback((tabId: string | null, text: string): boolean => {
+        if (!tabId) return false;
+        const handler = sendHandlers.current.get(tabId);
+        if (!handler) return false;
+        handler(text);
+        return true;
+    }, []);
+
     //   Refs so restore effect can call stable functions without re-running
 
     const reconnectSessionRef = useRef<typeof reconnectSession | null>(null);
@@ -410,6 +438,8 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 updateSessionStatus,
                 setSessionError,
                 setSessionWs,
+                registerSendHandler,
+                sendToSession,
             }}
         >
             {children}
