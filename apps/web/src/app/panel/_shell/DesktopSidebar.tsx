@@ -8,11 +8,17 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     Plus,
+    Search,
     Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TerminalLogo from '@/components/common/Logo';
+import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
 import { isNavItemActive, navigation, type PanelUser } from './navigation';
+
+function openCommandPalette() {
+    window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT));
+}
 
 /** Hover label shown beside icons while the sidebar is collapsed. */
 function CollapseTooltip({ label, children }: { label: string; children: React.ReactNode }) {
@@ -208,6 +214,30 @@ export function DesktopSidebar({
                         )}
                     </button>
                 </div>
+            </div>
+
+            <div className="px-3 pt-3">
+                {collapsed ? (
+                    <CollapseTooltip label="Search (⌘K)">
+                        <button
+                            onClick={openCommandPalette}
+                            className="flex items-center justify-center w-full h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        >
+                            <Search className="w-4 h-4" />
+                        </button>
+                    </CollapseTooltip>
+                ) : (
+                    <button
+                        onClick={openCommandPalette}
+                        className="flex w-full items-center gap-2 rounded-xl border border-border/60 bg-background/70 px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+                    >
+                        <Search className="w-4 h-4 shrink-0" />
+                        <span className="flex-1 text-left">Search…</span>
+                        <kbd className="shrink-0 rounded border border-border/60 bg-secondary px-1.5 py-0.5 text-[10px] font-medium">
+                            ⌘K
+                        </kbd>
+                    </button>
+                )}
             </div>
 
             {/* Add Server — the expanded button collapses to zero height rather

@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 
@@ -24,7 +25,23 @@ import { ProfilePanel } from './_panels/ProfilePanel';
 import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
 
-import type { SectionId, SetUser, User } from './types';
+import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
+
+/** Applies a `?section=` deep link (e.g. from the command palette) on mount. */
+function SectionFromUrl({ onSection }: { onSection: (s: SectionId) => void }) {
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const section = searchParams.get('section');
+        if (section && SECTION_IDS.includes(section as SectionId)) {
+            onSection(section as SectionId);
+        }
+        // Run only on mount — intentional
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return null;
+}
 
 export default function SettingsPage() {
     // Share the layout's cached user instead of re-fetching /api/auth/me. Writes
@@ -70,7 +87,14 @@ export default function SettingsPage() {
 
     return (
         <div className="mx-auto max-w-screen-2xl pb-16">
+            <Suspense fallback={null}>
+                <SectionFromUrl onSection={setActiveSection} />
+            </Suspense>
+
             <div className="mb-8 max-w-4xl">
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Your account
+                </p>
                 <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Settings</h1>
                 <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Manage your account, security, and preferences

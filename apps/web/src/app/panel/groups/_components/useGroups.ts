@@ -28,7 +28,13 @@ export function useGroups() {
 
     const [details, setDetails] = useState<Record<string, GroupDetail>>({});
     const [loadingDetail, setLoadingDetail] = useState(false);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+    // Seeded from `?group=` (e.g. the command palette) so the deep link wins
+    // outright — setting this any later would race the auto-select effect
+    // below, which runs as soon as the group list loads.
+    const [selectedId, setSelectedId] = useState<string | null>(() => {
+        if (typeof window === 'undefined') return null;
+        return new URLSearchParams(window.location.search).get('group');
+    });
     const [search, setSearch] = useState('');
     const [deleting, setDeleting] = useState(false);
     const [toast, setToast] = useState<{ type: ToastKind; msg: string } | null>(null);

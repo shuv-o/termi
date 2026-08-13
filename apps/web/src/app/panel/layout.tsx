@@ -4,6 +4,7 @@ import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import StarNudge from '@/components/common/StarNudge';
 
+import { CommandPalette } from './_shell/CommandPalette';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
 import { MobileBottomNav, MobileTopBar, VerifyEmailBanner } from './_shell/MobileChrome';
 import { usePanelShell } from './_shell/usePanelShell';
@@ -99,6 +100,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             )}
 
             <StarNudge userCreatedAt={user.createdAt} serverCount={shell.serverCount} />
+            <CommandPalette />
         </div>
     );
 }

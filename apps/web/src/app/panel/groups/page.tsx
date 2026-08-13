@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Check, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,32 @@ import { GroupModal } from './_components/GroupModal';
 import { GroupSidebar } from './_components/GroupSidebar';
 import { useGroups } from './_components/useGroups';
 import { EMPTY_FORM, type Group } from './_components/types';
+
+/**
+ * Applies `?group=` and `?new=1` deep links (e.g. from the command palette) on
+ * mount. The actual selection is seeded directly into `useGroups`'s initial
+ * state (reading the URL before this even runs) to avoid racing that hook's
+ * auto-select-first-group effect — this just handles the mobile view and the
+ * create-modal shortcut, which have no such race.
+ */
+function ParamsFromUrl({
+    onGroupParam,
+    onCreate,
+}: {
+    onGroupParam: () => void;
+    onCreate: () => void;
+}) {
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        if (searchParams.get('group')) onGroupParam();
+        if (searchParams.get('new') === '1') onCreate();
+        // Run only on mount — intentional
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return null;
+}
 
 export default function GroupsPage() {
     const router = useRouter();
@@ -44,6 +70,13 @@ export default function GroupsPage() {
 
     return (
         <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-[calc(100vh-0rem)] -m-4 lg:-m-8">
+            <Suspense fallback={null}>
+                <ParamsFromUrl
+                    onGroupParam={() => setMobileShowDetail(true)}
+                    onCreate={() => setShowCreate(true)}
+                />
+            </Suspense>
+
             {g.toast && (
                 <div
                     className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl text-sm font-medium transition-all duration-300 ${

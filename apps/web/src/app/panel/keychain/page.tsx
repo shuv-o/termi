@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { BookKey, CheckCircle2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,30 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
 import { emptyForm, type EntryForm, type KeychainEntry } from './_components/types';
+
+/** Applies `?new=1` and `?entry=` deep links (e.g. from the command palette) on mount. */
+function ParamsFromUrl({
+    onCreate,
+    onEditEntry,
+}: {
+    onCreate: () => void;
+    onEditEntry: (id: string) => void;
+}) {
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const entryId = searchParams.get('entry');
+        if (entryId) {
+            onEditEntry(entryId);
+        } else if (searchParams.get('new') === '1') {
+            onCreate();
+        }
+        // Run only on mount — intentional
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return null;
+}
 
 export default function KeychainPage() {
     // Cached so returning to the keychain shows the list instantly instead of
@@ -160,9 +185,16 @@ export default function KeychainPage() {
 
     return (
         <div className="space-y-4 sm:space-y-6">
+            <Suspense fallback={null}>
+                <ParamsFromUrl onCreate={openCreate} onEditEntry={openEdit} />
+            </Suspense>
+
             <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between gap-4">
                     <div>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                            Encrypted credentials
+                        </p>
                         <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Keychain</h1>
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                             {entries.length > 0
@@ -170,7 +202,7 @@ export default function KeychainPage() {
                                 : 'Save credentials once, reuse them across servers'}
                         </p>
                     </div>
-                    <Button onClick={openCreate}>
+                    <Button onClick={openCreate} className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0">
                         <Plus className="w-4 h-4" />
                         <span className="hidden sm:inline">New Entry</span>
                         <span className="sm:hidden">New</span>
