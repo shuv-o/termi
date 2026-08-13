@@ -28,6 +28,13 @@ export default function GroupsPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [editTarget, setEditTarget] = useState<Group | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Group | null>(null);
+    // On mobile the list and detail panel are two full-screen views, not a
+    // side-by-side split, so selecting a group doesn't automatically mean
+    // "show its detail" the way it does on desktop — that's tracked here,
+    // separately from `g.selectedId`, which always has a group (auto-picked)
+    // so the desktop split view never shows a blank right pane.
+    const [mobileShowDetail, setMobileShowDetail] = useState(false);
+    const showDetailOnMobile = mobileShowDetail && !!g.selectedGroup;
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -81,15 +88,25 @@ export default function GroupsPage() {
                     search={g.search}
                     onSearchChange={g.setSearch}
                     totalServers={g.totalServers}
-                    onSelect={g.select}
+                    onSelect={(id) => {
+                        g.select(id);
+                        setMobileShowDetail(true);
+                    }}
                     onMove={g.move}
                     onEdit={setEditTarget}
                     onDelete={setDeleteTarget}
                     onCreate={() => setShowCreate(true)}
+                    hideOnMobile={showDetailOnMobile}
                 />
 
                 <div
-                    className={`flex-1 min-w-0 min-h-0 overflow-hidden ${g.selectedGroup ? '' : 'hidden lg:flex'}`}
+                    className={`flex-1 min-w-0 min-h-0 overflow-hidden ${
+                        !g.selectedGroup
+                            ? 'hidden lg:flex'
+                            : showDetailOnMobile
+                              ? ''
+                              : 'hidden lg:block'
+                    }`}
                 >
                     <GroupDetailPanel
                         group={g.selectedGroup}
@@ -100,6 +117,7 @@ export default function GroupsPage() {
                         onConnect={(serverId, protocol) =>
                             router.push(`/panel/connect/${serverId}/${protocol.toLowerCase()}`)
                         }
+                        onBack={() => setMobileShowDetail(false)}
                     />
                 </div>
             </div>

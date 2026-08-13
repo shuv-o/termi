@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Boxes, FolderClosed, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Boxes, FolderClosed, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatRelativeTime } from '@/lib/format';
@@ -88,11 +88,14 @@ function GroupHeader({
     detail,
     onEdit,
     onDelete,
+    onBack,
 }: {
     group: Group;
     detail: GroupDetail | null;
     onEdit: (g: Group) => void;
     onDelete: (g: Group) => void;
+    /** Shown only on mobile, where the detail view replaces the group list full-screen. */
+    onBack?: () => void;
 }) {
     const IconComp = getIconComponent(group.icon);
     const color = group.color || DEFAULT_GROUP_COLOR;
@@ -104,6 +107,17 @@ function GroupHeader({
             className="px-6 py-5 border-b border-border/60 shrink-0"
             style={{ borderLeftColor: color, borderLeftWidth: 4 }}
         >
+            {onBack && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onBack}
+                    className="lg:hidden -ml-2 mb-3 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Groups
+                </Button>
+            )}
             <div className="flex items-start gap-4">
                 <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border"
@@ -173,6 +187,7 @@ export function GroupDetailPanel({
     onEdit,
     onDelete,
     onConnect,
+    onBack,
 }: {
     group: Group | null;
     detail: GroupDetail | null;
@@ -180,6 +195,7 @@ export function GroupDetailPanel({
     onEdit: (g: Group) => void;
     onDelete: (g: Group) => void;
     onConnect: (serverId: string, protocol: string) => void;
+    onBack?: () => void;
 }) {
     if (!group) return <NoGroupSelected />;
 
@@ -187,7 +203,13 @@ export function GroupDetailPanel({
 
     return (
         <div className="flex flex-col h-full min-h-0">
-            <GroupHeader group={group} detail={detail} onEdit={onEdit} onDelete={onDelete} />
+            <GroupHeader
+                group={group}
+                detail={detail}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onBack={onBack}
+            />
 
             <div className="flex-1 overflow-y-auto">
                 {loadingDetail ? (

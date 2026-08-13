@@ -140,6 +140,7 @@ export function GroupSidebar({
     onEdit,
     onDelete,
     onCreate,
+    hideOnMobile,
 }: {
     groups: Group[];
     filtered: Group[];
@@ -153,9 +154,13 @@ export function GroupSidebar({
     onEdit: (g: Group) => void;
     onDelete: (g: Group) => void;
     onCreate: () => void;
+    /** Hidden on mobile while a group's detail is showing full-screen. */
+    hideOnMobile?: boolean;
 }) {
     return (
-        <div className="w-full lg:w-72 xl:w-80 flex flex-col border-r border-border/60 bg-card/30 shrink-0 min-h-0 overflow-hidden">
+        <div
+            className={`${hideOnMobile ? 'hidden lg:flex' : 'flex'} w-full lg:w-72 xl:w-80 flex-col border-r border-border/60 bg-card/30 shrink-0 min-h-0 overflow-hidden`}
+        >
             <div className="px-3 py-3 border-b border-border/40 shrink-0">
                 <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
