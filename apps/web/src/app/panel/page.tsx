@@ -234,7 +234,6 @@ export default function DashboardPage() {
                                 <DropdownMenuTrigger asChild>
                                     <Button
                                         variant="outline"
-                                        className="h-9 sm:h-10 px-2.5 sm:px-3"
                                         title="Import or export servers"
                                     >
                                         <ArrowUpDown className="w-4 h-4" />
@@ -258,7 +257,7 @@ export default function DashboardPage() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            <Button asChild className="h-9 sm:h-10 px-3 sm:px-4">
+                            <Button asChild>
                                 <Link href="/panel/servers/new">
                                     <Plus className="w-4 h-4" />{' '}
                                     <span className="hidden sm:inline">Add Server</span>

@@ -170,7 +170,7 @@ export default function KeychainPage() {
                                 : 'Save credentials once, reuse them across servers'}
                         </p>
                     </div>
-                    <Button onClick={openCreate} className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0">
+                    <Button onClick={openCreate}>
                         <Plus className="w-4 h-4" />
                         <span className="hidden sm:inline">New Entry</span>
                         <span className="sm:hidden">New</span>

@@ -72,7 +72,7 @@ export default function GroupsPage() {
                         </p>
                     </div>
                 </div>
-                <Button onClick={() => setShowCreate(true)} size="sm" className="gap-1.5">
+                <Button onClick={() => setShowCreate(true)}>
                     <Plus className="w-4 h-4" />
                     <span className="hidden sm:inline">Create Group</span>
                     <span className="sm:hidden">Create</span>
