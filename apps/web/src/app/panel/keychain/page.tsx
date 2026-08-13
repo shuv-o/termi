@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { ArrowLeft, BookKey, CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { BookKey, CheckCircle2, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -159,34 +158,26 @@ export default function KeychainPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="-mx-4 sticky top-14 lg:top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
-                <div className="mx-auto flex max-w-screen-2xl items-center gap-3">
-                    <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-xl">
-                        <Link href="/panel">
-                            <ArrowLeft className="w-4 h-4" />
-                        </Link>
-                    </Button>
-                    <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                             Encrypted credentials
                         </p>
-                        <h1 className="flex items-center gap-2 text-xl font-semibold">
-                            <BookKey className="h-5 w-5 text-primary" />
-                            Keychain
-                        </h1>
+                        <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Keychain</h1>
+                        <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+                            {entries.length > 0
+                                ? `${entries.length} saved credential${entries.length === 1 ? '' : 's'} · reuse across servers`
+                                : 'Save credentials once, reuse them across servers'}
+                        </p>
                     </div>
-                    <Button onClick={openCreate} className="h-10 gap-1.5 px-4">
+                    <Button onClick={openCreate} className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0">
                         <Plus className="w-4 h-4" />
-                        New Entry
+                        <span className="hidden sm:inline">New Entry</span>
+                        <span className="sm:hidden">New</span>
                     </Button>
                 </div>
-            </div>
-
-            <div className="mx-auto max-w-screen-2xl space-y-6">
-                <p className="text-sm text-muted-foreground">
-                    Reusable encrypted credentials for your servers.
-                </p>
 
                 {successMsg && (
                     <div className="flex items-center gap-2 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-2.5 text-sm text-green-400">
@@ -223,7 +214,7 @@ export default function KeychainPage() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="rounded-2xl border border-border bg-card/30 divide-y divide-border/60 overflow-hidden">
                         {entries.map((entry) => (
                             <KeychainEntryCard
                                 key={entry.id}

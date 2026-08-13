@@ -3,6 +3,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { decryptCredentials } from '@/lib/crypto';
 
 // TYPES
 
@@ -81,7 +82,7 @@ export async function getServerGroups(userId: string) {
 }
 
 export async function getServerGroupById(groupId: string, userId: string) {
-    return prisma.serverGroup.findFirst({
+    const group = await prisma.serverGroup.findFirst({
         where: { id: groupId, userId },
         include: {
             servers: {
@@ -90,11 +91,26 @@ export async function getServerGroupById(groupId: string, userId: string) {
                     name: true,
                     protocol: true,
                     isFavorite: true,
+                    lastUsedAt: true,
+                    host: true,
+                    username: true,
+                    port: true,
                 },
                 orderBy: { name: 'asc' },
             },
         },
     });
+
+    if (!group) return group;
+
+    // `host`/`username` are AES-256-GCM encrypted at rest — decrypt for display.
+    return {
+        ...group,
+        servers: group.servers.map(({ host, username, ...rest }) => {
+            const creds = decryptCredentials({ host, username });
+            return { ...rest, host: creds.host, username: creds.username };
+        }),
+    };
 }
 
 // UPDATE
