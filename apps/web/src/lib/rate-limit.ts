@@ -125,3 +125,14 @@ export function forgotPasswordRateLimit(ip: string): RateLimitResult {
 export function sendVerificationRateLimit(userId: string): RateLimitResult {
     return rateLimit(`send-verification:${userId}`, 3, 60 * 60 * 1000);
 }
+
+/**
+ * 10 group-broadcast command runs per 5 minutes per user.
+ *
+ * Each run opens SSH connections to every server in a group and executes
+ * arbitrary input there, so this is throttled more like a mutating action
+ * than a read — the risk is "commands run," not request volume.
+ */
+export function broadcastCommandRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`broadcast:${userId}`, 10, 5 * 60 * 1000);
+}

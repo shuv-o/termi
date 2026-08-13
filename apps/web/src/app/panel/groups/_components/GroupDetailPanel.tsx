@@ -1,7 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Boxes, FolderClosed, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    ArrowRight,
+    Boxes,
+    FolderClosed,
+    Layers,
+    Pencil,
+    Plus,
+    Radio,
+    Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatRelativeTime } from '@/lib/format';
@@ -88,12 +98,14 @@ function GroupHeader({
     detail,
     onEdit,
     onDelete,
+    onBroadcast,
     onBack,
 }: {
     group: Group;
     detail: GroupDetail | null;
     onEdit: (g: Group) => void;
     onDelete: (g: Group) => void;
+    onBroadcast: (g: Group) => void;
     /** Shown only on mobile, where the detail view replaces the group list full-screen. */
     onBack?: () => void;
 }) {
@@ -159,6 +171,16 @@ function GroupHeader({
                     <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => onBroadcast(group)}
+                        className="gap-1.5 text-xs h-8"
+                        title="Run a command on every SSH server in this group"
+                    >
+                        <Radio className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Run Command</span>
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onEdit(group)}
                         className="gap-1.5 text-xs h-8"
                     >
@@ -186,6 +208,7 @@ export function GroupDetailPanel({
     loadingDetail,
     onEdit,
     onDelete,
+    onBroadcast,
     onConnect,
     onBack,
 }: {
@@ -194,6 +217,7 @@ export function GroupDetailPanel({
     loadingDetail: boolean;
     onEdit: (g: Group) => void;
     onDelete: (g: Group) => void;
+    onBroadcast: (g: Group) => void;
     onConnect: (serverId: string, protocol: string) => void;
     onBack?: () => void;
 }) {
@@ -208,6 +232,7 @@ export function GroupDetailPanel({
                 detail={detail}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onBroadcast={onBroadcast}
                 onBack={onBack}
             />
 

@@ -6,3 +6,4 @@ export * from './monitor.service';
 export * from './share.service';
 export * from './keychain.service';
 export * from './snippet.service';
+export * from './broadcast.service';

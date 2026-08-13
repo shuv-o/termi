@@ -15,6 +15,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+import { BroadcastModal } from './_components/BroadcastModal';
 import { GroupDetailPanel } from './_components/GroupDetailPanel';
 import { GroupModal } from './_components/GroupModal';
 import { GroupSidebar } from './_components/GroupSidebar';
@@ -54,6 +55,7 @@ export default function GroupsPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [editTarget, setEditTarget] = useState<Group | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Group | null>(null);
+    const [broadcastTarget, setBroadcastTarget] = useState<Group | null>(null);
     // On mobile the list and detail panel are two full-screen views, not a
     // side-by-side split, so selecting a group doesn't automatically mean
     // "show its detail" the way it does on desktop — that's tracked here,
@@ -147,6 +149,7 @@ export default function GroupsPage() {
                         loadingDetail={g.loadingDetail}
                         onEdit={setEditTarget}
                         onDelete={setDeleteTarget}
+                        onBroadcast={setBroadcastTarget}
                         onConnect={(serverId, protocol) =>
                             router.push(`/panel/connect/${serverId}/${protocol.toLowerCase()}`)
                         }
@@ -178,6 +181,8 @@ export default function GroupsPage() {
                 onClose={() => setEditTarget(null)}
                 onSave={(form) => g.update(editTarget!, form)}
             />
+
+            <BroadcastModal group={broadcastTarget} onClose={() => setBroadcastTarget(null)} />
 
             <AlertDialog
                 open={!!deleteTarget}
