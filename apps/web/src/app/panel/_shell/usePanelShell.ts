@@ -43,10 +43,14 @@ export function usePanelShell() {
     const isLocalPage = pathname === '/panel/local';
     const isConnectPage = pathname.startsWith('/panel/connect/');
 
-    // A "root" page maps directly to a primary nav item (or the local
-    // terminal). Anything deeper (server detail, settings sub-page, connect…)
-    // is a sub-page that needs a back affordance on mobile/PWA.
-    const isRootPage = navigation.some((n) => n.href === pathname) || isLocalPage;
+    // A "root" page maps directly to a primary nav item. Anything deeper
+    // (server detail, settings sub-page, connect…) is a sub-page that needs
+    // a back affordance on mobile/PWA. Sessions and the local terminal are
+    // exceptions: sessions IS a primary nav item, and local terminal isn't,
+    // but both hide the bottom nav to give the terminal the full viewport —
+    // so unlike the other nav items they still need the back button rather
+    // than just the home-logo link.
+    const isRootPage = navigation.some((n) => n.href === pathname) && !isSessionsPage;
 
     const openLocalTerminal = useCallback(() => {
         router.push('/panel/local');
