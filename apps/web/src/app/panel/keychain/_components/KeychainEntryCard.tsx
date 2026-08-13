@@ -108,7 +108,7 @@ export function KeychainEntryCard({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary"
+                            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary"
                             onClick={onCopySecret}
                             title={entry.hasPrivateKey ? 'Copy SSH key' : 'Copy password'}
                         >
@@ -122,7 +122,7 @@ export function KeychainEntryCard({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
                         onClick={onEdit}
                     >
                         <Pencil className="w-4 h-4" />
@@ -130,7 +130,7 @@ export function KeychainEntryCard({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive"
+                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
                         onClick={() => setConfirming(true)}
                     >
                         <Trash2 className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import { FolderOpen, Monitor, Terminal, Tv } from 'lucide-react';
+export { protocolIcons, protocolColors } from '@/lib/protocol-style';
 
 export interface ServerInfo {
     id: string;
@@ -157,18 +157,3 @@ export function scoreBarColor(score: number): string {
     return 'bg-red-400';
 }
 
-export const protocolColors: Record<string, string> = {
-    SSH: 'bg-green-500/15 text-green-400 border-green-500/30',
-    SCP: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    RDP: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-    VNC: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-    TELNET: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-};
-
-export const protocolIcons: Record<string, typeof Terminal> = {
-    SSH: Terminal,
-    SCP: FolderOpen,
-    RDP: Monitor,
-    VNC: Tv,
-    TELNET: Terminal,
-};

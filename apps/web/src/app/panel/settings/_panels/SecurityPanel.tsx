@@ -309,7 +309,7 @@ export function SecurityPanel({
 
                     {has2FA && !twoFactor.showDisable && (
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-300">
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-300">
                                 <ShieldCheck className="w-4 h-4 shrink-0" />
                                 <div>
                                     <p className="font-medium">
@@ -317,7 +317,7 @@ export function SecurityPanel({
                                             ? 'Authenticator app is active'
                                             : 'Email OTP is active'}
                                     </p>
-                                    <p className="text-xs text-green-300/70 mt-0.5">
+                                    <p className="text-xs text-emerald-300/70 mt-0.5">
                                         {user?.twoFactorMethod === 'TOTP'
                                             ? 'Keep your recovery codes stored safely.'
                                             : 'A code is sent to your email on each login.'}

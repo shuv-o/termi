@@ -32,8 +32,8 @@ export function EncryptionPanel({
                         <div
                             className={`flex items-center gap-2 p-3 rounded-xl text-sm ${
                                 user.hasMasterKey
-                                    ? 'bg-green-500/10 border border-green-500/20 text-green-300'
-                                    : 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-300'
+                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                                    : 'bg-amber-500/10 border border-amber-500/20 text-amber-300'
                             }`}
                         >
                             {user.hasMasterKey ? (
@@ -103,7 +103,7 @@ export function EncryptionPanel({
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-300">
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-300">
                             <CheckCircle2 className="w-4 h-4 shrink-0" />
                             Encryption active — key derived from your login password
                         </div>

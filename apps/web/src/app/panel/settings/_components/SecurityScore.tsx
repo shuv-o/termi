@@ -23,8 +23,8 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
     const pct = (score / checks.length) * 100;
 
     const scoreColor =
-        score === 4 ? 'text-green-400' : score >= 2 ? 'text-yellow-400' : 'text-red-400';
-    const barColor = score === 4 ? 'bg-green-500' : score >= 2 ? 'bg-yellow-500' : 'bg-red-500';
+        score === 4 ? 'text-emerald-400' : score >= 2 ? 'text-amber-400' : 'text-red-400';
+    const barColor = score === 4 ? 'bg-emerald-500' : score >= 2 ? 'bg-amber-500' : 'bg-red-500';
     const label = score === 4 ? 'Excellent' : score >= 3 ? 'Good' : score >= 2 ? 'Fair' : 'Weak';
 
     return (
@@ -32,9 +32,9 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     {score === 4 ? (
-                        <ShieldCheck className="w-5 h-5 text-green-400" />
+                        <ShieldCheck className="w-5 h-5 text-emerald-400" />
                     ) : score >= 2 ? (
-                        <Shield className="w-5 h-5 text-yellow-400" />
+                        <Shield className="w-5 h-5 text-amber-400" />
                     ) : (
                         <ShieldAlert className="w-5 h-5 text-red-400" />
                     )}
@@ -54,7 +54,7 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
                 {checks.map((c) => (
                     <div key={c.label} className="flex items-center gap-2">
                         {c.done ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         ) : (
                             <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
                         )}

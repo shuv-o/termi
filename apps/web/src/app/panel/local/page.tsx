@@ -161,7 +161,7 @@ export default function LocalTerminalPage() {
                     <span
                         className={`w-2 h-2 rounded-full ${
                             activeStatus === 'connected'
-                                ? 'bg-green-500'
+                                ? 'bg-emerald-500'
                                 : activeStatus === 'connecting'
                                   ? 'bg-yellow-500 animate-pulse'
                                   : 'bg-red-500'

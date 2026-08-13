@@ -4,16 +4,16 @@ import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react'
 import type { Toast, ToastType } from '../types';
 
 const ICONS: Record<ToastType, React.ReactNode> = {
-    success: <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />,
+    success: <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />,
     error: <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />,
-    warning: <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0" />,
+    warning: <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />,
     info: <Info className="w-4 h-4 text-sky-400 shrink-0" />,
 };
 
 const COLORS: Record<ToastType, string> = {
-    success: 'bg-green-500/10 border-green-500/30 text-green-300',
+    success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
     error: 'bg-red-500/10 border-red-500/30 text-red-300',
-    warning: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300',
+    warning: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
     info: 'bg-sky-500/10 border-sky-500/30 text-sky-300',
 };
 

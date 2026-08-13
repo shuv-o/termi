@@ -26,21 +26,26 @@ export function FleetAlerts({
     if (total === 0) return null;
 
     return (
-        <div className="mb-5 rounded-lg border border-border bg-card overflow-hidden">
+        <div className="mb-5 rounded-xl border border-border bg-card overflow-hidden">
             <button
                 type="button"
                 onClick={() => setExpanded((e) => !e)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted/40 transition-colors"
+                className="w-full flex flex-col gap-1.5 px-4 py-2.5 text-left hover:bg-muted/40 transition-colors"
                 aria-expanded={expanded}
             >
-                <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
-                </span>
-                <span className="text-sm font-medium text-foreground shrink-0">
-                    {total} {total === 1 ? 'server needs' : 'servers need'} attention
-                </span>
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-3">
+                    <span className="relative flex h-2 w-2 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
+                    </span>
+                    <span className="text-sm font-medium text-foreground flex-1 truncate">
+                        {total} {total === 1 ? 'server needs' : 'servers need'} attention
+                    </span>
+                    <ChevronDown
+                        className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
+                    />
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 pl-5">
                     {offline.length > 0 && (
                         <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
                             <WifiOff className="w-2.5 h-2.5" />
@@ -54,9 +59,6 @@ export function FleetAlerts({
                         </span>
                     )}
                 </div>
-                <ChevronDown
-                    className={`w-4 h-4 ml-auto text-muted-foreground shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
-                />
             </button>
             {expanded && (
                 <div className="border-t border-border max-h-64 overflow-y-auto divide-y divide-border/60">

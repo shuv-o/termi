@@ -222,9 +222,6 @@ export default function DashboardPage() {
                 <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-5">
                     <div className="flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                Fleet overview
-                            </p>
                             <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Servers</h1>
                             <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                                 {servers.length > 0
@@ -241,7 +238,7 @@ export default function DashboardPage() {
                                         title="Import or export servers"
                                     >
                                         <ArrowUpDown className="w-4 h-4" />
-                                        <span className="hidden md:inline">Transfer</span>
+                                        <span className="hidden sm:inline">Transfer</span>
                                         <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                                     </Button>
                                 </DropdownMenuTrigger>

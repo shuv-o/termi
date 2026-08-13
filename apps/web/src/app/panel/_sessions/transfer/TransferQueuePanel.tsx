@@ -17,14 +17,14 @@ import type { TransferItem, TransferItemStatus } from './useTransferQueue';
 const STATUS_ICONS: Record<TransferItemStatus, React.ReactNode> = {
     queued: <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />,
     transferring: <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />,
-    done: <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />,
+    done: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />,
     failed: <FileX className="w-3.5 h-3.5 text-red-400 shrink-0" />,
 };
 
 const BAR_COLORS: Record<TransferItemStatus, string> = {
     queued: 'bg-slate-600',
     transferring: 'bg-primary',
-    done: 'bg-green-500',
+    done: 'bg-emerald-500',
     failed: 'bg-red-500',
 };
 
@@ -93,7 +93,7 @@ export function TransferQueuePanel({
                     ) : failedItems > 0 ? (
                         <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
                     ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     )}
                     <span className="text-xs font-medium">Transfer queue</span>
                     <span className="text-[10px] text-muted-foreground">

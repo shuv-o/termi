@@ -330,7 +330,7 @@ export default function PasskeyRevealModal({
                                 {fieldLabel[field]}
                             </label>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary border border-border">
-                                <code className="flex-1 text-sm font-mono break-all text-green-400 select-all min-w-0">
+                                <code className="flex-1 text-sm font-mono break-all text-emerald-400 select-all min-w-0">
                                     {showValue
                                         ? revealedValue
                                         : '•'.repeat(Math.min(revealedValue.length, 24))}
@@ -358,7 +358,7 @@ export default function PasskeyRevealModal({
                             <Button
                                 onClick={copyToClipboard}
                                 className={
-                                    copied ? 'bg-green-600 hover:bg-green-500 text-white' : ''
+                                    copied ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : ''
                                 }
                             >
                                 {copied ? (

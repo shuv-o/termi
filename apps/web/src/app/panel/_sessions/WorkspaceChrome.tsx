@@ -99,7 +99,7 @@ export function WorkspaceTopBar({
                     </span>
                 </span>
                 {connectedCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-green-400 text-xs">
+                    <span className="flex items-center gap-0.5 text-emerald-400 text-xs">
                         <Wifi className="w-3 h-3" />
                         <span className="hidden md:inline">{connectedCount} live</span>
                     </span>

@@ -184,7 +184,7 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                     <p className="text-xs font-medium truncate">
                                         {inv.inviteeEmail}
                                     </p>
-                                    <p className="text-[10px] text-yellow-400">
+                                    <p className="text-[10px] text-amber-400">
                                         Pending invitation · {inv.permissions}
                                     </p>
                                 </div>

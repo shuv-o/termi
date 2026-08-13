@@ -1,11 +1,12 @@
 'use client';
 
-import { ArrowDown, ArrowUp, Clock, Layers, Star, WifiOff } from 'lucide-react';
+import { ArrowDown, ArrowUp, Clock, Layers, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CopyButton } from '@/components/common/CopyButton';
 import { formatBytes, formatRelativeTime } from '@/lib/format';
 import { ServerActionsMenu } from './ServerActionsMenu';
+import { ServerStatusPill } from './StatusIndicator';
 import { protocolIcons, protocolVariants, type ServerCardProps } from './types';
 
 /** A single usage bar (CPU / RAM / Disk) inside the card's metrics strip. */
@@ -26,7 +27,7 @@ function UsageBar({
     const textColor = high
         ? 'text-red-400'
         : warn
-          ? 'text-yellow-400'
+          ? 'text-amber-400'
           : tone === 'cpu'
             ? 'text-emerald-400'
             : tone === 'ram'
@@ -35,7 +36,7 @@ function UsageBar({
     const barColor = high
         ? 'bg-red-500'
         : warn
-          ? 'bg-yellow-500'
+          ? 'bg-amber-500'
           : tone === 'cpu'
             ? 'bg-emerald-500'
             : tone === 'ram'
@@ -108,13 +109,15 @@ export function ServerGridCard({
                             {mLoading ? (
                                 <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
                             ) : m?.reachable === true ? (
-                                <span className="mt-0.5 shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
-                                    {m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
+                                <span className="mt-0.5">
+                                    <ServerStatusPill
+                                        status="online"
+                                        label={m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
+                                    />
                                 </span>
                             ) : m?.reachable === false ? (
-                                <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                                    <WifiOff className="h-2.5 w-2.5" />
-                                    Offline
+                                <span className="mt-0.5">
+                                    <ServerStatusPill status="offline" label="Offline" />
                                 </span>
                             ) : null}
                         </div>
@@ -126,7 +129,7 @@ export function ServerGridCard({
                             e.stopPropagation();
                             onFavorite();
                         }}
-                        className={`h-7 w-7 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
+                        className={`h-8 w-8 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
                     >
                         <Star
                             className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`}

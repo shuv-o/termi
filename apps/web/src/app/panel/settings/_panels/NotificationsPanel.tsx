@@ -28,12 +28,12 @@ function StatusBanner({ push }: { push: PushState }) {
     }
     if (push.subscribed) {
         return (
-            <div className="flex items-center gap-3 p-4 rounded-xl border bg-green-500/10 border-green-500/20">
-                <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
-                    <Bell className="w-4 h-4 text-green-400" />
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-emerald-500/10 border-emerald-500/20">
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Bell className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-green-400">Notifications active</p>
+                    <p className="text-sm font-medium text-emerald-400">Notifications active</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                         This device will receive server alert notifications
                     </p>

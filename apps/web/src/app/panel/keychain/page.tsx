@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { BookKey, CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { BookKey, CheckCircle2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
@@ -162,9 +163,6 @@ export default function KeychainPage() {
             <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                            Encrypted credentials
-                        </p>
                         <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Keychain</h1>
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                             {entries.length > 0
@@ -180,24 +178,34 @@ export default function KeychainPage() {
                 </div>
 
                 {successMsg && (
-                    <div className="flex items-center gap-2 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-2.5 text-sm text-green-400">
+                    <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-400">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
                         {successMsg}
                     </div>
                 )}
 
                 {loading ? (
-                    <div className="flex h-32 items-center justify-center">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <div className="rounded-2xl border border-border bg-card/30 divide-y divide-border/60 overflow-hidden">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5">
+                                <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+                                <div className="flex-1 space-y-1.5">
+                                    <Skeleton className="h-3.5 w-32" />
+                                    <Skeleton className="h-3 w-24" />
+                                </div>
+                                <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
+                                <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
+                            </div>
+                        ))}
                     </div>
                 ) : entries.length === 0 ? (
                     <Card className="border-border">
                         <CardContent className="flex min-h-[320px] flex-col items-center justify-center gap-4 py-14 text-center">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary/30">
-                                <BookKey className="h-8 w-8 text-muted-foreground/40" />
+                            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
+                                <BookKey className="h-10 w-10 text-muted-foreground/35" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-semibold">No keychain entries yet</h2>
+                                <h2 className="text-xl font-semibold">No keychain entries yet</h2>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     Save reusable credentials once, then attach them to servers in
                                     seconds.

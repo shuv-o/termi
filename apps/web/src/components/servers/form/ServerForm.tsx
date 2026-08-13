@@ -62,17 +62,14 @@ export function ServerForm({
     return (
         <div className="mx-auto max-w-5xl space-y-6">
             <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-xl">
+                <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-xl">
                     <Link href="/panel">
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                 </Button>
                 <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                        Server setup
-                    </p>
-                    <h1 className="text-2xl font-semibold">{copy.heading}</h1>
-                    <p className="text-muted-foreground text-sm">{subtitle}</p>
+                    <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">{copy.heading}</h1>
+                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
                 </div>
             </div>
 

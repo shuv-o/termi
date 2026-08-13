@@ -70,7 +70,7 @@ export function FleetStats({
                     : avgLatency < 50
                       ? 'text-emerald-400'
                       : avgLatency < 150
-                        ? 'text-yellow-400'
+                        ? 'text-amber-400'
                         : 'text-red-400',
         },
         {

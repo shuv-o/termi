@@ -273,7 +273,7 @@ export function TestConnectionCard({
                         !canTest
                             ? 'border-border text-muted-foreground/40 cursor-not-allowed bg-transparent'
                             : testStatus === 'success'
-                              ? 'border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/15'
+                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
                               : testStatus === 'failed'
                                 ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
                                 : 'border-primary/30 bg-primary/8 text-primary hover:bg-primary/15'
@@ -306,13 +306,13 @@ export function TestConnectionCard({
                 )}
 
                 {testStatus === 'success' && testResult?.latency !== undefined && (
-                    <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-green-500/8 border border-green-500/20">
-                        <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                    <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-emerald-500/8 border border-emerald-500/20">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                         <div>
-                            <p className="text-xs font-medium text-green-400">
+                            <p className="text-xs font-medium text-emerald-400">
                                 {isSSHProto ? 'Authentication successful' : 'Port reachable'}
                             </p>
-                            <p className="text-[11px] text-green-500/60">
+                            <p className="text-[11px] text-emerald-500/60">
                                 Latency: {testResult.latency}ms
                             </p>
                         </div>

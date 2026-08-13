@@ -191,7 +191,9 @@ export function GroupSidebar({
                     <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                         {search ? (
                             <>
-                                <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
+                                    <Search className="h-10 w-10 text-muted-foreground/35" />
+                                </div>
                                 <p>No match for &ldquo;{search}&rdquo;</p>
                                 <button
                                     onClick={() => onSearchChange('')}
@@ -202,7 +204,9 @@ export function GroupSidebar({
                             </>
                         ) : (
                             <>
-                                <FolderOpen className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
+                                    <FolderOpen className="h-10 w-10 text-muted-foreground/35" />
+                                </div>
                                 <p>No groups yet</p>
                                 <button
                                     onClick={onCreate}

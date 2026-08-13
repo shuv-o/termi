@@ -14,15 +14,15 @@ export function UnverifiedBanner({
     onResend: () => void;
 }) {
     return (
-        <div className="mb-6 flex max-w-4xl items-center justify-between gap-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm">
-            <div className="flex items-center gap-2 text-yellow-300">
+        <div className="mb-6 flex max-w-4xl items-center justify-between gap-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
+            <div className="flex items-center gap-2 text-amber-300">
                 <Info className="w-4 h-4 shrink-0" />
                 Your email address is not verified.
             </div>
             <button
                 onClick={onResend}
                 disabled={resending || sent}
-                className="text-xs font-medium text-yellow-300 hover:text-yellow-200 underline shrink-0 disabled:opacity-50"
+                className="text-xs font-medium text-amber-300 hover:text-amber-200 underline shrink-0 disabled:opacity-50"
             >
                 {sent ? 'Email sent!' : resending ? 'Sending…' : 'Resend verification'}
             </button>
@@ -43,10 +43,10 @@ export function RecoveryCodesPanel({
     onDismiss: () => void;
 }) {
     return (
-        <div className="mb-6 max-w-4xl rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-5">
+        <div className="mb-6 max-w-4xl rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
             <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                <h2 className="font-semibold text-yellow-400">Save your recovery codes</h2>
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
+                <h2 className="font-semibold text-amber-400">Save your recovery codes</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
                 Store these securely. Each code can only be used once and won&apos;t be shown again.
@@ -63,7 +63,7 @@ export function RecoveryCodesPanel({
                             className="text-muted-foreground hover:text-foreground ml-2 transition-colors"
                         >
                             {copiedCode === code ? (
-                                <Check className="w-3.5 h-3.5 text-green-400" />
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
                             ) : (
                                 <Copy className="w-3.5 h-3.5" />
                             )}

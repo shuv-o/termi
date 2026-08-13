@@ -57,7 +57,7 @@ function SecretInput({
 function StoredHint({ icon: Icon, children }: { icon: React.ElementType; children: string }) {
     return (
         <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
-            <Icon className="w-3 h-3 text-green-500/70" />
+            <Icon className="w-3 h-3 text-emerald-500/70" />
             {children}
         </div>
     );
@@ -164,7 +164,7 @@ export function AuthCard({
                                 </Select>
                                 {selectedKeychainId && (
                                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                                         Credentials loaded from keychain
                                     </p>
                                 )}

@@ -5,6 +5,7 @@ import { ArrowLeft, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { formatRelativeTime } from '@/lib/format';
+import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
 import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } from './types';
 
 function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -36,21 +37,21 @@ export function ServerHeader({
                 </Link>
             </Button>
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2.5">
-                    <h1 className="text-xl font-semibold truncate">{server.name}</h1>
-                    {isOnline !== null &&
-                        (isOnline ? (
-                            <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                Online
-                            </span>
-                        ) : (
-                            <span className="flex items-center gap-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-2 py-0.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                Offline
-                            </span>
-                        ))}
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    {server.protocol} server
+                </p>
+                <div className="mt-0.5 flex items-center gap-2.5">
+                    <h1 className="text-xl sm:text-2xl font-bold truncate">{server.name}</h1>
+                    {isOnline !== null && (
+                        <ServerStatusPill
+                            status={isOnline ? 'online' : 'offline'}
+                            label={isOnline ? 'Online' : 'Offline'}
+                            size="md"
+                        />
+                    )}
                 </div>
+                {server.protocol} server
+
                 {server.description && (
                     <p className="text-sm text-muted-foreground mt-0.5 truncate">
                         {server.description}

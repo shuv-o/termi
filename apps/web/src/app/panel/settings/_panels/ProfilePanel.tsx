@@ -147,9 +147,9 @@ export function ProfilePanel({
                         <span className="text-sm flex items-center gap-1.5 min-w-0">
                             <span className="truncate max-w-[180px] sm:max-w-xs">{user.email}</span>
                             {user.isVerified ? (
-                                <CheckCircle className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                             ) : (
-                                <AlertCircle className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
+                                <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                             )}
                         </span>
                     </DetailRow>
@@ -166,7 +166,7 @@ export function ProfilePanel({
                     </DetailRow>
                     <DetailRow label="Two-factor auth">
                         <span
-                            className={`text-sm font-medium ${has2FA ? 'text-green-400' : 'text-muted-foreground'}`}
+                            className={`text-sm font-medium ${has2FA ? 'text-emerald-400' : 'text-muted-foreground'}`}
                         >
                             {user.twoFactorMethod === 'TOTP'
                                 ? 'Authenticator App'
@@ -177,14 +177,14 @@ export function ProfilePanel({
                     </DetailRow>
                     <DetailRow label="Passkeys">
                         <span
-                            className={`text-sm font-medium ${user.passkeyEnabled ? 'text-green-400' : 'text-muted-foreground'}`}
+                            className={`text-sm font-medium ${user.passkeyEnabled ? 'text-emerald-400' : 'text-muted-foreground'}`}
                         >
                             {user.passkeyEnabled ? `${passkeys.length} registered` : 'None'}
                         </span>
                     </DetailRow>
                     <DetailRow label="Encryption key" last>
                         <span
-                            className={`text-sm font-medium ${user.hasMasterKey || !user.isGoogleUser ? 'text-green-400' : 'text-yellow-400'}`}
+                            className={`text-sm font-medium ${user.hasMasterKey || !user.isGoogleUser ? 'text-emerald-400' : 'text-amber-400'}`}
                         >
                             {!user.isGoogleUser
                                 ? 'Auto (password-derived)'

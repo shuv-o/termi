@@ -118,12 +118,12 @@ export function SettingsSidebar({
                         </p>
                         <div className="mt-1 flex items-center gap-1">
                             {user.isVerified ? (
-                                <span className="flex items-center gap-1 text-[10px] text-green-400">
+                                <span className="flex items-center gap-1 text-[10px] text-emerald-400">
                                     <CheckCircle className="w-2.5 h-2.5" />
                                     Verified
                                 </span>
                             ) : (
-                                <span className="text-[10px] text-yellow-400">Unverified</span>
+                                <span className="text-[10px] text-amber-400">Unverified</span>
                             )}
                         </div>
                     </div>

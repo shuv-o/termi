@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/common/CopyButton';
 import { formatRelativeTime } from '@/lib/format';
 import { ServerActionsMenu } from './ServerActionsMenu';
-import { StatusIndicator } from './StatusIndicator';
+import { ServerStatusPill } from './StatusIndicator';
 import { protocolIcons, protocolVariants, type ServerCardProps } from './types';
 
 /** Column headings for the list view — also used by the loading skeleton. */
@@ -42,22 +42,14 @@ export function ServerListRow({
     onShare,
 }: ServerCardProps) {
     const Icon = protocolIcons[server.protocol];
-    const statusTone = mLoading
-        ? 'text-muted-foreground'
-        : m?.reachable === true
-          ? 'text-emerald-400'
-          : m?.reachable === false
-            ? 'text-red-400'
-            : 'text-muted-foreground';
-    const statusLabel = mLoading
-        ? 'Checking'
-        : m?.reachable === true
-          ? m.latencyMs != null
-              ? `${m.latencyMs}ms`
-              : 'Online'
-          : m?.reachable === false
-            ? 'Offline'
-            : 'Unknown';
+    const statusLabel =
+        m?.reachable === true
+            ? m.latencyMs != null
+                ? `${m.latencyMs}ms`
+                : 'Online'
+            : m?.reachable === false
+              ? 'Offline'
+              : 'Unknown';
 
     return (
         <div
@@ -128,9 +120,21 @@ export function ServerListRow({
                 </span>
             </div>
 
-            <div className={`hidden w-28 shrink-0 items-center gap-2 xl:flex ${statusTone}`}>
-                <StatusIndicator metrics={m} loading={mLoading} />
-                <span className="text-xs font-medium">{statusLabel}</span>
+            <div className="hidden w-28 shrink-0 items-center xl:flex">
+                {mLoading ? (
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
+                ) : (
+                    <ServerStatusPill
+                        status={
+                            m?.reachable === true
+                                ? 'online'
+                                : m?.reachable === false
+                                  ? 'offline'
+                                  : 'unknown'
+                        }
+                        label={statusLabel}
+                    />
+                )}
             </div>
 
             <div className="hidden w-24 shrink-0 items-center text-xs text-muted-foreground 2xl:flex">

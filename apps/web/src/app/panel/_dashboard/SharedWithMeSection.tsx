@@ -28,13 +28,15 @@ export function SharedWithMeSection({
                     {servers.length}
                 </span>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {/* Flex-wrap with per-card widths (not `grid`) so 1-2 shared servers sit
+                left-aligned instead of stretching across mostly-empty grid tracks. */}
+            <div className="flex flex-wrap gap-4">
                 {servers.map((server) => {
                     const Icon = protocolIcons[server.protocol];
                     return (
                         <Card
                             key={server.id}
-                            className="flex flex-col overflow-hidden border border-border border-primary/20 bg-card transition-all duration-200 hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md"
+                            className="flex flex-col overflow-hidden border border-border border-primary/20 bg-card transition-all duration-200 hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)] xl:w-[calc((100%-3rem)/4)] 2xl:w-[calc((100%-4rem)/5)]"
                         >
                             <div className="p-4 flex-1 space-y-3">
                                 <div className="flex items-start gap-3">

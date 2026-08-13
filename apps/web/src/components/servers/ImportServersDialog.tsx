@@ -199,7 +199,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                             Import complete
                         </DialogTitle>
                     </DialogHeader>
@@ -348,7 +348,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                                 className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                                             >
                                                 {copied ? (
-                                                    <Check className="w-3.5 h-3.5 text-green-500" />
+                                                    <Check className="w-3.5 h-3.5 text-emerald-500" />
                                                 ) : (
                                                     <Copy className="w-3.5 h-3.5" />
                                                 )}
@@ -546,7 +546,7 @@ function Stat({
 }) {
     const color =
         tone === 'good'
-            ? 'text-green-500'
+            ? 'text-emerald-500'
             : tone === 'bad'
               ? 'text-destructive'
               : 'text-foreground';

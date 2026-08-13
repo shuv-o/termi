@@ -71,8 +71,8 @@ export default function SettingsPage() {
     return (
         <div className="mx-auto max-w-screen-2xl pb-16">
             <div className="mb-8 max-w-4xl">
-                <h1 className="text-2xl font-bold">Settings</h1>
-                <p className="text-muted-foreground text-sm mt-1">
+                <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Settings</h1>
+                <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Manage your account, security, and preferences
                 </p>
             </div>

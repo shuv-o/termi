@@ -71,7 +71,7 @@ function ServerRow({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                     asChild
                 >
                     <Link href={`/panel/servers/${srv.id}`}>
@@ -230,7 +230,9 @@ export function GroupDetailPanel({
                     </div>
                 ) : !hasServers ? (
                     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                        <FolderClosed className="w-10 h-10 text-muted-foreground/30 mb-3" />
+                        <div className="w-20 h-20 rounded-2xl bg-secondary/60 flex items-center justify-center mx-auto mb-4">
+                            <FolderClosed className="w-10 h-10 text-muted-foreground/40" />
+                        </div>
                         <p className="text-sm font-medium text-muted-foreground mb-1">
                             No servers in this group
                         </p>

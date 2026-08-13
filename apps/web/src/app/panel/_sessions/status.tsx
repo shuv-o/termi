@@ -4,7 +4,7 @@ import type { SessionStatus } from '../sessions-context';
 
 const DOT_CLASS: Record<SessionStatus, string> = {
     connecting: 'bg-yellow-400 animate-pulse',
-    connected: 'bg-green-400',
+    connected: 'bg-emerald-400',
     disconnected: 'bg-slate-500',
     error: 'bg-red-400',
     detached: 'bg-amber-400 animate-pulse',
@@ -20,7 +20,7 @@ const LABELS: Record<SessionStatus, string> = {
 
 const COLORS: Record<SessionStatus, string> = {
     connecting: 'text-yellow-400',
-    connected: 'text-green-400',
+    connected: 'text-emerald-400',
     disconnected: 'text-slate-400',
     error: 'text-red-400',
     detached: 'text-amber-400',

@@ -41,7 +41,7 @@ export function UploadQueuePanel({
                         <div key={u.id} className="flex items-center gap-2">
                             <div className="shrink-0 w-3.5">
                                 {u.status === 'done' && (
-                                    <Check className="w-3.5 h-3.5 text-green-400" />
+                                    <Check className="w-3.5 h-3.5 text-emerald-400" />
                                 )}
                                 {u.status === 'error' && (
                                     <AlertCircle className="w-3.5 h-3.5 text-red-400" />

@@ -9,8 +9,8 @@ import type { ServerItem } from './types';
 const protocolMeta: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
     SSH: {
         icon: <Terminal className="w-5 h-5" />,
-        color: 'text-green-400',
-        bg: 'bg-green-500/15 border-green-500/20',
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/15 border-emerald-500/20',
     },
     RDP: {
         icon: <Monitor className="w-5 h-5" />,

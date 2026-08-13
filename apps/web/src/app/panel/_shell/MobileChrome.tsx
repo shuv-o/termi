@@ -18,21 +18,21 @@ export function VerifyEmailBanner({
 }) {
     return (
         <div
-            className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2.5 flex items-center justify-between gap-3"
+            className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5 flex items-center justify-between gap-3"
             style={{
                 paddingTop: 'max(0.625rem, env(safe-area-inset-top, 0px))',
                 paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
                 paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
             }}
         >
-            <div className="flex items-center gap-2 text-sm text-yellow-300 min-w-0">
+            <div className="flex items-center gap-2 text-sm text-amber-300 min-w-0">
                 <Mail className="w-4 h-4 shrink-0" />
                 <span className="truncate">Verify your email to secure your account.</span>
             </div>
             <button
                 onClick={onResend}
                 disabled={resending || sent}
-                className="text-xs font-medium text-yellow-300 hover:text-yellow-200 underline shrink-0 disabled:opacity-50"
+                className="text-xs font-medium text-amber-300 hover:text-amber-200 underline shrink-0 disabled:opacity-50"
             >
                 {sent ? 'Sent!' : resending ? 'Sending…' : 'Resend'}
             </button>

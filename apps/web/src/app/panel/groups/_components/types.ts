@@ -1,4 +1,5 @@
 import { FolderOpen, Globe, Layers, Lock, Monitor, Server, Tag, Terminal } from 'lucide-react';
+export { protocolIcons, protocolColors } from '@/lib/protocol-style';
 
 export interface ServerInGroup {
     id: string;
@@ -61,21 +62,6 @@ export const PRESET_ICONS = [
 
 /** Fallback colour for groups that haven't picked one. */
 export const DEFAULT_GROUP_COLOR = '#475569';
-
-export const protocolColors: Record<string, string> = {
-    SSH: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    SCP: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    RDP: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    VNC: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-};
-
-export const protocolIcons: Record<string, typeof Terminal> = {
-    SSH: Terminal,
-    SCP: FolderOpen,
-    RDP: Monitor,
-    VNC: Monitor,
-    TELNET: Terminal,
-};
 
 export function getIconComponent(iconName: string | null) {
     if (!iconName) return FolderOpen;

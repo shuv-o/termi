@@ -51,7 +51,7 @@ function KeyFileDropzone({
             <label
                 className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors ${
                     fileName
-                        ? 'border-green-500/40 bg-green-500/5 hover:bg-green-500/8'
+                        ? 'border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/8'
                         : 'border-border bg-secondary/40 hover:border-border/80 hover:bg-accent/20'
                 }`}
             >
@@ -70,8 +70,8 @@ function KeyFileDropzone({
                 />
                 {fileName ? (
                     <>
-                        <FileKey className="w-5 h-5 text-green-400" />
-                        <span className="break-all text-center text-xs font-medium text-green-400">
+                        <FileKey className="w-5 h-5 text-emerald-400" />
+                        <span className="break-all text-center text-xs font-medium text-emerald-400">
                             {fileName}
                         </span>
                         <span className="text-[10px] text-muted-foreground">Click to replace</span>
