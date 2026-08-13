@@ -7,6 +7,18 @@
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
 import { sendPushToUser } from './push.service';
+import { decrypt, deserializeEncrypted } from '@/lib/crypto/crypto';
+
+/** `server.host` is AES-256-GCM encrypted at rest — decrypt before display. */
+function decryptServerAddr(server: { host: string; port: number }): string {
+    try {
+        const host = decrypt(deserializeEncrypted(server.host));
+        return `${host}:${server.port}`;
+    } catch (err) {
+        console.error('[Alert] Failed to decrypt server host:', err);
+        return `(unknown host):${server.port}`;
+    }
+}
 
 // MAILER (reuses SMTP config from email-otp)
 
@@ -49,7 +61,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
     if (!config) return;
 
     const serverName = config.server.name;
-    const serverAddr = `${config.server.host}:${config.server.port}`;
+    const serverAddr = decryptServerAddr(config.server);
 
     if (config.alertPush) {
         await sendPushToUser(config.userId, {
@@ -103,7 +115,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
     if (!config) return;
 
     const serverName = config.server.name;
-    const serverAddr = `${config.server.host}:${config.server.port}`;
+    const serverAddr = decryptServerAddr(config.server);
 
     if (config.alertPush) {
         await sendPushToUser(config.userId, {

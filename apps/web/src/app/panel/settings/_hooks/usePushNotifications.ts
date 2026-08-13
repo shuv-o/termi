@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { isIOS, isStandalone } from '@/components/pwa/InstallPrompt';
 import type { AddToast } from '../types';
 
 /** VAPID keys travel as base64url; `pushManager.subscribe` wants raw bytes. */
@@ -16,6 +17,10 @@ export function usePushNotifications(addToast: AddToast) {
     const [permission, setPermission] = useState<NotificationPermission>('default');
     const [subscribed, setSubscribed] = useState(false);
     const [busy, setBusy] = useState(false);
+    // iOS Safari only exposes the Push/Notification APIs once the PWA has
+    // been added to the Home Screen (and only on iOS 16.4+) — a page open
+    // in a regular Safari tab can never receive a permission prompt.
+    const [needsIOSInstall, setNeedsIOSInstall] = useState(false);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -27,11 +32,19 @@ export function usePushNotifications(addToast: AddToast) {
                 )
                 .catch(() => {});
         }
+        setNeedsIOSInstall(isIOS() && !isStandalone());
     }, []);
 
     const enable = useCallback(async () => {
         setBusy(true);
         try {
+            if (isIOS() && !isStandalone()) {
+                addToast(
+                    'error',
+                    'On iPhone/iPad, add Termi to your Home Screen first (Share → Add to Home Screen), then enable notifications from inside the installed app.',
+                );
+                return;
+            }
             if (!('Notification' in window) || !('serviceWorker' in navigator)) {
                 addToast('error', 'Push notifications are not supported by your browser');
                 return;
@@ -110,5 +123,5 @@ export function usePushNotifications(addToast: AddToast) {
         }
     }, [addToast]);
 
-    return { permission, subscribed, busy, enable, disable };
+    return { permission, subscribed, busy, needsIOSInstall, enable, disable };
 }

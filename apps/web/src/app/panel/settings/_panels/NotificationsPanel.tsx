@@ -9,6 +9,23 @@ import type { usePushNotifications } from '../_hooks/usePushNotifications';
 type PushState = ReturnType<typeof usePushNotifications>;
 
 function StatusBanner({ push }: { push: PushState }) {
+    if (push.needsIOSInstall) {
+        return (
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-amber-500/10 border-amber-500/20">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                    <Info className="w-4 h-4 text-amber-400" />
+                </div>
+                <div>
+                    <p className="text-sm font-medium text-amber-400">Add to Home Screen first</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        iOS only allows notifications for apps installed to the Home Screen. Tap
+                        Share → Add to Home Screen, then open Termi from there and enable
+                        notifications again.
+                    </p>
+                </div>
+            </div>
+        );
+    }
     if (push.subscribed) {
         return (
             <div className="flex items-center gap-3 p-4 rounded-xl border bg-green-500/10 border-green-500/20">
@@ -83,7 +100,9 @@ export function NotificationsPanel({ push }: { push: PushState }) {
                     ) : (
                         <Button
                             onClick={push.enable}
-                            disabled={push.busy || push.permission === 'denied'}
+                            disabled={
+                                push.busy || push.permission === 'denied' || push.needsIOSInstall
+                            }
                             className="gap-2"
                         >
                             {push.busy ? (

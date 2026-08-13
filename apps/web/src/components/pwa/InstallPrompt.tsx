@@ -14,7 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISS_KEY = 'termi:install-dismissed';
 
-function isStandalone(): boolean {
+export function isStandalone(): boolean {
     if (typeof window === 'undefined') return false;
     return (
         window.matchMedia('(display-mode: standalone)').matches ||
@@ -23,7 +23,7 @@ function isStandalone(): boolean {
     );
 }
 
-function isIOS(): boolean {
+export function isIOS(): boolean {
     if (typeof navigator === 'undefined') return false;
     return (
         /iphone|ipad|ipod/i.test(navigator.userAgent) &&
