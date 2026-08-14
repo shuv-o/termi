@@ -8,14 +8,22 @@
  * to the target, using this exact same origin/port, so it works behind a
  * reverse proxy that only forwards 80/443 (no arbitrary TCP listener needed).
  *
- * Known limitation: this is path-prefixed, not a dedicated subdomain, so a
- * target app that emits absolute-path links/assets (most SPAs with a
- * hardcoded root) will have broken links. A best-effort <base> tag is
- * injected into HTML responses to fix *relative* links; it can't fix
- * absolute ones — that would require a real per-tunnel subdomain.
+ * Bodies are streamed both ways rather than buffered, except HTML responses
+ * up to MAX_HTML_REWRITE_BYTES, which are buffered just long enough to inject
+ * a <base> tag (see below) — everything else, including large file transfers,
+ * passes through without ever holding the full payload in memory.
+ *
+ * Known limitations:
+ *  - Path-prefixed, not a dedicated subdomain, so a target app that emits
+ *    absolute-path links/assets (most SPAs with a hardcoded root) will have
+ *    broken links. The <base> tag fixes *relative* links only; absolute ones
+ *    would need a real per-tunnel subdomain.
+ *  - Targets that expect a WebSocket upgrade (dev servers with hot-reload,
+ *    some admin panels) aren't supported — see the explicit check below.
  */
 
 import http from 'node:http';
+import { Readable } from 'node:stream';
 import type { Duplex } from 'node:stream';
 import { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
@@ -45,6 +53,11 @@ const HOP_BY_HOP_HEADERS = new Set([
 // session to whatever's on the other end of the tunnel. Never forward these.
 const CREDENTIAL_HEADERS = new Set(['cookie', 'authorization']);
 
+// HTML responses are buffered (not streamed) so the <base> tag can be
+// injected — bounded so a huge "text/html" response can't exhaust memory;
+// past this size the body streams through unmodified instead.
+const MAX_HTML_REWRITE_BYTES = 5 * 1024 * 1024;
+
 /** Routes Node's http client over an already-open duplex stream instead of
  *  opening its own TCP socket — the standard pattern for HTTP-over-tunnel. */
 class StreamAgent extends http.Agent {
@@ -56,9 +69,56 @@ class StreamAgent extends http.Agent {
     }
 }
 
+/** Strips hop-by-hop and credential headers before forwarding a request to
+ *  the tunneled target — see CREDENTIAL_HEADERS above for why. */
+export function filterForwardHeaders(requestHeaders: Headers): Record<string, string> {
+    const headers: Record<string, string> = {};
+    requestHeaders.forEach((value, key) => {
+        const lower = key.toLowerCase();
+        if (!HOP_BY_HOP_HEADERS.has(lower) && !CREDENTIAL_HEADERS.has(lower)) {
+            headers[key] = value;
+        }
+    });
+    return headers;
+}
+
+/** Re-scopes a Set-Cookie header's Path to this tunnel's own path, so a
+ *  tunneled target's cookies never collide with Termi's own or another
+ *  tunnel's. */
+export function scopeCookiePath(cookie: string, basePath: string): string {
+    return /;\s*Path=/i.test(cookie)
+        ? cookie.replace(/;\s*Path=[^;]*/i, `; Path=${basePath}`)
+        : `${cookie}; Path=${basePath}`;
+}
+
+/** Injects a <base> tag right after <head> so relative links/assets resolve
+ *  against this tunnel's path prefix. No-op if the HTML already has one, or
+ *  has no detectable <head>. */
+export function injectBaseTag(html: string, basePath: string): string {
+    if (!/<head[^>]*>/i.test(html) || /<base[\s>]/i.test(html)) return html;
+    return html.replace(/<head([^>]*)>/i, `<head$1><base href="${basePath}">`);
+}
+
 async function handleProxy(request: NextRequest, { params }: RouteParams): Promise<Response> {
     const user = await getCurrentUser();
     if (!user) return new Response('Unauthorized', { status: 401 });
+
+    // Targets that expect a WebSocket upgrade need a completely different
+    // handshake (HTTP 101 + a persistent bidirectional pipe) that this
+    // request/response proxy doesn't implement. In practice, requests that
+    // genuinely carry `Upgrade: websocket` never reach this check at all —
+    // Node's own HTTP server closes the socket before Next.js's router sees
+    // it, since nothing here registers an `'upgrade'` server-level listener.
+    // That still fails clearly (the client sees a closed connection), just
+    // not with this custom message. This check is a backstop for callers
+    // that send the header without actually going through the WS handshake.
+    if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+        return new Response(
+            'This tunnel proxy only handles plain HTTP requests — targets that need a ' +
+                'WebSocket upgrade (e.g. a dev server with hot-reload) are not supported.',
+            { status: 501 },
+        );
+    }
 
     const { serverId, port, path } = await params;
     const remotePort = parseInt(port, 10);
@@ -103,22 +163,19 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
         );
     }
 
-    const body =
-        request.method !== 'GET' && request.method !== 'HEAD'
-            ? Buffer.from(await request.arrayBuffer())
-            : undefined;
+    const hasBody = request.method !== 'GET' && request.method !== 'HEAD' && request.body;
 
     return new Promise<Response>((resolve) => {
         let settled = false;
         const finish = (response: Response) => {
             if (settled) return;
             settled = true;
-            sshPool.release(poolKey);
             resolve(response);
         };
 
         client.forwardOut('127.0.0.1', 0, remoteHost, remotePort, (err, stream) => {
             if (err || !stream) {
+                sshPool.release(poolKey);
                 finish(
                     new Response(
                         `Failed to reach ${remoteHost}:${remotePort} — ${err?.message ?? 'unknown error'}`,
@@ -128,17 +185,28 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                 return;
             }
 
-            const headers: Record<string, string> = {};
-            request.headers.forEach((value, key) => {
-                const lower = key.toLowerCase();
-                if (!HOP_BY_HOP_HEADERS.has(lower) && !CREDENTIAL_HEADERS.has(lower)) {
-                    headers[key] = value;
-                }
-            });
+            // The forwardOut channel closes once the HTTP interaction is fully
+            // done — whether the response streamed straight through or was
+            // buffered for HTML rewriting, and whether it succeeded or errored.
+            // Releasing the pooled SSH connection here (exactly once) avoids
+            // needing to duplicate that bookkeeping across every response path,
+            // and — critically — avoids double-consuming a streamed body just
+            // to know when it finished (a client-side ReadableStream can only
+            // be read by one consumer).
+            let released = false;
+            const releasePoolOnce = () => {
+                if (released) return;
+                released = true;
+                sshPool.release(poolKey);
+            };
+            stream.on('close', releasePoolOnce);
+            stream.on('error', releasePoolOnce);
+
+            const headers = filterForwardHeaders(request.headers);
             headers.host = `${remoteHost}:${remotePort}`;
-            // Always request uncompressed responses — the body may be rewritten
-            // below (the <base> tag injection), and re-declaring a stale
-            // content-encoding on modified bytes breaks decoding client-side.
+            // Always request uncompressed responses — an HTML body may be
+            // rewritten below (the <base> tag injection), and re-declaring a
+            // stale content-encoding on modified bytes breaks client decoding.
             headers['accept-encoding'] = 'identity';
 
             const proxyReq = http.request(
@@ -149,51 +217,94 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                     headers,
                 },
                 (proxyRes) => {
-                    const chunks: Buffer[] = [];
-                    proxyRes.on('data', (chunk: Buffer) => chunks.push(chunk));
-                    proxyRes.on('end', () => {
-                        const resHeaders = new Headers();
-                        for (const [key, value] of Object.entries(proxyRes.headers)) {
-                            if (value === undefined || HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
-                                continue;
+                    const hostSuffix = url.searchParams.get('host')
+                        ? `?host=${encodeURIComponent(remoteHost)}`
+                        : '';
+                    const basePath = `/tunnel/${serverId}/${port}${hostSuffix}/`;
+
+                    const resHeaders = new Headers();
+                    for (const [key, value] of Object.entries(proxyRes.headers)) {
+                        const lower = key.toLowerCase();
+                        if (value === undefined || HOP_BY_HOP_HEADERS.has(lower)) continue;
+
+                        if (lower === 'set-cookie') {
+                            // Multiple Set-Cookie headers must stay separate lines, not
+                            // comma-joined — and are re-scoped to this tunnel's own path
+                            // so the target's session cookie never leaks onto Termi's
+                            // real pages or collides with a different tunnel.
+                            const cookies = Array.isArray(value) ? value : [value];
+                            for (const cookie of cookies) {
+                                resHeaders.append('set-cookie', scopeCookiePath(cookie, basePath));
                             }
-                            resHeaders.set(key, Array.isArray(value) ? value.join(', ') : value);
+                            continue;
                         }
 
-                        let responseBody = Buffer.concat(chunks);
-                        const contentType = resHeaders.get('content-type') || '';
-                        if (contentType.includes('text/html')) {
-                            const hostSuffix = url.searchParams.get('host')
-                                ? `?host=${encodeURIComponent(remoteHost)}`
-                                : '';
-                            const basePath = `/tunnel/${serverId}/${port}${hostSuffix}/`;
-                            let html = responseBody.toString('utf8');
-                            if (/<head[^>]*>/i.test(html) && !/<base[\s>]/i.test(html)) {
-                                html = html.replace(
-                                    /<head([^>]*)>/i,
-                                    `<head$1><base href="${basePath}">`,
-                                );
-                            }
-                            responseBody = Buffer.from(html, 'utf8');
-                            resHeaders.delete('content-length');
-                        }
+                        resHeaders.set(key, Array.isArray(value) ? value.join(', ') : value);
+                    }
 
+                    const status = proxyRes.statusCode ?? 502;
+                    const contentType = resHeaders.get('content-type') || '';
+
+                    if (!contentType.includes('text/html')) {
+                        // Not HTML — nothing to rewrite, so stream straight through
+                        // without ever holding the full body in memory.
                         finish(
-                            new Response(responseBody, {
-                                status: proxyRes.statusCode ?? 502,
+                            new Response(Readable.toWeb(proxyRes) as ReadableStream, {
+                                status,
                                 headers: resHeaders,
                             }),
                         );
+                        return;
+                    }
+
+                    // HTML: buffer up to the cap so the <base> tag can be injected.
+                    const chunks: Buffer[] = [];
+                    let total = 0;
+                    let overCap = false;
+                    proxyRes.on('data', (chunk: Buffer) => {
+                        total += chunk.length;
+                        if (total > MAX_HTML_REWRITE_BYTES) {
+                            overCap = true;
+                            return; // still drains via 'data'; just stop retaining
+                        }
+                        chunks.push(chunk);
+                    });
+                    proxyRes.on('end', () => {
+                        if (overCap) {
+                            // Too large to safely buffer — return what little we can
+                            // say about it rather than silently truncating HTML.
+                            finish(
+                                new Response(
+                                    'Response too large to rewrite through this proxy ' +
+                                        `(over ${MAX_HTML_REWRITE_BYTES / (1024 * 1024)} MB).`,
+                                    { status: 502 },
+                                ),
+                            );
+                            return;
+                        }
+
+                        const html = injectBaseTag(Buffer.concat(chunks).toString('utf8'), basePath);
+                        resHeaders.delete('content-length');
+                        finish(new Response(Buffer.from(html, 'utf8'), { status, headers: resHeaders }));
                     });
                 },
             );
 
             proxyReq.on('error', (e) => {
+                // Belt-and-braces: the underlying stream's own close/error normally
+                // fires releasePoolOnce, but a request-level failure that doesn't
+                // cleanly tear down the stream shouldn't leak the pooled connection.
+                releasePoolOnce();
                 finish(new Response(`Proxy error: ${e.message}`, { status: 502 }));
             });
 
-            if (body) proxyReq.write(body);
-            proxyReq.end();
+            if (hasBody && request.body) {
+                Readable.fromWeb(request.body as import('node:stream/web').ReadableStream).pipe(
+                    proxyReq,
+                );
+            } else {
+                proxyReq.end();
+            }
         });
     });
 }

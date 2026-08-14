@@ -24,6 +24,7 @@ import { TunnelHandler } from './handlers/tunnel.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
 import { AsciicastRecorder } from './sessions/AsciicastRecorder.js';
+import { TunnelSlotLimiter } from './sessions/TunnelSlotLimiter.js';
 import {
     PersistentSessionStore,
     type PersistentSession,
@@ -128,6 +129,10 @@ interface NonSshMeta {
     handler?: SCPHandler | GuacamoleHandler | LocalHandler | TelnetHandler | TunnelHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
+
+/** Per-user cap on concurrent tunnel connections — see TunnelSlotLimiter. */
+const MAX_TUNNELS_PER_USER = 10;
+const tunnelSlotLimiter = new TunnelSlotLimiter(MAX_TUNNELS_PER_USER);
 
 // SSH SINK FACTORY
 
@@ -639,6 +644,17 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         } else if (protocol === 'tunnel') {
             //   Tunnel: forwardOut to an internal address, raw binary I/O like SSH/Telnet
 
+            if (!tunnelSlotLimiter.tryAcquire(tokenPayload.userId)) {
+                // Registered into nonSshConnections above (shared non-SSH preamble) —
+                // clean that up ourselves since we're returning before the shared
+                // close/error listeners further down ever get attached.
+                if (timeoutId) clearTimeout(timeoutId);
+                nonSshConnections.delete(ws);
+                ws.send(JSON.stringify({ type: 'error', message: 'Too many concurrent tunnels open' }));
+                ws.close(4029, 'Too Many Requests');
+                return;
+            }
+
             const sink: SSHOutputSink = {
                 onData(data: Buffer) {
                     if (ws.readyState === WebSocket.OPEN) {
@@ -684,6 +700,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             if (timeoutId) clearTimeout(timeoutId);
             meta.handler?.close();
             nonSshConnections.delete(ws);
+            if (meta.protocol === 'tunnel') tunnelSlotLimiter.release(meta.userId);
         });
 
         ws.on('error', (err) => {
@@ -691,6 +708,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             if (timeoutId) clearTimeout(timeoutId);
             meta.handler?.close();
             nonSshConnections.delete(ws);
+            if (meta.protocol === 'tunnel') tunnelSlotLimiter.release(meta.userId);
         });
     };
 

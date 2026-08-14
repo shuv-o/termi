@@ -33,7 +33,7 @@ const createTunnelSchema = z.object({
 /** Self-contained Node.js bridge: forwards a local TCP port to the tunnel's
  *  target over the gateway WebSocket. No dependencies beyond Node's built-in
  *  global WebSocket (Node 22+). */
-function buildBridgeScript(opts: {
+export function buildBridgeScript(opts: {
     gatewayUrl: string;
     serverId: string;
     token: string;
