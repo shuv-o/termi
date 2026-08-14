@@ -9,6 +9,7 @@ import {
     Plus,
     RotateCcw,
     Terminal,
+    Waypoints,
     Wrench,
     X,
 } from 'lucide-react';
@@ -96,6 +97,7 @@ export function TerminalPaneHeader({
     onToggleKeyboard,
     isRecording,
     onToggleRecording,
+    onOpenTunnel,
     onClose,
 }: {
     session: Session;
@@ -114,6 +116,7 @@ export function TerminalPaneHeader({
     onToggleKeyboard: () => void;
     isRecording: boolean;
     onToggleRecording: () => void;
+    onOpenTunnel: () => void;
     onClose: () => void;
 }) {
     const showShellTabs =
@@ -194,6 +197,15 @@ export function TerminalPaneHeader({
                                         : 'text-muted-foreground'
                                 }`}
                             />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onOpenTunnel}
+                            className="h-7 w-7"
+                            title="Port forwarding"
+                        >
+                            <Waypoints className="w-3.5 h-3.5" />
                         </Button>
                         <Button
                             variant={showToolbar ? 'default' : 'ghost'}

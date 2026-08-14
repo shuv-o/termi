@@ -6,6 +6,7 @@ import { Loader2, RotateCcw, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
 import { TerminalPaneHeader } from './TerminalPaneHeader';
+import { TunnelDialog } from './TunnelDialog';
 import { useShells } from './useShells';
 import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
 
@@ -109,6 +110,7 @@ export function TerminalPane({
     const [showToolbar, setShowToolbar] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [recordingShellId, setRecordingShellId] = useState<string | null>(null);
+    const [showTunnelDialog, setShowTunnelDialog] = useState(false);
 
     const { registerSendHandler } = useSessionsContext();
 
@@ -243,8 +245,18 @@ export function TerminalPane({
                 }}
                 isRecording={recordingShellId === activeShellId}
                 onToggleRecording={toggleRecording}
+                onOpenTunnel={() => setShowTunnelDialog(true)}
                 onClose={() => removeSession(session.tabId)}
             />
+
+            {session.type !== 'local' && (
+                <TunnelDialog
+                    open={showTunnelDialog}
+                    onOpenChange={setShowTunnelDialog}
+                    serverId={session.serverId}
+                    serverName={session.serverName}
+                />
+            )}
 
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 min-w-0 min-h-0 relative">

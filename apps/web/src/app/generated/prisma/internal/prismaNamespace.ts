@@ -398,6 +398,7 @@ export const ModelName = {
   ServerHealthRecord: 'ServerHealthRecord',
   BenchmarkRun: 'BenchmarkRun',
   Recording: 'Recording',
+  TunnelSession: 'TunnelSession',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1459,6 +1460,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TunnelSession: {
+      payload: Prisma.$TunnelSessionPayload<ExtArgs>
+      fields: Prisma.TunnelSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TunnelSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TunnelSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.TunnelSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TunnelSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        findMany: {
+          args: Prisma.TunnelSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>[]
+        }
+        create: {
+          args: Prisma.TunnelSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        createMany: {
+          args: Prisma.TunnelSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TunnelSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.TunnelSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        update: {
+          args: Prisma.TunnelSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TunnelSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TunnelSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TunnelSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TunnelSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TunnelSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.TunnelSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTunnelSession>
+        }
+        groupBy: {
+          args: Prisma.TunnelSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TunnelSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TunnelSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TunnelSessionCountAggregateOutputType> | number
+        }
+      }
+    }
     RecoveryCode: {
       payload: Prisma.$RecoveryCodePayload<ExtArgs>
       fields: Prisma.RecoveryCodeFieldRefs
@@ -2193,6 +2268,23 @@ export const RecordingScalarFieldEnum = {
 export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
 
 
+export const TunnelSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  remoteHost: 'remoteHost',
+  remotePort: 'remotePort',
+  kind: 'kind',
+  localPort: 'localPort',
+  electronId: 'electronId',
+  createdAt: 'createdAt',
+  closedAt: 'closedAt'
+} as const
+
+export type TunnelSessionScalarFieldEnum = (typeof TunnelSessionScalarFieldEnum)[keyof typeof TunnelSessionScalarFieldEnum]
+
+
 export const RecoveryCodeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2511,6 +2603,20 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'TunnelKind'
+ */
+export type EnumTunnelKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TunnelKind'>
+    
+
+
+/**
+ * Reference to a field of type 'TunnelKind[]'
+ */
+export type ListEnumTunnelKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TunnelKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'InvitationStatus'
  */
 export type EnumInvitationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvitationStatus'>
@@ -2647,6 +2753,7 @@ export type GlobalOmitConfig = {
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
   benchmarkRun?: Prisma.BenchmarkRunOmit
   recording?: Prisma.RecordingOmit
+  tunnelSession?: Prisma.TunnelSessionOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
   commandSnippet?: Prisma.CommandSnippetOmit

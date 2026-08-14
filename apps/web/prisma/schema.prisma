@@ -15,7 +15,6 @@ model User {
   name         String?
   passwordHash String? // scrypt hash — null for OAuth-only users
 
-
   // TOTP 2FA
   totpSecret  String? // Encrypted TOTP secret
   totpEnabled Boolean @default(false)
@@ -55,23 +54,24 @@ model User {
   passkeyEnabled Boolean @default(false)
 
   // Relations
-  sessions           Session[]
-  servers            Server[]
-  serverGroups       ServerGroup[]
-  auditLogs          AuditLog[]
-  recoveryCodes      RecoveryCode[]
-  emailOTPs          EmailOTP[]
-  passkeys           Passkey[]
-  pushSubscriptions  PushSubscription[]
-  monitorConfigs     ServerMonitorConfig[]
-  oauthAccounts      OAuthAccount[]
-  persistentSessions PersistentSession[]
-  sentInvitations      ServerInvitation[]     @relation("SentInvitations")
-  ownedShares          ServerShare[]          @relation("OwnedShares")
-  receivedShares       ServerShare[]          @relation("ReceivedShares")
-  keychainCredentials  KeychainCredential[]
-  commandSnippets      CommandSnippet[]
-  recordings           Recording[]
+  sessions            Session[]
+  servers             Server[]
+  serverGroups        ServerGroup[]
+  auditLogs           AuditLog[]
+  recoveryCodes       RecoveryCode[]
+  emailOTPs           EmailOTP[]
+  passkeys            Passkey[]
+  pushSubscriptions   PushSubscription[]
+  monitorConfigs      ServerMonitorConfig[]
+  oauthAccounts       OAuthAccount[]
+  persistentSessions  PersistentSession[]
+  sentInvitations     ServerInvitation[]    @relation("SentInvitations")
+  ownedShares         ServerShare[]         @relation("OwnedShares")
+  receivedShares      ServerShare[]         @relation("ReceivedShares")
+  keychainCredentials KeychainCredential[]
+  commandSnippets     CommandSnippet[]
+  recordings          Recording[]
+  tunnelSessions      TunnelSession[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -174,15 +174,16 @@ model Server {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group         ServerGroup?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  connections   Connection[]
-  monitorConfig ServerMonitorConfig?
-  healthRecords ServerHealthRecord[]
-  benchmarkRuns BenchmarkRun[]
-  recordings    Recording[]
-  invitations   ServerInvitation[]
-  shares        ServerShare[]
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group          ServerGroup?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  connections    Connection[]
+  monitorConfig  ServerMonitorConfig?
+  healthRecords  ServerHealthRecord[]
+  benchmarkRuns  BenchmarkRun[]
+  recordings     Recording[]
+  tunnelSessions TunnelSession[]
+  invitations    ServerInvitation[]
+  shares         ServerShare[]
 
   @@index([userId])
   @@index([groupId])
@@ -518,8 +519,8 @@ model BenchmarkRun {
 }
 
 model Recording {
-  id     String @id @default(cuid())
-  userId String
+  id       String  @id @default(cuid())
+  userId   String
   // Nullable + SetNull: a recording is an audit/handoff artifact that should
   // outlive the server it was taken of, unlike health/benchmark history.
   serverId String?
@@ -538,6 +539,48 @@ model Recording {
   server Server? @relation(fields: [serverId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
+}
+
+/// How a tunnel's data path actually flows — see apps/web/src/app/api/tunnels/route.ts.
+enum TunnelKind {
+  HTTP_PROXY // one-click browser link at /tunnel/[serverId]/[port]
+  BRIDGE_SCRIPT // copyable local Node.js script (web, non-HTTP target)
+  ELECTRON_LOCAL // real local TCP port bound by the desktop shell
+}
+
+/// A record of a tunnel the user opened, for the "Active Tunnels" list.
+/// This is a self-reported bookkeeping record, not a live connection probe —
+/// the same limitation PersistentSession already has: if the client never
+/// gets a chance to mark it closed (browser killed, laptop lid shut), the
+/// row goes stale until the user removes it manually. The gateway's own
+/// TunnelSlotLimiter is the actual security boundary on concurrent tunnels;
+/// this table exists purely so the user can see and manage what they opened.
+model TunnelSession {
+  id       String  @id @default(cuid())
+  userId   String
+  // Nullable + SetNull: a history/management record that should outlive the
+  // server it points at, same reasoning as Recording.serverId.
+  serverId String?
+
+  // Snapshotted at open time so the label survives server rename/deletion.
+  serverName String
+
+  remoteHost String
+  remotePort Int
+  kind       TunnelKind
+
+  // Only set for kind = ELECTRON_LOCAL: the port actually bound on the
+  // user's machine, and the id used to ask the desktop shell to close it.
+  localPort  Int?
+  electronId String?
+
+  createdAt DateTime  @default(now())
+  closedAt  DateTime?
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server Server? @relation(fields: [serverId], references: [id], onDelete: SetNull)
+
+  @@index([userId, closedAt])
 }
 
 // RECOVERY CODES
@@ -613,7 +656,7 @@ model KeychainCredential {
   label String
 
   // Credentials (all encrypted with AES-256-GCM)
-  username   String  // Encrypted
+  username   String // Encrypted
   password   String? // Encrypted (optional – password auth)
   privateKey String? // Encrypted (optional – SSH key auth)
   passphrase String? // Encrypted (optional – key passphrase)

@@ -103,6 +103,15 @@ export const AuditAction = {
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 
 
+export const TunnelKind = {
+  HTTP_PROXY: 'HTTP_PROXY',
+  BRIDGE_SCRIPT: 'BRIDGE_SCRIPT',
+  ELECTRON_LOCAL: 'ELECTRON_LOCAL'
+} as const
+
+export type TunnelKind = (typeof TunnelKind)[keyof typeof TunnelKind]
+
+
 export const OAuthProvider = {
   GOOGLE: 'GOOGLE'
 } as const

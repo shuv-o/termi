@@ -41,6 +41,7 @@ export type SectionId =
     | 'notifications'
     | 'sessions'
     | 'recordings'
+    | 'tunnels'
     | 'danger';
 
 export const SECTION_IDS: SectionId[] = [
@@ -51,6 +52,7 @@ export const SECTION_IDS: SectionId[] = [
     'notifications',
     'sessions',
     'recordings',
+    'tunnels',
     'danger',
 ];
 
@@ -63,6 +65,7 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     notifications: 'Alerts',
     sessions: 'Sessions',
     recordings: 'Recordings',
+    tunnels: 'Tunnels',
     danger: 'Danger',
 };
 

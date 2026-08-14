@@ -369,6 +369,7 @@ export type UserWhereInput = {
   keychainCredentials?: Prisma.KeychainCredentialListRelationFilter
   commandSnippets?: Prisma.CommandSnippetListRelationFilter
   recordings?: Prisma.RecordingListRelationFilter
+  tunnelSessions?: Prisma.TunnelSessionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -411,6 +412,7 @@ export type UserOrderByWithRelationInput = {
   keychainCredentials?: Prisma.KeychainCredentialOrderByRelationAggregateInput
   commandSnippets?: Prisma.CommandSnippetOrderByRelationAggregateInput
   recordings?: Prisma.RecordingOrderByRelationAggregateInput
+  tunnelSessions?: Prisma.TunnelSessionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -456,6 +458,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   keychainCredentials?: Prisma.KeychainCredentialListRelationFilter
   commandSnippets?: Prisma.CommandSnippetListRelationFilter
   recordings?: Prisma.RecordingListRelationFilter
+  tunnelSessions?: Prisma.TunnelSessionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -556,6 +559,7 @@ export type UserCreateInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -598,6 +602,7 @@ export type UserUncheckedCreateInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -640,6 +645,7 @@ export type UserUpdateInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -682,6 +688,7 @@ export type UserUncheckedUpdateInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1026,6 +1033,20 @@ export type UserUpdateOneRequiredWithoutRecordingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRecordingsInput, Prisma.UserUpdateWithoutRecordingsInput>, Prisma.UserUncheckedUpdateWithoutRecordingsInput>
 }
 
+export type UserCreateNestedOneWithoutTunnelSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTunnelSessionsInput, Prisma.UserUncheckedCreateWithoutTunnelSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTunnelSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTunnelSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTunnelSessionsInput, Prisma.UserUncheckedCreateWithoutTunnelSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTunnelSessionsInput
+  upsert?: Prisma.UserUpsertWithoutTunnelSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTunnelSessionsInput, Prisma.UserUpdateWithoutTunnelSessionsInput>, Prisma.UserUncheckedUpdateWithoutTunnelSessionsInput>
+}
+
 export type UserCreateNestedOneWithoutRecoveryCodesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRecoveryCodesInput, Prisma.UserUncheckedCreateWithoutRecoveryCodesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRecoveryCodesInput
@@ -1163,6 +1184,7 @@ export type UserCreateWithoutSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1204,6 +1226,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1261,6 +1284,7 @@ export type UserUpdateWithoutSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1302,6 +1326,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServerGroupsInput = {
@@ -1343,6 +1368,7 @@ export type UserCreateWithoutServerGroupsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServerGroupsInput = {
@@ -1384,6 +1410,7 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServerGroupsInput = {
@@ -1441,6 +1468,7 @@ export type UserUpdateWithoutServerGroupsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
@@ -1482,6 +1510,7 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServersInput = {
@@ -1523,6 +1552,7 @@ export type UserCreateWithoutServersInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServersInput = {
@@ -1564,6 +1594,7 @@ export type UserUncheckedCreateWithoutServersInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServersInput = {
@@ -1621,6 +1652,7 @@ export type UserUpdateWithoutServersInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServersInput = {
@@ -1662,6 +1694,7 @@ export type UserUncheckedUpdateWithoutServersInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPersistentSessionsInput = {
@@ -1703,6 +1736,7 @@ export type UserCreateWithoutPersistentSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
@@ -1744,6 +1778,7 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPersistentSessionsInput = {
@@ -1801,6 +1836,7 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
@@ -1842,6 +1878,7 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -1883,6 +1920,7 @@ export type UserCreateWithoutAuditLogsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -1924,6 +1962,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -1981,6 +2020,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -2022,6 +2062,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOauthAccountsInput = {
@@ -2063,6 +2104,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -2104,6 +2146,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -2161,6 +2204,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -2202,6 +2246,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasskeysInput = {
@@ -2243,6 +2288,7 @@ export type UserCreateWithoutPasskeysInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasskeysInput = {
@@ -2284,6 +2330,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasskeysInput = {
@@ -2341,6 +2388,7 @@ export type UserUpdateWithoutPasskeysInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasskeysInput = {
@@ -2382,6 +2430,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -2423,6 +2472,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -2464,6 +2514,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -2521,6 +2572,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -2562,6 +2614,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMonitorConfigsInput = {
@@ -2603,6 +2656,7 @@ export type UserCreateWithoutMonitorConfigsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
@@ -2644,6 +2698,7 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMonitorConfigsInput = {
@@ -2701,6 +2756,7 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
@@ -2742,6 +2798,7 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordingsInput = {
@@ -2783,6 +2840,7 @@ export type UserCreateWithoutRecordingsInput = {
   receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordingsInput = {
@@ -2824,6 +2882,7 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordingsInput = {
@@ -2881,6 +2940,7 @@ export type UserUpdateWithoutRecordingsInput = {
   receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordingsInput = {
@@ -2922,6 +2982,191 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTunnelSessionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTunnelSessionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTunnelSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTunnelSessionsInput, Prisma.UserUncheckedCreateWithoutTunnelSessionsInput>
+}
+
+export type UserUpsertWithoutTunnelSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTunnelSessionsInput, Prisma.UserUncheckedUpdateWithoutTunnelSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTunnelSessionsInput, Prisma.UserUncheckedCreateWithoutTunnelSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTunnelSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTunnelSessionsInput, Prisma.UserUncheckedUpdateWithoutTunnelSessionsInput>
+}
+
+export type UserUpdateWithoutTunnelSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecoveryCodesInput = {
@@ -2963,6 +3208,7 @@ export type UserCreateWithoutRecoveryCodesInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
@@ -3004,6 +3250,7 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecoveryCodesInput = {
@@ -3061,6 +3308,7 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
@@ -3102,6 +3350,7 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailOTPsInput = {
@@ -3143,6 +3392,7 @@ export type UserCreateWithoutEmailOTPsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
@@ -3184,6 +3434,7 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailOTPsInput = {
@@ -3241,6 +3492,7 @@ export type UserUpdateWithoutEmailOTPsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
@@ -3282,6 +3534,7 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommandSnippetsInput = {
@@ -3323,6 +3576,7 @@ export type UserCreateWithoutCommandSnippetsInput = {
   receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommandSnippetsInput = {
@@ -3364,6 +3618,7 @@ export type UserUncheckedCreateWithoutCommandSnippetsInput = {
   receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommandSnippetsInput = {
@@ -3421,6 +3676,7 @@ export type UserUpdateWithoutCommandSnippetsInput = {
   receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
@@ -3462,6 +3718,7 @@ export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
   receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutKeychainCredentialsInput = {
@@ -3503,6 +3760,7 @@ export type UserCreateWithoutKeychainCredentialsInput = {
   receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
@@ -3544,6 +3802,7 @@ export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
   receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutKeychainCredentialsInput = {
@@ -3601,6 +3860,7 @@ export type UserUpdateWithoutKeychainCredentialsInput = {
   receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
@@ -3642,6 +3902,7 @@ export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
   receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -3683,6 +3944,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -3724,6 +3986,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -3781,6 +4044,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -3822,6 +4086,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedSharesInput = {
@@ -3863,6 +4128,7 @@ export type UserCreateWithoutOwnedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedSharesInput = {
@@ -3904,6 +4170,7 @@ export type UserUncheckedCreateWithoutOwnedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedSharesInput = {
@@ -3950,6 +4217,7 @@ export type UserCreateWithoutReceivedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedSharesInput = {
@@ -3991,6 +4259,7 @@ export type UserUncheckedCreateWithoutReceivedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedSharesInput = {
@@ -4048,6 +4317,7 @@ export type UserUpdateWithoutOwnedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedSharesInput = {
@@ -4089,6 +4359,7 @@ export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedSharesInput = {
@@ -4141,6 +4412,7 @@ export type UserUpdateWithoutReceivedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedSharesInput = {
@@ -4182,6 +4454,7 @@ export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -4207,6 +4480,7 @@ export type UserCountOutputType = {
   keychainCredentials: number
   commandSnippets: number
   recordings: number
+  tunnelSessions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4227,6 +4501,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   keychainCredentials?: boolean | UserCountOutputTypeCountKeychainCredentialsArgs
   commandSnippets?: boolean | UserCountOutputTypeCountCommandSnippetsArgs
   recordings?: boolean | UserCountOutputTypeCountRecordingsArgs
+  tunnelSessions?: boolean | UserCountOutputTypeCountTunnelSessionsArgs
 }
 
 /**
@@ -4358,6 +4633,13 @@ export type UserCountOutputTypeCountRecordingsArgs<ExtArgs extends runtime.Types
   where?: Prisma.RecordingWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTunnelSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TunnelSessionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4399,6 +4681,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   keychainCredentials?: boolean | Prisma.User$keychainCredentialsArgs<ExtArgs>
   commandSnippets?: boolean | Prisma.User$commandSnippetsArgs<ExtArgs>
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
+  tunnelSessions?: boolean | Prisma.User$tunnelSessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4496,6 +4779,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   keychainCredentials?: boolean | Prisma.User$keychainCredentialsArgs<ExtArgs>
   commandSnippets?: boolean | Prisma.User$commandSnippetsArgs<ExtArgs>
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
+  tunnelSessions?: boolean | Prisma.User$tunnelSessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4521,6 +4805,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     keychainCredentials: Prisma.$KeychainCredentialPayload<ExtArgs>[]
     commandSnippets: Prisma.$CommandSnippetPayload<ExtArgs>[]
     recordings: Prisma.$RecordingPayload<ExtArgs>[]
+    tunnelSessions: Prisma.$TunnelSessionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4956,6 +5241,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   keychainCredentials<T extends Prisma.User$keychainCredentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$keychainCredentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KeychainCredentialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   commandSnippets<T extends Prisma.User$commandSnippetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$commandSnippetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommandSnippetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recordings<T extends Prisma.User$recordingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recordingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tunnelSessions<T extends Prisma.User$tunnelSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tunnelSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TunnelSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5805,6 +6091,30 @@ export type User$recordingsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.RecordingScalarFieldEnum | Prisma.RecordingScalarFieldEnum[]
+}
+
+/**
+ * User.tunnelSessions
+ */
+export type User$tunnelSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TunnelSession
+   */
+  select?: Prisma.TunnelSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TunnelSession
+   */
+  omit?: Prisma.TunnelSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TunnelSessionInclude<ExtArgs> | null
+  where?: Prisma.TunnelSessionWhereInput
+  orderBy?: Prisma.TunnelSessionOrderByWithRelationInput | Prisma.TunnelSessionOrderByWithRelationInput[]
+  cursor?: Prisma.TunnelSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TunnelSessionScalarFieldEnum | Prisma.TunnelSessionScalarFieldEnum[]
 }
 
 /**

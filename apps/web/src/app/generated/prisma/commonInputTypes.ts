@@ -426,6 +426,23 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumTunnelKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.TunnelKind | Prisma.EnumTunnelKindFieldRefInput<$PrismaModel>
+  in?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel> | $Enums.TunnelKind
+}
+
+export type EnumTunnelKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TunnelKind | Prisma.EnumTunnelKindFieldRefInput<$PrismaModel>
+  in?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTunnelKindWithAggregatesFilter<$PrismaModel> | $Enums.TunnelKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel>
+}
+
 export type EnumInvitationStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.InvitationStatus | Prisma.EnumInvitationStatusFieldRefInput<$PrismaModel>
   in?: $Enums.InvitationStatus[] | Prisma.ListEnumInvitationStatusFieldRefInput<$PrismaModel>
@@ -828,6 +845,23 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumTunnelKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.TunnelKind | Prisma.EnumTunnelKindFieldRefInput<$PrismaModel>
+  in?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel> | $Enums.TunnelKind
+}
+
+export type NestedEnumTunnelKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TunnelKind | Prisma.EnumTunnelKindFieldRefInput<$PrismaModel>
+  in?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TunnelKind[] | Prisma.ListEnumTunnelKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTunnelKindWithAggregatesFilter<$PrismaModel> | $Enums.TunnelKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTunnelKindFilter<$PrismaModel>
 }
 
 export type NestedEnumInvitationStatusFilter<$PrismaModel = never> = {

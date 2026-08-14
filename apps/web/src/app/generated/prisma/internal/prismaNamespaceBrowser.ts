@@ -65,6 +65,7 @@ export const ModelName = {
   ServerHealthRecord: 'ServerHealthRecord',
   BenchmarkRun: 'BenchmarkRun',
   Recording: 'Recording',
+  TunnelSession: 'TunnelSession',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -338,6 +339,23 @@ export const RecordingScalarFieldEnum = {
 } as const
 
 export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
+
+
+export const TunnelSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  remoteHost: 'remoteHost',
+  remotePort: 'remotePort',
+  kind: 'kind',
+  localPort: 'localPort',
+  electronId: 'electronId',
+  createdAt: 'createdAt',
+  closedAt: 'closedAt'
+} as const
+
+export type TunnelSessionScalarFieldEnum = (typeof TunnelSessionScalarFieldEnum)[keyof typeof TunnelSessionScalarFieldEnum]
 
 
 export const RecoveryCodeScalarFieldEnum = {

@@ -28,7 +28,7 @@ export default function ServerDetailsPage() {
 
     const monitoring = useServerMonitoring(id);
     const benchmark = useBenchmark(id);
-    const tunnels = useTunnels(id);
+    const tunnels = useTunnels(id, server?.name ?? '');
 
     // A missing/forbidden server means there is nothing to show here.
     useEffect(() => {
@@ -99,6 +99,10 @@ export default function ServerDetailsPage() {
                     onOpen={tunnels.open}
                     result={tunnels.result}
                     onReset={tunnels.reset}
+                    activeSessions={tunnels.activeSessions}
+                    onCloseSession={tunnels.closeSession}
+                    proxyUrlFor={tunnels.proxyUrlFor}
+                    onRegenerateScript={tunnels.regenerateBridgeScript}
                 />
             )}
         </div>

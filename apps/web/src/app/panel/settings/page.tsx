@@ -25,8 +25,10 @@ import { ProfilePanel } from './_panels/ProfilePanel';
 import { RecordingsPanel } from './_panels/RecordingsPanel';
 import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
+import { TunnelsPanel } from './_panels/TunnelsPanel';
 
 import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
+import type { TunnelSessionRow } from '../servers/[id]/_details/useTunnels';
 
 /** Applies a `?section=` deep link (e.g. from the command palette) on mount. */
 function SectionFromUrl({ onSection }: { onSection: (s: SectionId) => void }) {
@@ -75,6 +77,9 @@ export default function SettingsPage() {
     const twoFactor = useTwoFactor(setUser, addToast);
     const push = usePushNotifications(addToast);
     const sessions = useAuthSessions(activeSection === 'sessions', addToast);
+    const { data: tunnelsData } = useCachedFetch<{ tunnels: TunnelSessionRow[] }>(
+        '/api/tunnel-sessions',
+    );
 
     // Only the very first visit (nothing cached) shows a spinner; arriving here
     // from elsewhere in the panel reuses the already-loaded user instantly.
@@ -125,6 +130,7 @@ export default function SettingsPage() {
                             onChange={setActiveSection}
                             passkeyCount={passkeys.passkeys.length}
                             sessionCount={sessions.sessions.length}
+                            tunnelCount={tunnelsData?.tunnels.length ?? 0}
                         />
                     )}
                 </aside>
@@ -160,6 +166,8 @@ export default function SettingsPage() {
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
 
                     {activeSection === 'recordings' && <RecordingsPanel />}
+
+                    {activeSection === 'tunnels' && <TunnelsPanel />}
 
                     {activeSection === 'danger' && (
                         <DangerZonePanel user={user} encryption={account.encryption} />

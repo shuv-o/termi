@@ -112,6 +112,17 @@ export type BenchmarkRun = Prisma.BenchmarkRunModel
  */
 export type Recording = Prisma.RecordingModel
 /**
+ * Model TunnelSession
+ * A record of a tunnel the user opened, for the "Active Tunnels" list.
+ * This is a self-reported bookkeeping record, not a live connection probe —
+ * the same limitation PersistentSession already has: if the client never
+ * gets a chance to mark it closed (browser killed, laptop lid shut), the
+ * row goes stale until the user removes it manually. The gateway's own
+ * TunnelSlotLimiter is the actual security boundary on concurrent tunnels;
+ * this table exists purely so the user can see and manage what they opened.
+ */
+export type TunnelSession = Prisma.TunnelSessionModel
+/**
  * Model RecoveryCode
  * 
  */

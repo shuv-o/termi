@@ -44,6 +44,7 @@
 - [Configuration](#️-configuration)
 - [Architecture](#-architecture)
 - [Security](#-security)
+- [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [Open Source & Community](#-open-source--community)
 - [Why star instead of just cloning?](#-why-star-instead-of-just-cloning)
@@ -68,8 +69,18 @@
 
 - **SSH** — full terminal emulation with [xterm.js](https://xtermjs.org/), key forwarding, and resizable viewport
 - **SCP / SFTP** — web-based file manager: upload, download, create folders, rename, delete
-- **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/)
-- **VNC** — Virtual Network Computing via Apache Guacamole
+- **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/), with touch-to-mouse translation and an on-screen keyboard on mobile
+- **VNC** — Virtual Network Computing via Apache Guacamole, same mobile touch support
+- **Telnet** — direct terminal access for legacy/unencrypted devices
+- **Port forwarding** — forward any port reachable from a server, like `ssh -L`, with no terminal needed. Auto-detects HTTP targets for a one-click browser link; anything else gets a copyable local-bridge script (or, in the desktop app, a real local port)
+
+### ⚡ Productivity
+
+- **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard
+- **Command snippets** — save frequently-used shell commands and run them into the active terminal with one click
+- **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
+- **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
+- **Session recording & playback** — record any SSH session and replay it later from Settings → Recordings, encrypted at rest
 
 ### 💻 Local Terminal
 
@@ -81,8 +92,8 @@
 
 - Real-time **CPU, memory, and disk** metrics fetched over SSH
 - **Health history** charts
-- Configurable **email & push notification** alerts
-- Built-in **benchmark tool**
+- Configurable **email, web push, and webhook** alerts (Slack, Discord, or any generic URL)
+- Built-in **benchmark tool** with persisted history and a trend chart over time
 
 ### 🤝 Server Sharing
 
@@ -264,8 +275,9 @@ termi/
 │   ├  web/                    # Next.js 16 App Router
 │   │   ├  src/
 │   │   │   ├  app/            # Pages + API routes (App Router)
-│   │   │   │   ├  api/        # 53 REST endpoints
-│   │   │   │   └  panel/      # Dashboard UI
+│   │   │   │   ├  api/        # REST endpoints
+│   │   │   │   ├  panel/      # Dashboard UI
+│   │   │   │   └  tunnel/     # Same-origin HTTP reverse proxy for port-forward tunnels
 │   │   │   ├  components/     # React components
 │   │   │   │   ├  terminal/   # SSH/RDP/VNC/local terminal
 │   │   │   │   ├  scp/        # File manager
@@ -279,7 +291,7 @@ termi/
 │   │
 │   ├  gateway/                # WebSocket gateway (pure ESM)
 │   │   └  src/
-│   │       ├  handlers/       # SSH, SCP, Guacamole (RDP/VNC), Local PTY
+│   │       ├  handlers/       # SSH, SCP, Guacamole (RDP/VNC), Telnet, Local PTY, Tunnel
 │   │       └  auth/           # JWE token validation
 │   │
 │   ├  electron/               # Desktop app wrapper
@@ -377,10 +389,10 @@ termi/
 
 1. Browser calls `POST /api/connection/token` → server decrypts stored credentials and issues a short-lived **JWE token
    ** (A256GCM, 5-minute TTL).
-2. Browser opens a WebSocket to the gateway with the JWE token as a query parameter.
-3. Gateway validates the token and routes to the appropriate handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler`, or
-   `LocalHandler`.
+2. Browser opens a WebSocket to the gateway with the JWE token as a query parameter and a protocol of `ssh`, `scp`, `rdp`, `vnc`, `telnet`, `local`, or `tunnel`.
+3. Gateway validates the token and routes to the matching handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler` (RDP/VNC), `TelnetHandler`, `LocalHandler`, or `TunnelHandler`.
 4. For RDP/VNC, `GuacamoleHandler` connects to guacd and forwards the Guacamole protocol frames to the browser.
+5. For port forwarding, `TunnelHandler` opens an SSH `forwardOut` channel and relays raw bytes over the same WebSocket — either straight to a bound local port (Electron), or through `/tunnel/<serverId>/<port>`, a same-origin HTTP reverse proxy that works behind a reverse proxy exposing only 80/443.
 
 ---
 
@@ -395,6 +407,22 @@ See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability repor
 - Rate limiting on authentication endpoints
 - CSP and security headers on every response
 - Session tokens revocable per-device
+
+---
+
+## 🧭 Roadmap
+
+### Next up: AI assistant (LLM integration)
+
+Planned for the next update — scope and details are still open to change:
+
+- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termi's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a Termi-operated relay.
+- **Terminal-grounded, not a generic chatbot.** Explain a confusing command's output, translate a plain-English request into the right shell command for review before running it, or summarize a long session recording instead of scrubbing through the replay.
+- **Monitoring-aware.** Answer questions like "why is this server flagged high-load" using real metrics/health-history/benchmark-trend data already collected, instead of the user cross-referencing charts manually.
+- **Read-only first.** The first iteration explains and suggests; it does not execute anything on its own. Any command it proposes goes through the same explicit-confirm step a human typing it would — no silent execution, matching the project's existing "ask before anything destructive" posture.
+- **Later, not v1:** webhook alert message drafting, anomaly explanations for monitoring alerts.
+
+This is a draft plan, not a committed spec — [open a discussion](https://github.com/shuvoooo/termi/discussions) if you have thoughts on scope or provider support before it's built.
 
 ---
 

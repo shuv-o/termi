@@ -8,7 +8,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- **Port forwarding (tunnels)** — forward any port reachable from a server, the same way `ssh -L` does, without opening a terminal. Auto-detects HTTP targets and hands back a one-click in-browser link served at `/tunnel/<serverId>/<port>`; anything else gets a copyable, dependency-free Node.js bridge script to run locally. The desktop app instead binds a real local TCP port directly via a new Electron IPC bridge. Stateless by design — nothing is tracked server-side beyond a per-user concurrent-tunnel cap (10) on the gateway.
+- **Multi-server broadcast** — run a shell command across every server in a group at once from the Groups view, with a per-server pass/fail results breakdown.
+- **Session recording & playback** — record any SSH session as an asciicast v2 transcript, browsable and replayable in-browser from Settings → Recordings, with duration/size shown per entry.
+- **Webhook alerts** — route monitoring alerts to Slack, Discord, or any generic webhook URL, alongside the existing email and web push notifications.
+- **Benchmark history & trends** — benchmark runs now persist per server, with a trend chart instead of only ever showing the most recent run.
+- **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection to a server.
+- **Global command palette (⌘K / Ctrl+K)** — jump to any server, group, keychain entry, or settings section, or run/create a reusable command snippet, without leaving the keyboard.
+- **Command snippets** — save frequently-used shell commands and send them into the active terminal with one click.
+
+### Changed
+
+- Mobile layout and navigation overhauled across the panel (keychain, groups, sessions), with a redesigned keychain entry card and clearer active-tab styling.
+- Status/success colors unified to emerald and high-load warnings to amber across every view that previously used ad-hoc green/yellow, via one shared protocol/status color source.
+
+### Fixed
+
+- **RDP/VNC on mobile didn't accept touch input** — touch events weren't translated to mouse events, so remote desktop sessions were effectively unusable on a phone or tablet. Added an on-screen keyboard trigger and a special-key row (Ctrl, Alt, Tab, arrows) for protocols that need them.
+- Sitemap and `robots.txt` pointed self-hosted deployments at this project's own GitHub URL instead of the deployment's real domain — both now resolve through the same `getSiteUrl()` used everywhere else.
+
+### Security
+
+- **Session recordings were stored in plaintext.** Now encrypted the same way as server credentials (AES-256-GCM) before storage, decrypted only when a recording is opened for playback.
+- **The tunnel HTTP proxy no longer forwards the browser's live Termi session cookie or `Authorization` header to the tunneled target.** This route is same-origin with the rest of the app, so the browser was attaching both automatically to every proxied request — a tunneled target (by definition something other than Termi itself) could previously have captured a real session credential.
+- Tunnel HTTP responses now stream instead of buffering the full body in memory — a bounded buffer applies only to HTML responses, to inject a `<base>` tag for relative-link rewriting. Large file transfers through a tunnel no longer risk exhausting server memory.
+- Added a per-user concurrent-tunnel cap on the gateway (10) to bound resource use from a runaway or malicious bridge script — each tunnel opens its own unpooled SSH connection.
 
 ---
 

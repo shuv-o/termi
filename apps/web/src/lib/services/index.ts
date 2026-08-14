@@ -8,3 +8,4 @@ export * from './keychain.service';
 export * from './snippet.service';
 export * from './broadcast.service';
 export * from './tunnel.service';
+export * from './tunnel-session.service';
