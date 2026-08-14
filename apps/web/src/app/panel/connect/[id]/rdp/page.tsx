@@ -181,16 +181,6 @@ export default function RDPConnectionPage() {
     const toolbar = (
         <>
             <div className="flex items-center gap-2 min-w-0">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    className={`shrink-0 ${isFullscreen ? 'h-8 w-8' : 'h-7 w-7'}`}
-                >
-                    <Link href="/panel">
-                        <ArrowLeft className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
-                    </Link>
-                </Button>
                 <span
                     className={`font-medium truncate ${isFullscreen ? 'text-white text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}
                 >
