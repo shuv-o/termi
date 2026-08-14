@@ -63,6 +63,7 @@ export const ModelName = {
   PushSubscription: 'PushSubscription',
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
+  BenchmarkRun: 'BenchmarkRun',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -298,6 +299,27 @@ export const ServerHealthRecordScalarFieldEnum = {
 } as const
 
 export type ServerHealthRecordScalarFieldEnum = (typeof ServerHealthRecordScalarFieldEnum)[keyof typeof ServerHealthRecordScalarFieldEnum]
+
+
+export const BenchmarkRunScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  cpuScore: 'cpuScore',
+  ramScore: 'ramScore',
+  diskScore: 'diskScore',
+  networkScore: 'networkScore',
+  overallScore: 'overallScore',
+  cpuSingleMBps: 'cpuSingleMBps',
+  cpuMultiMBps: 'cpuMultiMBps',
+  ramWriteMBps: 'ramWriteMBps',
+  ramReadMBps: 'ramReadMBps',
+  diskWriteMBps: 'diskWriteMBps',
+  diskReadMBps: 'diskReadMBps',
+  pingMs: 'pingMs',
+  runAt: 'runAt'
+} as const
+
+export type BenchmarkRunScalarFieldEnum = (typeof BenchmarkRunScalarFieldEnum)[keyof typeof BenchmarkRunScalarFieldEnum]
 
 
 export const RecoveryCodeScalarFieldEnum = {

@@ -9,8 +9,10 @@ import { BenchmarkSection } from './_details/BenchmarkSection';
 import { HealthHistorySection } from './_details/HealthHistorySection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
+import { TunnelSection } from './_details/TunnelSection';
 import { useBenchmark } from './_details/useBenchmark';
 import { useServerMonitoring } from './_details/useServerMonitoring';
+import { useTunnels } from './_details/useTunnels';
 import type { ServerInfo } from './_details/types';
 
 export default function ServerDetailsPage() {
@@ -26,6 +28,7 @@ export default function ServerDetailsPage() {
 
     const monitoring = useServerMonitoring(id);
     const benchmark = useBenchmark(id);
+    const tunnels = useTunnels(id);
 
     // A missing/forbidden server means there is nothing to show here.
     useEffect(() => {
@@ -79,7 +82,24 @@ export default function ServerDetailsPage() {
                     phase={benchmark.phase}
                     message={benchmark.message}
                     results={benchmark.results}
+                    history={benchmark.history}
                     onRun={benchmark.run}
+                />
+            )}
+
+            {/* Port forwarding needs a shell channel, so it's SSH-only too. */}
+            {isSSH && (
+                <TunnelSection
+                    tunnels={tunnels.tunnels}
+                    remoteHost={tunnels.remoteHost}
+                    setRemoteHost={tunnels.setRemoteHost}
+                    remotePort={tunnels.remotePort}
+                    setRemotePort={tunnels.setRemotePort}
+                    opening={tunnels.opening}
+                    error={tunnels.error}
+                    onOpen={tunnels.open}
+                    onClose={tunnels.close}
+                    closingId={tunnels.closingId}
                 />
             )}
         </div>

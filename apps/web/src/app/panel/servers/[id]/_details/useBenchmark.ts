@@ -1,17 +1,33 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import type { BenchmarkPhase, BenchmarkResults } from './types';
+import { useCallback, useEffect, useState } from 'react';
+import type { BenchmarkPhase, BenchmarkResults, BenchmarkRunSummary } from './types';
 
 /**
  * Runs the agentless SSH hardware benchmark, consuming the endpoint's
  * server-sent-event stream so each phase updates the UI as it completes.
+ * Also loads past runs so the UI can show a score trend over time.
  */
 export function useBenchmark(id: string) {
     const [running, setRunning] = useState(false);
     const [phase, setPhase] = useState<BenchmarkPhase | null>(null);
     const [message, setMessage] = useState('');
     const [results, setResults] = useState<BenchmarkResults | null>(null);
+    const [history, setHistory] = useState<BenchmarkRunSummary[]>([]);
+
+    const fetchHistory = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/servers/${id}/benchmark`);
+            const data = await response.json();
+            if (data.success) setHistory(data.data.runs);
+        } catch {
+            /* Trend chart just stays empty — not worth surfacing an error for. */
+        }
+    }, [id]);
+
+    useEffect(() => {
+        fetchHistory();
+    }, [fetchHistory]);
 
     const run = useCallback(async () => {
         setRunning(true);
@@ -53,8 +69,9 @@ export function useBenchmark(id: string) {
             setMessage('Connection lost');
         } finally {
             setRunning(false);
+            fetchHistory();
         }
-    }, [id]);
+    }, [id, fetchHistory]);
 
-    return { running, phase, message, results, run };
+    return { running, phase, message, results, history, run };
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, Loader2, Play, Zap } from 'lucide-react';
+import { AlertTriangle, Loader2, Play, TrendingUp, Zap } from 'lucide-react';
+import MetricSparkline from '@/components/monitoring/MetricSparkline';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -11,7 +12,60 @@ import {
     RamResultCard,
     ScoreSummaryCard,
 } from './BenchmarkResults';
-import { BENCHMARK_PHASES, phaseIndex, type BenchmarkPhase, type BenchmarkResults } from './types';
+import {
+    BENCHMARK_PHASES,
+    phaseIndex,
+    scoreColor,
+    type BenchmarkPhase,
+    type BenchmarkResults,
+    type BenchmarkRunSummary,
+} from './types';
+
+/** Overall-score trend across past runs — only worth showing once there are 2+ points. */
+function ScoreTrendCard({ history }: { history: BenchmarkRunSummary[] }) {
+    const first = history[0];
+    const latest = history[history.length - 1];
+    const delta = latest.overallScore - first.overallScore;
+
+    return (
+        <Card className="p-4 mb-3">
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground">Score Trend</span>
+                    <span className="text-[10px] text-muted-foreground/60">
+                        ({history.length} runs)
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span
+                        className={`text-lg font-bold tabular-nums ${scoreColor(latest.overallScore)}`}
+                    >
+                        {latest.overallScore}
+                    </span>
+                    {delta !== 0 && (
+                        <span
+                            className={`text-xs font-medium ${delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                        >
+                            {delta > 0 ? '+' : ''}
+                            {delta}
+                        </span>
+                    )}
+                </div>
+            </div>
+            <MetricSparkline
+                data={history.map((h) => h.overallScore)}
+                color="#facc15"
+                height={44}
+                showDots
+            />
+            <p className="text-[10px] text-muted-foreground mt-2">
+                {new Date(first.runAt).toLocaleDateString()} →{' '}
+                {new Date(latest.runAt).toLocaleDateString()}
+            </p>
+        </Card>
+    );
+}
 
 /** Segmented progress bar showing which benchmark stage is running. */
 function PhaseProgress({ phase, message }: { phase: BenchmarkPhase | null; message: string }) {
@@ -55,12 +109,14 @@ export function BenchmarkSection({
     phase,
     message,
     results,
+    history,
     onRun,
 }: {
     running: boolean;
     phase: BenchmarkPhase | null;
     message: string;
     results: BenchmarkResults | null;
+    history: BenchmarkRunSummary[];
     onRun: () => void;
 }) {
     return (
@@ -88,6 +144,8 @@ export function BenchmarkSection({
                     )}
                 </Button>
             </div>
+
+            {history.length >= 2 && <ScoreTrendCard history={history} />}
 
             {running && <PhaseProgress phase={phase} message={message} />}
 

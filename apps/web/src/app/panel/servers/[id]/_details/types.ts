@@ -106,6 +106,24 @@ export interface BenchmarkResults {
     error?: string;
 }
 
+/** One persisted benchmark run, as returned by GET .../benchmark (oldest first). */
+export interface BenchmarkRunSummary {
+    id: string;
+    cpuScore: number;
+    ramScore: number;
+    diskScore: number;
+    networkScore: number;
+    overallScore: number;
+    cpuSingleMBps: number | null;
+    cpuMultiMBps: number | null;
+    ramWriteMBps: number | null;
+    ramReadMBps: number | null;
+    diskWriteMBps: number | null;
+    diskReadMBps: number | null;
+    pingMs: number | null;
+    runAt: string;
+}
+
 export type BenchmarkPhase =
     | 'connecting'
     | 'hardware'

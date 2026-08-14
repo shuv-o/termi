@@ -396,6 +396,7 @@ export const ModelName = {
   PushSubscription: 'PushSubscription',
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
+  BenchmarkRun: 'BenchmarkRun',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1309,6 +1310,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BenchmarkRun: {
+      payload: Prisma.$BenchmarkRunPayload<ExtArgs>
+      fields: Prisma.BenchmarkRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BenchmarkRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BenchmarkRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        findFirst: {
+          args: Prisma.BenchmarkRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BenchmarkRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        findMany: {
+          args: Prisma.BenchmarkRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>[]
+        }
+        create: {
+          args: Prisma.BenchmarkRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        createMany: {
+          args: Prisma.BenchmarkRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BenchmarkRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>[]
+        }
+        delete: {
+          args: Prisma.BenchmarkRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        update: {
+          args: Prisma.BenchmarkRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.BenchmarkRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BenchmarkRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BenchmarkRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.BenchmarkRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BenchmarkRunPayload>
+        }
+        aggregate: {
+          args: Prisma.BenchmarkRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBenchmarkRun>
+        }
+        groupBy: {
+          args: Prisma.BenchmarkRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BenchmarkRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BenchmarkRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BenchmarkRunCountAggregateOutputType> | number
+        }
+      }
+    }
     RecoveryCode: {
       payload: Prisma.$RecoveryCodePayload<ExtArgs>
       fields: Prisma.RecoveryCodeFieldRefs
@@ -2005,6 +2080,27 @@ export const ServerHealthRecordScalarFieldEnum = {
 export type ServerHealthRecordScalarFieldEnum = (typeof ServerHealthRecordScalarFieldEnum)[keyof typeof ServerHealthRecordScalarFieldEnum]
 
 
+export const BenchmarkRunScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  cpuScore: 'cpuScore',
+  ramScore: 'ramScore',
+  diskScore: 'diskScore',
+  networkScore: 'networkScore',
+  overallScore: 'overallScore',
+  cpuSingleMBps: 'cpuSingleMBps',
+  cpuMultiMBps: 'cpuMultiMBps',
+  ramWriteMBps: 'ramWriteMBps',
+  ramReadMBps: 'ramReadMBps',
+  diskWriteMBps: 'diskWriteMBps',
+  diskReadMBps: 'diskReadMBps',
+  pingMs: 'pingMs',
+  runAt: 'runAt'
+} as const
+
+export type BenchmarkRunScalarFieldEnum = (typeof BenchmarkRunScalarFieldEnum)[keyof typeof BenchmarkRunScalarFieldEnum]
+
+
 export const RecoveryCodeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2443,6 +2539,7 @@ export type GlobalOmitConfig = {
   pushSubscription?: Prisma.PushSubscriptionOmit
   serverMonitorConfig?: Prisma.ServerMonitorConfigOmit
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
+  benchmarkRun?: Prisma.BenchmarkRunOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
   commandSnippet?: Prisma.CommandSnippetOmit

@@ -77,7 +77,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         // `useRouteFade` gets the same fade cue without that.
                         className={`transition-[opacity,transform] duration-150 ease-out ${
                             fading ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
-                        } ${isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 lg:pb-8'}`}
+                        } ${isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 sm:pb-28 lg:pb-8'}`}
                     >
                         {children}
                     </main>

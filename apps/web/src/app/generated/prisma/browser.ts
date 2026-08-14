@@ -78,6 +78,11 @@ export type ServerMonitorConfig = Prisma.ServerMonitorConfigModel
  */
 export type ServerHealthRecord = Prisma.ServerHealthRecordModel
 /**
+ * Model BenchmarkRun
+ * 
+ */
+export type BenchmarkRun = Prisma.BenchmarkRunModel
+/**
  * Model RecoveryCode
  * 
  */

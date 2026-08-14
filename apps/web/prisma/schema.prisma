@@ -178,6 +178,7 @@ model Server {
   connections   Connection[]
   monitorConfig ServerMonitorConfig?
   healthRecords ServerHealthRecord[]
+  benchmarkRuns BenchmarkRun[]
   invitations   ServerInvitation[]
   shares        ServerShare[]
 
@@ -382,6 +383,10 @@ enum AuditAction {
   SNIPPET_CREATED
   SNIPPET_UPDATED
   SNIPPET_DELETED
+
+  // Port-forward tunnel events
+  TUNNEL_OPENED
+  TUNNEL_CLOSED
 }
 
 // PUSH NOTIFICATIONS
@@ -466,6 +471,33 @@ model ServerHealthRecord {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, checkedAt])
+}
+
+model BenchmarkRun {
+  id       String @id @default(cuid())
+  serverId String
+
+  // Composite 0-1000 scores (see benchmark.service.ts computeScores)
+  cpuScore     Int
+  ramScore     Int
+  diskScore    Int
+  networkScore Int
+  overallScore Int
+
+  // Raw figures, for display alongside the scores
+  cpuSingleMBps Int?
+  cpuMultiMBps  Int?
+  ramWriteMBps  Int?
+  ramReadMBps   Int?
+  diskWriteMBps Int?
+  diskReadMBps  Int?
+  pingMs        Float?
+
+  runAt DateTime @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, runAt])
 }
 
 // RECOVERY CODES

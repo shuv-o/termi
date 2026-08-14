@@ -247,6 +247,7 @@ export async function getServerForConnection(
 ): Promise<
     | (ServerCredentials & {
           id: string;
+          name: string;
           port: number;
           protocol: Protocol;
           displayWidth: number | null;
@@ -300,6 +301,7 @@ export async function getServerForConnection(
 
     return {
         id: server.id,
+        name: server.name,
         port: server.port,
         protocol: server.protocol,
         displayWidth: server.displayWidth,

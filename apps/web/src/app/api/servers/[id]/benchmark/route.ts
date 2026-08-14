@@ -9,7 +9,13 @@
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { runBenchmark } from '@/lib/services/benchmark.service';
-import { unauthorizedResponse, notFoundResponse, errorResponse } from '@/lib/api';
+import { prisma } from '@/lib/db';
+import {
+    successResponse,
+    unauthorizedResponse,
+    notFoundResponse,
+    errorResponse,
+} from '@/lib/api';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -40,7 +46,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
                 }
             };
 
-            await runBenchmark(
+            const results = await runBenchmark(
                 {
                     host: server.host,
                     port: server.port,
@@ -51,6 +57,30 @@ export async function POST(_request: Request, { params }: RouteParams) {
                 },
                 send,
             );
+
+            if (results.scores && !results.error) {
+                try {
+                    await prisma.benchmarkRun.create({
+                        data: {
+                            serverId: id,
+                            cpuScore: results.scores.cpu,
+                            ramScore: results.scores.ram,
+                            diskScore: results.scores.disk,
+                            networkScore: results.scores.network,
+                            overallScore: results.scores.overall,
+                            cpuSingleMBps: results.cpu?.singleCoreMBps ?? null,
+                            cpuMultiMBps: results.cpu?.multiCoreMBps ?? null,
+                            ramWriteMBps: results.ram?.writeMBps ?? null,
+                            ramReadMBps: results.ram?.readMBps ?? null,
+                            diskWriteMBps: results.disk?.writeMBps ?? null,
+                            diskReadMBps: results.disk?.readMBps ?? null,
+                            pingMs: results.network?.pingMs ?? null,
+                        },
+                    });
+                } catch (err) {
+                    console.error('[Benchmark] Failed to persist run:', err);
+                }
+            }
 
             try {
                 controller.close();
@@ -67,4 +97,36 @@ export async function POST(_request: Request, { params }: RouteParams) {
             Connection: 'keep-alive',
         },
     });
+}
+
+/**
+ * GET /api/servers/[id]/benchmark
+ *
+ * Returns past benchmark runs for this server (for trend charting).
+ */
+export async function GET(request: Request, { params }: RouteParams) {
+    const user = await getCurrentUser();
+    if (!user) return unauthorizedResponse();
+
+    const { id } = await params;
+
+    const server = await getServerById(id, user.id);
+    if (!server) return notFoundResponse('Server not found');
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 50);
+
+        const runs = await prisma.benchmarkRun.findMany({
+            where: { serverId: id },
+            orderBy: { runAt: 'desc' },
+            take: limit,
+        });
+
+        // Return in chronological order for charting
+        return successResponse({ runs: runs.reverse() });
+    } catch (err) {
+        console.error('[Benchmark] Error fetching history:', err);
+        return errorResponse('Failed to fetch benchmark history', 500);
+    }
 }

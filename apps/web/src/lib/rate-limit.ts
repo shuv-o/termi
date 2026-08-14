@@ -136,3 +136,8 @@ export function sendVerificationRateLimit(userId: string): RateLimitResult {
 export function broadcastCommandRateLimit(userId: string): RateLimitResult {
     return rateLimit(`broadcast:${userId}`, 10, 5 * 60 * 1000);
 }
+
+/** 20 tunnel-open attempts per 10 minutes per user — each opens a real listening port. */
+export function tunnelCreateRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`tunnel-create:${userId}`, 20, 10 * 60 * 1000);
+}
