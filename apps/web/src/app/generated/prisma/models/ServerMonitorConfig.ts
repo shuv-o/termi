@@ -46,6 +46,9 @@ export type ServerMonitorConfigMinAggregateOutputType = {
   checkIntervalMinutes: number | null
   alertEmail: boolean | null
   alertPush: boolean | null
+  webhookEnabled: boolean | null
+  webhookPlatform: $Enums.WebhookPlatform | null
+  webhookUrl: string | null
   failureThreshold: number | null
   consecutiveFailures: number | null
   alertSent: boolean | null
@@ -63,6 +66,9 @@ export type ServerMonitorConfigMaxAggregateOutputType = {
   checkIntervalMinutes: number | null
   alertEmail: boolean | null
   alertPush: boolean | null
+  webhookEnabled: boolean | null
+  webhookPlatform: $Enums.WebhookPlatform | null
+  webhookUrl: string | null
   failureThreshold: number | null
   consecutiveFailures: number | null
   alertSent: boolean | null
@@ -80,6 +86,9 @@ export type ServerMonitorConfigCountAggregateOutputType = {
   checkIntervalMinutes: number
   alertEmail: number
   alertPush: number
+  webhookEnabled: number
+  webhookPlatform: number
+  webhookUrl: number
   failureThreshold: number
   consecutiveFailures: number
   alertSent: number
@@ -111,6 +120,9 @@ export type ServerMonitorConfigMinAggregateInputType = {
   checkIntervalMinutes?: true
   alertEmail?: true
   alertPush?: true
+  webhookEnabled?: true
+  webhookPlatform?: true
+  webhookUrl?: true
   failureThreshold?: true
   consecutiveFailures?: true
   alertSent?: true
@@ -128,6 +140,9 @@ export type ServerMonitorConfigMaxAggregateInputType = {
   checkIntervalMinutes?: true
   alertEmail?: true
   alertPush?: true
+  webhookEnabled?: true
+  webhookPlatform?: true
+  webhookUrl?: true
   failureThreshold?: true
   consecutiveFailures?: true
   alertSent?: true
@@ -145,6 +160,9 @@ export type ServerMonitorConfigCountAggregateInputType = {
   checkIntervalMinutes?: true
   alertEmail?: true
   alertPush?: true
+  webhookEnabled?: true
+  webhookPlatform?: true
+  webhookUrl?: true
   failureThreshold?: true
   consecutiveFailures?: true
   alertSent?: true
@@ -249,6 +267,9 @@ export type ServerMonitorConfigGroupByOutputType = {
   checkIntervalMinutes: number
   alertEmail: boolean
   alertPush: boolean
+  webhookEnabled: boolean
+  webhookPlatform: $Enums.WebhookPlatform | null
+  webhookUrl: string | null
   failureThreshold: number
   consecutiveFailures: number
   alertSent: boolean
@@ -289,6 +310,9 @@ export type ServerMonitorConfigWhereInput = {
   checkIntervalMinutes?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertEmail?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
   alertPush?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookEnabled?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookPlatform?: Prisma.EnumWebhookPlatformNullableFilter<"ServerMonitorConfig"> | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.StringNullableFilter<"ServerMonitorConfig"> | string | null
   failureThreshold?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   consecutiveFailures?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertSent?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
@@ -308,6 +332,9 @@ export type ServerMonitorConfigOrderByWithRelationInput = {
   checkIntervalMinutes?: Prisma.SortOrder
   alertEmail?: Prisma.SortOrder
   alertPush?: Prisma.SortOrder
+  webhookEnabled?: Prisma.SortOrder
+  webhookPlatform?: Prisma.SortOrderInput | Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   failureThreshold?: Prisma.SortOrder
   consecutiveFailures?: Prisma.SortOrder
   alertSent?: Prisma.SortOrder
@@ -330,6 +357,9 @@ export type ServerMonitorConfigWhereUniqueInput = Prisma.AtLeast<{
   checkIntervalMinutes?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertEmail?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
   alertPush?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookEnabled?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookPlatform?: Prisma.EnumWebhookPlatformNullableFilter<"ServerMonitorConfig"> | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.StringNullableFilter<"ServerMonitorConfig"> | string | null
   failureThreshold?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   consecutiveFailures?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertSent?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
@@ -349,6 +379,9 @@ export type ServerMonitorConfigOrderByWithAggregationInput = {
   checkIntervalMinutes?: Prisma.SortOrder
   alertEmail?: Prisma.SortOrder
   alertPush?: Prisma.SortOrder
+  webhookEnabled?: Prisma.SortOrder
+  webhookPlatform?: Prisma.SortOrderInput | Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   failureThreshold?: Prisma.SortOrder
   consecutiveFailures?: Prisma.SortOrder
   alertSent?: Prisma.SortOrder
@@ -374,6 +407,9 @@ export type ServerMonitorConfigScalarWhereWithAggregatesInput = {
   checkIntervalMinutes?: Prisma.IntWithAggregatesFilter<"ServerMonitorConfig"> | number
   alertEmail?: Prisma.BoolWithAggregatesFilter<"ServerMonitorConfig"> | boolean
   alertPush?: Prisma.BoolWithAggregatesFilter<"ServerMonitorConfig"> | boolean
+  webhookEnabled?: Prisma.BoolWithAggregatesFilter<"ServerMonitorConfig"> | boolean
+  webhookPlatform?: Prisma.EnumWebhookPlatformNullableWithAggregatesFilter<"ServerMonitorConfig"> | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.StringNullableWithAggregatesFilter<"ServerMonitorConfig"> | string | null
   failureThreshold?: Prisma.IntWithAggregatesFilter<"ServerMonitorConfig"> | number
   consecutiveFailures?: Prisma.IntWithAggregatesFilter<"ServerMonitorConfig"> | number
   alertSent?: Prisma.BoolWithAggregatesFilter<"ServerMonitorConfig"> | boolean
@@ -389,6 +425,9 @@ export type ServerMonitorConfigCreateInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -408,6 +447,9 @@ export type ServerMonitorConfigUncheckedCreateInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -423,6 +465,9 @@ export type ServerMonitorConfigUpdateInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -442,6 +487,9 @@ export type ServerMonitorConfigUncheckedUpdateInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -459,6 +507,9 @@ export type ServerMonitorConfigCreateManyInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -474,6 +525,9 @@ export type ServerMonitorConfigUpdateManyMutationInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -491,6 +545,9 @@ export type ServerMonitorConfigUncheckedUpdateManyInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -523,6 +580,9 @@ export type ServerMonitorConfigCountOrderByAggregateInput = {
   checkIntervalMinutes?: Prisma.SortOrder
   alertEmail?: Prisma.SortOrder
   alertPush?: Prisma.SortOrder
+  webhookEnabled?: Prisma.SortOrder
+  webhookPlatform?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   failureThreshold?: Prisma.SortOrder
   consecutiveFailures?: Prisma.SortOrder
   alertSent?: Prisma.SortOrder
@@ -546,6 +606,9 @@ export type ServerMonitorConfigMaxOrderByAggregateInput = {
   checkIntervalMinutes?: Prisma.SortOrder
   alertEmail?: Prisma.SortOrder
   alertPush?: Prisma.SortOrder
+  webhookEnabled?: Prisma.SortOrder
+  webhookPlatform?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   failureThreshold?: Prisma.SortOrder
   consecutiveFailures?: Prisma.SortOrder
   alertSent?: Prisma.SortOrder
@@ -563,6 +626,9 @@ export type ServerMonitorConfigMinOrderByAggregateInput = {
   checkIntervalMinutes?: Prisma.SortOrder
   alertEmail?: Prisma.SortOrder
   alertPush?: Prisma.SortOrder
+  webhookEnabled?: Prisma.SortOrder
+  webhookPlatform?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   failureThreshold?: Prisma.SortOrder
   consecutiveFailures?: Prisma.SortOrder
   alertSent?: Prisma.SortOrder
@@ -652,12 +718,19 @@ export type ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServerMonitorConfigUpdateToOneWithWhereWithoutServerInput, Prisma.ServerMonitorConfigUpdateWithoutServerInput>, Prisma.ServerMonitorConfigUncheckedUpdateWithoutServerInput>
 }
 
+export type NullableEnumWebhookPlatformFieldUpdateOperationsInput = {
+  set?: $Enums.WebhookPlatform | null
+}
+
 export type ServerMonitorConfigCreateWithoutUserInput = {
   id?: string
   enabled?: boolean
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -675,6 +748,9 @@ export type ServerMonitorConfigUncheckedCreateWithoutUserInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -721,6 +797,9 @@ export type ServerMonitorConfigScalarWhereInput = {
   checkIntervalMinutes?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertEmail?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
   alertPush?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookEnabled?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
+  webhookPlatform?: Prisma.EnumWebhookPlatformNullableFilter<"ServerMonitorConfig"> | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.StringNullableFilter<"ServerMonitorConfig"> | string | null
   failureThreshold?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   consecutiveFailures?: Prisma.IntFilter<"ServerMonitorConfig"> | number
   alertSent?: Prisma.BoolFilter<"ServerMonitorConfig"> | boolean
@@ -736,6 +815,9 @@ export type ServerMonitorConfigCreateWithoutServerInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -753,6 +835,9 @@ export type ServerMonitorConfigUncheckedCreateWithoutServerInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -784,6 +869,9 @@ export type ServerMonitorConfigUpdateWithoutServerInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -801,6 +889,9 @@ export type ServerMonitorConfigUncheckedUpdateWithoutServerInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -817,6 +908,9 @@ export type ServerMonitorConfigCreateManyUserInput = {
   checkIntervalMinutes?: number
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: $Enums.WebhookPlatform | null
+  webhookUrl?: string | null
   failureThreshold?: number
   consecutiveFailures?: number
   alertSent?: boolean
@@ -832,6 +926,9 @@ export type ServerMonitorConfigUpdateWithoutUserInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -849,6 +946,9 @@ export type ServerMonitorConfigUncheckedUpdateWithoutUserInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -865,6 +965,9 @@ export type ServerMonitorConfigUncheckedUpdateManyWithoutUserInput = {
   checkIntervalMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   alertEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   alertPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  webhookPlatform?: Prisma.NullableEnumWebhookPlatformFieldUpdateOperationsInput | $Enums.WebhookPlatform | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   consecutiveFailures?: Prisma.IntFieldUpdateOperationsInput | number
   alertSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -884,6 +987,9 @@ export type ServerMonitorConfigSelect<ExtArgs extends runtime.Types.Extensions.I
   checkIntervalMinutes?: boolean
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: boolean
+  webhookUrl?: boolean
   failureThreshold?: boolean
   consecutiveFailures?: boolean
   alertSent?: boolean
@@ -903,6 +1009,9 @@ export type ServerMonitorConfigSelectCreateManyAndReturn<ExtArgs extends runtime
   checkIntervalMinutes?: boolean
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: boolean
+  webhookUrl?: boolean
   failureThreshold?: boolean
   consecutiveFailures?: boolean
   alertSent?: boolean
@@ -922,6 +1031,9 @@ export type ServerMonitorConfigSelectUpdateManyAndReturn<ExtArgs extends runtime
   checkIntervalMinutes?: boolean
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: boolean
+  webhookUrl?: boolean
   failureThreshold?: boolean
   consecutiveFailures?: boolean
   alertSent?: boolean
@@ -941,6 +1053,9 @@ export type ServerMonitorConfigSelectScalar = {
   checkIntervalMinutes?: boolean
   alertEmail?: boolean
   alertPush?: boolean
+  webhookEnabled?: boolean
+  webhookPlatform?: boolean
+  webhookUrl?: boolean
   failureThreshold?: boolean
   consecutiveFailures?: boolean
   alertSent?: boolean
@@ -950,7 +1065,7 @@ export type ServerMonitorConfigSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ServerMonitorConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "userId" | "enabled" | "checkIntervalMinutes" | "alertEmail" | "alertPush" | "failureThreshold" | "consecutiveFailures" | "alertSent" | "lastCheckedAt" | "lastStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["serverMonitorConfig"]>
+export type ServerMonitorConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "userId" | "enabled" | "checkIntervalMinutes" | "alertEmail" | "alertPush" | "webhookEnabled" | "webhookPlatform" | "webhookUrl" | "failureThreshold" | "consecutiveFailures" | "alertSent" | "lastCheckedAt" | "lastStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["serverMonitorConfig"]>
 export type ServerMonitorConfigInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -978,6 +1093,9 @@ export type $ServerMonitorConfigPayload<ExtArgs extends runtime.Types.Extensions
     checkIntervalMinutes: number
     alertEmail: boolean
     alertPush: boolean
+    webhookEnabled: boolean
+    webhookPlatform: $Enums.WebhookPlatform | null
+    webhookUrl: string | null
     failureThreshold: number
     consecutiveFailures: number
     alertSent: boolean
@@ -1417,6 +1535,9 @@ export interface ServerMonitorConfigFieldRefs {
   readonly checkIntervalMinutes: Prisma.FieldRef<"ServerMonitorConfig", 'Int'>
   readonly alertEmail: Prisma.FieldRef<"ServerMonitorConfig", 'Boolean'>
   readonly alertPush: Prisma.FieldRef<"ServerMonitorConfig", 'Boolean'>
+  readonly webhookEnabled: Prisma.FieldRef<"ServerMonitorConfig", 'Boolean'>
+  readonly webhookPlatform: Prisma.FieldRef<"ServerMonitorConfig", 'WebhookPlatform'>
+  readonly webhookUrl: Prisma.FieldRef<"ServerMonitorConfig", 'String'>
   readonly failureThreshold: Prisma.FieldRef<"ServerMonitorConfig", 'Int'>
   readonly consecutiveFailures: Prisma.FieldRef<"ServerMonitorConfig", 'Int'>
   readonly alertSent: Prisma.FieldRef<"ServerMonitorConfig", 'Boolean'>

@@ -30,6 +30,15 @@ export const ConnectionStatus = {
 export type ConnectionStatus = (typeof ConnectionStatus)[keyof typeof ConnectionStatus]
 
 
+export const WebhookPlatform = {
+  SLACK: 'SLACK',
+  DISCORD: 'DISCORD',
+  GENERIC: 'GENERIC'
+} as const
+
+export type WebhookPlatform = (typeof WebhookPlatform)[keyof typeof WebhookPlatform]
+
+
 export const TwoFactorMethod = {
   NONE: 'NONE',
   TOTP: 'TOTP',

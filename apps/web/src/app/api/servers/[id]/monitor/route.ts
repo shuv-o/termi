@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { prisma } from '@/lib/db';
+import { encryptField } from '@/lib/crypto/crypto';
+import { validateHost } from '@/lib/security/ssrf';
 import {
     validateBody,
     successResponse,
@@ -33,8 +35,21 @@ const monitorSchema = z.object({
         .optional(),
     alertEmail: z.boolean().optional(),
     alertPush: z.boolean().optional(),
+    webhookEnabled: z.boolean().optional(),
+    webhookPlatform: z.enum(['SLACK', 'DISCORD', 'GENERIC']).optional(),
+    // Omitted/blank = leave the stored webhook URL unchanged, same convention
+    // as the server-credential password field.
+    webhookUrl: z.string().url().max(500).optional(),
     failureThreshold: z.number().int().min(1).max(10).optional(),
 });
+
+/** Strips the (encrypted) webhookUrl before it ever reaches the client. */
+function toClientConfig<T extends { webhookUrl: string | null }>(
+    config: T,
+): Omit<T, 'webhookUrl'> & { webhookConfigured: boolean } {
+    const { webhookUrl, ...rest } = config;
+    return { ...rest, webhookConfigured: !!webhookUrl };
+}
 
 export async function GET(_request: Request, { params }: RouteParams) {
     const user = await getCurrentUser();
@@ -52,6 +67,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
             checkIntervalMinutes: true,
             alertEmail: true,
             alertPush: true,
+            webhookEnabled: true,
+            webhookPlatform: true,
+            webhookUrl: true,
             failureThreshold: true,
             consecutiveFailures: true,
             alertSent: true,
@@ -60,7 +78,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         },
     });
 
-    return successResponse({ config });
+    return successResponse({ config: config ? toClientConfig(config) : null });
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
@@ -76,6 +94,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     if ('error' in result) return result.error;
 
     const data = result.data;
+
+    if (data.webhookUrl) {
+        let hostname: string;
+        try {
+            hostname = new URL(data.webhookUrl).hostname;
+        } catch {
+            return errorResponse('Invalid webhook URL', 400);
+        }
+        const hostCheck = await validateHost(hostname);
+        if (!hostCheck.valid) {
+            return errorResponse(hostCheck.error || 'Webhook URL is not allowed', 400);
+        }
+    }
+
+    const encryptedWebhookUrl = data.webhookUrl ? encryptField(data.webhookUrl) : undefined;
 
     try {
         // Read existing config to detect a toggle change
@@ -107,6 +140,11 @@ export async function POST(request: Request, { params }: RouteParams) {
                 }),
                 ...(data.alertEmail !== undefined && { alertEmail: data.alertEmail }),
                 ...(data.alertPush !== undefined && { alertPush: data.alertPush }),
+                ...(data.webhookEnabled !== undefined && { webhookEnabled: data.webhookEnabled }),
+                ...(data.webhookPlatform !== undefined && {
+                    webhookPlatform: data.webhookPlatform,
+                }),
+                ...(encryptedWebhookUrl !== undefined && { webhookUrl: encryptedWebhookUrl }),
                 ...(data.failureThreshold !== undefined && {
                     failureThreshold: data.failureThreshold,
                 }),
@@ -119,6 +157,9 @@ export async function POST(request: Request, { params }: RouteParams) {
                 checkIntervalMinutes: data.checkIntervalMinutes ?? 5,
                 alertEmail: data.alertEmail ?? true,
                 alertPush: data.alertPush ?? true,
+                webhookEnabled: data.webhookEnabled ?? false,
+                webhookPlatform: data.webhookPlatform,
+                webhookUrl: encryptedWebhookUrl,
                 failureThreshold: data.failureThreshold ?? 3,
                 // New configs always start with clean state
                 consecutiveFailures: 0,
@@ -129,6 +170,9 @@ export async function POST(request: Request, { params }: RouteParams) {
                 checkIntervalMinutes: true,
                 alertEmail: true,
                 alertPush: true,
+                webhookEnabled: true,
+                webhookPlatform: true,
+                webhookUrl: true,
                 failureThreshold: true,
                 consecutiveFailures: true,
                 alertSent: true,
@@ -137,7 +181,7 @@ export async function POST(request: Request, { params }: RouteParams) {
             },
         });
 
-        return successResponse({ config });
+        return successResponse({ config: toClientConfig(config) });
     } catch (err) {
         console.error('[Monitor] Failed to save config:', err);
         return errorResponse('Failed to save monitoring configuration', 500);

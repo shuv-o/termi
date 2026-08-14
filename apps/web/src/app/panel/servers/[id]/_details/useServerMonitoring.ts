@@ -17,6 +17,9 @@ export function useServerMonitoring(id: string) {
         checkIntervalMinutes: 5,
         alertEmail: true,
         alertPush: true,
+        webhookEnabled: false,
+        webhookPlatform: 'SLACK',
+        webhookUrl: '',
         failureThreshold: 3,
     });
 
@@ -41,6 +44,10 @@ export function useServerMonitoring(id: string) {
                     checkIntervalMinutes: cfg.checkIntervalMinutes as CheckInterval,
                     alertEmail: cfg.alertEmail,
                     alertPush: cfg.alertPush,
+                    webhookEnabled: cfg.webhookEnabled,
+                    webhookPlatform: cfg.webhookPlatform ?? 'SLACK',
+                    // Never prefilled — the server never sends the stored URL back.
+                    webhookUrl: '',
                     failureThreshold: cfg.failureThreshold,
                 });
             }
@@ -71,13 +78,21 @@ export function useServerMonitoring(id: string) {
     const save = useCallback(async () => {
         setSaving(true);
         try {
+            // A blank webhookUrl means "leave it as-is" — omit it entirely so
+            // the API doesn't overwrite an already-stored URL with nothing.
+            const { webhookUrl, ...rest } = form;
+            const body = { ...rest, ...(webhookUrl.trim() && { webhookUrl: webhookUrl.trim() }) };
+
             const res = await fetch(`/api/servers/${id}/monitor`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify(body),
             });
             const data = await res.json();
-            if (data.success) setMonitorConfig(data.data.config);
+            if (data.success) {
+                setMonitorConfig(data.data.config);
+                setForm((f) => ({ ...f, webhookUrl: '' }));
+            }
         } finally {
             setSaving(false);
         }

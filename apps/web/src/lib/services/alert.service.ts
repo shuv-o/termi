@@ -7,6 +7,7 @@
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
 import { sendPushToUser } from './push.service';
+import { sendWebhookAlert, type WebhookPlatform } from './webhook.service';
 import { decrypt, deserializeEncrypted } from '@/lib/crypto/crypto';
 
 /** `server.host` is AES-256-GCM encrypted at rest — decrypt before display. */
@@ -18,6 +19,28 @@ function decryptServerAddr(server: { host: string; port: number }): string {
         console.error('[Alert] Failed to decrypt server host:', err);
         return `(unknown host):${server.port}`;
     }
+}
+
+/** `webhookUrl` is AES-256-GCM encrypted at rest, same as credential fields. */
+function decryptWebhookUrl(encrypted: string): string | null {
+    try {
+        return decrypt(deserializeEncrypted(encrypted));
+    } catch (err) {
+        console.error('[Alert] Failed to decrypt webhook URL:', err);
+        return null;
+    }
+}
+
+async function fireWebhook(
+    config: { webhookEnabled: boolean; webhookUrl: string | null; webhookPlatform: WebhookPlatform | null },
+    payload: Parameters<typeof sendWebhookAlert>[2],
+): Promise<void> {
+    if (!config.webhookEnabled || !config.webhookUrl || !config.webhookPlatform) return;
+
+    const webhookUrl = decryptWebhookUrl(config.webhookUrl);
+    if (!webhookUrl) return;
+
+    await sendWebhookAlert(webhookUrl, config.webhookPlatform, payload);
 }
 
 // MAILER (reuses SMTP config from email-otp)
@@ -101,6 +124,14 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
             `,
         );
     }
+
+    await fireWebhook(config, {
+        status: 'down',
+        serverId,
+        serverName,
+        serverAddr,
+        detail: `failed ${config.failureThreshold} consecutive health checks`,
+    });
 }
 
 export async function sendServerUpAlert(serverId: string): Promise<void> {
@@ -152,4 +183,12 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
             `,
         );
     }
+
+    await fireWebhook(config, {
+        status: 'up',
+        serverId,
+        serverName,
+        serverAddr,
+        detail: 'is back online',
+    });
 }

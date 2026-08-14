@@ -2054,6 +2054,9 @@ export const ServerMonitorConfigScalarFieldEnum = {
   checkIntervalMinutes: 'checkIntervalMinutes',
   alertEmail: 'alertEmail',
   alertPush: 'alertPush',
+  webhookEnabled: 'webhookEnabled',
+  webhookPlatform: 'webhookPlatform',
+  webhookUrl: 'webhookUrl',
   failureThreshold: 'failureThreshold',
   consecutiveFailures: 'consecutiveFailures',
   alertSent: 'alertSent',
@@ -2387,6 +2390,20 @@ export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Bytes[]'
  */
 export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+/**
+ * Reference to a field of type 'WebhookPlatform'
+ */
+export type EnumWebhookPlatformFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WebhookPlatform'>
+    
+
+
+/**
+ * Reference to a field of type 'WebhookPlatform[]'
+ */
+export type ListEnumWebhookPlatformFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WebhookPlatform[]'>
     
 
 

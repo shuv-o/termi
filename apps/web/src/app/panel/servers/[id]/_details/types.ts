@@ -13,11 +13,17 @@ export interface ServerInfo {
     group: { id: string; name: string; color: string | null } | null;
 }
 
+export type WebhookPlatform = 'SLACK' | 'DISCORD' | 'GENERIC';
+
 export interface MonitorConfig {
     enabled: boolean;
     checkIntervalMinutes: number;
     alertEmail: boolean;
     alertPush: boolean;
+    webhookEnabled: boolean;
+    webhookPlatform: WebhookPlatform | null;
+    /** Whether a webhook URL is already stored — the URL itself is never sent to the client. */
+    webhookConfigured: boolean;
     failureThreshold: number;
     consecutiveFailures: number;
     alertSent: boolean;
@@ -41,8 +47,18 @@ export interface MonitorFormValues {
     checkIntervalMinutes: CheckInterval;
     alertEmail: boolean;
     alertPush: boolean;
+    webhookEnabled: boolean;
+    webhookPlatform: WebhookPlatform;
+    /** A new URL to save. Blank means "leave the stored webhook unchanged". */
+    webhookUrl: string;
     failureThreshold: number;
 }
+
+export const WEBHOOK_PLATFORMS: { value: WebhookPlatform; label: string }[] = [
+    { value: 'SLACK', label: 'Slack' },
+    { value: 'DISCORD', label: 'Discord' },
+    { value: 'GENERIC', label: 'Generic' },
+];
 
 export const INTERVALS: { value: CheckInterval; label: string }[] = [
     { value: 1, label: 'Every 1 min' },

@@ -8,14 +8,21 @@ import {
     Clock,
     Loader2,
     Mail,
+    Webhook,
     WifiOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { formatRelativeTime } from '@/lib/format';
-import { INTERVALS, type MonitorConfig, type MonitorFormValues } from './types';
+import {
+    INTERVALS,
+    WEBHOOK_PLATFORMS,
+    type MonitorConfig,
+    type MonitorFormValues,
+} from './types';
 
 function AlertChannel({
     icon: Icon,
@@ -218,6 +225,55 @@ export function MonitorSettingsSection({
                         enabled={form.enabled}
                         onChange={(alertPush) => setForm((f) => ({ ...f, alertPush }))}
                     />
+                    <AlertChannel
+                        icon={Webhook}
+                        title="Webhook"
+                        description={
+                            monitorConfig?.webhookConfigured
+                                ? 'Configured — posts to Slack, Discord, or a custom URL'
+                                : 'Post alerts to Slack, Discord, or a custom URL'
+                        }
+                        checked={form.webhookEnabled}
+                        enabled={form.enabled}
+                        onChange={(webhookEnabled) => setForm((f) => ({ ...f, webhookEnabled }))}
+                    />
+                    {form.webhookEnabled && (
+                        <div className="pl-1 space-y-2">
+                            <div className="flex gap-1.5">
+                                {WEBHOOK_PLATFORMS.map((p) => (
+                                    <button
+                                        key={p.value}
+                                        type="button"
+                                        onClick={() =>
+                                            setForm((f) => ({ ...f, webhookPlatform: p.value }))
+                                        }
+                                        disabled={!form.enabled}
+                                        className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-colors ${
+                                            form.webhookPlatform === p.value
+                                                ? 'bg-primary/15 border-primary/40 text-primary'
+                                                : 'border-border text-muted-foreground hover:text-foreground disabled:opacity-40'
+                                        }`}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <Input
+                                type="url"
+                                value={form.webhookUrl}
+                                onChange={(e) =>
+                                    setForm((f) => ({ ...f, webhookUrl: e.target.value }))
+                                }
+                                disabled={!form.enabled}
+                                placeholder={
+                                    monitorConfig?.webhookConfigured
+                                        ? 'Webhook URL set — enter a new one to replace it'
+                                        : 'https://hooks.slack.com/services/...'
+                                }
+                                className="font-mono text-xs"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {monitorConfig?.enabled && <MonitorStatusBanner config={monitorConfig} />}

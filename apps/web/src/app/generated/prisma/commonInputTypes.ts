@@ -382,6 +382,23 @@ export type BytesWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedBytesFilter<$PrismaModel>
 }
 
+export type EnumWebhookPlatformNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.WebhookPlatform | Prisma.EnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel> | $Enums.WebhookPlatform | null
+}
+
+export type EnumWebhookPlatformNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WebhookPlatform | Prisma.EnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumWebhookPlatformNullableWithAggregatesFilter<$PrismaModel> | $Enums.WebhookPlatform | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel>
+}
+
 export type FloatNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
@@ -778,6 +795,23 @@ export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedBytesFilter<$PrismaModel>
   _max?: Prisma.NestedBytesFilter<$PrismaModel>
+}
+
+export type NestedEnumWebhookPlatformNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.WebhookPlatform | Prisma.EnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel> | $Enums.WebhookPlatform | null
+}
+
+export type NestedEnumWebhookPlatformNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WebhookPlatform | Prisma.EnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.WebhookPlatform[] | Prisma.ListEnumWebhookPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumWebhookPlatformNullableWithAggregatesFilter<$PrismaModel> | $Enums.WebhookPlatform | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWebhookPlatformNullableFilter<$PrismaModel>
 }
 
 export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {

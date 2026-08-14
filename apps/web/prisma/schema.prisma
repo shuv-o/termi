@@ -291,6 +291,12 @@ enum ConnectionStatus {
   FAILED
 }
 
+enum WebhookPlatform {
+  SLACK
+  DISCORD
+  GENERIC
+}
+
 enum TwoFactorMethod {
   NONE
   TOTP
@@ -427,6 +433,11 @@ model ServerMonitorConfig {
   // Alert preferences
   alertEmail Boolean @default(true)
   alertPush  Boolean @default(true)
+
+  // Webhook alert (Slack / Discord / generic JSON POST)
+  webhookEnabled  Boolean          @default(false)
+  webhookPlatform WebhookPlatform?
+  webhookUrl      String? // Encrypted
 
   // How many consecutive failures before alerting (default 3)
   failureThreshold Int @default(3)
