@@ -57,8 +57,8 @@ export function QRConnectDialog({
                     </div>
                     <p className="text-sm font-medium text-center">{serverName}</p>
                     <p className="text-xs text-muted-foreground text-center max-w-[260px]">
-                        Scan with your phone&apos;s camera to open this server on mobile. You&apos;ll
-                        need to already be signed in to Termi on that device.
+                        Scan with your phone&apos;s camera to open this server on mobile.
+                        You&apos;ll need to already be signed in to Termi on that device.
                     </p>
                 </div>
             </DialogContent>

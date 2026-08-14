@@ -103,8 +103,8 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
         <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 space-y-2">
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 shrink-0" />
-                Not HTTP — run this once on your own machine to open a local port (requires
-                Node.js 22+):
+                Not HTTP — run this once on your own machine to open a local port (requires Node.js
+                22+):
             </p>
             <pre className="text-[11px] font-mono bg-black/40 text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
                 {result.bridgeScript}
@@ -227,10 +227,19 @@ export function TunnelSessionRowCard({
                             </pre>
                             <div className="flex gap-2">
                                 <CopyTextButton text={script} label="Copy script" />
-                                <Button variant="secondary" size="sm" onClick={() => downloadScript(script)}>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => downloadScript(script)}
+                                >
                                     Download
                                 </Button>
-                                <Button variant="ghost" size="sm" className="gap-1" onClick={onClose}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="gap-1"
+                                    onClick={onClose}
+                                >
                                     <X className="w-3.5 h-3.5" />
                                     Remove
                                 </Button>
@@ -256,7 +265,12 @@ export function TunnelSessionRowCard({
                                         'Get script'
                                     )}
                                 </Button>
-                                <Button variant="ghost" size="sm" className="gap-1" onClick={onClose}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="gap-1"
+                                    onClick={onClose}
+                                >
                                     <X className="w-3.5 h-3.5" />
                                     Remove
                                 </Button>
@@ -270,8 +284,8 @@ export function TunnelSessionRowCard({
                         </div>
                     )}
                     <p className="text-[11px] text-muted-foreground/70">
-                        The token inside a bridge script expires after 5 minutes — fetch a fresh
-                        one rather than reusing an old copy.
+                        The token inside a bridge script expires after 5 minutes — fetch a fresh one
+                        rather than reusing an old copy.
                     </p>
                 </div>
             )}
@@ -316,7 +330,8 @@ export function TunnelSection({
     proxyUrlFor: (row: TunnelSessionRow) => string;
     onRegenerateScript: (row: TunnelSessionRow) => Promise<string | null>;
 }) {
-    const canOpen = remoteHost.trim().length > 0 && Number(remotePort) >= 1 && Number(remotePort) <= 65535;
+    const canOpen =
+        remoteHost.trim().length > 0 && Number(remotePort) >= 1 && Number(remotePort) <= 65535;
 
     return (
         <div>
@@ -348,7 +363,11 @@ export function TunnelSection({
                         disabled={opening}
                     />
                     <Button onClick={onOpen} disabled={opening || !canOpen} className="shrink-0">
-                        {opening ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Create Tunnel'}
+                        {opening ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                            'Create Tunnel'
+                        )}
                     </Button>
                 </div>
 

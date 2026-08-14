@@ -9,7 +9,8 @@ import type { TunnelSessionRow } from '../../servers/[id]/_details/useTunnels';
 
 function buildProxyUrl(row: TunnelSessionRow): string | null {
     if (!row.serverId) return null;
-    const hostParam = row.remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(row.remoteHost)}` : '';
+    const hostParam =
+        row.remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(row.remoteHost)}` : '';
     return `${window.location.origin}/tunnel/${row.serverId}/${row.remotePort}${hostParam}`;
 }
 

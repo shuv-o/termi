@@ -160,7 +160,8 @@ export async function POST(request: Request) {
         });
 
         if (probe.isHttp) {
-            const hostParam = remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(remoteHost)}` : '';
+            const hostParam =
+                remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(remoteHost)}` : '';
             const proxyUrl = `${getSiteUrl()}/tunnel/${serverId}/${remotePort}${hostParam}`;
             return successResponse({ isHttp: true, proxyUrl }, 201);
         }

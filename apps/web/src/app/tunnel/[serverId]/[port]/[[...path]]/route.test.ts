@@ -52,9 +52,9 @@ describe('scopeCookiePath', () => {
     });
 
     it('preserves other cookie attributes untouched', () => {
-        expect(scopeCookiePath('session=abc; Path=/app; HttpOnly; Secure', '/tunnel/srv1/8080/')).toBe(
-            'session=abc; Path=/tunnel/srv1/8080/; HttpOnly; Secure',
-        );
+        expect(
+            scopeCookiePath('session=abc; Path=/app; HttpOnly; Secure', '/tunnel/srv1/8080/'),
+        ).toBe('session=abc; Path=/tunnel/srv1/8080/; HttpOnly; Secure');
     });
 });
 

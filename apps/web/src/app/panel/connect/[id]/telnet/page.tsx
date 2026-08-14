@@ -163,11 +163,6 @@ export default function TelnetConnectionPage() {
             {/* Header */}
             <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
                 <div className="flex items-center gap-2 min-w-0">
-                    <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
-                        <Link href="/panel">
-                            <ArrowLeft className="w-4 h-4" />
-                        </Link>
-                    </Button>
                     <span className="font-medium text-sm truncate max-w-[120px] sm:max-w-xs">
                         {server?.name}
                     </span>

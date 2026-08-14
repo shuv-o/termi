@@ -1,16 +1,16 @@
 'use client';
 
-import {useState} from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import {ArrowLeft, Pencil, QrCode} from 'lucide-react';
-import {Button} from '@/components/ui/button';
-import {Card} from '@/components/ui/card';
-import {formatRelativeTime} from '@/lib/format';
-import {ServerStatusPill} from '@/app/panel/_dashboard/StatusIndicator';
-import {QRConnectDialog} from './QRConnectDialog';
-import {protocolColors, protocolIcons, type MonitorConfig, type ServerInfo} from './types';
+import { ArrowLeft, Pencil, QrCode } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { formatRelativeTime } from '@/lib/format';
+import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
+import { QRConnectDialog } from './QRConnectDialog';
+import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } from './types';
 
-function StatPill({label, value, sub}: { label: string; value: string; sub?: string }) {
+function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
         <div className="flex flex-col gap-0.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
             <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
@@ -24,9 +24,9 @@ function StatPill({label, value, sub}: { label: string; value: string; sub?: str
 
 /** Back button, name, live online badge and the edit link. */
 export function ServerHeader({
-                                 server,
-                                 isOnline,
-                             }: {
+    server,
+    isOnline,
+}: {
     server: ServerInfo;
     /** `null` while no health check has been recorded yet. */
     isOnline: boolean | null;
@@ -45,7 +45,6 @@ export function ServerHeader({
                     )}
                 </div>
                 {server.protocol} server
-
                 {server.description && (
                     <p className="text-sm text-muted-foreground mt-0.5 truncate">
                         {server.description}
@@ -56,13 +55,13 @@ export function ServerHeader({
             {/* Back button  if desktop */}
             <Button variant="secondary" size="sm" asChild className="hidden md:flex">
                 <Link href="/panel">
-                    <ArrowLeft className="w-4 h-4"/> Back
+                    <ArrowLeft className="w-4 h-4" /> Back
                 </Link>
             </Button>
 
             <Button variant="secondary" size="sm" asChild className="gap-1.5">
                 <Link href={`/panel/servers/${server.id}/edit`}>
-                    <Pencil className="w-3.5 h-3.5"/>
+                    <Pencil className="w-3.5 h-3.5" />
                     Edit
                 </Link>
             </Button>
@@ -72,12 +71,12 @@ export function ServerHeader({
 
 /** Protocol/host chips, at-a-glance stat pills and the connect button. */
 export function ServerInfoCard({
-                                   server,
-                                   monitorConfig,
-                                   uptimePct,
-                                   checkCount,
-                                   latencyMs,
-                               }: {
+    server,
+    monitorConfig,
+    uptimePct,
+    checkCount,
+    latencyMs,
+}: {
     server: ServerInfo;
     monitorConfig: MonitorConfig | null;
     uptimePct: number | null;
@@ -94,7 +93,7 @@ export function ServerInfoCard({
                 <div
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${protoColor}`}
                 >
-                    <ProtoIcon className="w-3.5 h-3.5"/>
+                    <ProtoIcon className="w-3.5 h-3.5" />
                     {server.protocol}
                 </div>
                 <span className="font-mono text-sm text-foreground/80">
@@ -116,7 +115,7 @@ export function ServerInfoCard({
             </div>
 
             <div className="flex flex-wrap gap-2">
-                <StatPill label="Last Used" value={formatRelativeTime(server.lastUsedAt)}/>
+                <StatPill label="Last Used" value={formatRelativeTime(server.lastUsedAt)} />
                 {monitorConfig?.lastCheckedAt && (
                     <StatPill
                         label="Last Check"
@@ -130,7 +129,7 @@ export function ServerInfoCard({
                         sub={`last ${checkCount} checks`}
                     />
                 )}
-                {latencyMs != null && <StatPill label="Latency" value={`${latencyMs}ms`}/>}
+                {latencyMs != null && <StatPill label="Latency" value={`${latencyMs}ms`} />}
                 {monitorConfig && (
                     <StatPill
                         label="Monitoring"
@@ -147,7 +146,7 @@ export function ServerInfoCard({
             <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
                 <Button size="sm" asChild className="gap-1.5">
                     <Link href={`/panel/connect/${server.id}/${server.protocol.toLowerCase()}`}>
-                        <ProtoIcon className="w-3.5 h-3.5"/>
+                        <ProtoIcon className="w-3.5 h-3.5" />
                         Connect via {server.protocol}
                     </Link>
                 </Button>
@@ -157,7 +156,7 @@ export function ServerInfoCard({
                     className="gap-1.5"
                     onClick={() => setShowQR(true)}
                 >
-                    <QrCode className="w-3.5 h-3.5"/>
+                    <QrCode className="w-3.5 h-3.5" />
                     QR
                 </Button>
             </div>

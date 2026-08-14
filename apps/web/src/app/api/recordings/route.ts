@@ -20,7 +20,10 @@ import {
 // A little over the gateway's 5 MB cap, to leave room for JSON overhead.
 const createRecordingSchema = z.object({
     serverId: z.string().min(1),
-    content: z.string().min(1).max(6 * 1024 * 1024),
+    content: z
+        .string()
+        .min(1)
+        .max(6 * 1024 * 1024),
     durationSec: z.number().int().min(0),
     sizeBytes: z.number().int().min(0),
 });

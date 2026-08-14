@@ -76,9 +76,7 @@ function RecordingRow({
 }
 
 export function RecordingsPanel() {
-    const { data, mutate } = useCachedFetch<{ recordings: RecordingSummary[] }>(
-        '/api/recordings',
-    );
+    const { data, mutate } = useCachedFetch<{ recordings: RecordingSummary[] }>('/api/recordings');
     const recordings = data?.recordings ?? [];
 
     const [playingId, setPlayingId] = useState<string | null>(null);

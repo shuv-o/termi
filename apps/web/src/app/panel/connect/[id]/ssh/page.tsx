@@ -312,11 +312,6 @@ export default function SSHConnectionPage() {
                 }}
             >
                 <div className="flex items-center gap-2 min-w-0">
-                    <Button variant="ghost" size="icon" asChild className="shrink-0 h-7 w-7">
-                        <Link href="/panel">
-                            <ArrowLeft className="w-4 h-4" />
-                        </Link>
-                    </Button>
                     <span className="font-medium text-sm truncate max-w-[120px] sm:max-w-xs">
                         {server?.name}
                     </span>
@@ -363,7 +358,9 @@ export default function SSHConnectionPage() {
                         size="icon"
                         className="h-7 w-7"
                         onClick={toggleRecording}
-                        title={recordingTabId === activeId ? 'Stop recording' : 'Record this session'}
+                        title={
+                            recordingTabId === activeId ? 'Stop recording' : 'Record this session'
+                        }
                     >
                         <Circle
                             className={`w-3.5 h-3.5 ${
@@ -508,11 +505,7 @@ export default function SSHConnectionPage() {
                                         }}
                                         onRecordingChange={(recording) =>
                                             setRecordingTabId((prev) =>
-                                                recording
-                                                    ? tab.id
-                                                    : prev === tab.id
-                                                      ? null
-                                                      : prev,
+                                                recording ? tab.id : prev === tab.id ? null : prev,
                                             )
                                         }
                                     />

@@ -75,7 +75,9 @@ interface ElectronTunnelAPI {
         serverId: string;
         token: string;
         localPort?: number;
-    }) => Promise<{ success: true; id: string; localPort: number } | { success: false; error: string }>;
+    }) => Promise<
+        { success: true; id: string; localPort: number } | { success: false; error: string }
+    >;
     close: (id: string) => void;
 }
 

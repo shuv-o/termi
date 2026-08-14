@@ -32,7 +32,11 @@ function decryptWebhookUrl(encrypted: string): string | null {
 }
 
 async function fireWebhook(
-    config: { webhookEnabled: boolean; webhookUrl: string | null; webhookPlatform: WebhookPlatform | null },
+    config: {
+        webhookEnabled: boolean;
+        webhookUrl: string | null;
+        webhookPlatform: WebhookPlatform | null;
+    },
     payload: Parameters<typeof sendWebhookAlert>[2],
 ): Promise<void> {
     if (!config.webhookEnabled || !config.webhookUrl || !config.webhookPlatform) return;

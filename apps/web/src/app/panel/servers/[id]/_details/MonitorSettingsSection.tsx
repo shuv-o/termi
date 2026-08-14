@@ -17,12 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { formatRelativeTime } from '@/lib/format';
-import {
-    INTERVALS,
-    WEBHOOK_PLATFORMS,
-    type MonitorConfig,
-    type MonitorFormValues,
-} from './types';
+import { INTERVALS, WEBHOOK_PLATFORMS, type MonitorConfig, type MonitorFormValues } from './types';
 
 function AlertChannel({
     icon: Icon,

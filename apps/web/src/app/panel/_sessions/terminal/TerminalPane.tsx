@@ -164,7 +164,9 @@ export function TerminalPane({
         const ws = wsRefs.current.get(activeShellId);
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
         ws.send(
-            JSON.stringify({ type: recordingShellId === activeShellId ? 'record-stop' : 'record-start' }),
+            JSON.stringify({
+                type: recordingShellId === activeShellId ? 'record-stop' : 'record-start',
+            }),
         );
     };
 

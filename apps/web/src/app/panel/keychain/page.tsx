@@ -199,7 +199,10 @@ export default function KeychainPage() {
                                 : 'Save credentials once, reuse them across servers'}
                         </p>
                     </div>
-                    <Button onClick={openCreate} className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0">
+                    <Button
+                        onClick={openCreate}
+                        className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0"
+                    >
                         <Plus className="w-4 h-4" />
                         <span className="hidden sm:inline">New Entry</span>
                         <span className="sm:hidden">New</span>
@@ -216,7 +219,10 @@ export default function KeychainPage() {
                 {loading ? (
                     <div className="rounded-2xl border border-border bg-card/30 divide-y divide-border/60 overflow-hidden">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5">
+                            <div
+                                key={i}
+                                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5"
+                            >
                                 <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
                                 <div className="flex-1 space-y-1.5">
                                     <Skeleton className="h-3.5 w-32" />

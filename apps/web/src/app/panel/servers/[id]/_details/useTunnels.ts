@@ -68,7 +68,9 @@ export function useTunnels(serverId: string, serverName: string) {
 
     const refreshSessions = useCallback(async () => {
         try {
-            const res = await fetch(`/api/tunnel-sessions?serverId=${encodeURIComponent(serverId)}`);
+            const res = await fetch(
+                `/api/tunnel-sessions?serverId=${encodeURIComponent(serverId)}`,
+            );
             const data = await res.json();
             if (data.success) setActiveSessions(data.data.tunnels);
         } catch {

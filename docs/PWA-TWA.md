@@ -12,8 +12,8 @@ Termi is a fully installable PWA. This doc covers the two distribution paths:
 
 ## What's already wired
 
-| Piece                   | Location                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------ |
+| Piece                   | Location                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
 | Web App Manifest        | `../apps/web/public/manifest.json` (maskable icons, shortcuts, `handle_links`, `launch_handler`) |
 | Service worker          | `../apps/web/public/sw.js` (offline cache + web push)                                            |
 | SW registration         | `../apps/web/src/app/layout.tsx` (inline, nonce'd)                                               |

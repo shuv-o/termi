@@ -283,9 +283,17 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                             return;
                         }
 
-                        const html = injectBaseTag(Buffer.concat(chunks).toString('utf8'), basePath);
+                        const html = injectBaseTag(
+                            Buffer.concat(chunks).toString('utf8'),
+                            basePath,
+                        );
                         resHeaders.delete('content-length');
-                        finish(new Response(Buffer.from(html, 'utf8'), { status, headers: resHeaders }));
+                        finish(
+                            new Response(Buffer.from(html, 'utf8'), {
+                                status,
+                                headers: resHeaders,
+                            }),
+                        );
                     });
                 },
             );

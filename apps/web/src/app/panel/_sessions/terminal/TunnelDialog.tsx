@@ -37,8 +37,8 @@ export function TunnelDialog({
                 </DialogHeader>
 
                 <p className="text-xs text-muted-foreground">
-                    Reach a port on this server&apos;s own network without opening a second
-                    session — like <code className="font-mono">ssh -L</code>.
+                    Reach a port on this server&apos;s own network without opening a second session
+                    — like <code className="font-mono">ssh -L</code>.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-2">

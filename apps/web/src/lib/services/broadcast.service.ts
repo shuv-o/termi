@@ -83,9 +83,7 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
         let poolKey: string | undefined;
         let released = false;
 
-        const done = (
-            partial: Omit<BroadcastResult, 'serverId' | 'serverName' | 'durationMs'>,
-        ) => {
+        const done = (partial: Omit<BroadcastResult, 'serverId' | 'serverName' | 'durationMs'>) => {
             if (!released) {
                 released = true;
                 if (poolKey) sshPool.release(poolKey);

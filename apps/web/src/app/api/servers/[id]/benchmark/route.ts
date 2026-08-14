@@ -10,12 +10,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { runBenchmark } from '@/lib/services/benchmark.service';
 import { prisma } from '@/lib/db';
-import {
-    successResponse,
-    unauthorizedResponse,
-    notFoundResponse,
-    errorResponse,
-} from '@/lib/api';
+import { successResponse, unauthorizedResponse, notFoundResponse, errorResponse } from '@/lib/api';
 
 interface RouteParams {
     params: Promise<{ id: string }>;

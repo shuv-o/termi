@@ -650,7 +650,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 // close/error listeners further down ever get attached.
                 if (timeoutId) clearTimeout(timeoutId);
                 nonSshConnections.delete(ws);
-                ws.send(JSON.stringify({ type: 'error', message: 'Too many concurrent tunnels open' }));
+                ws.send(
+                    JSON.stringify({ type: 'error', message: 'Too many concurrent tunnels open' }),
+                );
                 ws.close(4029, 'Too Many Requests');
                 return;
             }

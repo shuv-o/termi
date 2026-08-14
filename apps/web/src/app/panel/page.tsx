@@ -232,10 +232,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2 shrink-0">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        title="Import or export servers"
-                                    >
+                                    <Button variant="outline" title="Import or export servers">
                                         <ArrowUpDown className="w-4 h-4" />
                                         <span className="hidden sm:inline">Transfer</span>
                                         <ChevronDown className="w-3.5 h-3.5 opacity-60" />

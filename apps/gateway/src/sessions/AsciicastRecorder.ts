@@ -41,10 +41,7 @@ export class AsciicastRecorder {
     append(data: Buffer): void {
         if (this.full) return;
 
-        if (
-            this.bytes >= MAX_BYTES ||
-            Date.now() - this.startedAt >= MAX_DURATION_MS
-        ) {
+        if (this.bytes >= MAX_BYTES || Date.now() - this.startedAt >= MAX_DURATION_MS) {
             this.full = true;
             return;
         }

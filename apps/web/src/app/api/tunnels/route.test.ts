@@ -33,12 +33,16 @@ describe('buildBridgeScript', () => {
     it('embeds the gateway WS URL with protocol=tunnel and the serverId', () => {
         const script = buildBridgeScript({ ...baseOpts, localPort: 5432 });
         expect(script).toContain(
-            "const WS_URL = \"ws://localhost:22081/connect?protocol=tunnel&serverId=srv1\";",
+            'const WS_URL = "ws://localhost:22081/connect?protocol=tunnel&serverId=srv1";',
         );
     });
 
     it('embeds the token as an opaque string, not interpolated into other code', () => {
-        const script = buildBridgeScript({ ...baseOpts, localPort: 5432, token: 'abc"; evil() //' });
+        const script = buildBridgeScript({
+            ...baseOpts,
+            localPort: 5432,
+            token: 'abc"; evil() //',
+        });
         expect(script).toContain(JSON.stringify('abc"; evil() //'));
     });
 

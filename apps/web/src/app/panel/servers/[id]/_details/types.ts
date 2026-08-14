@@ -190,4 +190,3 @@ export function scoreBarColor(score: number): string {
     if (score >= 400) return 'bg-amber-400';
     return 'bg-red-400';
 }
-
