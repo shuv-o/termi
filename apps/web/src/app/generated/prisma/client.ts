@@ -107,6 +107,11 @@ export type ServerHealthRecord = Prisma.ServerHealthRecordModel
  */
 export type BenchmarkRun = Prisma.BenchmarkRunModel
 /**
+ * Model Recording
+ * 
+ */
+export type Recording = Prisma.RecordingModel
+/**
  * Model RecoveryCode
  * 
  */

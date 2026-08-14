@@ -1,5 +1,6 @@
 import type { WebSocket } from 'ws';
 import type { SSHHandler } from '../handlers/ssh.js';
+import type { AsciicastRecorder } from './AsciicastRecorder.js';
 import type { RingBuffer } from './RingBuffer.js';
 
 export interface PersistentSession {
@@ -19,6 +20,9 @@ export interface PersistentSession {
      */
     detachedAt: number | null;
     isClosing: boolean;
+    /** Set while a recording is active. Lives on the session (not the WS) so it
+     *  survives tab reattachment, same as the ring buffer. */
+    recording: AsciicastRecorder | null;
 }
 
 /**

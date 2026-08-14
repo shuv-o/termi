@@ -17,6 +17,7 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         attachedWs: null,
         detachedAt: null,
         isClosing: false,
+        recording: null,
         ...overrides,
     };
 }

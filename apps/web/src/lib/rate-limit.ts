@@ -141,3 +141,8 @@ export function broadcastCommandRateLimit(userId: string): RateLimitResult {
 export function tunnelCreateRateLimit(userId: string): RateLimitResult {
     return rateLimit(`tunnel-create:${userId}`, 20, 10 * 60 * 1000);
 }
+
+/** 20 recording saves per hour per user — each stores up to 5 MB of text. */
+export function recordingCreateRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`recording-create:${userId}`, 20, 60 * 60 * 1000);
+}

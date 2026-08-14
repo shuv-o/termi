@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    Circle,
     FolderOpen,
     Keyboard,
     KeyRound,
@@ -93,6 +94,8 @@ export function TerminalPaneHeader({
     onToggleToolbar,
     showKeyboard,
     onToggleKeyboard,
+    isRecording,
+    onToggleRecording,
     onClose,
 }: {
     session: Session;
@@ -109,6 +112,8 @@ export function TerminalPaneHeader({
     onToggleToolbar: () => void;
     showKeyboard: boolean;
     onToggleKeyboard: () => void;
+    isRecording: boolean;
+    onToggleRecording: () => void;
     onClose: () => void;
 }) {
     const showShellTabs =
@@ -174,6 +179,21 @@ export function TerminalPaneHeader({
                             title="Reconnect shell"
                         >
                             <RotateCcw className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onToggleRecording}
+                            className="h-7 w-7"
+                            title={isRecording ? 'Stop recording' : 'Record this session'}
+                        >
+                            <Circle
+                                className={`w-3.5 h-3.5 ${
+                                    isRecording
+                                        ? 'fill-red-500 text-red-500 animate-pulse'
+                                        : 'text-muted-foreground'
+                                }`}
+                            />
                         </Button>
                         <Button
                             variant={showToolbar ? 'default' : 'ghost'}

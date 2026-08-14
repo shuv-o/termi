@@ -6,6 +6,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
     ArrowLeft,
+    Circle,
     Maximize2,
     Minimize2,
     RotateCcw,
@@ -58,6 +59,7 @@ export default function SSHConnectionPage() {
     const [showToolbar, setShowToolbar] = useState(false);
     const [showFiles, setShowFiles] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [recordingTabId, setRecordingTabId] = useState<string | null>(null);
 
     //   Tabs
     const [tabs, setTabs] = useState<TermTab[]>([]);
@@ -163,6 +165,14 @@ export default function SSHConnectionPage() {
         },
         [fetchToken],
     );
+
+    const toggleRecording = useCallback(() => {
+        const ws = wsRefs.current.get(activeId);
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(
+            JSON.stringify({ type: recordingTabId === activeId ? 'record-stop' : 'record-start' }),
+        );
+    }, [activeId, recordingTabId]);
 
     /** Disconnect everything and leave. */
     const disconnectAll = useCallback(() => {
@@ -351,6 +361,22 @@ export default function SSHConnectionPage() {
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="h-7 w-7"
+                        onClick={toggleRecording}
+                        title={recordingTabId === activeId ? 'Stop recording' : 'Record this session'}
+                    >
+                        <Circle
+                            className={`w-3.5 h-3.5 ${
+                                recordingTabId === activeId
+                                    ? 'fill-red-500 text-red-500 animate-pulse'
+                                    : 'text-muted-foreground'
+                            }`}
+                        />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         className="hidden sm:flex h-7 w-7"
                         onClick={toggleFullscreen}
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
@@ -480,6 +506,15 @@ export default function SSHConnectionPage() {
                                         onReconnectReady={(fn) => {
                                             reconnectFns.current.set(tab.id, fn);
                                         }}
+                                        onRecordingChange={(recording) =>
+                                            setRecordingTabId((prev) =>
+                                                recording
+                                                    ? tab.id
+                                                    : prev === tab.id
+                                                      ? null
+                                                      : prev,
+                                            )
+                                        }
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center h-full text-muted-foreground gap-3">

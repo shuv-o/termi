@@ -397,6 +397,7 @@ export const ModelName = {
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
   BenchmarkRun: 'BenchmarkRun',
+  Recording: 'Recording',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1384,6 +1385,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Recording: {
+      payload: Prisma.$RecordingPayload<ExtArgs>
+      fields: Prisma.RecordingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecordingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecordingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        findFirst: {
+          args: Prisma.RecordingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecordingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        findMany: {
+          args: Prisma.RecordingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>[]
+        }
+        create: {
+          args: Prisma.RecordingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        createMany: {
+          args: Prisma.RecordingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecordingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>[]
+        }
+        delete: {
+          args: Prisma.RecordingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        update: {
+          args: Prisma.RecordingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecordingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecordingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecordingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecordingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingPayload>
+        }
+        aggregate: {
+          args: Prisma.RecordingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecording>
+        }
+        groupBy: {
+          args: Prisma.RecordingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecordingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecordingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecordingCountAggregateOutputType> | number
+        }
+      }
+    }
     RecoveryCode: {
       payload: Prisma.$RecoveryCodePayload<ExtArgs>
       fields: Prisma.RecoveryCodeFieldRefs
@@ -2104,6 +2179,20 @@ export const BenchmarkRunScalarFieldEnum = {
 export type BenchmarkRunScalarFieldEnum = (typeof BenchmarkRunScalarFieldEnum)[keyof typeof BenchmarkRunScalarFieldEnum]
 
 
+export const RecordingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  content: 'content',
+  durationSec: 'durationSec',
+  sizeBytes: 'sizeBytes',
+  createdAt: 'createdAt'
+} as const
+
+export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
+
+
 export const RecoveryCodeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2557,6 +2646,7 @@ export type GlobalOmitConfig = {
   serverMonitorConfig?: Prisma.ServerMonitorConfigOmit
   serverHealthRecord?: Prisma.ServerHealthRecordOmit
   benchmarkRun?: Prisma.BenchmarkRunOmit
+  recording?: Prisma.RecordingOmit
   recoveryCode?: Prisma.RecoveryCodeOmit
   emailOTP?: Prisma.EmailOTPOmit
   commandSnippet?: Prisma.CommandSnippetOmit

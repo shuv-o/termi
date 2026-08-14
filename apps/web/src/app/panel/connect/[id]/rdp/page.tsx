@@ -171,7 +171,7 @@ export default function RDPConnectionPage() {
             <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
                 <p className="text-destructive">{error || 'Connection failed'}</p>
                 <Button asChild>
-                    <Link href="/panel">Back to Dashboard</Link>
+                    <Link href="/panel">Back</Link>
                 </Button>
             </div>
         );

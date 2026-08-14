@@ -22,6 +22,7 @@ import { EncryptionPanel } from './_panels/EncryptionPanel';
 import { NotificationsPanel } from './_panels/NotificationsPanel';
 import { PasskeysPanel } from './_panels/PasskeysPanel';
 import { ProfilePanel } from './_panels/ProfilePanel';
+import { RecordingsPanel } from './_panels/RecordingsPanel';
 import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
 
@@ -160,6 +161,8 @@ export default function SettingsPage() {
                     {activeSection === 'notifications' && <NotificationsPanel push={push} />}
 
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
+
+                    {activeSection === 'recordings' && <RecordingsPanel />}
 
                     {activeSection === 'danger' && (
                         <DangerZonePanel user={user} encryption={account.encryption} />

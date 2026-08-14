@@ -38,7 +38,7 @@ export default function SCPPage() {
                 <AlertCircle className="w-10 h-10 text-destructive" />
                 <p className="text-destructive">{error}</p>
                 <Button asChild>
-                    <Link href="/panel">Back to Dashboard</Link>
+                    <Link href="/panel">Back</Link>
                 </Button>
             </div>
         );

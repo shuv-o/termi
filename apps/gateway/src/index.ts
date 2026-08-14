@@ -22,6 +22,7 @@ import { LocalHandler } from './handlers/local.js';
 import { TelnetHandler } from './handlers/telnet.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
+import { AsciicastRecorder } from './sessions/AsciicastRecorder.js';
 import {
     PersistentSessionStore,
     type PersistentSession,
@@ -139,6 +140,7 @@ function createSink(session: PersistentSession): SSHOutputSink {
         onData(data: Buffer) {
             if (session.isClosing) return;
             session.buffer.append(data);
+            session.recording?.append(data);
             // Terminal output is sent as a raw binary frame — no base64/JSON
             // overhead on the hot path. Control messages stay JSON (see onMessage).
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
@@ -147,6 +149,18 @@ function createSink(session: PersistentSession): SSHOutputSink {
         },
         onMessage(type: string, extra?: Record<string, unknown>) {
             if (session.isClosing) return;
+
+            // A recording in progress when the session ends would otherwise be
+            // silently lost — fold its content into the same close message so
+            // the browser can still save what was captured.
+            if (
+                session.recording &&
+                (type === 'disconnected' || type === 'closed' || type === 'error')
+            ) {
+                extra = { ...extra, ...session.recording.serialize() };
+                session.recording = null;
+            }
+
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
                 session.attachedWs.send(JSON.stringify({ type, ...extra }));
             }
@@ -415,6 +429,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     attachedWs: ws,
                     detachedAt: null,
                     isClosing: false,
+                    recording: null,
                 };
 
                 const sink = createSink(session);
@@ -497,6 +512,25 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                                 pongTimer = null;
                             }
                             break;
+                        case 'record-start':
+                            if (!session.recording) {
+                                session.recording = new AsciicastRecorder();
+                                ws.send(JSON.stringify({ type: 'record-started' }));
+                            }
+                            break;
+                        case 'record-stop': {
+                            const recording = session.recording;
+                            session.recording = null;
+                            if (recording) {
+                                ws.send(
+                                    JSON.stringify({
+                                        type: 'record-stopped',
+                                        ...recording.serialize(),
+                                    }),
+                                );
+                            }
+                            break;
+                        }
                         case 'close-session':
                             persistentSessions.delete(resolvedSessionId);
                             ws.close(1000, 'Session closed');

@@ -71,6 +71,7 @@ model User {
   receivedShares       ServerShare[]          @relation("ReceivedShares")
   keychainCredentials  KeychainCredential[]
   commandSnippets      CommandSnippet[]
+  recordings           Recording[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -179,6 +180,7 @@ model Server {
   monitorConfig ServerMonitorConfig?
   healthRecords ServerHealthRecord[]
   benchmarkRuns BenchmarkRun[]
+  recordings    Recording[]
   invitations   ServerInvitation[]
   shares        ServerShare[]
 
@@ -393,6 +395,10 @@ enum AuditAction {
   // Port-forward tunnel events
   TUNNEL_OPENED
   TUNNEL_CLOSED
+
+  // Session recording events
+  RECORDING_SAVED
+  RECORDING_DELETED
 }
 
 // PUSH NOTIFICATIONS
@@ -509,6 +515,29 @@ model BenchmarkRun {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, runAt])
+}
+
+model Recording {
+  id     String @id @default(cuid())
+  userId String
+  // Nullable + SetNull: a recording is an audit/handoff artifact that should
+  // outlive the server it was taken of, unlike health/benchmark history.
+  serverId String?
+
+  // Snapshotted at record time so the label survives server rename/deletion.
+  serverName String
+
+  // Full asciicast v2 text (header line + newline-delimited [t,"o",data] events).
+  content     String
+  durationSec Int
+  sizeBytes   Int
+
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server Server? @relation(fields: [serverId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
 }
 
 // RECOVERY CODES

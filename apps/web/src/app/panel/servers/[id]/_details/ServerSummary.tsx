@@ -1,11 +1,13 @@
 'use client';
 
+import {useState} from 'react';
 import Link from 'next/link';
-import {ArrowLeft, Pencil} from 'lucide-react';
+import {ArrowLeft, Pencil, QrCode} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Card} from '@/components/ui/card';
 import {formatRelativeTime} from '@/lib/format';
 import {ServerStatusPill} from '@/app/panel/_dashboard/StatusIndicator';
+import {QRConnectDialog} from './QRConnectDialog';
 import {protocolColors, protocolIcons, type MonitorConfig, type ServerInfo} from './types';
 
 function StatPill({label, value, sub}: { label: string; value: string; sub?: string }) {
@@ -84,6 +86,7 @@ export function ServerInfoCard({
 }) {
     const ProtoIcon = protocolIcons[server.protocol];
     const protoColor = protocolColors[server.protocol];
+    const [showQR, setShowQR] = useState(false);
 
     return (
         <Card className="p-4">
@@ -148,7 +151,24 @@ export function ServerInfoCard({
                         Connect via {server.protocol}
                     </Link>
                 </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setShowQR(true)}
+                >
+                    <QrCode className="w-3.5 h-3.5"/>
+                    QR
+                </Button>
             </div>
+
+            <QRConnectDialog
+                open={showQR}
+                onClose={() => setShowQR(false)}
+                serverId={server.id}
+                serverName={server.name}
+                protocol={server.protocol}
+            />
         </Card>
     );
 }

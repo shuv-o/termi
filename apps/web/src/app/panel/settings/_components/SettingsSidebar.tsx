@@ -7,6 +7,7 @@ import {
     Fingerprint,
     Lock,
     Monitor,
+    ScreenShare,
     Shield,
     User as UserIcon,
 } from 'lucide-react';
@@ -42,6 +43,7 @@ function SidebarNav({
             icon: Monitor,
             badge: sessionCount || undefined,
         },
+        { id: 'recordings', label: 'Recordings', icon: ScreenShare },
         { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
     ];
 

@@ -25,6 +25,7 @@ interface SSHTerminalProps {
     onWebSocketCreated?: (ws: WebSocket | null) => void;
     onSessionNotFound?: () => void;
     onReconnectReady?: (fn: () => void) => void;
+    onRecordingChange?: (recording: boolean) => void;
 }
 
 export default function SSHTerminal({
@@ -40,6 +41,7 @@ export default function SSHTerminal({
     onWebSocketCreated,
     onSessionNotFound,
     onReconnectReady,
+    onRecordingChange,
 }: SSHTerminalProps) {
     const terminalRef = useRef<HTMLDivElement>(null);
     const terminalInstance = useRef<Terminal | null>(null);
@@ -62,6 +64,8 @@ export default function SSHTerminal({
     onSessionNotFoundRef.current = onSessionNotFound;
     const onReconnectReadyRef = useRef(onReconnectReady);
     onReconnectReadyRef.current = onReconnectReady;
+    const onRecordingChangeRef = useRef(onRecordingChange);
+    onRecordingChangeRef.current = onRecordingChange;
 
     const connectionTokenRef = useRef(connectionToken);
     connectionTokenRef.current = connectionToken;
@@ -72,11 +76,32 @@ export default function SSHTerminal({
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const intentionalCloseRef = useRef(false);
+    const isRecordingRef = useRef(false);
 
     const updateStatus = useCallback((newStatus: typeof status) => {
         statusRef.current = newStatus;
         setStatus(newStatus);
     }, []);
+
+    /** Uploads a completed asciicast recording. Never surfaced as a hard error —
+     *  losing a recording shouldn't disrupt the session it was taken of. */
+    const saveRecording = useCallback(
+        (cast: unknown, durationSec: unknown, sizeBytes: unknown) => {
+            if (typeof cast !== 'string' || cast.length === 0) return;
+            fetch('/api/recordings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    serverId,
+                    content: cast,
+                    durationSec: typeof durationSec === 'number' ? durationSec : 0,
+                    sizeBytes: typeof sizeBytes === 'number' ? sizeBytes : cast.length,
+                }),
+            }).catch((err) => console.error('[SSHTerminal] Failed to save recording:', err));
+            terminalInstance.current?.write('\r\n\x1b[36m● Recording saved\x1b[0m\r\n');
+        },
+        [serverId],
+    );
 
     const connect = useCallback(async () => {
         const gatewayBase =
@@ -166,6 +191,9 @@ export default function SSHTerminal({
                         terminalInstance.current?.write(
                             '\r\n\x1b[33mConnection closed.\x1b[0m\r\n',
                         );
+                        isRecordingRef.current = false;
+                        onRecordingChangeRef.current?.(false);
+                        saveRecording(message.cast, message.durationSec, message.sizeBytes);
                         onDisconnectRef.current?.();
                         break;
 
@@ -174,7 +202,24 @@ export default function SSHTerminal({
                         terminalInstance.current?.write(
                             `\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`,
                         );
+                        isRecordingRef.current = false;
+                        onRecordingChangeRef.current?.(false);
+                        saveRecording(message.cast, message.durationSec, message.sizeBytes);
                         onErrorRef.current?.(message.message);
+                        break;
+
+                    case 'record-started':
+                        isRecordingRef.current = true;
+                        onRecordingChangeRef.current?.(true);
+                        terminalInstance.current?.write(
+                            '\r\n\x1b[36m● Recording started\x1b[0m\r\n',
+                        );
+                        break;
+
+                    case 'record-stopped':
+                        isRecordingRef.current = false;
+                        onRecordingChangeRef.current?.(false);
+                        saveRecording(message.cast, message.durationSec, message.sizeBytes);
                         break;
                 }
             } catch (e) {
@@ -219,7 +264,7 @@ export default function SSHTerminal({
                 onErrorRef.current?.('WebSocket connection failed');
             }
         };
-    }, [serverId, sessionId, gatewayUrl, updateStatus]);
+    }, [serverId, sessionId, gatewayUrl, updateStatus, saveRecording]);
 
     const reconnect = useCallback(() => {
         intentionalCloseRef.current = false;

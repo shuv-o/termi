@@ -108,6 +108,7 @@ export function TerminalPane({
     const [showKeyboard, setShowKeyboard] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [recordingShellId, setRecordingShellId] = useState<string | null>(null);
 
     const { registerSendHandler } = useSessionsContext();
 
@@ -155,6 +156,14 @@ export function TerminalPane({
     const renewShell = (shellId: string, isFirst: boolean) => {
         if (isFirst) renewSession(session.tabId, session.serverId);
         else refreshShellToken(shellId);
+    };
+
+    const toggleRecording = () => {
+        const ws = wsRefs.current.get(activeShellId);
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(
+            JSON.stringify({ type: recordingShellId === activeShellId ? 'record-stop' : 'record-start' }),
+        );
     };
 
     // Native "Shell" menu commands (Cmd+T, Cmd+Shift+W, Cmd+Shift+[ / ]).
@@ -232,6 +241,8 @@ export function TerminalPane({
                     setShowKeyboard((k) => !k);
                     nudgeResize();
                 }}
+                isRecording={recordingShellId === activeShellId}
+                onToggleRecording={toggleRecording}
                 onClose={() => removeSession(session.tabId)}
             />
 
@@ -311,6 +322,15 @@ export function TerminalPane({
                                                 }}
                                                 onSessionNotFound={() =>
                                                     renewShell(shell.id, isFirst)
+                                                }
+                                                onRecordingChange={(recording) =>
+                                                    setRecordingShellId((prev) =>
+                                                        recording
+                                                            ? shell.id
+                                                            : prev === shell.id
+                                                              ? null
+                                                              : prev,
+                                                    )
                                                 }
                                             />
                                         )}

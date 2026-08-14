@@ -64,6 +64,7 @@ export const ModelName = {
   ServerMonitorConfig: 'ServerMonitorConfig',
   ServerHealthRecord: 'ServerHealthRecord',
   BenchmarkRun: 'BenchmarkRun',
+  Recording: 'Recording',
   RecoveryCode: 'RecoveryCode',
   EmailOTP: 'EmailOTP',
   CommandSnippet: 'CommandSnippet',
@@ -323,6 +324,20 @@ export const BenchmarkRunScalarFieldEnum = {
 } as const
 
 export type BenchmarkRunScalarFieldEnum = (typeof BenchmarkRunScalarFieldEnum)[keyof typeof BenchmarkRunScalarFieldEnum]
+
+
+export const RecordingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  serverName: 'serverName',
+  content: 'content',
+  durationSec: 'durationSec',
+  sizeBytes: 'sizeBytes',
+  createdAt: 'createdAt'
+} as const
+
+export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
 
 
 export const RecoveryCodeScalarFieldEnum = {

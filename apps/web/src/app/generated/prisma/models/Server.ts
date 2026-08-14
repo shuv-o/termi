@@ -398,6 +398,7 @@ export type ServerWhereInput = {
   monitorConfig?: Prisma.XOR<Prisma.ServerMonitorConfigNullableScalarRelationFilter, Prisma.ServerMonitorConfigWhereInput> | null
   healthRecords?: Prisma.ServerHealthRecordListRelationFilter
   benchmarkRuns?: Prisma.BenchmarkRunListRelationFilter
+  recordings?: Prisma.RecordingListRelationFilter
   invitations?: Prisma.ServerInvitationListRelationFilter
   shares?: Prisma.ServerShareListRelationFilter
 }
@@ -435,6 +436,7 @@ export type ServerOrderByWithRelationInput = {
   monitorConfig?: Prisma.ServerMonitorConfigOrderByWithRelationInput
   healthRecords?: Prisma.ServerHealthRecordOrderByRelationAggregateInput
   benchmarkRuns?: Prisma.BenchmarkRunOrderByRelationAggregateInput
+  recordings?: Prisma.RecordingOrderByRelationAggregateInput
   invitations?: Prisma.ServerInvitationOrderByRelationAggregateInput
   shares?: Prisma.ServerShareOrderByRelationAggregateInput
 }
@@ -475,6 +477,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   monitorConfig?: Prisma.XOR<Prisma.ServerMonitorConfigNullableScalarRelationFilter, Prisma.ServerMonitorConfigWhereInput> | null
   healthRecords?: Prisma.ServerHealthRecordListRelationFilter
   benchmarkRuns?: Prisma.BenchmarkRunListRelationFilter
+  recordings?: Prisma.RecordingListRelationFilter
   invitations?: Prisma.ServerInvitationListRelationFilter
   shares?: Prisma.ServerShareListRelationFilter
 }, "id">
@@ -576,6 +579,7 @@ export type ServerCreateInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -611,6 +615,7 @@ export type ServerUncheckedCreateInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -646,6 +651,7 @@ export type ServerUpdateInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -681,6 +687,7 @@ export type ServerUncheckedUpdateInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -892,6 +899,11 @@ export type ServerScalarRelationFilter = {
   isNot?: Prisma.ServerWhereInput
 }
 
+export type ServerNullableScalarRelationFilter = {
+  is?: Prisma.ServerWhereInput | null
+  isNot?: Prisma.ServerWhereInput | null
+}
+
 export type ServerCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.ServerCreateWithoutUserInput, Prisma.ServerUncheckedCreateWithoutUserInput> | Prisma.ServerCreateWithoutUserInput[] | Prisma.ServerUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.ServerCreateOrConnectWithoutUserInput | Prisma.ServerCreateOrConnectWithoutUserInput[]
@@ -1053,6 +1065,22 @@ export type ServerUpdateOneRequiredWithoutBenchmarkRunsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutBenchmarkRunsInput, Prisma.ServerUpdateWithoutBenchmarkRunsInput>, Prisma.ServerUncheckedUpdateWithoutBenchmarkRunsInput>
 }
 
+export type ServerCreateNestedOneWithoutRecordingsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutRecordingsInput, Prisma.ServerUncheckedCreateWithoutRecordingsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutRecordingsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneWithoutRecordingsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutRecordingsInput, Prisma.ServerUncheckedCreateWithoutRecordingsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutRecordingsInput
+  upsert?: Prisma.ServerUpsertWithoutRecordingsInput
+  disconnect?: Prisma.ServerWhereInput | boolean
+  delete?: Prisma.ServerWhereInput | boolean
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutRecordingsInput, Prisma.ServerUpdateWithoutRecordingsInput>, Prisma.ServerUncheckedUpdateWithoutRecordingsInput>
+}
+
 export type ServerCreateNestedOneWithoutInvitationsInput = {
   create?: Prisma.XOR<Prisma.ServerCreateWithoutInvitationsInput, Prisma.ServerUncheckedCreateWithoutInvitationsInput>
   connectOrCreate?: Prisma.ServerCreateOrConnectWithoutInvitationsInput
@@ -1111,6 +1139,7 @@ export type ServerCreateWithoutUserInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1145,6 +1174,7 @@ export type ServerUncheckedCreateWithoutUserInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1237,6 +1267,7 @@ export type ServerCreateWithoutGroupInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1271,6 +1302,7 @@ export type ServerUncheckedCreateWithoutGroupInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1331,6 +1363,7 @@ export type ServerCreateWithoutConnectionsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1365,6 +1398,7 @@ export type ServerUncheckedCreateWithoutConnectionsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1415,6 +1449,7 @@ export type ServerUpdateWithoutConnectionsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -1449,6 +1484,7 @@ export type ServerUncheckedUpdateWithoutConnectionsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -1483,6 +1519,7 @@ export type ServerCreateWithoutMonitorConfigInput = {
   connections?: Prisma.ConnectionCreateNestedManyWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1517,6 +1554,7 @@ export type ServerUncheckedCreateWithoutMonitorConfigInput = {
   connections?: Prisma.ConnectionUncheckedCreateNestedManyWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1567,6 +1605,7 @@ export type ServerUpdateWithoutMonitorConfigInput = {
   connections?: Prisma.ConnectionUpdateManyWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -1601,6 +1640,7 @@ export type ServerUncheckedUpdateWithoutMonitorConfigInput = {
   connections?: Prisma.ConnectionUncheckedUpdateManyWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -1635,6 +1675,7 @@ export type ServerCreateWithoutHealthRecordsInput = {
   connections?: Prisma.ConnectionCreateNestedManyWithoutServerInput
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1669,6 +1710,7 @@ export type ServerUncheckedCreateWithoutHealthRecordsInput = {
   connections?: Prisma.ConnectionUncheckedCreateNestedManyWithoutServerInput
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1719,6 +1761,7 @@ export type ServerUpdateWithoutHealthRecordsInput = {
   connections?: Prisma.ConnectionUpdateManyWithoutServerNestedInput
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -1753,6 +1796,7 @@ export type ServerUncheckedUpdateWithoutHealthRecordsInput = {
   connections?: Prisma.ConnectionUncheckedUpdateManyWithoutServerNestedInput
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -1787,6 +1831,7 @@ export type ServerCreateWithoutBenchmarkRunsInput = {
   connections?: Prisma.ConnectionCreateNestedManyWithoutServerInput
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
@@ -1821,6 +1866,7 @@ export type ServerUncheckedCreateWithoutBenchmarkRunsInput = {
   connections?: Prisma.ConnectionUncheckedCreateNestedManyWithoutServerInput
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
@@ -1871,6 +1917,7 @@ export type ServerUpdateWithoutBenchmarkRunsInput = {
   connections?: Prisma.ConnectionUpdateManyWithoutServerNestedInput
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -1905,6 +1952,163 @@ export type ServerUncheckedUpdateWithoutBenchmarkRunsInput = {
   connections?: Prisma.ConnectionUncheckedUpdateManyWithoutServerNestedInput
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
+  invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
+  shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutRecordingsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  tags?: Prisma.ServerCreatetagsInput | string[]
+  color?: string | null
+  icon?: string | null
+  host: string
+  port: number
+  protocol: $Enums.Protocol
+  username: string
+  password?: string | null
+  privateKey?: string | null
+  passphrase?: string | null
+  notes?: string | null
+  sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  displayWidth?: number | null
+  displayHeight?: number | null
+  colorDepth?: number | null
+  rdpSecurity?: string | null
+  isFavorite?: boolean
+  lastUsedAt?: Date | string | null
+  useCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutServersInput
+  group?: Prisma.ServerGroupCreateNestedOneWithoutServersInput
+  connections?: Prisma.ConnectionCreateNestedManyWithoutServerInput
+  monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
+  healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
+  benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
+  shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutRecordingsInput = {
+  id?: string
+  userId: string
+  groupId?: string | null
+  name: string
+  description?: string | null
+  tags?: Prisma.ServerCreatetagsInput | string[]
+  color?: string | null
+  icon?: string | null
+  host: string
+  port: number
+  protocol: $Enums.Protocol
+  username: string
+  password?: string | null
+  privateKey?: string | null
+  passphrase?: string | null
+  notes?: string | null
+  sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  displayWidth?: number | null
+  displayHeight?: number | null
+  colorDepth?: number | null
+  rdpSecurity?: string | null
+  isFavorite?: boolean
+  lastUsedAt?: Date | string | null
+  useCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  connections?: Prisma.ConnectionUncheckedCreateNestedManyWithoutServerInput
+  monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
+  healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
+  benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
+  shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutRecordingsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutRecordingsInput, Prisma.ServerUncheckedCreateWithoutRecordingsInput>
+}
+
+export type ServerUpsertWithoutRecordingsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutRecordingsInput, Prisma.ServerUncheckedUpdateWithoutRecordingsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutRecordingsInput, Prisma.ServerUncheckedCreateWithoutRecordingsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutRecordingsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutRecordingsInput, Prisma.ServerUncheckedUpdateWithoutRecordingsInput>
+}
+
+export type ServerUpdateWithoutRecordingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.ServerUpdatetagsInput | string[]
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  protocol?: Prisma.EnumProtocolFieldUpdateOperationsInput | $Enums.Protocol
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  useCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutServersNestedInput
+  group?: Prisma.ServerGroupUpdateOneWithoutServersNestedInput
+  connections?: Prisma.ConnectionUpdateManyWithoutServerNestedInput
+  monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
+  healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
+  benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
+  shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutRecordingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.ServerUpdatetagsInput | string[]
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  protocol?: Prisma.EnumProtocolFieldUpdateOperationsInput | $Enums.Protocol
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  useCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  connections?: Prisma.ConnectionUncheckedUpdateManyWithoutServerNestedInput
+  monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
+  healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
+  benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -1940,6 +2144,7 @@ export type ServerCreateWithoutInvitationsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareCreateNestedManyWithoutServerInput
 }
 
@@ -1974,6 +2179,7 @@ export type ServerUncheckedCreateWithoutInvitationsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   shares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutServerInput
 }
 
@@ -2024,6 +2230,7 @@ export type ServerUpdateWithoutInvitationsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
 
@@ -2058,6 +2265,7 @@ export type ServerUncheckedUpdateWithoutInvitationsInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
 
@@ -2092,6 +2300,7 @@ export type ServerCreateWithoutSharesInput = {
   monitorConfig?: Prisma.ServerMonitorConfigCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationCreateNestedManyWithoutServerInput
 }
 
@@ -2126,6 +2335,7 @@ export type ServerUncheckedCreateWithoutSharesInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedCreateNestedOneWithoutServerInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedCreateNestedManyWithoutServerInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedCreateNestedManyWithoutServerInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutServerInput
   invitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutServerInput
 }
 
@@ -2176,6 +2386,7 @@ export type ServerUpdateWithoutSharesInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
 }
 
@@ -2210,6 +2421,7 @@ export type ServerUncheckedUpdateWithoutSharesInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
 }
 
@@ -2271,6 +2483,7 @@ export type ServerUpdateWithoutUserInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -2305,6 +2518,7 @@ export type ServerUncheckedUpdateWithoutUserInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -2395,6 +2609,7 @@ export type ServerUpdateWithoutGroupInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUpdateManyWithoutServerNestedInput
 }
@@ -2429,6 +2644,7 @@ export type ServerUncheckedUpdateWithoutGroupInput = {
   monitorConfig?: Prisma.ServerMonitorConfigUncheckedUpdateOneWithoutServerNestedInput
   healthRecords?: Prisma.ServerHealthRecordUncheckedUpdateManyWithoutServerNestedInput
   benchmarkRuns?: Prisma.BenchmarkRunUncheckedUpdateManyWithoutServerNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutServerNestedInput
   invitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutServerNestedInput
   shares?: Prisma.ServerShareUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -2470,6 +2686,7 @@ export type ServerCountOutputType = {
   connections: number
   healthRecords: number
   benchmarkRuns: number
+  recordings: number
   invitations: number
   shares: number
 }
@@ -2478,6 +2695,7 @@ export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   connections?: boolean | ServerCountOutputTypeCountConnectionsArgs
   healthRecords?: boolean | ServerCountOutputTypeCountHealthRecordsArgs
   benchmarkRuns?: boolean | ServerCountOutputTypeCountBenchmarkRunsArgs
+  recordings?: boolean | ServerCountOutputTypeCountRecordingsArgs
   invitations?: boolean | ServerCountOutputTypeCountInvitationsArgs
   shares?: boolean | ServerCountOutputTypeCountSharesArgs
 }
@@ -2511,6 +2729,13 @@ export type ServerCountOutputTypeCountHealthRecordsArgs<ExtArgs extends runtime.
  */
 export type ServerCountOutputTypeCountBenchmarkRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BenchmarkRunWhereInput
+}
+
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountRecordingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RecordingWhereInput
 }
 
 /**
@@ -2561,6 +2786,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   monitorConfig?: boolean | Prisma.Server$monitorConfigArgs<ExtArgs>
   healthRecords?: boolean | Prisma.Server$healthRecordsArgs<ExtArgs>
   benchmarkRuns?: boolean | Prisma.Server$benchmarkRunsArgs<ExtArgs>
+  recordings?: boolean | Prisma.Server$recordingsArgs<ExtArgs>
   invitations?: boolean | Prisma.Server$invitationsArgs<ExtArgs>
   shares?: boolean | Prisma.Server$sharesArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
@@ -2665,6 +2891,7 @@ export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   monitorConfig?: boolean | Prisma.Server$monitorConfigArgs<ExtArgs>
   healthRecords?: boolean | Prisma.Server$healthRecordsArgs<ExtArgs>
   benchmarkRuns?: boolean | Prisma.Server$benchmarkRunsArgs<ExtArgs>
+  recordings?: boolean | Prisma.Server$recordingsArgs<ExtArgs>
   invitations?: boolean | Prisma.Server$invitationsArgs<ExtArgs>
   shares?: boolean | Prisma.Server$sharesArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
@@ -2687,6 +2914,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     monitorConfig: Prisma.$ServerMonitorConfigPayload<ExtArgs> | null
     healthRecords: Prisma.$ServerHealthRecordPayload<ExtArgs>[]
     benchmarkRuns: Prisma.$BenchmarkRunPayload<ExtArgs>[]
+    recordings: Prisma.$RecordingPayload<ExtArgs>[]
     invitations: Prisma.$ServerInvitationPayload<ExtArgs>[]
     shares: Prisma.$ServerSharePayload<ExtArgs>[]
   }
@@ -3117,6 +3345,7 @@ export interface Prisma__ServerClient<T, Null = never, ExtArgs extends runtime.T
   monitorConfig<T extends Prisma.Server$monitorConfigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$monitorConfigArgs<ExtArgs>>): Prisma.Prisma__ServerMonitorConfigClient<runtime.Types.Result.GetResult<Prisma.$ServerMonitorConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   healthRecords<T extends Prisma.Server$healthRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$healthRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerHealthRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   benchmarkRuns<T extends Prisma.Server$benchmarkRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$benchmarkRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BenchmarkRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recordings<T extends Prisma.Server$recordingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$recordingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitations<T extends Prisma.Server$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shares<T extends Prisma.Server$sharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$sharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3682,6 +3911,30 @@ export type Server$benchmarkRunsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.BenchmarkRunScalarFieldEnum | Prisma.BenchmarkRunScalarFieldEnum[]
+}
+
+/**
+ * Server.recordings
+ */
+export type Server$recordingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recording
+   */
+  select?: Prisma.RecordingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recording
+   */
+  omit?: Prisma.RecordingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecordingInclude<ExtArgs> | null
+  where?: Prisma.RecordingWhereInput
+  orderBy?: Prisma.RecordingOrderByWithRelationInput | Prisma.RecordingOrderByWithRelationInput[]
+  cursor?: Prisma.RecordingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RecordingScalarFieldEnum | Prisma.RecordingScalarFieldEnum[]
 }
 
 /**
