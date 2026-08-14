@@ -55,9 +55,9 @@ apps/web/prisma/*.db-journal
 /.idea.worktrees/
 AGENTS.md
 CLAUDE.md
-/.idea
 /.claude
 /.worktrees
 
 # Internal design docs
 apps/web/docs/
+.idea

@@ -15,16 +15,16 @@ account-password prompt — nothing breaks.
 
 ## How it fits together
 
-- `apps/web/src/lib/webauthn/client.ts` — `webauthnRegister` / `webauthnAuthenticate` /
+- `../apps/web/src/lib/webauthn/client.ts` — `webauthnRegister` / `webauthnAuthenticate` /
   `isPasskeySupported`. Chooses browser WebAuthn (web, Windows, Linux) or the
   Electron macOS bridge. Returns the same server-ready JSON either way.
-- `apps/electron/main.js` — optional `require('electron-webauthn')` (macOS only) and
+- `../apps/electron/main.js` — optional `require('electron-webauthn')` (macOS only) and
   the `passkey:isAvailable` / `passkey:create` / `passkey:get` IPC handlers. Converts
   the server's base64url options to W3C options and maps the native result back to
   `RegistrationResponseJSON` / `AuthenticationResponseJSON`.
-- `apps/electron/preload.js` — exposes `window.electronAPI.platform` and `.passkey`.
+- `../apps/electron/preload.js` — exposes `window.electronAPI.platform` and `.passkey`.
 
-The server (`apps/web/src/lib/auth/passkey.ts`, `@simplewebauthn/server`) is
+The server (`../apps/web/src/lib/auth/passkey.ts`, `@simplewebauthn/server`) is
 **unchanged** — every platform sends it the standard response shape, verified
 against the server-issued challenge.
 
@@ -42,9 +42,9 @@ entitlements and a matching Apple App Site Association file.
    capability and a Developer ID provisioning profile (see
    [electron-webauthn docs](https://github.com/iamEvanYT/electron-webauthn/blob/main/docs/entitlements-and-provisioning.md)).
 
-3. **Entitlements:** edit `apps/electron/entitlements.mac.plist` — replace
+3. **Entitlements:** edit `../apps/electron/entitlements.mac.plist` — replace
    `TEAM_ID` with your Apple Team ID. The bundle id must equal `build.appId`
-   (`com.shuvoo.termi`) in the root `package.json`. `webcredentials:` must equal
+   (`com.shuvoo.termi`) in the root `../package.json`. `webcredentials:` must equal
    the server's WebAuthn `rpID` (default `termi.shuvoo.com`).
 
 4. **Apple App Site Association:** set `APPLE_TEAM_ID` (and optionally
@@ -58,7 +58,7 @@ entitlements and a matching Apple App Site Association file.
 5. **Build:** `TERMI_REMOTE_URL=https://termi.shuvoo.com npm run build:electron`
    with signing configured (`CSC_LINK` / `CSC_KEY_PASSWORD` or an installed
    Developer ID cert). The `mac.entitlements` wiring is already in the root
-   `package.json` `build` block.
+   `../package.json` `build` block.
 
 > The desktop app's served origin (`TERMI_REMOTE_URL`) must match the server's
 > `rpID` / `NEXT_PUBLIC_APP_URL` domain, or WebAuthn verification will reject the

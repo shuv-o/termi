@@ -14,12 +14,12 @@ Termi is a fully installable PWA. This doc covers the two distribution paths:
 
 | Piece                   | Location                                                                             |
 | ----------------------- | ------------------------------------------------------------------------------------ |
-| Web App Manifest        | `public/manifest.json` (maskable icons, shortcuts, `handle_links`, `launch_handler`) |
-| Service worker          | `public/sw.js` (offline cache + web push)                                            |
-| SW registration         | `src/app/layout.tsx` (inline, nonce'd)                                               |
-| iOS meta tags           | `src/app/layout.tsx` → `appleWebApp` metadata                                        |
-| In-app install prompt   | `src/components/pwa/InstallPrompt.tsx` (Android button + iOS hint)                   |
-| **Digital Asset Links** | `public/.well-known/assetlinks.json` ← **must be edited, see below**                 |
+| Web App Manifest        | `../apps/web/public/manifest.json` (maskable icons, shortcuts, `handle_links`, `launch_handler`) |
+| Service worker          | `../apps/web/public/sw.js` (offline cache + web push)                                            |
+| SW registration         | `../apps/web/src/app/layout.tsx` (inline, nonce'd)                                               |
+| iOS meta tags           | `../apps/web/src/app/layout.tsx` → `appleWebApp` metadata                                        |
+| In-app install prompt   | `../apps/web/src/components/pwa/InstallPrompt.tsx` (Android button + iOS hint)                   |
+| **Digital Asset Links** | `../apps/web/public/.well-known/assetlinks.json` ← **must be edited, see below**                 |
 
 ---
 
@@ -63,7 +63,7 @@ keytool -list -v -keystore android.keystore -alias android | grep SHA256
 > is the one Play shows under **Release → Setup → App signing**, not your local key.
 > You can list both there.
 
-Paste the fingerprint(s) into `public/.well-known/assetlinks.json`, replacing
+Paste the fingerprint(s) into `../apps/web/public/.well-known/assetlinks.json`, replacing
 `REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT`. Multiple fingerprints are allowed:
 
 ```json
