@@ -90,7 +90,6 @@ export default function ServerDetailsPage() {
             {/* Port forwarding needs a shell channel, so it's SSH-only too. */}
             {isSSH && (
                 <TunnelSection
-                    tunnels={tunnels.tunnels}
                     remoteHost={tunnels.remoteHost}
                     setRemoteHost={tunnels.setRemoteHost}
                     remotePort={tunnels.remotePort}
@@ -98,8 +97,8 @@ export default function ServerDetailsPage() {
                     opening={tunnels.opening}
                     error={tunnels.error}
                     onOpen={tunnels.open}
-                    onClose={tunnels.close}
-                    closingId={tunnels.closingId}
+                    result={tunnels.result}
+                    onReset={tunnels.reset}
                 />
             )}
         </div>

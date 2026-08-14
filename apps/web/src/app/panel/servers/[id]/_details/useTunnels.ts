@@ -1,44 +1,79 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
+import { useEffect, useRef, useState } from 'react';
 
-export interface TunnelInfo {
-    id: string;
-    serverId: string;
-    serverName: string;
-    remoteHost: string;
-    remotePort: number;
-    localPort: number;
-    createdAt: number;
-    bytesIn: number;
-    bytesOut: number;
-    connectionCount: number;
+export interface TunnelResult {
+    isHttp: boolean;
+    proxyUrl?: string;
+    bridgeScript?: string;
+    /** Set only in the Electron shell, which can bind a real local port. */
+    electronLocalPort?: number;
 }
 
-/** Port-forward tunnels for one server — opening, listing, and closing them. */
+/**
+ * Port-forward tunnels: stateless — each request probes the target and hands
+ * back either a one-click browser link, a copyable local-bridge script, or
+ * (inside the Electron desktop shell, which can bind a real local port
+ * unlike a browser tab) an actual `127.0.0.1:<port>` to point a tool at.
+ */
 export function useTunnels(serverId: string) {
-    const { data, mutate, refresh } = useCachedFetch<{ tunnels: TunnelInfo[] }>('/api/tunnels');
-    const tunnels = (data?.tunnels ?? []).filter((t) => t.serverId === serverId);
-
     const [remoteHost, setRemoteHost] = useState('127.0.0.1');
     const [remotePort, setRemotePort] = useState('');
     const [opening, setOpening] = useState(false);
     const [error, setError] = useState('');
-    const [closingId, setClosingId] = useState<string | null>(null);
+    const [result, setResult] = useState<TunnelResult | null>(null);
+    const electronTunnelIdRef = useRef<string | null>(null);
 
-    // Poll while a tunnel is open so byte counters/connection counts stay live.
-    useEffect(() => {
-        if (tunnels.length === 0) return;
-        const interval = setInterval(refresh, 5000);
-        return () => clearInterval(interval);
-    }, [tunnels.length, refresh]);
+    const closeElectronTunnel = () => {
+        if (electronTunnelIdRef.current && window.electronAPI?.tunnel) {
+            window.electronAPI.tunnel.close(electronTunnelIdRef.current);
+            electronTunnelIdRef.current = null;
+        }
+    };
+
+    // Close any bound local port if the user navigates away mid-session.
+    useEffect(() => closeElectronTunnel, []);
 
     const open = async () => {
         const port = Number(remotePort);
         setOpening(true);
         setError('');
+        setResult(null);
+        closeElectronTunnel();
+
         try {
+            if (window.electronAPI?.tunnel) {
+                const tokenRes = await fetch('/api/connection/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        protocol: 'tunnel',
+                        serverId,
+                        remoteHost,
+                        remotePort: port,
+                    }),
+                });
+                const tokenData = await tokenRes.json();
+                if (!tokenData.success) {
+                    setError(tokenData.error || 'Failed to open tunnel');
+                    return;
+                }
+
+                const bridge = await window.electronAPI.tunnel.open({
+                    gatewayUrl: tokenData.data.gatewayUrl,
+                    serverId,
+                    token: tokenData.data.token,
+                });
+                if (!bridge.success) {
+                    setError(bridge.error);
+                    return;
+                }
+
+                electronTunnelIdRef.current = bridge.id;
+                setResult({ isHttp: false, electronLocalPort: bridge.localPort });
+                return;
+            }
+
             const res = await fetch('/api/tunnels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -49,8 +84,7 @@ export function useTunnels(serverId: string) {
                 setError(data.error || 'Failed to open tunnel');
                 return;
             }
-            mutate((prev) => ({ tunnels: [...(prev?.tunnels ?? []), data.data.tunnel] }));
-            setRemotePort('');
+            setResult(data.data);
         } catch {
             setError('Failed to open tunnel');
         } finally {
@@ -58,18 +92,13 @@ export function useTunnels(serverId: string) {
         }
     };
 
-    const close = async (id: string) => {
-        setClosingId(id);
-        try {
-            await fetch(`/api/tunnels/${id}`, { method: 'DELETE' });
-            mutate((prev) => ({ tunnels: (prev?.tunnels ?? []).filter((t) => t.id !== id) }));
-        } finally {
-            setClosingId(null);
-        }
+    const reset = () => {
+        closeElectronTunnel();
+        setResult(null);
+        setError('');
     };
 
     return {
-        tunnels,
         remoteHost,
         setRemoteHost,
         remotePort,
@@ -77,7 +106,7 @@ export function useTunnels(serverId: string) {
         opening,
         error,
         open,
-        close,
-        closingId,
+        result,
+        reset,
     };
 }

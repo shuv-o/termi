@@ -550,6 +550,86 @@ ipcMain.on('local-terminal:kill', (event, id) => {
     }
 });
 
+//   Tunnel bridge IPC (port-forward tunnels, bound locally for desktop)  ─
+//
+// Unlike the web PWA (which has no way to bind a local TCP port and instead
+// gets a one-click HTTP proxy URL or a copy-pasted bridge script — see
+// apps/web/src/app/api/tunnels/route.ts), the desktop shell can offer a real
+// local port directly: this opens a TCP listener on 127.0.0.1 and bridges
+// each accepted connection to the gateway's tunnel WebSocket, one WS
+// connection per local TCP connection, mirroring the standalone bridge
+// script's own logic exactly.
+
+const tunnelServers = new Map(); // id -> net.Server
+
+ipcMain.handle('tunnel:open', (event, { gatewayUrl, serverId, token, localPort }) => {
+    const net = require('net');
+    const { randomUUID } = require('crypto');
+    const wsUrl = `${gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(serverId)}`;
+
+    return new Promise((resolve) => {
+        const server = net.createServer((socket) => {
+            socket.pause();
+            const ws = new WebSocket(wsUrl);
+            ws.binaryType = 'arraybuffer';
+
+            ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
+            ws.onmessage = (ev) => {
+                if (typeof ev.data !== 'string') {
+                    socket.write(Buffer.from(ev.data));
+                    return;
+                }
+                let msg;
+                try {
+                    msg = JSON.parse(ev.data);
+                } catch {
+                    return;
+                }
+                if (msg.type === 'tunnel-ready') {
+                    socket.resume();
+                } else if (
+                    msg.type === 'error' ||
+                    msg.type === 'closed' ||
+                    msg.type === 'disconnected'
+                ) {
+                    socket.destroy();
+                }
+            };
+            ws.onclose = () => socket.destroy();
+            ws.onerror = () => socket.destroy();
+
+            socket.on('data', (chunk) => {
+                if (ws.readyState === WebSocket.OPEN) ws.send(chunk);
+            });
+            const cleanup = () => {
+                try {
+                    ws.close();
+                } catch (_) {}
+            };
+            socket.on('close', cleanup);
+            socket.on('error', cleanup);
+        });
+
+        server.once('error', (err) => {
+            resolve({ success: false, error: err.message });
+        });
+
+        server.listen(localPort || 0, '127.0.0.1', () => {
+            const id = randomUUID();
+            tunnelServers.set(id, server);
+            resolve({ success: true, id, localPort: server.address().port });
+        });
+    });
+});
+
+ipcMain.on('tunnel:close', (event, id) => {
+    const server = tunnelServers.get(id);
+    if (server) {
+        server.close();
+        tunnelServers.delete(id);
+    }
+});
+
 //   Native passkey IPC (macOS)                             ─
 
 ipcMain.handle('passkey:isAvailable', async () => !!(await loadElectronWebauthn()));

@@ -20,6 +20,7 @@ import { SCPHandler } from './handlers/scp.js';
 import { GuacamoleHandler } from './handlers/guacamole.js';
 import { LocalHandler } from './handlers/local.js';
 import { TelnetHandler } from './handlers/telnet.js';
+import { TunnelHandler } from './handlers/tunnel.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
 import { AsciicastRecorder } from './sessions/AsciicastRecorder.js';
@@ -122,9 +123,9 @@ const persistentSessions = new PersistentSessionStore();
 /** Active non-SSH WebSocket connections (for cleanup on error/close). */
 interface NonSshMeta {
     userId: string;
-    protocol: 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local';
+    protocol: 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     serverId: string;
-    handler?: SCPHandler | GuacamoleHandler | LocalHandler | TelnetHandler;
+    handler?: SCPHandler | GuacamoleHandler | LocalHandler | TelnetHandler | TunnelHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
@@ -211,7 +212,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         | 'rdp'
         | 'vnc'
         | 'telnet'
-        | 'local';
+        | 'local'
+        | 'tunnel';
     const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
     const browserWidth = parseInt(url.searchParams.get('width') || '0', 10) || 0;
@@ -223,7 +225,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
-    if (!['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local'].includes(protocol)) {
+    if (!['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local', 'tunnel'].includes(protocol)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Invalid protocol' }));
         ws.close(4000, 'Bad Request');
         return;
@@ -563,7 +565,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
         const meta: NonSshMeta = {
             userId: tokenPayload.userId,
-            protocol: protocol as 'scp' | 'rdp' | 'vnc' | 'telnet',
+            protocol: protocol as 'scp' | 'rdp' | 'vnc' | 'telnet' | 'tunnel',
             serverId,
         };
         nonSshConnections.set(ws, meta);
@@ -629,6 +631,41 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                             telnetHandler.close();
                             ws.close(1000, 'Session closed');
                             break;
+                    }
+                } catch {
+                    /* ignore malformed control messages */
+                }
+            });
+        } else if (protocol === 'tunnel') {
+            //   Tunnel: forwardOut to an internal address, raw binary I/O like SSH/Telnet
+
+            const sink: SSHOutputSink = {
+                onData(data: Buffer) {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(data, { binary: true });
+                    }
+                },
+                onMessage(type: string, extra?: Record<string, unknown>) {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type, ...extra }));
+                    }
+                },
+            };
+
+            const tunnelHandler = new TunnelHandler(tokenPayload, sink);
+            meta.handler = tunnelHandler;
+
+            ws.on('message', (data: Buffer, isBinary: boolean) => {
+                if (isBinary) {
+                    resetTimeout();
+                    tunnelHandler.write(data);
+                    return;
+                }
+                try {
+                    const msg = JSON.parse(data.toString());
+                    if (msg.type === 'close-session') {
+                        tunnelHandler.close();
+                        ws.close(1000, 'Session closed');
                     }
                 } catch {
                     /* ignore malformed control messages */

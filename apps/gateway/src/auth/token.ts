@@ -13,7 +13,7 @@ import { createHash } from 'crypto';
 export interface TokenPayload {
     userId: string;
     serverId: string;
-    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local';
+    protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     // host/username are present for remote protocols, absent for 'local'
     host: string;
     port: number;
@@ -25,6 +25,11 @@ export interface TokenPayload {
     displayHeight?: number;
     colorDepth?: number;
     rdpSecurity?: string;
+    // 'tunnel' protocol only — the internal address (reachable from `host`'s own
+    // network) that forwardOut targets. Not secret: equivalent to what the user
+    // could already reach with a normal interactive session on this server.
+    remoteHost?: string;
+    remotePort?: number;
     exp: number;
 }
 
@@ -68,7 +73,7 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             throw new Error('Invalid token payload');
         }
 
-        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local'] as const;
+        const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local', 'tunnel'] as const;
         if (
             !payload.protocol ||
             !VALID_PROTOCOLS.includes(payload.protocol as (typeof VALID_PROTOCOLS)[number])

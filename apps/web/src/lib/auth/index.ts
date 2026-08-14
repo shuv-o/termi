@@ -1,4 +1,5 @@
 export * from './session';
+export * from './connectionToken';
 export * from './totp';
 export * from './auth';
 export * from './email-otp';

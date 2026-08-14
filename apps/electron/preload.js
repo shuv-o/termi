@@ -61,4 +61,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             return () => ipcRenderer.removeListener('local-terminal:exit', handler);
         },
     },
+    tunnel: {
+        open: (opts) => ipcRenderer.invoke('tunnel:open', opts),
+        close: (id) => ipcRenderer.send('tunnel:close', id),
+    },
 });

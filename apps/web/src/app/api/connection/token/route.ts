@@ -6,8 +6,7 @@
  */
 
 import { z } from 'zod';
-import * as jose from 'jose';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
 import { getServerForConnection } from '@/lib/services';
 import {
     validateBody,
@@ -17,7 +16,6 @@ import {
     notFoundResponse,
 } from '@/lib/api';
 import { validateHost } from '@/lib/security/ssrf';
-import { createHash } from 'crypto';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 
 const tokenSchema = z.discriminatedUnion('protocol', [
@@ -29,21 +27,13 @@ const tokenSchema = z.discriminatedUnion('protocol', [
         protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc', 'telnet']),
         serverId: z.string(),
     }),
+    z.object({
+        protocol: z.literal('tunnel'),
+        serverId: z.string(),
+        remoteHost: z.string().min(1).max(255),
+        remotePort: z.number().int().min(1).max(65535),
+    }),
 ]);
-
-function getJWEKey(): Uint8Array {
-    const secret = process.env.GATEWAY_JWT_SECRET;
-    if (!secret || secret === 'gateway-secret-key-change-in-production') {
-        if (process.env.NODE_ENV === 'production') {
-            throw new Error(
-                'GATEWAY_JWT_SECRET must be set to a strong random value in production',
-            );
-        }
-        // Dev fallback
-        return new Uint8Array(createHash('sha256').update('dev-gateway-secret').digest());
-    }
-    return new Uint8Array(createHash('sha256').update(secret).digest());
-}
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
@@ -67,28 +57,25 @@ export async function POST(request: Request) {
                 return errorResponse('Local terminal is not enabled on this server', 403);
             }
 
-            const key = getJWEKey();
-            const token = await new jose.EncryptJWT({
+            const token = await mintConnectionToken({
                 userId: user.id,
                 serverId: 'local',
                 protocol: 'local',
                 host: '',
                 port: 0,
                 username: '',
-            })
-                .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
-                .setExpirationTime('5m')
-                .setIssuedAt()
-                .encrypt(key);
+            });
 
-            const gatewayUrl =
-                process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
-            return successResponse({ token, gatewayUrl });
+            return successResponse({ token, gatewayUrl: getGatewayUrl() });
         }
 
         const { serverId, protocol } = tokenData;
         const server = await getServerForConnection(serverId, user.id);
         if (!server) return notFoundResponse('Server not found');
+
+        if (protocol === 'tunnel' && server.protocol !== 'SSH') {
+            return errorResponse('Port forwarding requires an SSH server', 400);
+        }
 
         // Re-validate host at token issuance time (defence-in-depth against tampered DB entries)
         const hostValidation = await validateHost(
@@ -99,10 +86,7 @@ export async function POST(request: Request) {
             return errorResponse('Invalid server host configuration', 400);
         }
 
-        const key = getJWEKey();
-
-        // Use JWE (encrypted JWT) — payload is AES-256-GCM encrypted
-        const token = await new jose.EncryptJWT({
+        const token = await mintConnectionToken({
             userId: user.id,
             serverId: server.id,
             protocol,
@@ -116,17 +100,13 @@ export async function POST(request: Request) {
             displayHeight: server.displayHeight ?? 1080,
             colorDepth: server.colorDepth ?? 24,
             rdpSecurity: server.rdpSecurity ?? 'any',
-        })
-            .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
-            .setExpirationTime('5m')
-            .setIssuedAt()
-            .encrypt(key);
+            ...(protocol === 'tunnel' && {
+                remoteHost: tokenData.remoteHost,
+                remotePort: tokenData.remotePort,
+            }),
+        });
 
-        // Return gatewayUrl alongside the token so client components can read
-        // it at runtime rather than relying on the NEXT_PUBLIC_ build-time bake-in.
-        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
-
-        return successResponse({ token, gatewayUrl });
+        return successResponse({ token, gatewayUrl: getGatewayUrl() });
     } catch (error) {
         if (error instanceof Error && error.message.includes('GATEWAY_JWT_SECRET')) {
             console.error('Connection token error:', error.message);

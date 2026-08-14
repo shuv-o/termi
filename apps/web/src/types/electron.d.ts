@@ -65,6 +65,20 @@ interface ElectronUpdaterAPI {
 /** Commands dispatched by the native "Shell" menu (see apps/electron/main.js). */
 type AppCommand = 'shell:new' | 'shell:close' | 'shell:next' | 'shell:prev' | 'palette:open';
 
+/**
+ * Local port-forward bridge — the desktop shell can bind a real local TCP
+ * port (a browser tab can't), bridging it to the gateway's tunnel WebSocket.
+ */
+interface ElectronTunnelAPI {
+    open: (opts: {
+        gatewayUrl: string;
+        serverId: string;
+        token: string;
+        localPort?: number;
+    }) => Promise<{ success: true; id: string; localPort: number } | { success: false; error: string }>;
+    close: (id: string) => void;
+}
+
 interface ElectronAPI {
     isElectron: true;
     /** The host OS platform, e.g. 'darwin' | 'win32' | 'linux' (from process.platform). */
@@ -78,6 +92,8 @@ interface ElectronAPI {
     localTerminal: ElectronLocalTerminalAPI;
     /** Native passkey bridge (macOS only). */
     passkey?: ElectronPasskeyAPI;
+    /** Local port-forward bridge (desktop shell only). */
+    tunnel?: ElectronTunnelAPI;
 }
 
 interface Window {
