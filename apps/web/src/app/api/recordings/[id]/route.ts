@@ -5,6 +5,7 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { decrypt, deserializeEncrypted } from '@/lib/crypto/crypto';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 interface RouteParams {
@@ -22,7 +23,15 @@ export async function GET(_request: Request, { params }: RouteParams) {
     });
     if (!recording) return notFoundResponse('Recording not found');
 
-    return successResponse({ recording });
+    let content: string;
+    try {
+        content = decrypt(deserializeEncrypted(recording.content));
+    } catch (err) {
+        console.error('[Recordings] Failed to decrypt content:', err);
+        return errorResponse('Failed to read recording', 500);
+    }
+
+    return successResponse({ recording: { ...recording, content } });
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
@@ -38,7 +47,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     if (!recording) return notFoundResponse('Recording not found');
 
     try {
-        await prisma.recording.delete({ where: { id } });
+        await prisma.recording.delete({ where: { id, userId: user.id } });
 
         await prisma.auditLog.create({
             data: {

@@ -528,7 +528,7 @@ model Recording {
   serverName String
 
   // Full asciicast v2 text (header line + newline-delimited [t,"o",data] events).
-  content     String
+  content     String // Encrypted
   durationSec Int
   sizeBytes   Int
 

@@ -93,9 +93,6 @@ export default function SettingsPage() {
             </Suspense>
 
             <div className="mb-8 max-w-4xl">
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Your account
-                </p>
                 <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Settings</h1>
                 <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Manage your account, security, and preferences

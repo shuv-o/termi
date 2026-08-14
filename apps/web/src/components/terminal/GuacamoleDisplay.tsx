@@ -4,7 +4,20 @@
  * GatewayTunnel bridges our custom gateway WS protocol to Guacamole.Tunnel.
  */
 import { useEffect, useRef, useState } from 'react';
+import { Keyboard } from 'lucide-react';
 import { createGatewayTunnel } from './GatewayTunnel';
+
+// X11 keysyms for keys a normal keyboard/browser can't send at all (the OS
+// intercepts Ctrl+Alt+Del before it reaches any page) or that touch devices
+// have no physical key for.
+const KEYSYM = {
+    ESCAPE: 0xff1b,
+    TAB: 0xff09,
+    DELETE: 0xffff,
+    CTRL_L: 0xffe3,
+    ALT_L: 0xffe9,
+    SUPER_L: 0xffeb,
+};
 interface GuacamoleDisplayProps {
     serverId: string;
     connectionToken: string;
@@ -68,9 +81,13 @@ export default function GuacamoleDisplay({
     // 0=IDLE 1=CONNECTING 2=WAITING 3=CONNECTED 4=DISCONNECTING 5=DISCONNECTED
     const [clientState, setClientState] = useState<number>(0);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [showKeyboard, setShowKeyboard] = useState(false);
     const onDisconnectRef = useRef(onDisconnect);
     onDisconnectRef.current = onDisconnect;
     const onErrorRef = useRef(onError);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const guacClientRef = useRef<any>(null);
+    const hiddenInputRef = useRef<HTMLInputElement>(null);
 
     // Refs that let scale changes re-fit the display without remounting the connection.
     const scaleRef = useRef<number | undefined>(scale);
@@ -88,6 +105,8 @@ export default function GuacamoleDisplay({
         let guacClient: any = null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let windowKeyboard: any = null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let mobileKeyboard: any = null;
         let resizeObserver: ResizeObserver | null = null;
         let displayEl: HTMLElement | null = null;
         let pasteHandler: ((e: ClipboardEvent) => void) | null = null;
@@ -115,6 +134,7 @@ export default function GuacamoleDisplay({
             const tunnel = createGatewayTunnel(Guacamole, wsUrl, connectionToken);
             // Client
             guacClient = new Guacamole.Client(tunnel);
+            guacClientRef.current = guacClient;
             // Display
             const display = guacClient.getDisplay();
             displayEl = display.getElement() as HTMLElement;
@@ -252,8 +272,15 @@ export default function GuacamoleDisplay({
             guacClient.onaudio = (stream: any, mimetype: string) => {
                 Guacamole.AudioPlayer.getInstance(stream, mimetype);
             };
-            // Mouse: legacy handler API receives Guacamole.Mouse.State directly
-            const mouse = new Guacamole.Mouse(displayEl);
+            // Mouse: legacy handler API receives Guacamole.Mouse.State directly.
+            // Plain Guacamole.Mouse only binds mousedown/mousemove/mouseup — touch
+            // devices never fire those, so taps would otherwise do nothing.
+            // Touchscreen (tap-to-click, long-press-to-right-click) is the absolute-
+            // positioning equivalent, which matches how RDP/VNC render the remote screen.
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const mouse = isTouchDevice
+                ? new Guacamole.Mouse.Touchscreen(displayEl)
+                : new Guacamole.Mouse(displayEl);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const forwardMouse = (state: any) => guacClient.sendMouseState(state, true);
             mouse.onmousedown = forwardMouse;
@@ -262,11 +289,8 @@ export default function GuacamoleDisplay({
             mouse.onmouseout = forwardMouse;
             // Suppress context menu so right-click is forwarded
             displayEl.addEventListener('contextmenu', (e: Event) => e.preventDefault());
-            // Document-level keyboard — works regardless of which element has DOM focus.
-            windowKeyboard = new Guacamole.Keyboard(document);
             // sendKeyEvent expects integer 1/0 (not boolean); guacd parses via atoi().
-            windowKeyboard.onkeydown = (keysym: number) => {
-                if (isNativeInput()) return;
+            const forwardKeyDown = (keysym: number) => {
                 if (keysym === CTRL_L || keysym === CTRL_R) ctrlDown = true;
                 if (isMac) {
                     if (keysym === META_L || keysym === META_R) {
@@ -289,8 +313,7 @@ export default function GuacamoleDisplay({
                 }
                 guacClient.sendKeyEvent(1, keysym);
             };
-            windowKeyboard.onkeyup = (keysym: number) => {
-                if (isNativeInput()) return;
+            const forwardKeyUp = (keysym: number) => {
                 if (keysym === CTRL_L || keysym === CTRL_R) ctrlDown = false;
                 if (isMac) {
                     if (keysym === META_L || keysym === META_R) {
@@ -310,6 +333,27 @@ export default function GuacamoleDisplay({
                 }
                 guacClient.sendKeyEvent(0, keysym);
             };
+            // Document-level keyboard — works regardless of which element has DOM
+            // focus, but deliberately skips events while a native input/textarea
+            // elsewhere on the page is focused (e.g. the hidden mobile-keyboard
+            // input below, which has its own dedicated, unguarded instance).
+            windowKeyboard = new Guacamole.Keyboard(document);
+            windowKeyboard.onkeydown = (keysym: number) => {
+                if (isNativeInput()) return;
+                forwardKeyDown(keysym);
+            };
+            windowKeyboard.onkeyup = (keysym: number) => {
+                if (isNativeInput()) return;
+                forwardKeyUp(keysym);
+            };
+            // Mobile on-screen keyboard: bound directly to the hidden input (not
+            // document), so it's exempt from the isNativeInput guard above — that
+            // guard exists to ignore *other* native fields, not this one.
+            if (hiddenInputRef.current) {
+                mobileKeyboard = new Guacamole.Keyboard(hiddenInputRef.current);
+                mobileKeyboard.onkeydown = forwardKeyDown;
+                mobileKeyboard.onkeyup = forwardKeyUp;
+            }
             // Connect
             guacClient.connect(connectData);
         });
@@ -317,6 +361,7 @@ export default function GuacamoleDisplay({
             fitFnRef.current = null;
             macMetaDown = macVSuppressed = ctrlDown = ctrlVSuppressed = false;
             if (pasteHandler) document.removeEventListener('paste', pasteHandler);
+            guacClientRef.current = null;
             try {
                 guacClient?.disconnect();
             } catch {
@@ -327,6 +372,11 @@ export default function GuacamoleDisplay({
                     windowKeyboard.onkeydown = null;
                     windowKeyboard.onkeyup = null;
                     windowKeyboard.reset?.();
+                }
+                if (mobileKeyboard) {
+                    mobileKeyboard.onkeydown = null;
+                    mobileKeyboard.onkeyup = null;
+                    mobileKeyboard.reset?.();
                 }
             } catch {
                 /* ignore */
@@ -341,25 +391,113 @@ export default function GuacamoleDisplay({
     const isConnecting = clientState === 1 || clientState === 2;
     const isConnected = clientState === 3;
     const label = CLIENT_STATE_LABELS[clientState] ?? String(clientState);
+
+    /** Single key tap: down, then up shortly after. */
+    const sendTap = (keysym: number) => {
+        const client = guacClientRef.current;
+        if (!client) return;
+        client.sendKeyEvent(1, keysym);
+        setTimeout(() => client.sendKeyEvent(0, keysym), 50);
+    };
+    /** Chord: press every key in order, hold briefly, then release in reverse order. */
+    const sendCombo = (keysyms: number[]) => {
+        const client = guacClientRef.current;
+        if (!client) return;
+        keysyms.forEach((k) => client.sendKeyEvent(1, k));
+        setTimeout(() => {
+            [...keysyms].reverse().forEach((k) => client.sendKeyEvent(0, k));
+        }, 80);
+    };
+    const toggleKeyboard = () => {
+        setShowKeyboard((v) => {
+            const next = !v;
+            if (next) setTimeout(() => hiddenInputRef.current?.focus(), 0);
+            else hiddenInputRef.current?.blur();
+            return next;
+        });
+    };
+
     return (
         <div className="relative h-full w-full bg-black overflow-hidden">
-            {/* Status badge */}
-            <div className="absolute top-2 right-2 z-10 flex items-center gap-2 pointer-events-none">
-                <span
-                    className={`w-2 h-2 rounded-full ${
-                        isConnected
-                            ? 'bg-green-500'
-                            : isConnecting
-                              ? 'bg-yellow-500 animate-pulse'
-                              : 'bg-red-500'
+            {/* Status badge + keyboard toggle */}
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+                <button
+                    onClick={toggleKeyboard}
+                    title={showKeyboard ? 'Hide keyboard' : 'Show keyboard'}
+                    className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${
+                        showKeyboard
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-black/50 text-gray-400 hover:text-white'
                     }`}
-                />
-                <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded">
-                    {label}
-                </span>
+                >
+                    <Keyboard className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex items-center gap-2 pointer-events-none">
+                    <span
+                        className={`w-2 h-2 rounded-full ${
+                            isConnected
+                                ? 'bg-green-500'
+                                : isConnecting
+                                  ? 'bg-yellow-500 animate-pulse'
+                                  : 'bg-red-500'
+                        }`}
+                    />
+                    <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded">
+                        {label}
+                    </span>
+                </div>
             </div>
             {/* Guacamole display is mounted here via useEffect */}
             <div ref={containerRef} className="h-full w-full" />
+            {/* Hidden input: focusing it summons the mobile OS keyboard. Its own
+                Guacamole.Keyboard instance (bound above) forwards its key events —
+                nothing is displayed or typed here, everything goes to the remote screen. */}
+            <input
+                ref={hiddenInputRef}
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                aria-hidden="true"
+                className="absolute w-px h-px opacity-0 -left-full"
+            />
+            {/* Special keys no browser can send via a normal keypress. */}
+            {showKeyboard && (
+                <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-1.5 px-2 py-2 bg-black/70 backdrop-blur-sm overflow-x-auto no-scrollbar">
+                    <button
+                        onClick={() => sendTap(KEYSYM.ESCAPE)}
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                    >
+                        Esc
+                    </button>
+                    <button
+                        onClick={() => sendTap(KEYSYM.TAB)}
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                    >
+                        Tab
+                    </button>
+                    <button
+                        onClick={() => sendCombo([KEYSYM.ALT_L, KEYSYM.TAB])}
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                    >
+                        Alt+Tab
+                    </button>
+                    <button
+                        onClick={() => sendCombo([KEYSYM.CTRL_L, KEYSYM.ALT_L, KEYSYM.DELETE])}
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                    >
+                        Ctrl+Alt+Del
+                    </button>
+                    <button
+                        onClick={() => sendTap(KEYSYM.SUPER_L)}
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                    >
+                        Win
+                    </button>
+                </div>
+            )}
             {/* Connecting overlay */}
             {isConnecting && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">

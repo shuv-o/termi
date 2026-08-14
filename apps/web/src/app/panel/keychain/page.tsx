@@ -192,9 +192,6 @@ export default function KeychainPage() {
             <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                            Encrypted credentials
-                        </p>
                         <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Keychain</h1>
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                             {entries.length > 0
