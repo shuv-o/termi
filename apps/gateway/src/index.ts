@@ -212,13 +212,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     // token is NO LONGER in the URL — it arrives in the first WS message
     const protocol = url.searchParams.get('protocol') as
-        | 'ssh'
-        | 'scp'
-        | 'rdp'
-        | 'vnc'
-        | 'telnet'
-        | 'local'
-        | 'tunnel';
+        'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
     const browserWidth = parseInt(url.searchParams.get('width') || '0', 10) || 0;

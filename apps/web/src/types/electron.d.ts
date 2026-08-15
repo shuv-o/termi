@@ -12,8 +12,7 @@ interface ElectronLocalTerminalAPI {
 
 /** Result of a native passkey ceremony bridged from the main process. */
 type ElectronPasskeyResult<T> =
-    | { success: true; data: T }
-    | { success: false; error: string; message?: string };
+    { success: true; data: T } | { success: false; error: string; message?: string };
 
 /**
  * Native passkey bridge — only wired on macOS, where Chromium's WebAuthn is

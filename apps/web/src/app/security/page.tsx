@@ -205,8 +205,8 @@ export default function SecurityPage() {
 
             <Section id="operator" title="Operator responsibilities">
                 <p>
-                    Because Termix is self-hosted, a secure deployment is a shared responsibility. As
-                    an operator you should:
+                    Because Termix is self-hosted, a secure deployment is a shared responsibility.
+                    As an operator you should:
                 </p>
                 <ul>
                     <li>

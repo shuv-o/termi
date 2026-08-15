@@ -36,14 +36,7 @@ export type ProtocolFilter = 'all' | 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';
 export const PROTOCOL_FILTERS: ProtocolFilter[] = ['all', 'SSH', 'SCP', 'RDP', 'VNC', 'TELNET'];
 
 export type SortField =
-    | 'name'
-    | 'lastUsed'
-    | 'protocol'
-    | 'status'
-    | 'cpu'
-    | 'ram'
-    | 'latency'
-    | 'favorite';
+    'name' | 'lastUsed' | 'protocol' | 'status' | 'cpu' | 'ram' | 'latency' | 'favorite';
 
 export type SortDir = 'asc' | 'desc';
 

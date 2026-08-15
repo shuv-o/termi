@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, Maximize2, Minimize2, RotateCcw, X, Keyboard, Loader2 } from 'lucide-react';
+import { Keyboard, Loader2, Maximize2, Minimize2, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const TelnetTerminal = dynamic(() => import('@/components/terminal/TelnetTerminal'), {
@@ -88,6 +88,7 @@ export default function TelnetConnectionPage() {
     // Initial load
     useEffect(() => {
         let cancelled = false;
+
         async function init() {
             try {
                 const [serverRes, tokenResult] = await Promise.all([
@@ -108,6 +109,7 @@ export default function TelnetConnectionPage() {
                 if (!cancelled) setLoading(false);
             }
         }
+
         init();
         return () => {
             cancelled = true;

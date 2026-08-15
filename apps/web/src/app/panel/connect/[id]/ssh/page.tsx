@@ -1,23 +1,22 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
-    ArrowLeft,
     Circle,
+    FolderOpen,
+    Keyboard,
+    KeyRound,
+    Loader2,
     Maximize2,
     Minimize2,
-    RotateCcw,
-    FolderOpen,
-    X,
-    KeyRound,
-    Keyboard,
-    Wrench,
     Plus,
+    RotateCcw,
     Terminal as TerminalIcon,
-    Loader2,
+    Wrench,
+    X,
 } from 'lucide-react';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
@@ -217,6 +216,7 @@ export default function SSHConnectionPage() {
 
     useEffect(() => {
         let cancelled = false;
+
         async function initConnection() {
             try {
                 const [serverResponse, tokenResult] = await Promise.all([
@@ -250,6 +250,7 @@ export default function SSHConnectionPage() {
                 setLoading(false);
             }
         }
+
         initConnection();
         return () => {
             cancelled = true;

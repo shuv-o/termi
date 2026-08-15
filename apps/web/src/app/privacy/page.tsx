@@ -46,8 +46,8 @@ export default function PrivacyPage() {
                 <p>
                     This policy describes what data a Termix instance handles so that you — as the
                     operator and as a user — understand exactly where your information goes. If you
-                    are using someone else&apos;s Termix deployment, the operator of that instance is
-                    the data controller, not the Termix project.
+                    are using someone else&apos;s Termix deployment, the operator of that instance
+                    is the data controller, not the Termix project.
                 </p>
             </Section>
 
