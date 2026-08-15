@@ -40,7 +40,8 @@
     "dependencies": {
         "electron-updater": "^6.6.2",
         "electron-webauthn": "~1.2.0",
-        "node-pty": "^1.1.0"
+        "node-pty": "^1.1.0",
+        "sharp": "0.35.3"
     },
     "overrides": {
         "shell-quote": "^1.8.4",
@@ -51,8 +52,8 @@
     "devDependencies": {
         "@electron/rebuild": "^4.0.0",
         "concurrently": "^9.2.1",
-        "electron": "41.3.0",
-        "electron-builder": "26.8.1",
+        "electron": "^41.10.5",
+        "electron-builder": "^26.15.3",
         "esbuild": "^0.28.1",
         "eslint-config-prettier": "^10.1.8",
         "prettier": "^3.8.3",
