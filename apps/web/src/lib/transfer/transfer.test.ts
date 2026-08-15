@@ -292,7 +292,7 @@ describe('parseExportFile', () => {
         [
             'a payload of the wrong shape',
             {
-                format: 'termi-export',
+                format: 'termix-export',
                 version: 1,
                 exportedAt: NOW.toISOString(),
                 includesCredentials: false,
@@ -521,7 +521,7 @@ describe('buildExportFile', () => {
         const file = buildExportFile(payload(), { includesCredentials: true, now: NOW });
 
         expect(file).toMatchObject({
-            format: 'termi-export',
+            format: 'termix-export',
             version: 1,
             encrypted: false,
             includesCredentials: true,

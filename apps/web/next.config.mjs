@@ -20,7 +20,7 @@ const nextConfig = {
     env: {
         NEXT_PUBLIC_APP_NAME: 'Termi',
         NEXT_PUBLIC_APP_VERSION: '1.0.0',
-        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'https://github.com/shuvoooo/termi',
+        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'https://github.com/shuv-o/termi',
     },
 
     // Prevent Next.js/Turbopack from bundling packages that use native Node.js

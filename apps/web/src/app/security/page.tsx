@@ -32,13 +32,13 @@ export default function SecurityPage() {
     return (
         <LegalShell
             title="Security Policy"
-            description="How Termi protects your data, and how to report a vulnerability responsibly."
+            description="How Termix protects your data, and how to report a vulnerability responsibly."
             lastUpdated="June 6, 2026"
             toc={toc}
         >
             <Section id="reporting" title="Reporting a vulnerability">
                 <p>
-                    We take the security of Termi seriously. If you believe you have found a
+                    We take the security of Termix seriously. If you believe you have found a
                     security vulnerability, please report it to us <strong>privately</strong> — do
                     not open a public GitHub issue, discussion, or pull request for it.
                 </p>
@@ -46,7 +46,7 @@ export default function SecurityPage() {
                     <li>
                         <strong>Preferred:</strong> use GitHub&apos;s{' '}
                         <Link
-                            href="https://github.com/shuvoooo/termi/security/advisories/new"
+                            href="https://github.com/shuv-o/termix/security/advisories/new"
                             rel="noopener noreferrer"
                             target="_blank"
                         >
@@ -76,7 +76,7 @@ export default function SecurityPage() {
 
             <Section id="supported-versions" title="Supported versions">
                 <p>
-                    Termi is distributed as source. Security fixes are applied to the{' '}
+                    Termix is distributed as source. Security fixes are applied to the{' '}
                     <code>main</code> branch, and we recommend running the latest released version.
                     Older versions do not receive backported security patches.
                 </p>
@@ -101,7 +101,7 @@ export default function SecurityPage() {
 
             <Section id="architecture" title="Security architecture">
                 <p>
-                    Termi runs as two independently deployable services plus a remote-desktop
+                    Termix runs as two independently deployable services plus a remote-desktop
                     daemon:
                 </p>
                 <ul>
@@ -205,7 +205,7 @@ export default function SecurityPage() {
 
             <Section id="operator" title="Operator responsibilities">
                 <p>
-                    Because Termi is self-hosted, a secure deployment is a shared responsibility. As
+                    Because Termix is self-hosted, a secure deployment is a shared responsibility. As
                     an operator you should:
                 </p>
                 <ul>

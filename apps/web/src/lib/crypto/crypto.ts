@@ -1,5 +1,5 @@
 /**
- * Termi Cryptography Module
+ * Termix Cryptography Module
  *
  * Security Architecture:
  * - All credentials are encrypted using AES-256-GCM before storage

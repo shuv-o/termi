@@ -107,7 +107,7 @@ export default function LegalShell({
                             Security
                         </Link>
                         <Link
-                            href="https://github.com/shuvoooo/termi"
+                            href="https://github.com/shuv-o/termi"
                             className="hover:text-white transition-colors"
                             rel="noopener noreferrer"
                             target="_blank"

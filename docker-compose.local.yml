@@ -3,19 +3,19 @@
 #   docker compose -f docker-compose.local.yml up
 #
 # If node_modules seem stale/wrong, force-reinitialise:
-#   docker volume rm termi_node_modules && docker compose -f docker-compose.local.yml up
+#   docker volume rm termix_node_modules && docker compose -f docker-compose.local.yml up
 
 services:
   guacd:
     image: guacamole/guacd:1.6.0
-    container_name: termi-guacd
+    container_name: termix-guacd
     restart: unless-stopped
     networks:
-      - termi-network
+      - termix-network
 
   postgres:
     image: postgres:17-alpine
-    container_name: termi-postgres
+    container_name: termix-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-termi}
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - termi-network
+      - termix-network
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}" ]
       interval: 10s
@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-init-modules
+    container_name: termix-init-modules
     restart: "no"
     volumes:
       - node_modules:/vol
@@ -50,7 +50,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-migrate
+    container_name: termix-migrate
     working_dir: /app
     restart: "no"
     depends_on:
@@ -65,7 +65,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-termi}:${POSTGRES_PASSWORD:-termi}@postgres:5432/${POSTGRES_DB:-termi}
     command: ["sh", "-c", "cd apps/web && ../../node_modules/.bin/prisma generate && ../../node_modules/.bin/prisma migrate deploy"]
     networks:
-      - termi-network
+      - termix-network
 
   gateway:
     # Reuse the deps stage — has all workspace deps compiled for Linux.
@@ -74,7 +74,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-gateway
+    container_name: termix-gateway
     working_dir: /app
     restart: unless-stopped
     depends_on:
@@ -99,14 +99,14 @@ services:
       NODE_ENV: development
     command: npm run dev:gateway
     networks:
-      - termi-network
+      - termix-network
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       target: deps
-    container_name: termi-web
+    container_name: termix-web
     working_dir: /app
     restart: unless-stopped
     depends_on:
@@ -145,14 +145,14 @@ services:
       NEXT_TELEMETRY_DISABLED: 1
     command: npm run dev
     networks:
-      - termi-network
+      - termix-network
 
 volumes:
   postgres_data:
   # Shared Linux-compiled node_modules for web, gateway, and migrate containers.
-  # Populated by init-modules on startup; delete to force reinit: docker volume rm termi_node_modules
+  # Populated by init-modules on startup; delete to force reinit: docker volume rm termix_node_modules
   node_modules:
 
 networks:
-  termi-network:
+  termix-network:
     driver: bridge

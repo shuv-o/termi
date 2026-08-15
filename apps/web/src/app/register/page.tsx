@@ -299,7 +299,7 @@ function RegisterContent() {
                                     servers smarter.
                                 </h2>
                                 <p className="text-sm text-muted-foreground mb-8">
-                                    Join developers who trust Termi for secure, instant server
+                                    Join developers who trust Termix for secure, instant server
                                     access.
                                 </p>
                                 <ul className="space-y-3">

@@ -1,5 +1,5 @@
 /**
- * Termi Session Management
+ * Termix Session Management
  *
  * Uses iron-session for secure, encrypted, cookie-based sessions.
  * Session data is encrypted and stored in an HTTP-only cookie.

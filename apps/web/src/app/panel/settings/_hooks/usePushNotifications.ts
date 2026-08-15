@@ -41,7 +41,7 @@ export function usePushNotifications(addToast: AddToast) {
             if (isIOS() && !isStandalone()) {
                 addToast(
                     'error',
-                    'On iPhone/iPad, add Termi to your Home Screen first (Share → Add to Home Screen), then enable notifications from inside the installed app.',
+                    'On iPhone/iPad, add Termix to your Home Screen first (Share → Add to Home Screen), then enable notifications from inside the installed app.',
                 );
                 return;
             }

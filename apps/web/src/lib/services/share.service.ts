@@ -101,9 +101,9 @@ export async function sendShareInvitation(
         },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.dp.shuvoo.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.dp.shuvoo.com';
     const inviteUrl = `${appUrl}/invitations/${token}`; // raw token in URL, hash stored in DB
-    const from = process.env.SMTP_FROM || '"Termi" <noreply@termi.app>';
+    const from = process.env.SMTP_FROM || '"Termi" <noreply@termix.run>';
 
     // User-controlled fields are escaped before being placed in HTML to prevent
     // markup/link injection in the delivered email.
@@ -127,7 +127,7 @@ export async function sendShareInvitation(
             Accept Invitation
           </a>
           <p style="color:#64748b;font-size:13px;margin:0">
-            This invitation expires in 7 days. If you don't have a Termi account yet, you'll be asked to create one first.
+            This invitation expires in 7 days. If you don't have a Termix account yet, you'll be asked to create one first.
           </p>
           <p style="color:#475569;font-size:12px;margin:16px 0 0">
             If you weren't expecting this invitation, you can safely ignore this email.

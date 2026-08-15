@@ -1,5 +1,5 @@
 /**
- * Termi server export/import file format (v1).
+ * Termix server export/import file format (v1).
  *
  * One shape covers both the encrypted and the plaintext variants so a single
  * parser can read either — `encrypted` selects which branch `payload` holds.
@@ -12,7 +12,7 @@ import { z } from 'zod';
 
 import { Protocol } from '@/app/generated/prisma/client';
 
-export const EXPORT_FORMAT = 'termi-export' as const;
+export const EXPORT_FORMAT = 'termix-export' as const;
 export const EXPORT_VERSION = 1 as const;
 
 /**
@@ -131,8 +131,8 @@ export const exportFileSchema = z.discriminatedUnion('encrypted', [
 
 export type ExportFile = z.infer<typeof exportFileSchema>;
 
-/** Suggested download filename, e.g. `termi-servers-2026-07-18.json`. */
+/** Suggested download filename, e.g. `termix-servers-2026-07-18.json`. */
 export function exportFilename(extension: 'json' | 'xlsx' | 'csv', date: Date): string {
     const stamp = date.toISOString().slice(0, 10);
-    return `termi-servers-${stamp}.${extension}`;
+    return `termix-servers-${stamp}.${extension}`;
 }

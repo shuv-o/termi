@@ -520,7 +520,7 @@ export async function runBenchmark(
 
                 const ramWriteOut = await execSSH(
                     client,
-                    'dd if=/dev/zero of=/dev/shm/.termi_bench bs=1M count=256 conv=fsync 2>&1',
+                    'dd if=/dev/zero of=/dev/shm/.termix_bench bs=1M count=256 conv=fsync 2>&1',
                     90000,
                 );
                 const ramWriteMBps = parseDdMBps(ramWriteOut);
@@ -536,7 +536,7 @@ export async function runBenchmark(
 
                 const ramReadOut = await execSSH(
                     client,
-                    'dd if=/dev/shm/.termi_bench of=/dev/null bs=1M 2>&1; rm -f /dev/shm/.termi_bench',
+                    'dd if=/dev/shm/.termix_bench of=/dev/null bs=1M 2>&1; rm -f /dev/shm/.termix_bench',
                     90000,
                 );
                 const ramReadMBps = parseDdMBps(ramReadOut);
@@ -577,7 +577,7 @@ export async function runBenchmark(
 
                 const diskWriteOut = await execSSH(
                     client,
-                    'dd if=/dev/zero of=/tmp/.termi_bench bs=1M count=256 conv=fdatasync 2>&1',
+                    'dd if=/dev/zero of=/tmp/.termix_bench bs=1M count=256 conv=fdatasync 2>&1',
                     180000,
                 );
                 const diskWriteMBps = parseDdMBps(diskWriteOut);
@@ -596,7 +596,7 @@ export async function runBenchmark(
 
                 const diskReadOut = await execSSH(
                     client,
-                    `(sync; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; true); dd if=/tmp/.termi_bench of=/dev/null bs=1M 2>&1; rm -f /tmp/.termi_bench`,
+                    `(sync; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null; true); dd if=/tmp/.termix_bench of=/dev/null bs=1M 2>&1; rm -f /tmp/.termix_bench`,
                     180000,
                 );
                 const diskReadMBps = parseDdMBps(diskReadOut);
@@ -697,7 +697,7 @@ export async function runBenchmark(
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 try {
-                    await execSSH(client, 'rm -f /dev/shm/.termi_bench /tmp/.termi_bench', 5000);
+                    await execSSH(client, 'rm -f /dev/shm/.termix_bench /tmp/.termix_bench', 5000);
                 } catch {
                     /* ignore */
                 }

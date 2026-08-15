@@ -5,7 +5,7 @@ import { Star, X } from 'lucide-react';
 
 /**
  * One-time, dismissible nudge to star the repo — shown only after a real
- * signal that Termi is actually working for this person, never on first load.
+ * signal that Termix is actually working for this person, never on first load.
  *
  * Asking on day one is just noise; nobody has an opinion yet. This waits for
  * two things to both be true: the account is at least a few days old (they
@@ -18,7 +18,7 @@ import { Star, X } from 'lucide-react';
 
 const DISMISS_KEY = 'termi:star-nudge-dismissed';
 const MIN_ACCOUNT_AGE_DAYS = 3;
-const STAR_URL = 'https://github.com/shuvoooo/termi';
+const STAR_URL = 'https://github.com/shuv-o/termi';
 
 interface Props {
     /** ISO timestamp the account was created. */
@@ -74,7 +74,7 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                    <p className="text-sm text-slate-200">Glad Termi is working out for you.</p>
+                    <p className="text-sm text-slate-200">Glad Termix is working out for you.</p>
                     <p className="mt-1 text-xs text-slate-400">
                         A star helps others find it, and tells me what to prioritize next.
                     </p>

@@ -12,19 +12,19 @@ let win;
 
 //   Remote server URL (baked at build time)                ─
 
-// The hosted Termi deployment serves the web UI and proxies SSH/SCP/RDP/VNC
+// The hosted Termix deployment serves the web UI and proxies SSH/SCP/RDP/VNC
 // through its own gateway + guacd. This desktop app is just a native shell
 // around that remote app, plus a local terminal. Resolution order:
-//   1. TERMI_REMOTE_URL env var (used by the dev scripts)
+//   1. TERMIX_REMOTE_URL env var (used by the dev scripts)
 //   2. build-config.json written next to main.js at build time
 //   3. the hardcoded default below
 function getRemoteUrl() {
-    if (process.env.TERMI_REMOTE_URL) return process.env.TERMI_REMOTE_URL;
+    if (process.env.TERMIX_REMOTE_URL) return process.env.TERMIX_REMOTE_URL;
     try {
         const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'build-config.json'), 'utf8'));
         if (cfg.remoteUrl) return cfg.remoteUrl;
     } catch (_) {}
-    return 'https://termi.shuvoo.com';
+    return 'https://termix.run';
 }
 
 const REMOTE_URL = getRemoteUrl();
@@ -779,8 +779,8 @@ app.whenReady().then(() => {
     // marker and grants a 30-day rolling session instead of the 7-day web one.
     try {
         const baseUA = session.defaultSession.getUserAgent();
-        if (!baseUA.includes('TermiDesktop')) {
-            session.defaultSession.setUserAgent(`${baseUA} TermiDesktop/${app.getVersion()}`);
+        if (!baseUA.includes('TermixDesktop')) {
+            session.defaultSession.setUserAgent(`${baseUA} TermixDesktop/${app.getVersion()}`);
         }
     } catch (e) {
         console.warn('[main] failed to set desktop User-Agent:', e.message);

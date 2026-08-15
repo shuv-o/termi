@@ -13,8 +13,8 @@ import { githubFetch } from '@/lib/github';
  * GitHub API itself (same constraint that `/api/download` works around).
  */
 
-const GITHUB_REPO_API = 'https://api.github.com/repos/shuvoooo/termi';
-const GITHUB_REPO_URL = 'https://github.com/shuvoooo/termi';
+const GITHUB_REPO_API = 'https://api.github.com/repos/shuv-o/termi';
+const GITHUB_REPO_URL = 'https://github.com/shuv-o/termi';
 
 /**
  * How stale the star count may get.
@@ -83,14 +83,14 @@ export default async function StarOnGitHub() {
                                 Enjoying Termi? Star it on GitHub
                             </h2>
                             <p className="text-slate-400 max-w-xl">
-                                Termi is free, open source and MIT licensed. A star costs you
+                                Termix is free, open source and MIT licensed. A star costs you
                                 nothing, helps other developers find the project, and keeps it
                                 moving forward.
                             </p>
                             <p className="text-slate-500 text-sm max-w-xl mt-2">
                                 Just want to bookmark it? A star is lighter than a fork — and
                                 it&apos;s the only one that shows up in search and helps others find
-                                Termi too.
+                                Termix too.
                             </p>
 
                             {/* Hidden at zero — "0 stars" under a "please star

@@ -73,7 +73,7 @@ export async function probeTunnelTarget(
             });
             stream.on('error', () => finish(false));
             stream.on('close', () => finish(false));
-            stream.write('HEAD / HTTP/1.0\r\nHost: termi-probe\r\nConnection: close\r\n\r\n');
+            stream.write('HEAD / HTTP/1.0\r\nHost: termix-probe\r\nConnection: close\r\n\r\n');
         });
     });
 }

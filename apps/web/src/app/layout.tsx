@@ -8,15 +8,15 @@ import { getSiteUrl } from '@/lib/site';
 export const metadata: Metadata = {
     // Resolves relative OG/twitter image URLs and the canonical link tag. This
     // must be the site people actually land on when they click a shared link,
-    // and — since Termi is self-hosted — that's a different domain for every
+    // and — since Termix is self-hosted — that's a different domain for every
     // deployment (NEXT_PUBLIC_APP_URL), not always this project's own site.
     metadataBase: new URL(getSiteUrl()),
     title: {
-        default: 'Termi - Secure Server Management',
+        default: 'Termix - Secure Server Management',
         template: '%s | Termi',
     },
     description:
-        'Termi is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
+        'Termix is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
     keywords: [
         'server management',
         'SSH client',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     authors: [
         {
             name: 'Shuvo',
-            url: 'https://github.com/shuvoooo',
+            url: 'https://github.com/shuv-o',
         },
     ],
     creator: 'Shuvo',
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
         statusBarStyle: 'black-translucent',
     },
     openGraph: {
-        title: 'Termi - Secure Server Management',
+        title: 'Termix - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
         type: 'website',
@@ -68,10 +68,10 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Termi - Secure Server Management',
+        title: 'Termix - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser.',
-        creator: '@shuvoooo',
+        creator: '@shuv-o',
     },
     robots: {
         index: true,
@@ -132,15 +132,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                                     operatingSystem: 'Any',
                                     description:
                                         'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-                                    url: 'https://github.com/shuvoooo/termi',
+                                    url: 'https://github.com/shuv-o/termi',
                                     author: {
                                         '@type': 'Person',
                                         name: 'Shuvo',
                                         email: 'shuvo.punam@gmail.com',
-                                        url: 'https://github.com/shuvoooo',
+                                        url: 'https://github.com/shuv-o',
                                         sameAs: [
-                                            'https://github.com/shuvoooo',
-                                            'https://www.linkedin.com/in/shuvoooo/',
+                                            'https://github.com/shuv-o',
+                                            'https://www.linkedin.com/in/shuv-o/',
                                         ],
                                     },
                                     license: 'https://opensource.org/licenses/MIT',
@@ -164,10 +164,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                                     '@type': 'Person',
                                     name: 'Shuvo',
                                     email: 'shuvo.punam@gmail.com',
-                                    url: 'https://github.com/shuvoooo',
+                                    url: 'https://github.com/shuv-o',
                                     sameAs: [
-                                        'https://github.com/shuvoooo',
-                                        'https://www.linkedin.com/in/shuvoooo/',
+                                        'https://github.com/shuv-o',
+                                        'https://www.linkedin.com/in/shuv-o/',
                                     ],
                                 },
                             ],

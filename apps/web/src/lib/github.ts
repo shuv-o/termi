@@ -16,7 +16,7 @@
  *   unauthenticated → 60 requests/hour
  *   authenticated   → 5000 requests/hour
  *
- * Optional. Termi reads only public repository metadata, so everything works
+ * Optional. Termix reads only public repository metadata, so everything works
  * without it — a token just raises the ceiling, letting the caches use a
  * shorter TTL. Self-hosters are never required to supply one.
  *
@@ -52,7 +52,7 @@ export interface GitHubCacheTtl {
 function githubHeaders(withAuth: boolean): Record<string, string> {
     const headers: Record<string, string> = {
         Accept: 'application/vnd.github+json',
-        'User-Agent': 'termi-web',
+        'User-Agent': 'termix-web',
     };
 
     if (withAuth && GITHUB_TOKEN) {

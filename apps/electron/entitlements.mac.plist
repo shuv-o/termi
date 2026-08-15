@@ -10,11 +10,11 @@
     <key>com.apple.application-identifier</key>
     <string>TEAM_ID.com.shuvoo.termi</string>
 
-    <!-- Scope passkeys to the Termi domain (must match the server's WebAuthn
+    <!-- Scope passkeys to the Termix domain (must match the server's WebAuthn
          rpID and be published in the domain's apple-app-site-association file). -->
     <key>com.apple.developer.associated-domains</key>
     <array>
-        <string>webcredentials:termi.shuvoo.com</string>
+        <string>webcredentials:termix.run</string>
     </array>
 
     <!-- Electron / hardened-runtime defaults -->

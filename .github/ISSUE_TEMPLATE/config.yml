@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: 🙋 Support
-    url: https://github.com/shuvoooo/termi/discussions
+    url: https://github.com/shuv-o/termix/discussions
     about: Need help with setup or usage? Ask in Discussions.
   - name: 🔒 Security Vulnerability
-    url: https://github.com/shuvoooo/termi/security/advisories/new
+    url: https://github.com/shuv-o/termix/security/advisories/new
     about: Please report security vulnerabilities privately — do NOT open a public issue.
   - name: 💬 Discussion / Question
-    url: https://github.com/shuvoooo/termi/discussions
+    url: https://github.com/shuv-o/termix/discussions
     about: Have a question or want to discuss an idea? Start a discussion.

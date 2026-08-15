@@ -11,7 +11,7 @@ import { sealData, unsealData } from 'iron-session';
 import { cookies } from 'next/headers';
 import { ResponseCookies } from 'next/dist/compiled/@edge-runtime/cookies';
 
-const COOKIE_NAME = 'termi_oauth';
+const COOKIE_NAME = 'termix_oauth';
 const TTL_SECONDS = 600; // 10 minutes
 
 interface OAuthState {

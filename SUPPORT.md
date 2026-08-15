@@ -4,11 +4,11 @@ Thanks for using Termi. This page describes where to ask questions and report pr
 
 ## Getting Help
 
-- **Usage questions / setup help**: [GitHub Discussions](https://github.com/shuvoooo/termi/discussions)
-- **Bug reports**: [Open a bug report](https://github.com/shuvoooo/termi/issues/new?template=bug_report.yml)
-- **Feature requests**: [Open a feature request](https://github.com/shuvoooo/termi/issues/new?template=feature_request.yml)
+- **Usage questions / setup help**: [GitHub Discussions](https://github.com/shuv-o/termix/discussions)
+- **Bug reports**: [Open a bug report](https://github.com/shuv-o/termix/issues/new?template=bug_report.yml)
+- **Feature requests**: [Open a feature request](https://github.com/shuv-o/termix/issues/new?template=feature_request.yml)
 
-Please include your Termi version, deployment method (Docker/dev/Electron), and relevant logs with secrets redacted.
+Please include your Termix version, deployment method (Docker/dev/Electron), and relevant logs with secrets redacted.
 
 ## Security Issues
 
@@ -16,8 +16,8 @@ Do not report security vulnerabilities in public issues or discussions.
 
 Use one of:
 
-1. [GitHub Security Advisories](https://github.com/shuvoooo/termi/security/advisories/new) (preferred)
-2. Private contact through the maintainer's [GitHub profile](https://github.com/shuvoooo)
+1. [GitHub Security Advisories](https://github.com/shuv-o/termix/security/advisories/new) (preferred)
+2. Private contact through the maintainer's [GitHub profile](https://github.com/shuv-o)
 
 See [SECURITY.md](SECURITY.md) for the full policy.
 

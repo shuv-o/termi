@@ -47,11 +47,11 @@ export function buildBridgeScript(opts: {
     // OS-assigned ephemeral port instead of blindly mirroring the remote one.
     const defaultLocalPort = opts.localPort >= 1024 ? opts.localPort : 0;
     return `#!/usr/bin/env node
-// Termi tunnel bridge — forwards a local port to ${opts.remoteHost}:${opts.remotePort}
+// Termix tunnel bridge — forwards a local port to ${opts.remoteHost}:${opts.remotePort}
 // on "${opts.serverName}" via Termi. Requires Node 22+ (built-in WebSocket).
-// This token expires in 5 minutes if unused — regenerate from Termi if this fails.
+// This token expires in 5 minutes if unused — regenerate from Termix if this fails.
 //
-// Run: node termi-tunnel.mjs
+// Run: node termix-tunnel.mjs
 
 import net from 'node:net';
 
@@ -78,7 +78,7 @@ const server = net.createServer((socket) => {
         if (msg.type === 'tunnel-ready') {
             socket.resume();
         } else if (msg.type === 'error') {
-            console.error('[termi-tunnel] ' + msg.message);
+            console.error('[termix-tunnel] ' + msg.message);
             socket.destroy();
         } else if (msg.type === 'closed' || msg.type === 'disconnected') {
             socket.destroy();
@@ -100,8 +100,8 @@ const server = net.createServer((socket) => {
 
 server.listen(LOCAL_PORT, '127.0.0.1', () => {
     const boundPort = server.address().port;
-    console.log(\`[termi-tunnel] Listening on 127.0.0.1:\${boundPort} -> ${opts.remoteHost}:${opts.remotePort} via ${opts.serverName}\`);
-    console.log('[termi-tunnel] Point your tool at 127.0.0.1:' + boundPort);
+    console.log(\`[termix-tunnel] Listening on 127.0.0.1:\${boundPort} -> ${opts.remoteHost}:${opts.remotePort} via ${opts.serverName}\`);
+    console.log('[termix-tunnel] Point your tool at 127.0.0.1:' + boundPort);
 });
 `;
 }

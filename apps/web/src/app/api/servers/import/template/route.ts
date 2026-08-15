@@ -32,19 +32,19 @@ export async function GET(request: NextRequest) {
 
     switch (format) {
         case 'xlsx':
-            body = buildXlsx('Termi Servers', columns, SAMPLE_ROWS, stamp);
+            body = buildXlsx('Termix Servers', columns, SAMPLE_ROWS, stamp);
             contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-            filename = 'termi-import-template.xlsx';
+            filename = 'termix-import-template.xlsx';
             break;
         case 'json':
             body = Buffer.from(SAMPLE_JSON, 'utf8');
             contentType = 'application/json';
-            filename = 'termi-import-template.json';
+            filename = 'termix-import-template.json';
             break;
         case 'csv':
             body = buildCsv(columns, SAMPLE_ROWS);
             contentType = 'text/csv; charset=utf-8';
-            filename = 'termi-import-template.csv';
+            filename = 'termix-import-template.csv';
             break;
         default:
             return errorResponse('format must be one of: csv, json, xlsx', 400);

@@ -1,7 +1,7 @@
 services:
   guacd:
     image: guacamole/guacd:1.6.0
-    container_name: termi-guacd
+    container_name: termix-guacd
     restart: unless-stopped
     networks:
       - dokploy-network
@@ -13,7 +13,7 @@ services:
       target: builder
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
-    container_name: termi-migrate
+    container_name: termix-migrate
     restart: "no"
     environment:
       DB_HOST: ${DB_HOST}
@@ -69,7 +69,7 @@ services:
       gateway:
         condition: service_started
 
-    container_name: termi-web
+    container_name: termix-web
     restart: unless-stopped
     environment:
       DB_HOST: ${DB_HOST}
@@ -111,7 +111,7 @@ services:
     build:
       context: .
       dockerfile: apps/gateway/Dockerfile
-    container_name: termi-gateway
+    container_name: termix-gateway
     restart: unless-stopped
     depends_on:
       - guacd

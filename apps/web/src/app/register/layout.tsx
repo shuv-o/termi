@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Create Account',
-    description: 'Create your Termi account and start managing your servers securely in minutes.',
+    description: 'Create your Termix account and start managing your servers securely in minutes.',
     robots: {
         index: false,
         follow: false,

@@ -27,12 +27,12 @@ describe('getSiteUrl', () => {
     it('falls back to the project domain, not a broken/foreign URL, when unset', async () => {
         delete process.env.NEXT_PUBLIC_APP_URL;
         const { getSiteUrl } = await import('./site');
-        expect(getSiteUrl()).toBe('https://termi.shuvoo.com');
+        expect(getSiteUrl()).toBe('https://termix.run');
     });
 
     it('treats a whitespace-only value as unset', async () => {
         process.env.NEXT_PUBLIC_APP_URL = '   ';
         const { getSiteUrl } = await import('./site');
-        expect(getSiteUrl()).toBe('https://termi.shuvoo.com');
+        expect(getSiteUrl()).toBe('https://termix.run');
     });
 });

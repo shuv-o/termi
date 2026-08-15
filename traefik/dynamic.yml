@@ -1,5 +1,5 @@
 {{/*
-  Termi Traefik dynamic routing configuration.
+  Termix Traefik dynamic routing configuration.
 
   Supports two deployment modes, controlled by environment variables:
 

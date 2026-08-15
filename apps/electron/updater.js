@@ -27,7 +27,7 @@ const { app, dialog, ipcMain, shell, BrowserWindow } = require('electron');
 const IS_MAC = process.platform === 'darwin';
 
 // Where to send macOS users to download a build by hand.
-const RELEASES_URL = 'https://github.com/shuvoooo/termi/releases/latest';
+const RELEASES_URL = 'https://github.com/shuv-o/termix/releases/latest';
 
 // How often to re-check while the app stays open.
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -55,7 +55,7 @@ function promptInstall(info) {
         defaultId: 0,
         cancelId: 1,
         title: 'Update ready',
-        message: `Termi ${info?.version || ''} is ready to install.`,
+        message: `Termix ${info?.version || ''} is ready to install.`,
         detail: 'The update will be applied the next time you restart. Restart now?',
     };
     const choice = w ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts);
@@ -81,7 +81,7 @@ function promptManualDownload(info) {
         defaultId: 0,
         cancelId: 1,
         title: 'Update available',
-        message: `Termi ${info?.version || ''} is available.`,
+        message: `Termix ${info?.version || ''} is available.`,
         detail: 'Download the new version and drag it into Applications to update. Open the download page now?',
     };
     const choice = w ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts);
@@ -216,7 +216,7 @@ async function checkForUpdatesInteractive() {
             const opts = {
                 type: 'info',
                 title: 'Updates',
-                message: 'Termi is up to date.',
+                message: 'Termix is up to date.',
                 detail: `You’re running the latest version (${app.getVersion()}).`,
             };
             if (w) dialog.showMessageBox(w, opts);

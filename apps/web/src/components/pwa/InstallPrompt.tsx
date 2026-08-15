@@ -111,7 +111,7 @@ export default function InstallPrompt() {
                         </p>
                     ) : (
                         <p className="text-slate-300">
-                            Install Termi for a faster, full-screen, app-like experience.
+                            Install Termix for a faster, full-screen, app-like experience.
                         </p>
                     )}
                 </div>

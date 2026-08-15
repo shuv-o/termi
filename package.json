@@ -1,10 +1,10 @@
 {
-    "name": "termi",
+    "name": "termix",
     "version": "1.0.8",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
-    "author": "Termi Contributors",
+    "author": "Termix Contributors",
     "main": "apps/electron/main.js",
     "workspaces": [
         "apps/*"
@@ -26,8 +26,8 @@
         "db:studio": "npm run db:studio --workspace=apps/web",
         "setup:electron": "electron-rebuild -f -w node-pty",
         "electron:dev": "ELECTRON_DEV=1 electron .",
-        "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
-        "build:electron:config": "node -e \"require('fs').writeFileSync('apps/electron/build-config.json', JSON.stringify({ remoteUrl: process.env.TERMI_REMOTE_URL || 'https://termi.shuvoo.com' }, null, 2) + '\\n')\"",
+        "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMIX_REMOTE_URL=http://localhost:22080 electron .\"",
+        "build:electron:config": "node -e \"require('fs').writeFileSync('apps/electron/build-config.json', JSON.stringify({ remoteUrl: process.env.TERMIX_REMOTE_URL || 'https://termix.run' }, null, 2) + '\\n')\"",
         "build:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder",
         "publish:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder --publish always",
         "mobile:config": "npm run config --workspace=apps/mobile",
@@ -62,5 +62,5 @@
     "engines": {
         "node": ">=22.0.0"
     },
-    "homepage": "https://termi.shuvoo.com"
+    "homepage": "https://termix.run"
 }

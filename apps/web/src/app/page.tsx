@@ -20,14 +20,14 @@ import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
-    title: 'Termi - Secure Server Management',
+    title: 'Termix - Secure Server Management',
     description:
-        'Termi is an open-source, self-hosted server management platform. Access your Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser with enterprise-grade security.',
+        'Termix is an open-source, self-hosted server management platform. Access your Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser with enterprise-grade security.',
     alternates: {
         canonical: '/',
     },
     openGraph: {
-        title: 'Termi - Secure Server Management',
+        title: 'Termix - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with AES-256-GCM encryption and TOTP 2FA.',
         url: '/',
@@ -66,7 +66,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuvoooo/termi"
+                                href="https://github.com/shuv-o/termi"
                                 className="text-slate-300 hover:text-white transition-colors"
                             >
                                 GitHub
@@ -290,7 +290,7 @@ export default async function HomePage() {
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Get Started?</h2>
                     <p className="text-lg text-slate-300 mb-8">
-                        Deploy your own Termi instance in minutes with Docker.
+                        Deploy your own Termix instance in minutes with Docker.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -307,7 +307,7 @@ export default async function HomePage() {
                             </Button>
                         )}
                         <Button variant="secondary" size="lg" asChild>
-                            <Link href="https://github.com/shuvoooo/termi">View on GitHub</Link>
+                            <Link href="https://github.com/shuv-o/termi">View on GitHub</Link>
                         </Button>
                     </div>
                 </div>
@@ -333,7 +333,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuvoooo/termi"
+                                href="https://github.com/shuv-o/termi"
                                 className="hover:text-white transition-colors"
                                 rel="noopener noreferrer"
                                 target="_blank"
@@ -348,7 +348,7 @@ export default async function HomePage() {
                         <p>
                             Built with ❤️ by{' '}
                             <Link
-                                href="https://github.com/shuvoooo"
+                                href="https://github.com/shuv-o"
                                 className="text-primary hover:text-sky-300 transition-colors font-medium"
                                 rel="noopener noreferrer"
                                 target="_blank"
@@ -359,7 +359,7 @@ export default async function HomePage() {
 
                         <div className="flex items-center gap-4">
                             <Link
-                                href="https://github.com/shuvoooo"
+                                href="https://github.com/shuv-o"
                                 aria-label="GitHub profile of Shuvo"
                                 className="hover:text-white transition-colors"
                                 rel="noopener noreferrer"
@@ -368,7 +368,7 @@ export default async function HomePage() {
                                 <Github className="w-5 h-5" />
                             </Link>
                             <Link
-                                href="https://www.linkedin.com/in/shuvoooo/"
+                                href="https://www.linkedin.com/in/shuv-o/"
                                 aria-label="LinkedIn profile of Shuvo"
                                 className="hover:text-white transition-colors"
                                 rel="noopener noreferrer"

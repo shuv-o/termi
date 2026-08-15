@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 /**
- * Bridge for when Termi runs inside the Capacitor native shell (`apps/mobile`).
+ * Bridge for when Termix runs inside the Capacitor native shell (`apps/mobile`).
  *
  * Uses the global `window.Capacitor` injected by the native runtime — no
  * `@capacitor/*` import — so the web bundle stays free of native deps and this

@@ -1,6 +1,6 @@
 # Contributing to Termi
 
-Thank you for your interest in contributing! Termi is a community-driven project and all kinds of contributions are welcome — bug reports, feature requests, documentation improvements, and code changes.
+Thank you for your interest in contributing! Termix is a community-driven project and all kinds of contributions are welcome — bug reports, feature requests, documentation improvements, and code changes.
 
 ---
 
@@ -32,12 +32,12 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 1. **Fork** the repository on GitHub.
 2. **Clone** your fork locally:
     ```bash
-    git clone https://github.com/<your-username>/termi.git
+    git clone https://github.com/<your-username>/termix.git
     cd termi
     ```
 3. **Add the upstream remote** so you can pull in future updates:
     ```bash
-    git remote add upstream https://github.com/shuvoooo/termi.git
+    git remote add upstream https://github.com/shuv-o/termix.git
     ```
 
 ---
@@ -90,7 +90,7 @@ npm run test:e2e         # End-to-end tests (Playwright)
 
 ```bash
 # Start guacd (on Apple Silicon, add --platform linux/arm64)
-docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
+docker run -d -p 4822:4822 --name termix-guacd guacamole/guacd: 1.6.0
 ```
 
 Then add an RDP or VNC server in the dashboard.
@@ -100,7 +100,7 @@ Then add an RDP or VNC server in the dashboard.
 ## Project Structure
 
 ```
-termi/
+termix/
 ├── apps/web/src/
 │   ├── app/api/         # REST API routes (Next.js App Router)
 │   ├── app/panel/       # Dashboard UI pages
@@ -185,7 +185,7 @@ security: validate host before SSRF in /api/servers/test
     git fetch upstream
     git rebase upstream/main
     ```
-2. Open a PR against the `main` branch of `shuvoooo/termi`.
+2. Open a PR against the `main` branch of `shuv-o/termi`.
 3. Fill out the **PR template** — describe what changed and why.
 4. Link the related issue if one exists (`Closes #123`).
 5. Wait for CI to pass and address any review feedback.
@@ -196,7 +196,7 @@ Pull requests are reviewed by maintainers. We aim to provide feedback within a f
 
 ## Release Process (Maintainers)
 
-Termi uses SemVer tags and GitHub Releases.
+Termix uses SemVer tags and GitHub Releases.
 
 1. Ensure `CHANGELOG.md` has a section for the version (for example, `## [1.0.5]`).
 2. Ensure the repo is in a releasable state (CI passing on `main`).
@@ -217,8 +217,8 @@ Termi uses SemVer tags and GitHub Releases.
     ```bash
     npx electron-builder --mac --arm64
     gh release upload v1.0.5 \
-        dist/Termi-1.0.5-arm64.dmg dist/Termi-1.0.5-arm64.dmg.blockmap \
-        dist/Termi-1.0.5-arm64-mac.zip dist/Termi-1.0.5-arm64-mac.zip.blockmap
+        dist/termix-1.0.5-arm64.dmg dist/termix-1.0.5-arm64.dmg.blockmap \
+        dist/termix-1.0.5-arm64-mac.zip dist/termix-1.0.5-arm64-mac.zip.blockmap
     ```
     Skipping this ships a release with no native Apple Silicon build; CI will not warn you.
 
@@ -232,9 +232,9 @@ Termi uses SemVer tags and GitHub Releases.
 
 ## Reporting Bugs
 
-Use the [Bug Report issue template](https://github.com/shuvoooo/termi/issues/new?template=bug_report.yml). Please include:
+Use the [Bug Report issue template](https://github.com/shuv-o/termix/issues/new?template=bug_report.yml). Please include:
 
-- Termi version and deployment type
+- Termix version and deployment type
 - Steps to reproduce
 - Expected vs. actual behaviour
 - Relevant logs (redact all secrets!)
@@ -243,15 +243,15 @@ Use the [Bug Report issue template](https://github.com/shuvoooo/termi/issues/new
 
 ## Requesting Features
 
-Use the [Feature Request issue template](https://github.com/shuvoooo/termi/issues/new?template=feature_request.yml). Describe the problem you're solving and your proposed solution.
+Use the [Feature Request issue template](https://github.com/shuv-o/termix/issues/new?template=feature_request.yml). Describe the problem you're solving and your proposed solution.
 
-For large changes or architectural decisions, open a [Discussion](https://github.com/shuvoooo/termi/discussions) first to get early feedback before writing code.
+For large changes or architectural decisions, open a [Discussion](https://github.com/shuv-o/termix/discussions) first to get early feedback before writing code.
 
 ---
 
 ## Getting Help
 
-For setup questions, usage help, or troubleshooting guidance, use [SUPPORT.md](SUPPORT.md), then open a [GitHub Discussion](https://github.com/shuvoooo/termi/discussions).
+For setup questions, usage help, or troubleshooting guidance, use [SUPPORT.md](SUPPORT.md), then open a [GitHub Discussion](https://github.com/shuv-o/termix/discussions).
 
 ---
 
@@ -259,4 +259,4 @@ For setup questions, usage help, or troubleshooting guidance, use [SUPPORT.md](S
 
 **Do not open a public issue for security vulnerabilities.**
 
-Please report them privately via [GitHub Security Advisories](https://github.com/shuvoooo/termi/security/advisories/new) or follow the process in [SECURITY.md](SECURITY.md).
+Please report them privately via [GitHub Security Advisories](https://github.com/shuv-o/termix/security/advisories/new) or follow the process in [SECURITY.md](SECURITY.md).

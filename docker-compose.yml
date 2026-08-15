@@ -1,7 +1,7 @@
 services:
   traefik:
     image: traefik:v3.3
-    container_name: termi-traefik
+    container_name: termix-traefik
     restart: unless-stopped
     command:
       - "--entrypoints.web.address=:22080"
@@ -22,18 +22,18 @@ services:
     volumes:
       - ./traefik:/etc/traefik:ro
     networks:
-      - termi-network
+      - termix-network
 
   guacd:
     image: guacamole/guacd:1.6.0
-    container_name: termi-guacd
+    container_name: termix-guacd
     restart: unless-stopped
     networks:
-      - termi-network
+      - termix-network
 
   postgres:
     image: postgres:17-alpine
-    container_name: termi-postgres
+    container_name: termix-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -42,7 +42,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - termi-network
+      - termix-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
       interval: 10s
@@ -56,7 +56,7 @@ services:
       target: builder
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
-    container_name: termi-migrate
+    container_name: termix-migrate
     restart: "no"
     depends_on:
       postgres:
@@ -65,7 +65,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
     command: ["sh", "-c", "cd apps/web && npx prisma migrate deploy"]
     networks:
-      - termi-network
+      - termix-network
 
   web:
     build:
@@ -82,7 +82,7 @@ services:
       gateway:
         condition: service_started
 
-    container_name: termi-web
+    container_name: termix-web
     restart: unless-stopped
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
@@ -114,13 +114,13 @@ services:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     networks:
-      - termi-network
+      - termix-network
 
   gateway:
     build:
       context: .
       dockerfile: apps/gateway/Dockerfile
-    container_name: termi-gateway
+    container_name: termix-gateway
     restart: unless-stopped
     depends_on:
       - guacd
@@ -133,11 +133,11 @@ services:
       GUACD_PORT: 4822
       NODE_ENV: production
     networks:
-      - termi-network
+      - termix-network
 
 volumes:
   postgres-data:
 
 networks:
-  termi-network:
+  termix-network:
     driver: bridge

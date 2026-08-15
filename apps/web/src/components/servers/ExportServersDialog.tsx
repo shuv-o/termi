@@ -124,7 +124,7 @@ export default function ExportServersDialog({ onClose }: Props) {
             const blob = await res.blob();
             const filename =
                 res.headers.get('Content-Disposition')?.match(/filename="([^"]+)"/)?.[1] ??
-                `termi-servers.${format}`;
+                `termix-servers.${format}`;
 
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');

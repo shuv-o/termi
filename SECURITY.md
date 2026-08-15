@@ -17,8 +17,8 @@ We recommend always running the latest version.
 
 To report a vulnerability, use one of:
 
-1. **GitHub Security Advisories (preferred):** [Open a private advisory](https://github.com/shuvoooo/termi/security/advisories/new)
-2. **Email:** Contact the maintainer via their [GitHub profile](https://github.com/shuvoooo)
+1. **GitHub Security Advisories (preferred):** [Open a private advisory](https://github.com/shuv-o/termix/security/advisories/new)
+2. **Email:** Contact the maintainer via their [GitHub profile](https://github.com/shuv-o)
 
 ### What to Include
 
@@ -109,7 +109,7 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 
 ## Self-Hosting Security Checklist
 
-Before exposing Termi to the internet, ensure:
+Before exposing Termix to the internet, ensure:
 
 - [ ] All secrets (`SESSION_SECRET`, `ENCRYPTION_KEY`, `GATEWAY_JWT_SECRET`) are ≥32 random bytes
 - [ ] HTTPS is enforced via a reverse proxy (Traefik, Nginx, Caddy)
@@ -117,7 +117,7 @@ Before exposing Termi to the internet, ensure:
 - [ ] `ALLOW_LOCAL_TERMINAL` is not set unless you need it and understand the implications
 - [ ] The database port is not exposed to the internet
 - [ ] Docker socket (if used) is not accessible from the containers
-- [ ] You have enabled 2FA on your Termi account
+- [ ] You have enabled 2FA on your Termix account
 - [ ] You are running a recent version
 
 ---

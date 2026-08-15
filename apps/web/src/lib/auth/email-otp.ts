@@ -67,7 +67,7 @@ function createTransporter() {
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
     const transporter = createTransporter();
     await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"Termi Security" <noreply@termi.app>',
+        from: process.env.SMTP_FROM || '"Termix Security" <noreply@termix.run>',
         to,
         subject,
         html,
@@ -107,7 +107,7 @@ export async function sendEmailOTP(
 
     await sendEmail(
         email,
-        'Your Termi verification code',
+        'Your Termix verification code',
         `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
           <h2 style="margin-bottom:8px">Verification Code</h2>
