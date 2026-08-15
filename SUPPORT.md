@@ -1,6 +1,6 @@
 # Support
 
-Thanks for using Termi. This page describes where to ask questions and report problems.
+Thanks for using Termix. This page describes where to ask questions and report problems.
 
 ## Getting Help
 

@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 
 // CONSTANTS
 
-const TOTP_ISSUER = 'Termi';
+const TOTP_ISSUER = 'Termix';
 const TOTP_ALGORITHM = 'SHA1';
 const TOTP_DIGITS = 6;
 const TOTP_PERIOD = 30;

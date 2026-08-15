@@ -30,8 +30,8 @@ const remoteUrl = getRemoteUrl();
 const isHttps = remoteUrl.startsWith('https://');
 
 const config: CapacitorConfig = {
-    appId: 'com.shuvoo.termi',
-    appName: 'Termi',
+    appId: 'run.termix',
+    appName: 'Termix',
     // Thin remote shell: the WebView loads the hosted Termix deployment directly,
     // so no local web build is bundled. `webDir` is only a fallback page.
     webDir: 'www',

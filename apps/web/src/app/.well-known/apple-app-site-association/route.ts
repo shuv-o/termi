@@ -16,7 +16,7 @@ export function GET() {
     if (!teamId) {
         return new Response('Not configured', { status: 404 });
     }
-    const bundleId = process.env.APPLE_APP_BUNDLE_ID || 'com.shuvoo.termi';
+    const bundleId = process.env.APPLE_APP_BUNDLE_ID || 'run.termix';
 
     const body = JSON.stringify({
         webcredentials: {

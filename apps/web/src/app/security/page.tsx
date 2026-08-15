@@ -5,11 +5,11 @@ import LegalShell, { Section, type TocItem } from '@/components/legal/LegalShell
 export const metadata: Metadata = {
     title: 'Security Policy',
     description:
-        "Termi's security model and how to responsibly report a vulnerability. Built with AES-256-GCM encryption, Argon2id hashing, TOTP 2FA, and short-lived JWE tokens.",
+        "Termix's security model and how to responsibly report a vulnerability. Built with AES-256-GCM encryption, Argon2id hashing, TOTP 2FA, and short-lived JWE tokens.",
     alternates: { canonical: '/security' },
     openGraph: {
-        title: 'Security Policy | Termi',
-        description: "Termi's security model and how to responsibly report a vulnerability.",
+        title: 'Security Policy | Termix',
+        description: "Termix's security model and how to responsibly report a vulnerability.",
         url: '/security',
         type: 'website',
     },

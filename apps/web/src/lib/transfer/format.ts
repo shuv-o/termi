@@ -100,7 +100,7 @@ export type ExportKdf = z.infer<typeof kdfSchema>;
 const baseFields = {
     format: z.literal(EXPORT_FORMAT),
     version: z.literal(EXPORT_VERSION),
-    // These three are informational — Termi's own exports always write them, but
+    // These three are informational — Termix's own exports always write them, but
     // they are optional on import so a file can be hand-authored from just
     // `format`, `version`, `encrypted` and `payload`.
     exportedAt: z.string().optional(),

@@ -36,7 +36,7 @@ export default function LegalShell({
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
                                 <Terminal className="w-6 h-6 text-white" />
                             </div>
-                            <span className="text-xl font-bold gradient-text">Termi</span>
+                            <span className="text-xl font-bold gradient-text">Termix</span>
                         </Link>
 
                         <Link
@@ -95,7 +95,7 @@ export default function LegalShell({
                 <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
                     <div className="flex items-center gap-2">
                         <Terminal className="w-5 h-5 text-primary" />
-                        <span className="font-semibold text-slate-300">Termi</span>
+                        <span className="font-semibold text-slate-300">Termix</span>
                         <span className="text-slate-600">•</span>
                         <span className="text-slate-500">MIT License</span>
                     </div>
@@ -107,7 +107,7 @@ export default function LegalShell({
                             Security
                         </Link>
                         <Link
-                            href="https://github.com/shuv-o/termi"
+                            href="https://github.com/shuv-o/termix"
                             className="hover:text-white transition-colors"
                             rel="noopener noreferrer"
                             target="_blank"

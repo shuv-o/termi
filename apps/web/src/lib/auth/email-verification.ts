@@ -36,12 +36,12 @@ export async function sendVerificationEmail(userId: string, email: string): Prom
         },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.dp.shuvoo.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
     const verifyUrl = `${appUrl}/api/auth/verify-email?token=${token}`;
 
     const transporter = createTransporter();
     await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"Termi" <noreply@termix.run>',
+        from: process.env.SMTP_FROM || '"Termix" <noreply@termix.run>',
         to: email,
         subject: 'Verify your Termix account',
         html: `

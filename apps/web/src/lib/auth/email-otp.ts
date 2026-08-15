@@ -111,7 +111,7 @@ export async function sendEmailOTP(
         `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
           <h2 style="margin-bottom:8px">Verification Code</h2>
-          <p style="color:#666;margin-bottom:24px">Use this code to sign in to Termi. It expires in 10 minutes.</p>
+          <p style="color:#666;margin-bottom:24px">Use this code to sign in to Termix. It expires in 10 minutes.</p>
           <div style="background:#f4f4f4;border-radius:8px;padding:24px;text-align:center;letter-spacing:8px;font-size:32px;font-weight:bold;font-family:monospace">
             ${code}
           </div>

@@ -13,8 +13,8 @@ import { githubFetch } from '@/lib/github';
  * GitHub API itself (same constraint that `/api/download` works around).
  */
 
-const GITHUB_REPO_API = 'https://api.github.com/repos/shuv-o/termi';
-const GITHUB_REPO_URL = 'https://github.com/shuv-o/termi';
+const GITHUB_REPO_API = 'https://api.github.com/repos/shuv-o/termix';
+const GITHUB_REPO_URL = 'https://github.com/shuv-o/termix';
 
 /**
  * How stale the star count may get.
@@ -80,7 +80,7 @@ export default async function StarOnGitHub() {
 
                         <div className="flex-1 text-center md:text-left">
                             <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-                                Enjoying Termi? Star it on GitHub
+                                Enjoying Termix? Star it on GitHub
                             </h2>
                             <p className="text-slate-400 max-w-xl">
                                 Termix is free, open source and MIT licensed. A star costs you

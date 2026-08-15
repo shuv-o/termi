@@ -122,7 +122,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
                 View Server
               </a>
               <p style="color:#999;font-size:12px;margin-top:24px">
-                You're receiving this because you enabled monitoring alerts for this server in Termi.
+                You're receiving this because you enabled monitoring alerts for this server in Termix.
               </p>
             </div>
             `,

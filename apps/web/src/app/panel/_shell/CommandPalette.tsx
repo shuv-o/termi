@@ -39,7 +39,7 @@ import type { Group } from '../groups/_components/types';
 import type { KeychainEntry } from '../keychain/_components/types';
 
 /** Fired by any button (e.g. the sidebar search field) that wants to open the palette. */
-export const OPEN_COMMAND_PALETTE_EVENT = 'termi:open-command-palette';
+export const OPEN_COMMAND_PALETTE_EVENT = 'termix:open-command-palette';
 
 const SETTINGS_SECTIONS = [
     { id: 'profile', label: 'Profile', icon: UserCog },

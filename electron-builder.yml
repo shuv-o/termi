@@ -8,7 +8,7 @@ directories:
 publish:
     provider: github
     owner: shuv-o
-    repo: termi
+    repo: termix
     # release.yml publishes a (non-draft) release for the same tag. electron-builder
     # defaults to releaseType: draft and will SKIP every upload if the existing
     # release is already published — so match it explicitly.
@@ -72,7 +72,7 @@ mac:
     # Notarization requires a paid Apple Developer ID, which this project does not
     # have. The DMG is therefore ad-hoc signed but NOT notarized, so macOS shows a
     # Gatekeeper warning on first launch. Users bypass it with right-click → Open
-    # or `xattr -dr com.apple.quarantine /Applications/Termi.app` (see README).
+    # or `xattr -dr com.apple.quarantine /Applications/Termix.app` (see README).
     notarize: false
 
 win:

@@ -382,7 +382,7 @@ function createWindow(appUrl) {
         ...bounds,
         minWidth: 800,
         minHeight: 600,
-        title: 'Termi',
+        title: 'Termix',
         // Paint the window in the app's own dark background from the very first
         // frame. Electron's default is white, so without this the window flashes
         // white on launch and on every full reload before the page paints — the

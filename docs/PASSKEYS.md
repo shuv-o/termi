@@ -44,7 +44,7 @@ entitlements and a matching Apple App Site Association file.
 
 3. **Entitlements:** edit `../apps/electron/entitlements.mac.plist` — replace
    `TEAM_ID` with your Apple Team ID. The bundle id must equal `build.appId`
-   (`com.shuvoo.termi`) in the root `../package.json`. `webcredentials:` must equal
+   (`run.termix`) in the root `../package.json`. `webcredentials:` must equal
    the server's WebAuthn `rpID` (default `termix.run`).
 
 4. **Apple App Site Association:** set `APPLE_TEAM_ID` (and optionally

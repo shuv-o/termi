@@ -8,7 +8,7 @@ export const metadata: Metadata = {
         'How Termix handles your data. As an open-source, self-hosted platform, your data stays on infrastructure you control.',
     alternates: { canonical: '/privacy' },
     openGraph: {
-        title: 'Privacy Policy | Termi',
+        title: 'Privacy Policy | Termix',
         description:
             'How Termix handles your data. As an open-source, self-hosted platform, your data stays on infrastructure you control.',
         url: '/privacy',
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
                 <p>
                     Termix is an <strong>open-source, self-hosted</strong> server management
                     platform. There is no central Termix service that collects your data. When you
-                    deploy Termi, it runs on infrastructure that <strong>you</strong> own and
+                    deploy Termix, it runs on infrastructure that <strong>you</strong> own and
                     operate, and all data it processes is stored in <strong>your</strong> database.
                 </p>
                 <p>
@@ -189,7 +189,7 @@ export default function PrivacyPage() {
                     We may update this policy as Termix evolves. Material changes are reflected in
                     the &ldquo;Last updated&rdquo; date above and tracked in the project&apos;s{' '}
                     <Link
-                        href="https://github.com/shuv-o/termi"
+                        href="https://github.com/shuv-o/termix"
                         rel="noopener noreferrer"
                         target="_blank"
                     >
@@ -201,10 +201,10 @@ export default function PrivacyPage() {
 
             <Section id="contact" title="Contact">
                 <p>
-                    Questions about this policy or about Termi&apos;s data handling? Open an issue
+                    Questions about this policy or about Termix&apos;s data handling? Open an issue
                     on{' '}
                     <Link
-                        href="https://github.com/shuv-o/termi"
+                        href="https://github.com/shuv-o/termix"
                         rel="noopener noreferrer"
                         target="_blank"
                     >

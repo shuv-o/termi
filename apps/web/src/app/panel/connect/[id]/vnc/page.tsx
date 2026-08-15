@@ -1,54 +1,39 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {useParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import {
-    ArrowLeft,
-    Maximize2,
-    Minimize2,
-    RotateCcw,
-    X,
-    Scan,
-    ZoomIn,
-    ChevronDown,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import {ChevronDown, Maximize2, Minimize2, RotateCcw, Scan, X, ZoomIn,} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 
 const GuacamoleDisplay = dynamic(() => import('@/components/terminal/GuacamoleDisplay'), {
     ssr: false,
 });
 
 const PRESETS = [
-    { label: 'Auto', value: 'auto' },
-    { label: '1280×720', value: '1280x720' },
-    { label: '1920×1080', value: '1920x1080' },
-    { label: '2560×1440', value: '2560x1440' },
-    { label: '3840×2160', value: '3840x2160' },
+    {label: 'Auto', value: 'auto'},
+    {label: '1280×720', value: '1280x720'},
+    {label: '1920×1080', value: '1920x1080'},
+    {label: '2560×1440', value: '2560x1440'},
+    {label: '3840×2160', value: '3840x2160'},
 ] as const;
 
 function parsePreset(value: string): { w: number; h: number } | null {
     if (value === 'auto') return null;
     const [w, h] = value.split('x').map(Number);
-    return { w, h };
+    return {w, h};
 }
 
 const ZOOM_LEVELS = [
-    { label: 'Fit', value: 'fit' },
-    { label: '50%', value: '0.5' },
-    { label: '75%', value: '0.75' },
-    { label: '100%', value: '1' },
-    { label: '125%', value: '1.25' },
-    { label: '150%', value: '1.5' },
-    { label: '200%', value: '2' },
+    {label: 'Fit', value: 'fit'},
+    {label: '50%', value: '0.5'},
+    {label: '75%', value: '0.75'},
+    {label: '100%', value: '1'},
+    {label: '125%', value: '1.25'},
+    {label: '150%', value: '1.5'},
+    {label: '200%', value: '2'},
 ] as const;
 
 export default function VNCConnectionPage() {
@@ -108,8 +93,8 @@ export default function VNCConnectionPage() {
 
                 const tokenResponse = await fetch(`/api/connection/token`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ serverId, protocol: 'vnc' }),
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({serverId, protocol: 'vnc'}),
                 });
 
                 const tokenData = await tokenResponse.json();
@@ -155,13 +140,13 @@ export default function VNCConnectionPage() {
 
     const selectValue = resolution
         ? (PRESETS.find((p) => p.value !== 'auto' && p.value === `${resolution.w}x${resolution.h}`)
-              ?.value ?? `${resolution.w}x${resolution.h}`)
+            ?.value ?? `${resolution.w}x${resolution.h}`)
         : 'auto';
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-dvh lg:h-screen">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"/>
             </div>
         );
     }
@@ -200,7 +185,7 @@ export default function VNCConnectionPage() {
                         <Scan
                             className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
                         />
-                        <SelectValue />
+                        <SelectValue/>
                     </SelectTrigger>
                     <SelectContent align="end" className="bg-card border-border">
                         {PRESETS.map((p) => (
@@ -221,7 +206,7 @@ export default function VNCConnectionPage() {
                         <ZoomIn
                             className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
                         />
-                        <SelectValue />
+                        <SelectValue/>
                     </SelectTrigger>
                     <SelectContent align="end" className="bg-card border-border">
                         {ZOOM_LEVELS.map((z) => (
@@ -239,7 +224,7 @@ export default function VNCConnectionPage() {
                     title="Reconnect / Fit to current window"
                     className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7'}
                 >
-                    <RotateCcw className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                    <RotateCcw className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}/>
                 </Button>
 
                 <Button
@@ -256,9 +241,9 @@ export default function VNCConnectionPage() {
                     }
                 >
                     {isFullscreen ? (
-                        <Minimize2 className="w-4 h-4" />
+                        <Minimize2 className="w-4 h-4"/>
                     ) : (
-                        <Maximize2 className="w-3.5 h-3.5" />
+                        <Maximize2 className="w-3.5 h-3.5"/>
                     )}
                 </Button>
 
@@ -273,7 +258,7 @@ export default function VNCConnectionPage() {
                             : 'h-7 w-7 text-destructive hover:text-destructive'
                     }
                 >
-                    <X className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                    <X className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}/>
                 </Button>
             </div>
         </>
@@ -282,7 +267,8 @@ export default function VNCConnectionPage() {
     return (
         <div ref={containerRef} className="flex flex-col h-[calc(100dvh-3.5rem-4rem)] lg:h-dvh">
             {!isFullscreen && (
-                <div className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
+                <div
+                    className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 border-b border-border bg-card">
                     {toolbar}
                 </div>
             )}
@@ -314,7 +300,7 @@ export default function VNCConnectionPage() {
                         className="absolute top-0 left-1/2 -translate-x-1/2 z-[51] flex items-center justify-center w-10 h-4 bg-white/20 hover:bg-white/35 rounded-b-full transition-colors"
                         title="Show controls"
                     >
-                        <ChevronDown className="w-3 h-3 text-white/80" />
+                        <ChevronDown className="w-3 h-3 text-white/80"/>
                     </button>
                 )}
 

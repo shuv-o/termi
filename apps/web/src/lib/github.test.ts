@@ -16,7 +16,7 @@ async function loadModule(token?: string) {
     return import('./github');
 }
 
-const URL = 'https://api.github.com/repos/shuv-o/termi';
+const URL = 'https://api.github.com/repos/shuv-o/termix';
 const TTL = { authenticated: 30, anonymous: 300 };
 
 /** Minimal stand-in for the bits of Response that githubFetch inspects. */

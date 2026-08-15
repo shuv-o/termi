@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     metadataBase: new URL(getSiteUrl()),
     title: {
         default: 'Termix - Secure Server Management',
-        template: '%s | Termi',
+        template: '%s | Termix',
     },
     description:
         'Termix is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     },
     appleWebApp: {
         capable: true,
-        title: 'Termi',
+        title: 'Termix',
         statusBarStyle: 'black-translucent',
     },
     openGraph: {
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
         type: 'website',
         url: getSiteUrl(),
-        siteName: 'Termi',
+        siteName: 'Termix',
         locale: 'en_US',
     },
     twitter: {
@@ -127,12 +127,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                             '@graph': [
                                 {
                                     '@type': 'SoftwareApplication',
-                                    name: 'Termi',
+                                    name: 'Termix',
                                     applicationCategory: 'DeveloperApplication',
                                     operatingSystem: 'Any',
                                     description:
                                         'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-                                    url: 'https://github.com/shuv-o/termi',
+                                    url: 'https://github.com/shuv-o/termix',
                                     author: {
                                         '@type': 'Person',
                                         name: 'Shuvo',

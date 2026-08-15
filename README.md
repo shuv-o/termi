@@ -4,7 +4,7 @@
 
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
-[![GitHub stars](https://img.shields.io/github/stars/shuv-o/termi?style=social)](https://github.com/shuv-o/termix/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/shuv-o/termix?style=social)](https://github.com/shuv-o/termix/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/shuv-o/termix/actions/workflows/ci.yml/badge.svg)](https://github.com/shuv-o/termix/actions/workflows/ci.yml)
 [![Release](https://github.com/shuv-o/termix/actions/workflows/release.yml/badge.svg)](https://github.com/shuv-o/termix/actions/workflows/release.yml)
@@ -134,7 +134,7 @@
 ```bash
 # 1. Clone the repository
 git clone https://github.com/shuv-o/termix.git
-cd termi
+cd termix
 
 # 2. Copy and configure environment
 cp .env.example .env
@@ -144,9 +144,9 @@ Open `.env` and set the required secrets (generate each with `openssl rand -base
 
 ```dotenv
 DB_HOST=postgres          # set to your DB host (Docker service name or external host)
-DB_USER=termi
+DB_USER=termix
 DB_PASSWORD=<strong-password>
-DB_NAME=termi
+DB_NAME=termix
 
 SESSION_SECRET=<openssl rand -base64 32>
 ENCRYPTION_KEY=<openssl rand -base64 32>
@@ -185,20 +185,20 @@ Builds are provided for **macOS, Windows, and Linux** in both **x64** and **arm6
 The macOS build is **ad-hoc signed but not notarized** (the project has no paid
 Apple Developer ID). On first launch, macOS Gatekeeper shows:
 
-> _"Apple could not verify 'Termi.app' is free of malware…"_
+> _"Apple could not verify 'Termix.app' is free of malware…"_
 
 This is expected. To open the app anyway, use either method:
 
 **Option A — Right-click to open**
 
-1. In Finder, locate **Termi.app** (drag it to `/Applications` first).
+1. In Finder, locate **Termix.app** (drag it to `/Applications` first).
 2. **Right-click** (or Control-click) the app → **Open**.
 3. Click **Open** in the dialog. macOS remembers this choice for future launches.
 
 **Option B — Remove the quarantine flag**
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/Termi.app
+xattr -dr com.apple.quarantine /Applications/Termix.app
 ```
 
 Then open the app normally.
@@ -416,7 +416,7 @@ See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability repor
 
 Planned for the next update — scope and details are still open to change:
 
-- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termi's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a termix-operated relay.
+- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termix's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a termix-operated relay.
 - **Terminal-grounded, not a generic chatbot.** Explain a confusing command's output, translate a plain-English request into the right shell command for review before running it, or summarize a long session recording instead of scrubbing through the replay.
 - **Monitoring-aware.** Answer questions like "why is this server flagged high-load" using real metrics/health-history/benchmark-trend data already collected, instead of the user cross-referencing charts manually.
 - **Read-only first.** The first iteration explains and suggests; it does not execute anything on its own. Any command it proposes goes through the same explicit-confirm step a human typing it would — no silent execution, matching the project's existing "ask before anything destructive" posture.
@@ -454,7 +454,7 @@ Cloning gets you the code. **Starring is the only action that shows up publicly*
 
 If you've already cloned or forked Termix and it's useful to you, this is the one extra click that actually helps the project grow:
 
-**[⭐ Star Termix on GitHub](https://github.com/shuv-o/termi)**
+**[⭐ Star Termix on GitHub](https://github.com/shuv-o/termix)**
 
 Stars also directly inform what gets built next — they're the closest thing this project has to a roadmap signal from real users.
 
@@ -462,11 +462,11 @@ Stars also directly inform what gets built next — they're the closest thing th
 
 ## ⭐ Star History
 
-<a href="https://star-history.com/#shuv-o/termi&Date">
+<a href="https://star-history.com/#shuv-o/termix&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date" />
   </picture>
 </a>
 

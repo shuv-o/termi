@@ -33,7 +33,7 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 2. **Clone** your fork locally:
     ```bash
     git clone https://github.com/<your-username>/termix.git
-    cd termi
+    cd termix
     ```
 3. **Add the upstream remote** so you can pull in future updates:
     ```bash
@@ -185,7 +185,7 @@ security: validate host before SSRF in /api/servers/test
     git fetch upstream
     git rebase upstream/main
     ```
-2. Open a PR against the `main` branch of `shuv-o/termi`.
+2. Open a PR against the `main` branch of `shuv-o/termix`.
 3. Fill out the **PR template** — describe what changed and why.
 4. Link the related issue if one exists (`Closes #123`).
 5. Wait for CI to pass and address any review feedback.

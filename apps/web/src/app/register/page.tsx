@@ -291,7 +291,7 @@ function RegisterContent() {
                             <div>
                                 <div className="flex items-center gap-3 mb-8">
                                     <TerminalLogo width={40} height={40} className="rounded-xl" />
-                                    <span className="text-xl font-bold gradient-text">Termi</span>
+                                    <span className="text-xl font-bold gradient-text">Termix</span>
                                 </div>
                                 <h2 className="text-2xl font-bold leading-snug mb-2">
                                     Start managing
@@ -317,7 +317,7 @@ function RegisterContent() {
                                 </ul>
                             </div>
                             <p className="text-xs text-muted-foreground/50 mt-8">
-                                © {new Date().getFullYear()} Termi. All rights reserved.
+                                © {new Date().getFullYear()} Termix. All rights reserved.
                             </p>
                         </div>
 
@@ -326,7 +326,7 @@ function RegisterContent() {
                             {/* Mobile logo */}
                             <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
                                 <TerminalLogo width={40} height={40} className="rounded-xl" />
-                                <span className="text-xl font-bold gradient-text">Termi</span>
+                                <span className="text-xl font-bold gradient-text">Termix</span>
                             </div>
 
                             {verifying ? (

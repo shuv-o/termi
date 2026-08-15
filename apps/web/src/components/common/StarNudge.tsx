@@ -16,9 +16,9 @@ import { Star, X } from 'lucide-react';
  * sets a permanent flag. This is a nudge, not a nag.
  */
 
-const DISMISS_KEY = 'termi:star-nudge-dismissed';
+const DISMISS_KEY = 'termix:star-nudge-dismissed';
 const MIN_ACCOUNT_AGE_DAYS = 3;
-const STAR_URL = 'https://github.com/shuv-o/termi';
+const STAR_URL = 'https://github.com/shuv-o/termix';
 
 interface Props {
     /** ISO timestamp the account was created. */

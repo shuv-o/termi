@@ -619,11 +619,11 @@ async function sendPasswordResetEmail(email: string, token: string): Promise<voi
           })
         : nodemailer.default.createTransport({ streamTransport: true, newline: 'unix' });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.dp.shuvoo.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
     await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"Termi" <noreply@termix.run>',
+        from: process.env.SMTP_FROM || '"Termix" <noreply@termix.run>',
         to: email,
         subject: 'Reset your Termix password',
         html: `

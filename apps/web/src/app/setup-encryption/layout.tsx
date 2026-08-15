@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Set Up Encryption — Termi' };
+export const metadata: Metadata = { title: 'Set Up Encryption — Termix' };
 
 export default function SetupEncryptionLayout({ children }: { children: React.ReactNode }) {
     return (

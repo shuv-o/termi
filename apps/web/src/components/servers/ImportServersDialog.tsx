@@ -310,7 +310,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                         {showFormat && (
                             <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
                                 <p className="text-xs text-muted-foreground">
-                                    Import a file you exported from Termi, or build your own.
+                                    Import a file you exported from Termix, or build your own.
                                     <span className="text-foreground">
                                         {' '}
                                         Only <code>Name</code> and <code>Host</code> are required

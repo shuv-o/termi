@@ -38,7 +38,7 @@ npm i -g @bubblewrap/cli
 bubblewrap init --manifest https://termix.run/manifest.json
 ```
 
-Answer the prompts (package id `com.shuvoo.termi`, app name `Termi`, etc.). Keep the
+Answer the prompts (package id `run.termix`, app name `Termix`, etc.). Keep the
 package id consistent with `assetlinks.json`.
 
 ### 3. Build the signed app

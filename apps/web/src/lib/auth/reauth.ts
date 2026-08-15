@@ -58,7 +58,7 @@ export function getRpDetails() {
     if (process.env.NODE_ENV === 'development') {
         return { rpID: 'localhost', origins: ['http://localhost:22080', 'http://127.0.0.1:22080'] };
     }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.dp.shuvoo.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
     const url = new URL(appUrl);
     return { rpID: url.hostname, origins: [url.origin] };
 }

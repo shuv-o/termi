@@ -18,15 +18,15 @@ services:
     container_name: termix-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-termi}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-termi}
-      POSTGRES_DB: ${POSTGRES_DB:-termi}
+      POSTGRES_USER: ${POSTGRES_USER:-termix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-termix}
+      POSTGRES_DB: ${POSTGRES_DB:-termix}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - termix-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termix}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,7 +62,7 @@ services:
       - .:/app
       - node_modules:/app/node_modules
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-termi}:${POSTGRES_PASSWORD:-termi}@postgres:5432/${POSTGRES_DB:-termi}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-termix}:${POSTGRES_PASSWORD:-termix}@postgres:5432/${POSTGRES_DB:-termix}
     command: ["sh", "-c", "cd apps/web && ../../node_modules/.bin/prisma generate && ../../node_modules/.bin/prisma migrate deploy"]
     networks:
       - termix-network
@@ -126,7 +126,7 @@ services:
       # defaults, so ${VAR:-default} would silently pick up the production value.
       NEXT_PUBLIC_GATEWAY_URL: ws://localhost:22081
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:22080}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-termi}:${POSTGRES_PASSWORD:-termi}@postgres:5432/${POSTGRES_DB:-termi}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-termix}:${POSTGRES_PASSWORD:-termix}@postgres:5432/${POSTGRES_DB:-termix}
       SESSION_SECRET: ${SESSION_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}

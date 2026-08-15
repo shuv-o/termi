@@ -48,7 +48,7 @@ export function buildBridgeScript(opts: {
     const defaultLocalPort = opts.localPort >= 1024 ? opts.localPort : 0;
     return `#!/usr/bin/env node
 // Termix tunnel bridge — forwards a local port to ${opts.remoteHost}:${opts.remotePort}
-// on "${opts.serverName}" via Termi. Requires Node 22+ (built-in WebSocket).
+// on "${opts.serverName}" via Termix. Requires Node 22+ (built-in WebSocket).
 // This token expires in 5 minutes if unused — regenerate from Termix if this fails.
 //
 // Run: node termix-tunnel.mjs

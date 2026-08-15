@@ -12,7 +12,7 @@ type Arch = 'arm64' | 'x64';
 
 // macOS builds are ad-hoc signed but not notarized, so Gatekeeper quarantines
 // the download. This strips the quarantine flag so the app launches.
-const XATTR_CMD = 'xattr -dr com.apple.quarantine /Applications/Termi.app';
+const XATTR_CMD = 'xattr -dr com.apple.quarantine /Applications/Termix.app';
 const LINUX_CMD = 'chmod +x termix.AppImage\n./termix.AppImage';
 
 function downloadUrl(os: OS, arch: Arch): string {
@@ -237,7 +237,7 @@ export default function DownloadDesktopButton() {
             {os === 'mac' && (
                 <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
                     <p>
-                        On first launch, right-click Termi.app →{' '}
+                        On first launch, right-click Termix.app →{' '}
                         <span className="text-slate-400">Open</span> to bypass the macOS
                         verification prompt.
                     </p>
@@ -261,7 +261,7 @@ export default function DownloadDesktopButton() {
                     </button>
                     <p>
                         <a
-                            href="https://github.com/shuv-o/termi#macos--first-launch"
+                            href="https://github.com/shuv-o/termix#macos--first-launch"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sky-400 underline underline-offset-2 hover:text-sky-300"

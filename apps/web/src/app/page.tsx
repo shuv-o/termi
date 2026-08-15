@@ -49,7 +49,7 @@ export default async function HomePage() {
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
                                 <Terminal className="w-6 h-6 text-white" />
                             </div>
-                            <span className="text-xl font-bold gradient-text">Termi</span>
+                            <span className="text-xl font-bold gradient-text">Termix</span>
                         </div>
 
                         <nav className="hidden md:flex items-center gap-6">
@@ -66,7 +66,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuv-o/termi"
+                                href="https://github.com/shuv-o/termix"
                                 className="text-slate-300 hover:text-white transition-colors"
                             >
                                 GitHub
@@ -307,7 +307,7 @@ export default async function HomePage() {
                             </Button>
                         )}
                         <Button variant="secondary" size="lg" asChild>
-                            <Link href="https://github.com/shuv-o/termi">View on GitHub</Link>
+                            <Link href="https://github.com/shuv-o/termix">View on GitHub</Link>
                         </Button>
                     </div>
                 </div>
@@ -320,7 +320,7 @@ export default async function HomePage() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
                             <Terminal className="w-5 h-5 text-primary" />
-                            <span className="font-semibold">Termi</span>
+                            <span className="font-semibold">Termix</span>
                             <span className="text-slate-500">•</span>
                             <span className="text-slate-500 text-sm">MIT License</span>
                         </div>
@@ -333,7 +333,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuv-o/termi"
+                                href="https://github.com/shuv-o/termix"
                                 className="hover:text-white transition-colors"
                                 rel="noopener noreferrer"
                                 target="_blank"

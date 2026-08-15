@@ -8,7 +8,7 @@
          Replace TEAM_ID with your Apple Developer Team ID. The bundle id must
          match "build.appId" in the root package.json. -->
     <key>com.apple.application-identifier</key>
-    <string>TEAM_ID.com.shuvoo.termi</string>
+    <string>TEAM_ID.run.termix</string>
 
     <!-- Scope passkeys to the Termix domain (must match the server's WebAuthn
          rpID and be published in the domain's apple-app-site-association file). -->

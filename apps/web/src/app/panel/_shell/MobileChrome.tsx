@@ -124,7 +124,7 @@ export function MobileTopBar({
                 {isRootPage ? (
                     <Link href="/panel" className="flex items-center gap-2.5">
                         <TerminalLogo width={26} height={26} className="rounded-md" />
-                        <span className="font-bold text-sm">Termi</span>
+                        <span className="font-bold text-sm">Termix</span>
                     </Link>
                 ) : (
                     <button
