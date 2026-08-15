@@ -49,7 +49,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 // This route is same-origin with the rest of Termi, so the browser attaches
 // the real session cookie (and any Authorization header) to every request
 // here automatically. Forwarding either to the tunneled target — a third
-// party as far as this credential is concerned — would leak a live Termi
+// party as far as this credential is concerned — would leak a live Termix
 // session to whatever's on the other end of the tunnel. Never forward these.
 const CREDENTIAL_HEADERS = new Set(['cookie', 'authorization']);
 

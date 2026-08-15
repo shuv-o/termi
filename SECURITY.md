@@ -100,7 +100,7 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 
 ### Out of Scope / Assumptions
 
-- **Physical access** to the host running Termi
+- **Physical access** to the host running Termix
 - **Compromise of the host OS** or container runtime
 - **Weak secrets** — you are responsible for generating strong `SESSION_SECRET`, `ENCRYPTION_KEY`, and `GATEWAY_JWT_SECRET` values
 - **Upstream dependencies** — we rely on well-maintained libraries (ssh2, jose, argon2, etc.) but cannot guarantee their security

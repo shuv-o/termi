@@ -102,7 +102,7 @@ export default function OpengraphImage() {
                             color: '#f8fafc',
                         }}
                     >
-                        Termi
+                        Termix
                     </div>
 
                     <div

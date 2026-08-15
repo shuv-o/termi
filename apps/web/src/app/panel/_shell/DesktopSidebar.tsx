@@ -188,7 +188,7 @@ export function DesktopSidebar({
                     >
                         <TerminalLogo width={30} height={30} className="rounded-lg shrink-0" />
                         <span className="text-base font-bold gradient-text whitespace-nowrap overflow-hidden">
-                            Termi
+                            Termix
                         </span>
                     </Link>
                 )}

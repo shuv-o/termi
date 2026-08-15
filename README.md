@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🖥️ Termi
+# 🖥️ Termix
 
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
@@ -163,7 +163,7 @@ docker compose up -d
 # 4. Run database migrations
 docker compose exec web npx prisma migrate deploy
 
-# 5. Open Termi
+# 5. Open Termix
 open http://localhost:22080
 ```
 

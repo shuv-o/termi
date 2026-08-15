@@ -1,4 +1,4 @@
-# Contributing to Termi
+# Contributing to Termix
 
 Thank you for your interest in contributing! Termix is a community-driven project and all kinds of contributions are welcome — bug reports, feature requests, documentation improvements, and code changes.
 
