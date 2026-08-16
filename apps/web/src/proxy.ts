@@ -34,6 +34,24 @@ async function slideDesktopSession(request: NextRequest, response: NextResponse)
 }
 
 export async function proxy(request: NextRequest) {
+    // Redirect users from specific domains to termi.run
+    const host = request.headers.get('host') || '';
+    const url = new URL(request.url);
+
+    // Check if the request is from termi.shuvoo.com or termix.run
+    if (host === 'termi.shuvoo.com' || host === 'termix.run') {
+        // Redirect to termi.run with the same path and query
+        const redirectUrl = new URL(url.pathname + url.search, 'https://termi.run');
+        return NextResponse.redirect(redirectUrl, {
+            status: 301, // Permanent redirect
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+    }
+
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
     const isDev = process.env.NODE_ENV !== 'production';
     const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
