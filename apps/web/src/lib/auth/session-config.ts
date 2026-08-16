@@ -1,5 +1,5 @@
 /**
- * Termix Session Configuration (Edge-safe)
+ * Termi Session Configuration (Edge-safe)
  *
  * These pieces contain no Node-only / Prisma dependencies, so they can be
  * imported from the Next.js proxy (`proxy.ts`), which runs on the Edge runtime,
@@ -66,7 +66,7 @@ function getSessionSecret(): string {
 
 export const sessionOptions: SessionOptions = {
     password: getSessionSecret(),
-    cookieName: 'termix_session',
+    cookieName: 'termi_session',
     cookieOptions: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,

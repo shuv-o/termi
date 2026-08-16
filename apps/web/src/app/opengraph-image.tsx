@@ -9,7 +9,7 @@ import { ImageResponse } from 'next/og';
  * upload, no stale image to remember to update.
  */
 
-export const alt = 'Termix — Self-hosted SSH, SCP, RDP & VNC from your browser';
+export const alt = 'Termi — Self-hosted SSH, SCP, RDP & VNC from your browser';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -101,7 +101,7 @@ export default function OpengraphImage() {
                             color: '#f8fafc',
                         }}
                     >
-                        Termix
+                        Termi
                     </div>
 
                     <div

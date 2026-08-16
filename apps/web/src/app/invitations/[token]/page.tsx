@@ -95,7 +95,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                 {/* Header */}
                 <div className="flex flex-col items-center mb-8">
                     <TerminalLogo width={48} height={48} className="rounded-xl mb-3" />
-                    <span className="text-2xl font-bold gradient-text">Termix</span>
+                    <span className="text-2xl font-bold gradient-text">Termi</span>
                 </div>
 
                 {/* Card */}

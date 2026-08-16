@@ -248,7 +248,7 @@ html {
     }
 }
 
-@keyframes termix-fade-in {
+@keyframes termi-fade-in {
     from {
         opacity: 0;
         transform: translateY(4px);
@@ -266,7 +266,7 @@ html {
  * across navigation and must not re-animate.
  */
 .animate-fade-in {
-    animation: termix-fade-in 180ms ease-out both;
+    animation: termi-fade-in 180ms ease-out both;
 }
 
 /*
@@ -275,7 +275,7 @@ html {
  * slow enough to actually wait for fades the placeholder in.
  */
 .route-loader {
-    animation: termix-fade-in 200ms ease-out 120ms both;
+    animation: termi-fade-in 200ms ease-out 120ms both;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the project maintainers via
-[GitHub Discussions](https://github.com/shuv-o/termix/discussions) or private
+[GitHub Discussions](https://github.com/shuv-o/termi/discussions) or private
 contact through the maintainer's
 [GitHub profile](https://github.com/shuv-o).
 All complaints will be reviewed and investigated promptly and fairly.

@@ -1,5 +1,5 @@
-appId: run.termix
-productName: Termix
+appId: run.termi
+productName: Termi
 directories:
     output: dist
 
@@ -8,14 +8,14 @@ directories:
 publish:
     provider: github
     owner: shuv-o
-    repo: termix
+    repo: termi
     # release.yml publishes a (non-draft) release for the same tag. electron-builder
     # defaults to releaseType: draft and will SKIP every upload if the existing
     # release is already published — so match it explicitly.
     releaseType: release
 
 # Only the Electron entry points go into the asar. The desktop app is a thin
-# native shell around the hosted Termix server (web + gateway + guacd all live
+# native shell around the hosted Termi server (web + gateway + guacd all live
 # there); the only local capability is the terminal, which uses node-pty.
 # NOTE: this list is an explicit whitelist. Every local module main.js requires
 # at startup (./updater, ./window-state, ./context-menu) must appear below, or
@@ -41,7 +41,7 @@ mac:
     # against Apple's timestamp server on GitHub's macOS runners. It builds
     # fine locally, so arm64 DMGs are produced with:
     #   npx electron-builder --mac --arm64
-    #   gh release upload vX.Y.Z dist/termix-X.Y.Z-arm64.dmg ...
+    #   gh release upload vX.Y.Z dist/termi-X.Y.Z-arm64.dmg ...
     # Restore arch: [x64, arm64] once a real Developer ID is configured.
     target:
         - target: dmg
@@ -72,7 +72,7 @@ mac:
     # Notarization requires a paid Apple Developer ID, which this project does not
     # have. The DMG is therefore ad-hoc signed but NOT notarized, so macOS shows a
     # Gatekeeper warning on first launch. Users bypass it with right-click → Open
-    # or `xattr -dr com.apple.quarantine /Applications/Termix.app` (see README).
+    # or `xattr -dr com.apple.quarantine /Applications/Termi.app` (see README).
     notarize: false
 
 win:

@@ -28,15 +28,15 @@ function getRpDetails() {
     if (process.env.NODE_ENV === 'development') {
         return {
             rpID: 'localhost',
-            rpName: 'Termix',
+            rpName: 'Termi',
             origins: ['http://localhost:22080', 'http://127.0.0.1:22080'],
         };
     }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.run';
     const url = new URL(appUrl);
     return {
         rpID: url.hostname,
-        rpName: 'Termix',
+        rpName: 'Termi',
         origins: [url.origin],
     };
 }

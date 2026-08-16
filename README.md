@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🖥️ Termix
+# 🖥️ Termi
 
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
-[![GitHub stars](https://img.shields.io/github/stars/shuv-o/termix?style=social)](https://github.com/shuv-o/termix/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/shuv-o/termi?style=social)](https://github.com/shuv-o/termi/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/shuv-o/termix/actions/workflows/ci.yml/badge.svg)](https://github.com/shuv-o/termix/actions/workflows/ci.yml)
-[![Release](https://github.com/shuv-o/termix/actions/workflows/release.yml/badge.svg)](https://github.com/shuv-o/termix/actions/workflows/release.yml)
+[![CI](https://github.com/shuv-o/termi/actions/workflows/ci.yml/badge.svg)](https://github.com/shuv-o/termi/actions/workflows/ci.yml)
+[![Release](https://github.com/shuv-o/termi/actions/workflows/release.yml/badge.svg)](https://github.com/shuv-o/termi/actions/workflows/release.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=next.js)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -15,21 +15,21 @@
 
 [![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/shuvoo)
 
-**[🌐 Website](https://termix.run)** · **[📖 Wiki](https://github.com/shuv-o/termix/wiki)** · **[⬇️ Download](https://github.com/shuv-o/termix/releases/latest)** · **[💬 Discussions](https://github.com/shuv-o/termix/discussions)**
+**[🌐 Website](https://termi.run)** · **[📖 Wiki](https://github.com/shuv-o/termi/wiki)** · **[⬇️ Download](https://github.com/shuv-o/termi/releases/latest)** · **[💬 Discussions](https://github.com/shuv-o/termi/discussions)**
 
 </div>
 
-> **⭐ If Termix is useful to you, please star the repo.** It costs nothing, takes two seconds, and is the main way other developers find this project — more effective than a clone, since a fork or a clone doesn't show up anywhere public. See [Why star instead of just cloning?](#-why-star-instead-of-just-cloning)
+> **⭐ If Termi is useful to you, please star the repo.** It costs nothing, takes two seconds, and is the main way other developers find this project — more effective than a clone, since a fork or a clone doesn't show up anywhere public. See [Why star instead of just cloning?](#-why-star-instead-of-just-cloning)
 
 ---
 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshot-hero.png" alt="Termix landing page — self-hosted SSH, SCP, RDP and VNC access from your browser" width="100%">
+  <img src=".github/assets/screenshot-hero.png" alt="Termi landing page — self-hosted SSH, SCP, RDP and VNC access from your browser" width="100%">
 </p>
 <p align="center">
-  <img src=".github/assets/screenshot-features.png" alt="Termix feature overview — SSH terminal, file manager, remote desktop, encrypted credential vault, 2FA, mobile support" width="100%">
+  <img src=".github/assets/screenshot-features.png" alt="Termi feature overview — SSH terminal, file manager, remote desktop, encrypted credential vault, 2FA, mobile support" width="100%">
 </p>
 
 ---
@@ -111,7 +111,7 @@
 
 - Native app for **macOS, Windows, and Linux**
 - Local terminal access via node-pty
-- Connects to your self-hosted Termix instance
+- Connects to your self-hosted Termi instance
 - Bundled gateway for fully offline / local-stack operation (`electron:dev:full`)
 
 ### 📦 Self-Hosted & Privacy-First
@@ -133,8 +133,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/shuv-o/termix.git
-cd termix
+git clone https://github.com/shuv-o/termi.git
+cd termi
 
 # 2. Copy and configure environment
 cp .env.example .env
@@ -144,9 +144,9 @@ Open `.env` and set the required secrets (generate each with `openssl rand -base
 
 ```dotenv
 DB_HOST=postgres          # set to your DB host (Docker service name or external host)
-DB_USER=termix
+DB_USER=termi
 DB_PASSWORD=<strong-password>
-DB_NAME=termix
+DB_NAME=termi
 
 SESSION_SECRET=<openssl rand -base64 32>
 ENCRYPTION_KEY=<openssl rand -base64 32>
@@ -163,14 +163,14 @@ docker compose up -d
 # 4. Run database migrations
 docker compose exec web npx prisma migrate deploy
 
-# 5. Open Termix
+# 5. Open Termi
 open http://localhost:22080
 ```
 
 > **RDP / VNC**: also start guacd — on Apple Silicon, add `--platform linux/arm64`:
 >
 > ```bash
-> docker run -d -p 4822:4822 --name termix-guacd guacamole/guacd: 1.6.0
+> docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
 > ```
 
 ---
@@ -185,20 +185,20 @@ Builds are provided for **macOS, Windows, and Linux** in both **x64** and **arm6
 The macOS build is **ad-hoc signed but not notarized** (the project has no paid
 Apple Developer ID). On first launch, macOS Gatekeeper shows:
 
-> _"Apple could not verify 'Termix.app' is free of malware…"_
+> _"Apple could not verify 'Termi.app' is free of malware…"_
 
 This is expected. To open the app anyway, use either method:
 
 **Option A — Right-click to open**
 
-1. In Finder, locate **Termix.app** (drag it to `/Applications` first).
+1. In Finder, locate **Termi.app** (drag it to `/Applications` first).
 2. **Right-click** (or Control-click) the app → **Open**.
 3. Click **Open** in the dialog. macOS remembers this choice for future launches.
 
 **Option B — Remove the quarantine flag**
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/Termix.app
+xattr -dr com.apple.quarantine /Applications/Termi.app
 ```
 
 Then open the app normally.
@@ -212,8 +212,8 @@ SmartScreen may warn that the publisher is unknown. Click **More info → Run an
 The Linux build is distributed as an **AppImage** — no installation required.
 
 ```bash
-chmod +x termix.AppImage
-./termix.AppImage
+chmod +x termi.AppImage
+./termi.AppImage
 ```
 
 ---
@@ -270,7 +270,7 @@ npm run build:electron            # Package Electron app
 ## 🗂️ Project Structure
 
 ```
-termix/
+termi/
 ├  apps/
 │   ├  web/                    # Next.js 16 App Router
 │   │   ├  src/
@@ -416,13 +416,13 @@ See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability repor
 
 Planned for the next update — scope and details are still open to change:
 
-- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termix's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a termix-operated relay.
+- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termi's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a termi-operated relay.
 - **Terminal-grounded, not a generic chatbot.** Explain a confusing command's output, translate a plain-English request into the right shell command for review before running it, or summarize a long session recording instead of scrubbing through the replay.
 - **Monitoring-aware.** Answer questions like "why is this server flagged high-load" using real metrics/health-history/benchmark-trend data already collected, instead of the user cross-referencing charts manually.
 - **Read-only first.** The first iteration explains and suggests; it does not execute anything on its own. Any command it proposes goes through the same explicit-confirm step a human typing it would — no silent execution, matching the project's existing "ask before anything destructive" posture.
 - **Later, not v1:** webhook alert message drafting, anomaly explanations for monitoring alerts.
 
-This is a draft plan, not a committed spec — [open a discussion](https://github.com/shuv-o/termix/discussions) if you have thoughts on scope or provider support before it's built.
+This is a draft plan, not a committed spec — [open a discussion](https://github.com/shuv-o/termi/discussions) if you have thoughts on scope or provider support before it's built.
 
 ---
 
@@ -444,17 +444,17 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 - Help & support channels: [SUPPORT.md](SUPPORT.md)
 - Security policy: [SECURITY.md](SECURITY.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
-- Full documentation: [Wiki](https://github.com/shuv-o/termix/wiki)
+- Full documentation: [Wiki](https://github.com/shuv-o/termi/wiki)
 
 ---
 
 ## ⭐ Why star instead of just cloning?
 
-Cloning gets you the code. **Starring is the only action that shows up publicly** — it's what surfaces Termix in GitHub's trending pages, in search ranking, and in other developers' recommendations. A clone or a fork is invisible outside your own account; a star is a two-second, zero-cost signal that tells the next person searching "self-hosted SSH client" that this project is worth a look.
+Cloning gets you the code. **Starring is the only action that shows up publicly** — it's what surfaces Termi in GitHub's trending pages, in search ranking, and in other developers' recommendations. A clone or a fork is invisible outside your own account; a star is a two-second, zero-cost signal that tells the next person searching "self-hosted SSH client" that this project is worth a look.
 
-If you've already cloned or forked Termix and it's useful to you, this is the one extra click that actually helps the project grow:
+If you've already cloned or forked Termi and it's useful to you, this is the one extra click that actually helps the project grow:
 
-**[⭐ Star Termix on GitHub](https://github.com/shuv-o/termix)**
+**[⭐ Star Termi on GitHub](https://github.com/shuv-o/termi)**
 
 Stars also directly inform what gets built next — they're the closest thing this project has to a roadmap signal from real users.
 
@@ -462,11 +462,11 @@ Stars also directly inform what gets built next — they're the closest thing th
 
 ## ⭐ Star History
 
-<a href="https://star-history.com/#shuv-o/termix&Date">
+<a href="https://star-history.com/#shuv-o/termi&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuv-o/termix&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuv-o/termi&type=Date" />
   </picture>
 </a>
 
@@ -493,7 +493,7 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 <div align="center">
 
-**If Termix saves you time, consider supporting its development:**
+**If Termi saves you time, consider supporting its development:**
 
 # [Buy me a Coffee](https://www.buymeacoffee.com/shuvoo)
 

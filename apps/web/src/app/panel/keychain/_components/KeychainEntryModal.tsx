@@ -187,7 +187,7 @@ export function KeychainEntryModal({
                     )}
 
                     <p className="rounded-lg border border-border/50 bg-secondary/30 px-3 py-2.5 text-xs text-muted-foreground">
-                        Termix encrypts these credentials before storing them.
+                        Termi encrypts these credentials before storing them.
                     </p>
 
                     {error && <p className="text-sm text-destructive">{error}</p>}

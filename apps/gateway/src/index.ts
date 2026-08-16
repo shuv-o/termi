@@ -1,5 +1,5 @@
 /**
- * Termix WebSocket Gateway
+ * Termi WebSocket Gateway
  *
  * Handles WebSocket connections and proxies them to SSH.
  * SSH sessions outlive their WebSocket connections — they are keyed by a

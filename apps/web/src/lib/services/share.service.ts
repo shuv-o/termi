@@ -101,9 +101,9 @@ export async function sendShareInvitation(
         },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.run';
     const inviteUrl = `${appUrl}/invitations/${token}`; // raw token in URL, hash stored in DB
-    const from = process.env.SMTP_FROM || '"Termix" <noreply@termix.run>';
+    const from = process.env.SMTP_FROM || '"Termi" <noreply@termi.run>';
 
     // User-controlled fields are escaped before being placed in HTML to prevent
     // markup/link injection in the delivered email.
@@ -114,20 +114,20 @@ export async function sendShareInvitation(
     await transporter.sendMail({
         from,
         to: inviteeEmail,
-        subject: `${inviterUser.email} invited you to manage a server on Termix`,
+        subject: `${inviterUser.email} invited you to manage a server on Termi`,
         html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px;background:#0f1117;color:#e2e8f0;border-radius:12px">
           <h2 style="margin:0 0 8px;font-size:22px;color:#fff">Server Invitation</h2>
           <p style="margin:0 0 20px;color:#94a3b8">
             <strong style="color:#a78bfa">${inviterEmailHtml}</strong> has invited you to
             <strong>${permissions === 'manage' ? 'manage' : 'connect to'}</strong>
-            the server <strong style="color:#fff">${serverNameHtml}</strong> on Termix.
+            the server <strong style="color:#fff">${serverNameHtml}</strong> on Termi.
           </p>
           <a href="${inviteUrl}" style="display:inline-block;background:#6366f1;color:white;padding:13px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;margin:0 0 24px">
             Accept Invitation
           </a>
           <p style="color:#64748b;font-size:13px;margin:0">
-            This invitation expires in 7 days. If you don't have a Termix account yet, you'll be asked to create one first.
+            This invitation expires in 7 days. If you don't have a Termi account yet, you'll be asked to create one first.
           </p>
           <p style="color:#475569;font-size:12px;margin:16px 0 0">
             If you weren't expecting this invitation, you can safely ignore this email.

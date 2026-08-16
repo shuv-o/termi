@@ -40,7 +40,7 @@ function LoginContent() {
                     {/* Mobile logo (hidden on md+) */}
                     <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
                         <TerminalLogo width={40} height={40} className="rounded-xl" />
-                        <span className="text-xl font-bold gradient-text">Termix</span>
+                        <span className="text-xl font-bold gradient-text">Termi</span>
                     </div>
 
                     {state.info && !state.requires2FA && (

@@ -214,5 +214,5 @@ export function buildSpreadsheet(
 
     return options.format === 'csv'
         ? buildCsv(columns, rows)
-        : buildXlsx('Termix Servers', columns, rows, options.now);
+        : buildXlsx('Termi Servers', columns, rows, options.now);
 }

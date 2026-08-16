@@ -48,7 +48,7 @@ function downloadScript(content: string) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'termix-tunnel.mjs';
+    a.download = 'termi-tunnel.mjs';
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -123,8 +123,8 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
                 </Button>
             </div>
             <p className="text-[11px] text-muted-foreground/70">
-                Save as <code className="font-mono">termix-tunnel.mjs</code> and run{' '}
-                <code className="font-mono">node termix-tunnel.mjs</code>. The token inside expires
+                Save as <code className="font-mono">termi-tunnel.mjs</code> and run{' '}
+                <code className="font-mono">node termi-tunnel.mjs</code>. The token inside expires
                 in 5 minutes if unused — regenerate here if it fails.
             </p>
         </div>

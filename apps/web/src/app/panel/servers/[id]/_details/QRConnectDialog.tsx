@@ -8,7 +8,7 @@ import { getSiteUrl } from '@/lib/site';
 
 /**
  * Scan-to-connect: renders a QR code for this server's connect URL. The
- * scanning device just needs to already be logged into Termix — the URL
+ * scanning device just needs to already be logged into Termi — the URL
  * carries no credentials or auth token, so a photographed/leaked code can't
  * be used to sign in as anyone.
  */
@@ -58,7 +58,7 @@ export function QRConnectDialog({
                     <p className="text-sm font-medium text-center">{serverName}</p>
                     <p className="text-xs text-muted-foreground text-center max-w-[260px]">
                         Scan with your phone&apos;s camera to open this server on mobile.
-                        You&apos;ll need to already be signed in to Termix on that device.
+                        You&apos;ll need to already be signed in to Termi on that device.
                     </p>
                 </div>
             </DialogContent>

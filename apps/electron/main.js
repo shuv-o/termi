@@ -12,19 +12,19 @@ let win;
 
 //   Remote server URL (baked at build time)                ─
 
-// The hosted Termix deployment serves the web UI and proxies SSH/SCP/RDP/VNC
+// The hosted Termi deployment serves the web UI and proxies SSH/SCP/RDP/VNC
 // through its own gateway + guacd. This desktop app is just a native shell
 // around that remote app, plus a local terminal. Resolution order:
-//   1. TERMIX_REMOTE_URL env var (used by the dev scripts)
+//   1. TERMI_REMOTE_URL env var (used by the dev scripts)
 //   2. build-config.json written next to main.js at build time
 //   3. the hardcoded default below
 function getRemoteUrl() {
-    if (process.env.TERMIX_REMOTE_URL) return process.env.TERMIX_REMOTE_URL;
+    if (process.env.TERMI_REMOTE_URL) return process.env.TERMI_REMOTE_URL;
     try {
         const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'build-config.json'), 'utf8'));
         if (cfg.remoteUrl) return cfg.remoteUrl;
     } catch (_) {}
-    return 'https://termix.run';
+    return 'https://termi.run';
 }
 
 const REMOTE_URL = getRemoteUrl();
@@ -382,7 +382,7 @@ function createWindow(appUrl) {
         ...bounds,
         minWidth: 800,
         minHeight: 600,
-        title: 'Termix',
+        title: 'Termi',
         // Paint the window in the app's own dark background from the very first
         // frame. Electron's default is white, so without this the window flashes
         // white on launch and on every full reload before the page paints — the
@@ -779,8 +779,8 @@ app.whenReady().then(() => {
     // marker and grants a 30-day rolling session instead of the 7-day web one.
     try {
         const baseUA = session.defaultSession.getUserAgent();
-        if (!baseUA.includes('TermixDesktop')) {
-            session.defaultSession.setUserAgent(`${baseUA} TermixDesktop/${app.getVersion()}`);
+        if (!baseUA.includes('TermiDesktop')) {
+            session.defaultSession.setUserAgent(`${baseUA} TermiDesktop/${app.getVersion()}`);
         }
     } catch (e) {
         console.warn('[main] failed to set desktop User-Agent:', e.message);

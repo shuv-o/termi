@@ -55,7 +55,7 @@ gateway,gw.example.com,SSH,2222,admin,Network,,,,,
 `;
 
 export const SAMPLE_JSON = `{
-  "format": "termix-export",
+  "format": "termi-export",
   "version": 1,
   "encrypted": false,
   "payload": {

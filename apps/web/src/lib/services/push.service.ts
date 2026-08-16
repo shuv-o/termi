@@ -17,7 +17,7 @@ function ensureVapidKeys() {
 
     const publicKey = process.env.VAPID_PUBLIC_KEY;
     const privateKey = process.env.VAPID_PRIVATE_KEY;
-    const subject = process.env.VAPID_SUBJECT || 'mailto:admin@termix.run';
+    const subject = process.env.VAPID_SUBJECT || 'mailto:admin@termi.run';
 
     if (!publicKey || !privateKey) {
         // In dev, generate ephemeral keys so we don't crash — push won't work

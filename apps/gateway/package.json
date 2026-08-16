@@ -1,5 +1,5 @@
 {
-    "name": "@termix/gateway",
+    "name": "@termi/gateway",
     "version": "1.0.8",
     "private": true,
     "type": "module",

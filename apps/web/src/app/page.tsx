@@ -20,14 +20,14 @@ import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
-    title: 'Termix - Secure Server Management',
+    title: 'Termi - Secure Server Management',
     description:
-        'Termix is an open-source, self-hosted server management platform. Access your Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser with enterprise-grade security.',
+        'Termi is an open-source, self-hosted server management platform. Access your Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser with enterprise-grade security.',
     alternates: {
         canonical: '/',
     },
     openGraph: {
-        title: 'Termix - Secure Server Management',
+        title: 'Termi - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with AES-256-GCM encryption and TOTP 2FA.',
         url: '/',
@@ -49,7 +49,7 @@ export default async function HomePage() {
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
                                 <Terminal className="w-6 h-6 text-white" />
                             </div>
-                            <span className="text-xl font-bold gradient-text">Termix</span>
+                            <span className="text-xl font-bold gradient-text">Termi</span>
                         </div>
 
                         <nav className="hidden md:flex items-center gap-6">
@@ -66,7 +66,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuv-o/termix"
+                                href="https://github.com/shuv-o/termi"
                                 className="text-slate-300 hover:text-white transition-colors"
                             >
                                 GitHub
@@ -290,7 +290,7 @@ export default async function HomePage() {
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Get Started?</h2>
                     <p className="text-lg text-slate-300 mb-8">
-                        Deploy your own Termix instance in minutes with Docker.
+                        Deploy your own Termi instance in minutes with Docker.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -307,7 +307,7 @@ export default async function HomePage() {
                             </Button>
                         )}
                         <Button variant="secondary" size="lg" asChild>
-                            <Link href="https://github.com/shuv-o/termix">View on GitHub</Link>
+                            <Link href="https://github.com/shuv-o/termi">View on GitHub</Link>
                         </Button>
                     </div>
                 </div>
@@ -320,7 +320,7 @@ export default async function HomePage() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
                             <Terminal className="w-5 h-5 text-primary" />
-                            <span className="font-semibold">Termix</span>
+                            <span className="font-semibold">Termi</span>
                             <span className="text-slate-500">•</span>
                             <span className="text-slate-500 text-sm">MIT License</span>
                         </div>
@@ -333,7 +333,7 @@ export default async function HomePage() {
                                 Security
                             </Link>
                             <Link
-                                href="https://github.com/shuv-o/termix"
+                                href="https://github.com/shuv-o/termi"
                                 className="hover:text-white transition-colors"
                                 rel="noopener noreferrer"
                                 target="_blank"

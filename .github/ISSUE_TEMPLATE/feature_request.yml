@@ -11,7 +11,7 @@ body:
     id: problem
     attributes:
       label: Problem / Motivation
-      description: What problem does this feature solve? Is your request related to a frustration you have with Termix?
+      description: What problem does this feature solve? Is your request related to a frustration you have with Termi?
       placeholder: "I'm frustrated when... / It would be useful to..."
     validations:
       required: true

@@ -1,6 +1,6 @@
-# Passkeys in the Termix desktop app
+# Passkeys in the Termi desktop app
 
-WebAuthn/passkey behaviour differs by platform inside Electron, so Termix routes
+WebAuthn/passkey behaviour differs by platform inside Electron, so Termi routes
 each platform to whatever actually works:
 
 | Platform            | Mechanism                                                                                                                                         | Extra setup                                |
@@ -44,22 +44,22 @@ entitlements and a matching Apple App Site Association file.
 
 3. **Entitlements:** edit `../apps/electron/entitlements.mac.plist` — replace
    `TEAM_ID` with your Apple Team ID. The bundle id must equal `build.appId`
-   (`run.termix`) in the root `../package.json`. `webcredentials:` must equal
-   the server's WebAuthn `rpID` (default `termix.run`).
+   (`run.termi`) in the root `../package.json`. `webcredentials:` must equal
+   the server's WebAuthn `rpID` (default `termi.run`).
 
 4. **Apple App Site Association:** set `APPLE_TEAM_ID` (and optionally
    `APPLE_APP_BUNDLE_ID`) in the web deployment env. Then
    `https://<domain>/.well-known/apple-app-site-association` serves:
 
     ```json
-    { "webcredentials": { "apps": ["TEAMID.com.shuvoo.termix"] } }
+    { "webcredentials": { "apps": ["TEAMID.run.termi"] } }
     ```
 
-5. **Build:** `TERMIX_REMOTE_URL=https://termix.run npm run build:electron`
+5. **Build:** `TERMI_REMOTE_URL=https://termi.run npm run build:electron`
    with signing configured (`CSC_LINK` / `CSC_KEY_PASSWORD` or an installed
    Developer ID cert). The `mac.entitlements` wiring is already in the root
    `../package.json` `build` block.
 
-> The desktop app's served origin (`TERMIX_REMOTE_URL`) must match the server's
+> The desktop app's served origin (`TERMI_REMOTE_URL`) must match the server's
 > `rpID` / `NEXT_PUBLIC_APP_URL` domain, or WebAuthn verification will reject the
 > ceremony on every platform.

@@ -3,7 +3,7 @@ import { filterForwardHeaders, scopeCookiePath, injectBaseTag } from './route';
 
 describe('filterForwardHeaders', () => {
     it('drops the session cookie — this route is same-origin, so the browser attaches it automatically', () => {
-        const headers = new Headers({ cookie: 'termix_session=secret', 'x-custom': 'keep-me' });
+        const headers = new Headers({ cookie: 'termi_session=secret', 'x-custom': 'keep-me' });
         const result = filterForwardHeaders(headers);
         expect(result.cookie).toBeUndefined();
         expect(result['x-custom']).toBe('keep-me');
@@ -19,14 +19,14 @@ describe('filterForwardHeaders', () => {
             connection: 'keep-alive',
             'transfer-encoding': 'chunked',
             upgrade: 'websocket',
-            host: 'termix.example.com',
+            host: 'termi.example.com',
         });
         const result = filterForwardHeaders(headers);
         expect(Object.keys(result)).toHaveLength(0);
     });
 
     it('is case-insensitive when matching header names to drop', () => {
-        const headers = new Headers({ Cookie: 'termix_session=secret' });
+        const headers = new Headers({ Cookie: 'termi_session=secret' });
         expect(filterForwardHeaders(headers).Cookie).toBeUndefined();
     });
 

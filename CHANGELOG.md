@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Termix are documented here.
+All notable changes to Termi are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Security
 
 - **Session recordings were stored in plaintext.** Now encrypted the same way as server credentials (AES-256-GCM) before storage, decrypted only when a recording is opened for playback.
-- **The tunnel HTTP proxy no longer forwards the browser's live Termix session cookie or `Authorization` header to the tunneled target.** This route is same-origin with the rest of the app, so the browser was attaching both automatically to every proxied request — a tunneled target (by definition something other than Termix itself) could previously have captured a real session credential.
+- **The tunnel HTTP proxy no longer forwards the browser's live Termi session cookie or `Authorization` header to the tunneled target.** This route is same-origin with the rest of the app, so the browser was attaching both automatically to every proxied request — a tunneled target (by definition something other than Termi itself) could previously have captured a real session credential.
 - Tunnel HTTP responses now stream instead of buffering the full body in memory — a bounded buffer applies only to HTML responses, to inject a `<base>` tag for relative-link rewriting. Large file transfers through a tunnel no longer risk exhausting server memory.
 - Added a per-user concurrent-tunnel cap on the gateway (10) to bound resource use from a runaway or malicious bridge script — each tunnel opens its own unpooled SSH connection.
 
@@ -155,7 +155,7 @@ First release to actually ship desktop installers. v1.0.2 built them but uploade
 **Desktop App (Electron)**
 
 - Native macOS, Windows, and Linux desktop app
-- Connects to any self-hosted Termix instance
+- Connects to any self-hosted Termi instance
 - Full local stack mode (`electron:dev:full`)
 - Bundled gateway (node-pty) for local terminal without a cloud instance
 - Setup UI for first-run configuration
@@ -190,5 +190,5 @@ First release to actually ship desktop installers. v1.0.2 built them but uploade
 - Patched transitive dependencies (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
 - Password-reset URLs (single-use tokens) are no longer written to server logs in production
 
-[Unreleased]: https://github.com/shuv-o/termix/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/shuv-o/termix/releases/tag/v1.0.0
+[Unreleased]: https://github.com/shuv-o/termi/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/shuv-o/termi/releases/tag/v1.0.0

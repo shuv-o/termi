@@ -1,6 +1,6 @@
 # PWA install & Android TWA
 
-Termix is a fully installable PWA. This doc covers the two distribution paths:
+Termi is a fully installable PWA. This doc covers the two distribution paths:
 
 1. **PWA install** — works today on Android, desktop Chromium, and iOS Safari.
 2. **TWA (Trusted Web Activity)** — wraps the PWA into a signed Android app for the Google Play Store.
@@ -35,10 +35,10 @@ npm i -g @bubblewrap/cli
 ### 2. Initialize from the live manifest
 
 ```bash
-bubblewrap init --manifest https://termix.run/manifest.json
+bubblewrap init --manifest https://termi.run/manifest.json
 ```
 
-Answer the prompts (package id `run.termix`, app name `Termix`, etc.). Keep the
+Answer the prompts (package id `run.termi`, app name `Termi`, etc.). Keep the
 package id consistent with `assetlinks.json`.
 
 ### 3. Build the signed app
@@ -73,11 +73,11 @@ Paste the fingerprint(s) into `../apps/web/public/.well-known/assetlinks.json`, 
 ]
 ```
 
-Deploy the web app so `https://termix.run/.well-known/assetlinks.json` returns
+Deploy the web app so `https://termi.run/.well-known/assetlinks.json` returns
 HTTP 200 with `Content-Type: application/json`. Verify:
 
 ```bash
-curl -i https://termix.run/.well-known/assetlinks.json
+curl -i https://termi.run/.well-known/assetlinks.json
 ```
 
 Verification can also be checked at:

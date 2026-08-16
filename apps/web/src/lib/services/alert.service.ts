@@ -64,7 +64,7 @@ function createTransporter() {
 async function sendAlertEmail(to: string, subject: string, html: string): Promise<void> {
     const transporter = createTransporter();
     await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"Termix Alerts" <alerts@termix.run>',
+        from: process.env.SMTP_FROM || '"Termi Alerts" <alerts@termi.run>',
         to,
         subject,
         html,
@@ -102,7 +102,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
     if (config.alertEmail && config.user.email) {
         await sendAlertEmail(
             config.user.email,
-            `[Termix Alert] Server Down: ${serverName}`,
+            `[Termi Alert] Server Down: ${serverName}`,
             `
             <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px">
               <h2 style="color:#ef4444;margin-bottom:8px">⚠ Server Unreachable</h2>
@@ -122,7 +122,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
                 View Server
               </a>
               <p style="color:#999;font-size:12px;margin-top:24px">
-                You're receiving this because you enabled monitoring alerts for this server in Termix.
+                You're receiving this because you enabled monitoring alerts for this server in Termi.
               </p>
             </div>
             `,
@@ -164,7 +164,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
     if (config.alertEmail && config.user.email) {
         await sendAlertEmail(
             config.user.email,
-            `[Termix Alert] Server Recovered: ${serverName}`,
+            `[Termi Alert] Server Recovered: ${serverName}`,
             `
             <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px">
               <h2 style="color:#22c55e;margin-bottom:8px">✓ Server Recovered</h2>

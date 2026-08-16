@@ -43,7 +43,7 @@ jobs:
         env:
           # electron-builder uploads artifacts to the GitHub Release via this token.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TERMIX_REMOTE_URL: ${{ vars.TERMIX_REMOTE_URL }}
+          TERMI_REMOTE_URL: ${{ vars.TERMI_REMOTE_URL }}
 
           # --- macOS code signing ---
           # This project has no Apple Developer ID (electron-builder.yml sets

@@ -23,7 +23,7 @@ import { openPayload, WrongPassphraseError } from './envelope';
 export { WrongPassphraseError };
 
 export class InvalidFileError extends Error {
-    constructor(message = 'This file is not a valid Termix export.') {
+    constructor(message = 'This file is not a valid Termi export.') {
         super(message);
         this.name = 'InvalidFileError';
     }

@@ -8,15 +8,15 @@ import { getSiteUrl } from '@/lib/site';
 export const metadata: Metadata = {
     // Resolves relative OG/twitter image URLs and the canonical link tag. This
     // must be the site people actually land on when they click a shared link,
-    // and — since Termix is self-hosted — that's a different domain for every
+    // and — since Termi is self-hosted — that's a different domain for every
     // deployment (NEXT_PUBLIC_APP_URL), not always this project's own site.
     metadataBase: new URL(getSiteUrl()),
     title: {
-        default: 'Termix - Secure Server Management',
-        template: '%s | Termix',
+        default: 'Termi - Secure Server Management',
+        template: '%s | Termi',
     },
     description:
-        'Termix is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
+        'Termi is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
     keywords: [
         'server management',
         'SSH client',
@@ -54,21 +54,21 @@ export const metadata: Metadata = {
     },
     appleWebApp: {
         capable: true,
-        title: 'Termix',
+        title: 'Termi',
         statusBarStyle: 'black-translucent',
     },
     openGraph: {
-        title: 'Termix - Secure Server Management',
+        title: 'Termi - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
         type: 'website',
         url: getSiteUrl(),
-        siteName: 'Termix',
+        siteName: 'Termi',
         locale: 'en_US',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Termix - Secure Server Management',
+        title: 'Termi - Secure Server Management',
         description:
             'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser.',
         creator: '@shuv-o',
@@ -127,12 +127,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                             '@graph': [
                                 {
                                     '@type': 'SoftwareApplication',
-                                    name: 'Termix',
+                                    name: 'Termi',
                                     applicationCategory: 'DeveloperApplication',
                                     operatingSystem: 'Any',
                                     description:
                                         'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-                                    url: 'https://github.com/shuv-o/termix',
+                                    url: 'https://github.com/shuv-o/termi',
                                     author: {
                                         '@type': 'Person',
                                         name: 'Shuvo',

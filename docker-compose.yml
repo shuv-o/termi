@@ -1,7 +1,7 @@
 services:
   traefik:
     image: traefik:v3.3
-    container_name: termix-traefik
+    container_name: termi-traefik
     restart: unless-stopped
     command:
       - "--entrypoints.web.address=:22080"
@@ -22,29 +22,29 @@ services:
     volumes:
       - ./traefik:/etc/traefik:ro
     networks:
-      - termix-network
+      - termi-network
 
   guacd:
     image: guacamole/guacd:1.6.0
-    container_name: termix-guacd
+    container_name: termi-guacd
     restart: unless-stopped
     networks:
-      - termix-network
+      - termi-network
 
   postgres:
     image: postgres:17-alpine
-    container_name: termix-postgres
+    container_name: termi-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-termix}
+      POSTGRES_DB: ${POSTGRES_DB:-termi}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - termix-network
+      - termi-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termix}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,16 +56,16 @@ services:
       target: builder
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
-    container_name: termix-migrate
+    container_name: termi-migrate
     restart: "no"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termix}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
     command: ["sh", "-c", "cd apps/web && npx prisma migrate deploy"]
     networks:
-      - termix-network
+      - termi-network
 
   web:
     build:
@@ -82,7 +82,7 @@ services:
       gateway:
         condition: service_started
 
-    container_name: termix-web
+    container_name: termi-web
     restart: unless-stopped
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
@@ -92,7 +92,7 @@ services:
       #   Separate domain:  wss://gateway.example.com  (with GATEWAY_DOMAIN=gateway.example.com)
       NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termix}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
       SESSION_SECRET: ${SESSION_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
@@ -114,13 +114,13 @@ services:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     networks:
-      - termix-network
+      - termi-network
 
   gateway:
     build:
       context: .
       dockerfile: apps/gateway/Dockerfile
-    container_name: termix-gateway
+    container_name: termi-gateway
     restart: unless-stopped
     depends_on:
       - guacd
@@ -133,11 +133,11 @@ services:
       GUACD_PORT: 4822
       NODE_ENV: production
     networks:
-      - termix-network
+      - termi-network
 
 volumes:
   postgres-data:
 
 networks:
-  termix-network:
+  termi-network:
     driver: bridge

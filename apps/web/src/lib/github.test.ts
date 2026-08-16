@@ -16,7 +16,7 @@ async function loadModule(token?: string) {
     return import('./github');
 }
 
-const URL = 'https://api.github.com/repos/shuv-o/termix';
+const URL = 'https://api.github.com/repos/shuv-o/termi';
 const TTL = { authenticated: 30, anonymous: 300 };
 
 /** Minimal stand-in for the bits of Response that githubFetch inspects. */
@@ -50,7 +50,7 @@ describe('githubFetch', () => {
         const [, init] = fetchMock.mock.calls[0];
         expect(init.headers.Authorization).toBeUndefined();
         // GitHub rejects requests with no User-Agent outright.
-        expect(init.headers['User-Agent']).toBe('termix-web');
+        expect(init.headers['User-Agent']).toBe('termi-web');
         // Anonymous requests must use the slower TTL to stay under 60 req/h.
         expect(init.next.revalidate).toBe(TTL.anonymous);
     });

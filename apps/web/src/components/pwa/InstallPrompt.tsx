@@ -12,7 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const DISMISS_KEY = 'termix:install-dismissed';
+const DISMISS_KEY = 'termi:install-dismissed';
 
 export function isStandalone(): boolean {
     if (typeof window === 'undefined') return false;
@@ -104,14 +104,14 @@ export default function InstallPrompt() {
                 <div className="min-w-0 flex-1 text-sm">
                     {showIOS ? (
                         <p className="text-slate-300">
-                            Install Termix: tap{' '}
+                            Install Termi: tap{' '}
                             <Share className="inline h-3.5 w-3.5 -translate-y-0.5 text-slate-400" />{' '}
                             <span className="text-slate-400">Share</span> →{' '}
                             <span className="text-slate-200">Add to Home Screen</span>.
                         </p>
                     ) : (
                         <p className="text-slate-300">
-                            Install Termix for a faster, full-screen, app-like experience.
+                            Install Termi for a faster, full-screen, app-like experience.
                         </p>
                     )}
                 </div>

@@ -36,22 +36,22 @@ export async function sendVerificationEmail(userId: string, email: string): Prom
         },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termix.run';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://termi.run';
     const verifyUrl = `${appUrl}/api/auth/verify-email?token=${token}`;
 
     const transporter = createTransporter();
     await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"Termix" <noreply@termix.run>',
+        from: process.env.SMTP_FROM || '"Termi" <noreply@termi.run>',
         to: email,
-        subject: 'Verify your Termix account',
+        subject: 'Verify your Termi account',
         html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
           <h2>Verify your email</h2>
-          <p>Click the button below to verify your Termix account. The link expires in 24 hours.</p>
+          <p>Click the button below to verify your Termi account. The link expires in 24 hours.</p>
           <a href="${verifyUrl}" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">
             Verify Email
           </a>
-          <p style="color:#999;font-size:12px">If you didn't create a Termix account, ignore this email.</p>
+          <p style="color:#999;font-size:12px">If you didn't create a Termi account, ignore this email.</p>
         </div>
         `,
     });

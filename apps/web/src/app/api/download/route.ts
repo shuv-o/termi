@@ -15,7 +15,7 @@ import { githubFetch } from '@/lib/github';
  *   GET /api/download?os=mac&arch=arm64  → 302 to the matching asset
  */
 
-const GITHUB_LATEST_RELEASE = 'https://api.github.com/repos/shuv-o/termix/releases/latest';
+const GITHUB_LATEST_RELEASE = 'https://api.github.com/repos/shuv-o/termi/releases/latest';
 
 /**
  * Cache the GitHub lookup. Releases change rarely, so this stays generous even
@@ -75,7 +75,7 @@ async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
  * Pick the installer for an OS/arch pair.
  *
  * electron-builder omits the arch suffix for the default x64 build
- * (`termix-1.0.4.dmg`) and appends it otherwise (`termix-1.0.4-arm64.dmg`), so
+ * (`Termi-1.0.4.dmg`) and appends it otherwise (`Termi-1.0.4-arm64.dmg`), so
  * x64 is matched by the *absence* of an arm marker rather than its presence.
  */
 function findAsset(assets: GitHubAsset[], os: OS, arch: Arch): GitHubAsset | null {

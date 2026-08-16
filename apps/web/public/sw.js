@@ -1,5 +1,5 @@
 /**
- * Termix Service Worker
+ * Termi Service Worker
  *
  * Handles:
  * - Offline caching (cache-first for static assets, network-first for pages)
@@ -7,7 +7,7 @@
  * - Notification click → focus/open the app
  */
 
-const CACHE_NAME = 'termix-v5';
+const CACHE_NAME = 'termi-v5';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to pre-cache on install
@@ -148,14 +148,14 @@ self.addEventListener('push', (event) => {
     try {
         payload = event.data.json();
     } catch {
-        payload = { title: 'Termix Alert', body: event.data.text() };
+        payload = { title: 'Termi Alert', body: event.data.text() };
     }
 
     const options = {
         body: payload.body || '',
         icon: payload.icon || '/icons/icon-192x192.png',
         badge: payload.badge || '/icons/icon-96x96.png',
-        tag: payload.tag || 'termix-alert',
+        tag: payload.tag || 'termi-alert',
         data: { url: payload.url || '/panel' },
         requireInteraction: true,
         actions: [
@@ -164,7 +164,7 @@ self.addEventListener('push', (event) => {
         ],
     };
 
-    event.waitUntil(self.registration.showNotification(payload.title || 'Termix Alert', options));
+    event.waitUntil(self.registration.showNotification(payload.title || 'Termi Alert', options));
 });
 
 // NOTIFICATION CLICK

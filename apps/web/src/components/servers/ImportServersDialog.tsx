@@ -94,7 +94,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
             try {
                 const res = await fetch('/api/servers/import/template?format=xlsx');
                 if (!res.ok) throw new Error();
-                triggerDownload(await res.blob(), 'termix-import-template.xlsx');
+                triggerDownload(await res.blob(), 'termi-import-template.xlsx');
             } catch {
                 setError('Could not download the Excel template. Try CSV instead.');
             }
@@ -106,7 +106,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
             new Blob([sampleText], {
                 type: isCsv ? 'text/csv;charset=utf-8' : 'application/json',
             }),
-            isCsv ? 'termix-import-template.csv' : 'termix-import-template.json',
+            isCsv ? 'termi-import-template.csv' : 'termi-import-template.json',
         );
     }
 
@@ -284,7 +284,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                             <>
                                 <Upload className="w-8 h-8 text-muted-foreground" />
                                 <span className="text-sm font-medium">
-                                    Choose a Termix export file
+                                    Choose a Termi export file
                                 </span>
                                 <span className="text-xs text-muted-foreground">
                                     JSON or CSV, up to 8 MB
@@ -310,7 +310,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                         {showFormat && (
                             <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
                                 <p className="text-xs text-muted-foreground">
-                                    Import a file you exported from Termix, or build your own.
+                                    Import a file you exported from Termi, or build your own.
                                     <span className="text-foreground">
                                         {' '}
                                         Only <code>Name</code> and <code>Host</code> are required
@@ -380,7 +380,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                         <span className="text-foreground">
                                             save it as CSV to import
                                         </span>{' '}
-                                        — Termix reads spreadsheets as CSV. Leave the{' '}
+                                        — Termi reads spreadsheets as CSV. Leave the{' '}
                                         <code>Password</code> / <code>Private Key</code> columns
                                         blank unless you need them.
                                     </p>

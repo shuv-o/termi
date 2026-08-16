@@ -46,10 +46,10 @@ const HOP_BY_HOP_HEADERS = new Set([
     'host',
 ]);
 
-// This route is same-origin with the rest of Termix, so the browser attaches
+// This route is same-origin with the rest of Termi, so the browser attaches
 // the real session cookie (and any Authorization header) to every request
 // here automatically. Forwarding either to the tunneled target — a third
-// party as far as this credential is concerned — would leak a live Termix
+// party as far as this credential is concerned — would leak a live Termi
 // session to whatever's on the other end of the tunnel. Never forward these.
 const CREDENTIAL_HEADERS = new Set(['cookie', 'authorization']);
 
@@ -83,7 +83,7 @@ export function filterForwardHeaders(requestHeaders: Headers): Record<string, st
 }
 
 /** Re-scopes a Set-Cookie header's Path to this tunnel's own path, so a
- *  tunneled target's cookies never collide with Termix's own or another
+ *  tunneled target's cookies never collide with Termi's own or another
  *  tunnel's. */
 export function scopeCookiePath(cookie: string, basePath: string): string {
     return /;\s*Path=/i.test(cookie)
@@ -230,7 +230,7 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                         if (lower === 'set-cookie') {
                             // Multiple Set-Cookie headers must stay separate lines, not
                             // comma-joined — and are re-scoped to this tunnel's own path
-                            // so the target's session cookie never leaks onto Termix's
+                            // so the target's session cookie never leaks onto Termi's
                             // real pages or collides with a different tunnel.
                             const cookies = Array.isArray(value) ? value : [value];
                             for (const cookie of cookies) {

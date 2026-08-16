@@ -1,5 +1,5 @@
 /**
- * Termix Database Client
+ * Termi Database Client
  *
  * Singleton Prisma client instance with proper configuration
  * for both development and production environments.

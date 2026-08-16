@@ -1,7 +1,7 @@
 {
     "id": "/",
-    "name": "Termix",
-    "short_name": "Termix",
+    "name": "Termi",
+    "short_name": "Termi",
     "description": "Open-source self-hosted server management — SSH, SCP, RDP, VNC from your browser. Built by Shuvo.",
     "start_url": "/panel",
     "display": "standalone",

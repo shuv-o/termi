@@ -19,7 +19,7 @@ function StatusBanner({ push }: { push: PushState }) {
                     <p className="text-sm font-medium text-amber-400">Add to Home Screen first</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                         iOS only allows notifications for apps installed to the Home Screen. Tap
-                        Share → Add to Home Screen, then open Termix from there and enable
+                        Share → Add to Home Screen, then open Termi from there and enable
                         notifications again.
                     </p>
                 </div>

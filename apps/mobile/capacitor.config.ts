@@ -10,18 +10,18 @@ const here = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPat
 
 // Server URL is baked at build time, mirroring the Electron shell.
 // Resolution order:
-//   1. TERMIX_REMOTE_URL env var (dev / CI)
+//   1. TERMI_REMOTE_URL env var (dev / CI)
 //   2. build-config.json written by `npm run config`
 //   3. the hardcoded production default
 function getRemoteUrl(): string {
-    if (process.env.TERMIX_REMOTE_URL) return process.env.TERMIX_REMOTE_URL;
+    if (process.env.TERMI_REMOTE_URL) return process.env.TERMI_REMOTE_URL;
     try {
         const cfg = JSON.parse(readFileSync(join(here, 'build-config.json'), 'utf8'));
         if (cfg.remoteUrl) return cfg.remoteUrl;
     } catch {
         /* not generated yet — fall through to default */
     }
-    return 'https://termix.run';
+    return 'https://termi.run';
 }
 
 const remoteUrl = getRemoteUrl();
@@ -30,9 +30,9 @@ const remoteUrl = getRemoteUrl();
 const isHttps = remoteUrl.startsWith('https://');
 
 const config: CapacitorConfig = {
-    appId: 'run.termix',
-    appName: 'Termix',
-    // Thin remote shell: the WebView loads the hosted Termix deployment directly,
+    appId: 'run.termi',
+    appName: 'Termi',
+    // Thin remote shell: the WebView loads the hosted Termi deployment directly,
     // so no local web build is bundled. `webDir` is only a fallback page.
     webDir: 'www',
     backgroundColor: '#0f172a',

@@ -25,10 +25,10 @@ async function main() {
     const passwordHash = await hashPassword('Demo@123');
 
     const user = await prisma.user.upsert({
-        where: { email: 'demo@termix.local' },
+        where: { email: 'demo@termi.local' },
         update: {},
         create: {
-            email: 'demo@termix.local',
+            email: 'demo@termi.local',
             passwordHash,
             isActive: true,
             isVerified: true,
@@ -163,7 +163,7 @@ async function main() {
     console.log('🎉 Seed completed!');
     console.log('');
     console.log('Demo credentials:');
-    console.log('  Email: demo@termix.local');
+    console.log('  Email: demo@termi.local');
     console.log('  Password: Demo@123');
     console.log('');
 }
