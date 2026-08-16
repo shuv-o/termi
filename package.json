@@ -1,6 +1,6 @@
 {
     "name": "termix",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
