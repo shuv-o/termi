@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/card';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
 import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
+import TerminalLogo from "@/components/common/Logo";
 
 export const metadata: Metadata = {
     title: 'Termi - Secure Server Management',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
     const session = await getSession();
-    const isLoggedIn = session.isLoggedIn === true;
+    const isLoggedIn = session.isLoggedIn;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -47,7 +48,7 @@ export default async function HomePage() {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <Terminal className="w-6 h-6 text-white" />
+                                <TerminalLogo className="w-6 h-6 text-white" />
                             </div>
                             <span className="text-xl font-bold gradient-text">Termi</span>
                         </div>

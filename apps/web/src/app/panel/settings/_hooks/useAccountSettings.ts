@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AddToast, SetUser, User } from '../types';
+import {useRouter} from "next/navigation";
 
 /**
  * Display name, login password, encryption passphrase and email verification —
@@ -12,6 +13,7 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
     const [nameInput, setNameInput] = useState('');
     const [savingName, setSavingName] = useState(false);
     const nameSeeded = useRef(false);
+    const router = useRouter();
 
     useEffect(() => {
         if (user && !nameSeeded.current) {
@@ -148,7 +150,8 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
             const data = await res.json();
             if (data.success) {
                 addToast('success', 'Encryption key reset successfully.');
-                window.location.href = '/setup-encryption';
+                // window.location.href = '/setup-encryption';
+                router.push('/setup-encryption');
             } else {
                 addToast('error', data.error || 'Failed to reset encryption key.');
                 setShowEncryptionResetConfirm(false);
@@ -159,7 +162,7 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
         } finally {
             setResettingEncryption(false);
         }
-    }, [addToast]);
+    }, [addToast, router]);
 
     //  Email verification
     const [resendingVerification, setResendingVerification] = useState(false);

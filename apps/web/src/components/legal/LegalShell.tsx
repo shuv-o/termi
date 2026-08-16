@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Terminal, ArrowLeft } from 'lucide-react';
+import {Terminal, ArrowLeft} from 'lucide-react';
+import TerminalLogo from "@/components/common/Logo";
 
 export interface TocItem {
     id: string;
@@ -20,12 +21,12 @@ interface LegalShellProps {
  * contents alongside a readable single-column document.
  */
 export default function LegalShell({
-    title,
-    description,
-    lastUpdated,
-    toc,
-    children,
-}: LegalShellProps) {
+                                       title,
+                                       description,
+                                       lastUpdated,
+                                       toc,
+                                       children,
+                                   }: LegalShellProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
             {/* Header */}
@@ -33,8 +34,9 @@ export default function LegalShell({
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <Terminal className="w-6 h-6 text-white" />
+                            <div
+                                className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-sky-700 flex items-center justify-center">
+                                <TerminalLogo className="w-6 h-6 text-white"/>
                             </div>
                             <span className="text-xl font-bold gradient-text">Termi</span>
                         </Link>
@@ -43,7 +45,7 @@ export default function LegalShell({
                             href="/"
                             className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-4 h-4"/>
                             Back to home
                         </Link>
                     </div>
@@ -92,9 +94,10 @@ export default function LegalShell({
 
             {/* Footer */}
             <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+                <div
+                    className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
                     <div className="flex items-center gap-2">
-                        <Terminal className="w-5 h-5 text-primary" />
+                        <Terminal className="w-5 h-5 text-primary"/>
                         <span className="font-semibold text-slate-300">Termi</span>
                         <span className="text-slate-600">•</span>
                         <span className="text-slate-500">MIT License</span>
@@ -123,10 +126,10 @@ export default function LegalShell({
 
 /** Section heading with an anchor target, matching the ToC ids. */
 export function Section({
-    id,
-    title,
-    children,
-}: {
+                            id,
+                            title,
+                            children,
+                        }: {
     id: string;
     title: string;
     children: React.ReactNode;
