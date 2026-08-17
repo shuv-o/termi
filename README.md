@@ -4,6 +4,8 @@
 
 **Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
 
+_Termi runs in production at **[termi.run](https://termi.run)** — try it there, or follow [Quick Start](#-quick-start) to self-host your own instance._
+
 [![GitHub stars](https://img.shields.io/github/stars/shuv-o/termi?style=social)](https://github.com/shuv-o/termi/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/shuv-o/termi/actions/workflows/ci.yml/badge.svg)](https://github.com/shuv-o/termi/actions/workflows/ci.yml)
@@ -15,7 +17,7 @@
 
 [![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/shuvoo)
 
-**[🌐 Website](https://termi.run)** · **[📖 Wiki](https://github.com/shuv-o/termi/wiki)** · **[⬇️ Download](https://github.com/shuv-o/termi/releases/latest)** · **[💬 Discussions](https://github.com/shuv-o/termi/discussions)**
+**[🚀 Live Demo](https://termi.run)** · **[📖 Wiki](https://github.com/shuv-o/termi/wiki)** · **[⬇️ Download](https://github.com/shuv-o/termi/releases/latest)** · **[💬 Discussions](https://github.com/shuv-o/termi/discussions)**
 
 </div>
 
