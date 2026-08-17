@@ -80,7 +80,7 @@ ENV TRUSTED_PROXY=${TRUSTED_PROXY}
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build --workspace=apps/web
+RUN npm run build
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
