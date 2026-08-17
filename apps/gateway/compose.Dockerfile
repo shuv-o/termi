@@ -8,16 +8,17 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ linux-headers
 
 # Copy package files
-COPY package.json ./
+COPY package.json package-lock.json* ./
+COPY apps/gateway/package.json ./apps/gateway/
 
 # Install dependencies (includes node-pty native compilation)
-RUN npm ci
+RUN npm ci --workspace=apps/gateway
 
 # Copy source code
-COPY . .
+COPY apps/gateway ./apps/gateway
 
 # Build TypeScript
-RUN npm run build
+RUN npm run build --workspace=apps/gateway
 
 # Stage 2: Production
 FROM node:20-alpine AS runner
@@ -30,8 +31,8 @@ RUN addgroup --system --gid 1001 gateway
 RUN adduser --system --uid 1001 gateway
 
 # Copy built files and compiled native modules from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/apps/gateway/dist ./dist
+COPY --from=builder /app/apps/gateway/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
 # Set permissions

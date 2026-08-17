@@ -110,19 +110,18 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: apps/gateway/Dockerfile
+      dockerfile: apps/gateway/compose.Dockerfile
     container_name: termi-gateway
     restart: unless-stopped
     depends_on:
       - guacd
     environment:
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
-
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       GATEWAY_HOST: ${GATEWAY_HOST:-"0.0.0.0"}
 
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
 
       GUACD_HOST: ${GUACD_HOST:-"guacd"}
       GUACD_PORT: ${GUACD_PORT:-4822}

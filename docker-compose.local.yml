@@ -72,7 +72,7 @@ services:
     # Source is mounted at runtime so tsx watch picks up changes instantly.
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/gateway/compose.Dockerfile
       target: deps
     container_name: termi-gateway
     working_dir: /app

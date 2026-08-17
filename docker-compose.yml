@@ -119,7 +119,7 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: apps/gateway/Dockerfile
+      dockerfile: apps/gateway/compose.Dockerfile
     container_name: termi-gateway
     restart: unless-stopped
     depends_on:
