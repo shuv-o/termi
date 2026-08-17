@@ -3,7 +3,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh
 WORKDIR /app
 
 # Copy ALL workspace package.json files so npm can resolve the full workspace graph
-COPY package.json ./
+COPY package.json package-lock.json* ./
+COPY apps/web/package.json ./apps/web/
+COPY apps/gateway/package.json ./apps/gateway/
 
 RUN npm install && \
     LCSS_VER=$(node -p "require('./node_modules/lightningcss/package.json').version") && \
@@ -26,7 +28,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
-RUN npx prisma generate --schema=prisma/schema.prisma
+RUN npx prisma generate --schema=apps/web/prisma/schema.prisma
 
 ARG DB_HOST
 ARG DB_PORT
@@ -94,10 +96,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/prisma ./apps/web/prisma
 
 # Set permissions
 RUN chown -R nextjs:nodejs /app
@@ -109,4 +111,4 @@ EXPOSE 22080
 ENV PORT=22080
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]

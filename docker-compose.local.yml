@@ -37,7 +37,7 @@ services:
   init-modules:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       target: deps
     container_name: termi-init-modules
     restart: "no"
@@ -48,7 +48,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       target: deps
     container_name: termi-migrate
     working_dir: /app
@@ -104,7 +104,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       target: deps
     container_name: termi-web
     working_dir: /app

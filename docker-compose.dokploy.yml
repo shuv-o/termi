@@ -9,7 +9,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       target: builder
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
@@ -29,7 +29,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       args:
         DB_HOST: ${DB_HOST}
         DB_PORT: ${DB_PORT:-5432}

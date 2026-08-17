@@ -1,4 +1,4 @@
-# Termi Gateway Dockerfile
+# Termi Gateway compose.Dockerfile
 
 # Stage 1: Build
 FROM node:20-alpine AS builder

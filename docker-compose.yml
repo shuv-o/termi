@@ -52,7 +52,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       target: builder
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
@@ -70,7 +70,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/compose.Dockerfile
       args:
         # NEXT_PUBLIC_GATEWAY_URL is intentionally excluded — it is a runtime env var only,
         # served to the browser via the token API. This keeps the image deployment-agnostic.
