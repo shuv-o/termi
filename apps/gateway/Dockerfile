@@ -11,7 +11,7 @@ RUN apk add --no-cache python3 make g++ linux-headers
 COPY package.json ./
 
 # Install dependencies (includes node-pty native compilation)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .
