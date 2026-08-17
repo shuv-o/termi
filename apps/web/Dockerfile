@@ -109,4 +109,23 @@ EXPOSE 22080
 ENV PORT=22080
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# entrypoint script
+COPY <<'EOF' /usr/local/bin/docker-entrypoint.sh
+#!/bin/bash
+set -e
+
+FLAG_FILE="/app/.migrations_done"
+
+if [ ! -f "$FLAG_FILE" ]; then
+    echo "First run detected - Running migrations..."
+    npx prisma migrate deploy
+    echo "Migrations completed!"
+    touch "$FLAG_FILE"
+else
+    echo "Migrations already run, skipping..."
+fi
+node server.js
+EOF
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
