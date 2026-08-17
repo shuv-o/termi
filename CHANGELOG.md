@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Security
+
+- **API responses had no `Cache-Control` header, allowing a shared cache to serve one user's authenticated data to another.** `/api/auth/me` and nearly all other JSON endpoints returned per-session data (email, name, 2FA/passkey status, etc.) with no directive telling intermediary caches (CDN, reverse proxy) not to store the response — a cached authenticated response could be replayed to a later, unauthenticated visitor. All response helpers in `lib/api/utils.ts` now send `Cache-Control: private, no-store`, with the same rule applied globally to `/api/*` in `next.config.mjs` as a backstop for routes that build a response without those helpers.
+
 ---
 
 ## [1.0.10] — 2026-08-17

@@ -16,35 +16,60 @@ export interface ApiResponse<T = unknown> {
 
 // RESPONSE HELPERS
 
+// Every JSON API response goes through these helpers, and many carry
+// per-session/per-user data (e.g. /api/auth/me). Without an explicit
+// no-store directive, a shared cache sitting in front of the deployment
+// (CDN, reverse proxy) is free to cache one user's authenticated response
+// and replay it to the next visitor — including an unauthenticated one.
+const NO_STORE_HEADERS = { 'Cache-Control': 'private, no-store' };
+
 export function successResponse<T>(data: T, status: number = 200) {
-    return NextResponse.json<ApiResponse<T>>({ success: true, data }, { status });
+    return NextResponse.json<ApiResponse<T>>(
+        { success: true, data },
+        { status, headers: NO_STORE_HEADERS },
+    );
 }
 
 export function errorResponse(error: string, status: number = 400) {
-    return NextResponse.json<ApiResponse>({ success: false, error }, { status });
+    return NextResponse.json<ApiResponse>(
+        { success: false, error },
+        { status, headers: NO_STORE_HEADERS },
+    );
 }
 
 export function validationErrorResponse(errors: Record<string, string[]>) {
     return NextResponse.json<ApiResponse>(
         { success: false, error: 'Validation failed', errors },
-        { status: 400 },
+        { status: 400, headers: NO_STORE_HEADERS },
     );
 }
 
 export function unauthorizedResponse(message: string = 'Unauthorized') {
-    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 401 });
+    return NextResponse.json<ApiResponse>(
+        { success: false, error: message },
+        { status: 401, headers: NO_STORE_HEADERS },
+    );
 }
 
 export function forbiddenResponse(message: string = 'Forbidden') {
-    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 403 });
+    return NextResponse.json<ApiResponse>(
+        { success: false, error: message },
+        { status: 403, headers: NO_STORE_HEADERS },
+    );
 }
 
 export function notFoundResponse(message: string = 'Not found') {
-    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 404 });
+    return NextResponse.json<ApiResponse>(
+        { success: false, error: message },
+        { status: 404, headers: NO_STORE_HEADERS },
+    );
 }
 
 export function serverErrorResponse(message: string = 'Internal server error') {
-    return NextResponse.json<ApiResponse>({ success: false, error: message }, { status: 500 });
+    return NextResponse.json<ApiResponse>(
+        { success: false, error: message },
+        { status: 500, headers: NO_STORE_HEADERS },
+    );
 }
 
 // VALIDATION

@@ -27,6 +27,21 @@ const nextConfig = {
     // addons (ssh2 → cpu-features, sshcrypto). They must be required at runtime
     // via the normal Node.js module resolution, not inlined into the bundle.
     serverExternalPackages: ['ssh2', 'cpu-features', 'sshcrypto', 'web-push', 'node-cron'],
+
+    // Defense-in-depth: every /api/* response can carry per-session/per-user
+    // data. lib/api/utils.ts already sets Cache-Control on responses built with
+    // its helpers, but this catches any route (OAuth redirects, raw
+    // Response.json) that doesn't go through them — otherwise a shared cache in
+    // front of the deployment (CDN, reverse proxy) could store one user's
+    // authenticated response and replay it to the next visitor.
+    async headers() {
+        return [
+            {
+                source: '/api/:path*',
+                headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+            },
+        ];
+    },
 };
 
 export default nextConfig;
