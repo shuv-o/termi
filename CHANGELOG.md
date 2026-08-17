@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+---
+
+## [1.0.10] — 2026-08-17
+
 ### Added
 
 - **Port forwarding (tunnels)** — forward any port reachable from a server, the same way `ssh -L` does, without opening a terminal. Auto-detects HTTP targets and hands back a one-click in-browser link served at `/tunnel/<serverId>/<port>`; anything else gets a copyable, dependency-free Node.js bridge script to run locally. The desktop app instead binds a real local TCP port directly via a new Electron IPC bridge. Stateless by design — nothing is tracked server-side beyond a per-user concurrent-tunnel cap (10) on the gateway.
@@ -21,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ### Changed
 
+- **Canonical domain moved to `termi.run`.** Requests arriving on the project's previous domains (`termi.shuvoo.com`, `termix.run`) now get a permanent (301) redirect to the same path on `termi.run` instead of serving the app directly.
 - Mobile layout and navigation overhauled across the panel (keychain, groups, sessions), with a redesigned keychain entry card and clearer active-tab styling.
 - Status/success colors unified to emerald and high-load warnings to amber across every view that previously used ad-hoc green/yellow, via one shared protocol/status color source.
 
@@ -35,6 +40,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - **The tunnel HTTP proxy no longer forwards the browser's live Termi session cookie or `Authorization` header to the tunneled target.** This route is same-origin with the rest of the app, so the browser was attaching both automatically to every proxied request — a tunneled target (by definition something other than Termi itself) could previously have captured a real session credential.
 - Tunnel HTTP responses now stream instead of buffering the full body in memory — a bounded buffer applies only to HTML responses, to inject a `<base>` tag for relative-link rewriting. Large file transfers through a tunnel no longer risk exhausting server memory.
 - Added a per-user concurrent-tunnel cap on the gateway (10) to bound resource use from a runaway or malicious bridge script — each tunnel opens its own unpooled SSH connection.
+
+### Note
+
+- Passkeys are bound to the domain they were registered on. Anyone who registered a passkey while this instance ran on `termi.shuvoo.com` or `termix.run` will need to re-register it under `termi.run` — WebAuthn credentials do not carry over across a domain change.
 
 ---
 
@@ -190,5 +199,6 @@ First release to actually ship desktop installers. v1.0.2 built them but uploade
 - Patched transitive dependencies (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
 - Password-reset URLs (single-use tokens) are no longer written to server logs in production
 
-[Unreleased]: https://github.com/shuv-o/termi/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/shuv-o/termi/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/shuv-o/termi/compare/v1.0.8...v1.0.10
 [1.0.0]: https://github.com/shuv-o/termi/releases/tag/v1.0.0
