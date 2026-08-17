@@ -24,7 +24,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
