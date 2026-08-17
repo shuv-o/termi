@@ -5,7 +5,11 @@ FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 # node-pty requires native build tools
-RUN apt install --no-cache python3 make g++ linux-headers
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+ && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package.json ./
