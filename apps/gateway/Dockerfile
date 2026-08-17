@@ -5,7 +5,7 @@ FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 # node-pty requires native build tools
-RUN apk add --no-cache python3 make g++ linux-headers
+RUN apt install --no-cache python3 make g++ linux-headers
 
 # Copy package files
 COPY package.json ./
