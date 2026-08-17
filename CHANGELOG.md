@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Security
 
 - **API responses had no `Cache-Control` header, allowing a shared cache to serve one user's authenticated data to another.** `/api/auth/me` and nearly all other JSON endpoints returned per-session data (email, name, 2FA/passkey status, etc.) with no directive telling intermediary caches (CDN, reverse proxy) not to store the response — a cached authenticated response could be replayed to a later, unauthenticated visitor. All response helpers in `lib/api/utils.ts` now send `Cache-Control: private, no-store`, with the same rule applied globally to `/api/*` in `next.config.mjs` as a backstop for routes that build a response without those helpers.
+- **The tunnel HTTP proxy (`/tunnel/[serverId]/[port]/...`) forwarded the tunneled target's own `Cache-Control` (or lack of one) straight through to the browser.** This route is same-origin and gated by session + per-server ownership, so a shared cache storing that response would let a cache HIT bypass the authorization check entirely, serving one user's private tunneled server content to anyone who requested the same URL. The proxy now always overrides the response with `Cache-Control: private, no-store`, and `next.config.mjs` applies the same rule as a backstop to `/tunnel/*`, `/panel/*` (the authenticated dashboard), `/invitations/*`, `/setup-encryption`, `/unlock-encryption`, and `/reset-password`.
 
 ---
 

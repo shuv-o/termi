@@ -28,18 +28,30 @@ const nextConfig = {
     // via the normal Node.js module resolution, not inlined into the bundle.
     serverExternalPackages: ['ssh2', 'cpu-features', 'sshcrypto', 'web-push', 'node-cron'],
 
-    // Defense-in-depth: every /api/* response can carry per-session/per-user
-    // data. lib/api/utils.ts already sets Cache-Control on responses built with
-    // its helpers, but this catches any route (OAuth redirects, raw
-    // Response.json) that doesn't go through them — otherwise a shared cache in
-    // front of the deployment (CDN, reverse proxy) could store one user's
-    // authenticated response and replay it to the next visitor.
+    // Defense-in-depth: every path below can carry per-session/per-user data.
+    // The relevant route/response helpers already set Cache-Control
+    // themselves (lib/api/utils.ts for /api/*, the tunnel proxy route for
+    // /tunnel/*), but this is a backstop for anything that builds a response
+    // without going through those — otherwise a shared cache in front of the
+    // deployment (CDN, reverse proxy) could store one user's authenticated
+    // response and replay it to the next visitor.
+    //   /api/*              — JSON endpoints, most already covered by lib/api/utils.ts
+    //   /tunnel/*            — same-origin reverse proxy into a user's own tunneled server
+    //   /panel/*             — the authenticated dashboard (servers, keychain, settings, sessions)
+    //   /invitations/*       — single-use server-share invitation tokens
+    //   /setup-encryption    — master-key setup flow
+    //   /unlock-encryption   — master-key unlock flow
+    //   /reset-password      — single-use password-reset token flow
     async headers() {
+        const noStore = [{ key: 'Cache-Control', value: 'private, no-store' }];
         return [
-            {
-                source: '/api/:path*',
-                headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
-            },
+            { source: '/api/:path*', headers: noStore },
+            { source: '/tunnel/:path*', headers: noStore },
+            { source: '/panel/:path*', headers: noStore },
+            { source: '/invitations/:path*', headers: noStore },
+            { source: '/setup-encryption', headers: noStore },
+            { source: '/unlock-encryption', headers: noStore },
+            { source: '/reset-password', headers: noStore },
         ];
     },
 };

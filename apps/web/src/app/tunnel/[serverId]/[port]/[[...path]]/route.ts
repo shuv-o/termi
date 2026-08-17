@@ -242,6 +242,15 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                         resHeaders.set(key, Array.isArray(value) ? value.join(', ') : value);
                     }
 
+                    // Same-origin + session-authenticated: whatever the tunneled
+                    // target sent (or didn't) for Cache-Control must never survive
+                    // to the browser. This response is gated by getCurrentUser()
+                    // and per-server ownership — a shared cache in front of this
+                    // origin storing it would let a cache HIT bypass that check
+                    // entirely, serving one user's private tunneled content to
+                    // anyone who requests the same /tunnel/<serverId>/<port> URL.
+                    resHeaders.set('cache-control', 'private, no-store');
+
                     const status = proxyRes.statusCode ?? 502;
                     const contentType = resHeaders.get('content-type') || '';
 
