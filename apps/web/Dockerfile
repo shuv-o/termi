@@ -115,7 +115,7 @@ ENV HOSTNAME="0.0.0.0"
 # later `RUN chmod` as the unprivileged nextjs user fails with "Operation not
 # permitted" on the root-owned file.
 COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
-#!/bin/bash
+#!/bin/sh
 set -e
 
 FLAG_FILE="/app/.migrations_done"
