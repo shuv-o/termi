@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.1.0] — 2026-08-18
+
+### Added
+
+- **`GET /api/health`** on the web app, matching the gateway's existing health endpoint — checks database connectivity (2s timeout) for container orchestration liveness/readiness probes.
+- CI now fails if root `package.json`, `package-lock.json`, and `apps/gateway/package.json` versions drift out of sync (this happened once silently before, through the 1.0.9 release).
+- Unit tests for the SSRF blocklist (`validateHost()`) and the JWE connection-token mint/validate boundary between web and gateway — previously untested despite being the actual security boundary between the two services.
+- `apps/web/.dockerignore` and `apps/gateway/.dockerignore`, so a local `node_modules` sitting in either app directory can no longer get copied over the correctly-installed one during a Docker build from that app's own context.
+
+### Fixed
+
+- **The published `termi-web` image failed on its very first container start** with `Error: The datasource.url property is required in your Prisma config file when using prisma migrate deploy`. `apps/web/prisma.config.ts` supplies that URL at runtime but was never copied into the runner image; once copied, its own `dotenv`/`prisma/config` imports still didn't resolve in the trimmed `.next/standalone` output. The entrypoint now runs a real `npm install prisma@<version>` on first boot — pinned to the exact `@prisma/client` version already baked into the image — instead of relying on `npx`'s temp cache or hand-copying individual packages. Verified end-to-end against a real Postgres container: all 13 migrations apply on first run, and a restart correctly skips re-running them.
+- **`POST /api/push/subscribe` accepted any URL unvalidated**, unlike every other user-supplied host in the app — now runs the endpoint through the same `validateHost()` SSRF check as webhooks and server connections.
+- Removed two stale references to `docker-compose.local.yml` in README.md and CONTRIBUTING.md — that file (along with `docker-compose.dokploy.yml`) was deleted in this release; the Postgres quick-start command now uses the main `docker-compose.yml`.
+
+### Changed
+
+- Docker images now build on Node.js 24 (up from 20).
+- Removed `docker-compose.local.yml` and `docker-compose.dokploy.yml` — superseded by `docker-compose.yml` and `docker-compose.prebuilt.yml`.
+
+---
+
 ## [1.0.13] — 2026-08-18
 
 ### Fixed

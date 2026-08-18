@@ -344,7 +344,6 @@ termi/
 ├  .github/workflows/          # CI, release notes, desktop builds
 ├  traefik/                    # Reverse-proxy configuration
 ├  docker-compose.yml
-├  docker-compose.local.yml    # Local development with Docker
 ├  docker-compose.prebuilt.yml # Deploy from published Docker Hub / GHCR images
 ├  electron-builder.yml        # Desktop build config (authoritative)
 └  .env.example

@@ -48,7 +48,7 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 - **Node.js** 22+ (`node --version`)
 - **npm** 10+ (comes with Node.js)
-- **PostgreSQL** 15+ — or start one with `docker compose -f docker-compose.local.yml up -d postgres`
+- **PostgreSQL** 15+ — or start one with `docker compose up -d postgres`
 - **Docker** — optional, but recommended for RDP/VNC testing with guacd
 
 ### Steps
