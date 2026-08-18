@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.0.12] — 2026-08-18
+
+### Fixed
+
+- **The published `termi-web` Docker image failed to build.** `apps/web/Dockerfile` switches to the unprivileged `nextjs` user before writing the entrypoint script; `COPY` always writes as root regardless of the active `USER`, so the following `RUN chmod +x` on that root-owned file failed with `Operation not permitted`. Fixed by setting the executable bit directly via `COPY --chmod=755` instead of a separate `RUN chmod` step.
+
+---
+
 ## [1.0.11] — 2026-08-18
 
 ### Added
