@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { saveSubscription, removeSubscription } from '@/lib/services/push.service';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
+import { validateHost } from '@/lib/security/ssrf';
 
 const subscribeSchema = z.object({
     endpoint: z.string().url(),
@@ -29,6 +30,19 @@ export async function POST(request: Request) {
     if ('error' in result) return result.error;
 
     const { endpoint, keys, deviceLabel } = result.data;
+
+    // The push service worker normally supplies this endpoint, but the request
+    // body is attacker-controllable — validate it the same as any other
+    // user-supplied host this server will later connect to (sendPushToUser).
+    const url = new URL(endpoint);
+    if (url.protocol !== 'https:') {
+        return errorResponse('Push endpoint must use https', 400);
+    }
+    const hostCheck = await validateHost(
+        url.hostname,
+        process.env.ALLOW_PRIVATE_NETWORKS === 'true',
+    );
+    if (!hostCheck.valid) return errorResponse(hostCheck.error!, 400);
 
     try {
         await saveSubscription(user.id, { endpoint, keys }, deviceLabel);

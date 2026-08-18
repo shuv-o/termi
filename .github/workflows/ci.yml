@@ -11,6 +11,32 @@ permissions:
   contents: read
 
 jobs:
+  version-consistency:
+    name: Version Consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # root package.json, package-lock.json, and apps/gateway/package.json
+      # must all move together — they drifted silently once before (gateway
+      # stayed on 1.0.8 through the 1.0.9 release). Fail fast instead of
+      # relying on someone noticing during the release process.
+      - name: Check package.json versions are in sync
+        run: |
+          ROOT=$(node -p "require('./package.json').version")
+          LOCK=$(node -p "require('./package-lock.json').version")
+          GATEWAY=$(node -p "require('./apps/gateway/package.json').version")
+
+          echo "root package.json:      $ROOT"
+          echo "package-lock.json:      $LOCK"
+          echo "gateway package.json:   $GATEWAY"
+
+          if [ "$ROOT" != "$LOCK" ] || [ "$ROOT" != "$GATEWAY" ]; then
+            echo "::error::Version mismatch — root ($ROOT), package-lock.json ($LOCK), and apps/gateway/package.json ($GATEWAY) must all match."
+            exit 1
+          fi
+
   lint-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
