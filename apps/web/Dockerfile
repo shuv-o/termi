@@ -110,7 +110,11 @@ ENV PORT=22080
 ENV HOSTNAME="0.0.0.0"
 
 # entrypoint script
-COPY <<'EOF' /usr/local/bin/docker-entrypoint.sh
+# --chmod is required here (rather than a separate RUN chmod) because USER nextjs
+# is already active above: COPY always writes as root regardless of USER, so a
+# later `RUN chmod` as the unprivileged nextjs user fails with "Operation not
+# permitted" on the root-owned file.
+COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
 #!/bin/bash
 set -e
 
@@ -127,5 +131,4 @@ fi
 node server.js
 EOF
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
