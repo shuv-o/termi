@@ -1,0 +1,136 @@
+# Deploy Termi from prebuilt images (Docker Hub / GHCR) instead of building
+# from source. Published by .github/workflows/docker-release.yml on every
+# v*.*.* tag.
+#
+# Usage:
+#   cp .env.example .env   # fill in secrets, same as docker-compose.yml
+#   docker compose -f docker-compose.prebuilt.yml up -d
+#
+# By default this pulls from Docker Hub. To pull from GitHub Container
+# Registry instead, set in .env:
+#   TERMI_WEB_IMAGE=ghcr.io/shuv-o/termi-web:latest
+#   TERMI_GATEWAY_IMAGE=ghcr.io/shuv-o/termi-gateway:latest
+#
+# Pin to a specific release instead of :latest by setting e.g. :1.0.10.
+#
+# No separate `migrate` service: the published web image runs
+# `prisma migrate deploy` automatically on first container start
+# (see the entrypoint in apps/web/Dockerfile) and skips it on subsequent
+# restarts.
+
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: termi-traefik
+    restart: unless-stopped
+    command:
+      - "--entrypoints.web.address=:22080"
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"
+      # Keep WebSocket connections alive (SSH/RDP sessions can be long-lived)
+      - "--entrypoints.web.transport.respondingTimeouts.readTimeout=0"
+      - "--entrypoints.web.transport.respondingTimeouts.writeTimeout=0"
+      - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=0"
+    ports:
+      - "${WEB_PORT:-22080}:22080"
+    environment:
+      # --- Same-domain mode: set GATEWAY_PREFIX (e.g. /gateway), leave GATEWAY_DOMAIN empty
+      # --- Separate-domain mode: set GATEWAY_DOMAIN (e.g. gateway.example.com), leave GATEWAY_PREFIX empty
+      GATEWAY_PREFIX: ${GATEWAY_PREFIX:-}
+      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN:-}
+      WEB_DOMAIN: ${WEB_DOMAIN:-}
+    volumes:
+      - ./traefik:/etc/traefik:ro
+    networks:
+      - termi-network
+
+  guacd:
+    image: guacamole/guacd:1.6.0
+    container_name: termi-guacd
+    restart: unless-stopped
+    networks:
+      - termi-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: termi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-termi}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - termi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: ${TERMI_WEB_IMAGE:-shuvoo/termi-web:latest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+    container_name: termi-web
+    restart: unless-stopped
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
+      # Returned by the token API to the browser at runtime — determines which URL the
+      # browser uses to open the WebSocket. Set to match your deployment:
+      #   Same domain:      ws://example.com/gateway   (with GATEWAY_PREFIX=/gateway in Traefik)
+      #   Separate domain:  wss://gateway.example.com  (with GATEWAY_DOMAIN=gateway.example.com)
+      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+      # Internal Docker network URL — web server talks directly to gateway, bypasses Traefik
+      GATEWAY_URL: ws://gateway:22081
+      WEB_DOMAIN: ${WEB_DOMAIN:-}
+      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN:-}
+      WEB_PORT: ${WEB_PORT:-22080}
+      GATEWAY_PORT: ${GATEWAY_PORT:-22081}
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      ALLOW_PRIVATE_NETWORKS: ${ALLOW_PRIVATE_NETWORKS:-false}
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    networks:
+      - termi-network
+
+  gateway:
+    image: ${TERMI_GATEWAY_IMAGE:-shuvoo/termi-gateway:latest}
+    container_name: termi-gateway
+    restart: unless-stopped
+    depends_on:
+      - guacd
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:22080}
+      GATEWAY_PORT: 22081
+      GATEWAY_HOST: 0.0.0.0
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
+      GUACD_HOST: guacd
+      GUACD_PORT: 4822
+      NODE_ENV: production
+    networks:
+      - termi-network
+
+volumes:
+  postgres-data:
+  web-state:
+
+networks:
+  termi-network:
+    driver: bridge

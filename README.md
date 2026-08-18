@@ -175,6 +175,44 @@ open http://localhost:22080
 > docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
 > ```
 
+### Deploy with Prebuilt Images
+
+Skip building from source by pulling the published images instead. Every
+tagged release (`v*.*.*`) publishes multi-arch (amd64 + arm64) images to both
+[Docker Hub](https://hub.docker.com/u/shuvoo) and
+[GitHub Container Registry](https://github.com/shuv-o/termi/pkgs/container/termi-web):
+
+| Image             | Docker Hub                    | GHCR                                  |
+| ----------------- | ------------------------------ | -------------------------------------- |
+| Web (`@termi/web`) | `shuvoo/termi-web`             | `ghcr.io/shuv-o/termi-web`              |
+| Gateway            | `shuvoo/termi-gateway`         | `ghcr.io/shuv-o/termi-gateway`          |
+
+Both are tagged `latest` and with the release version (e.g. `1.0.10`).
+
+```bash
+git clone https://github.com/shuv-o/termi.git
+cd termi
+cp .env.example .env
+# edit .env — same required secrets as the "Deploy with Docker" section above
+
+docker compose -f docker-compose.prebuilt.yml up -d
+```
+
+To pull from GHCR instead of Docker Hub, or pin to a specific version, set in `.env`:
+
+```dotenv
+TERMI_WEB_IMAGE=ghcr.io/shuv-o/termi-web:1.0.10
+TERMI_GATEWAY_IMAGE=ghcr.io/shuv-o/termi-gateway:1.0.10
+```
+
+The web image runs `prisma migrate deploy` automatically on first start —
+no separate migration step needed.
+
+> **Note:** the published images don't bake in `NEXT_PUBLIC_APP_URL` /
+> `NEXT_PUBLIC_GATEWAY_URL` at build time (they're deployment-agnostic).
+> If your setup needs those values compiled in rather than resolved at
+> request time, build from source with `docker-compose.yml` instead.
+
 ---
 
 ## 💻 Desktop App Installation
@@ -307,6 +345,7 @@ termi/
 ├  traefik/                    # Reverse-proxy configuration
 ├  docker-compose.yml
 ├  docker-compose.local.yml    # Local development with Docker
+├  docker-compose.prebuilt.yml # Deploy from published Docker Hub / GHCR images
 ├  electron-builder.yml        # Desktop build config (authoritative)
 └  .env.example
 ```
