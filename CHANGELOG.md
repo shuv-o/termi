@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [Unreleased]
+## [1.0.11] — 2026-08-18
+
+### Added
+
+- **Prebuilt Docker images** — every tagged release now publishes multi-arch (amd64 + arm64) `termi-web` and `termi-gateway` images to both Docker Hub and GitHub Container Registry. A new `docker-compose.prebuilt.yml` deploys from these images instead of building from source.
 
 ### Security
 
