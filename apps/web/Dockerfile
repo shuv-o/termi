@@ -114,21 +114,23 @@ ENV HOSTNAME="0.0.0.0"
 # is already active above: COPY always writes as root regardless of USER, so a
 # later `RUN chmod` as the unprivileged nextjs user fails with "Operation not
 # permitted" on the root-owned file.
-COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
-#!/bin/sh
-set -e
+#COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
+##!/bin/sh
+#set -e
+#
+#FLAG_FILE="/app/.migrations_done"
+#
+#if [ ! -f "$FLAG_FILE" ]; then
+#    echo "First run detected - Running migrations..."
+#    npx prisma migrate deploy
+#    echo "Migrations completed!"
+#    touch "$FLAG_FILE"
+#else
+#    echo "Migrations already run, skipping..."
+#fi
+#node server.js
+#EOF
+#
+#ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-FLAG_FILE="/app/.migrations_done"
-
-if [ ! -f "$FLAG_FILE" ]; then
-    echo "First run detected - Running migrations..."
-    npx prisma migrate deploy
-    echo "Migrations completed!"
-    touch "$FLAG_FILE"
-else
-    echo "Migrations already run, skipping..."
-fi
-node server.js
-EOF
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["node", "server.js"]
