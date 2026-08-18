@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.0.13] — 2026-08-18
+
+### Fixed
+
+- **The published `termi-web` Docker image failed at container start with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory`.** The runner stage is `node:20-alpine`, which has no `bash`, but the entrypoint script's shebang was `#!/bin/bash` — the kernel can't find that interpreter and Docker reports the missing interpreter as if the script itself were missing. The script uses no bash-specific syntax, so the shebang is now `#!/bin/sh`.
+
+---
+
 ## [1.0.12] — 2026-08-18
 
 ### Fixed
