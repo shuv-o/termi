@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
+    Activity,
     Circle,
     FolderOpen,
     Keyboard,
@@ -19,6 +20,7 @@ import {
     X,
 } from 'lucide-react';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
+import MetricsPanel from './_metrics/MetricsPanel';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
 import { Button } from '@/components/ui/button';
 
@@ -57,6 +59,7 @@ export default function SSHConnectionPage() {
     const [showKeyboard, setShowKeyboard] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
     const [showFiles, setShowFiles] = useState(false);
+    const [showMetrics, setShowMetrics] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [recordingTabId, setRecordingTabId] = useState<string | null>(null);
 
@@ -338,10 +341,30 @@ export default function SSHConnectionPage() {
                         variant={showFiles ? 'default' : 'ghost'}
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => setShowFiles((f) => !f)}
+                        onClick={() =>
+                            setShowFiles((f) => {
+                                if (!f) setShowMetrics(false);
+                                return !f;
+                            })
+                        }
                         title={showFiles ? 'Hide file manager' : 'Open file manager'}
                     >
                         <FolderOpen className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
+                        variant={showMetrics ? 'default' : 'ghost'}
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() =>
+                            setShowMetrics((m) => {
+                                if (!m) setShowFiles(false);
+                                return !m;
+                            })
+                        }
+                        title={showMetrics ? 'Hide live metrics' : 'Show live metrics'}
+                    >
+                        <Activity className="w-3.5 h-3.5" />
                     </Button>
 
                     <Button
@@ -535,6 +558,27 @@ export default function SSHConnectionPage() {
                             <FileManagerPanel
                                 serverId={serverId}
                                 onClose={() => setShowFiles(false)}
+                            />
+                        </div>
+                    </>
+                )}
+
+                {/* Live metrics panel — desktop: side panel | mobile: full overlay */}
+                {showMetrics && (
+                    <>
+                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
+                            <MetricsPanel
+                                serverId={serverId}
+                                enabled={showMetrics}
+                                onClose={() => setShowMetrics(false)}
+                            />
+                        </div>
+
+                        <div className="md:hidden absolute inset-0 z-20 overflow-hidden border border-border">
+                            <MetricsPanel
+                                serverId={serverId}
+                                enabled={showMetrics}
+                                onClose={() => setShowMetrics(false)}
                             />
                         </div>
                     </>

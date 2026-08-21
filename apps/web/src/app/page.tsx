@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
     Terminal,
@@ -11,7 +13,6 @@ import {
     Github,
     Linkedin,
     Mail,
-    LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -36,9 +37,19 @@ export const metadata: Metadata = {
     },
 };
 
+// Only ever redirect back into our own /panel routes — guards against the
+// cookie somehow holding an absolute or protocol-relative URL.
+const LAST_PATH_PATTERN = /^\/panel(\/[\w.~-]+)*\/?$/;
+
 export default async function HomePage() {
     const session = await getSession();
     const isLoggedIn = session.isLoggedIn;
+
+    if (isLoggedIn) {
+        const cookieStore = await cookies();
+        const lastPath = cookieStore.get('termi_last_path')?.value;
+        redirect(lastPath && LAST_PATH_PATTERN.test(lastPath) ? lastPath : '/panel');
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -75,23 +86,12 @@ export default async function HomePage() {
                         </nav>
 
                         <div className="flex items-center gap-3">
-                            {isLoggedIn ? (
-                                <Button size="sm" asChild className="glow-hover">
-                                    <Link href="/panel">
-                                        <LayoutDashboard className="w-4 h-4 mr-1" />
-                                        Dashboard
-                                    </Link>
-                                </Button>
-                            ) : (
-                                <>
-                                    <Button variant="ghost" size="sm" asChild>
-                                        <Link href="/login">Login</Link>
-                                    </Button>
-                                    <Button size="sm" asChild>
-                                        <Link href="/register">Get Started</Link>
-                                    </Button>
-                                </>
-                            )}
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/login">Login</Link>
+                            </Button>
+                            <Button size="sm" asChild>
+                                <Link href="/register">Get Started</Link>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -121,22 +121,12 @@ export default async function HomePage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        {isLoggedIn ? (
-                            <Button size="lg" asChild className="glow-hover group">
-                                <Link href="/panel">
-                                    <LayoutDashboard className="w-5 h-5 mr-1" />
-                                    Go to Dashboard
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </Link>
-                            </Button>
-                        ) : (
-                            <Button size="lg" asChild className="glow-hover group">
-                                <Link href="/register">
-                                    Start Free
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </Link>
-                            </Button>
-                        )}
+                        <Button size="lg" asChild className="glow-hover group">
+                            <Link href="/register">
+                                Start Free
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </Button>
                         <Button variant="secondary" size="lg" asChild>
                             <Link href="#features">Learn More</Link>
                         </Button>
@@ -295,18 +285,9 @@ export default async function HomePage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        {isLoggedIn ? (
-                            <Button size="lg" asChild className="glow-hover">
-                                <Link href="/panel">
-                                    <LayoutDashboard className="w-5 h-5 mr-1" />
-                                    Go to Dashboard
-                                </Link>
-                            </Button>
-                        ) : (
-                            <Button size="lg" asChild>
-                                <Link href="/register">Create Account</Link>
-                            </Button>
-                        )}
+                        <Button size="lg" asChild>
+                            <Link href="/register">Create Account</Link>
+                        </Button>
                         <Button variant="secondary" size="lg" asChild>
                             <Link href="https://github.com/shuv-o/termi">View on GitHub</Link>
                         </Button>

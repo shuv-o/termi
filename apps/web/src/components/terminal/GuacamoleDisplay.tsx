@@ -290,7 +290,14 @@ export default function GuacamoleDisplay({
             // Suppress context menu so right-click is forwarded
             displayEl.addEventListener('contextmenu', (e: Event) => e.preventDefault());
             // sendKeyEvent expects integer 1/0 (not boolean); guacd parses via atoi().
-            const forwardKeyDown = (keysym: number) => {
+            // Return value feeds Guacamole.Keyboard's own preventDefault logic: it
+            // calls event.preventDefault() on the native keydown whenever this
+            // returns falsy. That's normally what we want (stops Tab shifting
+            // focus, Backspace navigating back, etc.), but the suppressed V here
+            // must NOT be prevented — the browser's own default paste action is
+            // what fires the native 'paste' event the clipboard handler listens
+            // for below, so returning true lets that action through.
+            const forwardKeyDown = (keysym: number): boolean | void => {
                 if (keysym === CTRL_L || keysym === CTRL_R) ctrlDown = true;
                 if (isMac) {
                     if (keysym === META_L || keysym === META_R) {
@@ -302,14 +309,14 @@ export default function GuacamoleDisplay({
                     if (macMetaDown && keysym === V_KEYSYM) {
                         // Cmd+V: suppress V — paste handler sends clipboard then V in order.
                         macVSuppressed = true;
-                        return;
+                        return true;
                     }
                 }
                 // Ctrl+V: suppress V on all platforms — paste handler sends clipboard
                 // then V so the remote always receives clipboard data before the keystroke.
                 if (ctrlDown && keysym === V_KEYSYM) {
                     ctrlVSuppressed = true;
-                    return;
+                    return true;
                 }
                 guacClient.sendKeyEvent(1, keysym);
             };
@@ -340,7 +347,7 @@ export default function GuacamoleDisplay({
             windowKeyboard = new Guacamole.Keyboard(document);
             windowKeyboard.onkeydown = (keysym: number) => {
                 if (isNativeInput()) return;
-                forwardKeyDown(keysym);
+                return forwardKeyDown(keysym);
             };
             windowKeyboard.onkeyup = (keysym: number) => {
                 if (isNativeInput()) return;

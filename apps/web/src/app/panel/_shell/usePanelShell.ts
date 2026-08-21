@@ -43,6 +43,14 @@ export function usePanelShell() {
     const isLocalPage = pathname === '/panel/local';
     const isConnectPage = pathname.startsWith('/panel/connect/');
 
+    // Remember the last-visited panel page so a signed-in user who closes the
+    // browser and later opens termi.run lands back where they left off,
+    // instead of the marketing page (read in app/page.tsx).
+    useEffect(() => {
+        const maxAge = 60 * 60 * 24 * 400; // ~400 days — the browser-enforced cap
+        document.cookie = `termi_last_path=${encodeURIComponent(pathname)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    }, [pathname]);
+
     // A "root" page maps directly to a primary nav item. Anything deeper
     // (server detail, settings sub-page, connect…) is a sub-page that needs
     // a back affordance on mobile/PWA. Sessions and the local terminal are
