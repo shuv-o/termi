@@ -307,54 +307,6 @@ npm run build:electron            # Package Electron app
 
 ---
 
-## 🗂️ Project Structure
-
-```
-termi/
-├  apps/
-│   ├  web/                    # Next.js 16 App Router
-│   │   ├  src/
-│   │   │   ├  app/            # Pages + API routes (App Router)
-│   │   │   │   ├  api/        # REST endpoints
-│   │   │   │   ├  panel/      # Dashboard UI
-│   │   │   │   └  tunnel/     # Same-origin HTTP reverse proxy for port-forward tunnels
-│   │   │   ├  components/     # React components
-│   │   │   │   ├  terminal/   # SSH/RDP/VNC/local terminal
-│   │   │   │   ├  scp/        # File manager
-│   │   │   │   └  monitoring/ # Metrics & charts
-│   │   │   └  lib/
-│   │   │       ├  auth/       # Session, TOTP, passkey, OAuth
-│   │   │       ├  crypto/     # AES-256-GCM, key derivation
-│   │   │       ├  security/   # SSRF protection, rate limiting
-│   │   │       └  services/   # SSH pool, SFTP, monitoring, alerts
-│   │   └  prisma/             # Database schema & migrations
-│   │
-│   ├  gateway/                # WebSocket gateway (pure ESM)
-│   │   └  src/
-│   │       ├  handlers/       # SSH, SCP, Guacamole (RDP/VNC), Telnet, Local PTY, Tunnel
-│   │       └  auth/           # JWE token validation
-│   │
-│   ├  electron/               # Desktop app wrapper
-│   │   ├  main.js             # Electron main process + node-pty IPC
-│   │   ├  preload.js          # Secure context bridge
-│   │   └  updater.js          # Auto-update via GitHub Releases
-│   │
-│   └  mobile/                 # Capacitor iOS/Android shell
-│
-├  .github/workflows/          # CI, release notes, desktop builds
-├  traefik/                    # Reverse-proxy configuration
-├  docker-compose.yml
-├  docker-compose.prebuilt.yml # Deploy from published Docker Hub / GHCR images
-├  electron-builder.yml        # Desktop build config (authoritative)
-└  .env.example
-```
-
-> The desktop and mobile apps are thin shells around the hosted web app, so UI
-> changes reach them without a new release. The desktop app checks GitHub
-> Releases for shell updates on launch and every 6 hours.
-
----
-
 ## ⚙️ Configuration
 
 ### Required Variables
