@@ -13,6 +13,7 @@ import {
     Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { connectHref } from '@/lib/connect-route';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatRelativeTime } from '@/lib/format';
 import {
@@ -302,10 +303,7 @@ export function GroupDetailPanel({
                             className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                             onClick={() => {
                                 detail!.servers.forEach((srv) => {
-                                    window.open(
-                                        `/panel/connect/${srv.id}/${srv.protocol.toLowerCase()}`,
-                                        '_blank',
-                                    );
+                                    window.open(connectHref(srv.id, srv.protocol), '_blank');
                                 });
                             }}
                         >

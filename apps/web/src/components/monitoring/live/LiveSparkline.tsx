@@ -1,7 +1,14 @@
 'use client';
 
-/** Minimal, dependency-free rolling line chart for one metric's recent history. */
-export function MetricSparkline({
+/**
+ * Minimal, dependency-free rolling line chart for one metric's recent history.
+ *
+ * Distinct from `components/monitoring/MetricSparkline`: that one auto-ranges
+ * and fills an area under the curve, for sparse historical health checks. This
+ * one holds a fixed scale (so a CPU trace at 20% looks calm rather than being
+ * stretched to fill the box) and redraws several times a minute.
+ */
+export function LiveSparkline({
     values,
     max,
     color,

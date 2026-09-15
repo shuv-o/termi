@@ -37,7 +37,6 @@ export function ServerListRow({
     onDelete,
     onCopyPassword,
     onConnect,
-    onSessions,
     onTagClick,
     onShare,
 }: ServerCardProps) {
@@ -182,19 +181,9 @@ export function ServerListRow({
                 >
                     <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-warning' : ''}`} />
                 </Button>
-                {server.protocol === 'SSH' && (
-                    <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={onSessions}
-                        className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-all"
-                        title={hasSession ? 'Open Session' : 'Add to Sessions'}
-                    >
-                        <Layers className="h-3.5 w-3.5" />
-                    </Button>
-                )}
-                <Button onClick={onConnect} size="sm" className="h-8 px-3 text-xs">
-                    Connect
+                <Button onClick={onConnect} size="sm" className="h-8 gap-1.5 px-3 text-xs">
+                    {hasSession && <Layers className="h-3.5 w-3.5" />}
+                    {hasSession ? 'Open' : 'Connect'}
                 </Button>
                 <ServerActionsMenu
                     server={server}

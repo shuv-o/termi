@@ -4,6 +4,7 @@ import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import StarNudge from '@/components/common/StarNudge';
 import { ToastProvider } from '@/components/ui/toast';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { CommandPalette } from './_shell/CommandPalette';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
@@ -70,7 +71,16 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     <SessionsWorkspace />
                 </div>
 
-                {!isSessionsPage && !isConnectPage && (
+                {isSessionsPage || isConnectPage ? (
+                    /* Both render full-bleed, with no page chrome around them.
+                       The sessions page in particular draws nothing itself —
+                       the workspace above is the UI — but its component must
+                       still mount, because it carries the `?add=<serverId>`
+                       handler that every Connect button in the app routes
+                       through. It was previously left unrendered here, which
+                       made that deep link silently do nothing. */
+                    <>{children}</>
+                ) : (
                     <main
                         // No `key={pathname}` here deliberately: re-keying would
                         // unmount/remount the whole page subtree on every nav
@@ -83,7 +93,6 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         {children}
                     </main>
                 )}
-                {isConnectPage && <>{children}</>}
             </div>
 
             {/* Omitted on the terminal views (connect pages, sessions workspace,
@@ -109,9 +118,15 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
         <ToastProvider>
-            <SessionsProvider>
-                <LayoutInner>{children}</LayoutInner>
-            </SessionsProvider>
+            {/* One provider for the whole panel. `delayDuration` is short
+                because these are icon buttons in a dense toolbar — the label is
+                the only thing telling you what the glyph does, so waiting the
+                Radix default of 700ms for it feels broken. */}
+            <TooltipProvider delayDuration={250} skipDelayDuration={300}>
+                <SessionsProvider>
+                    <LayoutInner>{children}</LayoutInner>
+                </SessionsProvider>
+            </TooltipProvider>
         </ToastProvider>
     );
 }

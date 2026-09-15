@@ -5,7 +5,9 @@ import dynamic from 'next/dynamic';
 import { Loader2, RotateCcw, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileManagerPanel from '@/components/scp/FileManagerPanel';
+import { LiveMetricsPanel } from '@/components/monitoring/live/LiveMetrics';
 import { TerminalPaneHeader } from './TerminalPaneHeader';
+import type { SessionServerMeta } from './ServerMeta';
 import { TunnelDialog } from './TunnelDialog';
 import { useShells } from './useShells';
 import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
@@ -83,7 +85,7 @@ export function TerminalPane({
     session,
     isActive,
     mode,
-    hasPassword,
+    serverMeta,
     updateSessionStatus,
     setSessionError,
     setSessionWs,
@@ -96,7 +98,8 @@ export function TerminalPane({
     session: Session;
     isActive: boolean;
     mode: 'terminal' | 'transfer';
-    hasPassword: boolean;
+    /** Host/username/port/hasPassword from the cached server list; `null` for local terminals. */
+    serverMeta: SessionServerMeta | null;
     updateSessionStatus: (tabId: string, status: SessionStatus) => void;
     setSessionError: (tabId: string, error: string | null) => void;
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
@@ -111,6 +114,10 @@ export function TerminalPane({
     const [isMobile, setIsMobile] = useState(false);
     const [recordingShellId, setRecordingShellId] = useState<string | null>(null);
     const [showTunnelDialog, setShowTunnelDialog] = useState(false);
+    // Metrics polling is only worth paying for while the panel is on screen AND
+    // this is the session you are looking at — a background tab holding an SSH
+    // channel open every couple of seconds is pure waste.
+    const [showMetrics, setShowMetrics] = useState(false);
 
     const { registerSendHandler } = useSessionsContext();
 
@@ -213,6 +220,10 @@ export function TerminalPane({
     ]);
 
     const visible = isActive && mode === 'terminal';
+    // Every session stays mounted so its shells survive tab switches, which
+    // means a metrics panel left open on a background session would keep
+    // polling forever. Gate it on the pane actually being on screen.
+    const metricsPolling = showMetrics && visible;
     const connectionFailed =
         session.status === 'error' || (!session.token && session.status !== 'connecting');
 
@@ -226,7 +237,7 @@ export function TerminalPane({
         >
             <TerminalPaneHeader
                 session={session}
-                hasPassword={hasPassword}
+                serverMeta={serverMeta}
                 shells={shells}
                 activeShellId={activeShellId}
                 onActivateShell={activateShell}
@@ -234,7 +245,20 @@ export function TerminalPane({
                 onAddShell={addShell}
                 onReconnectShell={() => reconnectShell(activeShellId, activeShellIndex === 0)}
                 onCopyPassword={onCopyPassword}
-                onToggleFiles={() => toggleFiles(session.tabId)}
+                onToggleFiles={() => {
+                    // The two side panels share one slot; opening either closes
+                    // the other rather than squeezing the terminal to nothing.
+                    if (!session.showFiles) setShowMetrics(false);
+                    toggleFiles(session.tabId);
+                }}
+                showMetrics={showMetrics}
+                onToggleMetrics={() => {
+                    setShowMetrics((m) => {
+                        if (!m && session.showFiles) toggleFiles(session.tabId);
+                        return !m;
+                    });
+                    nudgeResize();
+                }}
                 showToolbar={showToolbar}
                 onToggleToolbar={() => {
                     setShowToolbar((t) => !t);
@@ -355,13 +379,51 @@ export function TerminalPane({
                     )}
                 </div>
 
+                {/* Side panels. On desktop they dock beside the terminal; on a
+                    phone there is no room to dock anything, so they take the
+                    pane over — the behaviour the standalone SSH page had and
+                    the sessions workspace was missing (the file manager simply
+                    never appeared on mobile). */}
                 {session.showFiles && session.type !== 'local' && (
-                    <div className="hidden md:flex w-72 lg:w-80 xl:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
-                        <FileManagerPanel
-                            serverId={session.serverId}
-                            onClose={() => toggleFiles(session.tabId)}
-                        />
-                    </div>
+                    <>
+                        <div className="hidden md:flex w-72 lg:w-80 xl:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
+                            <FileManagerPanel
+                                serverId={session.serverId}
+                                onClose={() => toggleFiles(session.tabId)}
+                            />
+                        </div>
+                        <div className="absolute inset-0 z-20 overflow-hidden border-t border-border md:hidden">
+                            <FileManagerPanel
+                                serverId={session.serverId}
+                                onClose={() => toggleFiles(session.tabId)}
+                            />
+                        </div>
+                    </>
+                )}
+
+                {showMetrics && session.type !== 'local' && (
+                    <>
+                        <div className="hidden md:flex w-72 lg:w-80 xl:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
+                            <LiveMetricsPanel
+                                serverId={session.serverId}
+                                enabled={metricsPolling}
+                                onClose={() => {
+                                    setShowMetrics(false);
+                                    nudgeResize();
+                                }}
+                            />
+                        </div>
+                        <div className="absolute inset-0 z-20 overflow-hidden border-t border-border md:hidden">
+                            <LiveMetricsPanel
+                                serverId={session.serverId}
+                                enabled={metricsPolling}
+                                onClose={() => {
+                                    setShowMetrics(false);
+                                    nudgeResize();
+                                }}
+                            />
+                        </div>
+                    </>
                 )}
             </div>
 

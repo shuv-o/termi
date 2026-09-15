@@ -7,6 +7,7 @@ import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 
 import { BenchmarkSection } from './_details/BenchmarkSection';
 import { HealthHistorySection } from './_details/HealthHistorySection';
+import { LiveMonitoringSection } from './_details/LiveMonitoringSection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
 import { TunnelSection } from './_details/TunnelSection';
@@ -57,6 +58,11 @@ export default function ServerDetailsPage() {
                 checkCount={monitoring.healthRecords.length}
                 latencyMs={lastRecord?.latencyMs}
             />
+
+            {/* Live first: when you open a server page it is usually because
+                something is happening now, not last Tuesday. Metrics are read
+                over SSH, so this is SSH-only. */}
+            {isSSH && <LiveMonitoringSection serverId={id} />}
 
             <HealthHistorySection
                 records={monitoring.healthRecords}

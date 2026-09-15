@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 import { Loader2, Smartphone } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getSiteUrl } from '@/lib/site';
+import { connectHref } from '@/lib/connect-route';
 
 /**
  * Scan-to-connect: renders a QR code for this server's connect URL. The
@@ -26,7 +27,7 @@ export function QRConnectDialog({
     protocol: string;
 }) {
     const [dataUrl, setDataUrl] = useState('');
-    const connectUrl = `${getSiteUrl()}/panel/connect/${serverId}/${protocol.toLowerCase()}`;
+    const connectUrl = `${getSiteUrl()}${connectHref(serverId, protocol)}`;
 
     useEffect(() => {
         if (!open) return;

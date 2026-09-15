@@ -61,7 +61,6 @@ export function ServerGridCard({
     onDelete,
     onCopyPassword,
     onConnect,
-    onSessions,
     onTagClick,
     onShare,
 }: ServerCardProps) {
@@ -225,30 +224,21 @@ export function ServerGridCard({
             </div>
 
             <div className="flex items-center gap-1.5 border-t border-border/60 bg-secondary/20 px-3 py-2.5">
+                {/* SSH used to have a second button here ("Add to Sessions")
+                    that did the same thing as Connect now does — both open a
+                    workspace session. One button, and it says whether that
+                    session already exists. */}
                 <Button
                     onClick={(e) => {
                         e.stopPropagation();
                         onConnect();
                     }}
                     size="sm"
-                    className="h-8 flex-1 justify-center text-xs"
+                    className="h-8 flex-1 justify-center gap-1.5 text-xs"
                 >
-                    Connect
+                    {hasSession && <Layers className="h-3.5 w-3.5" />}
+                    {hasSession ? 'Open session' : 'Connect'}
                 </Button>
-                {server.protocol === 'SSH' && (
-                    <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onSessions();
-                        }}
-                        className="h-8 w-8 shrink-0"
-                        title={hasSession ? 'Open Session' : 'Add to Sessions'}
-                    >
-                        <Layers className="h-3.5 w-3.5" />
-                    </Button>
-                )}
                 <ServerActionsMenu
                     server={server}
                     onEdit={onEdit}

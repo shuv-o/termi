@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
+import { connectHref } from '@/lib/connect-route';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -138,7 +139,7 @@ export default function GroupsPage() {
                         onDelete={setDeleteTarget}
                         onBroadcast={setBroadcastTarget}
                         onConnect={(serverId, protocol) =>
-                            router.push(`/panel/connect/${serverId}/${protocol.toLowerCase()}`)
+                            router.push(connectHref(serverId, protocol))
                         }
                         onBack={() => setMobileShowDetail(false)}
                     />

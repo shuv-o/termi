@@ -17,6 +17,7 @@ import {
     X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { StatusDot, statusColor, statusLabel } from './status';
 import type { Session } from '../sessions-context';
@@ -59,34 +60,25 @@ export function WorkspaceTopBar({
                     : undefined
             }
         >
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggleLayout}
-                className="h-8 w-8 shrink-0"
-                title={
+            <IconButton
+                label={
                     layoutMode === 'sidebar'
                         ? 'Switch to tab bar layout'
                         : 'Switch to sidebar layout'
                 }
-            >
-                {layoutMode === 'sidebar' ? (
-                    <PanelTop className="w-4 h-4" />
-                ) : (
-                    <PanelLeft className="w-4 h-4" />
-                )}
-            </Button>
+                icon={layoutMode === 'sidebar' ? PanelTop : PanelLeft}
+                onClick={onToggleLayout}
+                className="shrink-0"
+            />
 
             {layoutMode === 'sidebar' && (
-                <Button
-                    variant="ghost"
-                    size="icon"
+                <IconButton
+                    label={sidebarOpen ? 'Hide session list' : 'Show session list'}
+                    icon={SplitSquareHorizontal}
+                    active={sidebarOpen}
                     onClick={onToggleSidebar}
-                    className="h-8 w-8 shrink-0"
-                    title={sidebarOpen ? 'Hide session list' : 'Show session list'}
-                >
-                    <SplitSquareHorizontal className="w-4 h-4" />
-                </Button>
+                    className="shrink-0"
+                />
             )}
 
             <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
@@ -130,19 +122,12 @@ export function WorkspaceTopBar({
                 ))}
             </div>
 
-            <Button
-                variant="ghost"
-                size="icon"
+            <IconButton
+                label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                icon={isFullscreen ? Minimize2 : Maximize2}
                 onClick={onToggleFullscreen}
-                className="hidden sm:flex h-8 w-8"
-                title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-            >
-                {isFullscreen ? (
-                    <Minimize2 className="w-4 h-4" />
-                ) : (
-                    <Maximize2 className="w-4 h-4" />
-                )}
-            </Button>
+                className="hidden sm:inline-flex"
+            />
         </div>
     );
 }
@@ -196,6 +181,7 @@ export function SessionTabBar({
                                     : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
                             }`}
                             title="Close tab"
+                            aria-label={`Close ${session.serverName}`}
                         >
                             <X className="w-3 h-3" />
                         </button>
@@ -210,6 +196,7 @@ export function SessionTabBar({
                         : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                 }`}
                 title="New server session"
+                aria-label="New server session"
             >
                 <Plus className="w-3.5 h-3.5" />
             </button>
@@ -217,6 +204,7 @@ export function SessionTabBar({
                 onClick={onAddLocal}
                 className="flex items-center justify-center px-3 py-2 shrink-0 text-violet-400 hover:text-violet-300 hover:bg-secondary/60 transition-colors"
                 title="New local terminal"
+                aria-label="New local terminal"
             >
                 <Laptop className="w-3.5 h-3.5" />
             </button>
@@ -306,6 +294,7 @@ export function SessionSidebar({
                                 }}
                                 className="p-1 rounded-sm hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                                 title="Close session"
+                                aria-label={`Close ${session.serverName}`}
                             >
                                 <X className="w-3 h-3" />
                             </button>

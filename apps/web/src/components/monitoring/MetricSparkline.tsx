@@ -32,7 +32,7 @@ export default function MetricSparkline({
     if (defined.length < 2) {
         return (
             <div className="w-full flex items-center justify-center" style={{ height: H }}>
-                <span className="text-[10px] text-slate-600">No data</span>
+                <span className="text-[10px] text-muted-foreground/60">No data</span>
             </div>
         );
     }
@@ -69,8 +69,12 @@ export default function MetricSparkline({
           ` L ${toX(values.length - 1)} ${H - PADDING} L ${toX(values.findIndex((v) => v !== null))} ${H - PADDING} Z`
         : '';
 
+    // Mirrors --danger from globals.css; SVG strokes need a literal.
+    const ALERT_COLOR = '#f87171';
     const lineColor =
-        alertThreshold != null && defined[defined.length - 1] >= alertThreshold ? '#ef4444' : color;
+        alertThreshold != null && defined[defined.length - 1] >= alertThreshold
+            ? ALERT_COLOR
+            : color;
 
     return (
         <svg

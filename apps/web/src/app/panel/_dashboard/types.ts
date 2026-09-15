@@ -72,7 +72,6 @@ export interface ServerCardProps {
     onDelete: () => void;
     onCopyPassword: () => void;
     onConnect: () => void;
-    onSessions: () => void;
     onTagClick: (tag: string) => void;
     onShare: () => void;
 }

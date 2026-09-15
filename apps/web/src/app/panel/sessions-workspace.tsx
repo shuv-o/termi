@@ -195,14 +195,25 @@ export default function SessionsWorkspace() {
                      * a session exists, so WebSocket connections stay alive.
                      */}
                     {sessions.map((session) => {
-                        const serverMeta = allServers.find((s) => s.id === session.serverId);
+                        const meta = allServers.find((s) => s.id === session.serverId);
+                        // Local terminals have no server record behind them.
+                        const serverMeta =
+                            session.type === 'local'
+                                ? null
+                                : {
+                                      id: session.serverId,
+                                      host: meta?.host,
+                                      username: meta?.username,
+                                      port: meta?.port,
+                                      hasPassword: meta?.hasPassword ?? false,
+                                  };
                         return (
                             <TerminalPane
                                 key={session.tabId}
                                 session={session}
                                 isActive={!showPicker && activeTabId === session.tabId}
                                 mode={mode}
-                                hasPassword={serverMeta?.hasPassword ?? false}
+                                serverMeta={serverMeta}
                                 updateSessionStatus={updateSessionStatus}
                                 setSessionError={setSessionError}
                                 setSessionWs={setSessionWs}

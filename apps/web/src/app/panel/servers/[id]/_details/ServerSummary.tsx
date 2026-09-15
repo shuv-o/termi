@@ -6,6 +6,7 @@ import { ArrowLeft, Pencil, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { formatRelativeTime } from '@/lib/format';
+import { connectHref } from '@/lib/connect-route';
 import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
 import { QRConnectDialog } from './QRConnectDialog';
 import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } from './types';
@@ -145,7 +146,7 @@ export function ServerInfoCard({
 
             <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
                 <Button size="sm" asChild className="gap-1.5">
-                    <Link href={`/panel/connect/${server.id}/${server.protocol.toLowerCase()}`}>
+                    <Link href={connectHref(server.id, server.protocol)}>
                         <ProtoIcon className="w-3.5 h-3.5" />
                         Connect via {server.protocol}
                     </Link>

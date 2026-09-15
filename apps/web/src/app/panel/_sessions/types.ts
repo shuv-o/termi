@@ -5,6 +5,9 @@ export interface ServerItem {
     protocol: string;
     description?: string;
     host?: string;
+    /** Used by the session header's "copy ssh command" action. */
+    username?: string;
+    port?: number;
     hasPassword?: boolean;
 }
 

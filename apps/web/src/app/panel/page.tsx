@@ -8,6 +8,7 @@ import { AlertTriangle, ArrowUpDown, ChevronDown, Download, Plus, Upload } from 
 import { Button } from '@/components/ui/button';
 import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 import { useToast } from '@/components/ui/toast';
+import { connectHref } from '@/lib/connect-route';
 import { Card } from '@/components/ui/card';
 import {
     AlertDialog,
@@ -64,7 +65,9 @@ const ShareModal = dynamic(() => import('./_dashboard/ShareModal'), { ssr: false
 export default function DashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { addSession, sessions } = useSessionsContext();
+    // Only needed for the live-session marker on each card's Connect button;
+    // opening a session is a plain navigation now (see `connectHref`).
+    const { sessions } = useSessionsContext();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -176,12 +179,6 @@ export default function DashboardPage() {
         );
     };
 
-    const openInSessions = async (server: ServerItem) => {
-        const alreadyOpen = sessions.some((s) => s.serverId === server.id);
-        if (!alreadyOpen) await addSession(server.id, server.name);
-        router.push('/panel/sessions');
-    };
-
     const handleDelete = async () => {
         if (!deleteConfirm) return;
         const { id, name } = deleteConfirm;
@@ -220,9 +217,7 @@ export default function DashboardPage() {
         onEdit: () => router.push(`/panel/servers/${server.id}/edit`),
         onDelete: () => setDeleteConfirm(server),
         onCopyPassword: () => setRevealTarget({ server, field: 'password' }),
-        onConnect: () =>
-            router.push(`/panel/connect/${server.id}/${server.protocol.toLowerCase()}`),
-        onSessions: () => openInSessions(server),
+        onConnect: () => router.push(connectHref(server.id, server.protocol)),
         onTagClick: handleTagClick,
         onShare: () => setShareTarget(server),
     });
@@ -346,9 +341,7 @@ export default function DashboardPage() {
 
                 <SharedWithMeSection
                     servers={sharedServers}
-                    onConnect={(server) =>
-                        router.push(`/panel/connect/${server.id}/${server.protocol.toLowerCase()}`)
-                    }
+                    onConnect={(server) => router.push(connectHref(server.id, server.protocol))}
                 />
             </div>
 

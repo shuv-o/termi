@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { ServerMetrics } from '../../../../_dashboard/types';
+import type { ServerMetrics } from '@/app/panel/_dashboard/types';
 
 export interface MetricPoint {
     t: number;
@@ -19,7 +19,15 @@ export interface MetricPoint {
 const POLL_DELAY_MS = 2000;
 const MAX_POINTS = 60;
 
-/** Polls the server metrics endpoint while `enabled`, keeping a rolling history for charting. */
+/**
+ * Polls the server metrics endpoint while `enabled`, keeping a rolling history
+ * for charting.
+ *
+ * Shared by the live-metrics side panel in a terminal session and the live
+ * monitoring card on the server detail page, so both read the same numbers at
+ * the same cadence. Polling stops the moment `enabled` goes false — each poll
+ * opens an SSH channel, so an unattended panel is not free.
+ */
 export function useLiveMetrics(serverId: string, enabled: boolean) {
     const [history, setHistory] = useState<MetricPoint[]>([]);
     const [latest, setLatest] = useState<ServerMetrics | null>(null);
