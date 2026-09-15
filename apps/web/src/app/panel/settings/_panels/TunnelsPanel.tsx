@@ -62,7 +62,7 @@ export function TunnelsPanel() {
                 title="Active Tunnels"
                 description="Port forwards you've opened across all servers — like ssh -L, but tracked in one place."
                 icon={Waypoints}
-                iconBg="bg-sky-500/15 text-sky-400"
+                iconBg="bg-info/15 text-info"
             >
                 {tunnels.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">

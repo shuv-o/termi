@@ -34,7 +34,7 @@ function CopyTextButton({ text, label = 'Copy' }: { text: string; label?: string
             }}
         >
             {copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <Check className="w-3.5 h-3.5 text-success" />
             ) : (
                 <Copy className="w-3.5 h-3.5" />
             )}
@@ -169,7 +169,7 @@ export function TunnelSessionRowCard({
                 <p className="text-xs font-medium text-foreground/80 truncate">{serverLabel}</p>
             )}
             <div className="flex items-center gap-2 min-w-0">
-                <Icon className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <Icon className="w-3.5 h-3.5 text-info shrink-0" />
                 <span className="text-sm font-mono truncate">
                     {row.remoteHost}:{row.remotePort}
                 </span>
@@ -336,7 +336,7 @@ export function TunnelSection({
     return (
         <div>
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
-                <Waypoints className="w-4 h-4 text-sky-400" />
+                <Waypoints className="w-4 h-4 text-info" />
                 Port Forwarding
             </h2>
 

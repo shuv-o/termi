@@ -59,7 +59,7 @@ function ResetPasswordForm() {
 
     if (!token) {
         return (
-            <p className="text-center text-sm text-red-400">
+            <p className="text-center text-sm text-danger">
                 Invalid reset link.{' '}
                 <Link href="/forgot-password" className="underline">
                     Request a new one
@@ -71,7 +71,7 @@ function ResetPasswordForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
+            <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 text-xs text-danger">
                 <AlertTriangle className="w-4 h-4 inline mr-1" />
                 <strong>Security notice:</strong> Resetting your password will permanently delete
                 your stored server credentials. You&apos;ll need to re-add your servers after reset.
@@ -79,7 +79,7 @@ function ResetPasswordForm() {
 
             {success ? (
                 <div className="text-center space-y-2">
-                    <p className="text-green-400 font-medium">
+                    <p className="text-success font-medium">
                         Password reset! Redirecting to login…
                     </p>
                 </div>
@@ -112,7 +112,7 @@ function ResetPasswordForm() {
                             {requirements.map((r) => (
                                 <li
                                     key={r.label}
-                                    className={`flex items-center gap-1 ${r.met ? 'text-green-400' : 'text-muted-foreground'}`}
+                                    className={`flex items-center gap-1 ${r.met ? 'text-success' : 'text-muted-foreground'}`}
                                 >
                                     {r.met ? (
                                         <Check className="w-3 h-3" />
@@ -134,13 +134,13 @@ function ResetPasswordForm() {
                             className={
                                 confirm.length > 0
                                     ? passwordsMatch
-                                        ? 'border-green-500'
-                                        : 'border-red-500'
+                                        ? 'border-success'
+                                        : 'border-danger'
                                     : ''
                             }
                         />
                     </div>
-                    {error && <p className="text-sm text-red-400">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
                     <Button
                         type="submit"
                         className="w-full"
@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
                     <TerminalLogo width={48} height={48} className="rounded-xl mb-3" />
                     <h1 className="text-2xl font-bold">Reset Password</h1>
                 </div>
-                <Suspense fallback={<div className="h-8 bg-muted rounded animate-pulse" />}>
+                <Suspense fallback={<div className="h-8 bg-muted rounded-sm animate-pulse" />}>
                     <ResetPasswordForm />
                 </Suspense>
             </CardContent>

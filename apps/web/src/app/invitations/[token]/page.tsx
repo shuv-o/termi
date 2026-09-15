@@ -109,7 +109,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
                     {state === 'invalid' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
-                            <XCircle className="w-12 h-12 text-red-400" />
+                            <XCircle className="w-12 h-12 text-danger" />
                             <h2 className="text-lg font-semibold">Invitation Expired</h2>
                             <p className="text-sm text-muted-foreground">
                                 This invitation link is invalid or has expired. Please ask the
@@ -172,7 +172,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
                                 {state === 'wrong-user' ? (
                                     <div className="space-y-3">
-                                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-300">
+                                        <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm text-warning">
                                             You are currently logged in as{' '}
                                             <strong>{currentUserEmail}</strong>. This invitation is
                                             for <strong>{invitation.inviteeEmail}</strong>. Please
@@ -225,7 +225,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
                     {state === 'accepted' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
-                            <CheckCircle className="w-12 h-12 text-emerald-400" />
+                            <CheckCircle className="w-12 h-12 text-success" />
                             <h2 className="text-lg font-semibold">Invitation Accepted!</h2>
                             <p className="text-sm text-muted-foreground">
                                 You now have access to <strong>{invitation?.serverName}</strong>.
@@ -236,7 +236,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
                     {state === 'error' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
-                            <XCircle className="w-12 h-12 text-red-400" />
+                            <XCircle className="w-12 h-12 text-danger" />
                             <h2 className="text-lg font-semibold">Something went wrong</h2>
                             <p className="text-sm text-muted-foreground">{errorMsg}</p>
                             <Button variant="outline" onClick={() => setState('valid')}>

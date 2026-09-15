@@ -77,7 +77,7 @@ export function NewSnippetDialog({
 
                     {/* Snippets are stored unencrypted, so say so where it matters: at
                         the point someone would otherwise paste a password. */}
-                    <div className="flex gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
+                    <div className="flex gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning">
                         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>
                             Snippets are stored as plain text and are not encrypted. Don&apos;t put

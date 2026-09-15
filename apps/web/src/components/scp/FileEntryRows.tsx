@@ -29,14 +29,14 @@ export function MobileEntryRow({
 }) {
     return (
         <div
-            className={`flex items-center gap-3 px-4 py-3.5 transition-colors active:bg-slate-800/80
-                ${isSelected ? 'bg-sky-500/10' : ''}`}
+            className={`flex items-center gap-3 px-4 py-3.5 transition-colors active:bg-card/80
+                ${isSelected ? 'bg-info/10' : ''}`}
             onClick={() => actions.onOpen(entry)}
         >
             {selectMode && (
                 <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                        ${isSelected ? 'bg-sky-500 border-sky-500' : 'border-slate-600'}`}
+                        ${isSelected ? 'bg-info border-info' : 'border-muted-foreground/40'}`}
                 >
                     {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
@@ -47,11 +47,11 @@ export function MobileEntryRow({
             <div className="flex-1 min-w-0">
                 <span
                     className={`text-sm truncate block font-medium leading-snug
-                        ${entry.type === 'dir' ? 'text-amber-300' : 'text-slate-200'}`}
+                        ${entry.type === 'dir' ? 'text-warning' : 'text-foreground'}`}
                 >
                     {entry.name}
                 </span>
-                <span className="text-xs text-slate-500 block mt-0.5">
+                <span className="text-xs text-muted-foreground/80 block mt-0.5">
                     {entry.type === 'dir' ? 'Folder' : formatBytes(entry.size, '—')}
                     {entry.modifiedAt ? ` · ${formatUnixDate(entry.modifiedAt)}` : ''}
                 </span>
@@ -63,7 +63,7 @@ export function MobileEntryRow({
                         e.stopPropagation();
                         actions.onMoreActions(entry);
                     }}
-                    className="p-2.5 rounded-full text-slate-500 active:bg-slate-700 shrink-0 -mr-1"
+                    className="p-2.5 rounded-full text-muted-foreground/80 active:bg-secondary shrink-0 -mr-1"
                     aria-label="More options"
                 >
                     <MoreVertical className="w-4 h-4" />
@@ -88,7 +88,7 @@ export function DesktopEntryRow({
     return (
         <div
             className={`group flex items-center gap-2 px-3 py-1.5 cursor-pointer transition-colors
-                ${isSelected ? 'bg-sky-500/10' : 'hover:bg-slate-800/60'}`}
+                ${isSelected ? 'bg-info/10' : 'hover:bg-card/60'}`}
             onClick={() => (isDir ? actions.onOpen(entry) : actions.onToggleSelect(entry.path))}
             onDoubleClick={() => isDir && actions.onOpen(entry)}
         >
@@ -103,13 +103,13 @@ export function DesktopEntryRow({
 
             <div className="flex-1 min-w-0">
                 <span
-                    className={`text-sm truncate block ${isDir ? 'text-amber-300 font-medium' : 'text-slate-200'}`}
+                    className={`text-sm truncate block ${isDir ? 'text-warning font-medium' : 'text-foreground'}`}
                 >
                     {entry.name}
                 </span>
             </div>
 
-            <span className="text-[10px] text-slate-500 shrink-0 w-8 text-right">
+            <span className="text-[10px] text-muted-foreground/80 shrink-0 w-8 text-right">
                 {isDir ? '' : formatBytes(entry.size, '—')}
             </span>
 
@@ -120,7 +120,7 @@ export function DesktopEntryRow({
                             e.stopPropagation();
                             actions.onDownload(entry);
                         }}
-                        className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-sky-400 transition-colors"
+                        className="p-1 rounded-sm hover:bg-secondary text-muted-foreground/80 hover:text-info transition-colors"
                         title="Download"
                     >
                         <Download className="w-3 h-3" />
@@ -131,7 +131,7 @@ export function DesktopEntryRow({
                         e.stopPropagation();
                         actions.onRename(entry);
                     }}
-                    className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-amber-400 transition-colors"
+                    className="p-1 rounded-sm hover:bg-secondary text-muted-foreground/80 hover:text-warning transition-colors"
                     title="Rename"
                 >
                     <Pencil className="w-3 h-3" />
@@ -141,7 +141,7 @@ export function DesktopEntryRow({
                         e.stopPropagation();
                         actions.onDelete(entry);
                     }}
-                    className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors"
+                    className="p-1 rounded-sm hover:bg-secondary text-muted-foreground/80 hover:text-danger transition-colors"
                     title="Delete"
                 >
                     <Trash2 className="w-3 h-3" />

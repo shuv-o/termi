@@ -58,7 +58,7 @@ function ServerRow({
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">{srv.name}</span>
-                    {srv.isFavorite && <span className="text-yellow-400 text-[10px]">★</span>}
+                    {srv.isFavorite && <span className="text-warning text-[10px]">★</span>}
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground/60 font-mono">
                     <span className="truncate">

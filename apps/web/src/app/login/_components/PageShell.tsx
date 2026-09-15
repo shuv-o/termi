@@ -36,7 +36,7 @@ const FEATURES = [
 /** Marketing column beside the sign-in form; hidden below `md`. */
 export function BrandPanel() {
     return (
-        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-gradient-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
+        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-linear-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
             <div>
                 <div className="flex items-center gap-3 mb-8">
                     <TerminalLogo width={40} height={40} className="rounded-xl" />

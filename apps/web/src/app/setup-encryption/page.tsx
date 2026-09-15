@@ -17,9 +17,9 @@ function getStrength(p: string): { score: number; label: string; color: string }
     if (/[a-z]/.test(p)) score++;
     if (/\d/.test(p)) score++;
     if (/[^A-Za-z0-9]/.test(p)) score++;
-    if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' };
-    if (score <= 4) return { score, label: 'Fair', color: 'bg-yellow-500' };
-    return { score, label: 'Strong', color: 'bg-green-500' };
+    if (score <= 2) return { score, label: 'Weak', color: 'bg-danger' };
+    if (score <= 4) return { score, label: 'Fair', color: 'bg-warning' };
+    return { score, label: 'Strong', color: 'bg-success' };
 }
 
 export default function SetupEncryptionPage() {
@@ -126,7 +126,7 @@ export default function SetupEncryptionPage() {
                                     {[1, 2, 3, 4, 5, 6].map((i) => (
                                         <div
                                             key={i}
-                                            className={`h-1 flex-1 rounded ${i <= strength.score ? strength.color : 'bg-muted'}`}
+                                            className={`h-1 flex-1 rounded-sm ${i <= strength.score ? strength.color : 'bg-muted'}`}
                                         />
                                     ))}
                                 </div>
@@ -147,22 +147,22 @@ export default function SetupEncryptionPage() {
                             className={
                                 confirm.length > 0
                                     ? passphraseMatch
-                                        ? 'border-green-500'
-                                        : 'border-red-500'
+                                        ? 'border-success'
+                                        : 'border-danger'
                                     : ''
                             }
                         />
                         {passphraseMatch && (
-                            <p className="text-xs text-green-400 flex items-center gap-1">
+                            <p className="text-xs text-success flex items-center gap-1">
                                 <Check className="w-3 h-3" /> Passphrases match
                             </p>
                         )}
                     </div>
-                    <div className="bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 text-xs text-sky-300">
+                    <div className="bg-info/10 border border-info/30 rounded-lg p-3 text-xs text-info">
                         ℹ️ This passphrase cannot be recovered. If you forget it, you&apos;ll need
                         to reset it — which will delete all your server credentials.
                     </div>
-                    {error && <p className="text-sm text-red-400">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
                     <Button
                         type="submit"
                         className="w-full"

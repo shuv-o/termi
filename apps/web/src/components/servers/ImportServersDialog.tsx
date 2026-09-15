@@ -199,7 +199,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            <CheckCircle2 className="w-5 h-5 text-success" />
                             Import complete
                         </DialogTitle>
                     </DialogHeader>
@@ -219,7 +219,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                 {result.failed.map((f, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-start gap-2 text-xs p-2 rounded bg-secondary/50"
+                                        className="flex items-start gap-2 text-xs p-2 rounded-sm bg-secondary/50"
                                     >
                                         <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-destructive" />
                                         <span>
@@ -345,10 +345,10 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                             <button
                                                 onClick={copySample}
                                                 title="Copy sample"
-                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                                className="flex items-center gap-1 px-2 py-1 rounded-sm text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                                             >
                                                 {copied ? (
-                                                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                                    <Check className="w-3.5 h-3.5 text-success" />
                                                 ) : (
                                                     <Copy className="w-3.5 h-3.5" />
                                                 )}
@@ -358,7 +358,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                         <button
                                             onClick={downloadSample}
                                             title="Download as a template file"
-                                            className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                            className="flex items-center gap-1 px-2 py-1 rounded-sm text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                                         >
                                             <FileDown className="w-3.5 h-3.5" />
                                             Template
@@ -369,7 +369,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                 {sampleTab === 'xlsx' ? (
                                     <SampleTable />
                                 ) : (
-                                    <pre className="text-[11px] leading-relaxed p-2.5 rounded bg-secondary/50 overflow-x-auto">
+                                    <pre className="text-[11px] leading-relaxed p-2.5 rounded-sm bg-secondary/50 overflow-x-auto">
                                         <code>{sampleText}</code>
                                     </pre>
                                 )}
@@ -479,7 +479,7 @@ function SampleTable() {
     const shownCols = SAMPLE_COLUMNS.slice(0, 7);
 
     return (
-        <div className="overflow-x-auto rounded border border-border">
+        <div className="overflow-x-auto rounded-sm border border-border">
             <table className="w-full text-[11px] border-collapse">
                 <thead>
                     <tr className="bg-secondary/70">
@@ -524,7 +524,7 @@ function TabButton({
     return (
         <button
             onClick={onClick}
-            className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+            className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors ${
                 active
                     ? 'bg-primary/15 text-primary'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -545,11 +545,7 @@ function Stat({
     tone: 'good' | 'bad' | 'muted';
 }) {
     const color =
-        tone === 'good'
-            ? 'text-emerald-500'
-            : tone === 'bad'
-              ? 'text-destructive'
-              : 'text-foreground';
+        tone === 'good' ? 'text-success' : tone === 'bad' ? 'text-destructive' : 'text-foreground';
     return (
         <div className="p-3 rounded-lg bg-secondary/50">
             <div className={`text-2xl font-bold ${color}`}>{value}</div>

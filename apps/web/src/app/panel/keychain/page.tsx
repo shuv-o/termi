@@ -3,10 +3,12 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { BookKey, CheckCircle2, Plus } from 'lucide-react';
+import { BookKey, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { EmptyStateCard } from '@/components/ui/empty-state';
+import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
@@ -54,9 +56,9 @@ export default function KeychainPage() {
     const [form, setForm] = useState<EntryForm>(emptyForm());
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
     // copied[entryId] = 'user' | 'pass' | null — which field just got copied
     const [copied, setCopied] = useState<Record<string, 'user' | 'pass' | null>>({});
+    const { toast } = useToast();
 
     const markCopied = (id: string, field: 'user' | 'pass') => {
         setCopied((prev) => ({ ...prev, [id]: field }));
@@ -87,10 +89,7 @@ export default function KeychainPage() {
 
     const update = (fields: Partial<EntryForm>) => setForm((f) => ({ ...f, ...fields }));
 
-    const flash = (msg: string) => {
-        setSuccessMsg(msg);
-        setTimeout(() => setSuccessMsg(''), 3000);
-    };
+    const flash = (msg: string) => toast('success', msg);
 
     const openCreate = () => {
         setEditId(null);
@@ -175,11 +174,13 @@ export default function KeychainPage() {
 
     const handleDelete = async (id: string) => {
         try {
-            await fetch(`/api/keychain/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/keychain/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error();
             setEntries((prev) => prev.filter((e) => e.id !== id));
             flash('Keychain entry deleted');
         } catch {
-            // ignore
+            // Was silently swallowed: the row stayed on screen with no reason.
+            toast('error', 'Could not delete that keychain entry');
         }
     };
 
@@ -189,32 +190,22 @@ export default function KeychainPage() {
                 <ParamsFromUrl onCreate={openCreate} onEditEntry={openEdit} />
             </Suspense>
 
-            <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-6">
-                <div className="flex items-center justify-between gap-4">
-                    <div>
-                        <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Keychain</h1>
-                        <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                            {entries.length > 0
-                                ? `${entries.length} saved credential${entries.length === 1 ? '' : 's'} · reuse across servers`
-                                : 'Save credentials once, reuse them across servers'}
-                        </p>
-                    </div>
-                    <Button
-                        onClick={openCreate}
-                        className="h-9 sm:h-10 gap-1.5 px-3 sm:px-4 shrink-0"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span className="hidden sm:inline">New Entry</span>
-                        <span className="sm:hidden">New</span>
-                    </Button>
-                </div>
-
-                {successMsg && (
-                    <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-400">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        {successMsg}
-                    </div>
-                )}
+            <div className={`${PAGE_CONTENT_WIDTH} space-y-4 sm:space-y-6`}>
+                <PageHeader
+                    title="Keychain"
+                    description={
+                        entries.length > 0
+                            ? `${entries.length} saved credential${entries.length === 1 ? '' : 's'} · reuse across servers`
+                            : 'Save credentials once, reuse them across servers'
+                    }
+                    actions={
+                        <Button onClick={openCreate}>
+                            <Plus className="w-4 h-4" />
+                            <span className="hidden sm:inline">New Entry</span>
+                            <span className="sm:hidden">New</span>
+                        </Button>
+                    }
+                />
 
                 {loading ? (
                     <div className="rounded-2xl border border-border bg-card/30 divide-y divide-border/60 overflow-hidden">
@@ -234,28 +225,17 @@ export default function KeychainPage() {
                         ))}
                     </div>
                 ) : entries.length === 0 ? (
-                    <Card className="border-border">
-                        <CardContent className="flex min-h-[320px] flex-col items-center justify-center gap-4 py-14 text-center">
-                            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
-                                <BookKey className="h-10 w-10 text-muted-foreground/35" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-semibold">No keychain entries yet</h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Save reusable credentials once, then attach them to servers in
-                                    seconds.
-                                </p>
-                            </div>
-                            <Button
-                                onClick={openCreate}
-                                variant="secondary"
-                                className="h-10 gap-1.5 px-4"
-                            >
+                    <EmptyStateCard
+                        icon={BookKey}
+                        title="No keychain entries yet"
+                        description="Save reusable credentials once, then attach them to servers in seconds."
+                        action={
+                            <Button onClick={openCreate} variant="secondary">
                                 <Plus className="w-4 h-4" />
                                 Create your first entry
                             </Button>
-                        </CardContent>
-                    </Card>
+                        }
+                    />
                 ) : (
                     <div className="rounded-2xl border border-border bg-card/30 divide-y divide-border/60 overflow-hidden">
                         {entries.map((entry) => (

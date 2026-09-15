@@ -44,7 +44,7 @@ function LoginContent() {
                     </div>
 
                     {state.info && !state.requires2FA && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-5">
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20 text-success text-sm mb-5">
                             <CheckCircle className="w-4 h-4 shrink-0" />
                             {state.info}
                         </div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
             fallback={
                 <PageShell>
                     <div className="p-8">
-                        <div className="h-8 w-40 mx-auto bg-muted rounded animate-pulse" />
+                        <div className="h-8 w-40 mx-auto bg-muted rounded-sm animate-pulse" />
                     </div>
                 </PageShell>
             }

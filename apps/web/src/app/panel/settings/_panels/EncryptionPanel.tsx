@@ -25,15 +25,15 @@ export function EncryptionPanel({
                 title="Credential Encryption"
                 description="How your stored server credentials are protected at rest."
                 icon={Lock}
-                iconBg="bg-sky-500/15 text-sky-400"
+                iconBg="bg-info/15 text-info"
             >
                 {user?.isGoogleUser ? (
                     <div className="space-y-4">
                         <div
                             className={`flex items-center gap-2 p-3 rounded-xl text-sm ${
                                 user.hasMasterKey
-                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
-                                    : 'bg-amber-500/10 border border-amber-500/20 text-amber-300'
+                                    ? 'bg-success/10 border border-success/20 text-success'
+                                    : 'bg-warning/10 border border-warning/20 text-warning'
                             }`}
                         >
                             {user.hasMasterKey ? (
@@ -103,7 +103,7 @@ export function EncryptionPanel({
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-300">
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20 text-sm text-success">
                             <CheckCircle2 className="w-4 h-4 shrink-0" />
                             Encryption active — key derived from your login password
                         </div>

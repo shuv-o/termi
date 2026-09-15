@@ -20,7 +20,7 @@ export function MobileSectionPicker({
                         className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                             active === s
                                 ? s === 'danger'
-                                    ? 'bg-red-500/20 text-red-400'
+                                    ? 'bg-danger/20 text-danger'
                                     : 'bg-primary/20 text-primary'
                                 : 'bg-secondary text-muted-foreground hover:text-foreground'
                         }`}

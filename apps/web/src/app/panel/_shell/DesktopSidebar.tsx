@@ -85,14 +85,15 @@ function SidebarFooter({
             {collapsed ? (
                 <>
                     <CollapseTooltip label={user.name || user.email}>
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default shadow-sm">
+                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default shadow-sm">
                             {initial}
                         </div>
                     </CollapseTooltip>
                     <CollapseTooltip label="Sign Out">
                         <button
                             onClick={onLogout}
-                            className="flex items-center justify-center w-9 h-9 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                            aria-label="Sign out"
+                            className="flex items-center justify-center w-9 h-9 rounded-lg text-danger hover:text-danger hover:bg-danger/10 transition-colors"
                         >
                             <LogOut className="w-4 h-4" />
                         </button>
@@ -101,7 +102,7 @@ function SidebarFooter({
             ) : (
                 <>
                     <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0 shadow-sm">
+                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0 shadow-sm">
                             {initial}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -114,14 +115,14 @@ function SidebarFooter({
                                 </p>
                             )}
                             {!user.name && user.totpEnabled && (
-                                <span className="flex items-center gap-1 text-[11px] text-emerald-400">
+                                <span className="flex items-center gap-1 text-[11px] text-success">
                                     <Shield className="w-3 h-3" /> 2FA enabled
                                 </span>
                             )}
                         </div>
                         <button
                             onClick={onLogout}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                             title="Sign Out"
                         >
                             <LogOut className="w-4 h-4" />
@@ -176,7 +177,7 @@ export function DesktopSidebar({
                 transition-[width] duration-200 ease-in-out
             `}
         >
-            <div className="h-0.5 w-full bg-gradient-to-r from-primary via-violet-500 to-transparent absolute top-0 left-0" />
+            <div className="h-0.5 w-full bg-linear-to-r from-primary via-violet-500 to-transparent absolute top-0 left-0" />
 
             <div
                 className={`flex items-center h-14 px-2.5 border-b border-border shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}
@@ -221,6 +222,7 @@ export function DesktopSidebar({
                     <CollapseTooltip label="Search (⌘K)">
                         <button
                             onClick={openCommandPalette}
+                            aria-label="Open command palette"
                             className="flex items-center justify-center w-full h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                         >
                             <Search className="w-4 h-4" />
@@ -233,7 +235,7 @@ export function DesktopSidebar({
                     >
                         <Search className="w-4 h-4 shrink-0" />
                         <span className="flex-1 text-left">Search…</span>
-                        <kbd className="shrink-0 rounded border border-border/60 bg-secondary px-1.5 py-0.5 text-[10px] font-medium">
+                        <kbd className="shrink-0 rounded-sm border border-border/60 bg-secondary px-1.5 py-0.5 text-[10px] font-medium">
                             ⌘K
                         </kbd>
                     </button>

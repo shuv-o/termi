@@ -112,7 +112,7 @@ export function KeychainEntryModal({
                     <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                             <Label className="text-xs">
-                                Label <span className="text-red-400">*</span>
+                                Label <span className="text-danger">*</span>
                             </Label>
                             <Input
                                 value={form.label}
@@ -123,7 +123,7 @@ export function KeychainEntryModal({
                         </div>
                         <div className="space-y-1.5">
                             <Label className="text-xs">
-                                Username <span className="text-red-400">*</span>
+                                Username <span className="text-danger">*</span>
                             </Label>
                             <Input
                                 value={form.username}

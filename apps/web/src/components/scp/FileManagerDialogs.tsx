@@ -138,7 +138,7 @@ export function DeleteDialog({
             <div className="space-y-3">
                 <div className="flex gap-2.5 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                     <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-foreground/90">
                         Delete{' '}
                         {targets.length === 1 ? `"${targets[0].name}"` : `${targets.length} items`}?
                         {targets.some((e) => e.type === 'dir') &&

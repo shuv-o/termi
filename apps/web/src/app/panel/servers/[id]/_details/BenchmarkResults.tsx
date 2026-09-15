@@ -102,7 +102,7 @@ export function ScoreSummaryCard({ scores }: { scores: BenchmarkScores }) {
     return (
         <Card className="p-4">
             <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-4 h-4 text-yellow-400" />
+                <Zap className="w-4 h-4 text-warning" />
                 <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
                     Benchmark Score
                 </span>
@@ -298,7 +298,7 @@ export function RamResultCard({ ram }: { ram: BenchmarkThroughput }) {
     return (
         <ThroughputCard
             icon={MemoryStick}
-            iconClass="text-amber-400"
+            iconClass="text-warning"
             title="RAM Bandwidth"
             result={ram}
         />

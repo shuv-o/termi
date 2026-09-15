@@ -68,14 +68,14 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
 
     return (
         <div className="fixed top-16 right-4 z-[60] max-w-sm animate-fade-in lg:top-4">
-            <div className="flex items-start gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/95 p-4 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-slate-900/80">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-yellow-500/15 text-yellow-400">
+            <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/95 p-4 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
                     <Star className="h-4.5 w-4.5" />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                    <p className="text-sm text-slate-200">Glad Termi is working out for you.</p>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="text-sm text-foreground">Glad Termi is working out for you.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
                         A star helps others find it, and tells me what to prioritize next.
                     </p>
 
@@ -85,14 +85,14 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={dismiss}
-                            className="rounded-lg bg-gradient-to-r from-primary to-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition-transform hover:-translate-y-0.5"
+                            className="rounded-lg bg-linear-to-r from-primary to-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition-transform hover:-translate-y-0.5"
                         >
                             ⭐ Star on GitHub
                         </a>
                         <button
                             type="button"
                             onClick={dismiss}
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground/90"
                         >
                             No thanks
                         </button>
@@ -103,7 +103,7 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
                     type="button"
                     onClick={dismiss}
                     title="Dismiss"
-                    className="shrink-0 rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                    className="shrink-0 rounded-lg p-1 text-muted-foreground/80 transition-colors hover:bg-card hover:text-foreground/90"
                 >
                     <X className="h-3.5 w-3.5" />
                 </button>

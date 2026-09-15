@@ -21,10 +21,10 @@ export function CopyButton({ text, className }: { text: string; className?: stri
     return (
         <button
             onClick={copy}
-            className={`p-0.5 rounded text-muted-foreground/50 hover:text-muted-foreground transition-colors ${className ?? ''}`}
+            className={`p-0.5 rounded-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors ${className ?? ''}`}
             title={`Copy ${text}`}
         >
-            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            {copied ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
         </button>
     );
 }

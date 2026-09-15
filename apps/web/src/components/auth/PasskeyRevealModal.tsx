@@ -221,8 +221,8 @@ export default function PasskeyRevealModal({
             <DialogContent className="bg-card border-border max-w-md">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-                        <KeyRound className="w-5 h-5 text-sky-400" />
+                    <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center shrink-0">
+                        <KeyRound className="w-5 h-5 text-info" />
                     </div>
                     <div className="min-w-0">
                         <h2 className="font-semibold">Reveal {fieldLabel[field]}</h2>
@@ -234,8 +234,8 @@ export default function PasskeyRevealModal({
                 {step === 'authenticating' && (
                     <div className="flex flex-col items-center gap-4 py-6">
                         <div className="relative">
-                            <div className="w-16 h-16 rounded-full bg-sky-500/10 flex items-center justify-center">
-                                <Fingerprint className="w-8 h-8 text-sky-400 animate-pulse" />
+                            <div className="w-16 h-16 rounded-full bg-info/10 flex items-center justify-center">
+                                <Fingerprint className="w-8 h-8 text-info animate-pulse" />
                             </div>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card flex items-center justify-center">
                                 <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
@@ -256,9 +256,9 @@ export default function PasskeyRevealModal({
                 {/* Step: password-fallback (no usable passkey on this device) */}
                 {step === 'password-fallback' && (
                     <div className="space-y-4">
-                        <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-amber-300/90">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                            <Lock className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                            <p className="text-sm text-warning/90">
                                 No passkey is available on this device. Enter your account password
                                 to reveal this credential.
                             </p>
@@ -274,7 +274,7 @@ export default function PasskeyRevealModal({
                                 onChange={(e) => setPasswordInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handlePasswordReveal()}
                                 placeholder="Enter your password"
-                                className="w-full rounded-md bg-secondary border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                className="w-full rounded-md bg-secondary border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-info"
                             />
                         </div>
                         <div className="flex gap-3 justify-end">
@@ -330,7 +330,7 @@ export default function PasskeyRevealModal({
                                 {fieldLabel[field]}
                             </label>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary border border-border">
-                                <code className="flex-1 text-sm font-mono break-all text-emerald-400 select-all min-w-0">
+                                <code className="flex-1 text-sm font-mono break-all text-success select-all min-w-0">
                                     {showValue
                                         ? revealedValue
                                         : '•'.repeat(Math.min(revealedValue.length, 24))}
@@ -358,7 +358,7 @@ export default function PasskeyRevealModal({
                             <Button
                                 onClick={copyToClipboard}
                                 className={
-                                    copied ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : ''
+                                    copied ? 'bg-success text-background hover:bg-success/90' : ''
                                 }
                             >
                                 {copied ? (

@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AlertTriangle, Check, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -79,40 +80,26 @@ export default function GroupsPage() {
                 />
             </Suspense>
 
-            {g.toast && (
-                <div
-                    className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl text-sm font-medium transition-all duration-300 ${
-                        g.toast.type === 'success'
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                            : 'bg-destructive/10 border-destructive/30 text-destructive'
-                    }`}
-                >
-                    {g.toast.type === 'success' ? (
-                        <Check className="w-4 h-4 shrink-0" />
-                    ) : (
-                        <AlertTriangle className="w-4 h-4 shrink-0" />
-                    )}
-                    {g.toast.msg}
-                </div>
-            )}
-
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 shrink-0 bg-card/50 backdrop-blur-sm lg:px-8">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Groups</h1>
-                        <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                            {g.loading
-                                ? 'Loading…'
-                                : `${g.groups.length} group${g.groups.length !== 1 ? 's' : ''} · ${g.totalServers} server${g.totalServers !== 1 ? 's' : ''}`}
-                        </p>
-                    </div>
-                </div>
-                <Button onClick={() => setShowCreate(true)}>
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Create Group</span>
-                    <span className="sm:hidden">Create</span>
-                </Button>
-            </div>
+            {/* This page is a full-height split view, so its header sits in a
+                bordered bar rather than floating on the page background — but
+                the title block itself is the shared one, so the type and
+                spacing match every other page. */}
+            <PageHeader
+                className="shrink-0 border-b border-border/60 bg-card/50 px-6 py-4 backdrop-blur-sm lg:px-8"
+                title="Groups"
+                description={
+                    g.loading
+                        ? 'Loading…'
+                        : `${g.groups.length} group${g.groups.length !== 1 ? 's' : ''} · ${g.totalServers} server${g.totalServers !== 1 ? 's' : ''}`
+                }
+                actions={
+                    <Button onClick={() => setShowCreate(true)}>
+                        <Plus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Create Group</span>
+                        <span className="sm:hidden">Create</span>
+                    </Button>
+                }
+            />
 
             <div className="flex flex-1 min-h-0 overflow-hidden">
                 <GroupSidebar

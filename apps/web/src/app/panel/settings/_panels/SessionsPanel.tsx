@@ -16,7 +16,7 @@ export function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useAut
                 title="Active Sessions"
                 description="Devices and browsers that are currently signed in to your account."
                 icon={Monitor}
-                iconBg="bg-sky-500/15 text-sky-400"
+                iconBg="bg-info/15 text-info"
             >
                 {sessions.loading ? (
                     <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">

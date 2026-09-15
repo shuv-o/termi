@@ -25,6 +25,18 @@
     --ring: #0ea5e9;
     --radius: 0.5rem;
 
+    /* Status tones.
+       `destructive` stays the solid-fill action colour (white text on top, so
+       it must stay dark enough); `danger` is the *state* colour used for text,
+       dots and soft 10%-tinted surfaces on the dark background, where a lighter
+       red reads far better. Every status surface in the app — pills, banners,
+       toasts, threshold colouring — uses one of these five, never a raw palette
+       class, so "warning" looks the same everywhere. */
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #38bdf8;
+
     /* Terminal colors */
     --terminal-bg: #0d1117;
     --terminal-fg: #c9d1d9;
@@ -55,6 +67,10 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-danger: var(--danger);
+    --color-info: var(--info);
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
@@ -80,6 +96,41 @@ body {
 /* Prevent overscroll bounce on iOS */
 html {
     overscroll-behavior: none;
+}
+
+/* ============================================================================
+   FOCUS VISIBILITY
+   ============================================================================
+   The shadcn primitives ship their own focus-visible ring, but the app also
+   hand-rolls ~150 plain <button> elements (toolbars, chips, tab strips, the
+   virtual keyboard). Those had no focus style at all, which made keyboard
+   navigation invisible. This is the floor for every focusable element; a
+   component that wants a different ring still overrides it: this lives in the
+   `base` layer, and every Tailwind utility (including the primitives'
+   `focus-visible:outline-none focus-visible:ring-2`) lands in `utilities`,
+   which the cascade ranks higher. The outline follows the element's own
+   border-radius automatically, so nothing needs to declare one here. */
+@layer base {
+    :where(
+        a,
+        button,
+        [role='button'],
+        [role='tab'],
+        [role='option'],
+        summary,
+        input,
+        select,
+        textarea,
+        [tabindex]:not([tabindex='-1'])
+    ):focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+    }
+}
+
+/* Pointer interaction should never paint the ring — only real keyboard focus. */
+:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* ============================================================================
@@ -278,8 +329,25 @@ html {
     animation: termi-fade-in 200ms ease-out 120ms both;
 }
 
+/* Toasts enter from the edge they are docked to. */
+@keyframes termi-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.animate-toast-in {
+    animation: termi-toast-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
+    .animate-toast-in,
     .route-loader {
         animation: none;
     }

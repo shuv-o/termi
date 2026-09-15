@@ -122,7 +122,7 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                     onClick={() => setPermissions(p)}
                                     className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                                         permissions === p
-                                            ? 'bg-primary text-white'
+                                            ? 'bg-primary text-primary-foreground'
                                             : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
@@ -132,8 +132,8 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                         </div>
                     </div>
 
-                    {error && <p className="text-xs text-red-400">{error}</p>}
-                    {success && <p className="text-xs text-emerald-400">{success}</p>}
+                    {error && <p className="text-xs text-danger">{error}</p>}
+                    {success && <p className="text-xs text-success">{success}</p>}
                 </form>
 
                 {loadingShares ? (
@@ -151,20 +151,20 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                 key={share.id}
                                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50"
                             >
-                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs shrink-0">
                                     {share.sharedWith.email[0].toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium truncate">
                                         {share.sharedWith.email}
                                     </p>
-                                    <p className="text-[10px] text-emerald-400">
+                                    <p className="text-[10px] text-success">
                                         Active · {share.permissions}
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => handleRevoke(share.id)}
-                                    className="text-muted-foreground/50 hover:text-red-400 transition-colors"
+                                    className="text-muted-foreground/50 hover:text-danger transition-colors"
                                     title="Revoke access"
                                 >
                                     <Unlink className="w-3.5 h-3.5" />
@@ -184,13 +184,13 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                     <p className="text-xs font-medium truncate">
                                         {inv.inviteeEmail}
                                     </p>
-                                    <p className="text-[10px] text-amber-400">
+                                    <p className="text-[10px] text-warning">
                                         Pending invitation · {inv.permissions}
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => handleRevoke(inv.id, true)}
-                                    className="text-muted-foreground/50 hover:text-red-400 transition-colors"
+                                    className="text-muted-foreground/50 hover:text-danger transition-colors"
                                     title="Cancel invitation"
                                 >
                                     <X className="w-3.5 h-3.5" />

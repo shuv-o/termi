@@ -35,7 +35,7 @@ export function KeychainEntryCard({
     }
 
     const accent = entry.hasPrivateKey
-        ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+        ? 'border-warning/30 bg-warning/10 text-warning'
         : 'border-primary/30 bg-primary/10 text-primary';
 
     return (
@@ -67,10 +67,10 @@ export function KeychainEntryCard({
                     <button
                         onClick={onCopyUsername}
                         title="Copy username"
-                        className="shrink-0 p-1 rounded hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                        className="shrink-0 p-1 rounded-sm hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                     >
                         {copiedField === 'user' ? (
-                            <Check className="w-3 h-3 text-emerald-400" />
+                            <Check className="w-3 h-3 text-success" />
                         ) : (
                             <Copy className="w-3 h-3" />
                         )}
@@ -85,7 +85,7 @@ export function KeychainEntryCard({
                     </span>
                     <button
                         onClick={() => setConfirming(false)}
-                        className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded"
+                        className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-sm"
                     >
                         Cancel
                     </button>
@@ -113,7 +113,7 @@ export function KeychainEntryCard({
                             title={entry.hasPrivateKey ? 'Copy SSH key' : 'Copy password'}
                         >
                             {copiedField === 'pass' ? (
-                                <Check className="w-4 h-4 text-emerald-400" />
+                                <Check className="w-4 h-4 text-success" />
                             ) : (
                                 <KeyRound className="w-4 h-4" />
                             )}

@@ -4,11 +4,11 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
+import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 
 import { MobileSectionPicker } from './_components/MobileSectionPicker';
 import { RecoveryCodesPanel, UnverifiedBanner } from './_components/RecoveryCodes';
 import { SettingsSidebar } from './_components/SettingsSidebar';
-import { ToastList } from './_components/ToastList';
 
 import { useAccountSettings } from './_hooks/useAccountSettings';
 import { useAuthSessions } from './_hooks/useAuthSessions';
@@ -71,7 +71,7 @@ export default function SettingsPage() {
 
     const [activeSection, setActiveSection] = useState<SectionId>('profile');
 
-    const { toasts, addToast, dismissToast } = useToasts();
+    const { addToast } = useToasts();
     const account = useAccountSettings(user, setUser, addToast);
     const passkeys = usePasskeys(addToast, setUser);
     const twoFactor = useTwoFactor(setUser, addToast);
@@ -92,17 +92,16 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="mx-auto max-w-screen-2xl pb-16">
+        <div className={`${PAGE_CONTENT_WIDTH} pb-16`}>
             <Suspense fallback={null}>
                 <SectionFromUrl onSection={setActiveSection} />
             </Suspense>
 
-            <div className="mb-8 max-w-4xl">
-                <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Settings</h1>
-                <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                    Manage your account, security, and preferences
-                </p>
-            </div>
+            <PageHeader
+                className="mb-8 max-w-4xl"
+                title="Settings"
+                description="Manage your account, security, and preferences"
+            />
 
             {user && !user.isVerified && (
                 <UnverifiedBanner
@@ -174,8 +173,6 @@ export default function SettingsPage() {
                     )}
                 </div>
             </div>
-
-            <ToastList toasts={toasts} onDismiss={dismissToast} />
         </div>
     );
 }

@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
+import { useToast } from '@/components/ui/toast';
 import type { Group, GroupDetail, GroupFormData } from './types';
-
-type ToastKind = 'success' | 'error';
 
 /** Group list, per-group detail cache, and every mutation the page performs. */
 export function useGroups() {
@@ -37,12 +36,10 @@ export function useGroups() {
     });
     const [search, setSearch] = useState('');
     const [deleting, setDeleting] = useState(false);
-    const [toast, setToast] = useState<{ type: ToastKind; msg: string } | null>(null);
 
-    const showToast = useCallback((type: ToastKind, msg: string) => {
-        setToast({ type, msg });
-        setTimeout(() => setToast(null), 3500);
-    }, []);
+    // Feedback goes through the app-wide toaster mounted in the panel layout,
+    // rather than this screen's own fixed-position banner.
+    const { toast: showToast } = useToast();
 
     // Auto-select the first group once the list is available (and whenever the
     // current selection disappears, e.g. after a delete).
@@ -206,7 +203,6 @@ export function useGroups() {
         selectedDetail: selectedId ? (details[selectedId] ?? null) : null,
         loadingDetail,
         totalServers: groups.reduce((s, g) => s + g._count.servers, 0),
-        toast,
         create,
         update,
         remove,

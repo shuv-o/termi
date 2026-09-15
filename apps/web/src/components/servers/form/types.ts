@@ -1,5 +1,7 @@
 import { FolderOpen, Monitor, Terminal, Tv } from 'lucide-react';
 
+import { protocolColors, protocolRings } from '@/lib/protocol-style';
+
 export interface Group {
     id: string;
     name: string;
@@ -26,33 +28,24 @@ export const defaultPorts = { SSH: 22, SCP: 22, RDP: 3389, VNC: 5900, TELNET: 23
 
 export type ProtocolValue = keyof typeof defaultPorts;
 
-export const protoColors: Record<ProtocolValue, { pill: string; ring: string; badge: string }> = {
-    SSH: {
-        pill: 'bg-green-500/15 text-green-400 border-green-500/30',
-        ring: 'ring-green-500/40 border-green-500/60',
-        badge: 'bg-green-500/15 text-green-400',
-    },
-    SCP: {
-        pill: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-        ring: 'ring-blue-500/40 border-blue-500/60',
-        badge: 'bg-blue-500/15 text-blue-400',
-    },
-    RDP: {
-        pill: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-        ring: 'ring-purple-500/40 border-purple-500/60',
-        badge: 'bg-purple-500/15 text-purple-400',
-    },
-    VNC: {
-        pill: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-        ring: 'ring-orange-500/40 border-orange-500/60',
-        badge: 'bg-orange-500/15 text-orange-400',
-    },
-    TELNET: {
-        pill: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-        ring: 'ring-cyan-500/40 border-cyan-500/60',
-        badge: 'bg-cyan-500/15 text-cyan-400',
-    },
-};
+/**
+ * Protocol accents for the form's picker cards, taken from the shared
+ * categorical table rather than a private copy (there were three copies, and
+ * they had drifted apart on opacity).
+ */
+export const protoColors: Record<ProtocolValue, { pill: string; ring: string; badge: string }> =
+    Object.fromEntries(
+        (Object.keys(defaultPorts) as ProtocolValue[]).map((p) => [
+            p,
+            {
+                pill: protocolColors[p],
+                ring: protocolRings[p],
+                // Same tint as the pill, minus the border — these sit on a card
+                // that already has one.
+                badge: protocolColors[p].replace(/\s*border-\S+/, ''),
+            },
+        ]),
+    ) as Record<ProtocolValue, { pill: string; ring: string; badge: string }>;
 
 export type RdpSecurity = 'any' | 'rdp' | 'nla' | 'tls';
 export type AuthMethod = 'password' | 'key';

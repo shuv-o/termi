@@ -386,10 +386,10 @@ export default function SSHTerminal({
                 <span
                     className={`w-2 h-2 rounded-full ${
                         status === 'connected'
-                            ? 'bg-green-500'
+                            ? 'bg-success'
                             : status === 'connecting'
-                              ? 'bg-yellow-500 animate-pulse'
-                              : 'bg-red-500'
+                              ? 'bg-warning animate-pulse'
+                              : 'bg-danger'
                     }`}
                 />
                 <span className="text-xs text-muted-foreground capitalize">{status}</span>

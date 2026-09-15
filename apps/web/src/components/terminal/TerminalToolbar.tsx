@@ -257,7 +257,7 @@ function ToolChip({
             title={title}
             className={`flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                 danger
-                    ? 'text-amber-400 hover:bg-amber-500/15'
+                    ? 'text-warning hover:bg-warning/15'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
             }`}
         >
@@ -333,7 +333,7 @@ function SnippetManager({
 
                     {/* Snippets are stored unencrypted, so say so where it matters:
                         at the point someone would otherwise paste a password. */}
-                    <div className="flex gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
+                    <div className="flex gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning">
                         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>
                             Snippets are stored as plain text and are not encrypted. Don&apos;t put
@@ -362,7 +362,7 @@ function SnippetManager({
                                     <button
                                         onClick={() => remove(snippet.id)}
                                         title="Delete snippet"
-                                        className="shrink-0 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                        className="shrink-0 p-1 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
                                     </button>

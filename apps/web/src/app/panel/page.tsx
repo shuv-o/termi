@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowUpDown, ChevronDown, Download, Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
+import { useToast } from '@/components/ui/toast';
 import { Card } from '@/components/ui/card';
 import {
     AlertDialog,
@@ -61,6 +63,7 @@ const ShareModal = dynamic(() => import('./_dashboard/ShareModal'), { ssr: false
 
 export default function DashboardPage() {
     const router = useRouter();
+    const { toast } = useToast();
     const { addSession, sessions } = useSessionsContext();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -181,15 +184,23 @@ export default function DashboardPage() {
 
     const handleDelete = async () => {
         if (!deleteConfirm) return;
+        const { id, name } = deleteConfirm;
         setDeleting(true);
         try {
-            const res = await fetch(`/api/servers/${deleteConfirm.id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/servers/${id}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
-                setServers((prev) => prev.filter((s) => s.id !== deleteConfirm.id));
-                forgetServer(deleteConfirm.id);
+                setServers((prev) => prev.filter((s) => s.id !== id));
+                forgetServer(id);
                 setDeleteConfirm(null);
+                toast('success', `Deleted ${name}`);
+            } else {
+                // Previously this branch did nothing at all: the dialog just sat
+                // there with the server still listed and no reason given.
+                toast('error', data.error ?? `Could not delete ${name}`);
             }
+        } catch {
+            toast('error', `Could not reach the server to delete ${name}`);
         } finally {
             setDeleting(false);
         }
@@ -219,49 +230,49 @@ export default function DashboardPage() {
     return (
         <>
             <div className="space-y-4 sm:space-y-6">
-                <div className="mx-auto max-w-screen-2xl space-y-4 sm:space-y-5">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">Servers</h1>
-                            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                                {servers.length > 0
-                                    ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
-                                    : 'Manage and connect to your servers'}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" title="Import or export servers">
-                                        <ArrowUpDown className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Transfer</span>
-                                        <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Bulk transfer</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => setShowImport(true)}>
-                                        <Upload className="w-4 h-4" />
-                                        Import servers
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setShowExport(true)}
-                                        disabled={servers.length === 0}
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        Export servers
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                <div className={`${PAGE_CONTENT_WIDTH} space-y-4 sm:space-y-5`}>
+                    <PageHeader
+                        title="Servers"
+                        description={
+                            servers.length > 0
+                                ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
+                                : 'Manage and connect to your servers'
+                        }
+                        actions={
+                            <>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" title="Import or export servers">
+                                            <ArrowUpDown className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Transfer</span>
+                                            <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Bulk transfer</DropdownMenuLabel>
+                                        <DropdownMenuItem onClick={() => setShowImport(true)}>
+                                            <Upload className="w-4 h-4" />
+                                            Import servers
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => setShowExport(true)}
+                                            disabled={servers.length === 0}
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            Export servers
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
-                            <Button asChild>
-                                <Link href="/panel/servers/new">
-                                    <Plus className="w-4 h-4" />{' '}
-                                    <span className="hidden sm:inline">Add Server</span>
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
+                                <Button asChild>
+                                    <Link href="/panel/servers/new">
+                                        <Plus className="w-4 h-4" />{' '}
+                                        <span className="hidden sm:inline">Add Server</span>
+                                    </Link>
+                                </Button>
+                            </>
+                        }
+                    />
 
                     <FleetStats
                         servers={servers}
@@ -303,7 +314,7 @@ export default function DashboardPage() {
                     onSelectTag={setActiveTag}
                 />
 
-                <div className="mx-auto max-w-screen-2xl">
+                <div className={PAGE_CONTENT_WIDTH}>
                     {loading ? (
                         <DashboardSkeleton viewMode={viewMode} />
                     ) : sortedServers.length === 0 ? (

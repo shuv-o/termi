@@ -474,7 +474,7 @@ export default function VirtualKeyboard({ onKey }: VirtualKeyboardProps) {
                     Fn
                 </button>
                 <button
-                    className="vk-key text-slate-400 text-[11px]"
+                    className="vk-key text-muted-foreground text-[11px]"
                     style={{ flex: 5 }}
                     onPointerDown={press(' ')}
                 >

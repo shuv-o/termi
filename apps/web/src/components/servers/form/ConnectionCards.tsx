@@ -84,7 +84,7 @@ export function IdentityCard({
             <div className="grid gap-3 p-4 md:grid-cols-2">
                 <div className="space-y-1.5">
                     <Label className="text-xs">
-                        Name <span className="text-red-400">*</span>
+                        Name <span className="text-danger">*</span>
                     </Label>
                     <Input
                         type="text"
@@ -122,7 +122,7 @@ export function IdentityCard({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className="col-span-2 space-y-1.5">
                         <Label className="text-xs">
-                            Host / IP <span className="text-red-400">*</span>
+                            Host / IP <span className="text-danger">*</span>
                         </Label>
                         <Input
                             type="text"
@@ -154,7 +154,7 @@ export function IdentityCard({
                 </div>
                 <div className="space-y-1.5">
                     <Label className="text-xs">
-                        Username <span className="text-red-400">*</span>
+                        Username <span className="text-danger">*</span>
                     </Label>
                     <Input
                         type="text"
@@ -225,7 +225,7 @@ export function DisplaySettingsCard({
                             key={label}
                             type="button"
                             onClick={() => update({ displayWidth: w, displayHeight: h })}
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
+                            className={`px-2 py-0.5 rounded-sm text-[10px] font-medium border transition-colors ${
                                 form.displayWidth === w && form.displayHeight === h
                                     ? 'bg-primary/15 text-primary border-primary/30'
                                     : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/30'

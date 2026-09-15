@@ -86,7 +86,7 @@ export function SessionRow({
                         {browser} on {os}
                     </p>
                     {session.isCurrent && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-medium shrink-0">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/20 text-success text-[10px] font-medium shrink-0">
                             <Activity className="w-2.5 h-2.5" /> Current
                         </span>
                     )}
@@ -102,7 +102,7 @@ export function SessionRow({
                         <div className="flex items-center gap-1.5">
                             <button
                                 onClick={() => setConfirmed(false)}
-                                className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded"
+                                className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-sm"
                             >
                                 Cancel
                             </button>

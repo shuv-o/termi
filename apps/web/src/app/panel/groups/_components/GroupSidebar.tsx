@@ -90,7 +90,7 @@ function GroupRow({
                     disabled={isFirst}
                     onClick={() => onMove('up')}
                     title="Move up"
-                    className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <ChevronUp className="w-3 h-3" />
                 </button>
@@ -98,13 +98,16 @@ function GroupRow({
                     disabled={isLast}
                     onClick={() => onMove('down')}
                     title="Move down"
-                    className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <ChevronDown className="w-3 h-3" />
                 </button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <button className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                        <button
+                            aria-label="Group actions"
+                            className="p-1 rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                        >
                             <MoreVertical className="w-3 h-3" />
                         </button>
                     </DropdownMenuTrigger>

@@ -1,4 +1,5 @@
 export { protocolIcons, protocolColors } from '@/lib/protocol-style';
+import { toneDot, tonePill, toneText, type Tone } from '@/lib/status-style';
 
 export interface ServerInfo {
     id: string;
@@ -169,24 +170,30 @@ export function phaseIndex(phase: BenchmarkPhase | null): number {
     return BENCHMARK_PHASES.findIndex((p) => p.key === phase);
 }
 
-/** Scores are 0–1000, graded against a high-end server reference. */
+/**
+ * Scores are 0–1000, graded against a high-end server reference.
+ *
+ * Three bands, matching the app-wide tone scale. There used to be four, but
+ * two of them were `yellow-400` and `amber-400` — indistinguishable side by
+ * side, so the extra band communicated nothing.
+ */
+const GOOD_SCORE = 800;
+const FAIR_SCORE = 500;
+
+function scoreTone(score: number): Tone {
+    if (score >= GOOD_SCORE) return 'success';
+    if (score >= FAIR_SCORE) return 'warning';
+    return 'danger';
+}
+
 export function scoreColor(score: number): string {
-    if (score >= 800) return 'text-emerald-400';
-    if (score >= 600) return 'text-yellow-400';
-    if (score >= 400) return 'text-amber-400';
-    return 'text-red-400';
+    return toneText[scoreTone(score)];
 }
 
 export function scoreBg(score: number): string {
-    if (score >= 800) return 'bg-emerald-500/10 border-emerald-500/20';
-    if (score >= 600) return 'bg-yellow-500/10 border-yellow-500/20';
-    if (score >= 400) return 'bg-amber-500/10 border-amber-500/20';
-    return 'bg-red-500/10 border-red-500/20';
+    return tonePill[scoreTone(score)];
 }
 
 export function scoreBarColor(score: number): string {
-    if (score >= 800) return 'bg-emerald-400';
-    if (score >= 600) return 'bg-yellow-400';
-    if (score >= 400) return 'bg-amber-400';
-    return 'bg-red-400';
+    return toneDot[scoreTone(score)];
 }

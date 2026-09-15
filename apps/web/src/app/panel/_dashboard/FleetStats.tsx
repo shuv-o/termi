@@ -3,6 +3,7 @@
 import { Cpu, Layers, MemoryStick, Server, Wifi, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { latencyTone, toneText, USAGE_WARN_PCT } from '@/lib/status-style';
 import type { ServerItem, ServerMetrics } from './types';
 
 /** Six-tile fleet summary across the top of the dashboard. */
@@ -31,8 +32,10 @@ export function FleetStats({
             ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length)
             : null;
 
-    const highCpu = servers.filter((s) => (metrics[s.id]?.cpu ?? 0) >= 80).length;
-    const highRam = servers.filter((s) => (metrics[s.id]?.ram?.percent ?? 0) >= 80).length;
+    const highCpu = servers.filter((s) => (metrics[s.id]?.cpu ?? 0) >= USAGE_WARN_PCT).length;
+    const highRam = servers.filter(
+        (s) => (metrics[s.id]?.ram?.percent ?? 0) >= USAGE_WARN_PCT,
+    ).length;
     const activeSessions = sessions.length;
 
     if (servers.length === 0) return null;
@@ -51,45 +54,38 @@ export function FleetStats({
             label: 'Online',
             value: metricsReady || online > 0 || offline > 0 ? String(online) : null,
             icon: Wifi,
-            iconClassName: 'text-emerald-400',
-            iconWrapperClassName: 'bg-emerald-500/10',
-            borderClassName: 'border-l-emerald-400',
-            valueClassName: 'text-emerald-400',
+            iconClassName: 'text-success',
+            iconWrapperClassName: 'bg-success/10',
+            borderClassName: 'border-l-success',
+            valueClassName: 'text-success',
         },
         {
             label: 'Avg Latency',
             value: avgLatency != null ? `${avgLatency}ms` : null,
             icon: Zap,
-            iconClassName:
-                avgLatency != null && avgLatency >= 150 ? 'text-red-400' : 'text-sky-400',
-            iconWrapperClassName: 'bg-sky-500/10',
-            borderClassName: 'border-l-sky-400',
+            iconClassName: latencyTone(avgLatency) === 'danger' ? 'text-danger' : 'text-info',
+            iconWrapperClassName: 'bg-info/10',
+            borderClassName: 'border-l-info',
             valueClassName:
-                avgLatency == null
-                    ? 'text-foreground'
-                    : avgLatency < 50
-                      ? 'text-emerald-400'
-                      : avgLatency < 150
-                        ? 'text-amber-400'
-                        : 'text-red-400',
+                avgLatency == null ? 'text-foreground' : toneText[latencyTone(avgLatency)],
         },
         {
             label: 'High CPU',
             value: String(highCpu),
             icon: Cpu,
-            iconClassName: highCpu > 0 ? 'text-amber-400' : 'text-violet-400',
+            iconClassName: highCpu > 0 ? 'text-warning' : 'text-violet-400',
             iconWrapperClassName: 'bg-violet-500/10',
             borderClassName: 'border-l-violet-400',
-            valueClassName: highCpu > 0 ? 'text-amber-400' : 'text-foreground',
+            valueClassName: highCpu > 0 ? 'text-warning' : 'text-foreground',
         },
         {
             label: 'High RAM',
             value: String(highRam),
             icon: MemoryStick,
-            iconClassName: 'text-amber-400',
-            iconWrapperClassName: 'bg-amber-500/10',
-            borderClassName: 'border-l-amber-400',
-            valueClassName: highRam > 0 ? 'text-amber-400' : 'text-foreground',
+            iconClassName: 'text-warning',
+            iconWrapperClassName: 'bg-warning/10',
+            borderClassName: 'border-l-warning',
+            valueClassName: highRam > 0 ? 'text-warning' : 'text-foreground',
         },
         {
             label: 'Active Sessions',
@@ -122,7 +118,7 @@ export function FleetStats({
                                     {stat.label}
                                 </p>
                                 {stat.label === 'Online' && offline > 0 && (
-                                    <p className="text-[10px] text-red-400">{offline} offline</p>
+                                    <p className="text-[10px] text-danger">{offline} offline</p>
                                 )}
                                 {stat.label === 'Online' && offline === 0 && unknown > 0 && (
                                     <p className="text-[10px] text-muted-foreground/70">

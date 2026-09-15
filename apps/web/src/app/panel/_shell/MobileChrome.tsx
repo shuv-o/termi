@@ -18,21 +18,21 @@ export function VerifyEmailBanner({
 }) {
     return (
         <div
-            className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5 flex items-center justify-between gap-3"
+            className="bg-warning/10 border-b border-warning/30 px-4 py-2.5 flex items-center justify-between gap-3"
             style={{
                 paddingTop: 'max(0.625rem, env(safe-area-inset-top, 0px))',
                 paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
                 paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
             }}
         >
-            <div className="flex items-center gap-2 text-sm text-amber-300 min-w-0">
+            <div className="flex items-center gap-2 text-sm text-warning min-w-0">
                 <Mail className="w-4 h-4 shrink-0" />
                 <span className="truncate">Verify your email to secure your account.</span>
             </div>
             <button
                 onClick={onResend}
                 disabled={resending || sent}
-                className="text-xs font-medium text-amber-300 hover:text-amber-200 underline shrink-0 disabled:opacity-50"
+                className="text-xs font-medium text-warning hover:text-warning/80 underline shrink-0 disabled:opacity-50"
             >
                 {sent ? 'Sent!' : resending ? 'Sending…' : 'Resend'}
             </button>
@@ -49,7 +49,7 @@ function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void })
                 onClick={() => setOpen((o) => !o)}
                 className="flex items-center gap-1 p-1 rounded-lg hover:bg-secondary transition-colors"
             >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs">
+                <div className="w-7 h-7 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs">
                     {(user.name || user.email)[0].toUpperCase()}
                 </div>
                 <ChevronDown
@@ -72,7 +72,7 @@ function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void })
                                 {user.email}
                             </p>
                             {user.totpEnabled && (
-                                <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                                <p className="text-[10px] text-success flex items-center gap-1 mt-0.5">
                                     <Shield className="w-2.5 h-2.5" /> 2FA enabled
                                 </p>
                             )}
@@ -82,7 +82,7 @@ function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void })
                                 setOpen(false);
                                 onLogout();
                             }}
-                            className="w-full flex items-center gap-2.5 px-3 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                            className="w-full flex items-center gap-2.5 px-3 py-3 text-sm text-danger hover:bg-danger/10 transition-colors"
                         >
                             <LogOut className="w-4 h-4" /> Sign Out
                         </button>
@@ -184,7 +184,7 @@ export function MobileBottomNav({
             <div className="relative flex items-center gap-1 h-[58px] px-2 rounded-[27px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
                 {/* Glass sheen — a faint highlight along the top edge of the
                     capsule so the bar reads as glass, not a flat panel */}
-                <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-linear-to-r from-transparent via-white/40 to-transparent" />
 
                 {navigation.map((item) => {
                     const isActive = isNavItemActive(item.href, pathname);

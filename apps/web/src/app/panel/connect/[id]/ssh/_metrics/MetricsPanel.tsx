@@ -6,8 +6,10 @@ import { formatBytes } from '@/lib/format';
 import { MetricSparkline } from './MetricSparkline';
 import { useLiveMetrics } from './useLiveMetrics';
 
-const CPU_COLOR = '#34d399'; // emerald-400
-const RAM_COLOR = '#38bdf8'; // sky-400
+// Canvas needs literals, so these mirror --success / --info from globals.css
+// (the same pair the CPU/RAM gauges on the dashboard cards use).
+const CPU_COLOR = '#34d399'; // --success
+const RAM_COLOR = '#38bdf8'; // --info
 const DISK_COLOR = '#a1a1aa'; // zinc-400
 
 function MetricRow({

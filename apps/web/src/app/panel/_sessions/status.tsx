@@ -1,13 +1,31 @@
 'use client';
 
+import { toneDot, toneText, type Tone } from '@/lib/status-style';
 import type { SessionStatus } from '../sessions-context';
 
-const DOT_CLASS: Record<SessionStatus, string> = {
-    connecting: 'bg-yellow-400 animate-pulse',
-    connected: 'bg-emerald-400',
-    disconnected: 'bg-slate-500',
-    error: 'bg-red-400',
-    detached: 'bg-amber-400 animate-pulse',
+/**
+ * Session lifecycle mapped onto the shared tone scale. Previously "connecting"
+ * was yellow and "detached" amber — two near-identical colours for two states a
+ * user cannot tell apart anyway — while "disconnected" used a raw slate that
+ * matched nothing else. Both transient states are now the one warning tone, and
+ * "disconnected" is the neutral muted foreground used for every other
+ * inactive/unknown state in the app.
+ */
+const TONE: Record<SessionStatus, Tone> = {
+    connecting: 'warning',
+    connected: 'success',
+    disconnected: 'neutral',
+    error: 'danger',
+    detached: 'warning',
+};
+
+/** Transient states pulse; settled ones sit still. */
+const PULSING: Record<SessionStatus, boolean> = {
+    connecting: true,
+    connected: false,
+    disconnected: false,
+    error: false,
+    detached: true,
 };
 
 const LABELS: Record<SessionStatus, string> = {
@@ -18,17 +36,15 @@ const LABELS: Record<SessionStatus, string> = {
     detached: 'Restoring…',
 };
 
-const COLORS: Record<SessionStatus, string> = {
-    connecting: 'text-yellow-400',
-    connected: 'text-emerald-400',
-    disconnected: 'text-slate-400',
-    error: 'text-red-400',
-    detached: 'text-amber-400',
-};
-
 export function StatusDot({ status, size = 'sm' }: { status: SessionStatus; size?: 'sm' | 'md' }) {
     const dim = size === 'md' ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5';
-    return <span className={`${dim} rounded-full shrink-0 ${DOT_CLASS[status]}`} />;
+    return (
+        <span
+            className={`${dim} rounded-full shrink-0 ${toneDot[TONE[status]]} ${
+                PULSING[status] ? 'animate-pulse' : ''
+            }`}
+        />
+    );
 }
 
 export function statusLabel(status: SessionStatus): string {
@@ -36,5 +52,5 @@ export function statusLabel(status: SessionStatus): string {
 }
 
 export function statusColor(status: SessionStatus): string {
-    return COLORS[status];
+    return toneText[TONE[status]];
 }

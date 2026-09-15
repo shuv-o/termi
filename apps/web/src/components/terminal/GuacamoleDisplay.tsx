@@ -443,13 +443,13 @@ export default function GuacamoleDisplay({
                     <span
                         className={`w-2 h-2 rounded-full ${
                             isConnected
-                                ? 'bg-green-500'
+                                ? 'bg-success'
                                 : isConnecting
-                                  ? 'bg-yellow-500 animate-pulse'
-                                  : 'bg-red-500'
+                                  ? 'bg-warning animate-pulse'
+                                  : 'bg-danger'
                         }`}
                     />
-                    <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded">
+                    <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded-sm">
                         {label}
                     </span>
                 </div>
@@ -518,11 +518,11 @@ export default function GuacamoleDisplay({
             {errorMsg && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20">
                     <div className="text-center px-6 max-w-md">
-                        <p className="text-red-400 text-sm font-semibold mb-2">Connection Error</p>
+                        <p className="text-danger text-sm font-semibold mb-2">Connection Error</p>
                         <p className="text-gray-300 text-xs leading-relaxed">{errorMsg}</p>
                         <button
                             onClick={() => window.location.reload()}
-                            className="mt-4 px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded hover:opacity-90"
+                            className="mt-4 px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-sm hover:opacity-90"
                         >
                             Retry
                         </button>

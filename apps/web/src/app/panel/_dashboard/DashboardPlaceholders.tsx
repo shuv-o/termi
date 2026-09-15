@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Plus, Search, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ServerListHeader } from './ServerListRow';
 import type { ViewMode } from './types';
@@ -68,41 +69,31 @@ export function DashboardEmptyState({
 }) {
     return (
         <Card className="flex min-h-[420px] items-center justify-center border-border">
-            <div className="mx-auto max-w-md px-6 text-center">
-                {fleetIsEmpty ? (
-                    <>
-                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
-                            <Server className="h-10 w-10 text-muted-foreground/35" />
-                        </div>
-                        <h3 className="text-xl font-semibold">Build your fleet</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Add your first server to create a clean, searchable fleet view.
-                        </p>
-                        <Button asChild className="mt-6 h-10 px-4">
+            {fleetIsEmpty ? (
+                <EmptyState
+                    icon={Server}
+                    title="Build your fleet"
+                    description="Add your first server to create a clean, searchable fleet view."
+                    action={
+                        <Button asChild>
                             <Link href="/panel/servers/new">
                                 <Plus className="w-4 h-4" /> Add your first server
                             </Link>
                         </Button>
-                    </>
-                ) : (
-                    <>
-                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-secondary/30">
-                            <Search className="h-10 w-10 text-muted-foreground/35" />
-                        </div>
-                        <h3 className="text-xl font-semibold">No matching servers</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Broaden your search or reset the active filters to see more servers.
-                        </p>
-                        <Button
-                            variant="secondary"
-                            className="mt-6 h-10 px-4"
-                            onClick={onClearFilters}
-                        >
+                    }
+                />
+            ) : (
+                <EmptyState
+                    icon={Search}
+                    title="No matching servers"
+                    description="Broaden your search or reset the active filters to see more servers."
+                    action={
+                        <Button variant="secondary" onClick={onClearFilters}>
                             Clear filters
                         </Button>
-                    </>
-                )}
-            </div>
+                    }
+                />
+            )}
         </Card>
     );
 }

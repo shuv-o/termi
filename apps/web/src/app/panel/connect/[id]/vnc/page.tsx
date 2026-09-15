@@ -260,7 +260,7 @@ export default function VNCConnectionPage() {
                     title="Disconnect"
                     className={
                         isFullscreen
-                            ? 'h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/20'
+                            ? 'h-8 w-8 text-danger hover:text-danger hover:bg-danger/20'
                             : 'h-7 w-7 text-destructive hover:text-destructive'
                     }
                 >

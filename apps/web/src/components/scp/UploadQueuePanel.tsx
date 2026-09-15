@@ -22,13 +22,13 @@ export function UploadQueuePanel({
     if (uploads.length === 0) return null;
 
     return (
-        <div className="shrink-0 border-t border-slate-700 bg-slate-800/50">
+        <div className="shrink-0 border-t border-border bg-card/50">
             <button
-                className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-slate-400 hover:text-white"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground hover:text-white"
                 onClick={onToggle}
             >
                 <span className="flex items-center gap-1.5">
-                    {pendingCount > 0 && <Loader2 className="w-3 h-3 animate-spin text-sky-400" />}
+                    {pendingCount > 0 && <Loader2 className="w-3 h-3 animate-spin text-info" />}
                     Uploads ({doneCount}/{uploads.length})
                 </span>
                 <ChevronUp
@@ -41,21 +41,21 @@ export function UploadQueuePanel({
                         <div key={u.id} className="flex items-center gap-2">
                             <div className="shrink-0 w-3.5">
                                 {u.status === 'done' && (
-                                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                    <Check className="w-3.5 h-3.5 text-success" />
                                 )}
                                 {u.status === 'error' && (
-                                    <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                                    <AlertCircle className="w-3.5 h-3.5 text-danger" />
                                 )}
                                 {u.status === 'uploading' && (
-                                    <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+                                    <Loader2 className="w-3.5 h-3.5 text-info animate-spin" />
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs text-slate-300 truncate">{u.name}</p>
+                                <p className="text-xs text-foreground/90 truncate">{u.name}</p>
                                 {u.status === 'uploading' && (
-                                    <div className="h-1 bg-slate-700 rounded-full mt-0.5 overflow-hidden">
+                                    <div className="h-1 bg-secondary rounded-full mt-0.5 overflow-hidden">
                                         <div
-                                            className="h-full bg-sky-500 rounded-full transition-all"
+                                            className="h-full bg-info rounded-full transition-all"
                                             style={{ width: `${u.progress}%` }}
                                         />
                                     </div>
@@ -64,7 +64,7 @@ export function UploadQueuePanel({
                             {u.status !== 'uploading' && (
                                 <button
                                     onClick={() => onDismiss(u.id)}
-                                    className="p-0.5 text-slate-600 hover:text-white"
+                                    className="p-0.5 text-muted-foreground/60 hover:text-white"
                                 >
                                     <X className="w-3 h-3" />
                                 </button>

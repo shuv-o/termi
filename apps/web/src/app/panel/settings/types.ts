@@ -69,16 +69,11 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     danger: 'Danger',
 };
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-export interface Toast {
-    id: number;
-    type: ToastType;
-    message: string;
-}
-
-/** Signature of the toast dispatcher handed down to hooks and panels. */
-export type AddToast = (type: ToastType, message: string, duration?: number) => void;
+/**
+ * Toast types live with the app-wide toaster now; re-exported here so the
+ * dozen settings hooks that import `AddToast` from this module keep working.
+ */
+export type { AddToast, Toast, ToastType } from '@/components/ui/toast';
 
 /** Cache-backed user updater — settings only ever edits an existing user. */
 export type SetUser = (updater: User | null | ((u: User | null) => User | null)) => void;

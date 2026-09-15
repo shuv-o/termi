@@ -22,9 +22,8 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
     const score = checks.filter((c) => c.done).length;
     const pct = (score / checks.length) * 100;
 
-    const scoreColor =
-        score === 4 ? 'text-emerald-400' : score >= 2 ? 'text-amber-400' : 'text-red-400';
-    const barColor = score === 4 ? 'bg-emerald-500' : score >= 2 ? 'bg-amber-500' : 'bg-red-500';
+    const scoreColor = score === 4 ? 'text-success' : score >= 2 ? 'text-warning' : 'text-danger';
+    const barColor = score === 4 ? 'bg-success' : score >= 2 ? 'bg-warning' : 'bg-danger';
     const label = score === 4 ? 'Excellent' : score >= 3 ? 'Good' : score >= 2 ? 'Fair' : 'Weak';
 
     return (
@@ -32,11 +31,11 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     {score === 4 ? (
-                        <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                        <ShieldCheck className="w-5 h-5 text-success" />
                     ) : score >= 2 ? (
-                        <Shield className="w-5 h-5 text-amber-400" />
+                        <Shield className="w-5 h-5 text-warning" />
                     ) : (
-                        <ShieldAlert className="w-5 h-5 text-red-400" />
+                        <ShieldAlert className="w-5 h-5 text-danger" />
                     )}
                     <span className="font-semibold text-sm">Security Score</span>
                 </div>
@@ -54,7 +53,7 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
                 {checks.map((c) => (
                     <div key={c.label} className="flex items-center gap-2">
                         {c.done ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
                         ) : (
                             <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
                         )}

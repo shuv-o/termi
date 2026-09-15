@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,6 +22,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { protocolChipActive, protocolChipIdle } from '@/lib/protocol-style';
 import {
     PROTOCOL_FILTERS,
     SORT_OPTIONS,
@@ -30,29 +32,14 @@ import {
     type ViewMode,
 } from './types';
 
-/** Per-protocol chip colours, split by active state. */
+/** Per-protocol chip colours, from the shared categorical protocol table. */
 function protocolChipClass(p: ProtocolFilter, active: boolean): string {
-    const map: Record<string, string> = {
-        SSH: active
-            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-            : 'text-muted-foreground border-border hover:border-emerald-500/30 hover:text-emerald-400',
-        SCP: active
-            ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'
-            : 'text-muted-foreground border-border hover:border-blue-500/30 hover:text-blue-400',
-        RDP: active
-            ? 'bg-purple-500/20 text-purple-400 border-purple-500/40'
-            : 'text-muted-foreground border-border hover:border-purple-500/30 hover:text-purple-400',
-        VNC: active
-            ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
-            : 'text-muted-foreground border-border hover:border-orange-500/30 hover:text-orange-400',
-        TELNET: active
-            ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
-            : 'text-muted-foreground border-border hover:border-cyan-500/30 hover:text-cyan-400',
-        all: active
+    if (p === 'all') {
+        return active
             ? 'bg-primary/15 text-primary border-primary/30'
-            : 'text-muted-foreground border-border hover:text-foreground',
-    };
-    return map[p];
+            : 'text-muted-foreground border-border hover:text-foreground';
+    }
+    return active ? protocolChipActive[p] : protocolChipIdle[p];
 }
 
 interface DashboardToolbarProps {
@@ -106,7 +93,7 @@ export function DashboardToolbar({
 
     return (
         <div className="-mx-4 sticky top-14 lg:top-0 z-10 border-b border-border bg-background/95 px-4 py-2.5 sm:py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
-            <div className="mx-auto max-w-screen-2xl space-y-2.5 sm:space-y-3">
+            <div className={`${PAGE_CONTENT_WIDTH} space-y-2.5 sm:space-y-3`}>
                 <div className="flex items-center gap-2 xl:gap-3">
                     <div className="relative flex-1 max-w-xs sm:max-w-sm">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -181,14 +168,14 @@ export function DashboardToolbar({
                         <div className="flex overflow-hidden rounded-lg border border-border">
                             <button
                                 onClick={() => onViewChange('grid')}
-                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
                                 title="Grid view"
                             >
                                 <LayoutGrid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => onViewChange('list')}
-                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
                                 title="List view"
                             >
                                 <List className="w-4 h-4" />
@@ -228,6 +215,7 @@ export function DashboardToolbar({
                         {activeTag && (
                             <button
                                 onClick={onClearTag}
+                                aria-label={`Clear the ${activeTag} tag filter`}
                                 className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-[11px] font-medium text-primary transition-all"
                             >
                                 <Tag className="w-3 h-3" />

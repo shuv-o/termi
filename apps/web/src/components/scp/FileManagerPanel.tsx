@@ -82,16 +82,16 @@ export default function FileManagerPanel({
 
     return (
         <div
-            className="relative flex flex-col h-full bg-slate-900 overflow-hidden"
+            className="relative flex flex-col h-full bg-background overflow-hidden"
             {...uploads.dragHandlers}
         >
             {uploads.dragging && (
                 <div
                     className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2
-                    bg-slate-900/95 border-2 border-dashed border-sky-500 rounded-xl pointer-events-none"
+                    bg-background/95 border-2 border-dashed border-info rounded-xl pointer-events-none"
                 >
-                    <Upload className="w-8 h-8 text-sky-400" />
-                    <p className="text-sm font-semibold text-sky-300">Drop to upload</p>
+                    <Upload className="w-8 h-8 text-info" />
+                    <p className="text-sm font-semibold text-info">Drop to upload</p>
                 </div>
             )}
 
@@ -114,13 +114,13 @@ export default function FileManagerPanel({
             />
 
             {isMobile && selectMode && (
-                <div className="shrink-0 flex items-center justify-between px-4 py-2 bg-sky-500/10 border-b border-sky-500/20">
-                    <span className="text-xs text-sky-300 font-medium">
+                <div className="shrink-0 flex items-center justify-between px-4 py-2 bg-info/10 border-b border-info/20">
+                    <span className="text-xs text-info font-medium">
                         {selected.size > 0 ? `${selected.size} selected` : 'Tap items to select'}
                     </span>
                     <button
                         onClick={clearSelection}
-                        className="text-xs text-sky-400 active:text-white"
+                        className="text-xs text-info active:text-white"
                     >
                         Done
                     </button>
@@ -130,8 +130,8 @@ export default function FileManagerPanel({
             <div className="flex-1 min-h-0 overflow-y-auto">
                 {error ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 p-6 text-center">
-                        <AlertCircle className="w-6 h-6 text-red-400" />
-                        <p className="text-sm text-red-400">{error}</p>
+                        <AlertCircle className="w-6 h-6 text-danger" />
+                        <p className="text-sm text-danger">{error}</p>
                         <Button variant="secondary" size="sm" onClick={reload}>
                             Retry
                         </Button>
@@ -141,12 +141,14 @@ export default function FileManagerPanel({
                         {currentPath !== '/' && (
                             <button
                                 onClick={() => loadDir(parent(currentPath))}
-                                className={`w-full flex items-center gap-2.5 px-3 hover:bg-slate-800/60 active:bg-slate-800 transition-colors
+                                className={`w-full flex items-center gap-2.5 px-3 hover:bg-card/60 active:bg-card transition-colors
                                     ${isMobile ? 'py-4' : 'py-2'}`}
                             >
-                                <ChevronUp className="w-4 h-4 text-slate-600 shrink-0" />
-                                <span className="text-xs text-slate-500 font-mono">..</span>
-                                <span className="text-xs text-slate-600 ml-1">
+                                <ChevronUp className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+                                <span className="text-xs text-muted-foreground/80 font-mono">
+                                    ..
+                                </span>
+                                <span className="text-xs text-muted-foreground/60 ml-1">
                                     Parent directory
                                 </span>
                             </button>
@@ -158,14 +160,14 @@ export default function FileManagerPanel({
                                     key={i}
                                     className={`flex items-center gap-2.5 px-3 ${isMobile ? 'py-3.5' : 'py-2'}`}
                                 >
-                                    <Skeleton className="w-4 h-4 rounded shrink-0" />
+                                    <Skeleton className="w-4 h-4 rounded-sm shrink-0" />
                                     <Skeleton
-                                        className={`h-4 rounded ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`}
+                                        className={`h-4 rounded-sm ${i % 3 === 0 ? 'w-32' : i % 3 === 1 ? 'w-44' : 'w-24'}`}
                                     />
                                 </div>
                             ))
                         ) : visible.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-16 text-slate-600 gap-2">
+                            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/60 gap-2">
                                 <Folder className="w-8 h-8 opacity-40" />
                                 <p className="text-sm">Empty directory</p>
                             </div>
@@ -195,10 +197,10 @@ export default function FileManagerPanel({
 
             {selected.size > 0 && (
                 <div
-                    className={`shrink-0 flex items-center justify-between gap-2 px-3 border-t border-slate-700 bg-slate-800/80
+                    className={`shrink-0 flex items-center justify-between gap-2 px-3 border-t border-border bg-card/80
                     ${isMobile ? 'py-3' : 'py-2'}`}
                 >
-                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-slate-300`}>
+                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-foreground/90`}>
                         {selected.size} selected
                     </span>
                     <Button
@@ -222,14 +224,14 @@ export default function FileManagerPanel({
                 doneCount={uploads.doneCount}
             />
 
-            <div className="shrink-0 flex items-center justify-between px-3 py-1 border-t border-slate-800 bg-slate-900/60">
-                <span className="text-[10px] text-slate-600">
+            <div className="shrink-0 flex items-center justify-between px-3 py-1 border-t border-border/60 bg-background/60">
+                <span className="text-[10px] text-muted-foreground/60">
                     {visible.length} item{visible.length !== 1 ? 's' : ''}
                     {!showHidden && entries.length !== visible.length
                         ? ` · ${entries.length - visible.length} hidden`
                         : ''}
                 </span>
-                <span className="text-[10px] text-slate-700 font-mono truncate max-w-[160px]">
+                <span className="text-[10px] text-muted-foreground/40 font-mono truncate max-w-[160px]">
                     {currentPath}
                 </span>
             </div>

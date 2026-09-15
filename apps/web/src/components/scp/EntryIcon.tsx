@@ -51,9 +51,9 @@ const EXT_ICONS: Record<string, React.ElementType> = {
 /** File-type glyph, picked from the entry kind and then its extension. */
 export function EntryIcon({ entry, size = 'sm' }: { entry: RemoteEntry; size?: 'sm' | 'md' }) {
     const cls = size === 'md' ? 'w-5 h-5' : 'w-4 h-4';
-    if (entry.type === 'dir') return <Folder className={`${cls} text-amber-400 shrink-0`} />;
-    if (entry.type === 'symlink') return <Link2 className={`${cls} text-sky-400 shrink-0`} />;
+    if (entry.type === 'dir') return <Folder className={`${cls} text-warning shrink-0`} />;
+    if (entry.type === 'symlink') return <Link2 className={`${cls} text-info shrink-0`} />;
     const ext = entry.name.split('.').pop()?.toLowerCase() ?? '';
     const Icon = EXT_ICONS[ext] ?? File;
-    return <Icon className={`${cls} text-slate-400 shrink-0`} />;
+    return <Icon className={`${cls} text-muted-foreground shrink-0`} />;
 }

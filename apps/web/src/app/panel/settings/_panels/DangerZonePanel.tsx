@@ -17,19 +17,19 @@ export function DangerZonePanel({
     encryption: EncryptionState;
 }) {
     return (
-        <Card className="border border-red-500/20 p-6 transition-all duration-200 hover:border-red-500/30">
+        <Card className="border border-danger/20 p-6 transition-all duration-200 hover:border-danger/30">
             <SettingsSection
                 title="Danger Zone"
                 description="Irreversible actions that permanently affect your account."
                 icon={AlertTriangle}
-                iconBg="bg-red-500/15 text-red-400"
+                iconBg="bg-danger/15 text-danger"
             >
                 <div className="space-y-4">
                     {user?.isGoogleUser && (
-                        <div className="p-4 rounded-xl border border-red-500/20 bg-red-500/5">
+                        <div className="p-4 rounded-xl border border-danger/20 bg-danger/5">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-sm font-medium text-red-300">
+                                    <p className="text-sm font-medium text-danger">
                                         Reset Encryption Key
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
@@ -42,15 +42,15 @@ export function DangerZonePanel({
                                         variant="outline"
                                         size="sm"
                                         onClick={() => encryption.setShowResetConfirm(true)}
-                                        className="shrink-0 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                                        className="shrink-0 border-danger/30 text-danger hover:bg-danger/10 hover:text-danger"
                                     >
                                         Reset
                                     </Button>
                                 )}
                             </div>
                             {encryption.showResetConfirm && (
-                                <div className="mt-4 pt-4 border-t border-red-500/20 space-y-3">
-                                    <p className="text-sm text-red-300 font-medium">
+                                <div className="mt-4 pt-4 border-t border-danger/20 space-y-3">
+                                    <p className="text-sm text-danger font-medium">
                                         This will permanently delete all your stored servers and
                                         credentials. This cannot be undone.
                                     </p>

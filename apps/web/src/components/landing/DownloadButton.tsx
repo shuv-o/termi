@@ -203,7 +203,7 @@ export default function DownloadDesktopButton() {
             <a
                 href={downloadUrl(os, arch)}
                 download
-                className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary to-sky-600 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
+                className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-xl bg-linear-to-r from-primary to-sky-600 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
             >
                 <Icon className="w-5 h-5" />
                 <span>

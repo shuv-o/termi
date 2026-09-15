@@ -36,7 +36,7 @@ function MetricCard({
                     <span className="text-xs font-medium text-muted-foreground">{label}</span>
                 </div>
                 <span
-                    className={`text-lg font-bold tabular-nums ${alert ? 'text-red-400' : 'text-foreground'}`}
+                    className={`text-lg font-bold tabular-nums ${alert ? 'text-danger' : 'text-foreground'}`}
                 >
                     {value}
                 </span>
@@ -111,11 +111,11 @@ export function HealthHistorySection({
                     >
                         <div className="mt-3 pt-3 border-t border-border/50">
                             {/* Up/down strip for the most recent checks. */}
-                            <div className="flex gap-0.5 h-3 rounded overflow-hidden">
+                            <div className="flex gap-0.5 h-3 rounded-sm overflow-hidden">
                                 {records.slice(-40).map((r, i) => (
                                     <div
                                         key={i}
-                                        className={`flex-1 rounded-sm ${r.reachable ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                        className={`flex-1 rounded-sm ${r.reachable ? 'bg-success' : 'bg-danger'}`}
                                         title={`${new Date(r.checkedAt).toLocaleTimeString()} — ${r.reachable ? 'Up' : 'Down'}`}
                                     />
                                 ))}
@@ -141,7 +141,7 @@ export function HealthHistorySection({
                             />
                             <MetricCard
                                 icon={MemoryStick}
-                                iconClass="text-amber-400"
+                                iconClass="text-warning"
                                 label="RAM"
                                 value={pct(lastRecord?.ramPercent)}
                                 alert={(lastRecord?.ramPercent ?? 0) >= 90}

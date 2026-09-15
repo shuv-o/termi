@@ -59,8 +59,8 @@ export default function UnlockEncryptionPage() {
             <Card className="w-full max-w-md border-border bg-card">
                 <CardContent className="pt-8 pb-6 px-8 space-y-4">
                     <div className="flex flex-col items-center mb-2">
-                        <AlertTriangle className="w-12 h-12 text-red-400 mb-2" />
-                        <h1 className="text-xl font-bold text-red-400">
+                        <AlertTriangle className="w-12 h-12 text-danger mb-2" />
+                        <h1 className="text-xl font-bold text-danger">
                             Delete All Server Credentials?
                         </h1>
                     </div>
@@ -130,7 +130,7 @@ export default function UnlockEncryptionPage() {
                             </button>
                         </div>
                     </div>
-                    {error && <p className="text-sm text-red-400">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
                     <Button type="submit" className="w-full" disabled={loading || !passphrase}>
                         {loading ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

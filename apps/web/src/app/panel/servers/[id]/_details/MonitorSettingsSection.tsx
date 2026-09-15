@@ -65,9 +65,9 @@ function MonitorStatusBanner({ config }: { config: MonitorConfig }) {
             <div className="flex items-center gap-3 text-xs">
                 {config.alertSent ? (
                     <>
-                        <WifiOff className="w-4 h-4 text-red-400 shrink-0" />
+                        <WifiOff className="w-4 h-4 text-danger shrink-0" />
                         <div>
-                            <span className="text-red-400 font-medium">
+                            <span className="text-danger font-medium">
                                 Server is currently DOWN
                             </span>
                             <span className="text-muted-foreground ml-1.5">— alert was sent</span>
@@ -75,8 +75,8 @@ function MonitorStatusBanner({ config }: { config: MonitorConfig }) {
                     </>
                 ) : config.consecutiveFailures > 0 ? (
                     <>
-                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                        <span className="text-amber-400">
+                        <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+                        <span className="text-warning">
                             {config.consecutiveFailures} failure
                             {config.consecutiveFailures !== 1 ? 's' : ''} —
                             {config.failureThreshold - config.consecutiveFailures} more before alert
@@ -84,8 +84,8 @@ function MonitorStatusBanner({ config }: { config: MonitorConfig }) {
                     </>
                 ) : (
                     <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span className="text-emerald-400">Server is healthy</span>
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                        <span className="text-success">Server is healthy</span>
                     </>
                 )}
                 {config.lastCheckedAt && (
@@ -114,7 +114,7 @@ export function MonitorSettingsSection({
     return (
         <div>
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
-                <Bell className="w-4 h-4 text-amber-400" />
+                <Bell className="w-4 h-4 text-warning" />
                 Monitoring &amp; Alerts
             </h2>
 
@@ -167,7 +167,7 @@ export function MonitorSettingsSection({
                 <div className="p-4">
                     <div className="mb-2">
                         <p className="text-sm font-medium flex items-center gap-1.5">
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                            <AlertTriangle className="w-3.5 h-3.5 text-warning" />
                             Failure Threshold
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -187,7 +187,7 @@ export function MonitorSettingsSection({
                                     failureThreshold: parseInt(e.target.value),
                                 }))
                             }
-                            className="flex-1 accent-sky-500 disabled:opacity-40"
+                            className="flex-1 accent-info disabled:opacity-40"
                         />
                         <span className="text-sm font-bold text-foreground w-8 text-center tabular-nums">
                             {form.failureThreshold}×

@@ -259,10 +259,10 @@ export default function LocalTerminal({
                 <span
                     className={`w-2 h-2 rounded-full ${
                         status === 'ready'
-                            ? 'bg-green-500'
+                            ? 'bg-success'
                             : status === 'starting'
-                              ? 'bg-yellow-500 animate-pulse'
-                              : 'bg-red-500'
+                              ? 'bg-warning animate-pulse'
+                              : 'bg-danger'
                     }`}
                 />
                 <span className="text-xs text-muted-foreground capitalize">{status}</span>

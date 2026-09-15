@@ -45,7 +45,7 @@ function ScoreTrendCard({ history }: { history: BenchmarkRunSummary[] }) {
                     </span>
                     {delta !== 0 && (
                         <span
-                            className={`text-xs font-medium ${delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                            className={`text-xs font-medium ${delta > 0 ? 'text-success' : 'text-danger'}`}
                         >
                             {delta > 0 ? '+' : ''}
                             {delta}
@@ -73,7 +73,7 @@ function PhaseProgress({ phase, message }: { phase: BenchmarkPhase | null; messa
     return (
         <Card className="p-4 mb-3">
             <div className="flex items-center gap-3 mb-3">
-                <Loader2 className="w-4 h-4 animate-spin text-yellow-400 shrink-0" />
+                <Loader2 className="w-4 h-4 animate-spin text-warning shrink-0" />
                 <p className="text-sm text-foreground">{message}</p>
             </div>
             <div className="flex gap-1">
@@ -85,14 +85,14 @@ function PhaseProgress({ phase, message }: { phase: BenchmarkPhase | null; messa
                             <div
                                 className={`h-1 w-full rounded-full transition-colors ${
                                     done
-                                        ? 'bg-yellow-400'
+                                        ? 'bg-warning'
                                         : active
-                                          ? 'bg-yellow-400/60 animate-pulse'
+                                          ? 'bg-warning/60 animate-pulse'
                                           : 'bg-secondary'
                                 }`}
                             />
                             <span
-                                className={`text-[9px] hidden sm:block ${active ? 'text-yellow-400' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}
+                                className={`text-[9px] hidden sm:block ${active ? 'text-warning' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}
                             >
                                 {p.label}
                             </span>
@@ -123,7 +123,7 @@ export function BenchmarkSection({
         <div>
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-yellow-400" />
+                    <Zap className="w-4 h-4 text-warning" />
                     Hardware Benchmark
                 </h2>
                 <Button

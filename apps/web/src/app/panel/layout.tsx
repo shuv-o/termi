@@ -3,6 +3,7 @@
 import { SessionsProvider } from './sessions-context';
 import SessionsWorkspace from './sessions-workspace';
 import StarNudge from '@/components/common/StarNudge';
+import { ToastProvider } from '@/components/ui/toast';
 
 import { CommandPalette } from './_shell/CommandPalette';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
@@ -107,8 +108,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <SessionsProvider>
-            <LayoutInner>{children}</LayoutInner>
-        </SessionsProvider>
+        <ToastProvider>
+            <SessionsProvider>
+                <LayoutInner>{children}</LayoutInner>
+            </SessionsProvider>
+        </ToastProvider>
     );
 }

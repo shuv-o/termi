@@ -55,7 +55,7 @@ function ShellTabs({
                                     e.stopPropagation();
                                     onClose(shell.id);
                                 }}
-                                className={`ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-all ${
+                                className={`ml-0.5 p-0.5 rounded-sm hover:bg-destructive/20 hover:text-destructive transition-all ${
                                     isShellActive
                                         ? 'opacity-40 hover:opacity-100 text-primary'
                                         : 'opacity-0 group-hover:opacity-60'
@@ -193,7 +193,7 @@ export function TerminalPaneHeader({
                             <Circle
                                 className={`w-3.5 h-3.5 ${
                                     isRecording
-                                        ? 'fill-red-500 text-red-500 animate-pulse'
+                                        ? 'fill-danger text-danger animate-pulse'
                                         : 'text-muted-foreground'
                                 }`}
                             />

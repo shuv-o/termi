@@ -69,10 +69,10 @@ function SidebarNav({
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
                             isActive
                                 ? isDanger
-                                    ? 'bg-red-500/15 text-red-400'
+                                    ? 'bg-danger/15 text-danger'
                                     : 'bg-primary/15 text-primary'
                                 : isDanger
-                                  ? 'text-red-400/70 hover:bg-red-500/10 hover:text-red-400'
+                                  ? 'text-danger/70 hover:bg-danger/10 hover:text-danger'
                                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                         }`}
                     >
@@ -119,7 +119,7 @@ export function SettingsSidebar({
                     Settings
                 </p>
                 <div className="mt-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
                         {(user.name || user.email)[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
@@ -131,12 +131,12 @@ export function SettingsSidebar({
                         </p>
                         <div className="mt-1 flex items-center gap-1">
                             {user.isVerified ? (
-                                <span className="flex items-center gap-1 text-[10px] text-emerald-400">
+                                <span className="flex items-center gap-1 text-[10px] text-success">
                                     <CheckCircle className="w-2.5 h-2.5" />
                                     Verified
                                 </span>
                             ) : (
-                                <span className="text-[10px] text-amber-400">Unverified</span>
+                                <span className="text-[10px] text-warning">Unverified</span>
                             )}
                         </div>
                     </div>

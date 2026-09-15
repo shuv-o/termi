@@ -100,14 +100,14 @@ export function ServerInfoCard({
                     {server.host}:{server.port}
                 </span>
                 {server.group && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
+                    <span className="text-xs px-2 py-0.5 rounded-sm bg-secondary text-secondary-foreground">
                         {server.group.name}
                     </span>
                 )}
                 {server.tags.map((t) => (
                     <span
                         key={t}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground"
+                        className="text-[10px] px-1.5 py-0.5 rounded-sm bg-secondary/80 text-muted-foreground"
                     >
                         {t}
                     </span>

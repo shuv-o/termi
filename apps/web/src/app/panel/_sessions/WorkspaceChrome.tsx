@@ -99,7 +99,7 @@ export function WorkspaceTopBar({
                     </span>
                 </span>
                 {connectedCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-emerald-400 text-xs">
+                    <span className="flex items-center gap-0.5 text-success text-xs">
                         <Wifi className="w-3 h-3" />
                         <span className="hidden md:inline">{connectedCount} live</span>
                     </span>
@@ -190,7 +190,7 @@ export function SessionTabBar({
                                 e.stopPropagation();
                                 onCloseTab(session.tabId);
                             }}
-                            className={`p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
+                            className={`p-0.5 rounded-sm hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
                                 isTabActive
                                     ? 'opacity-50 hover:opacity-100 text-muted-foreground'
                                     : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
@@ -304,7 +304,7 @@ export function SessionSidebar({
                                     e.stopPropagation();
                                     onCloseSession(session.tabId);
                                 }}
-                                className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                className="p-1 rounded-sm hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                                 title="Close session"
                             >
                                 <X className="w-3 h-3" />

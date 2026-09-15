@@ -19,17 +19,18 @@ export function BottomSheet({
             onClick={onClose}
         >
             <div
-                className="bg-slate-800 rounded-t-2xl border-t border-slate-700 shadow-2xl max-h-[85vh] overflow-y-auto"
+                className="bg-card rounded-t-2xl border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-center pt-3 pb-1">
-                    <div className="w-10 h-1 rounded-full bg-slate-600" />
+                    <div className="w-10 h-1 rounded-full bg-accent" />
                 </div>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-border/60">
                     <h3 className="font-medium text-sm text-white truncate pr-4">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-full bg-slate-700/60 text-slate-400 active:bg-slate-600 shrink-0"
+                        aria-label="Close"
+                        className="p-1.5 rounded-full bg-secondary text-muted-foreground active:bg-accent shrink-0"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -57,12 +58,12 @@ export function SheetAction({
             className={`w-full flex items-center gap-4 px-3 py-3.5 rounded-xl text-sm font-medium transition-colors active:scale-[0.98]
                 ${
                     variant === 'danger'
-                        ? 'text-red-400 hover:bg-red-500/10 active:bg-red-500/15'
-                        : 'text-slate-200 hover:bg-slate-700 active:bg-slate-600/80'
+                        ? 'text-danger hover:bg-danger/10 active:bg-danger/15'
+                        : 'text-foreground hover:bg-secondary active:bg-accent/80'
                 }`}
         >
             <Icon
-                className={`w-5 h-5 shrink-0 ${variant === 'danger' ? 'text-red-400' : 'text-slate-400'}`}
+                className={`w-5 h-5 shrink-0 ${variant === 'danger' ? 'text-danger' : 'text-muted-foreground'}`}
             />
             {label}
         </button>

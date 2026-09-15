@@ -30,9 +30,9 @@ function ResultRow({ result }: { result: BroadcastResult }) {
                 disabled={!hasOutput}
             >
                 {result.success ? (
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <Check className="w-4 h-4 text-success shrink-0" />
                 ) : (
-                    <X className="w-4 h-4 text-red-400 shrink-0" />
+                    <X className="w-4 h-4 text-danger shrink-0" />
                 )}
                 <span className="text-sm font-medium truncate flex-1">{result.serverName}</span>
                 <span className="text-[11px] text-muted-foreground shrink-0">
@@ -119,7 +119,7 @@ export function BroadcastModal({ group, onClose }: { group: Group | null; onClos
                     </div>
 
                     {!results && (
-                        <div className="flex gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
+                        <div className="flex gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning">
                             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                             <span>
                                 Runs immediately on every SSH server in this group — there&apos;s no

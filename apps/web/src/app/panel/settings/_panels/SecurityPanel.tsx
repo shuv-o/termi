@@ -56,7 +56,7 @@ function MethodPicker({ twoFactor }: { twoFactor: TwoFactor }) {
                         {twoFactor.enablingEmailOtp ? (
                             <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         ) : (
-                            <Mail className="w-4 h-4 text-sky-400" />
+                            <Mail className="w-4 h-4 text-info" />
                         )}
                         <span className="text-sm font-medium">Email OTP</span>
                     </div>
@@ -210,6 +210,7 @@ function SecretField({
                 <button
                     type="button"
                     onClick={onToggle}
+                    aria-label={visible ? 'Hide password' : 'Show password'}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                     {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -228,7 +229,7 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
                 title="Change Password"
                 description="Update your account password. Use a strong, unique password."
                 icon={Key}
-                iconBg="bg-amber-500/15 text-amber-400"
+                iconBg="bg-warning/15 text-warning"
             >
                 <form onSubmit={change} className="space-y-3">
                     <SecretField
@@ -309,7 +310,7 @@ export function SecurityPanel({
 
                     {has2FA && !twoFactor.showDisable && (
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-300">
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20 text-sm text-success">
                                 <ShieldCheck className="w-4 h-4 shrink-0" />
                                 <div>
                                     <p className="font-medium">
@@ -317,7 +318,7 @@ export function SecurityPanel({
                                             ? 'Authenticator app is active'
                                             : 'Email OTP is active'}
                                     </p>
-                                    <p className="text-xs text-emerald-300/70 mt-0.5">
+                                    <p className="text-xs text-success/70 mt-0.5">
                                         {user?.twoFactorMethod === 'TOTP'
                                             ? 'Keep your recovery codes stored safely.'
                                             : 'A code is sent to your email on each login.'}

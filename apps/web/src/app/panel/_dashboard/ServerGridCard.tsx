@@ -7,6 +7,7 @@ import { CopyButton } from '@/components/common/CopyButton';
 import { formatBytes, formatRelativeTime } from '@/lib/format';
 import { ServerActionsMenu } from './ServerActionsMenu';
 import { ServerStatusPill } from './StatusIndicator';
+import { toneDot, toneText, usageTone } from '@/lib/status-style';
 import { protocolIcons, protocolVariants, type ServerCardProps } from './types';
 
 /** A single usage bar (CPU / RAM / Disk) inside the card's metrics strip. */
@@ -22,26 +23,16 @@ function UsageBar({
     text: string;
     tone: 'cpu' | 'ram' | 'disk';
 }) {
-    const high = percent >= 90;
-    const warn = percent >= 70;
-    const textColor = high
-        ? 'text-red-400'
-        : warn
-          ? 'text-amber-400'
-          : tone === 'cpu'
-            ? 'text-emerald-400'
-            : tone === 'ram'
-              ? 'text-sky-400'
-              : 'text-muted-foreground';
-    const barColor = high
-        ? 'bg-red-500'
-        : warn
-          ? 'bg-amber-500'
-          : tone === 'cpu'
-            ? 'bg-emerald-500'
-            : tone === 'ram'
-              ? 'bg-sky-500'
-              : 'bg-muted-foreground/30';
+    // Thresholds come from the shared scale so this bar turns amber at exactly
+    // the point the "High CPU"/"High RAM" fleet stats start counting the server,
+    // and red at the point the alert banner starts listing it.
+    const loadTone = usageTone(percent);
+    const idleText =
+        tone === 'cpu' ? 'text-success' : tone === 'ram' ? 'text-info' : 'text-muted-foreground';
+    const idleBar =
+        tone === 'cpu' ? 'bg-success' : tone === 'ram' ? 'bg-info' : 'bg-muted-foreground/30';
+    const textColor = loadTone === 'success' ? idleText : toneText[loadTone];
+    const barColor = loadTone === 'success' ? idleBar : toneDot[loadTone];
 
     return (
         <div className="space-y-1">
@@ -79,9 +70,9 @@ export function ServerGridCard({
     const statusStrip = mLoading
         ? ''
         : m?.reachable === true
-          ? 'bg-emerald-500/60'
+          ? 'bg-success/60'
           : m?.reachable === false
-            ? 'bg-red-500/60'
+            ? 'bg-danger/60'
             : '';
 
     return (
@@ -129,10 +120,10 @@ export function ServerGridCard({
                             e.stopPropagation();
                             onFavorite();
                         }}
-                        className={`h-8 w-8 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400 [@media(hover:none)]:opacity-100'}`}
+                        className={`h-8 w-8 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-warning' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-warning [@media(hover:none)]:opacity-100'}`}
                     >
                         <Star
-                            className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`}
+                            className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-warning' : ''}`}
                         />
                     </Button>
                 </div>
@@ -219,11 +210,11 @@ export function ServerGridCard({
                         {m?.network && (
                             <>
                                 <span className="mx-0.5 text-muted-foreground/30">·</span>
-                                <ArrowDown className="h-2.5 w-2.5 text-emerald-500/60" />
+                                <ArrowDown className="h-2.5 w-2.5 text-success/60" />
                                 <span className="tabular-nums">
                                     {formatBytes(m.network.rxBytes)}
                                 </span>
-                                <ArrowUp className="h-2.5 w-2.5 text-sky-400/60" />
+                                <ArrowUp className="h-2.5 w-2.5 text-info/60" />
                                 <span className="tabular-nums">
                                     {formatBytes(m.network.txBytes)}
                                 </span>

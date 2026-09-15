@@ -58,7 +58,7 @@ export function PasskeyRow({
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setConfirming(false)}
-                            className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded"
+                            className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-sm"
                         >
                             Cancel
                         </button>

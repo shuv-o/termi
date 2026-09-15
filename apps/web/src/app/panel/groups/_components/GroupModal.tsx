@@ -140,7 +140,7 @@ export function GroupModal({
                 <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-5 pt-1">
                     <div className="space-y-1.5">
                         <Label>
-                            Name <span className="text-red-400">*</span>
+                            Name <span className="text-danger">*</span>
                         </Label>
                         <Input
                             ref={nameRef}

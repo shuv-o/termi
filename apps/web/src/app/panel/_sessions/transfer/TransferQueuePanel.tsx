@@ -15,17 +15,17 @@ import { formatBytes } from '@/lib/format';
 import type { TransferItem, TransferItemStatus } from './useTransferQueue';
 
 const STATUS_ICONS: Record<TransferItemStatus, React.ReactNode> = {
-    queued: <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />,
+    queued: <Clock className="w-3.5 h-3.5 text-muted-foreground/80 shrink-0" />,
     transferring: <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />,
-    done: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />,
-    failed: <FileX className="w-3.5 h-3.5 text-red-400 shrink-0" />,
+    done: <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />,
+    failed: <FileX className="w-3.5 h-3.5 text-danger shrink-0" />,
 };
 
 const BAR_COLORS: Record<TransferItemStatus, string> = {
-    queued: 'bg-slate-600',
+    queued: 'bg-accent',
     transferring: 'bg-primary',
-    done: 'bg-emerald-500',
-    failed: 'bg-red-500',
+    done: 'bg-success',
+    failed: 'bg-danger',
 };
 
 function QueueItemRow({ item }: { item: TransferItem }) {
@@ -50,7 +50,7 @@ function QueueItemRow({ item }: { item: TransferItem }) {
                     </div>
                 )}
                 {item.status === 'failed' && item.error && (
-                    <p className="text-[10px] text-red-400 truncate mt-0.5">{item.error}</p>
+                    <p className="text-[10px] text-danger truncate mt-0.5">{item.error}</p>
                 )}
             </div>
         </div>
@@ -91,15 +91,15 @@ export function TransferQueuePanel({
                     {isTransferring ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-primary shrink-0" />
                     ) : failedItems > 0 ? (
-                        <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        <AlertCircle className="w-3.5 h-3.5 text-danger shrink-0" />
                     ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
                     )}
                     <span className="text-xs font-medium">Transfer queue</span>
                     <span className="text-[10px] text-muted-foreground">
                         {doneItems}/{totalItems} done
                         {failedItems > 0 && (
-                            <span className="text-red-400 ml-1">· {failedItems} failed</span>
+                            <span className="text-danger ml-1">· {failedItems} failed</span>
                         )}
                     </span>
                 </div>

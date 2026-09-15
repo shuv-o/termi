@@ -11,12 +11,12 @@ type PushState = ReturnType<typeof usePushNotifications>;
 function StatusBanner({ push }: { push: PushState }) {
     if (push.needsIOSInstall) {
         return (
-            <div className="flex items-center gap-3 p-4 rounded-xl border bg-amber-500/10 border-amber-500/20">
-                <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-                    <Info className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-warning/10 border-warning/20">
+                <div className="w-9 h-9 rounded-lg bg-warning/20 flex items-center justify-center shrink-0">
+                    <Info className="w-4 h-4 text-warning" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-amber-400">Add to Home Screen first</p>
+                    <p className="text-sm font-medium text-warning">Add to Home Screen first</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                         iOS only allows notifications for apps installed to the Home Screen. Tap
                         Share → Add to Home Screen, then open Termi from there and enable
@@ -28,12 +28,12 @@ function StatusBanner({ push }: { push: PushState }) {
     }
     if (push.subscribed) {
         return (
-            <div className="flex items-center gap-3 p-4 rounded-xl border bg-emerald-500/10 border-emerald-500/20">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <Bell className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-success/10 border-success/20">
+                <div className="w-9 h-9 rounded-lg bg-success/20 flex items-center justify-center shrink-0">
+                    <Bell className="w-4 h-4 text-success" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-emerald-400">Notifications active</p>
+                    <p className="text-sm font-medium text-success">Notifications active</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                         This device will receive server alert notifications
                     </p>
@@ -43,12 +43,12 @@ function StatusBanner({ push }: { push: PushState }) {
     }
     if (push.permission === 'denied') {
         return (
-            <div className="flex items-center gap-3 p-4 rounded-xl border bg-red-500/10 border-red-500/20">
-                <div className="w-9 h-9 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0">
-                    <BellOff className="w-4 h-4 text-red-400" />
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-danger/10 border-danger/20">
+                <div className="w-9 h-9 rounded-lg bg-danger/20 flex items-center justify-center shrink-0">
+                    <BellOff className="w-4 h-4 text-danger" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-red-400">Notifications blocked</p>
+                    <p className="text-sm font-medium text-danger">Notifications blocked</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                         Enable them in your browser site settings, then reload this page.
                     </p>
@@ -78,7 +78,7 @@ export function NotificationsPanel({ push }: { push: PushState }) {
                 title="Push Notifications"
                 description="Get browser notifications for server down/up alerts on this device."
                 icon={BellRing}
-                iconBg="bg-amber-500/15 text-amber-400"
+                iconBg="bg-warning/15 text-warning"
             >
                 <div className="space-y-4">
                     <StatusBanner push={push} />

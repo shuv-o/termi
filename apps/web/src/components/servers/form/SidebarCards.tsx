@@ -183,12 +183,12 @@ export function PreviewCard({
                             )}
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                                 <span
-                                    className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.badge}`}
+                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium ${colors.badge}`}
                                 >
                                     {form.protocol}
                                 </span>
                                 {selectedGroup && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-secondary text-secondary-foreground">
                                         {selectedGroup.name}
                                     </span>
                                 )}
@@ -227,7 +227,7 @@ export function PreviewCard({
                                     {form.tags.map((t) => (
                                         <span
                                             key={t}
-                                            className="text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 text-muted-foreground"
+                                            className="text-[10px] px-1.5 py-0.5 rounded-sm bg-secondary/80 text-muted-foreground"
                                         >
                                             {t}
                                         </span>
@@ -273,9 +273,9 @@ export function TestConnectionCard({
                         !canTest
                             ? 'border-border text-muted-foreground/40 cursor-not-allowed bg-transparent'
                             : testStatus === 'success'
-                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
+                              ? 'border-success/40 bg-success/10 text-success hover:bg-success/15'
                               : testStatus === 'failed'
-                                ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
+                                ? 'border-danger/40 bg-danger/10 text-danger hover:bg-danger/15'
                                 : 'border-primary/30 bg-primary/8 text-primary hover:bg-primary/15'
                     }`}
                 >
@@ -306,13 +306,13 @@ export function TestConnectionCard({
                 )}
 
                 {testStatus === 'success' && testResult?.latency !== undefined && (
-                    <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-emerald-500/8 border border-emerald-500/20">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div className="mt-3 flex items-center gap-2.5 p-2.5 rounded-lg bg-success/8 border border-success/20">
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                         <div>
-                            <p className="text-xs font-medium text-emerald-400">
+                            <p className="text-xs font-medium text-success">
                                 {isSSHProto ? 'Authentication successful' : 'Port reachable'}
                             </p>
-                            <p className="text-[11px] text-emerald-500/60">
+                            <p className="text-[11px] text-success/60">
                                 Latency: {testResult.latency}ms
                             </p>
                         </div>

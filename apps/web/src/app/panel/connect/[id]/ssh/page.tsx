@@ -389,7 +389,7 @@ export default function SSHConnectionPage() {
                         <Circle
                             className={`w-3.5 h-3.5 ${
                                 recordingTabId === activeId
-                                    ? 'fill-red-500 text-red-500 animate-pulse'
+                                    ? 'fill-danger text-danger animate-pulse'
                                     : 'text-muted-foreground'
                             }`}
                         />
@@ -474,7 +474,7 @@ export default function SSHConnectionPage() {
                                         e.stopPropagation();
                                         closeTab(tab.id);
                                     }}
-                                    className="rounded p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                                    className="rounded-sm p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
                                     title="Close shell"
                                 >
                                     <X className="w-3 h-3" />

@@ -161,10 +161,10 @@ export default function LocalTerminalPage() {
                     <span
                         className={`w-2 h-2 rounded-full ${
                             activeStatus === 'connected'
-                                ? 'bg-emerald-500'
+                                ? 'bg-success'
                                 : activeStatus === 'connecting'
-                                  ? 'bg-yellow-500 animate-pulse'
-                                  : 'bg-red-500'
+                                  ? 'bg-warning animate-pulse'
+                                  : 'bg-danger'
                         }`}
                     />
                     <span className="text-xs text-muted-foreground capitalize hidden sm:inline">
@@ -213,7 +213,7 @@ export default function LocalTerminalPage() {
                                         e.stopPropagation();
                                         closeTab(tab.id);
                                     }}
-                                    className="rounded p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                                    className="rounded-sm p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
                                     title="Close shell"
                                 >
                                     <X className="w-3 h-3" />

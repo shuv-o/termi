@@ -176,7 +176,7 @@ function VerifyStep({
 
             <p className="mt-5 text-sm text-muted-foreground">
                 {resent ? (
-                    <span className="text-emerald-400">Code resent!</span>
+                    <span className="text-success">Code resent!</span>
                 ) : (
                     <>
                         Didn&apos;t receive it?{' '}
@@ -277,7 +277,7 @@ function RegisterContent() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-slate-950 via-background to-slate-950">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
                 <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
@@ -287,7 +287,7 @@ function RegisterContent() {
                 <Card className="bg-card border-border overflow-hidden">
                     <div className="flex min-h-0">
                         {/* Left brand panel */}
-                        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-gradient-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
+                        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-linear-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
                             <div>
                                 <div className="flex items-center gap-3 mb-8">
                                     <TerminalLogo width={40} height={40} className="rounded-xl" />
@@ -444,7 +444,7 @@ function RegisterContent() {
                                                     {passwordRequirements.map((req, i) => (
                                                         <div
                                                             key={i}
-                                                            className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-emerald-400' : 'text-muted-foreground'}`}
+                                                            className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-success' : 'text-muted-foreground'}`}
                                                         >
                                                             {req.met ? (
                                                                 <Check className="w-3 h-3 shrink-0" />
@@ -484,7 +484,7 @@ function RegisterContent() {
                                             )}
                                         </div>
 
-                                        <div className="flex gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs text-sky-300">
+                                        <div className="flex gap-2 p-3 rounded-lg bg-info/10 border border-info/30 text-xs text-info">
                                             <span className="shrink-0">🔒</span>
                                             <span>
                                                 Credentials are encrypted using a key derived from
@@ -536,8 +536,8 @@ export default function RegisterPage() {
     return (
         <Suspense
             fallback={
-                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-background to-slate-950">
-                    <div className="h-8 w-40 bg-muted rounded animate-pulse" />
+                <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-slate-950 via-background to-slate-950">
+                    <div className="h-8 w-40 bg-muted rounded-sm animate-pulse" />
                 </div>
             }
         >

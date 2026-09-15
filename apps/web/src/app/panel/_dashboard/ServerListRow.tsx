@@ -66,7 +66,7 @@ export function ServerListRow({
                 <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-medium">{server.name}</span>
                     {server.isFavorite && (
-                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                     )}
                 </div>
                 <div className="hidden 2xl:flex items-center gap-2 mt-0.5">
@@ -178,9 +178,9 @@ export function ServerListRow({
                     variant="ghost"
                     size="icon"
                     onClick={onFavorite}
-                    className={`h-8 w-8 rounded-lg transition-all ${server.isFavorite ? 'text-yellow-400' : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-yellow-400'}`}
+                    className={`h-8 w-8 rounded-lg transition-all ${server.isFavorite ? 'text-warning' : 'text-muted-foreground/30 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100 hover:text-warning'}`}
                 >
-                    <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-yellow-400' : ''}`} />
+                    <Star className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-warning' : ''}`} />
                 </Button>
                 {server.protocol === 'SSH' && (
                     <Button

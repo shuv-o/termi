@@ -43,14 +43,14 @@ export default function ForgotPasswordPage() {
 
                 {sent ? (
                     <div className="text-center space-y-4">
-                        <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-                            <Mail className="w-6 h-6 text-green-400" />
+                        <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+                            <Mail className="w-6 h-6 text-success" />
                         </div>
                         <p className="text-sm text-muted-foreground">
                             If that email address has an account, we&apos;ve sent a password reset
                             link. Check your inbox.
                         </p>
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-xs text-yellow-300">
+                        <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-xs text-warning">
                             ⚠️ Resetting your password will permanently delete your stored server
                             credentials.
                         </div>
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
                         <p className="text-sm text-muted-foreground text-center">
                             Enter your email address and we&apos;ll send a reset link.
                         </p>
-                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
+                        <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 text-xs text-danger">
                             ⚠️ Warning: Resetting your password will permanently delete all stored
                             server credentials (passwords, private keys). This cannot be undone.
                         </div>
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
                                 autoFocus
                             />
                         </div>
-                        {error && <p className="text-sm text-red-400">{error}</p>}
+                        {error && <p className="text-sm text-danger">{error}</p>}
                         <Button type="submit" className="w-full" disabled={loading || !email}>
                             {loading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
