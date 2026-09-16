@@ -91,19 +91,24 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
     const serverAddr = decryptServerAddr(config.server);
 
     if (config.alertPush) {
-        await sendPushToUser(config.userId, {
-            title: `Server Down: ${serverName}`,
-            body: `${serverAddr} is unreachable. Check your server.`,
-            tag: `server-down-${serverId}`,
-            url: `/panel/servers/${serverId}`,
-        });
+        try {
+            await sendPushToUser(config.userId, {
+                title: `Server Down: ${serverName}`,
+                body: `${serverAddr} is unreachable. Check your server.`,
+                tag: `server-down-${serverId}`,
+                url: `/panel/servers/${serverId}`,
+            });
+        } catch (err) {
+            console.error(`[Alert] Push failed for server ${serverId}:`, err);
+        }
     }
 
     if (config.alertEmail && config.user.email) {
-        await sendAlertEmail(
-            config.user.email,
-            `[Termi Alert] Server Down: ${serverName}`,
-            `
+        try {
+            await sendAlertEmail(
+                config.user.email,
+                `[Termi Alert] Server Down: ${serverName}`,
+                `
             <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px">
               <h2 style="color:#ef4444;margin-bottom:8px">⚠ Server Unreachable</h2>
               <p style="color:#666;margin-bottom:20px">
@@ -126,16 +131,23 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
               </p>
             </div>
             `,
-        );
+            );
+        } catch (err) {
+            console.error(`[Alert] Email failed for server ${serverId}:`, err);
+        }
     }
 
-    await fireWebhook(config, {
-        status: 'down',
-        serverId,
-        serverName,
-        serverAddr,
-        detail: `failed ${config.failureThreshold} consecutive health checks`,
-    });
+    try {
+        await fireWebhook(config, {
+            status: 'down',
+            serverId,
+            serverName,
+            serverAddr,
+            detail: `failed ${config.failureThreshold} consecutive health checks`,
+        });
+    } catch (err) {
+        console.error(`[Alert] Webhook failed for server ${serverId}:`, err);
+    }
 }
 
 export async function sendServerUpAlert(serverId: string): Promise<void> {
@@ -153,19 +165,24 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
     const serverAddr = decryptServerAddr(config.server);
 
     if (config.alertPush) {
-        await sendPushToUser(config.userId, {
-            title: `Server Recovered: ${serverName}`,
-            body: `${serverAddr} is back online.`,
-            tag: `server-down-${serverId}`, // same tag replaces the "down" notification
-            url: `/panel/servers/${serverId}`,
-        });
+        try {
+            await sendPushToUser(config.userId, {
+                title: `Server Recovered: ${serverName}`,
+                body: `${serverAddr} is back online.`,
+                tag: `server-down-${serverId}`, // same tag replaces the "down" notification
+                url: `/panel/servers/${serverId}`,
+            });
+        } catch (err) {
+            console.error(`[Alert] Push failed for server ${serverId}:`, err);
+        }
     }
 
     if (config.alertEmail && config.user.email) {
-        await sendAlertEmail(
-            config.user.email,
-            `[Termi Alert] Server Recovered: ${serverName}`,
-            `
+        try {
+            await sendAlertEmail(
+                config.user.email,
+                `[Termi Alert] Server Recovered: ${serverName}`,
+                `
             <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px">
               <h2 style="color:#22c55e;margin-bottom:8px">✓ Server Recovered</h2>
               <p style="color:#666;margin-bottom:20px">
@@ -185,14 +202,21 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
               </a>
             </div>
             `,
-        );
+            );
+        } catch (err) {
+            console.error(`[Alert] Email failed for server ${serverId}:`, err);
+        }
     }
 
-    await fireWebhook(config, {
-        status: 'up',
-        serverId,
-        serverName,
-        serverAddr,
-        detail: 'is back online',
-    });
+    try {
+        await fireWebhook(config, {
+            status: 'up',
+            serverId,
+            serverName,
+            serverAddr,
+            detail: 'is back online',
+        });
+    } catch (err) {
+        console.error(`[Alert] Webhook failed for server ${serverId}:`, err);
+    }
 }
