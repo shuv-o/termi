@@ -101,6 +101,15 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 
+# Bake the Prisma CLI into the image at build time. The standalone output
+# above only traces @prisma/client (what app code actually imports), not the
+# `prisma` CLI binary that `migrate deploy` needs — this used to be installed
+# from the registry inside the entrypoint on every fresh container's first
+# start, adding ~3 minutes to startup. Pinned to the exact @prisma/client
+# version already baked in above to avoid drift.
+RUN PRISMA_VERSION=$(node -p "require('@prisma/client/package.json').version") && \
+    npm install --no-save --no-audit --no-fund "prisma@$PRISMA_VERSION"
+
 # Set permissions
 RUN chown -R nextjs:nodejs /app
 
@@ -124,14 +133,6 @@ FLAG_FILE="/app/.migrations_done"
 
 if [ ! -f "$FLAG_FILE" ]; then
     echo "First run detected - Running migrations..."
-    # The prisma CLI isn't in the standalone runtime image (only @prisma/client
-    # is), and prisma.config.ts's own `import ... from 'prisma/config'` resolves
-    # via normal node_modules lookup from /app — so a piecemeal-copied or
-    # npx-cached prisma package won't satisfy it. A real `npm install` here
-    # resolves the CLI's full dependency tree correctly; pinned to the exact
-    # @prisma/client version already baked into this image to avoid drift.
-    PRISMA_VERSION=$(node -p "require('@prisma/client/package.json').version")
-    npm install --no-save --no-audit --no-fund "prisma@$PRISMA_VERSION"
     npx prisma migrate deploy
     echo "Migrations completed!"
     touch "$FLAG_FILE"
