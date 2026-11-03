@@ -36,7 +36,7 @@ import {
 function protocolChipClass(p: ProtocolFilter, active: boolean): string {
     if (p === 'all') {
         return active
-            ? 'bg-primary/15 text-primary border-primary/30'
+            ? 'bg-accent text-foreground border-input'
             : 'text-muted-foreground border-border hover:text-foreground';
     }
     return active ? protocolChipActive[p] : protocolChipIdle[p];
@@ -62,6 +62,13 @@ interface DashboardToolbarProps {
     allTags: string[];
     onSelectTag: (tag: string) => void;
 }
+
+/** Shared look for the small segmented toggles in this bar. */
+const SEGMENTED = 'flex h-10 items-center rounded-md border border-input p-0.5 sm:h-9';
+const segment = (active: boolean) =>
+    `flex h-full items-center justify-center rounded-[5px] text-sm font-medium transition-colors ${
+        active ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+    }`;
 
 /** Sticky search / filter / sort / view bar above the server list. */
 export function DashboardToolbar({
@@ -92,66 +99,69 @@ export function DashboardToolbar({
     );
 
     return (
-        <div className="-mx-4 sticky top-14 lg:top-0 z-10 border-b border-border bg-background/95 px-4 py-2.5 sm:py-3 backdrop-blur-sm lg:-mx-8 lg:px-8">
-            <div className={`${PAGE_CONTENT_WIDTH} space-y-2.5 sm:space-y-3`}>
-                <div className="flex items-center gap-2 xl:gap-3">
-                    <div className="relative flex-1 max-w-xs sm:max-w-sm">
+        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mx-4 border-b border-border bg-background/90 px-4 py-2.5 backdrop-blur-lg sm:-mx-6 sm:px-6 lg:top-0 lg:-mx-10 lg:px-10">
+            <div className={`${PAGE_CONTENT_WIDTH} space-y-2.5`}>
+                <div className="flex flex-wrap items-center gap-2 xl:gap-3">
+                    <div className="relative min-w-0 basis-full sm:basis-auto sm:flex-1 sm:max-w-sm">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             type="text"
-                            placeholder="Search servers..."
+                            placeholder="Search by name, host or tag"
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="h-9 bg-secondary pl-9 pr-9 text-sm"
+                            className="pl-9 pr-9"
                         />
                         {searchPending && (
                             <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground/50" />
                         )}
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
-                        <Button
-                            onClick={() => onFilterChange('all')}
-                            variant={filter === 'all' ? 'default' : 'secondary'}
-                            size="sm"
-                            className="h-9 px-3 text-xs hidden sm:flex"
-                        >
-                            All
-                        </Button>
-                        <Button
-                            onClick={() => onFilterChange('favorites')}
-                            variant={filter === 'favorites' ? 'default' : 'secondary'}
-                            size="sm"
-                            className="h-9 px-2.5 sm:px-3 text-xs gap-1.5"
-                        >
-                            <Star className="w-3.5 h-3.5" />{' '}
-                            <span className="hidden sm:inline">Starred</span>
-                        </Button>
+                    <div className="flex w-full shrink-0 items-center gap-1.5 sm:ml-auto sm:w-auto sm:gap-2">
+                        <div className={SEGMENTED} role="group" aria-label="Show">
+                            <button
+                                onClick={() => onFilterChange('all')}
+                                aria-pressed={filter === 'all'}
+                                className={`${segment(filter === 'all')} hidden px-3 sm:flex`}
+                            >
+                                All
+                            </button>
+                            <button
+                                onClick={() =>
+                                    onFilterChange(filter === 'favorites' ? 'all' : 'favorites')
+                                }
+                                aria-pressed={filter === 'favorites'}
+                                aria-label="Starred only"
+                                className={`${segment(filter === 'favorites')} gap-1.5 px-2.5 sm:px-3`}
+                            >
+                                <Star
+                                    className={`h-4 w-4 ${filter === 'favorites' ? 'fill-warning text-warning' : ''}`}
+                                />
+                                <span className="hidden sm:inline">Starred</span>
+                            </button>
+                        </div>
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    className="h-9 max-w-[180px] gap-1.5 px-2.5 sm:px-3 text-xs"
+                                    variant="outline"
+                                    aria-label={`Sort: ${currentSortLabel}`}
+                                    className="max-w-[180px] gap-1.5 px-2.5 sm:px-3"
                                 >
-                                    <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
+                                    <ArrowUpDown className="shrink-0" />
                                     <span className="hidden truncate sm:inline">
                                         {currentSortLabel}
                                     </span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-card border-border">
-                                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                                    Sort by
-                                </DropdownMenuLabel>
+                            <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
                                 {SORT_OPTIONS.map((opt) => {
                                     const active = sort.field === opt.field && sort.dir === opt.dir;
                                     return (
                                         <DropdownMenuItem
                                             key={`${opt.field}-${opt.dir}`}
                                             onClick={() => onSortChange(opt.field, opt.dir)}
-                                            className={`gap-2 text-xs ${active ? 'text-primary' : ''}`}
+                                            className={active ? 'text-primary' : ''}
                                         >
                                             {active ? (
                                                 <Check className="w-3 h-3 shrink-0" />
@@ -165,29 +175,34 @@ export function DashboardToolbar({
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <div className="flex overflow-hidden rounded-lg border border-border">
+                        <div className={SEGMENTED} role="group" aria-label="Layout">
                             <button
                                 onClick={() => onViewChange('grid')}
-                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                aria-pressed={viewMode === 'grid'}
+                                className={`${segment(viewMode === 'grid')} w-9 sm:w-8`}
                                 title="Grid view"
+                                aria-label="Grid view"
                             >
                                 <LayoutGrid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => onViewChange('list')}
-                                className={`px-2 sm:px-2.5 py-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                                aria-pressed={viewMode === 'list'}
+                                className={`${segment(viewMode === 'list')} w-9 sm:w-8`}
                                 title="List view"
+                                aria-label="List view"
                             >
                                 <List className="w-4 h-4" />
                             </button>
                         </div>
 
                         <Button
-                            variant="secondary"
+                            variant="ghost"
                             size="icon"
                             onClick={onRefresh}
-                            className="h-9 w-9"
-                            title="Refresh"
+                            className="ml-auto sm:ml-0"
+                            title="Refresh status"
+                            aria-label="Refresh status"
                         >
                             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                         </Button>
@@ -195,7 +210,7 @@ export function DashboardToolbar({
                 </div>
 
                 {showProtocolFilters && (
-                    <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+                    <div className="no-scrollbar -mx-4 flex items-center gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                         {PROTOCOL_FILTERS.map((p) => {
                             const count = protocolCounts[p];
                             if (p !== 'all' && count === 0) return null;
@@ -204,9 +219,10 @@ export function DashboardToolbar({
                                 <button
                                     key={p}
                                     onClick={() => onProtocolFilterChange(p)}
-                                    className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-all ${protocolChipClass(p, active)}`}
+                                    aria-pressed={active}
+                                    className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors sm:h-7 ${protocolChipClass(p, active)}`}
                                 >
-                                    {p === 'all' ? 'All protocols' : p}
+                                    {p === 'all' ? 'All' : p}
                                     <span className="tabular-nums opacity-60">{count}</span>
                                 </button>
                             );
@@ -216,7 +232,7 @@ export function DashboardToolbar({
                             <button
                                 onClick={onClearTag}
                                 aria-label={`Clear the ${activeTag} tag filter`}
-                                className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-[11px] font-medium text-primary transition-all"
+                                className="flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/12 px-3 text-xs font-medium text-primary sm:h-7"
                             >
                                 <Tag className="w-3 h-3" />
                                 {activeTag}
@@ -227,13 +243,13 @@ export function DashboardToolbar({
                 )}
 
                 {allTags.length > 0 && !activeTag && (
-                    <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+                    <div className="no-scrollbar -mx-4 flex items-center gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                         <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
                         {allTags.map((tag) => (
                             <button
                                 key={tag}
                                 onClick={() => onSelectTag(tag)}
-                                className="shrink-0 rounded-full border border-border bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                                className="flex h-8 shrink-0 items-center rounded-full border border-border px-2.5 text-xs text-muted-foreground transition-colors hover:border-input hover:text-foreground sm:h-7"
                             >
                                 {tag}
                             </button>

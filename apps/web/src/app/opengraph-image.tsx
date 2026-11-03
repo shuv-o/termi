@@ -25,7 +25,7 @@ export default function OpengraphImage() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#0f172a',
+                backgroundColor: '#0e1319',
                 backgroundImage:
                     'radial-gradient(circle at 22% 20%, rgba(14,165,233,0.35), rgba(15,23,42,0) 55%), radial-gradient(circle at 82% 78%, rgba(139,92,246,0.30), rgba(15,23,42,0) 55%)',
                 fontFamily: 'sans-serif',

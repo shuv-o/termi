@@ -86,7 +86,7 @@ export function SessionRow({
                         {browser} on {os}
                     </p>
                     {session.isCurrent && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/20 text-success text-[10px] font-medium shrink-0">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/20 text-success text-[11px] font-medium shrink-0">
                             <Activity className="w-2.5 h-2.5" /> Current
                         </span>
                     )}
@@ -98,7 +98,7 @@ export function SessionRow({
             {!session.isCurrent &&
                 (confirmed ? (
                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="text-xs text-destructive">Sign out?</span>
+                        <span className="text-xs text-danger">Sign out?</span>
                         <div className="flex items-center gap-1.5">
                             <button
                                 onClick={() => setConfirmed(false)}
@@ -124,7 +124,7 @@ export function SessionRow({
                 ) : (
                     <button
                         onClick={() => setConfirmed(true)}
-                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
+                        className="p-2 text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
                         title="Revoke this session"
                     >
                         <LogOut className="w-3.5 h-3.5" />

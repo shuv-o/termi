@@ -1,9 +1,24 @@
 import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
+import { IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google';
 import '../styles/globals.css';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 import { getSiteUrl } from '@/lib/site';
+
+// Self-hosted at build time by next/font, so the CSP's `font-src 'self'` holds.
+const plex = IBM_Plex_Sans({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700'],
+    variable: '--font-plex',
+    display: 'swap',
+});
+const jetbrains = JetBrains_Mono({
+    subsets: ['latin'],
+    weight: ['400', '500'],
+    variable: '--font-jetbrains',
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     // Resolves relative OG/twitter image URLs and the canonical link tag. This
@@ -93,7 +108,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: '#0f172a',
+    themeColor: '#0e1319',
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
@@ -105,16 +120,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const nonce = (await headers()).get('x-nonce') ?? '';
 
     return (
-        <html lang="en" className="dark">
+        <html lang="en" className={`dark ${plex.variable} ${jetbrains.variable}`}>
             <head>
                 {/* Propagate the per-request nonce so Next.js can apply it to
                     any inline scripts it injects during hydration */}
                 <meta name="csp-nonce" content={nonce} />
                 {/* Microsoft tile */}
-                <meta name="msapplication-TileColor" content="#0f172a" />
+                <meta name="msapplication-TileColor" content="#0e1319" />
                 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
             </head>
-            <body className="min-h-screen bg-background text-white antialiased">
+            <body className="min-h-screen bg-background text-foreground antialiased">
                 {children}
                 <InstallPrompt />
                 <CapacitorBridge />

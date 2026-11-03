@@ -32,7 +32,7 @@ export function NewFolderDialog({
     };
 
     return (
-        <Modal title="New Folder" onClose={onClose}>
+        <Modal title="New folder" onClose={onClose}>
             <div className="space-y-3">
                 <Input
                     autoFocus
@@ -134,10 +134,10 @@ export function DeleteDialog({
     };
 
     return (
-        <Modal title="Confirm Delete" onClose={onClose}>
+        <Modal title="Confirm delete" onClose={onClose}>
             <div className="space-y-3">
-                <div className="flex gap-2.5 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                <div className="flex gap-2.5 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                     <p className="text-xs text-foreground/90">
                         Delete{' '}
                         {targets.length === 1 ? `"${targets[0].name}"` : `${targets.length} items`}?

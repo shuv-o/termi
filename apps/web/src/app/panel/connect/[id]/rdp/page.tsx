@@ -152,7 +152,7 @@ export default function RDPConnectionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-dvh lg:h-screen">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
             </div>
         );
     }
@@ -160,7 +160,7 @@ export default function RDPConnectionPage() {
     if (error || !connectionToken) {
         return (
             <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
-                <p className="text-destructive">{error || 'Connection failed'}</p>
+                <p className="text-danger">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back</Link>
                 </Button>
@@ -173,7 +173,7 @@ export default function RDPConnectionPage() {
         <>
             <div className="flex items-center gap-2 min-w-0">
                 <span
-                    className={`font-medium truncate ${isFullscreen ? 'text-white text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}
+                    className={`font-medium truncate ${isFullscreen ? 'text-foreground text-sm max-w-xs' : 'text-sm max-w-[120px] sm:max-w-xs'}`}
                 >
                     {server?.name}
                 </span>
@@ -187,10 +187,10 @@ export default function RDPConnectionPage() {
             <div className={`flex items-center shrink-0 ${isFullscreen ? 'gap-1.5' : 'gap-1'}`}>
                 <Select value={selectValue} onValueChange={(v) => setResolution(parsePreset(v))}>
                     <SelectTrigger
-                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}
+                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-foreground hover:bg-white/20' : 'h-7'}`}
                     >
                         <Scan
-                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
+                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-foreground/70' : 'w-3 h-3 text-muted-foreground'}`}
                         />
                         <SelectValue />
                     </SelectTrigger>
@@ -208,10 +208,10 @@ export default function RDPConnectionPage() {
                     onValueChange={(v) => setZoom(v === 'fit' ? undefined : parseFloat(v))}
                 >
                     <SelectTrigger
-                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-white hover:bg-white/20' : 'h-7'}`}
+                        className={`w-auto gap-1 border-0 bg-transparent hover:bg-accent text-xs px-2 focus:ring-0 [&>svg]:hidden ${isFullscreen ? 'h-8 text-foreground hover:bg-white/20' : 'h-7'}`}
                     >
                         <ZoomIn
-                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-white/70' : 'w-3 h-3 text-muted-foreground'}`}
+                            className={`shrink-0 ${isFullscreen ? 'w-3.5 h-3.5 text-foreground/70' : 'w-3 h-3 text-muted-foreground'}`}
                         />
                         <SelectValue />
                     </SelectTrigger>
@@ -228,7 +228,7 @@ export default function RDPConnectionPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setReconnectKey((k) => k + 1)}
-                    title="Reconnect / Fit to current window"
+                    title="Reconnect / fit to current window"
                     className={isFullscreen ? 'h-8 w-8 text-white hover:bg-white/20' : 'h-7 w-7'}
                 >
                     <RotateCcw className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
@@ -262,7 +262,7 @@ export default function RDPConnectionPage() {
                     className={
                         isFullscreen
                             ? 'h-8 w-8 text-danger hover:text-danger hover:bg-danger/20'
-                            : 'h-7 w-7 text-destructive hover:text-destructive'
+                            : 'h-7 w-7 text-danger hover:text-danger'
                     }
                 >
                     <X className={isFullscreen ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
@@ -308,7 +308,7 @@ export default function RDPConnectionPage() {
                         className="absolute top-0 left-1/2 -translate-x-1/2 z-[51] flex items-center justify-center w-10 h-4 bg-white/20 hover:bg-white/35 rounded-b-full transition-colors"
                         title="Show controls"
                     >
-                        <ChevronDown className="w-3 h-3 text-white/80" />
+                        <ChevronDown className="w-3 h-3 text-foreground/80" />
                     </button>
                 )}
 

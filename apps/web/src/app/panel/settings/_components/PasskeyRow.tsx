@@ -43,7 +43,7 @@ export function PasskeyRow({
                 <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{passkey.name}</p>
                     {isMultiDevice && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-medium shrink-0">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[11px] font-medium shrink-0">
                             <Globe className="w-2.5 h-2.5" /> Synced
                         </span>
                     )}
@@ -54,7 +54,7 @@ export function PasskeyRow({
             </div>
             {confirming ? (
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span className="text-xs text-destructive">Remove?</span>
+                    <span className="text-xs text-danger">Remove?</span>
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setConfirming(false)}
@@ -76,7 +76,7 @@ export function PasskeyRow({
             ) : (
                 <button
                     onClick={() => setConfirming(true)}
-                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
+                    className="p-2 text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-lg transition-colors shrink-0 [@media(hover:none)]:opacity-100 opacity-0 group-hover:opacity-100"
                     title="Remove passkey"
                 >
                     <Trash2 className="w-3.5 h-3.5" />

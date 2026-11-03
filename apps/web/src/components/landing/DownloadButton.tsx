@@ -198,14 +198,14 @@ export default function DownloadDesktopButton() {
     const { label, Icon, archLabel } = PLATFORMS[os];
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-start gap-3">
             {/* Primary, OS + architecture aware download */}
             <a
                 href={downloadUrl(os, arch)}
                 download
-                className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-xl bg-linear-to-r from-primary to-sky-600 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
+                className="group inline-flex h-11 items-center gap-2.5 rounded-md border border-input px-4 text-sm font-medium text-foreground transition-colors hover:border-muted-foreground/40 hover:bg-accent"
             >
-                <Icon className="w-5 h-5" />
+                <Icon className="h-4 w-4" />
                 <span>
                     Download for {label}
                     <span className="opacity-80"> ({archLabel[arch]})</span>
@@ -213,11 +213,11 @@ export default function DownloadDesktopButton() {
                 <Download className="w-4 h-4 opacity-80 group-hover:translate-y-0.5 transition-transform" />
             </a>
 
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-start gap-1">
                 <button
                     type="button"
                     onClick={() => setShowAll((v) => !v)}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                     {showAll ? 'Hide all downloads' : 'All platforms & architectures'}
                 </button>
@@ -226,7 +226,7 @@ export default function DownloadDesktopButton() {
                         href={release.releaseUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-slate-500 transition-colors hover:text-slate-300"
+                        className="text-xs text-muted-foreground transition-colors hover:text-foreground/85"
                     >
                         Latest release: {release.version}
                     </a>
@@ -235,28 +235,28 @@ export default function DownloadDesktopButton() {
 
             {/* macOS is ad-hoc signed but not notarized — surface the first-launch steps */}
             {os === 'mac' && (
-                <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
+                <div className="max-w-sm space-y-2 text-left text-xs text-muted-foreground">
                     <p>
                         On first launch, right-click Termi.app →{' '}
-                        <span className="text-slate-400">Open</span> to bypass the macOS
+                        <span className="text-muted-foreground">Open</span> to bypass the macOS
                         verification prompt.
                     </p>
                     <p>
                         If macOS says the app is{' '}
-                        <span className="text-slate-400">&ldquo;damaged&rdquo;</span>, run this in
+                        <span className="text-muted-foreground">&ldquo;damaged&rdquo;</span>, run this in
                         Terminal after moving it to Applications:
                     </p>
                     <button
                         type="button"
                         onClick={copyXattr}
                         title="Copy to clipboard"
-                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2 text-left font-mono text-[11px] text-slate-300 transition-colors hover:border-slate-500"
+                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-left font-mono text-[11px] text-foreground/85 transition-colors hover:border-border"
                     >
                         <code className="flex-1 break-all">{XATTR_CMD}</code>
                         {copied ? (
-                            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                            <Check className="h-3.5 w-3.5 shrink-0 text-success" />
                         ) : (
-                            <Copy className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover/cmd:text-slate-300" />
+                            <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover/cmd:text-foreground/85" />
                         )}
                     </button>
                     <p>
@@ -264,7 +264,7 @@ export default function DownloadDesktopButton() {
                             href="https://github.com/shuv-o/termi#macos--first-launch"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sky-400 underline underline-offset-2 hover:text-sky-300"
+                            className="text-primary underline underline-offset-2 hover:text-primary"
                         >
                             Learn more
                         </a>
@@ -274,7 +274,7 @@ export default function DownloadDesktopButton() {
 
             {/* Linux AppImage — must be made executable before first run */}
             {os === 'linux' && (
-                <div className="max-w-sm space-y-2 text-center text-xs text-slate-500">
+                <div className="max-w-sm space-y-2 text-left text-xs text-muted-foreground">
                     <p>After downloading, make the file executable and run it:</p>
                     <button
                         type="button"
@@ -288,13 +288,13 @@ export default function DownloadDesktopButton() {
                             }
                         }}
                         title="Copy to clipboard"
-                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2 text-left font-mono text-[11px] text-slate-300 transition-colors hover:border-slate-500"
+                        className="group/cmd flex w-full items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-left font-mono text-[11px] text-foreground/85 transition-colors hover:border-border"
                     >
                         <code className="flex-1 whitespace-pre">{LINUX_CMD}</code>
                         {copied ? (
-                            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                            <Check className="h-3.5 w-3.5 shrink-0 text-success" />
                         ) : (
-                            <Copy className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover/cmd:text-slate-300" />
+                            <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover/cmd:text-foreground/85" />
                         )}
                     </button>
                 </div>
@@ -302,7 +302,7 @@ export default function DownloadDesktopButton() {
 
             {/* Full matrix: every OS × architecture */}
             {showAll && (
-                <div className="w-full max-w-md space-y-3 rounded-xl border border-slate-700/60 bg-slate-900/40 p-4">
+                <div className="w-full max-w-md space-y-3 rounded-xl border border-border bg-card/40 p-4">
                     {OS_ORDER.map((o) => {
                         const P = PLATFORMS[o];
                         return (
@@ -310,7 +310,7 @@ export default function DownloadDesktopButton() {
                                 key={o}
                                 className="flex items-center justify-between gap-3 text-sm"
                             >
-                                <span className="inline-flex items-center gap-2 text-slate-300">
+                                <span className="inline-flex items-center gap-2 text-foreground/85">
                                     <P.Icon className="w-4 h-4" />
                                     {P.label}
                                 </span>
@@ -324,8 +324,8 @@ export default function DownloadDesktopButton() {
                                                 download
                                                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors ${
                                                     current
-                                                        ? 'border-primary/60 bg-primary/10 text-white'
-                                                        : 'border-slate-700/60 text-slate-400 hover:border-slate-500 hover:text-white'
+                                                        ? 'border-primary/60 bg-primary/10 text-foreground'
+                                                        : 'border-border text-muted-foreground hover:border-border hover:text-foreground'
                                                 }`}
                                             >
                                                 <Download className="w-3 h-3" />
@@ -334,7 +334,7 @@ export default function DownloadDesktopButton() {
                                         );
                                     })}
                                     {!ARCH_ORDER.some((a) => hasBuild(o, a)) && (
-                                        <span className="text-xs text-slate-600">
+                                        <span className="text-xs text-muted-foreground/70">
                                             Not available yet
                                         </span>
                                     )}

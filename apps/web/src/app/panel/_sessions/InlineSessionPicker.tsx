@@ -14,13 +14,13 @@ const protocolMeta: Record<string, { icon: React.ReactNode; color: string; bg: s
     },
     RDP: {
         icon: <Monitor className="w-5 h-5" />,
-        color: 'text-blue-400',
-        bg: 'bg-blue-500/15 border-blue-500/20',
+        color: 'text-proto-scp',
+        bg: 'bg-proto-scp/15 border-proto-scp/20',
     },
     VNC: {
         icon: <Globe className="w-5 h-5" />,
-        color: 'text-purple-400',
-        bg: 'bg-purple-500/15 border-purple-500/20',
+        color: 'text-proto-rdp',
+        bg: 'bg-proto-rdp/15 border-proto-rdp/20',
     },
 };
 
@@ -64,7 +64,7 @@ function ServerPickerCard({
                 )}
             </div>
             <span
-                className={`self-start text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}
+                className={`self-start text-[11px] font-semibold px-1.5 py-0.5 rounded-md border ${meta.bg} ${meta.color}`}
             >
                 {server.protocol}
             </span>
@@ -89,7 +89,7 @@ function ServerGrid({
     return (
         <>
             <p
-                className={`text-[10px] uppercase tracking-widest font-semibold text-muted-foreground ${className}`}
+                className={`text-[11px] font-semibold text-muted-foreground ${className}`}
             >
                 {title}
             </p>
@@ -146,7 +146,7 @@ export function InlineSessionPicker({
         <div className="absolute inset-0 z-10 flex flex-col bg-background overflow-hidden">
             <div className="shrink-0 flex items-center gap-3 px-5 py-4 border-b border-border bg-card/40">
                 <div className="flex-1">
-                    <h2 className="text-base font-semibold">New Session</h2>
+                    <h2 className="text-base font-semibold">New session</h2>
                     <p className="text-xs text-muted-foreground">Pick a server to connect to</p>
                 </div>
                 {canClose && (
@@ -187,14 +187,14 @@ export function InlineSessionPicker({
                 ) : (
                     <>
                         <ServerGrid
-                            title="SSH Servers"
+                            title="SSH servers"
                             servers={sshServers}
                             onPick={onPick}
                             className="pt-2 pb-2"
                         />
                         {/* Only SSH can be opened as a workspace session today. */}
                         <ServerGrid
-                            title="Other Protocols"
+                            title="Other protocols"
                             servers={otherServers}
                             onPick={() => {}}
                             disabled

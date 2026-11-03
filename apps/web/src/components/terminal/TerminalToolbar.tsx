@@ -356,13 +356,13 @@ function SnippetManager({
                                             {snippet.command}
                                         </code>
                                     </div>
-                                    <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                    <span className="shrink-0 text-[11px] text-muted-foreground">
                                         {snippet.runImmediately ? 'Runs' : 'Types'}
                                     </span>
                                     <button
                                         onClick={() => remove(snippet.id)}
                                         title="Delete snippet"
-                                        className="shrink-0 p-1 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                        className="shrink-0 p-1 rounded-sm text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -412,7 +412,7 @@ function SnippetManager({
                             </span>
                         </label>
 
-                        {error && <p className="text-sm text-destructive">{error}</p>}
+                        {error && <p className="text-sm text-danger">{error}</p>}
 
                         <div className="flex justify-end gap-2">
                             <Button variant="ghost" onClick={onClose}>

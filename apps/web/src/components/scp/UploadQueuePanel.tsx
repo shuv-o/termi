@@ -24,7 +24,7 @@ export function UploadQueuePanel({
     return (
         <div className="shrink-0 border-t border-border bg-card/50">
             <button
-                className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground hover:text-white"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
                 onClick={onToggle}
             >
                 <span className="flex items-center gap-1.5">
@@ -64,7 +64,7 @@ export function UploadQueuePanel({
                             {u.status !== 'uploading' && (
                                 <button
                                     onClick={() => onDismiss(u.id)}
-                                    className="p-0.5 text-muted-foreground/60 hover:text-white"
+                                    className="p-0.5 text-muted-foreground/60 hover:text-foreground"
                                 >
                                     <X className="w-3 h-3" />
                                 </button>

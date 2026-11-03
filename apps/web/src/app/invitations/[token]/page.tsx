@@ -110,7 +110,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                     {state === 'invalid' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
                             <XCircle className="w-12 h-12 text-danger" />
-                            <h2 className="text-lg font-semibold">Invitation Expired</h2>
+                            <h2 className="text-lg font-semibold">Invitation expired</h2>
                             <p className="text-sm text-muted-foreground">
                                 This invitation link is invalid or has expired. Please ask the
                                 server owner to send a new invitation.
@@ -126,7 +126,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                             <>
                                 <div className="flex items-center gap-2 mb-5">
                                     <Shield className="w-5 h-5 text-primary shrink-0" />
-                                    <h2 className="text-lg font-semibold">Server Invitation</h2>
+                                    <h2 className="text-lg font-semibold">Server invitation</h2>
                                 </div>
 
                                 {/* Invitation details */}
@@ -226,7 +226,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                     {state === 'accepted' && (
                         <div className="flex flex-col items-center gap-3 py-8 text-center">
                             <CheckCircle className="w-12 h-12 text-success" />
-                            <h2 className="text-lg font-semibold">Invitation Accepted!</h2>
+                            <h2 className="text-lg font-semibold">Invitation accepted!</h2>
                             <p className="text-sm text-muted-foreground">
                                 You now have access to <strong>{invitation?.serverName}</strong>.
                                 Redirecting to your dashboard…

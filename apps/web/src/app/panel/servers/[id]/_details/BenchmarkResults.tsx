@@ -48,7 +48,7 @@ function StatBox({
         <div
             className={`rounded-lg bg-secondary/60 border border-border/50 px-3 py-2 ${className}`}
         >
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+            <p className="text-[11px] text-muted-foreground mb-0.5">
                 {label}
             </p>
             <p className={valueClass}>{children}</p>
@@ -78,10 +78,10 @@ function ResultHeader({
     return (
         <div className="flex items-center gap-2 mb-3">
             <Icon className={`w-4 h-4 ${iconClass}`} />
-            <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-foreground/80">
                 {title}
             </span>
-            {note && <span className="text-[10px] text-muted-foreground ml-1">{note}</span>}
+            {note && <span className="text-[11px] text-muted-foreground ml-1">{note}</span>}
             {score !== undefined && (
                 <div className="ml-auto">
                     <ScoreBadge score={score} />
@@ -103,10 +103,10 @@ export function ScoreSummaryCard({ scores }: { scores: BenchmarkScores }) {
         <Card className="p-4">
             <div className="flex items-center gap-2 mb-4">
                 <Zap className="w-4 h-4 text-warning" />
-                <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-foreground/80">
                     Benchmark Score
                 </span>
-                <span className="text-[10px] text-muted-foreground ml-auto">
+                <span className="text-[11px] text-muted-foreground ml-auto">
                     scored vs. high-end server reference
                 </span>
             </div>
@@ -119,7 +119,7 @@ export function ScoreSummaryCard({ scores }: { scores: BenchmarkScores }) {
                     >
                         {scores.overall}
                     </span>
-                    <span className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                    <span className="text-xs text-muted-foreground mt-1">
                         Overall
                     </span>
                 </div>
@@ -133,7 +133,7 @@ export function ScoreSummaryCard({ scores }: { scores: BenchmarkScores }) {
                         <span className={`text-xl font-bold tabular-nums ${scoreColor(score)}`}>
                             {score}
                         </span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                        <span className="text-[11px] text-muted-foreground">
                             {label}
                         </span>
                         <div className="w-full px-3">
@@ -225,15 +225,15 @@ export function CpuResultCard({
         <Card className="p-4">
             <ResultHeader
                 icon={Cpu}
-                iconClass="text-violet-400"
-                title="CPU Performance"
+                iconClass="text-local"
+                title="CPU performance"
                 note="SHA-256"
                 score={cpu.score}
             />
             <div className="grid grid-cols-2 gap-2">
                 <StatBox
                     label="Single-Core"
-                    sub={<p className="text-[10px] text-muted-foreground/40 mt-0.5">1 thread</p>}
+                    sub={<p className="text-[11px] text-muted-foreground/40 mt-0.5">1 thread</p>}
                 >
                     {cpu.singleCoreMBps.toLocaleString()}
                     <Unit>MB/s</Unit>
@@ -242,7 +242,7 @@ export function CpuResultCard({
                     label="Multi-Core"
                     sub={
                         threads !== undefined ? (
-                            <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+                            <p className="text-[11px] text-muted-foreground/40 mt-0.5">
                                 {threads} threads
                                 {scaling}
                             </p>
@@ -299,7 +299,7 @@ export function RamResultCard({ ram }: { ram: BenchmarkThroughput }) {
         <ThroughputCard
             icon={MemoryStick}
             iconClass="text-warning"
-            title="RAM Bandwidth"
+            title="RAM bandwidth"
             result={ram}
         />
     );
@@ -309,8 +309,8 @@ export function DiskResultCard({ disk }: { disk: BenchmarkThroughput }) {
     return (
         <ThroughputCard
             icon={HardDrive}
-            iconClass="text-rose-400"
-            title="Disk Speed"
+            iconClass="text-proto-vnc"
+            title="Disk speed"
             result={disk}
         />
     );
@@ -337,10 +337,10 @@ export function NetworkResultCard({ network }: { network: BenchmarkNetworkResult
                     )}
                 </StatBox>
                 <StatBox
-                    label="Loopback Bandwidth"
+                    label="Loopback bandwidth"
                     size="base"
                     sub={
-                        <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+                        <p className="text-[11px] text-muted-foreground/40 mt-0.5">
                             OS kernel socket speed
                         </p>
                     }

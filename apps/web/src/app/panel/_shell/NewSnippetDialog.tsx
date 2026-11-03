@@ -125,7 +125,7 @@ export function NewSnippetDialog({
                             </span>
                         </label>
 
-                        {error && <p className="text-sm text-destructive">{error}</p>}
+                        {error && <p className="text-sm text-danger">{error}</p>}
 
                         <div className="flex justify-end gap-2">
                             <Button variant="ghost" onClick={handleClose}>

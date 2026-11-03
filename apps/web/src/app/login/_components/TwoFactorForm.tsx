@@ -75,7 +75,7 @@ export function TwoFactorForm({ state }: { state: LoginState }) {
                 </div>
 
                 {error && (
-                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
                         {error}
                     </div>
                 )}
@@ -114,9 +114,7 @@ export function TwoFactorForm({ state }: { state: LoginState }) {
                     variant="ghost"
                     onClick={state.backToLogin}
                     className="w-full text-muted-foreground"
-                >
-                    Back to Login
-                </Button>
+                >Back to login</Button>
             </form>
         </>
     );

@@ -16,7 +16,7 @@ interface SparklineProps {
 
 export default function MetricSparkline({
     data,
-    color = '#3b82f6',
+    color = '#38b2f0',
     height = 48,
     showDots = false,
     alertThreshold,
@@ -32,7 +32,7 @@ export default function MetricSparkline({
     if (defined.length < 2) {
         return (
             <div className="w-full flex items-center justify-center" style={{ height: H }}>
-                <span className="text-[10px] text-muted-foreground/60">No data</span>
+                <span className="text-[11px] text-muted-foreground/60">No data</span>
             </div>
         );
     }
@@ -70,7 +70,7 @@ export default function MetricSparkline({
         : '';
 
     // Mirrors --danger from globals.css; SVG strokes need a literal.
-    const ALERT_COLOR = '#f87171';
+    const ALERT_COLOR = '#f2706b';
     const lineColor =
         alertThreshold != null && defined[defined.length - 1] >= alertThreshold
             ? ALERT_COLOR

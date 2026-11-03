@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 
-import { toneBanner, toneText, type Tone } from '@/lib/status-style';
+import { toneText, type Tone } from '@/lib/status-style';
 import { cn } from '@/lib/utils';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -134,17 +134,16 @@ function Toaster({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: numbe
                 return (
                     <div
                         key={t.id}
-                        className={cn(
-                            'animate-toast-in pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-xl backdrop-blur-sm',
-                            toneBanner[tone],
-                        )}
+                        // Solid surface so the message stays legible over any
+                        // page; the tone lives in the icon, not a tinted wash.
+                        className="animate-toast-in pointer-events-auto flex items-start gap-3 rounded-xl border border-border bg-popover px-3.5 py-3 text-sm shadow-xl"
                     >
                         <Icon className={cn('mt-px h-4 w-4 shrink-0', toneText[tone])} />
-                        <span className="flex-1 break-words text-foreground/90">{t.message}</span>
+                        <span className="flex-1 break-words leading-snug text-foreground">{t.message}</span>
                         <button
                             type="button"
                             onClick={() => onDismiss(t.id)}
-                            className="-m-1 shrink-0 rounded-sm p-1 opacity-60 transition-opacity hover:opacity-100"
+                            className="-m-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Dismiss notification"
                         >
                             <X className="h-3.5 w-3.5" />

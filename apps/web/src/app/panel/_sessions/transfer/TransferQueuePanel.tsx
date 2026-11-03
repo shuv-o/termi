@@ -37,7 +37,7 @@ function QueueItemRow({ item }: { item: TransferItem }) {
                     <span className="text-xs text-foreground truncate font-medium">
                         {item.name}
                     </span>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
+                    <span className="text-[11px] text-muted-foreground shrink-0">
                         {formatBytes(item.size, '—')}
                     </span>
                 </div>
@@ -50,7 +50,7 @@ function QueueItemRow({ item }: { item: TransferItem }) {
                     </div>
                 )}
                 {item.status === 'failed' && item.error && (
-                    <p className="text-[10px] text-danger truncate mt-0.5">{item.error}</p>
+                    <p className="text-[11px] text-danger truncate mt-0.5">{item.error}</p>
                 )}
             </div>
         </div>
@@ -96,7 +96,7 @@ export function TransferQueuePanel({
                         <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
                     )}
                     <span className="text-xs font-medium">Transfer queue</span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                         {doneItems}/{totalItems} done
                         {failedItems > 0 && (
                             <span className="text-danger ml-1">· {failedItems} failed</span>
@@ -110,7 +110,7 @@ export function TransferQueuePanel({
                                 e.stopPropagation();
                                 onRetry();
                             }}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/20 border border-primary/30 text-primary text-[10px] font-medium hover:bg-primary/30"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/20 border border-primary/30 text-primary text-[11px] font-medium hover:bg-primary/30"
                         >
                             <RefreshCw className="w-2.5 h-2.5" /> Retry
                         </button>
@@ -121,7 +121,7 @@ export function TransferQueuePanel({
                                 e.stopPropagation();
                                 onClear();
                             }}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-muted-foreground text-[10px] hover:text-foreground"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-muted-foreground text-[11px] hover:text-foreground"
                         >
                             <X className="w-2.5 h-2.5" /> Clear
                         </button>

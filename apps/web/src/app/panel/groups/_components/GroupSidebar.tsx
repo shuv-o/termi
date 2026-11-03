@@ -118,7 +118,7 @@ function GroupRow({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={onDelete}
-                            className="gap-2 text-xs text-destructive focus:text-destructive"
+                            className="gap-2 text-xs text-danger focus:text-danger"
                         >
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                         </DropdownMenuItem>
@@ -169,7 +169,7 @@ export function GroupSidebar({
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
                         type="text"
-                        className="bg-secondary border-border pl-8 h-8 text-sm"
+                        className="pl-8 h-8 text-sm"
                         placeholder="Search groups…"
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
@@ -214,9 +214,7 @@ export function GroupSidebar({
                                 <button
                                     onClick={onCreate}
                                     className="mt-2 text-primary hover:text-primary/80 text-xs transition-colors"
-                                >
-                                    Create your first group
-                                </button>
+                                >Create your first group</button>
                             </>
                         )}
                     </div>
@@ -241,7 +239,7 @@ export function GroupSidebar({
 
             {!loading && groups.length > 0 && (
                 <div className="px-4 py-3 border-t border-border/40 shrink-0 bg-secondary/20">
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground/50">
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground/50">
                         <span>
                             {groups.length} group{groups.length !== 1 ? 's' : ''}
                         </span>

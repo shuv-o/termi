@@ -290,10 +290,10 @@ export default function SSHTerminal({
             fontSize: 14,
             lineHeight: 1.2,
             theme: {
-                background: '#0d1117',
+                background: '#0b0f14',
                 foreground: '#c9d1d9',
-                cursor: '#58a6ff',
-                cursorAccent: '#0d1117',
+                cursor: '#38b2f0',
+                cursorAccent: '#0b0f14',
                 selectionBackground: '#264f78',
                 selectionForeground: '#ffffff',
                 black: '#484f58',

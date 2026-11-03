@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Pencil, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 import { formatRelativeTime } from '@/lib/format';
 import { connectHref } from '@/lib/connect-route';
 import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
@@ -13,12 +14,12 @@ import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } fr
 
 function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
-        <div className="flex flex-col gap-0.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+        <div className="flex min-w-[96px] flex-col gap-0.5 rounded-md border border-border bg-background/50 px-3 py-2">
+            <span className="text-[11px] text-muted-foreground">
                 {label}
             </span>
-            <span className="text-sm font-semibold text-foreground">{value}</span>
-            {sub && <span className="text-[10px] text-muted-foreground">{sub}</span>}
+            <span className="text-sm font-semibold tabular-nums text-foreground">{value}</span>
+            {sub && <span className="text-[11px] text-muted-foreground">{sub}</span>}
         </div>
     );
 }
@@ -33,40 +34,35 @@ export function ServerHeader({
     isOnline: boolean | null;
 }) {
     return (
-        <div className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-                <div className="mt-0.5 flex items-center gap-2.5">
-                    <h1 className="text-xl sm:text-2xl font-bold truncate">{server.name}</h1>
+        <PageHeader
+            title={server.name}
+            description={
+                <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
                     {isOnline !== null && (
                         <ServerStatusPill
                             status={isOnline ? 'online' : 'offline'}
                             label={isOnline ? 'Online' : 'Offline'}
-                            size="md"
                         />
                     )}
-                </div>
-                {server.protocol} server
-                {server.description && (
-                    <p className="text-sm text-muted-foreground mt-0.5 truncate">
-                        {server.description}
-                    </p>
-                )}
-            </div>
-
-            {/* Back button  if desktop */}
-            <Button variant="secondary" size="sm" asChild className="hidden md:flex">
-                <Link href="/panel">
-                    <ArrowLeft className="w-4 h-4" /> Back
-                </Link>
-            </Button>
-
-            <Button variant="secondary" size="sm" asChild className="gap-1.5">
-                <Link href={`/panel/servers/${server.id}/edit`}>
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit
-                </Link>
-            </Button>
-        </div>
+                    <span>{server.description || `${server.protocol} server`}</span>
+                </span>
+            }
+            actions={
+                <>
+                    <Button variant="ghost" asChild className="hidden lg:inline-flex">
+                        <Link href="/panel">
+                            <ArrowLeft /> All servers
+                        </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={`/panel/servers/${server.id}/edit`}>
+                            <Pencil />
+                            Edit server
+                        </Link>
+                    </Button>
+                </>
+            }
+        />
     );
 }
 
@@ -92,23 +88,23 @@ export function ServerInfoCard({
         <Card className="p-4">
             <div className="flex flex-wrap items-center gap-3 mb-4">
                 <div
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${protoColor}`}
+                    className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${protoColor}`}
                 >
                     <ProtoIcon className="w-3.5 h-3.5" />
                     {server.protocol}
                 </div>
-                <span className="font-mono text-sm text-foreground/80">
+                <span className="data text-sm text-foreground/85">
                     {server.host}:{server.port}
                 </span>
                 {server.group && (
-                    <span className="text-xs px-2 py-0.5 rounded-sm bg-secondary text-secondary-foreground">
+                    <span className="rounded-full border border-border px-2 py-0.5 text-xs text-foreground/80">
                         {server.group.name}
                     </span>
                 )}
                 {server.tags.map((t) => (
                     <span
                         key={t}
-                        className="text-[10px] px-1.5 py-0.5 rounded-sm bg-secondary/80 text-muted-foreground"
+                        className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
                     >
                         {t}
                     </span>
@@ -116,10 +112,10 @@ export function ServerInfoCard({
             </div>
 
             <div className="flex flex-wrap gap-2">
-                <StatPill label="Last Used" value={formatRelativeTime(server.lastUsedAt)} />
+                <StatPill label="Last used" value={formatRelativeTime(server.lastUsedAt)} />
                 {monitorConfig?.lastCheckedAt && (
                     <StatPill
-                        label="Last Check"
+                        label="Last check"
                         value={formatRelativeTime(monitorConfig.lastCheckedAt)}
                     />
                 )}

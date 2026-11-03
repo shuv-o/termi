@@ -33,7 +33,7 @@ function ScoreTrendCard({ history }: { history: BenchmarkRunSummary[] }) {
                 <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     <span className="text-xs font-medium text-muted-foreground">Score Trend</span>
-                    <span className="text-[10px] text-muted-foreground/60">
+                    <span className="text-[11px] text-muted-foreground/60">
                         ({history.length} runs)
                     </span>
                 </div>
@@ -55,11 +55,11 @@ function ScoreTrendCard({ history }: { history: BenchmarkRunSummary[] }) {
             </div>
             <MetricSparkline
                 data={history.map((h) => h.overallScore)}
-                color="#facc15"
+                color="#f2b544"
                 height={44}
                 showDots
             />
-            <p className="text-[10px] text-muted-foreground mt-2">
+            <p className="text-[11px] text-muted-foreground mt-2">
                 {new Date(first.runAt).toLocaleDateString()} →{' '}
                 {new Date(latest.runAt).toLocaleDateString()}
             </p>
@@ -92,7 +92,7 @@ function PhaseProgress({ phase, message }: { phase: BenchmarkPhase | null; messa
                                 }`}
                             />
                             <span
-                                className={`text-[9px] hidden sm:block ${active ? 'text-warning' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}
+                                className={`text-[10px] hidden sm:block ${active ? 'text-warning' : done ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}
                             >
                                 {p.label}
                             </span>
@@ -150,9 +150,9 @@ export function BenchmarkSection({
             {running && <PhaseProgress phase={phase} message={message} />}
 
             {!running && phase === 'error' && (
-                <Card className="p-4 flex items-center gap-3 mb-3 border-destructive/20 bg-destructive/5">
-                    <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
-                    <p className="text-sm text-destructive/80">{message}</p>
+                <Card className="p-4 flex items-center gap-3 mb-3 border-danger/20 bg-danger/5">
+                    <AlertTriangle className="w-4 h-4 text-danger shrink-0" />
+                    <p className="text-sm text-danger/80">{message}</p>
                 </Card>
             )}
 

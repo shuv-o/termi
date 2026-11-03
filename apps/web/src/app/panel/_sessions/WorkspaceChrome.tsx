@@ -175,7 +175,7 @@ export function SessionTabBar({
                                 e.stopPropagation();
                                 onCloseTab(session.tabId);
                             }}
-                            className={`p-0.5 rounded-sm hover:bg-destructive/20 hover:text-destructive transition-opacity shrink-0 ml-1 ${
+                            className={`p-0.5 rounded-sm hover:bg-danger/20 hover:text-danger transition-opacity shrink-0 ml-1 ${
                                 isTabActive
                                     ? 'opacity-50 hover:opacity-100 text-muted-foreground'
                                     : 'opacity-0 group-hover:opacity-60 text-muted-foreground'
@@ -202,7 +202,7 @@ export function SessionTabBar({
             </button>
             <button
                 onClick={onAddLocal}
-                className="flex items-center justify-center px-3 py-2 shrink-0 text-violet-400 hover:text-violet-300 hover:bg-secondary/60 transition-colors"
+                className="flex items-center justify-center px-3 py-2 shrink-0 text-local hover:text-local hover:bg-secondary/60 transition-colors"
                 title="New local terminal"
                 aria-label="New local terminal"
             >
@@ -292,7 +292,7 @@ export function SessionSidebar({
                                     e.stopPropagation();
                                     onCloseSession(session.tabId);
                                 }}
-                                className="p-1 rounded-sm hover:bg-destructive/20 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                className="p-1 rounded-sm hover:bg-danger/20 text-muted-foreground hover:text-danger opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                                 title="Close session"
                                 aria-label={`Close ${session.serverName}`}
                             >
@@ -316,13 +316,13 @@ export function SessionSidebar({
                 </button>
                 <button
                     onClick={onAddLocal}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-violet-400 hover:text-violet-300 hover:bg-secondary transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-local hover:text-local hover:bg-secondary transition-colors"
                 >
                     <Laptop className="w-3.5 h-3.5" /> Local terminal
                 </button>
                 <div className="px-3 py-1.5 rounded-lg bg-secondary/50 flex items-center gap-2">
                     <Globe className="w-3 h-3 text-muted-foreground shrink-0" />
-                    <p className="text-[10px] text-muted-foreground leading-snug">
+                    <p className="text-[11px] text-muted-foreground leading-snug">
                         Sessions sync across devices
                     </p>
                 </div>

@@ -214,7 +214,7 @@ export function MonitorSettingsSection({
                     />
                     <AlertChannel
                         icon={BellRing}
-                        title="Push Notification"
+                        title="Push notification"
                         description="Browser / mobile push alert"
                         checked={form.alertPush}
                         enabled={form.enabled}

@@ -36,7 +36,7 @@ export default function CapacitorBridge() {
 
         const StatusBar = cap.Plugins?.StatusBar;
         StatusBar?.setStyle?.({ style: 'DARK' }).catch(() => {});
-        StatusBar?.setBackgroundColor?.({ color: '#0f172a' }).catch(() => {});
+        StatusBar?.setBackgroundColor?.({ color: '#0e1319' }).catch(() => {});
 
         let remove: (() => void) | undefined;
         const App = cap.Plugins?.App;

@@ -109,7 +109,7 @@ export function ServerForm({
                         />
 
                         {error && (
-                            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+                            <div className="flex items-start gap-2 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs">
                                 <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                                 {error}
                             </div>

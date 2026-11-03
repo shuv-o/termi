@@ -75,7 +75,7 @@ export function NotificationsPanel({ push }: { push: PushState }) {
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Push Notifications"
+                title="Push notifications"
                 description="Get browser notifications for server down/up alerts on this device."
                 icon={BellRing}
                 iconBg="bg-warning/15 text-warning"

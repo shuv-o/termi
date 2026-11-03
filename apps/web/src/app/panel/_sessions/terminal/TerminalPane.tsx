@@ -57,11 +57,11 @@ function ConnectionFailed({
 }) {
     return (
         <div className="flex flex-col items-center justify-center h-full gap-4 bg-card/20">
-            <div className="w-14 h-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
-                <WifiOff className="w-6 h-6 text-destructive/70" />
+            <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center">
+                <WifiOff className="w-6 h-6 text-danger/70" />
             </div>
             <div className="text-center">
-                <p className="text-sm font-medium text-destructive">Connection failed</p>
+                <p className="text-sm font-medium text-danger">Connection failed</p>
                 {errorMessage && (
                     <p className="text-xs text-muted-foreground mt-1 max-w-xs px-4 break-words">
                         {errorMessage}

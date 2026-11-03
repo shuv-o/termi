@@ -37,7 +37,7 @@ function MethodPicker({ twoFactor }: { twoFactor: TwoFactor }) {
                     className="flex flex-col items-start gap-2 p-4 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/60 hover:border-primary/30 transition-all text-left group"
                 >
                     <div className="flex items-center gap-2">
-                        <Smartphone className="w-4 h-4 text-violet-400" />
+                        <Smartphone className="w-4 h-4 text-local" />
                         <span className="text-sm font-medium">Authenticator App</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -130,12 +130,12 @@ function TotpEnrolment({ twoFactor }: { twoFactor: TwoFactor }) {
 function DisableConfirm({ twoFactor }: { twoFactor: TwoFactor }) {
     return (
         <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-danger/10 border border-danger/20 text-sm text-danger">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 Disabling 2FA reduces your account security. Confirm your password to continue.
             </div>
             <div className="space-y-1.5">
-                <Label>Confirm Password</Label>
+                <Label>Confirm password</Label>
                 <Input
                     type="password"
                     value={twoFactor.disablePassword}
@@ -226,14 +226,14 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Change Password"
+                title="Change password"
                 description="Update your account password. Use a strong, unique password."
                 icon={Key}
                 iconBg="bg-warning/15 text-warning"
             >
                 <form onSubmit={change} className="space-y-3">
                     <SecretField
-                        label="Current Password"
+                        label="Current password"
                         value={form.currentPassword}
                         onChange={(v) => setForm({ ...form, currentPassword: v })}
                         visible={show.currentPassword}
@@ -243,7 +243,7 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
                         autoComplete="current-password"
                     />
                     <SecretField
-                        label="New Password"
+                        label="New password"
                         value={form.newPassword}
                         onChange={(v) => setForm({ ...form, newPassword: v })}
                         visible={show.newPassword}
@@ -254,7 +254,7 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
                         <PasswordStrength password={form.newPassword} />
                     </SecretField>
                     <SecretField
-                        label="Confirm New Password"
+                        label="Confirm new password"
                         value={form.confirmPassword}
                         onChange={(v) => setForm({ ...form, confirmPassword: v })}
                         visible={show.confirmPassword}
@@ -265,7 +265,7 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
                         invalid={!!form.confirmPassword && !matches}
                     >
                         {form.confirmPassword && !matches && (
-                            <p className="text-xs text-destructive flex items-center gap-1">
+                            <p className="text-xs text-danger flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" /> Passwords do not match
                             </p>
                         )}
@@ -299,10 +299,10 @@ export function SecurityPanel({
         <div className="space-y-4">
             <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
                 <SettingsSection
-                    title="Two-Factor Authentication"
+                    title="Two-factor authentication"
                     description="Require a second verification step when signing in."
                     icon={Shield}
-                    iconBg="bg-violet-500/15 text-violet-400"
+                    iconBg="bg-local/15 text-local"
                 >
                     {!has2FA && !twoFactor.setupOpen && <MethodPicker twoFactor={twoFactor} />}
 
@@ -329,7 +329,7 @@ export function SecurityPanel({
                                 variant="outline"
                                 size="sm"
                                 onClick={() => twoFactor.setShowDisable(true)}
-                                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                className="border-danger/30 text-danger hover:bg-danger/10 hover:text-danger"
                             >
                                 <ShieldOff className="w-3.5 h-3.5" /> Disable 2FA
                             </Button>

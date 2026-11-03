@@ -35,8 +35,8 @@ export default function SCPPage() {
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
-                <AlertCircle className="w-10 h-10 text-destructive" />
-                <p className="text-destructive">{error}</p>
+                <AlertCircle className="w-10 h-10 text-danger" />
+                <p className="text-danger">{error}</p>
                 <Button asChild>
                     <Link href="/panel">Back</Link>
                 </Button>

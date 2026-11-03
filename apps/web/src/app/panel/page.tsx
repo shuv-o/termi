@@ -230,17 +230,23 @@ export default function DashboardPage() {
                         title="Servers"
                         description={
                             servers.length > 0
-                                ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? ` · ${filteredServers.length} shown` : ''}`
-                                : 'Manage and connect to your servers'
+                                ? `${servers.length} server${servers.length === 1 ? '' : 's'}${filteredServers.length !== servers.length ? `, ${filteredServers.length} shown` : ''}`
+                                : 'Add a server to connect over SSH, RDP, VNC or Telnet'
                         }
                         actions={
                             <>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" title="Import or export servers">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            title="Import or export servers"
+                                            aria-label="Import or export servers"
+                                            className="sm:w-auto sm:px-4"
+                                        >
                                             <ArrowUpDown className="w-4 h-4" />
-                                            <span className="hidden sm:inline">Transfer</span>
-                                            <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                                            <span className="hidden sm:inline">Import / export</span>
+                                            <ChevronDown className="hidden w-3.5 h-3.5 opacity-60 sm:block" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
@@ -259,10 +265,10 @@ export default function DashboardPage() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
 
-                                <Button asChild>
+                                <Button asChild className="flex-1 sm:flex-none">
                                     <Link href="/panel/servers/new">
-                                        <Plus className="w-4 h-4" />{' '}
-                                        <span className="hidden sm:inline">Add Server</span>
+                                        <Plus className="w-4 h-4" />
+                                        Add server
                                     </Link>
                                 </Button>
                             </>
@@ -324,7 +330,7 @@ export default function DashboardPage() {
                             }}
                         />
                     ) : viewMode === 'grid' ? (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                             {sortedServers.map((server) => (
                                 <ServerGridCard key={server.id} {...cardProps(server)} />
                             ))}
@@ -349,35 +355,31 @@ export default function DashboardPage() {
                 open={!!deleteConfirm}
                 onOpenChange={(open) => !open && setDeleteConfirm(null)}
             >
-                <AlertDialogContent className="bg-card border-border">
+                <AlertDialogContent>
                     <AlertDialogHeader>
                         <div className="flex items-center gap-3 mb-1">
-                            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                            <div className="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="w-5 h-5 text-danger" />
                             </div>
-                            <AlertDialogTitle>Delete Server</AlertDialogTitle>
+                            <AlertDialogTitle>Delete server</AlertDialogTitle>
                         </div>
                         <AlertDialogDescription>
-                            Are you sure you want to delete{' '}
                             <span className="font-medium text-foreground">
                                 {deleteConfirm?.name}
-                            </span>
-                            ? All associated data will be permanently removed.
+                            </span>{' '}
+                            and everything saved with it will be permanently removed.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel
-                            disabled={deleting}
-                            className="bg-secondary border-border hover:bg-secondary/80"
-                        >
+                        <AlertDialogCancel disabled={deleting}>
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={deleting}
-                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/88"
                         >
-                            {deleting ? 'Deleting…' : 'Delete'}
+                            {deleting ? 'Deleting…' : 'Delete server'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

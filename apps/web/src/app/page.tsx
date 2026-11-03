@@ -3,19 +3,16 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Terminal,
-    Shield,
-    Smartphone,
-    Server,
-    Lock,
-    Zap,
-    ArrowRight,
+    Activity,
+    FolderOpen,
     Github,
     Linkedin,
     Mail,
+    Monitor,
+    Smartphone,
+    Terminal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
 import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
@@ -52,323 +49,306 @@ export default async function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 glass">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <TerminalLogo className="w-6 h-6 text-white" />
-                            </div>
-                            <span className="text-xl font-bold gradient-text">Termi</span>
-                        </div>
-
-                        <nav className="hidden md:flex items-center gap-6">
+        <div className="min-h-dvh bg-background">
+            <header
+                className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur-lg"
+                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            >
+                <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+                    <Link href="/" className="flex items-center gap-2.5">
+                        <TerminalLogo width={26} height={26} className="rounded-md" />
+                        <span className="text-[15px] font-semibold">Termi</span>
+                    </Link>
+                    <nav aria-label="Page" className="hidden items-center gap-6 text-sm md:flex">
+                        {[
+                            ['What it does', '#features'],
+                            ['Security', '#security'],
+                            ['GitHub', 'https://github.com/shuv-o/termi'],
+                        ].map(([label, href]) => (
                             <Link
-                                href="#features"
-                                className="text-slate-300 hover:text-white transition-colors"
+                                key={href}
+                                href={href}
+                                className="text-muted-foreground transition-colors hover:text-foreground"
                             >
-                                Features
+                                {label}
                             </Link>
-                            <Link
-                                href="#security"
-                                className="text-slate-300 hover:text-white transition-colors"
-                            >
-                                Security
-                            </Link>
-                            <Link
-                                href="https://github.com/shuv-o/termi"
-                                className="text-slate-300 hover:text-white transition-colors"
-                            >
-                                GitHub
-                            </Link>
-                        </nav>
-
-                        <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="sm" asChild>
-                                <Link href="/login">Login</Link>
-                            </Button>
-                            <Button size="sm" asChild>
-                                <Link href="/register">Get Started</Link>
-                            </Button>
-                        </div>
+                        ))}
+                    </nav>
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link href="/login">Sign in</Link>
+                        </Button>
+                        <Button size="sm" asChild>
+                            <Link href="/register">Create account</Link>
+                        </Button>
                     </div>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-                </div>
-
-                <div className="relative max-w-5xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-                        <Shield className="w-4 h-4 text-primary" />
-                        <span className="text-sm text-sky-300">Open Source & Self-Hosted</span>
-                    </div>
-
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-                        Manage Your Servers
-                        <span className="block mt-2 gradient-text">Securely from Anywhere</span>
-                    </h1>
-
-                    <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
-                        SSH, SCP, RDP, and VNC access directly from your browser. Zero-trust
-                        security with end-to-end encryption and TOTP 2FA.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Button size="lg" asChild className="glow-hover group">
-                            <Link href="/register">
-                                Start Free
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </Button>
-                        <Button variant="secondary" size="lg" asChild>
-                            <Link href="#features">Learn More</Link>
-                        </Button>
-                    </div>
-
-                    {/* Desktop app download */}
-                    <div className="mt-10 flex flex-col items-center gap-4">
-                        <div className="flex items-center gap-3 w-full max-w-xs">
-                            <div className="flex-1 h-px bg-slate-700/60" />
-                            <span className="text-xs uppercase tracking-wider text-slate-500">
-                                Or get the desktop app
-                            </span>
-                            <div className="flex-1 h-px bg-slate-700/60" />
+            {/* Hero: the headline on the left, and on the right the thing
+                itself — a session pane with a real-looking shell in it. */}
+            <section className="px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:pb-24">
+                <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
+                    <div>
+                        <p className="mb-5 text-sm text-muted-foreground">
+                            Open source, MIT licensed, self-hosted
+                        </p>
+                        <h1 className="text-[40px] font-semibold leading-[1.04] tracking-[-0.03em] sm:text-[56px]">
+                            Every server you run, in one browser tab
+                            <span aria-hidden className="cursor-block" />
+                        </h1>
+                        <p className="mt-6 max-w-[52ch] text-base leading-relaxed text-muted-foreground sm:text-lg">
+                            Open SSH shells, move files over SCP, and drive Windows or Linux desktops
+                            over RDP and VNC — from a laptop or a phone. Credentials are encrypted
+                            with AES-256-GCM before they touch the database.
+                        </p>
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <Button size="lg" asChild>
+                                <Link href="/register">Create account</Link>
+                            </Button>
+                            <Button variant="outline" size="lg" asChild>
+                                <Link href="https://github.com/shuv-o/termi">
+                                    <Github />
+                                    Self-host it
+                                </Link>
+                            </Button>
                         </div>
-                        <DownloadDesktopButton />
+                        <div className="mt-10">
+                            <p className="mb-3 text-[13px] text-muted-foreground">
+                                Prefer a native window? Get the desktop app.
+                            </p>
+                            <DownloadDesktopButton />
+                        </div>
                     </div>
 
-                    {/* Protocol badges */}
-                    <div className="flex items-center justify-center gap-3 mt-12">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            SSH
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            SCP
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            RDP
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                            VNC
-                        </span>
-                    </div>
+                    <HeroConsole />
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">Everything You Need</h2>
-                        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                            A complete solution for managing Linux and Windows servers from any
-                            device.
+            {/* What it does: a spec sheet, not a grid of identical cards. */}
+            <section id="features" className="border-t border-border px-4 py-16 sm:px-6 lg:py-24">
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_2fr]">
+                    <div>
+                        <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">One place for every way in</h2>
+                        <p className="mt-3 max-w-[40ch] text-muted-foreground">
+                            Linux, Windows and anything that speaks Telnet, from whichever device is
+                            in your hand.
                         </p>
                     </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
-                                <Terminal className="w-6 h-6 text-green-400" />
+                    <dl className="divide-y divide-border border-y border-border">
+                        {FEATURES.map((f) => (
+                            <div
+                                key={f.name}
+                                className="grid gap-1 py-5 sm:grid-cols-[180px_1fr] sm:gap-6"
+                            >
+                                <dt className="flex items-center gap-2.5 font-medium">
+                                    <f.icon className={`h-4 w-4 shrink-0 ${f.tone}`} />
+                                    {f.name}
+                                </dt>
+                                <dd className="text-muted-foreground">{f.body}</dd>
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">SSH Terminal</h3>
-                            <p className="text-slate-400">
-                                Full-featured terminal with xterm.js. Support for colors, unicode,
-                                and all keyboard shortcuts.
-                            </p>
-                        </Card>
-
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
-                                <Server className="w-6 h-6 text-blue-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">File Manager</h3>
-                            <p className="text-slate-400">
-                                Browse, upload, download, and manage files via SCP with a modern web
-                                interface.
-                            </p>
-                        </Card>
-
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
-                                <Smartphone className="w-6 h-6 text-purple-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Remote Desktop</h3>
-                            <p className="text-slate-400">
-                                Access Windows RDP and Linux VNC directly from your browser or
-                                mobile device.
-                            </p>
-                        </Card>
-
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
-                                <Lock className="w-6 h-6 text-primary" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Secure Vault</h3>
-                            <p className="text-slate-400">
-                                AES-256-GCM encryption for all credentials. Optional master key for
-                                extra protection.
-                            </p>
-                        </Card>
-
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center mb-4">
-                                <Shield className="w-6 h-6 text-yellow-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Two-Factor Auth</h3>
-                            <p className="text-slate-400">
-                                TOTP-based 2FA with support for Google Authenticator, Authy, and
-                                other apps.
-                            </p>
-                        </Card>
-
-                        <Card className="p-6 bg-card border-border hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
-                            <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mb-4">
-                                <Zap className="w-6 h-6 text-red-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Mobile Optimized</h3>
-                            <p className="text-slate-400">
-                                PWA with virtual keyboard, touch gestures, and mobile-first
-                                responsive design.
-                            </p>
-                        </Card>
-                    </div>
+                        ))}
+                    </dl>
                 </div>
             </section>
 
-            {/* Security Section */}
-            <section id="security" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/50">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">Security First Design</h2>
-                    <p className="text-lg text-slate-300 mb-12">
-                        Your credentials are encrypted with AES-256-GCM and never stored in
-                        plaintext. We follow zero-trust principles and industry best practices.
+            <section
+                id="security"
+                className="border-t border-border bg-card px-4 py-16 sm:px-6 lg:py-24"
+            >
+                <div className="mx-auto max-w-6xl">
+                    <h2 className="max-w-[24ch] text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">Your keys stay yours</h2>
+                    <p className="mt-3 max-w-[60ch] text-muted-foreground">
+                        Passwords, private keys and notes are encrypted before they are stored, and
+                        never leave the server in plaintext. An optional master key adds a second
+                        layer that only you can unlock.
                     </p>
-
-                    <div className="grid sm:grid-cols-3 gap-8 text-left">
-                        <div>
-                            <div className="text-3xl font-bold text-primary mb-2">AES-256</div>
-                            <div className="text-slate-400">
-                                GCM encryption for all stored credentials
+                    <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+                        {SECURITY.map((item) => (
+                            <div key={item.title} className="bg-card p-5">
+                                <p className="data text-lg font-medium text-primary">{item.title}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
                             </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-primary mb-2">Argon2id</div>
-                            <div className="text-slate-400">
-                                Password hashing with secure parameters
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-primary mb-2">TOTP 2FA</div>
-                            <div className="text-slate-400">Time-based one-time passwords</div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Star on GitHub */}
             <StarOnGitHub />
 
-            {/* CTA Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Get Started?</h2>
-                    <p className="text-lg text-slate-300 mb-8">
-                        Deploy your own Termi instance in minutes with Docker.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <section className="border-t border-border px-4 py-16 sm:px-6 lg:py-24">
+                <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+                    <div>
+                        <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">
+                            Run your own in a few minutes
+                        </h2>
+                        <p className="mt-3 text-muted-foreground">
+                            One Docker Compose file: the web app, the gateway and guacd.
+                        </p>
+                    </div>
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                         <Button size="lg" asChild>
-                            <Link href="/register">Create Account</Link>
+                            <Link href="/register">Create account</Link>
                         </Button>
-                        <Button variant="secondary" size="lg" asChild>
-                            <Link href="https://github.com/shuv-o/termi">View on GitHub</Link>
+                        <Button variant="outline" size="lg" asChild>
+                            <Link href="https://github.com/shuv-o/termi">Read the setup guide</Link>
                         </Button>
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-                <div className="max-w-6xl mx-auto space-y-6">
-                    {/* Top row */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <Terminal className="w-5 h-5 text-primary" />
-                            <span className="font-semibold">Termi</span>
-                            <span className="text-slate-500">•</span>
-                            <span className="text-slate-500 text-sm">MIT License</span>
-                        </div>
-
-                        <div className="flex items-center gap-6 text-sm text-slate-400">
-                            <Link href="/privacy" className="hover:text-white transition-colors">
-                                Privacy
-                            </Link>
-                            <Link href="/security" className="hover:text-white transition-colors">
-                                Security
-                            </Link>
-                            <Link
-                                href="https://github.com/shuv-o/termi"
-                                className="hover:text-white transition-colors"
-                                rel="noopener noreferrer"
-                                target="_blank"
-                            >
-                                GitHub
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Developer attribution */}
-                    <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-                        <p>
-                            Built with ❤️ by{' '}
-                            <Link
-                                href="https://github.com/shuv-o"
-                                className="text-primary hover:text-sky-300 transition-colors font-medium"
-                                rel="noopener noreferrer"
-                                target="_blank"
-                            >
-                                Shuvo
-                            </Link>
-                        </p>
-
-                        <div className="flex items-center gap-4">
-                            <Link
-                                href="https://github.com/shuv-o"
-                                aria-label="GitHub profile of Shuvo"
-                                className="hover:text-white transition-colors"
-                                rel="noopener noreferrer"
-                                target="_blank"
-                            >
-                                <Github className="w-5 h-5" />
-                            </Link>
-                            <Link
-                                href="https://www.linkedin.com/in/shuv-o/"
-                                aria-label="LinkedIn profile of Shuvo"
-                                className="hover:text-white transition-colors"
-                                rel="noopener noreferrer"
-                                target="_blank"
-                            >
-                                <Linkedin className="w-5 h-5" />
-                            </Link>
-                            <Link
-                                href="mailto:shuvo.punam@gmail.com"
-                                aria-label="Email Shuvo"
-                                className="hover:text-white transition-colors"
-                            >
-                                <Mail className="w-5 h-5" />
-                            </Link>
-                        </div>
+            <footer
+                className="border-t border-border px-4 py-8 sm:px-6"
+                style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 0px))' }}
+            >
+                <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    <p>
+                        Termi is MIT licensed. Built by{' '}
+                        <Link
+                            href="https://github.com/shuv-o"
+                            className="text-foreground underline-offset-4 hover:underline"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            Shuvo
+                        </Link>
+                        .
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                        <Link href="/privacy" className="transition-colors hover:text-foreground">
+                            Privacy
+                        </Link>
+                        <Link href="/security" className="transition-colors hover:text-foreground">
+                            Security
+                        </Link>
+                        <Link
+                            href="https://github.com/shuv-o"
+                            aria-label="GitHub profile of Shuvo"
+                            className="transition-colors hover:text-foreground"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            <Github className="h-[18px] w-[18px]" />
+                        </Link>
+                        <Link
+                            href="https://www.linkedin.com/in/shuv-o/"
+                            aria-label="LinkedIn profile of Shuvo"
+                            className="transition-colors hover:text-foreground"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            <Linkedin className="h-[18px] w-[18px]" />
+                        </Link>
+                        <Link
+                            href="mailto:shuvo.punam@gmail.com"
+                            aria-label="Email Shuvo"
+                            className="transition-colors hover:text-foreground"
+                        >
+                            <Mail className="h-[18px] w-[18px]" />
+                        </Link>
                     </div>
                 </div>
             </footer>
+        </div>
+    );
+}
+
+const FEATURES = [
+    {
+        name: 'SSH',
+        icon: Terminal,
+        tone: 'text-proto-ssh',
+        body: 'A full xterm terminal with colour, Unicode and every shortcut. Sessions survive a closed tab and reattach when you come back.',
+    },
+    {
+        name: 'File transfer',
+        icon: FolderOpen,
+        tone: 'text-proto-scp',
+        body: 'Browse, upload, download and edit files over SFTP, with a transfer queue that shows progress per file.',
+    },
+    {
+        name: 'Remote desktop',
+        icon: Monitor,
+        tone: 'text-proto-rdp',
+        body: 'Windows over RDP and Linux over VNC, rendered in the browser with clipboard sync.',
+    },
+    {
+        name: 'On your phone',
+        icon: Smartphone,
+        tone: 'text-proto-vnc',
+        body: 'An installable app with a terminal keyboard row for Ctrl, Esc, Tab and arrows, so a phone is enough in an emergency.',
+    },
+    {
+        name: 'Monitoring',
+        icon: Activity,
+        tone: 'text-proto-telnet',
+        body: 'CPU, memory and disk for every SSH server, with push, email and webhook alerts when one goes down.',
+    },
+];
+
+const SECURITY = [
+    { title: 'AES-256-GCM', body: 'Encryption for every stored credential.' },
+    { title: 'scrypt', body: 'Memory-hard hashing for account passwords.' },
+    { title: 'TOTP + passkeys', body: 'Two-factor sign-in with an app or a passkey.' },
+];
+
+/** The hero visual: a Termi session pane, drawn in the product's own chrome. */
+function HeroConsole() {
+    return (
+        <div
+            aria-hidden
+            className="overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+        >
+            <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
+                {[
+                    { name: 'web-01', proto: 'bg-proto-ssh', active: true },
+                    { name: 'db-primary', proto: 'bg-proto-ssh', active: false },
+                    { name: 'win-desktop', proto: 'bg-proto-rdp', active: false },
+                ].map((t) => (
+                    <span
+                        key={t.name}
+                        className={`data flex items-center gap-2 rounded-md px-2.5 py-1 text-xs ${
+                            t.active ? 'bg-accent text-foreground' : 'text-muted-foreground'
+                        } ${t.name === 'win-desktop' ? 'hidden sm:flex' : ''}`}
+                    >
+                        <span className={`h-1.5 w-1.5 rounded-full ${t.proto}`} />
+                        {t.name}
+                    </span>
+                ))}
+            </div>
+            <div className="data bg-[var(--terminal-bg)] p-4 text-[12.5px] leading-[1.7] sm:p-5 sm:text-[13px]">
+                <p>
+                    <span className="text-proto-ssh">deploy@web-01</span>
+                    <span className="text-muted-foreground">:~$ </span>
+                    <span className="text-foreground">systemctl status nginx</span>
+                </p>
+                <p className="text-foreground/80">
+                    <span className="text-success">●</span> nginx.service — A high performance web
+                    server
+                </p>
+                <p className="text-muted-foreground">
+                    {'   '}Active: <span className="text-success">active (running)</span> since Mon
+                    09:12; 3 days ago
+                </p>
+                <p className="text-muted-foreground">{'   '}Memory: 18.4M</p>
+                <p className="mt-2">
+                    <span className="text-proto-ssh">deploy@web-01</span>
+                    <span className="text-muted-foreground">:~$ </span>
+                    <span className="inline-block h-[1.1em] w-[0.55em] translate-y-[0.2em] bg-primary" />
+                </p>
+            </div>
+            <div className="grid grid-cols-3 divide-x divide-border border-t border-border text-xs">
+                {[
+                    ['CPU', '12%'],
+                    ['Memory', '41%'],
+                    ['Latency', '14 ms'],
+                ].map(([k, v]) => (
+                    <div key={k} className="px-4 py-2.5">
+                        <p className="text-muted-foreground">{k}</p>
+                        <p className="mt-0.5 font-medium tabular-nums text-foreground">{v}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

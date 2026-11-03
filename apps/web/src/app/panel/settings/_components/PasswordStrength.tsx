@@ -2,7 +2,7 @@
 
 import { Check } from 'lucide-react';
 
-const COLORS = ['bg-danger', 'bg-orange-500', 'bg-warning', 'bg-success'];
+const COLORS = ['bg-danger', 'bg-proto-vnc', 'bg-warning', 'bg-success'];
 const LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
 export function PasswordStrength({ password }: { password: string }) {
@@ -30,7 +30,7 @@ export function PasswordStrength({ password }: { password: string }) {
                     {checks.map((c) => (
                         <span
                             key={c.label}
-                            className={`text-[10px] flex items-center gap-1 ${c.ok ? 'text-success' : 'text-muted-foreground/50'}`}
+                            className={`text-[11px] flex items-center gap-1 ${c.ok ? 'text-success' : 'text-muted-foreground/50'}`}
                         >
                             {c.ok ? (
                                 <Check className="w-2.5 h-2.5" />
@@ -43,7 +43,7 @@ export function PasswordStrength({ password }: { password: string }) {
                 </div>
                 {strength > 0 && (
                     <span
-                        className={`text-[10px] font-medium ${COLORS[strength - 1].replace('bg-', 'text-')}`}
+                        className={`text-[11px] font-medium ${COLORS[strength - 1].replace('bg-', 'text-')}`}
                     >
                         {LABELS[strength - 1]}
                     </span>

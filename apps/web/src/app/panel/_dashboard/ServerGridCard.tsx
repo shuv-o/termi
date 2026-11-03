@@ -15,7 +15,6 @@ function UsageBar({
     label,
     percent,
     text,
-    tone,
 }: {
     label: string;
     percent: number;
@@ -27,20 +26,20 @@ function UsageBar({
     // the point the "High CPU"/"High RAM" fleet stats start counting the server,
     // and red at the point the alert banner starts listing it.
     const loadTone = usageTone(percent);
-    const idleText =
-        tone === 'cpu' ? 'text-success' : tone === 'ram' ? 'text-info' : 'text-muted-foreground';
-    const idleBar =
-        tone === 'cpu' ? 'bg-success' : tone === 'ram' ? 'bg-info' : 'bg-muted-foreground/30';
+    // Below the warning line a bar is just a reading, not a verdict — so it
+    // stays neutral, and colour is reserved for load that needs attention.
+    const idleText = 'text-foreground/80';
+    const idleBar = 'bg-muted-foreground/45';
     const textColor = loadTone === 'success' ? idleText : toneText[loadTone];
     const barColor = loadTone === 'success' ? idleBar : toneDot[loadTone];
 
     return (
-        <div className="space-y-1">
-            <div className="flex items-center justify-between text-[10px]">
-                <span className="text-muted-foreground/60">{label}</span>
+        <div className="min-w-0 space-y-1">
+            <div className="flex items-center justify-between gap-1 text-[11px]">
+                <span className="truncate text-muted-foreground">{label}</span>
                 <span className={`tabular-nums font-medium ${textColor}`}>{text}%</span>
             </div>
-            <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-1 overflow-hidden rounded-full bg-accent">
                 <div
                     className={`h-full rounded-full transition-all duration-700 ${barColor}`}
                     style={{ width: `${Math.min(100, percent)}%` }}
@@ -66,96 +65,75 @@ export function ServerGridCard({
 }: ServerCardProps) {
     const Icon = protocolIcons[server.protocol];
     const hasMetrics = server.protocol === 'SSH' && m && m.reachable && !m.error;
-    const statusStrip = mLoading
-        ? ''
-        : m?.reachable === true
-          ? 'bg-success/60'
-          : m?.reachable === false
-            ? 'bg-danger/60'
-            : '';
 
     return (
-        <Card className="group flex flex-col overflow-hidden border border-border bg-card hover:-translate-y-[2px] hover:border-border/80 hover:shadow-lg transition-all duration-200">
-            <div className={`h-0.5 w-full transition-colors duration-500 ${statusStrip}`} />
-
-            <div className="flex flex-1 flex-col gap-3 p-3.5 cursor-pointer" onClick={onOpen}>
+        <Card className="group relative flex flex-col overflow-hidden transition-colors duration-150 hover:border-input">
+            <div className="flex flex-1 cursor-pointer flex-col gap-3 p-4" onClick={onOpen}>
                 <div className="flex items-start gap-3">
                     <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${protocolVariants[server.protocol]}`}
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${protocolVariants[server.protocol]}`}
+                        title={server.protocol}
                     >
                         <Icon className="h-4 w-4" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-start gap-2 min-w-0">
-                            <div className="min-w-0 flex-1">
-                                <h3 className="truncate text-sm font-semibold leading-tight">
-                                    {server.name}
-                                </h3>
-                                <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground/80">
-                                    {server.host}
-                                    <span className="text-muted-foreground/50">:{server.port}</span>
-                                </p>
-                            </div>
-                            {mLoading ? (
-                                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40 animate-pulse" />
-                            ) : m?.reachable === true ? (
-                                <span className="mt-0.5">
-                                    <ServerStatusPill
-                                        status="online"
-                                        label={m.latencyMs != null ? `${m.latencyMs}ms` : 'Online'}
-                                    />
-                                </span>
-                            ) : m?.reachable === false ? (
-                                <span className="mt-0.5">
-                                    <ServerStatusPill status="offline" label="Offline" />
-                                </span>
-                            ) : null}
+                    <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-[15px] font-semibold leading-snug">
+                            {server.name}
+                        </h3>
+                        <div className="mt-0.5 flex min-w-0 items-center gap-1">
+                            <p className="data truncate text-xs text-muted-foreground">
+                                {server.username}@{server.host}
+                                <span className="text-muted-foreground/60">:{server.port}</span>
+                            </p>
+                            <CopyButton
+                                text={`${server.host}:${server.port}`}
+                                className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                            />
                         </div>
                     </div>
                     <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={server.isFavorite ? 'Unstar' : 'Star'}
+                        aria-pressed={server.isFavorite}
                         onClick={(e) => {
                             e.stopPropagation();
                             onFavorite();
                         }}
-                        className={`h-8 w-8 shrink-0 rounded-md transition-all ${server.isFavorite ? 'text-warning' : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-warning [@media(hover:none)]:opacity-100'}`}
+                        className={`-mr-2 -mt-1.5 h-9 w-9 shrink-0 sm:h-8 sm:w-8 ${server.isFavorite ? 'text-warning hover:text-warning' : 'text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-warning [@media(hover:none)]:opacity-100'}`}
                     >
-                        <Star
-                            className={`h-3.5 w-3.5 ${server.isFavorite ? 'fill-warning' : ''}`}
-                        />
+                        <Star className={`h-4 w-4 ${server.isFavorite ? 'fill-warning' : ''}`} />
                     </Button>
                 </div>
 
-                <div className="rounded-lg border border-border/60 bg-secondary/30 px-2.5 py-2">
-                    <div className="flex items-center gap-2">
-                        <span className="truncate font-mono text-[11px] text-foreground/75">
-                            {server.username}@{server.host}
-                        </span>
-                        <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
-                    </div>
-                    {server.description && (
-                        <p className="mt-1.5 line-clamp-1 text-[11px] text-muted-foreground">
-                            {server.description}
-                        </p>
-                    )}
-                </div>
+                {server.description && (
+                    <p className="line-clamp-2 text-[13px] leading-snug text-muted-foreground">
+                        {server.description}
+                    </p>
+                )}
 
                 <div className="flex flex-wrap items-center gap-1.5">
-                    <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${protocolVariants[server.protocol]}`}
-                    >
-                        {server.protocol}
-                    </span>
+                    {mLoading ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-px text-[11px] text-muted-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                            Checking
+                        </span>
+                    ) : m?.reachable === true ? (
+                        <ServerStatusPill
+                            status="online"
+                            label={m.latencyMs != null ? `Online, ${m.latencyMs} ms` : 'Online'}
+                        />
+                    ) : m?.reachable === false ? (
+                        <ServerStatusPill status="offline" label="Offline" />
+                    ) : null}
                     {server.group && (
                         <span
-                            className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
-                            style={{
-                                backgroundColor: `${server.group.color}20`,
-                                color: server.group.color || undefined,
-                                borderColor: `${server.group.color}40`,
-                            }}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-px text-[11px] font-medium text-foreground/80"
                         >
+                            <span
+                                className="h-1.5 w-1.5 rounded-full"
+                                style={{ backgroundColor: server.group.color || 'var(--muted-foreground)' }}
+                            />
                             {server.group.name}
                         </span>
                     )}
@@ -166,16 +144,16 @@ export function ServerGridCard({
                                 e.stopPropagation();
                                 onTagClick(tag);
                             }}
-                            className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                            className="inline-flex items-center rounded-full border border-border px-2 py-px text-[11px] text-muted-foreground transition-colors hover:border-input hover:text-foreground"
                         >
-                            {tag}
+                            #{tag}
                         </button>
                     ))}
                 </div>
 
-                <div className="mt-auto space-y-2">
+                <div className="mt-auto space-y-2.5">
                     {hasMetrics && (
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-3">
                             {m!.cpu != null && (
                                 <UsageBar
                                     label="CPU"
@@ -186,7 +164,7 @@ export function ServerGridCard({
                             )}
                             {m!.ram && (
                                 <UsageBar
-                                    label="RAM"
+                                    label="Memory"
                                     percent={m!.ram.percent}
                                     text={String(Math.round(m!.ram.percent))}
                                     tone="ram"
@@ -203,40 +181,36 @@ export function ServerGridCard({
                         </div>
                     )}
 
-                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                         <Clock className="h-3 w-3 shrink-0" />
                         <span>{formatRelativeTime(server.lastUsedAt)}</span>
                         {m?.network && (
-                            <>
-                                <span className="mx-0.5 text-muted-foreground/30">·</span>
-                                <ArrowDown className="h-2.5 w-2.5 text-success/60" />
-                                <span className="tabular-nums">
-                                    {formatBytes(m.network.rxBytes)}
-                                </span>
-                                <ArrowUp className="h-2.5 w-2.5 text-info/60" />
-                                <span className="tabular-nums">
-                                    {formatBytes(m.network.txBytes)}
-                                </span>
-                            </>
+                            <span className="ml-auto flex items-center gap-1 tabular-nums">
+                                <ArrowDown className="h-3 w-3" aria-label="Received" />
+                                {formatBytes(m.network.rxBytes)}
+                                <ArrowUp className="ml-1 h-3 w-3" aria-label="Sent" />
+                                {formatBytes(m.network.txBytes)}
+                            </span>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-1.5 border-t border-border/60 bg-secondary/20 px-3 py-2.5">
-                {/* SSH used to have a second button here ("Add to Sessions")
-                    that did the same thing as Connect now does — both open a
-                    workspace session. One button, and it says whether that
-                    session already exists. */}
+            <div className="flex items-center gap-2 border-t border-border px-3 py-2.5">
+                {/* One button: it opens a workspace session, and says whether
+                    that session already exists. */}
                 <Button
                     onClick={(e) => {
                         e.stopPropagation();
                         onConnect();
                     }}
+                    // Quiet in a grid of many: a wall of solid accent buttons
+                    // drowns out the one thing on the page that needs it.
+                    variant="secondary"
                     size="sm"
-                    className="h-8 flex-1 justify-center gap-1.5 text-xs"
+                    className={`flex-1 ${hasSession ? '' : 'text-primary hover:border-primary/40 hover:bg-primary/10'}`}
                 >
-                    {hasSession && <Layers className="h-3.5 w-3.5" />}
+                    {hasSession && <Layers />}
                     {hasSession ? 'Open session' : 'Connect'}
                 </Button>
                 <ServerActionsMenu
@@ -245,7 +219,7 @@ export function ServerGridCard({
                     onShare={onShare}
                     onCopyPassword={onCopyPassword}
                     onDelete={onDelete}
-                    triggerClassName="h-8 w-8 shrink-0"
+                    triggerClassName="h-9 w-9 shrink-0 sm:h-8 sm:w-8"
                 />
             </div>
         </Card>

@@ -85,7 +85,7 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={dismiss}
-                            className="rounded-lg bg-linear-to-r from-primary to-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition-transform hover:-translate-y-0.5"
+                            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-transform"
                         >
                             ⭐ Star on GitHub
                         </a>
@@ -93,9 +93,7 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
                             type="button"
                             onClick={dismiss}
                             className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground/90"
-                        >
-                            No thanks
-                        </button>
+                        >No thanks</button>
                     </div>
                 </div>
 

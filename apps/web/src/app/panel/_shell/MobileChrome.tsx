@@ -1,9 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, ChevronLeft, Laptop, LogOut, Mail, Shield } from 'lucide-react';
+import { ChevronLeft, Laptop, LogOut, Mail, Search, Settings, Shield } from 'lucide-react';
 import TerminalLogo from '@/components/common/Logo';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
 import { activeNavName, isNavItemActive, navigation, type PanelUser } from './navigation';
 
 /** Prompt to verify the account email; sits above the mobile header. */
@@ -32,64 +39,51 @@ export function VerifyEmailBanner({
             <button
                 onClick={onResend}
                 disabled={resending || sent}
-                className="text-xs font-medium text-warning hover:text-warning/80 underline shrink-0 disabled:opacity-50"
+                className="h-8 shrink-0 rounded-md border border-warning/30 px-2.5 text-xs font-medium text-warning transition-colors hover:bg-warning/10 disabled:opacity-50"
             >
-                {sent ? 'Sent!' : resending ? 'Sending…' : 'Resend'}
+                {sent ? 'Email sent' : resending ? 'Sending…' : 'Resend email'}
             </button>
         </div>
     );
 }
 
 function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void }) {
-    const [open, setOpen] = useState(false);
-
     return (
-        <div className="relative">
-            <button
-                onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-1 p-1 rounded-lg hover:bg-secondary transition-colors"
-            >
-                <div className="w-7 h-7 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs">
-                    {(user.name || user.email)[0].toUpperCase()}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button
+                    aria-label="Account"
+                    className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-accent"
+                >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-input bg-accent text-xs font-semibold">
+                        {(user.name || user.email)[0].toUpperCase()}
+                    </span>
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+                <div className="px-2.5 py-2">
+                    {user.name && <p className="truncate text-sm font-medium">{user.name}</p>}
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    {user.totpEnabled && (
+                        <p className="mt-1 flex items-center gap-1 text-xs text-success">
+                            <Shield className="h-3 w-3" /> 2FA on
+                        </p>
+                    )}
                 </div>
-                <ChevronDown
-                    className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
-                />
-            </button>
-
-            {open && (
-                <>
-                    {/* Click-away catcher behind the menu. */}
-                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-52 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
-                        <div className="px-3 py-2.5 border-b border-border">
-                            {user.name && (
-                                <p className="text-xs font-medium truncate">{user.name}</p>
-                            )}
-                            <p
-                                className={`truncate ${user.name ? 'text-[10px] text-muted-foreground' : 'text-xs font-medium'}`}
-                            >
-                                {user.email}
-                            </p>
-                            {user.totpEnabled && (
-                                <p className="text-[10px] text-success flex items-center gap-1 mt-0.5">
-                                    <Shield className="w-2.5 h-2.5" /> 2FA enabled
-                                </p>
-                            )}
-                        </div>
-                        <button
-                            onClick={() => {
-                                setOpen(false);
-                                onLogout();
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-3 text-sm text-danger hover:bg-danger/10 transition-colors"
-                        >
-                            <LogOut className="w-4 h-4" /> Sign Out
-                        </button>
-                    </div>
-                </>
-            )}
-        </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                    <Link href="/panel/settings">
+                        <Settings /> Settings
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onSelect={onLogout}
+                    className="text-danger focus:bg-danger/10 focus:text-danger"
+                >
+                    <LogOut /> Sign out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -108,9 +102,11 @@ export function MobileTopBar({
     onBack: () => void;
     onLogout: () => void;
 }) {
+    const section = activeNavName(pathname);
+
     return (
         <header
-            className="lg:hidden sticky top-0 z-30 bg-card/90 backdrop-blur-md border-b border-border"
+            className="lg:hidden sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-lg"
             style={{
                 // The banner (when shown) already pushes content below
                 // the status bar / Dynamic Island, so only the header
@@ -120,27 +116,31 @@ export function MobileTopBar({
                 paddingRight: 'env(safe-area-inset-right, 0px)',
             }}
         >
-            <div className="flex items-center justify-between h-14 px-4">
+            <div className="flex h-14 items-center gap-1 px-2">
                 {isRootPage ? (
-                    <Link href="/panel" className="flex items-center gap-2.5">
-                        <TerminalLogo width={26} height={26} className="rounded-md" />
-                        <span className="font-bold text-sm">Termi</span>
+                    <Link href="/panel" className="flex items-center gap-2 rounded-md px-2 py-1.5">
+                        <TerminalLogo width={24} height={24} className="rounded-md" />
+                        <span className="text-[15px] font-semibold">Termi</span>
                     </Link>
                 ) : (
                     <button
                         onClick={onBack}
-                        aria-label="Go back"
-                        className="flex items-center gap-1 -ml-1.5 pr-2 py-1.5 rounded-lg text-foreground hover:bg-secondary active:scale-95 transition-transform"
+                        className="flex h-10 items-center gap-0.5 rounded-md pl-1 pr-2.5 text-foreground transition-colors hover:bg-accent active:bg-accent"
                     >
-                        <ChevronLeft className="w-5 h-5 shrink-0" />
-                        <span className="text-sm font-medium">Back</span>
+                        <ChevronLeft className="h-5 w-5 shrink-0" />
+                        <span className="text-sm font-medium">{section || 'Back'}</span>
                     </button>
                 )}
 
-                <span className="text-sm font-medium text-muted-foreground capitalize">
-                    {activeNavName(pathname)}
-                </span>
+                <div className="flex-1" />
 
+                <button
+                    onClick={() => window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT))}
+                    aria-label="Search"
+                    className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                    <Search className="h-[18px] w-[18px]" />
+                </button>
                 <UserMenu user={user} onLogout={onLogout} />
             </div>
         </header>
@@ -148,9 +148,9 @@ export function MobileTopBar({
 }
 
 /**
- * Floating "Liquid Glass" capsule, clear of every edge, rather than a bar
- * docked flush to the screen bottom. The caller omits it entirely on terminal
- * views so those screens get the full viewport.
+ * Floating capsule, clear of every edge, rather than a bar docked flush to the
+ * screen bottom. The caller omits it entirely on terminal views so those
+ * screens get the full viewport.
  */
 export function MobileBottomNav({
     pathname,
@@ -165,69 +165,57 @@ export function MobileBottomNav({
     localTerminalActive: boolean;
     onOpenLocalTerminal: () => void;
 }) {
-    const itemClass = (active: boolean, activeBg: string) =>
-        `flex flex-col items-center justify-center gap-0.5 w-[60px] h-[48px] rounded-[18px] transition-all active:scale-90 duration-150 ${
-            active ? activeBg : ''
+    const item = (active: boolean) =>
+        `relative flex h-[52px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors active:bg-accent ${
+            active ? 'text-foreground' : 'text-muted-foreground'
         }`;
 
     return (
         <nav
+            aria-label="Main"
             className={`lg:hidden fixed inset-x-0 z-40 flex justify-center transition-transform duration-200 ${
                 keyboardOpen ? 'translate-y-[calc(100%+2rem)] pointer-events-none' : 'translate-y-0'
             }`}
             style={{
-                bottom: 'max(0.625rem, calc(env(safe-area-inset-bottom, 0px) + 0.375rem))',
-                paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
-                paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+                bottom: 'max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.25rem))',
+                paddingLeft: 'max(0.75rem, env(safe-area-inset-left, 0px))',
+                paddingRight: 'max(0.75rem, env(safe-area-inset-right, 0px))',
             }}
         >
-            <div className="relative flex items-center gap-1 h-[58px] px-2 rounded-[27px] bg-card/70 backdrop-blur-2xl border border-border/60 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)]">
-                {/* Glass sheen — a faint highlight along the top edge of the
-                    capsule so the bar reads as glass, not a flat panel */}
-                <div className="pointer-events-none absolute inset-x-4 top-px h-px bg-linear-to-r from-transparent via-white/40 to-transparent" />
-
-                {navigation.map((item) => {
-                    const isActive = isNavItemActive(item.href, pathname);
+            <div className="glass flex w-full max-w-md items-center gap-0.5 rounded-2xl p-1 shadow-xl">
+                {navigation.map((nav) => {
+                    const isActive = isNavItemActive(nav.href, pathname);
                     return (
                         <Link
-                            key={item.name}
-                            href={item.href}
-                            className={itemClass(isActive, 'bg-primary/15')}
+                            key={nav.name}
+                            href={nav.href}
+                            aria-current={isActive ? 'page' : undefined}
+                            className={item(isActive)}
                         >
-                            <item.icon
-                                className={`w-[20px] h-[20px] shrink-0 transition-colors ${
-                                    isActive ? 'text-primary' : 'text-muted-foreground/55'
-                                }`}
+                            <nav.icon
+                                className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : ''}`}
                             />
                             <span
-                                className={`text-[9.5px] leading-none tracking-tight transition-colors ${
-                                    isActive
-                                        ? 'font-semibold text-primary'
-                                        : 'font-medium text-muted-foreground/55'
-                                }`}
+                                className={`text-[11px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}
                             >
-                                {item.name}
+                                {nav.name}
                             </span>
+                            {/* Cursor mark under the active tab. */}
+                            {isActive && (
+                                <span
+                                    aria-hidden
+                                    className="absolute bottom-1 h-[3px] w-4 rounded-full bg-primary"
+                                />
+                            )}
                         </Link>
                     );
                 })}
 
                 {isElectron && (
-                    <button
-                        onClick={onOpenLocalTerminal}
-                        className={itemClass(localTerminalActive, 'bg-violet-500/15')}
-                    >
-                        <Laptop
-                            className={`w-[20px] h-[20px] shrink-0 transition-colors ${
-                                localTerminalActive ? 'text-violet-400' : 'text-violet-400/50'
-                            }`}
-                        />
+                    <button onClick={onOpenLocalTerminal} className={item(localTerminalActive)}>
+                        <Laptop className="h-5 w-5 shrink-0 text-local" />
                         <span
-                            className={`text-[9.5px] leading-none tracking-tight transition-colors ${
-                                localTerminalActive
-                                    ? 'font-semibold text-violet-400'
-                                    : 'font-medium text-violet-400/50'
-                            }`}
+                            className={`text-[11px] leading-none ${localTerminalActive ? 'font-semibold' : 'font-medium'}`}
                         >
                             Local
                         </span>

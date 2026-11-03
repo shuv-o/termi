@@ -59,7 +59,7 @@ export function TunnelsPanel() {
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Active Tunnels"
+                title="Active tunnels"
                 description="Port forwards you've opened across all servers — like ssh -L, but tracked in one place."
                 icon={Waypoints}
                 iconBg="bg-info/15 text-info"

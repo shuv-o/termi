@@ -26,7 +26,7 @@ export function BottomSheet({
                     <div className="w-10 h-1 rounded-full bg-accent" />
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-border/60">
-                    <h3 className="font-medium text-sm text-white truncate pr-4">{title}</h3>
+                    <h3 className="font-medium text-sm text-foreground truncate pr-4">{title}</h3>
                     <button
                         onClick={onClose}
                         aria-label="Close"

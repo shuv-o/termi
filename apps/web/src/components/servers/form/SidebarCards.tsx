@@ -29,7 +29,7 @@ import {
 } from './types';
 
 const CARD_CLASS = 'border-border hover:border-border/80 transition-all duration-200';
-const SECTION_LABEL = 'text-[11px] font-semibold text-muted-foreground uppercase tracking-wider';
+const SECTION_LABEL = 'text-xs font-medium text-muted-foreground';
 
 /** Collapsible description / tags / notes block. */
 export function AdvancedCard({
@@ -119,7 +119,7 @@ export function AdvancedCard({
                                                     tags: form.tags.filter((t) => t !== tag),
                                                 })
                                             }
-                                            className="text-muted-foreground transition-colors hover:text-destructive"
+                                            className="text-muted-foreground transition-colors hover:text-danger"
                                         >
                                             <X className="w-3 h-3" />
                                         </button>
@@ -183,12 +183,12 @@ export function PreviewCard({
                             )}
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                                 <span
-                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium ${colors.badge}`}
+                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[11px] font-medium ${colors.badge}`}
                                 >
                                     {form.protocol}
                                 </span>
                                 {selectedGroup && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-secondary text-secondary-foreground">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[11px] font-medium bg-secondary text-secondary-foreground">
                                         {selectedGroup.name}
                                     </span>
                                 )}
@@ -216,7 +216,7 @@ export function PreviewCard({
                                     <span className="font-mono truncate text-foreground/80">
                                         {form.username}
                                     </span>
-                                    <span className="text-muted-foreground/40 text-[10px]">
+                                    <span className="text-muted-foreground/40 text-[11px]">
                                         ({form.authMethod === 'key' ? 'key' : 'password'})
                                     </span>
                                 </div>
@@ -227,7 +227,7 @@ export function PreviewCard({
                                     {form.tags.map((t) => (
                                         <span
                                             key={t}
-                                            className="text-[10px] px-1.5 py-0.5 rounded-sm bg-secondary/80 text-muted-foreground"
+                                            className="text-[11px] px-1.5 py-0.5 rounded-sm bg-secondary/80 text-muted-foreground"
                                         >
                                             {t}
                                         </span>
@@ -320,13 +320,13 @@ export function TestConnectionCard({
                 )}
 
                 {testStatus === 'failed' && testResult?.error && (
-                    <div className="mt-3 flex items-start gap-2.5 p-2.5 rounded-lg bg-destructive/8 border border-destructive/20">
-                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                    <div className="mt-3 flex items-start gap-2.5 p-2.5 rounded-lg bg-destructive/8 border border-danger/20">
+                        <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-xs font-medium text-destructive">
+                            <p className="text-xs font-medium text-danger">
                                 {isSSHProto ? 'Authentication failed' : 'Unreachable'}
                             </p>
-                            <p className="text-[11px] text-destructive/60 break-words">
+                            <p className="text-[11px] text-danger/60 break-words">
                                 {testResult.error}
                             </p>
                         </div>

@@ -94,7 +94,7 @@ export function AuthCard({
         <Card className="border-border hover:border-border/80 transition-all duration-200">
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <p className="text-[11px] font-semibold text-muted-foreground">
                         Authentication
                     </p>
                     <div className="flex gap-1 rounded-lg border border-border/50 bg-background/60 p-1">
@@ -144,7 +144,7 @@ export function AuthCard({
                                         if (id) applyKeychain(id);
                                     }}
                                 >
-                                    <SelectTrigger className="h-9 bg-secondary border-border text-sm">
+                                    <SelectTrigger className="h-9 text-sm">
                                         <SelectValue placeholder="Choose a keychain entry…" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-card border-border">
@@ -155,7 +155,7 @@ export function AuthCard({
                                                 <span className="ml-2 text-xs text-muted-foreground">
                                                     {kc.username}
                                                 </span>
-                                                <span className="ml-1.5 text-[10px] text-muted-foreground/60">
+                                                <span className="ml-1.5 text-[11px] text-muted-foreground/60">
                                                     {kc.hasPrivateKey ? '(SSH key)' : '(password)'}
                                                 </span>
                                             </SelectItem>

@@ -221,7 +221,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                         key={i}
                                         className="flex items-start gap-2 text-xs p-2 rounded-sm bg-secondary/50"
                                     >
-                                        <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-destructive" />
+                                        <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-danger" />
                                         <span>
                                             <span className="font-medium">{f.name}</span> —{' '}
                                             {f.reason}
@@ -443,7 +443,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                         </span>
                     </div>
 
-                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
 
                     <div className="flex justify-end gap-2">
                         <Button variant="ghost" onClick={onClose} disabled={busy}>
@@ -545,7 +545,7 @@ function Stat({
     tone: 'good' | 'bad' | 'muted';
 }) {
     const color =
-        tone === 'good' ? 'text-success' : tone === 'bad' ? 'text-destructive' : 'text-foreground';
+        tone === 'good' ? 'text-success' : tone === 'bad' ? 'text-danger' : 'text-foreground';
     return (
         <div className="p-3 rounded-lg bg-secondary/50">
             <div className={`text-2xl font-bold ${color}`}>{value}</div>

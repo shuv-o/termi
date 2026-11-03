@@ -59,7 +59,7 @@ function ServerRow({
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">{srv.name}</span>
-                    {srv.isFavorite && <span className="text-warning text-[10px]">★</span>}
+                    {srv.isFavorite && <span className="text-warning text-[11px]">★</span>}
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground/60 font-mono">
                     <span className="truncate">
@@ -68,7 +68,7 @@ function ServerRow({
                     <span>:{srv.port}</span>
                 </div>
             </div>
-            <div className="hidden sm:block text-[10px] text-muted-foreground/40 w-14 text-right shrink-0">
+            <div className="hidden sm:block text-[11px] text-muted-foreground/40 w-14 text-right shrink-0">
                 {formatRelativeTime(srv.lastUsedAt)}
             </div>
             <div className="flex items-center gap-1 shrink-0">
@@ -192,7 +192,7 @@ function GroupHeader({
                         variant="ghost"
                         size="sm"
                         onClick={() => onDelete(group)}
-                        className="gap-1.5 text-xs h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="gap-1.5 text-xs h-8 text-danger hover:text-danger hover:bg-danger/10"
                     >
                         <Trash2 className="w-3.5 h-3.5" />
                         Delete
@@ -275,7 +275,7 @@ export function GroupDetailPanel({
                 ) : (
                     <>
                         <div className="px-6 pt-4 pb-2">
-                            <p className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+                            <p className="text-[11px] font-medium text-muted-foreground/60">
                                 Servers · {detail!.servers.length}
                             </p>
                         </div>
@@ -310,7 +310,7 @@ export function GroupDetailPanel({
                             <Layers className="w-3.5 h-3.5" />
                             Open all ({detail!.servers.length})
                         </Button>
-                        <div className="ml-auto text-[10px] text-muted-foreground/40">
+                        <div className="ml-auto text-[11px] text-muted-foreground/40">
                             Created {formatRelativeTime(group.createdAt)}
                         </div>
                     </div>

@@ -46,14 +46,14 @@ export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePas
                             type="text"
                             value={passkeys.newName}
                             onChange={(e) => passkeys.setNewName(e.target.value)}
-                            placeholder="My Passkey"
+                            placeholder="My passkey"
                             className="bg-card border-border"
                             maxLength={64}
                             disabled={passkeys.adding}
                             autoFocus
                         />
                         {passkeys.error && (
-                            <div className="flex items-start gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+                            <div className="flex items-start gap-2 p-3 rounded-xl bg-danger/10 border border-danger/20 text-sm text-danger">
                                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                                 {passkeys.error}
                             </div>

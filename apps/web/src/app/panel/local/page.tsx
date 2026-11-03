@@ -148,8 +148,8 @@ export default function LocalTerminalPage() {
         <div className="flex flex-col h-[calc(100vh-7.5rem)] lg:h-screen -m-4 lg:-m-8 bg-background">
             {/* Header */}
             <div className="shrink-0 flex items-center gap-2.5 px-3 sm:px-4 py-2.5 border-b border-border bg-card/40">
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 shrink-0">
-                    <Laptop className="w-4 h-4 text-violet-400" />
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-local/10 border border-local/20 shrink-0">
+                    <Laptop className="w-4 h-4 text-local" />
                 </span>
                 <div className="flex flex-col min-w-0">
                     <span className="text-sm font-semibold leading-tight truncate">{title}</span>
@@ -199,7 +199,7 @@ export default function LocalTerminalPage() {
                             }}
                             className={`group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap cursor-pointer transition-colors select-none ${
                                 isActive
-                                    ? 'bg-violet-500/15 text-violet-300'
+                                    ? 'bg-local/15 text-local'
                                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                             }`}
                         >
@@ -213,7 +213,7 @@ export default function LocalTerminalPage() {
                                         e.stopPropagation();
                                         closeTab(tab.id);
                                     }}
-                                    className="rounded-sm p-0.5 opacity-50 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                                    className="rounded-sm p-0.5 opacity-50 group-hover:opacity-100 hover:bg-danger/20 hover:text-danger transition-colors"
                                     title="Close shell"
                                 >
                                     <X className="w-3 h-3" />
@@ -253,11 +253,11 @@ export default function LocalTerminalPage() {
                             >
                                 {tab.status === 'error' ? (
                                     <div className="flex flex-col items-center justify-center h-full gap-4">
-                                        <div className="w-14 h-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
-                                            <WifiOff className="w-6 h-6 text-destructive/70" />
+                                        <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center">
+                                            <WifiOff className="w-6 h-6 text-danger/70" />
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-sm font-medium text-destructive">
+                                            <p className="text-sm font-medium text-danger">
                                                 Could not start the terminal
                                             </p>
                                             {tab.error && (

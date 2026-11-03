@@ -173,7 +173,7 @@ export function TunnelSessionRowCard({
                 <span className="text-sm font-mono truncate">
                     {row.remoteHost}:{row.remotePort}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
+                <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
                     {KIND_LABEL[row.kind]}
                 </span>
                 <span className="text-[11px] text-muted-foreground/70 shrink-0 ml-auto">
@@ -372,7 +372,7 @@ export function TunnelSection({
                 </div>
 
                 {error && (
-                    <div className="flex items-center gap-2 text-xs text-destructive">
+                    <div className="flex items-center gap-2 text-xs text-danger">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                         {error}
                     </div>
@@ -382,7 +382,7 @@ export function TunnelSection({
 
                 {activeSessions.length > 0 && (
                     <div className="space-y-2 pt-1">
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        <p className="text-[11px] font-medium text-muted-foreground">
                             Active tunnels for this server
                         </p>
                         {activeSessions.map((row) => (

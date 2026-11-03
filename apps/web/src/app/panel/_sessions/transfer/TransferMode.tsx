@@ -29,12 +29,12 @@ function ServerSelector({
     const serverName = servers.find((s) => s.id === serverId)?.name ?? serverId;
     return (
         <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0 w-6">
+            <span className="text-[11px] font-bold text-muted-foreground shrink-0 w-6">
                 {label}
             </span>
             {serverId ? (
                 <Select value={serverId} onValueChange={setServerId}>
-                    <SelectTrigger className="h-7 text-xs bg-secondary border-border max-w-[160px]">
+                    <SelectTrigger className="h-7 text-xs max-w-[160px]">
                         <SelectValue>{serverName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border">
@@ -90,11 +90,11 @@ function TransferArrow({
                     <Arrow className="w-4 h-4" />
                 )}
                 {fileCount > 0 && (
-                    <span className="text-[9px] font-bold leading-none">{fileCount}</span>
+                    <span className="text-[10px] font-bold leading-none">{fileCount}</span>
                 )}
             </button>
             {fileCount > 0 && (
-                <span className="text-[9px] text-muted-foreground">{formatBytes(bytes, '—')}</span>
+                <span className="text-[10px] text-muted-foreground">{formatBytes(bytes, '—')}</span>
             )}
         </div>
     );
@@ -293,7 +293,7 @@ export function TransferMode({ servers }: { servers: ServerItem[] }) {
                     {activeDir && (
                         <div className="flex flex-col items-center gap-1">
                             <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
-                            <span className="text-[9px] text-primary font-medium">Live</span>
+                            <span className="text-[10px] text-primary font-medium">Live</span>
                         </div>
                     )}
                 </div>

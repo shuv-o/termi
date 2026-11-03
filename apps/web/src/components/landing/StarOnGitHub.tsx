@@ -64,44 +64,32 @@ export default async function StarOnGitHub() {
     const stats = await fetchRepoStats();
 
     return (
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                <Card className="relative overflow-hidden p-8 sm:p-10 bg-card border-border">
-                    {/* Ambient glow, matching the hero treatment */}
-                    <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 bg-yellow-500/10 rounded-full blur-3xl"
-                    />
+        <section className="border-t border-border px-4 py-16 sm:px-6">
+            <div className="mx-auto max-w-6xl">
+                <Card className="relative overflow-hidden p-6 sm:p-8">
 
-                    <div className="relative flex flex-col md:flex-row items-center gap-8">
-                        <div className="w-16 h-16 shrink-0 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
-                            <Star className="w-8 h-8 text-yellow-400" />
+                    <div className="relative flex flex-col items-start gap-6 md:flex-row md:items-center">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-warning/25 bg-warning/10">
+                            <Star className="h-6 w-6 text-warning" />
                         </div>
 
-                        <div className="flex-1 text-center md:text-left">
-                            <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-                                Enjoying Termi? Star it on GitHub
-                            </h2>
-                            <p className="text-slate-400 max-w-xl">
+                        <div className="flex-1">
+                            <h2 className="mb-2 text-xl font-semibold tracking-[-0.01em] sm:text-2xl">Enjoying Termi? Star it on GitHub</h2>
+                            <p className="text-muted-foreground max-w-xl">
                                 Termi is free, open source and MIT licensed. A star costs you
                                 nothing, helps other developers find the project, and keeps it
                                 moving forward.
-                            </p>
-                            <p className="text-slate-500 text-sm max-w-xl mt-2">
-                                Just want to bookmark it? A star is lighter than a fork — and
-                                it&apos;s the only one that shows up in search and helps others find
-                                Termi too.
                             </p>
 
                             {/* Hidden at zero — "0 stars" under a "please star
                                 us" ask reads worse than no number at all. */}
                             {stats && stats.stars > 0 && (
-                                <div className="mt-5 flex items-center justify-center md:justify-start gap-3 text-sm">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                                <div className="mt-4 flex items-center gap-2 text-sm">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning border border-warning/20">
                                         <Star className="w-3.5 h-3.5" />
                                         {formatCount(stats.stars)} stars
                                     </span>
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-500/10 text-slate-300 border border-slate-500/20">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-foreground/85 border border-border">
                                         <GitFork className="w-3.5 h-3.5" />
                                         {formatCount(stats.forks)} forks
                                     </span>

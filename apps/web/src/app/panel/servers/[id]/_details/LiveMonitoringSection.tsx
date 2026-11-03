@@ -23,13 +23,13 @@ function Reading({
 }) {
     return (
         <div className="flex min-w-0 flex-col gap-0.5 rounded-lg border border-border/50 bg-secondary/60 px-3 py-2">
-            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground">
                 {label}
             </span>
             <span className={`text-lg font-bold tabular-nums ${tone ?? 'text-foreground'}`}>
                 {value}
             </span>
-            {sub && <span className="truncate text-[10px] text-muted-foreground">{sub}</span>}
+            {sub && <span className="truncate text-[11px] text-muted-foreground">{sub}</span>}
         </div>
     );
 }
@@ -75,13 +75,13 @@ export function LiveMonitoringSection({ serverId }: { serverId: string }) {
                     <Activity className="h-4 w-4 text-primary" />
                     <h2 className="text-base font-semibold">Live monitoring</h2>
                     {enabled && latest?.reachable && (
-                        <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-success">
+                        <span className="flex items-center gap-1 text-[11px] font-semibold text-success">
                             <Radio className="h-3 w-3 animate-pulse" />
                             Live
                         </span>
                     )}
                     {!enabled && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span className="text-[11px] font-semibold text-muted-foreground">
                             Paused
                         </span>
                     )}

@@ -77,7 +77,7 @@ export default function SetupEncryptionPage() {
 
     if (checkingUser)
         return (
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
         );
 
     return (
@@ -96,7 +96,7 @@ export default function SetupEncryptionPage() {
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1">
-                        <Label htmlFor="passphrase">Encryption Passphrase</Label>
+                        <Label htmlFor="passphrase">Encryption passphrase</Label>
                         <div className="relative">
                             <Input
                                 id="passphrase"
@@ -137,7 +137,7 @@ export default function SetupEncryptionPage() {
                         )}
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="confirm">Confirm Passphrase</Label>
+                        <Label htmlFor="confirm">Confirm passphrase</Label>
                         <Input
                             id="confirm"
                             type="password"

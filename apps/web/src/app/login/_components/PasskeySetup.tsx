@@ -42,7 +42,7 @@ export function PasskeySetup({ state }: { state: LoginState }) {
                 />
             </div>
             {passkeySetupError && (
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm mb-4">
+                <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm mb-4">
                     {passkeySetupError}
                 </div>
             )}

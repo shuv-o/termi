@@ -25,16 +25,33 @@ function CollapseTooltip({ label, children }: { label: string; children: React.R
     return (
         <span className="group relative flex justify-center">
             {children}
-            <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap z-50 bg-popover border border-border text-foreground shadow-md opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150">
+            <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-[5px] border border-border bg-popover px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-lg transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100">
                 {label}
             </span>
         </span>
     );
 }
 
-/** Left accent bar marking the active nav entry. */
+/**
+ * The active nav entry is marked with the logo's block cursor, parked in the
+ * left gutter — the same mark that ends every page title.
+ */
 function ActiveMarker() {
-    return <span className="absolute left-0 h-4 w-0.5 rounded-full bg-primary" />;
+    return (
+        <span
+            aria-hidden
+            className="absolute -left-2 top-1/2 h-4 w-[5px] -translate-y-1/2 rounded-[1.5px] bg-primary"
+        />
+    );
+}
+
+const itemBase =
+    'relative flex h-9 w-full items-center rounded-md text-sm font-medium transition-colors select-none';
+
+function itemTone(active: boolean) {
+    return active
+        ? 'bg-accent text-foreground'
+        : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground';
 }
 
 function LocalTerminalButton({
@@ -46,25 +63,32 @@ function LocalTerminalButton({
     active: boolean;
     onClick: () => void;
 }) {
-    const tone = active
-        ? 'bg-primary/15 text-primary'
-        : 'text-violet-400 hover:bg-accent hover:text-violet-300';
-
     const button = (
         <button
             onClick={onClick}
-            title={collapsed ? 'Local Terminal' : undefined}
-            className={`relative flex items-center rounded-xl text-sm font-medium transition-colors select-none w-full ${tone} ${
-                collapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2.5'
-            }`}
+            aria-label={collapsed ? 'Local terminal' : undefined}
+            className={`${itemBase} ${itemTone(active)} ${collapsed ? 'justify-center' : 'gap-3 px-2.5'}`}
         >
             {active && <ActiveMarker />}
-            <Laptop className="w-5 h-5 shrink-0" />
-            {!collapsed && <span className="truncate">Local Terminal</span>}
+            <Laptop className="h-[18px] w-[18px] shrink-0 text-local" />
+            {!collapsed && <span className="truncate">Local terminal</span>}
         </button>
     );
 
-    return collapsed ? <CollapseTooltip label="Local Terminal">{button}</CollapseTooltip> : button;
+    return collapsed ? <CollapseTooltip label="Local terminal">{button}</CollapseTooltip> : button;
+}
+
+/** Plain initial on the raised surface — no gradient avatar. */
+function Avatar({ user, size = 'md' }: { user: PanelUser; size?: 'sm' | 'md' }) {
+    return (
+        <div
+            className={`flex shrink-0 items-center justify-center rounded-full border border-input bg-accent font-semibold text-foreground ${
+                size === 'sm' ? 'h-7 w-7 text-xs' : 'h-8 w-8 text-[13px]'
+            }`}
+        >
+            {(user.name || user.email)[0].toUpperCase()}
+        </div>
+    );
 }
 
 function SidebarFooter({
@@ -76,70 +100,62 @@ function SidebarFooter({
     collapsed: boolean;
     onLogout: () => void;
 }) {
-    const initial = (user.name || user.email)[0].toUpperCase();
+    if (collapsed) {
+        return (
+            <div className="flex shrink-0 flex-col items-center gap-2 border-t border-border p-2">
+                <CollapseTooltip label={user.name || user.email}>
+                    <Avatar user={user} />
+                </CollapseTooltip>
+                <CollapseTooltip label="Sign out">
+                    <button
+                        onClick={onLogout}
+                        aria-label="Sign out"
+                        className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </button>
+                </CollapseTooltip>
+            </div>
+        );
+    }
 
     return (
-        <div
-            className={`p-3 border-t border-border shrink-0 ${collapsed ? 'flex flex-col items-center gap-2' : ''}`}
-        >
-            {collapsed ? (
-                <>
-                    <CollapseTooltip label={user.name || user.email}>
-                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm cursor-default shadow-sm">
-                            {initial}
-                        </div>
-                    </CollapseTooltip>
-                    <CollapseTooltip label="Sign Out">
-                        <button
-                            onClick={onLogout}
-                            aria-label="Sign out"
-                            className="flex items-center justify-center w-9 h-9 rounded-lg text-danger hover:text-danger hover:bg-danger/10 transition-colors"
-                        >
-                            <LogOut className="w-4 h-4" />
-                        </button>
-                    </CollapseTooltip>
-                </>
-            ) : (
-                <>
-                    <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2">
-                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-sm shrink-0 shadow-sm">
-                            {initial}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                                {user.name || user.email}
+        <div className="shrink-0 border-t border-border p-3">
+            <div className="flex items-center gap-2.5">
+                <Avatar user={user} />
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium leading-tight">
+                        {user.name || user.email}
+                    </p>
+                    {user.totpEnabled ? (
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-success">
+                            <Shield className="h-3 w-3" /> 2FA on
+                        </span>
+                    ) : (
+                        user.name && (
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                {user.email}
                             </p>
-                            {user.name && (
-                                <p className="truncate text-xs text-muted-foreground">
-                                    {user.email}
-                                </p>
-                            )}
-                            {!user.name && user.totpEnabled && (
-                                <span className="flex items-center gap-1 text-[11px] text-success">
-                                    <Shield className="w-3 h-3" /> 2FA enabled
-                                </span>
-                            )}
-                        </div>
-                        <button
-                            onClick={onLogout}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
-                            title="Sign Out"
-                        >
-                            <LogOut className="w-4 h-4" />
-                        </button>
-                    </div>
-                    <div className="mt-2.5 text-center">
-                        <a
-                            href="https://shuvoo.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
-                        >
-                            Developed by Shuvo
-                        </a>
-                    </div>
-                </>
-            )}
+                        )
+                    )}
+                </div>
+                <button
+                    onClick={onLogout}
+                    aria-label="Sign out"
+                    title="Sign out"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                >
+                    <LogOut className="h-4 w-4" />
+                </button>
+            </div>
+            <a
+                href="https://shuvoo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 block text-[11px] text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+            >
+                Made by Shuvo
+            </a>
         </div>
     );
 }
@@ -165,145 +181,112 @@ export function DesktopSidebar({
     onBack: () => void;
     onLogout: () => void;
 }) {
-    const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-64 2xl:w-72';
+    const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-60';
 
     return (
         <aside
-            className={`
-                hidden lg:flex flex-col
-                fixed top-0 left-0 bottom-0
-                bg-card border-r border-border z-50
-                ${sidebarW}
-                transition-[width] duration-200 ease-in-out
-            `}
+            className={`fixed bottom-0 left-0 top-0 z-50 hidden flex-col border-r border-border bg-card lg:flex ${sidebarW} transition-[width] duration-200 ease-in-out`}
         >
-            <div className="h-0.5 w-full bg-linear-to-r from-primary via-violet-500 to-transparent absolute top-0 left-0" />
-
             <div
-                className={`flex items-center h-14 px-2.5 border-b border-border shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}
+                className={`flex h-14 shrink-0 items-center px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}
             >
                 {!collapsed && (
-                    <Link
-                        href="/panel"
-                        className="flex items-center gap-2.5 overflow-hidden min-w-0"
-                    >
-                        <TerminalLogo width={30} height={30} className="rounded-lg shrink-0" />
-                        <span className="text-base font-bold gradient-text whitespace-nowrap overflow-hidden">
-                            Termi
-                        </span>
+                    <Link href="/panel" className="flex min-w-0 items-center gap-2.5 rounded-md">
+                        <TerminalLogo width={26} height={26} className="shrink-0 rounded-md" />
+                        <span className="text-[15px] font-semibold tracking-[-0.01em]">Termi</span>
                     </Link>
                 )}
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex shrink-0 items-center gap-0.5">
                     {isElectron && !collapsed && (
                         <button
                             onClick={onBack}
                             title="Back (Cmd/Alt+←)"
-                            className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+                            aria-label="Back"
+                            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                         >
-                            <ChevronLeft className="w-4 h-4" />
+                            <ChevronLeft className="h-4 w-4" />
                         </button>
                     )}
                     <button
                         onClick={onToggleCollapsed}
                         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+                        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
                         {collapsed ? (
-                            <PanelLeftOpen className="w-4 h-4" />
+                            <PanelLeftOpen className="h-4 w-4" />
                         ) : (
-                            <PanelLeftClose className="w-4 h-4" />
+                            <PanelLeftClose className="h-4 w-4" />
                         )}
                     </button>
                 </div>
             </div>
 
-            <div className="px-3 pt-3">
+            <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-3'}`}>
                 {collapsed ? (
-                    <CollapseTooltip label="Search (⌘K)">
+                    <>
+                        <CollapseTooltip label="Search  ⌘K">
+                            <button
+                                onClick={openCommandPalette}
+                                aria-label="Search"
+                                className="flex h-9 w-full items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            >
+                                <Search className="h-4 w-4" />
+                            </button>
+                        </CollapseTooltip>
+                        <CollapseTooltip label="Add server">
+                            <Button asChild size="icon" className="h-9 w-full">
+                                <Link href="/panel/servers/new" aria-label="Add server">
+                                    <Plus />
+                                </Link>
+                            </Button>
+                        </CollapseTooltip>
+                    </>
+                ) : (
+                    <>
                         <button
                             onClick={openCommandPalette}
-                            aria-label="Open command palette"
-                            className="flex items-center justify-center w-full h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-background/60 px-2.5 text-[13px] text-muted-foreground transition-colors hover:border-muted-foreground/40 hover:text-foreground"
                         >
-                            <Search className="w-4 h-4" />
+                            <Search className="h-4 w-4 shrink-0" />
+                            <span className="flex-1 text-left">Search or run…</span>
+                            <kbd className="data shrink-0 rounded-[4px] border border-border px-1.5 py-px text-[11px]">
+                                ⌘K
+                            </kbd>
                         </button>
-                    </CollapseTooltip>
-                ) : (
-                    <button
-                        onClick={openCommandPalette}
-                        className="flex w-full items-center gap-2 rounded-xl border border-border/60 bg-background/70 px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:text-foreground"
-                    >
-                        <Search className="w-4 h-4 shrink-0" />
-                        <span className="flex-1 text-left">Search…</span>
-                        <kbd className="shrink-0 rounded-sm border border-border/60 bg-secondary px-1.5 py-0.5 text-[10px] font-medium">
-                            ⌘K
-                        </kbd>
-                    </button>
-                )}
-            </div>
-
-            {/* Add Server — the expanded button collapses to zero height rather
-                than unmounting, so the transition stays smooth. */}
-            <div
-                className={`px-3 pt-3 overflow-hidden transition-all duration-200 ${collapsed ? 'max-h-0 opacity-0 pt-0' : 'max-h-16 opacity-100'}`}
-            >
-                <Button asChild className="w-full h-10 rounded-xl" tabIndex={collapsed ? -1 : 0}>
-                    <Link href="/panel/servers/new">
-                        <Plus className="w-4 h-4" />
-                        Add Server
-                    </Link>
-                </Button>
-            </div>
-            {collapsed && (
-                <div className="px-2 pt-3">
-                    <CollapseTooltip label="Add Server">
-                        <Button
-                            asChild
-                            size="icon"
-                            variant="secondary"
-                            className="w-full h-9 rounded-lg"
-                        >
+                        <Button asChild className="h-9 w-full">
                             <Link href="/panel/servers/new">
-                                <Plus className="w-4 h-4" />
+                                <Plus />
+                                Add server
                             </Link>
                         </Button>
-                    </CollapseTooltip>
-                </div>
-            )}
-
-            <nav className="flex-1 px-2 pt-3 space-y-1">
-                {isElectron && (
-                    <LocalTerminalButton
-                        collapsed={collapsed}
-                        active={localTerminalActive}
-                        onClick={onOpenLocalTerminal}
-                    />
+                    </>
                 )}
+            </div>
 
+            <nav
+                aria-label="Main"
+                className={`flex flex-1 flex-col gap-0.5 overflow-y-auto pt-4 ${collapsed ? 'px-2' : 'px-3'}`}
+            >
                 {navigation.map((item) => {
                     const isActive = isNavItemActive(item.href, pathname);
-                    const cls = `relative flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-colors select-none ${
-                        isActive
-                            ? 'bg-primary/15 text-primary'
-                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                    } ${collapsed ? 'justify-center px-0 w-full' : 'px-3'}`;
-
                     const link = (
                         <Link
                             key={item.name}
                             href={item.href}
                             prefetch
-                            className={cls}
-                            title={collapsed ? item.name : undefined}
+                            aria-current={isActive ? 'page' : undefined}
+                            aria-label={collapsed ? item.name : undefined}
+                            className={`${itemBase} ${itemTone(isActive)} ${collapsed ? 'justify-center' : 'gap-3 px-2.5'}`}
                         >
                             {isActive && <ActiveMarker />}
-                            <item.icon className="w-5 h-5 shrink-0" />
+                            <item.icon
+                                className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-primary' : ''}`}
+                            />
                             {!collapsed && <span className="truncate">{item.name}</span>}
                         </Link>
                     );
 
-                    // Expanded items sit directly in the nav so `space-y-1`
-                    // spaces them; collapsed ones need the tooltip wrapper.
                     return collapsed ? (
                         <CollapseTooltip key={item.name} label={item.name}>
                             {link}
@@ -312,6 +295,16 @@ export function DesktopSidebar({
                         link
                     );
                 })}
+
+                {isElectron && (
+                    <div className="mt-3 border-t border-border pt-3">
+                        <LocalTerminalButton
+                            collapsed={collapsed}
+                            active={localTerminalActive}
+                            onClick={onOpenLocalTerminal}
+                        />
+                    </div>
+                )}
             </nav>
 
             <SidebarFooter user={user} collapsed={collapsed} onLogout={onLogout} />

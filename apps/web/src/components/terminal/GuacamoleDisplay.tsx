@@ -434,7 +434,7 @@ export default function GuacamoleDisplay({
                     className={`flex items-center justify-center w-7 h-7 rounded-md transition-colors ${
                         showKeyboard
                             ? 'bg-primary text-primary-foreground'
-                            : 'bg-black/50 text-gray-400 hover:text-white'
+                            : 'bg-black/50 text-muted-foreground hover:text-primary-foreground'
                     }`}
                 >
                     <Keyboard className="w-3.5 h-3.5" />
@@ -449,7 +449,7 @@ export default function GuacamoleDisplay({
                                   : 'bg-danger'
                         }`}
                     />
-                    <span className="text-xs text-gray-400 capitalize bg-black/50 px-2 py-1 rounded-sm">
+                    <span className="text-xs text-muted-foreground capitalize bg-black/50 px-2 py-1 rounded-sm">
                         {label}
                     </span>
                 </div>
@@ -475,31 +475,31 @@ export default function GuacamoleDisplay({
                 <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-1.5 px-2 py-2 bg-black/70 backdrop-blur-sm overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => sendTap(KEYSYM.ESCAPE)}
-                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-foreground hover:bg-white/20"
                     >
                         Esc
                     </button>
                     <button
                         onClick={() => sendTap(KEYSYM.TAB)}
-                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-foreground hover:bg-white/20"
                     >
                         Tab
                     </button>
                     <button
                         onClick={() => sendCombo([KEYSYM.ALT_L, KEYSYM.TAB])}
-                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-foreground hover:bg-white/20"
                     >
                         Alt+Tab
                     </button>
                     <button
                         onClick={() => sendCombo([KEYSYM.CTRL_L, KEYSYM.ALT_L, KEYSYM.DELETE])}
-                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-foreground hover:bg-white/20"
                     >
                         Ctrl+Alt+Del
                     </button>
                     <button
                         onClick={() => sendTap(KEYSYM.SUPER_L)}
-                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-gray-200 hover:bg-white/20"
+                        className="shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-white/10 text-foreground hover:bg-white/20"
                     >
                         Win
                     </button>
@@ -509,8 +509,8 @@ export default function GuacamoleDisplay({
             {isConnecting && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
                     <div className="text-center">
-                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                        <p className="text-white">Connecting to {protocol.toUpperCase()}...</p>
+                        <span role="status" aria-label="Connecting" className="cursor-block cursor-waiting mb-4 text-2xl" />
+                        <p className="text-foreground">Connecting to {protocol.toUpperCase()}...</p>
                     </div>
                 </div>
             )}
@@ -519,7 +519,7 @@ export default function GuacamoleDisplay({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20">
                     <div className="text-center px-6 max-w-md">
                         <p className="text-danger text-sm font-semibold mb-2">Connection Error</p>
-                        <p className="text-gray-300 text-xs leading-relaxed">{errorMsg}</p>
+                        <p className="text-foreground text-xs leading-relaxed">{errorMsg}</p>
                         <button
                             onClick={() => window.location.reload()}
                             className="mt-4 px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-sm hover:opacity-90"
@@ -532,7 +532,7 @@ export default function GuacamoleDisplay({
             {/* Disconnected overlay */}
             {!errorMsg && (clientState === 4 || clientState === 5) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
-                    <p className="text-gray-300 text-sm">Disconnected</p>
+                    <p className="text-foreground text-sm">Disconnected</p>
                 </div>
             )}
         </div>

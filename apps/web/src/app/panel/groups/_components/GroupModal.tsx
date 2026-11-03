@@ -145,8 +145,8 @@ export function GroupModal({
                         <Input
                             ref={nameRef}
                             type="text"
-                            className="bg-secondary border-border"
-                            placeholder="e.g. Production Servers"
+                            
+                            placeholder="e.g. production servers"
                             maxLength={50}
                             value={form.name}
                             onChange={(e) => update({ name: e.target.value })}
@@ -159,7 +159,7 @@ export function GroupModal({
                             <span className="text-muted-foreground font-normal">(optional)</span>
                         </Label>
                         <Textarea
-                            className="bg-secondary border-border resize-none"
+                            className="resize-none"
                             rows={2}
                             placeholder="Brief description..."
                             maxLength={200}
@@ -194,7 +194,7 @@ export function GroupModal({
                     </div>
 
                     {error && (
-                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-danger/10 border border-danger/30 text-danger text-sm">
                             <AlertTriangle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>

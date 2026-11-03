@@ -38,26 +38,26 @@ export function EmptyState({
         <div
             className={cn(
                 'flex flex-col items-center justify-center px-6 text-center',
-                compact ? 'gap-3 py-10' : 'min-h-[320px] gap-4 py-14',
+                compact ? 'gap-3 py-10' : 'min-h-[300px] gap-4 py-12',
                 className,
             )}
         >
             <div
                 className={cn(
-                    'flex items-center justify-center rounded-2xl border border-border bg-secondary/30',
-                    compact ? 'h-14 w-14' : 'h-20 w-20',
+                    'flex items-center justify-center rounded-xl border border-dashed border-input bg-background/50',
+                    compact ? 'h-12 w-12' : 'h-16 w-16',
                 )}
             >
                 <Icon
-                    className={cn('text-muted-foreground/35', compact ? 'h-7 w-7' : 'h-10 w-10')}
+                    className={cn('text-muted-foreground', compact ? 'h-5 w-5' : 'h-7 w-7')}
                 />
             </div>
             <div className="max-w-md">
-                <Heading className={compact ? 'text-base font-semibold' : 'text-xl font-semibold'}>
+                <Heading className={compact ? 'text-[15px] font-semibold' : 'text-lg font-semibold'}>
                     {title}
                 </Heading>
                 {description != null && (
-                    <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
+                    <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
                 )}
             </div>
             {action != null && <div className="mt-1">{action}</div>}

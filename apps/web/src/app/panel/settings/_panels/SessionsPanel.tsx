@@ -13,7 +13,7 @@ export function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useAut
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Active Sessions"
+                title="Active sessions"
                 description="Devices and browsers that are currently signed in to your account."
                 icon={Monitor}
                 iconBg="bg-info/15 text-info"
@@ -45,7 +45,7 @@ export function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useAut
                             size="sm"
                             onClick={sessions.revokeAllOthers}
                             disabled={sessions.revokingAll}
-                            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            className="gap-2 border-danger/30 text-danger hover:bg-danger/10 hover:text-danger"
                         >
                             {sessions.revokingAll ? (
                                 <>

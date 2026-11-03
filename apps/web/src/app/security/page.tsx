@@ -31,7 +31,7 @@ const toc: TocItem[] = [
 export default function SecurityPage() {
     return (
         <LegalShell
-            title="Security Policy"
+            title="Security policy"
             description="How Termi protects your data, and how to report a vulnerability responsibly."
             lastUpdated="June 6, 2026"
             toc={toc}

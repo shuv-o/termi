@@ -21,9 +21,7 @@ export function SharedWithMeSection({
         <div className="mx-auto max-w-screen-2xl space-y-4">
             <div className="flex items-center gap-2">
                 <Share2 className="w-4 h-4 text-primary" />
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Shared with me
-                </h2>
+                <h2 className="text-xs font-semibold text-muted-foreground">Shared with me</h2>
                 <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary">
                     {servers.length}
                 </span>
@@ -50,7 +48,7 @@ export function SharedWithMeSection({
                                             {server.name}
                                         </h3>
                                         <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className="text-[10px] text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">
+                                            <span className="text-[11px] text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">
                                                 Shared by {server.sharedBy}
                                             </span>
                                         </div>
@@ -62,7 +60,7 @@ export function SharedWithMeSection({
                                         <span className="text-[11px] text-foreground/80 font-mono truncate">
                                             {server.host}
                                         </span>
-                                        <span className="text-[10px] text-muted-foreground/50 shrink-0">
+                                        <span className="text-[11px] text-muted-foreground/50 shrink-0">
                                             :{server.port}
                                         </span>
                                     </div>
@@ -75,11 +73,11 @@ export function SharedWithMeSection({
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1">
                                     <span
-                                        className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${protocolVariants[server.protocol]}`}
+                                        className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-medium border ${protocolVariants[server.protocol]}`}
                                     >
                                         {server.protocol}
                                     </span>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">
                                         {server.permissions}
                                     </span>
                                 </div>

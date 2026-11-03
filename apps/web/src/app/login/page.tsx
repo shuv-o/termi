@@ -17,8 +17,8 @@ function LoginContent() {
     // Session check gate — avoids flashing the form for signed-in users.
     if (state.checkingSession) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-background to-slate-950">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
             </div>
         );
     }
@@ -36,11 +36,11 @@ function LoginContent() {
             <div className="flex min-h-0">
                 <BrandPanel />
 
-                <div className="flex-1 p-8 flex flex-col justify-center">
+                <div className="flex flex-1 flex-col justify-center p-6 sm:p-8">
                     {/* Mobile logo (hidden on md+) */}
-                    <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
-                        <TerminalLogo width={40} height={40} className="rounded-xl" />
-                        <span className="text-xl font-bold gradient-text">Termi</span>
+                    <div className="mb-6 flex items-center gap-2.5 md:hidden">
+                        <TerminalLogo width={28} height={28} className="rounded-md" />
+                        <span className="text-[15px] font-semibold">Termi</span>
                     </div>
 
                     {state.info && !state.requires2FA && (

@@ -62,7 +62,7 @@ function RecordingRow({
                 size="icon"
                 onClick={onDelete}
                 disabled={deleting}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                className="h-8 w-8 text-muted-foreground hover:text-danger shrink-0"
                 title="Delete recording"
             >
                 {deleting ? (
@@ -114,7 +114,7 @@ export function RecordingsPanel() {
                 title="Recordings"
                 description="Asciinema-style captures of terminal sessions you recorded, for audit or handoff."
                 icon={ScreenShare}
-                iconBg="bg-cyan-500/15 text-cyan-400"
+                iconBg="bg-proto-telnet/15 text-proto-telnet"
             >
                 {recordings.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">

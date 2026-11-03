@@ -201,7 +201,7 @@ export default function ExportServersDialog({ onClose }: Props) {
                                     >
                                         <Icon className="w-4 h-4" />
                                         <span className="text-sm font-medium">{f.label}</span>
-                                        <span className="text-[10px] leading-tight text-muted-foreground">
+                                        <span className="text-[11px] leading-tight text-muted-foreground">
                                             {f.hint}
                                         </span>
                                     </button>
@@ -262,14 +262,14 @@ export default function ExportServersDialog({ onClose }: Props) {
 
                     {/*   Plaintext warning   */}
                     {willBePlaintextSecrets && (
-                        <div className="space-y-3 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-                            <div className="flex gap-2 text-sm text-destructive">
+                        <div className="space-y-3 p-3 rounded-lg bg-danger/10 border border-danger/30">
+                            <div className="flex gap-2 text-sm text-danger">
                                 <ShieldAlert className="w-5 h-5 shrink-0" />
                                 <div>
                                     <p className="font-semibold">
                                         This file will contain unencrypted secrets
                                     </p>
-                                    <p className="text-xs mt-1 text-destructive/90">
+                                    <p className="text-xs mt-1 text-danger/90">
                                         Anyone who opens it can read every password and private key.
                                         Store it somewhere encrypted, and delete it as soon as
                                         you&apos;re done.
@@ -314,7 +314,7 @@ export default function ExportServersDialog({ onClose }: Props) {
                                     autoComplete="current-password"
                                 />
                             </div>
-                            <div className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
+                            <div className="text-center text-[11px] text-muted-foreground">
                                 or
                             </div>
                             <div className="space-y-1.5">
@@ -341,7 +341,7 @@ export default function ExportServersDialog({ onClose }: Props) {
                         </Button>
                     </div>
 
-                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
 
                     <div className="flex justify-end gap-2 pt-1">
                         <Button variant="ghost" onClick={onClose} disabled={busy}>

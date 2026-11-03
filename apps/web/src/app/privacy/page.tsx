@@ -31,7 +31,7 @@ const toc: TocItem[] = [
 export default function PrivacyPage() {
     return (
         <LegalShell
-            title="Privacy Policy"
+            title="Privacy policy"
             description="Termi is open-source and self-hosted. You run it, you own the data, and you control where it lives."
             lastUpdated="June 6, 2026"
             toc={toc}

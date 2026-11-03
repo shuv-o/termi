@@ -20,7 +20,7 @@ import {
 } from './types';
 
 const CARD_CLASS = 'border-border hover:border-border/80 transition-all duration-200';
-const SECTION_LABEL = 'text-[11px] font-semibold text-muted-foreground uppercase tracking-wider';
+const SECTION_LABEL = 'text-xs font-medium text-muted-foreground';
 
 export function ProtocolSelector({
     value,
@@ -54,7 +54,7 @@ export function ProtocolSelector({
                             >
                                 <Icon className="w-4 h-4" />
                                 <span className="text-xs font-semibold">{p.label}</span>
-                                <span className="text-[10px] opacity-60 hidden sm:block leading-none">
+                                <span className="text-[11px] opacity-60 hidden sm:block leading-none">
                                     {p.desc}
                                 </span>
                             </button>
@@ -103,7 +103,7 @@ export function IdentityCard({
                         value={form.groupId || 'none'}
                         onValueChange={(v) => update({ groupId: v === 'none' ? '' : v })}
                     >
-                        <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                        <SelectTrigger className="text-sm h-9">
                             <SelectValue placeholder="No group" />
                         </SelectTrigger>
                         <SelectContent className="bg-card border-border">
@@ -225,7 +225,7 @@ export function DisplaySettingsCard({
                             key={label}
                             type="button"
                             onClick={() => update({ displayWidth: w, displayHeight: h })}
-                            className={`px-2 py-0.5 rounded-sm text-[10px] font-medium border transition-colors ${
+                            className={`px-2 py-0.5 rounded-sm text-[11px] font-medium border transition-colors ${
                                 form.displayWidth === w && form.displayHeight === h
                                     ? 'bg-primary/15 text-primary border-primary/30'
                                     : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/30'
@@ -237,12 +237,12 @@ export function DisplaySettingsCard({
                 </div>
                 {form.protocol === 'RDP' && (
                     <div className="space-y-1.5">
-                        <Label className="text-xs">Security Mode</Label>
+                        <Label className="text-xs">Security mode</Label>
                         <Select
                             value={form.rdpSecurity}
                             onValueChange={(v) => update({ rdpSecurity: v as RdpSecurity })}
                         >
-                            <SelectTrigger className="bg-secondary border-border text-sm h-9">
+                            <SelectTrigger className="text-sm h-9">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-card border-border">

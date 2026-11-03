@@ -120,7 +120,7 @@ export default function FileManagerPanel({
                     </span>
                     <button
                         onClick={clearSelection}
-                        className="text-xs text-info active:text-white"
+                        className="text-xs text-info active:text-foreground"
                     >
                         Done
                     </button>
@@ -225,13 +225,13 @@ export default function FileManagerPanel({
             />
 
             <div className="shrink-0 flex items-center justify-between px-3 py-1 border-t border-border/60 bg-background/60">
-                <span className="text-[10px] text-muted-foreground/60">
+                <span className="text-[11px] text-muted-foreground/60">
                     {visible.length} item{visible.length !== 1 ? 's' : ''}
                     {!showHidden && entries.length !== visible.length
                         ? ` · ${entries.length - visible.length} hidden`
                         : ''}
                 </span>
-                <span className="text-[10px] text-muted-foreground/40 font-mono truncate max-w-[160px]">
+                <span className="text-[11px] text-muted-foreground/40 font-mono truncate max-w-[160px]">
                     {currentPath}
                 </span>
             </div>

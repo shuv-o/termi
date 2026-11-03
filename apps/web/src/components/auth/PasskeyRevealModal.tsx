@@ -242,7 +242,7 @@ export default function PasskeyRevealModal({
                             </div>
                         </div>
                         <div className="text-center space-y-1">
-                            <p className="font-medium">Verify with Passkey</p>
+                            <p className="font-medium">Verify with a passkey</p>
                             <p className="text-sm text-muted-foreground">
                                 Use Touch ID, Face ID, or your security key to authenticate
                             </p>
@@ -264,7 +264,7 @@ export default function PasskeyRevealModal({
                             </p>
                         </div>
                         <div>
-                            <label className="text-xs text-muted-foreground mb-1.5 block uppercase tracking-wider">
+                            <label className="text-xs text-muted-foreground mb-1.5 block">
                                 Account Password
                             </label>
                             <input
@@ -295,13 +295,13 @@ export default function PasskeyRevealModal({
                 {/* Step: error */}
                 {step === 'error' && (
                     <div className="space-y-4">
-                        <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                            <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-danger/10 border border-danger/20">
+                            <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
                             <div className="space-y-1">
-                                <p className="text-sm font-medium text-destructive">
+                                <p className="text-sm font-medium text-danger">
                                     Authentication Failed
                                 </p>
-                                <p className="text-sm text-destructive/80">{errorMsg}</p>
+                                <p className="text-sm text-danger/80">{errorMsg}</p>
                             </div>
                         </div>
                         <div className="flex gap-3 justify-end">
@@ -326,7 +326,7 @@ export default function PasskeyRevealModal({
                 {step === 'revealed' && (
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs text-muted-foreground mb-1.5 block uppercase tracking-wider">
+                            <label className="text-xs text-muted-foreground mb-1.5 block">
                                 {fieldLabel[field]}
                             </label>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary border border-border">

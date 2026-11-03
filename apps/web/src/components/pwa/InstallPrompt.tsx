@@ -120,7 +120,7 @@ export default function InstallPrompt() {
                     <button
                         type="button"
                         onClick={install}
-                        className="shrink-0 rounded-lg bg-linear-to-r from-primary to-sky-600 px-3.5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+                        className="shrink-0 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-transform"
                     >
                         Install
                     </button>

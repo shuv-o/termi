@@ -142,7 +142,7 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                     </div>
                 ) : hasAnyShares ? (
                     <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        <p className="text-xs font-medium text-muted-foreground">
                             Shared with
                         </p>
 
@@ -151,14 +151,14 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                 key={share.id}
                                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50"
                             >
-                                <div className="w-7 h-7 rounded-full bg-linear-to-br from-primary to-purple-500 flex items-center justify-center text-white font-medium text-xs shrink-0">
+                                <div className="w-7 h-7 rounded-full border border-input bg-accent flex items-center justify-center text-foreground font-medium text-xs shrink-0">
                                     {share.sharedWith.email[0].toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium truncate">
                                         {share.sharedWith.email}
                                     </p>
-                                    <p className="text-[10px] text-success">
+                                    <p className="text-[11px] text-success">
                                         Active · {share.permissions}
                                     </p>
                                 </div>
@@ -184,7 +184,7 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                                     <p className="text-xs font-medium truncate">
                                         {inv.inviteeEmail}
                                     </p>
-                                    <p className="text-[10px] text-warning">
+                                    <p className="text-[11px] text-warning">
                                         Pending invitation · {inv.permissions}
                                     </p>
                                 </div>

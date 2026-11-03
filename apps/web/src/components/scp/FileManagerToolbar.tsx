@@ -20,7 +20,7 @@ function ToolbarButton({
     onClick,
     active,
     disabled,
-    className = 'text-muted-foreground hover:text-white hover:bg-secondary',
+    className = 'text-muted-foreground hover:text-foreground hover:bg-accent',
     padding = 'p-1.5',
     spin,
 }: {
@@ -94,7 +94,7 @@ export function FileManagerToolbar({
             >
                 <button
                     onClick={() => onNavigate('/')}
-                    className="p-1.5 rounded-sm hover:bg-secondary text-muted-foreground hover:text-white transition-colors shrink-0"
+                    className="p-1.5 rounded-sm hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors shrink-0"
                     title="Root"
                 >
                     <Home className="w-4 h-4" />
@@ -103,13 +103,13 @@ export function FileManagerToolbar({
                     <span key={seg.path} className="flex items-center gap-0.5 shrink-0">
                         <ChevronRight className="w-3 h-3 text-muted-foreground/60 shrink-0" />
                         {i === segs.length - 2 ? (
-                            <span className="text-xs text-white font-medium px-1 whitespace-nowrap">
+                            <span className="text-xs text-foreground font-medium px-1 whitespace-nowrap">
                                 {seg.label}
                             </span>
                         ) : (
                             <button
                                 onClick={() => onNavigate(seg.path)}
-                                className="text-xs text-muted-foreground hover:text-white px-1 hover:underline whitespace-nowrap"
+                                className="text-xs text-muted-foreground hover:text-foreground px-1 hover:underline whitespace-nowrap"
                             >
                                 {seg.label}
                             </button>
@@ -126,7 +126,7 @@ export function FileManagerToolbar({
                         onClick={onToggleSelectMode}
                         active={selectMode}
                         padding="p-2"
-                        className="text-muted-foreground/80 hover:text-white hover:bg-secondary"
+                        className="text-muted-foreground/80 hover:text-foreground hover:bg-secondary"
                     />
                 )}
                 <ToolbarButton
@@ -134,7 +134,7 @@ export function FileManagerToolbar({
                     title={showHidden ? 'Hide hidden files' : 'Show hidden files'}
                     onClick={onToggleHidden}
                     active={showHidden}
-                    className="text-muted-foreground/80 hover:text-white hover:bg-secondary"
+                    className="text-muted-foreground/80 hover:text-foreground hover:bg-secondary"
                 />
                 <ToolbarButton icon={FolderPlus} title="New folder" onClick={onNewFolder} />
                 <ToolbarButton
@@ -153,7 +153,7 @@ export function FileManagerToolbar({
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-sm text-muted-foreground/80 hover:text-white hover:bg-secondary transition-colors ml-0.5"
+                        className="p-1.5 rounded-sm text-muted-foreground/80 hover:text-foreground hover:bg-secondary transition-colors ml-0.5"
                         title="Close file manager"
                     >
                         <X className="w-4 h-4" />

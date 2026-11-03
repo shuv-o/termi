@@ -28,21 +28,19 @@ export default function LegalShell({
     children,
 }: LegalShellProps) {
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 left-0 right-0 z-50 glass">
+            <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <Link href="/" className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary to-sky-700 flex items-center justify-center">
-                                <TerminalLogo className="w-6 h-6 text-white" />
-                            </div>
-                            <span className="text-xl font-bold gradient-text">Termi</span>
+                    <div className="flex h-14 items-center justify-between">
+                        <Link href="/" className="flex items-center gap-2.5">
+                            <TerminalLogo width={26} height={26} className="rounded-md" />
+                            <span className="text-[15px] font-semibold">Termi</span>
                         </Link>
 
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                            className="inline-flex items-center gap-2 text-sm text-foreground/85 hover:text-foreground transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             Back to home
@@ -52,12 +50,12 @@ export default function LegalShell({
             </header>
 
             {/* Title block */}
-            <div className="border-b border-slate-800 bg-slate-900/40">
+            <div className="border-b border-border bg-card/40">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                     <h1 className="text-3xl sm:text-4xl font-bold mb-3">{title}</h1>
-                    <p className="text-lg text-slate-400 max-w-2xl">{description}</p>
-                    <p className="text-sm text-slate-500 mt-6">
-                        Last updated: <time className="text-slate-300">{lastUpdated}</time>
+                    <p className="text-lg text-muted-foreground max-w-2xl">{description}</p>
+                    <p className="text-sm text-muted-foreground mt-6">
+                        Last updated: <time className="text-foreground/85">{lastUpdated}</time>
                     </p>
                 </div>
             </div>
@@ -68,15 +66,15 @@ export default function LegalShell({
                     {/* Table of contents */}
                     <aside className="hidden lg:block">
                         <nav className="sticky top-24" aria-label="Table of contents">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+                            <p className="text-xs font-semibold text-muted-foreground mb-4">
                                 On this page
                             </p>
-                            <ul className="space-y-2 border-l border-slate-800">
+                            <ul className="space-y-2 border-l border-border">
                                 {toc.map((item) => (
                                     <li key={item.id}>
                                         <a
                                             href={`#${item.id}`}
-                                            className="block -ml-px border-l border-transparent pl-4 text-sm text-slate-400 hover:text-white hover:border-primary transition-colors"
+                                            className="block -ml-px border-l border-transparent pl-4 text-sm text-muted-foreground hover:text-foreground hover:border-primary transition-colors"
                                         >
                                             {item.label}
                                         </a>
@@ -92,24 +90,24 @@ export default function LegalShell({
             </div>
 
             {/* Footer */}
-            <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+            <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t border-border">
+                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <Terminal className="w-5 h-5 text-primary" />
-                        <span className="font-semibold text-slate-300">Termi</span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-slate-500">MIT License</span>
+                        <span className="font-semibold text-foreground/85">Termi</span>
+                        <span className="text-muted-foreground/70">•</span>
+                        <span className="text-muted-foreground">MIT License</span>
                     </div>
                     <div className="flex items-center gap-6">
-                        <Link href="/privacy" className="hover:text-white transition-colors">
+                        <Link href="/privacy" className="hover:text-foreground transition-colors">
                             Privacy
                         </Link>
-                        <Link href="/security" className="hover:text-white transition-colors">
+                        <Link href="/security" className="hover:text-foreground transition-colors">
                             Security
                         </Link>
                         <Link
                             href="https://github.com/shuv-o/termi"
-                            className="hover:text-white transition-colors"
+                            className="hover:text-foreground transition-colors"
                             rel="noopener noreferrer"
                             target="_blank"
                         >
@@ -139,7 +137,7 @@ export function Section({
                     {title}
                 </a>
             </h2>
-            <div className="space-y-4 text-slate-300 leading-relaxed">{children}</div>
+            <div className="space-y-4 text-foreground/85 leading-relaxed">{children}</div>
         </section>
     );
 }

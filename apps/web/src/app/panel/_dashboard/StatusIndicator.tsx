@@ -30,15 +30,15 @@ export function ServerStatusPill({
 }) {
     const tone = TONE[status];
     const sizeClass =
-        size === 'md' ? 'gap-1.5 px-2 py-0.5 text-xs' : 'gap-1 px-1.5 py-0.5 text-[10px]';
-    const dotSizeClass = size === 'md' ? 'w-1.5 h-1.5' : 'w-1 h-1';
+        size === 'md' ? 'gap-1.5 px-2 py-0.5 text-xs' : 'gap-1.5 px-2 py-px text-[11px]';
+    const dotSizeClass = 'w-1.5 h-1.5';
 
     return (
         <span
-            className={`inline-flex shrink-0 items-center rounded-full border font-medium ${tonePill[tone]} ${sizeClass}`}
+            className={`inline-flex shrink-0 items-center rounded-full border font-medium tabular-nums ${tonePill[tone]} ${sizeClass}`}
         >
             <span
-                className={`shrink-0 rounded-full ${toneDot[tone]} ${dotSizeClass} ${status === 'online' ? 'animate-pulse' : ''}`}
+                className={`shrink-0 rounded-full ${toneDot[tone]} ${dotSizeClass}`}
             />
             {label}
         </span>

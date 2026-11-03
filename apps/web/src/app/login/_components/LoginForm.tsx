@@ -46,7 +46,7 @@ export function LoginForm({ state }: { state: LoginState }) {
 
             <form onSubmit={state.submitLogin} method="POST" className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email">Email address</Label>
                     <Input
                         type="email"
                         id="email"
@@ -99,13 +99,13 @@ export function LoginForm({ state }: { state: LoginState }) {
                 </div>
 
                 {error && (
-                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
                         {error}
                     </div>
                 )}
 
                 <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign in'}
                 </Button>
             </form>
 
@@ -128,7 +128,7 @@ export function LoginForm({ state }: { state: LoginState }) {
                         ) : (
                             <Fingerprint className="w-4 h-4 text-primary" />
                         )}
-                        {state.passkeyLoading ? 'Waiting for passkey…' : 'Sign in with Passkey'}
+                        {state.passkeyLoading ? 'Waiting for passkey…' : 'Sign in with a passkey'}
                     </Button>
                 </>
             )}

@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, Check, X, Terminal, Shield, Zap, Globe, Mail } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, X, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
 import TerminalLogo from '@/components/common/Logo';
+import { BrandPanel, PageShell } from '@/app/login/_components/PageShell';
 
 function GoogleIcon({ className }: { className?: string }) {
     return (
@@ -33,12 +33,6 @@ function GoogleIcon({ className }: { className?: string }) {
     );
 }
 
-const features = [
-    { icon: Terminal, text: 'Manage SSH servers from one place' },
-    { icon: Shield, text: 'End-to-end encrypted credentials' },
-    { icon: Zap, text: 'Instant terminal sessions' },
-    { icon: Globe, text: 'Access from anywhere, securely' },
-];
 
 // ── OTP verification step ────────────────────────────────────────────────────
 
@@ -164,7 +158,7 @@ function VerifyStep({
                 </div>
 
                 {error && (
-                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
                         {error}
                     </div>
                 )}
@@ -277,56 +271,16 @@ function RegisterContent() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-slate-950 via-background to-slate-950">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-            </div>
-
-            <div className="relative w-full max-w-3xl">
-                <Card className="bg-card border-border overflow-hidden">
+        <PageShell fullWidth>
                     <div className="flex min-h-0">
-                        {/* Left brand panel */}
-                        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-linear-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
-                            <div>
-                                <div className="flex items-center gap-3 mb-8">
-                                    <TerminalLogo width={40} height={40} className="rounded-xl" />
-                                    <span className="text-xl font-bold gradient-text">Termi</span>
-                                </div>
-                                <h2 className="text-2xl font-bold leading-snug mb-2">
-                                    Start managing
-                                    <br />
-                                    servers smarter.
-                                </h2>
-                                <p className="text-sm text-muted-foreground mb-8">
-                                    Join developers who trust Termi for secure, instant server
-                                    access.
-                                </p>
-                                <ul className="space-y-3">
-                                    {features.map(({ icon: Icon, text }) => (
-                                        <li
-                                            key={text}
-                                            className="flex items-center gap-3 text-sm text-muted-foreground"
-                                        >
-                                            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
-                                                <Icon className="w-3.5 h-3.5 text-primary" />
-                                            </span>
-                                            {text}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <p className="text-xs text-muted-foreground/50 mt-8">
-                                © {new Date().getFullYear()} Termi. All rights reserved.
-                            </p>
-                        </div>
+                        <BrandPanel />
 
                         {/* Right form / verify panel */}
-                        <div className="flex-1 p-8 flex flex-col justify-center">
+                        <div className="flex flex-1 flex-col justify-center p-6 sm:p-8">
                             {/* Mobile logo */}
-                            <div className="flex items-center justify-center gap-3 mb-6 md:hidden">
-                                <TerminalLogo width={40} height={40} className="rounded-xl" />
-                                <span className="text-xl font-bold gradient-text">Termi</span>
+                            <div className="mb-6 flex items-center gap-2.5 md:hidden">
+                                <TerminalLogo width={28} height={28} className="rounded-md" />
+                                <span className="text-[15px] font-semibold">Termi</span>
                             </div>
 
                             {verifying ? (
@@ -337,7 +291,7 @@ function RegisterContent() {
                                 />
                             ) : (
                                 <>
-                                    <h1 className="text-2xl font-bold mb-1">Create Account</h1>
+                                    <h1 className="text-2xl font-bold mb-1">Create account</h1>
                                     <p className="text-muted-foreground text-sm mb-6">
                                         Start managing your servers securely
                                     </p>
@@ -369,7 +323,7 @@ function RegisterContent() {
                                         className="space-y-4"
                                     >
                                         <div className="space-y-1.5">
-                                            <Label htmlFor="name">Full Name</Label>
+                                            <Label htmlFor="name">Full name</Label>
                                             <Input
                                                 type="text"
                                                 id="name"
@@ -388,7 +342,7 @@ function RegisterContent() {
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <Label htmlFor="email">Email Address</Label>
+                                            <Label htmlFor="email">Email address</Label>
                                             <Input
                                                 type="email"
                                                 id="email"
@@ -459,9 +413,7 @@ function RegisterContent() {
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <Label htmlFor="confirmPassword">
-                                                Confirm Password
-                                            </Label>
+                                            <Label htmlFor="confirmPassword">Confirm password</Label>
                                             <Input
                                                 type="password"
                                                 id="confirmPassword"
@@ -478,7 +430,7 @@ function RegisterContent() {
                                                 autoComplete="new-password"
                                             />
                                             {formData.confirmPassword && !passwordsMatch && (
-                                                <p className="text-xs text-destructive">
+                                                <p className="text-xs text-danger">
                                                     Passwords do not match
                                                 </p>
                                             )}
@@ -493,7 +445,7 @@ function RegisterContent() {
                                         </div>
 
                                         {error && (
-                                            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                            <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
                                                 {error}
                                             </div>
                                         )}
@@ -508,7 +460,7 @@ function RegisterContent() {
                                             {loading ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
                                             ) : (
-                                                'Create Account'
+                                                'Create account'
                                             )}
                                         </Button>
                                     </form>
@@ -526,9 +478,7 @@ function RegisterContent() {
                             )}
                         </div>
                     </div>
-                </Card>
-            </div>
-        </div>
+        </PageShell>
     );
 }
 
@@ -536,7 +486,7 @@ export default function RegisterPage() {
     return (
         <Suspense
             fallback={
-                <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-slate-950 via-background to-slate-950">
+                <div className="min-h-screen flex items-center justify-center p-4 bg-background">
                     <div className="h-8 w-40 bg-muted rounded-sm animate-pulse" />
                 </div>
             }

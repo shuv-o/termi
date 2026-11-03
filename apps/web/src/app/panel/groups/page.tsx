@@ -179,11 +179,11 @@ export default function GroupsPage() {
                 <AlertDialogContent className="bg-card border-border">
                     <AlertDialogHeader>
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
-                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                            <div className="w-10 h-10 rounded-full bg-danger/15 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="w-5 h-5 text-danger" />
                             </div>
                             <div>
-                                <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                                <AlertDialogTitle>Delete group</AlertDialogTitle>
                                 <AlertDialogDescription className="mt-1">
                                     Are you sure you want to delete{' '}
                                     <span className="text-foreground font-medium">

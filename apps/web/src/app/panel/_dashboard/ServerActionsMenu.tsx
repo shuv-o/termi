@@ -59,7 +59,7 @@ export function ServerActionsMenu({
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem
                     onClick={onDelete}
-                    className="gap-2 text-destructive focus:text-destructive"
+                    className="gap-2 text-danger focus:text-danger"
                 >
                     <Trash2 className="w-3.5 h-3.5" /> Delete
                 </DropdownMenuItem>

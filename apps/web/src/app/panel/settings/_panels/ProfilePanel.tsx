@@ -107,12 +107,10 @@ export function ProfilePanel({
             <SecurityScore user={user} passkeys={passkeys} />
 
             <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                    Display Name
-                </h2>
+                <h2 className="text-xs font-semibold text-muted-foreground mb-4">Display name</h2>
                 <form onSubmit={name.save} className="flex items-end gap-3">
                     <div className="flex-1 space-y-1.5">
-                        <Label htmlFor="displayName">Full Name</Label>
+                        <Label htmlFor="displayName">Full name</Label>
                         <Input
                             id="displayName"
                             type="text"
@@ -139,9 +137,7 @@ export function ProfilePanel({
             </Card>
 
             <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                    Account Details
-                </h2>
+                <h2 className="text-xs font-semibold text-muted-foreground mb-4">Account details</h2>
                 <div className="space-y-0">
                     <DetailRow label="Email">
                         <span className="text-sm flex items-center gap-1.5 min-w-0">
@@ -197,26 +193,24 @@ export function ProfilePanel({
             </Card>
 
             <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                    Quick Actions
-                </h2>
+                <h2 className="text-xs font-semibold text-muted-foreground mb-4">Quick actions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <QuickAction
                         icon={Shield}
-                        iconClass="text-violet-400"
+                        iconClass="text-local"
                         label={has2FA ? 'Manage 2FA' : 'Enable 2FA'}
                         onClick={() => onNavigate('security')}
                     />
                     <QuickAction
                         icon={Fingerprint}
                         iconClass="text-primary"
-                        label="Add Passkey"
+                        label="Add passkey"
                         onClick={() => onNavigate('passkeys')}
                     />
                     <QuickAction
                         icon={Monitor}
                         iconClass="text-info"
-                        label="Active Sessions"
+                        label="Active sessions"
                         onClick={() => onNavigate('sessions')}
                     />
                     <QuickAction

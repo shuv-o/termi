@@ -62,7 +62,7 @@ function ShellTabs({
                                     onClose(shell.id);
                                 }}
                                 aria-label={`Close shell ${i + 1}`}
-                                className={`ml-0.5 p-0.5 rounded-sm hover:bg-destructive/20 hover:text-destructive transition-all ${
+                                className={`ml-0.5 p-0.5 rounded-sm hover:bg-danger/20 hover:text-danger transition-all ${
                                     isShellActive
                                         ? 'opacity-40 hover:opacity-100 text-primary'
                                         : 'opacity-0 group-hover:opacity-60'
@@ -265,7 +265,7 @@ export function TerminalPaneHeader({
                 label="Close session"
                 icon={X}
                 onClick={onClose}
-                className="text-destructive/70 hover:bg-destructive/10 hover:text-destructive"
+                className="text-danger/70 hover:bg-danger/10 hover:text-danger"
             />
         </>
     );
@@ -275,7 +275,7 @@ export function TerminalPaneHeader({
             <div className="flex min-h-0 items-center gap-2 overflow-hidden px-3 py-1.5">
                 <div className="flex shrink-0 items-center gap-2">
                     {session.type === 'local' ? (
-                        <Laptop className="w-4 h-4 text-violet-400 shrink-0" />
+                        <Laptop className="w-4 h-4 text-local shrink-0" />
                     ) : (
                         <Terminal className="w-4 h-4 text-muted-foreground shrink-0" />
                     )}
@@ -290,7 +290,7 @@ export function TerminalPaneHeader({
                     </span>
                     {isRecording && (
                         <span
-                            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-danger"
+                            className="flex items-center gap-1 text-[11px] font-semibold text-danger"
                             title="This session is being recorded"
                         >
                             <Circle className="h-2 w-2 animate-pulse fill-danger" />

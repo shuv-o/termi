@@ -57,7 +57,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
             variant: variant ?? (active ? ('default' as const) : ('ghost' as const)),
             size: 'icon' as const,
             'aria-label': label,
-            className: cn(size === 'sm' ? 'h-7 w-7' : 'h-8 w-8', className),
+            className: cn(size === 'sm' ? 'h-8 w-8 sm:h-7 sm:w-7' : 'h-9 w-9 sm:h-8 sm:w-8', className),
         };
 
         return (

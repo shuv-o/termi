@@ -88,9 +88,7 @@ export function DashboardEmptyState({
                     title="No matching servers"
                     description="Broaden your search or reset the active filters to see more servers."
                     action={
-                        <Button variant="secondary" onClick={onClearFilters}>
-                            Clear filters
-                        </Button>
+                        <Button variant="secondary" onClick={onClearFilters}>Clear filters</Button>
                     }
                 />
             )}

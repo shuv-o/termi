@@ -1,11 +1,10 @@
 'use client';
 
-import { Globe, Shield, Terminal, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import TerminalLogo from '@/components/common/Logo';
 import { cn } from '@/lib/utils';
 
-/** Gradient backdrop + centred card shared by every login screen state. */
+/** Plain ink ground + centred card shared by every login screen state. */
 export function PageShell({
     children,
     fullWidth = false,
@@ -14,59 +13,70 @@ export function PageShell({
     fullWidth?: boolean;
 }) {
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-slate-950 via-background to-slate-950">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-            </div>
-            <div className={cn('relative w-full', fullWidth ? 'max-w-3xl' : 'max-w-lg')}>
-                <Card className="bg-card border-border overflow-hidden">{children}</Card>
+        <div
+            className="flex min-h-dvh items-center justify-center bg-background px-4 py-8"
+            style={{
+                paddingTop: 'max(2rem, env(safe-area-inset-top, 0px))',
+                paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 0px))',
+            }}
+        >
+            <div className={cn('w-full', fullWidth ? 'max-w-3xl' : 'max-w-md')}>
+                <Card className="overflow-hidden">{children}</Card>
             </div>
         </div>
     );
 }
 
-const FEATURES = [
-    { icon: Terminal, text: 'Manage SSH servers from one place' },
-    { icon: Shield, text: 'End-to-end encrypted credentials' },
-    { icon: Zap, text: 'Instant terminal sessions' },
-    { icon: Globe, text: 'Access from anywhere, securely' },
+/** A few lines of what Termi actually looks like in use. */
+const TRANSCRIPT: { host: string; state: 'online' | 'offline'; note: string }[] = [
+    { host: 'web-01', state: 'online', note: '14 ms' },
+    { host: 'db-primary', state: 'online', note: '9 ms' },
+    { host: 'build-runner', state: 'offline', note: 'offline' },
+    { host: 'win-desktop', state: 'online', note: 'RDP' },
 ];
 
-/** Marketing column beside the sign-in form; hidden below `md`. */
+/** Brand column beside the sign-in form; hidden below `md`. */
 export function BrandPanel() {
     return (
-        <div className="hidden md:flex flex-col justify-between w-[42%] shrink-0 bg-linear-to-b from-primary/10 to-purple-500/10 border-r border-border p-8">
+        <div className="hidden w-[44%] shrink-0 flex-col justify-between border-r border-border bg-background/50 p-8 md:flex">
             <div>
-                <div className="flex items-center gap-3 mb-8">
-                    <TerminalLogo width={40} height={40} className="rounded-xl" />
-                    <span className="text-xl font-bold gradient-text">Termi</span>
+                <div className="mb-10 flex items-center gap-2.5">
+                    <TerminalLogo width={28} height={28} className="rounded-md" />
+                    <span className="text-[15px] font-semibold">Termi</span>
                 </div>
-                <h2 className="text-2xl font-bold leading-snug mb-2">
+                <h2 className="text-[26px] font-semibold leading-[1.15] tracking-[-0.02em]">
                     Your servers,
                     <br />
-                    always within reach.
+                    one tap away
+                    <span aria-hidden className="cursor-block" />
                 </h2>
-                <p className="text-sm text-muted-foreground mb-8">
-                    A secure, modern SSH manager built for developers and teams.
+                <p className="mt-3 max-w-[30ch] text-sm text-muted-foreground">
+                    SSH, RDP, VNC and file transfer from any browser, with credentials encrypted
+                    before they are stored.
                 </p>
-                <ul className="space-y-3">
-                    {FEATURES.map(({ icon: Icon, text }) => (
-                        <li
-                            key={text}
-                            className="flex items-center gap-3 text-sm text-muted-foreground"
-                        >
-                            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
-                                <Icon className="w-3.5 h-3.5 text-primary" />
-                            </span>
-                            {text}
-                        </li>
-                    ))}
-                </ul>
             </div>
-            <p className="text-xs text-muted-foreground/50 mt-8">
-                © {new Date().getFullYear()} Termi. All rights reserved.
-            </p>
+
+            <div
+                aria-hidden
+                className="data mt-10 rounded-lg border border-border bg-[var(--terminal-bg)] p-4 text-[12px] leading-6"
+            >
+                <p className="text-muted-foreground">
+                    <span className="text-primary">$</span> termi status
+                </p>
+                {TRANSCRIPT.map((row) => (
+                    <p key={row.host} className="flex items-center gap-2">
+                        <span
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${row.state === 'online' ? 'bg-success' : 'bg-danger'}`}
+                        />
+                        <span className="flex-1 text-foreground/90">{row.host}</span>
+                        <span
+                            className={row.state === 'online' ? 'text-muted-foreground' : 'text-danger'}
+                        >
+                            {row.note}
+                        </span>
+                    </p>
+                ))}
+            </div>
         </div>
     );
 }

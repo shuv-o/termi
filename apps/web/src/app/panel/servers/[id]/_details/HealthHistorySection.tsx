@@ -75,7 +75,7 @@ export function HealthHistorySection({
                 <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
                     <Activity className="w-4 h-4 text-primary" />
                     Health History
-                    <span className="text-[10px] text-muted-foreground font-normal">
+                    <span className="text-[11px] text-muted-foreground font-normal">
                         ({records.length} records)
                     </span>
                 </h2>
@@ -107,7 +107,7 @@ export function HealthHistorySection({
                         label="Latency"
                         value={lastRecord?.latencyMs != null ? `${lastRecord.latencyMs}ms` : '—'}
                         data={records.map((r) => (r.reachable ? (r.latencyMs ?? null) : null))}
-                        color="#38bdf8"
+                        color="#6cb8f5"
                     >
                         <div className="mt-3 pt-3 border-t border-border/50">
                             {/* Up/down strip for the most recent checks. */}
@@ -120,7 +120,7 @@ export function HealthHistorySection({
                                     />
                                 ))}
                             </div>
-                            <p className="text-[10px] text-muted-foreground mt-1">
+                            <p className="text-[11px] text-muted-foreground mt-1">
                                 Uptime: {upCount}/{records.length} checks
                             </p>
                         </div>
@@ -131,12 +131,12 @@ export function HealthHistorySection({
                         <>
                             <MetricCard
                                 icon={Cpu}
-                                iconClass="text-violet-400"
+                                iconClass="text-local"
                                 label="CPU"
                                 value={pct(lastRecord?.cpuPercent)}
                                 alert={(lastRecord?.cpuPercent ?? 0) >= 90}
                                 data={records.map((r) => r.cpuPercent)}
-                                color="#a78bfa"
+                                color="#b58cff"
                                 alertThreshold={90}
                             />
                             <MetricCard
@@ -146,17 +146,17 @@ export function HealthHistorySection({
                                 value={pct(lastRecord?.ramPercent)}
                                 alert={(lastRecord?.ramPercent ?? 0) >= 90}
                                 data={records.map((r) => r.ramPercent)}
-                                color="#fbbf24"
+                                color="#f2b544"
                                 alertThreshold={90}
                             />
                             <MetricCard
                                 icon={HardDrive}
-                                iconClass="text-rose-400"
+                                iconClass="text-proto-vnc"
                                 label="Disk"
                                 value={pct(lastRecord?.diskPercent)}
                                 alert={(lastRecord?.diskPercent ?? 0) >= 90}
                                 data={records.map((r) => r.diskPercent)}
-                                color="#fb7185"
+                                color="#ff9b5e"
                                 alertThreshold={90}
                             />
                         </>

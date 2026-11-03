@@ -71,9 +71,7 @@ export function RecoveryCodesPanel({
                     </div>
                 ))}
             </div>
-            <Button variant="secondary" size="sm" onClick={onDismiss}>
-                I&apos;ve saved my recovery codes
-            </Button>
+            <Button variant="secondary" size="sm" onClick={onDismiss}>I&apos;ve saved my recovery codes</Button>
         </div>
     );
 }

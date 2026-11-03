@@ -21,13 +21,17 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     // later navigation `user` is already present, so the shell paints instantly.
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <div
+                className="min-h-screen flex items-center justify-center bg-background text-2xl"
+                role="status"
+                aria-label="Loading"
+            >
+                <span className="cursor-block cursor-waiting" />
             </div>
         );
     }
 
-    const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-64 2xl:pl-72';
+    const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-60';
 
     // Email banner is the top-most element on mobile, so it (rather than the
     // sticky header) carries the safe-area inset when shown.
@@ -88,7 +92,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                         // `useRouteFade` gets the same fade cue without that.
                         className={`transition-[opacity,transform] duration-150 ease-out ${
                             fading ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
-                        } ${isLocalPage ? 'p-4 sm:p-5 lg:p-8' : 'p-4 sm:p-5 lg:p-8 pb-28 sm:pb-28 lg:pb-8'}`}
+                        } ${isLocalPage ? 'px-4 py-5 sm:px-6 lg:px-10 lg:py-8' : 'px-4 pt-5 pb-32 sm:px-6 lg:px-10 lg:py-8'}`}
                     >
                         {children}
                     </main>

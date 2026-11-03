@@ -54,7 +54,7 @@ export function KeychainEntryCard({
                 <div className="flex items-center gap-2 min-w-0">
                     <p className="truncate text-sm font-semibold">{entry.label}</p>
                     <span
-                        className={`hidden sm:inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${accent}`}
+                        className={`hidden sm:inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${accent}`}
                     >
                         {entry.hasPrivateKey ? 'SSH key' : 'Password'}
                     </span>
@@ -80,7 +80,7 @@ export function KeychainEntryCard({
 
             {confirming ? (
                 <div className="flex shrink-0 items-center gap-2">
-                    <span className="hidden sm:inline text-xs text-destructive">
+                    <span className="hidden sm:inline text-xs text-danger">
                         Delete this entry?
                     </span>
                     <button
@@ -130,7 +130,7 @@ export function KeychainEntryCard({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
+                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-danger"
                         onClick={() => setConfirming(true)}
                     >
                         <Trash2 className="w-4 h-4" />

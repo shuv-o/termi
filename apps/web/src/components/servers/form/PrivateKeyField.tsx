@@ -47,7 +47,7 @@ function KeyFileDropzone({
 }) {
     return (
         <div className="space-y-1.5">
-            <Label className="text-xs">Key File (.pem, .ppk)</Label>
+            <Label className="text-xs">Key file (.pem, .ppk)</Label>
             <label
                 className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors ${
                     fileName
@@ -74,7 +74,7 @@ function KeyFileDropzone({
                         <span className="break-all text-center text-xs font-medium text-success">
                             {fileName}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">Click to replace</span>
+                        <span className="text-[11px] text-muted-foreground">Click to replace</span>
                     </>
                 ) : (
                     <>

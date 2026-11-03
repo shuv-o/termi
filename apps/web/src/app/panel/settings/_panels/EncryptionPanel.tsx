@@ -22,7 +22,7 @@ export function EncryptionPanel({
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Credential Encryption"
+                title="Credential encryption"
                 description="How your stored server credentials are protected at rest."
                 icon={Lock}
                 iconBg="bg-info/15 text-info"
@@ -77,7 +77,7 @@ export function EncryptionPanel({
                                 minLength={8}
                             />
                             {mismatch && (
-                                <p className="text-xs text-destructive">Passphrases do not match</p>
+                                <p className="text-xs text-danger">Passphrases do not match</p>
                             )}
                             <Button
                                 type="submit"

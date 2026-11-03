@@ -19,7 +19,7 @@ export function DangerZonePanel({
     return (
         <Card className="border border-danger/20 p-6 transition-all duration-200 hover:border-danger/30">
             <SettingsSection
-                title="Danger Zone"
+                title="Danger zone"
                 description="Irreversible actions that permanently affect your account."
                 icon={AlertTriangle}
                 iconBg="bg-danger/15 text-danger"

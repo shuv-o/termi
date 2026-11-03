@@ -129,7 +129,7 @@ export default function TelnetConnectionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-dvh lg:h-screen">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
             </div>
         );
     }
@@ -137,7 +137,7 @@ export default function TelnetConnectionPage() {
     if (error || !token) {
         return (
             <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
-                <p className="text-destructive">{error || 'Connection failed'}</p>
+                <p className="text-danger">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back to Dashboard</Link>
                 </Button>
@@ -214,7 +214,7 @@ export default function TelnetConnectionPage() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        className="h-7 w-7 text-danger hover:text-danger"
                         onClick={disconnect}
                         title="Disconnect"
                     >

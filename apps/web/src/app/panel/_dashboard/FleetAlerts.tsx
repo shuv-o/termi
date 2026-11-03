@@ -30,7 +30,7 @@ export function FleetAlerts({
     if (total === 0) return null;
 
     return (
-        <div className="mb-5 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
             <button
                 type="button"
                 onClick={() => setExpanded((e) => !e)}
@@ -51,13 +51,13 @@ export function FleetAlerts({
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5 pl-5">
                     {offline.length > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-danger/10 text-danger border border-danger/20 shrink-0">
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-danger/10 text-danger border border-danger/20 shrink-0">
                             <WifiOff className="w-2.5 h-2.5" />
                             {offline.length} offline
                         </span>
                     )}
                     {highLoad.length > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-warning/10 text-warning border border-warning/20 shrink-0">
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-warning/10 text-warning border border-warning/20 shrink-0">
                             <AlertTriangle className="w-2.5 h-2.5" />
                             {highLoad.length} high load
                         </span>
@@ -67,9 +67,10 @@ export function FleetAlerts({
             {expanded && (
                 <div className="border-t border-border max-h-64 overflow-y-auto divide-y divide-border/60">
                     {offline.map((s) => (
-                        <div
+                        <button
+                            type="button"
                             key={s.id}
-                            className="flex items-center gap-3 px-4 py-2 text-sm cursor-pointer hover:bg-danger/5 transition-colors"
+                            className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors hover:bg-danger/5"
                             onClick={() => onSelectServer(s.id)}
                         >
                             <WifiOff className="w-3.5 h-3.5 text-danger shrink-0" />
@@ -77,28 +78,29 @@ export function FleetAlerts({
                             <span className="text-danger/50 text-xs shrink-0 hidden sm:inline">
                                 offline
                             </span>
-                            <span className="ml-auto text-[10px] text-muted-foreground/40 font-mono hidden sm:block shrink-0">
+                            <span className="ml-auto text-xs text-muted-foreground data hidden sm:block shrink-0">
                                 {s.host}
                             </span>
-                        </div>
+                        </button>
                     ))}
                     {highLoad.map((s) => {
                         const m = metrics[s.id]!;
                         return (
-                            <div
+                            <button
+                                type="button"
                                 key={s.id}
-                                className="flex items-center gap-3 px-4 py-2 text-sm cursor-pointer hover:bg-warning/5 transition-colors"
+                                className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors hover:bg-warning/5"
                                 onClick={() => onSelectServer(s.id)}
                             >
                                 <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
                                 <span className="font-medium text-warning truncate">{s.name}</span>
-                                <div className="ml-auto flex items-center gap-3 text-[10px] text-muted-foreground/60 shrink-0">
+                                <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground tabular-nums shrink-0">
                                     {(m.cpu ?? 0) >= 90 && <span>CPU {m.cpu}%</span>}
                                     {(m.ram?.percent ?? 0) >= 90 && (
                                         <span>RAM {Math.round(m.ram!.percent)}%</span>
                                     )}
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>

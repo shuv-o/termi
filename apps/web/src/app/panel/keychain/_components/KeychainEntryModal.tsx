@@ -190,7 +190,7 @@ export function KeychainEntryModal({
                         Termi encrypts these credentials before storing them.
                     </p>
 
-                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    {error && <p className="text-sm text-danger">{error}</p>}
 
                     <div className="flex justify-end gap-2 pt-1">
                         <Button type="button" variant="secondary" onClick={onClose}>

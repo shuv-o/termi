@@ -12,9 +12,9 @@ import type { ServerMetrics } from '@/app/panel/_dashboard/types';
 
 // Canvas/SVG strokes need literal colours, so these mirror --success / --info
 // from globals.css (the same pair the dashboard CPU/RAM gauges use).
-const CPU_COLOR = '#34d399'; // --success
-const RAM_COLOR = '#38bdf8'; // --info
-const DISK_COLOR = '#a1a1aa'; // zinc-400
+const CPU_COLOR = '#3ecf8e'; // --success
+const RAM_COLOR = '#6cb8f5'; // --info
+const DISK_COLOR = '#8794a6'; // --muted-foreground
 
 function MetricRow({
     label,
@@ -52,7 +52,7 @@ function MetricRow({
                 </span>
             </div>
             <LiveSparkline values={values} max={max} color={color} />
-            {sub && <p className="truncate text-[10px] text-muted-foreground/70">{sub}</p>}
+            {sub && <p className="truncate text-[11px] text-muted-foreground/70">{sub}</p>}
         </div>
     );
 }
@@ -106,7 +106,7 @@ export function LiveMetricsBody({
                 </p>
             )}
 
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && <p className="text-xs text-danger">{error}</p>}
 
             {latest?.reachable && (
                 <>

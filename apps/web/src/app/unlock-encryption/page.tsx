@@ -107,7 +107,7 @@ export default function UnlockEncryptionPage() {
                 </div>
                 <form onSubmit={handleUnlock} className="space-y-4">
                     <div className="space-y-1">
-                        <Label htmlFor="passphrase">Passphrase / Account Password</Label>
+                        <Label htmlFor="passphrase">Passphrase / account password</Label>
                         <div className="relative">
                             <Input
                                 id="passphrase"

@@ -38,7 +38,7 @@ export function MobileEntryRow({
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                         ${isSelected ? 'bg-info border-info' : 'border-muted-foreground/40'}`}
                 >
-                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                    {isSelected && <Check className="w-3 h-3 text-foreground" />}
                 </div>
             )}
 
@@ -109,7 +109,7 @@ export function DesktopEntryRow({
                 </span>
             </div>
 
-            <span className="text-[10px] text-muted-foreground/80 shrink-0 w-8 text-right">
+            <span className="text-[11px] text-muted-foreground/80 shrink-0 w-8 text-right">
                 {isDir ? '' : formatBytes(entry.size, '—')}
             </span>
 

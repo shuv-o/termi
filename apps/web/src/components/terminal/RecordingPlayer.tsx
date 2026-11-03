@@ -59,7 +59,7 @@ export default function RecordingPlayer({ content }: { content: string }) {
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
             fontSize: 13,
             lineHeight: 1.2,
-            theme: { background: '#0d1117', foreground: '#c9d1d9' },
+            theme: { background: '#0b0f14', foreground: '#c9d1d9' },
         });
         const fit = new FitAddon();
         terminal.loadAddon(fit);

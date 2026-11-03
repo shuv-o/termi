@@ -71,7 +71,7 @@ export function TunnelDialog({
                 </div>
 
                 {tunnels.error && (
-                    <div className="flex items-center gap-2 text-xs text-destructive">
+                    <div className="flex items-center gap-2 text-xs text-danger">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                         {tunnels.error}
                     </div>

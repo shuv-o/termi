@@ -1,0 +1,27 @@
+import { chromium } from 'playwright';
+const [,, path, out, w, h, full] = process.argv;
+const user = { id:'u1', email:'demo@termi.local', name:'Demo User', totpEnabled:true, hasMasterKey:false, isVerified:true, isGoogleUser:false, createdAt:new Date().toISOString() };
+const mk=(id,name,protocol,host,tags,fav,group,desc)=>({id,name,protocol,host,port:protocol==='RDP'?3389:protocol==='VNC'?5900:22,username:protocol==='RDP'?'Administrator':'deploy',tags,isFavorite:fav,hasPassword:true,lastUsedAt:new Date(Date.now()-3600e3*Math.random()*48).toISOString(),description:desc,group});
+const prod={id:'g1',name:'Production',color:'#10b981'}, stg={id:'g2',name:'Staging',color:'#f59e0b'};
+const servers=[mk('s1','web-01','SSH','10.0.1.12',['nginx','edge'],true,prod,'Public edge, nginx + certbot'),mk('s2','db-primary','SSH','10.0.2.4',['postgres'],true,prod),mk('s3','build-runner','SSH','10.0.3.9',['ci'],false,stg,'GitHub Actions self-hosted runner'),mk('s4','win-desktop','RDP','192.168.1.40',['office'],false,null),mk('s5','media-nas','VNC','192.168.1.22',[],false,null),mk('s6','files-backup','SCP','10.0.5.2',['backup'],false,stg)];
+const metrics={s1:{reachable:true,latencyMs:14,cpu:23,ram:{percent:41,usedBytes:1,totalBytes:2},disk:{percent:62,usedBytes:1,totalBytes:2},network:{rxBytes:1.2e9,txBytes:3.4e8}},s2:{reachable:true,latencyMs:9,cpu:86,ram:{percent:72,usedBytes:1,totalBytes:2},disk:{percent:48,usedBytes:1,totalBytes:2}},s3:{reachable:false},s4:{reachable:true,latencyMs:31},s5:{reachable:true,latencyMs:52},s6:{reachable:true,latencyMs:18}};
+const b = await chromium.launch({ channel:'chrome' });
+const ctx = await b.newContext({ viewport:{width:+w,height:+h}, isMobile: +w<600, hasTouch: +w<600 });
+const p = await ctx.newPage();
+const errs=[]; p.on('pageerror', e=>errs.push(e.message));
+await ctx.route('**/api/**', async r => {
+  const u = new URL(r.request().url()); const pth=u.pathname;
+  const ok = d => r.fulfill({ json:{ success:true, data:d } });
+  if (pth==='/api/auth/me') return ok({ user });
+  if (pth==='/api/servers') return ok({ servers });
+  const m = pth.match(/^\/api\/servers\/(s\d)\/metrics/); if (m) return ok({ metrics: metrics[m[1]] });
+  if (pth==='/api/shared-servers') return ok({ servers: [] });
+  if (pth==='/api/groups') return ok({ groups:[{...prod,_count:{servers:2},servers:servers.slice(0,2)},{...stg,_count:{servers:2},servers:[servers[2],servers[5]]}] });
+  if (pth==='/api/keychain') return ok({ entries:[], credentials:[] });
+  return ok({});
+});
+await p.goto('http://localhost:22080'+path, { waitUntil:'networkidle' });
+await p.waitForTimeout(3000);
+await p.screenshot({ path: out, fullPage: full==='full' });
+console.log('errors:', errs.join(' | ')||'none');
+await b.close();
