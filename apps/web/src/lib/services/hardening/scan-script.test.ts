@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'child_process';
-import { mkdtempSync, writeFileSync } from 'fs';
+import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { SCAN_SCRIPT } from './scan-script';
@@ -36,5 +36,31 @@ describe('SCAN_SCRIPT', () => {
     it('brackets its output with start/end markers', () => {
         expect(SCAN_SCRIPT).toContain('echo "TERMI_SCAN=1"');
         expect(SCAN_SCRIPT).toContain('echo "TERMI_SCAN_END=1"');
+    });
+
+    // A fake 'nft' that prints a captured ruleset, ahead of the real PATH.
+    function firewallFor(fixture: string): string {
+        const dir = mkdtempSync(join(tmpdir(), 'termi-nft-'));
+        const ruleset = readFileSync(join(__dirname, '__fixtures__', `nft-${fixture}.txt`), 'utf8');
+        writeFileSync(join(dir, 'ruleset'), ruleset);
+        writeFileSync(join(dir, 'nft'), `#!/bin/sh\ncat '${join(dir, 'ruleset')}'\n`);
+        chmodSync(join(dir, 'nft'), 0o755);
+        const script = join(dir, 'scan.sh');
+        writeFileSync(script, SCAN_SCRIPT);
+        const out = execFileSync('sh', [script], {
+            env: { ...process.env, PATH: `${dir}:${process.env.PATH}` },
+            encoding: 'utf8',
+        });
+        return out.match(/^firewall=(.*)$/m)?.[1] ?? '';
+    }
+
+    it('does not mistake Docker/libvirt forward-chain drops for a firewall', () => {
+        expect(firewallFor('docker')).not.toBe('nftables');
+        expect(firewallFor('debian-default')).not.toBe('nftables');
+    });
+
+    it('recognises a real nftables firewall, including rules in a jumped-to chain', () => {
+        expect(firewallFor('real-policy')).toBe('nftables');
+        expect(firewallFor('real-jump')).toBe('nftables');
     });
 });

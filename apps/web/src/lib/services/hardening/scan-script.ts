@@ -126,7 +126,29 @@ if [ "$fw" = none ] || [ "$fw" = unknown ]; then
     if has nft; then
         rules=$(run nft list ruleset)
         if [ -n "$rules" ]; then
-            printf '%s\n' "$rules" | grep -qE 'policy drop|[[:space:]](drop|reject)([[:space:]]|$)' && fw=nftables
+            # Only rules that can block traffic TO this host count: chains on the
+            # input hook, plus chains they jump/goto. Docker, libvirt and k8s add
+            # drop rules to forward chains — those route container traffic and
+            # are not a firewall in front of this server.
+            printf '%s\n' "$rules" | awk '
+                $1=="table" { tbl=$2"|"$3; next }
+                $1=="chain" && cur=="" { cur=tbl"|"$2; next }
+                cur!="" {
+                    if ($1=="}") { cur=""; next }
+                    if ($0 ~ /hook input/) input[cur]=1
+                    if ($0 ~ /policy drop/) blocks[cur]=1
+                    else if ($0 ~ /(^|[[:space:]])(drop|reject)([[:space:];]|$)/) blocks[cur]=1
+                    for (i=1; i<NF; i++) if ($i=="jump" || $i=="goto") { t=$(i+1); sub(/;$/, "", t); jumps[cur]=jumps[cur]" "tbl"|"t }
+                }
+                END {
+                    for (c in input) {
+                        if (blocks[c]) { found=1; break }
+                        n=split(jumps[c], j, " ")
+                        for (k=1; k<=n; k++) if (blocks[j[k]]) { found=1; break }
+                        if (found) break
+                    }
+                    exit found ? 0 : 1
+                }' && fw=nftables
         elif [ -z "$SUDO" ] && [ "$uid" != "0" ]; then fw=unknown; fi
     fi
 fi

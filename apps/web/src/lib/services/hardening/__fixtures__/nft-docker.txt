@@ -1,0 +1,20 @@
+table ip filter {
+	chain DOCKER {
+		iifname != "docker0" oifname "docker0" counter drop
+	}
+	chain DOCKER-ISOLATION-STAGE-2 {
+		oifname "docker0" counter drop
+		counter return
+	}
+	chain FORWARD {
+		type filter hook forward priority filter; policy drop;
+		counter jump DOCKER-ISOLATION-STAGE-2
+		oifname "docker0" counter jump DOCKER
+	}
+}
+table ip nat {
+	chain POSTROUTING {
+		type nat hook postrouting priority srcnat; policy accept;
+		oifname != "docker0" ip saddr 172.17.0.0/16 counter masquerade
+	}
+}

@@ -338,7 +338,9 @@ export async function hardenServer(
             if (managed) firewallPlan = { mode: 'open-only', tool: managed, allowPorts: [] };
             else if (fwNow === 'nftables' || fwNow === 'iptables') {
                 return stop(
-                    `A ${fwNow} firewall is active. Allow port ${newPort} in it first, then move the port.`,
+                    fwNow === 'nftables'
+                        ? `This server has its own nftables firewall, which would block port ${newPort}. Allow it there first — for example: nft add rule inet filter input tcp dport ${newPort} accept (use your table and chain names) — then move the port.`
+                        : `This server has its own iptables firewall, which would block port ${newPort}. Allow it there first — for example: iptables -I INPUT -p tcp --dport ${newPort} -j ACCEPT — then move the port.`,
                 );
             }
         }

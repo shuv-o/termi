@@ -1,0 +1,11 @@
+table inet fw {
+	chain rules {
+		tcp dport 22 accept
+		counter reject
+	}
+	chain input {
+		type filter hook input priority filter; policy accept;
+		iifname "lo" accept
+		jump rules
+	}
+}
