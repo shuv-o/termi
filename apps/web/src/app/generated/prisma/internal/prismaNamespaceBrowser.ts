@@ -71,7 +71,8 @@ export const ModelName = {
   CommandSnippet: 'CommandSnippet',
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
-  ServerShare: 'ServerShare'
+  ServerShare: 'ServerShare',
+  ServerHardeningRun: 'ServerHardeningRun'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -440,6 +441,22 @@ export const ServerShareScalarFieldEnum = {
 export type ServerShareScalarFieldEnum = (typeof ServerShareScalarFieldEnum)[keyof typeof ServerShareScalarFieldEnum]
 
 
+export const ServerHardeningRunScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  userId: 'userId',
+  status: 'status',
+  options: 'options',
+  steps: 'steps',
+  pendingSecret: 'pendingSecret',
+  message: 'message',
+  createdAt: 'createdAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type ServerHardeningRunScalarFieldEnum = (typeof ServerHardeningRunScalarFieldEnum)[keyof typeof ServerHardeningRunScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -454,6 +471,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

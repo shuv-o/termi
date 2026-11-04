@@ -1,0 +1,407 @@
+'use client';
+
+import { useState } from 'react';
+import {
+    AlertTriangle,
+    CheckCircle2,
+    Circle,
+    KeyRound,
+    Loader2,
+    MinusCircle,
+    ShieldCheck,
+    XCircle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import PasskeyRevealModal from '@/components/auth/PasskeyRevealModal';
+import type { HardenEvent, StepStatus } from '@/lib/services/hardening/harden.service';
+import type { SecurityReport } from '@/lib/services/hardening/evaluate';
+import { cn } from '@/lib/utils';
+
+type Done = Extract<HardenEvent, { type: 'done' }>;
+interface StepRow {
+    id: string;
+    status: StepStatus;
+    label: string;
+}
+
+const STEP_ICON: Record<StepStatus, typeof CheckCircle2> = {
+    running: Loader2,
+    done: CheckCircle2,
+    warning: AlertTriangle,
+    failed: XCircle,
+    skipped: MinusCircle,
+};
+const STEP_TONE: Record<StepStatus, string> = {
+    running: 'text-primary animate-spin',
+    done: 'text-success',
+    warning: 'text-warning',
+    failed: 'text-danger',
+    skipped: 'text-muted-foreground',
+};
+
+function OptionRow({
+    id,
+    title,
+    hint,
+    checked,
+    onChange,
+    disabled,
+    children,
+}: {
+    id: string;
+    title: string;
+    hint: string;
+    checked: boolean;
+    onChange: (v: boolean) => void;
+    disabled?: boolean;
+    children?: React.ReactNode;
+}) {
+    return (
+        <div className="py-3">
+            <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                    <Label htmlFor={id} className="text-sm">
+                        {title}
+                    </Label>
+                    <p className="mt-1 text-xs leading-snug text-muted-foreground">{hint}</p>
+                </div>
+                <Switch id={id} checked={checked} onCheckedChange={onChange} disabled={disabled} />
+            </div>
+            {checked && children}
+        </div>
+    );
+}
+
+/**
+ * "Secure this server": the options, then live progress, then the outcome.
+ * The two choices that change how people log in afterwards — a dedicated
+ * admin user, and turning password logins off — are the user's to make.
+ */
+export function HardenDialog({
+    serverId,
+    serverName,
+    report,
+    open,
+    onOpenChange,
+    onFinished,
+}: {
+    serverId: string;
+    serverName: string;
+    report: SecurityReport;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    /** Called after a run ends, so the page can refresh and re-scan. */
+    onFinished: (ok: boolean) => void;
+}) {
+    const loggedInAsRoot = report.loginUser === 'root';
+    const [createUser, setCreateUser] = useState(loggedInAsRoot);
+    const [newUsername, setNewUsername] = useState('termi-admin');
+    const [disablePasswords, setDisablePasswords] = useState(true);
+    const [rotatePassword, setRotatePassword] = useState(true);
+    const [fail2ban, setFail2ban] = useState(true);
+    const [autoUpdates, setAutoUpdates] = useState(true);
+    const [extraKey, setExtraKey] = useState('');
+
+    const [running, setRunning] = useState(false);
+    const [steps, setSteps] = useState<StepRow[]>([]);
+    const [result, setResult] = useState<Done | null>(null);
+    const [showKey, setShowKey] = useState(false);
+
+    const usernameValid = /^[a-z_][a-z0-9_-]{0,31}$/.test(newUsername) && newUsername !== 'root';
+    const canStart = !running && (!createUser || usernameValid);
+    const started = running || result !== null;
+
+    const apply = async () => {
+        setRunning(true);
+        setSteps([]);
+        setResult(null);
+        try {
+            const res = await fetch(`/api/servers/${serverId}/harden`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    createUser,
+                    newUsername: createUser ? newUsername : undefined,
+                    disablePasswordLogin: disablePasswords,
+                    rotatePassword: createUser || rotatePassword,
+                    fail2ban,
+                    autoUpdates,
+                    extraPublicKey: extraKey.trim() || undefined,
+                }),
+            });
+            if (!res.ok || !res.body) {
+                const json = await res.json().catch(() => null);
+                setResult({
+                    type: 'done',
+                    ok: false,
+                    outcome: 'failed',
+                    message: json?.error || 'Could not start. Nothing was changed.',
+                });
+                return;
+            }
+            // Buffer across chunks: an event can arrive split in two.
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const parts = buffer.split('\n\n');
+                buffer = parts.pop() ?? '';
+                for (const part of parts) {
+                    if (!part.startsWith('data: ')) continue;
+                    const event = JSON.parse(part.slice(6)) as HardenEvent;
+                    if (event.type === 'done') {
+                        setResult(event);
+                    } else {
+                        setSteps((prev) => {
+                            const i = prev.findIndex((s) => s.id === event.id);
+                            const row = { id: event.id, status: event.status, label: event.label };
+                            if (i < 0) return [...prev, row];
+                            const next = [...prev];
+                            next[i] = row;
+                            return next;
+                        });
+                    }
+                }
+            }
+        } catch {
+            setResult({
+                type: 'done',
+                ok: false,
+                outcome: 'rollback-pending',
+                message:
+                    'Lost the connection to Termi. The run continues on the server: if it could not finish, the server restores its previous settings within 5 minutes.',
+            });
+        } finally {
+            setRunning(false);
+        }
+    };
+
+    const close = (next: boolean) => {
+        if (running) return; // never abandon a run from the UI
+        if (!next && result) onFinished(result.ok);
+        onOpenChange(next);
+        if (!next) {
+            setSteps([]);
+            setResult(null);
+        }
+    };
+
+    return (
+        <>
+            <Dialog open={open} onOpenChange={close}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ShieldCheck className="h-5 w-5 text-primary" />
+                            Secure {serverName}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Before changing anything, Termi arms an automatic rollback on the
+                            server. It only switches to the new login after proving it works —
+                            otherwise everything is restored.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {!started ? (
+                        <div className="-my-1 divide-y divide-border">
+                            <div className="pb-3">
+                                <p className="text-xs text-muted-foreground">Always applied</p>
+                                <ul className="mt-1.5 space-y-1 text-[13px] text-foreground/85">
+                                    <li>A new SSH key that only Termi holds</li>
+                                    <li>
+                                        {createUser || !loggedInAsRoot
+                                            ? 'No root login over SSH'
+                                            : 'root can only log in with a key'}
+                                    </li>
+                                    <li>3 login tries per connection, 30-second login timeout</li>
+                                    <li>No empty passwords, no X11 forwarding</li>
+                                </ul>
+                            </div>
+
+                            <OptionRow
+                                id="harden-user"
+                                title="Create a dedicated admin user"
+                                hint={
+                                    loggedInAsRoot
+                                        ? 'Recommended. Termi will log in as this user and use sudo, instead of logging in as root.'
+                                        : `Termi will log in as a new sudo user instead of ${report.loginUser}.`
+                                }
+                                checked={createUser}
+                                onChange={setCreateUser}
+                            >
+                                <div className="mt-2.5">
+                                    <Input
+                                        value={newUsername}
+                                        onChange={(e) => setNewUsername(e.target.value.trim())}
+                                        aria-label="Username for the admin user"
+                                        aria-invalid={!usernameValid || undefined}
+                                        className="data"
+                                        autoCapitalize="off"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                    />
+                                    {!usernameValid && (
+                                        <p className="mt-1 text-xs text-danger">
+                                            Lowercase letters, digits, - and _; start with a letter.
+                                        </p>
+                                    )}
+                                </div>
+                            </OptionRow>
+
+                            <OptionRow
+                                id="harden-passwords"
+                                title="Turn off password logins"
+                                hint="Only SSH keys can log in, so passwords can no longer be guessed. Add your own public key below to keep a way in outside Termi."
+                                checked={disablePasswords}
+                                onChange={setDisablePasswords}
+                            />
+
+                            {!createUser && (
+                                <OptionRow
+                                    id="harden-rotate"
+                                    title={`New password for ${report.loginUser}`}
+                                    hint="Replaces the current (possibly default) password with a strong random one, saved in Termi."
+                                    checked={rotatePassword}
+                                    onChange={setRotatePassword}
+                                />
+                            )}
+
+                            <OptionRow
+                                id="harden-f2b"
+                                title="Brute-force protection"
+                                hint="Installs fail2ban and bans addresses that keep failing to log in. Termi's own address is never banned."
+                                checked={fail2ban}
+                                onChange={setFail2ban}
+                            />
+
+                            <OptionRow
+                                id="harden-updates"
+                                title="Automatic security updates"
+                                hint="Security fixes install on their own, every day."
+                                checked={autoUpdates}
+                                onChange={setAutoUpdates}
+                            />
+
+                            <div className="pt-3">
+                                <Label htmlFor="harden-key" className="text-sm">
+                                    Your public key{' '}
+                                    <span className="font-normal text-muted-foreground">
+                                        (optional)
+                                    </span>
+                                </Label>
+                                <Textarea
+                                    id="harden-key"
+                                    value={extraKey}
+                                    onChange={(e) => setExtraKey(e.target.value)}
+                                    placeholder="ssh-ed25519 AAAA… you@laptop"
+                                    className="data mt-1.5 min-h-[64px] text-xs"
+                                    spellCheck={false}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <ul className="space-y-1.5" aria-live="polite">
+                                {steps.map((s) => {
+                                    const Icon = STEP_ICON[s.status];
+                                    return (
+                                        <li key={s.id} className="flex items-start gap-2.5 text-sm">
+                                            <Icon
+                                                className={cn(
+                                                    'mt-0.5 h-4 w-4 shrink-0',
+                                                    STEP_TONE[s.status],
+                                                )}
+                                            />
+                                            <span
+                                                className={
+                                                    s.status === 'running'
+                                                        ? 'text-foreground'
+                                                        : 'text-foreground/85'
+                                                }
+                                            >
+                                                {s.label}
+                                            </span>
+                                        </li>
+                                    );
+                                })}
+                                {running && steps.length === 0 && (
+                                    <li className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                        <Circle className="h-4 w-4" /> Starting…
+                                    </li>
+                                )}
+                            </ul>
+
+                            {result && (
+                                <div
+                                    className={cn(
+                                        'rounded-lg border p-3 text-sm',
+                                        result.ok
+                                            ? 'border-success/25 bg-success/5 text-foreground'
+                                            : result.outcome === 'rollback-pending'
+                                              ? 'border-warning/30 bg-warning/5 text-foreground'
+                                              : 'border-danger/25 bg-danger/5 text-foreground',
+                                    )}
+                                >
+                                    {result.message}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Pinned, so the action stays reachable while the options scroll. */}
+                    <DialogFooter className="sticky -bottom-6 z-10 -mx-5 -mb-5 border-t border-border bg-card px-5 py-3 sm:-mx-6 sm:-mb-6 sm:px-6">
+                        {!started ? (
+                            <>
+                                <Button variant="outline" onClick={() => close(false)}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={apply} disabled={!canStart}>
+                                    <ShieldCheck /> Secure server
+                                </Button>
+                            </>
+                        ) : running ? (
+                            <Button disabled>
+                                <Loader2 className="animate-spin" /> Securing… keep this open
+                            </Button>
+                        ) : (
+                            <>
+                                {result?.ok && (
+                                    <Button variant="outline" onClick={() => setShowKey(true)}>
+                                        <KeyRound /> Copy private key
+                                    </Button>
+                                )}
+                                <Button onClick={() => close(false)}>
+                                    {result?.ok ? 'Done' : 'Close'}
+                                </Button>
+                            </>
+                        )}
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {showKey && (
+                <PasskeyRevealModal
+                    serverId={serverId}
+                    serverName={serverName}
+                    field="privateKey"
+                    onClose={() => setShowKey(false)}
+                />
+            )}
+        </>
+    );
+}

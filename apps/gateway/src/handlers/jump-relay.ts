@@ -103,7 +103,9 @@ export async function openJumpRelay(
 
         bastion.forwardOut('127.0.0.1', 0, targetHost, targetPort, (err, stream) => {
             if (err) {
-                console.error(`[JumpRelay] ${jump.host} could not reach ${targetHost}:${targetPort}`);
+                console.error(
+                    `[JumpRelay] ${jump.host} could not reach ${targetHost}:${targetPort}`,
+                );
                 socket.destroy();
                 return;
             }

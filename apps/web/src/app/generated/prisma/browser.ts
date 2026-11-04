@@ -132,3 +132,8 @@ export type ServerInvitation = Prisma.ServerInvitationModel
  * 
  */
 export type ServerShare = Prisma.ServerShareModel
+/**
+ * Model ServerHardeningRun
+ * One "secure this server" run (lib/services/hardening/harden.service.ts).
+ */
+export type ServerHardeningRun = Prisma.ServerHardeningRunModel

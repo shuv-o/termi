@@ -194,6 +194,7 @@ model Server {
   // jump host that is still in use is refused instead (see deleteServer).
   jumpServer     Server?              @relation("JumpHost", fields: [jumpServerId], references: [id], onDelete: NoAction)
   jumpTargets    Server[]             @relation("JumpHost")
+  hardeningRuns  ServerHardeningRun[]
 
   @@index([userId])
   @@index([groupId])
@@ -411,6 +412,10 @@ enum AuditAction {
   // Session recording events
   RECORDING_SAVED
   RECORDING_DELETED
+
+  // Security hardening events
+  SERVER_HARDENED
+  SERVER_HARDENING_FAILED
 }
 
 // PUSH NOTIFICATIONS
@@ -724,4 +729,28 @@ model ServerShare {
   @@unique([serverId, sharedWithId])
   @@index([ownerId])
   @@index([sharedWithId])
+}
+
+/// One "secure this server" run (lib/services/hardening/harden.service.ts).
+model ServerHardeningRun {
+  id       String @id @default(cuid())
+  serverId String
+  userId   String
+  /// running | succeeded | failed | rollback-pending
+  status   String
+  /// The options the user picked (no secrets).
+  options  Json
+  /// Step-by-step outcome, as streamed to the browser.
+  steps    Json   @default("[]")
+  /// Encrypted JSON of the new credentials, written BEFORE they are put to use
+  /// on the server and cleared once committed to the Server row — so a crash
+  /// mid-run never leaves a password set that Termi has no record of.
+  pendingSecret String?
+  message       String?
+  createdAt     DateTime  @default(now())
+  finishedAt    DateTime?
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, createdAt])
 }

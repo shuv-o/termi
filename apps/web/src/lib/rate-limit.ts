@@ -111,6 +111,16 @@ export function connectionTestRateLimit(userId: string): RateLimitResult {
     return rateLimit(`conn-test:${userId}`, 20, 5 * 60 * 1000);
 }
 
+/** 5 hardening runs per hour per user — each one changes a server's login. */
+export function serverHardenRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`server-harden:${userId}`, 5, 60 * 60 * 1000);
+}
+
+/** 10 security scans per 10 minutes per user — each one runs a script over SSH. */
+export function securityScanRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`security-scan:${userId}`, 10, 10 * 60 * 1000);
+}
+
 /** 30 connection token requests per 5 minutes per user */
 export function connectionTokenRateLimit(userId: string): RateLimitResult {
     return rateLimit(`conn-token:${userId}`, 30, 5 * 60 * 1000);

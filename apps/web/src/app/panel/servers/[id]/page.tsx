@@ -9,6 +9,7 @@ import { BenchmarkSection } from './_details/BenchmarkSection';
 import { HealthHistorySection } from './_details/HealthHistorySection';
 import { LiveMonitoringSection } from './_details/LiveMonitoringSection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
+import { SecurityScanSection } from './_details/SecurityScanSection';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
 import { TunnelSection } from './_details/TunnelSection';
 import { useBenchmark } from './_details/useBenchmark';
@@ -63,6 +64,10 @@ export default function ServerDetailsPage() {
                 something is happening now, not last Tuesday. Metrics are read
                 over SSH, so this is SSH-only. */}
             {isSSH && <LiveMonitoringSection serverId={id} />}
+
+            {/* Right after live metrics: "is this box exposed?" is the other
+                question you open a server page to answer. */}
+            {isSSH && <SecurityScanSection serverId={id} serverName={server.name} />}
 
             <HealthHistorySection
                 records={monitoring.healthRecords}

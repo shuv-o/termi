@@ -417,7 +417,8 @@ export const ModelName = {
   CommandSnippet: 'CommandSnippet',
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
-  ServerShare: 'ServerShare'
+  ServerShare: 'ServerShare',
+  ServerHardeningRun: 'ServerHardeningRun'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -433,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1991,6 +1992,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ServerHardeningRun: {
+      payload: Prisma.$ServerHardeningRunPayload<ExtArgs>
+      fields: Prisma.ServerHardeningRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServerHardeningRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServerHardeningRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        findFirst: {
+          args: Prisma.ServerHardeningRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServerHardeningRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        findMany: {
+          args: Prisma.ServerHardeningRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>[]
+        }
+        create: {
+          args: Prisma.ServerHardeningRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        createMany: {
+          args: Prisma.ServerHardeningRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServerHardeningRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>[]
+        }
+        delete: {
+          args: Prisma.ServerHardeningRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        update: {
+          args: Prisma.ServerHardeningRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.ServerHardeningRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServerHardeningRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServerHardeningRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.ServerHardeningRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerHardeningRunPayload>
+        }
+        aggregate: {
+          args: Prisma.ServerHardeningRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServerHardeningRun>
+        }
+        groupBy: {
+          args: Prisma.ServerHardeningRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerHardeningRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServerHardeningRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerHardeningRunCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2380,6 +2455,22 @@ export const ServerShareScalarFieldEnum = {
 export type ServerShareScalarFieldEnum = (typeof ServerShareScalarFieldEnum)[keyof typeof ServerShareScalarFieldEnum]
 
 
+export const ServerHardeningRunScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  userId: 'userId',
+  status: 'status',
+  options: 'options',
+  steps: 'steps',
+  pendingSecret: 'pendingSecret',
+  message: 'message',
+  createdAt: 'createdAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type ServerHardeningRunScalarFieldEnum = (typeof ServerHardeningRunScalarFieldEnum)[keyof typeof ServerHardeningRunScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2394,6 +2485,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2815,6 +2913,7 @@ export type GlobalOmitConfig = {
   keychainCredential?: Prisma.KeychainCredentialOmit
   serverInvitation?: Prisma.ServerInvitationOmit
   serverShare?: Prisma.ServerShareOmit
+  serverHardeningRun?: Prisma.ServerHardeningRunOmit
 }
 
 /* Types for Logging */
