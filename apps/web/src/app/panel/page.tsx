@@ -212,6 +212,9 @@ export default function DashboardPage() {
         m: metrics[server.id] ?? null,
         mLoading: metricsLoading[server.id] ?? false,
         hasSession: sessions.some((s) => s.serverId === server.id),
+        jumpVia: server.jumpServerId
+            ? (servers.find((s) => s.id === server.jumpServerId)?.name ?? 'a jump host')
+            : null,
         onOpen: () => router.push(`/panel/servers/${server.id}`),
         onFavorite: () => toggleFavorite(server.id),
         onEdit: () => router.push(`/panel/servers/${server.id}/edit`),

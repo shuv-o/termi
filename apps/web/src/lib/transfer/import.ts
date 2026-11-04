@@ -135,6 +135,7 @@ const CSV_HEADERS: Record<string, string> = {
     description: 'description',
     tags: 'tags',
     favorite: 'isFavorite',
+    'jump host': 'jumpServerName',
     password: 'password',
     'private key': 'privateKey',
     'key passphrase': 'passphrase',

@@ -514,6 +514,25 @@ describe('buildPayload', () => {
         expect(csv.split('\r\n')[0]).not.toContain('Password');
         expect(csv).not.toContain('hunter2');
     });
+
+    it('references the jump host by name, and keeps it through a CSV round trip', () => {
+        const jumped = { ...stored(), name: 'db-primary', jumpServer: { name: 'bastion' } };
+        const result = buildPayload([stored(), jumped], { includeCredentials: false });
+
+        expect(result.servers[0].jumpServerName).toBeNull();
+        expect(result.servers[1].jumpServerName).toBe('bastion');
+
+        const csv = buildSpreadsheet(result, {
+            format: 'csv',
+            includesCredentials: false,
+            now: NOW,
+        }).toString('utf8');
+        expect(csv.split('\r\n')[0]).toContain('Jump host');
+
+        const parsed = parseCsvExport(csv).servers;
+        expect(parsed.find((s) => s.name === 'db-primary')?.jumpServerName).toBe('bastion');
+        expect(parsed.find((s) => s.name === 'web-01')?.jumpServerName).toBeUndefined();
+    });
 });
 
 describe('buildExportFile', () => {

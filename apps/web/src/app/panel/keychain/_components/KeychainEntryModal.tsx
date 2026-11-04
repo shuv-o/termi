@@ -30,7 +30,7 @@ function SecretInput({
             <Textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="min-h-[180px] resize-none bg-secondary font-mono text-xs leading-relaxed"
+                className="min-h-[180px] resize-none font-mono text-xs leading-relaxed"
                 placeholder={placeholder}
             />
         );
@@ -42,7 +42,7 @@ function SecretInput({
                 type={visible ? 'text' : 'password'}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="h-10 bg-secondary pr-10 text-sm"
+                className="h-10 pr-10"
                 placeholder={placeholder}
             />
             <Button
@@ -82,7 +82,7 @@ export function KeychainEntryModal({
             <DialogContent className="bg-card border-border max-w-lg">
                 <DialogHeader>
                     <DialogTitle>
-                        {editing ? 'Edit Keychain Entry' : 'New Keychain Entry'}
+                        {editing ? 'Edit keychain entry' : 'New keychain entry'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -104,7 +104,7 @@ export function KeychainEntryModal({
                                 ) : (
                                     <Key className="w-3 h-3" />
                                 )}
-                                {m === 'password' ? 'Password' : 'SSH Key'}
+                                {m === 'password' ? 'Password' : 'SSH key'}
                             </button>
                         ))}
                     </div>
@@ -117,7 +117,7 @@ export function KeychainEntryModal({
                             <Input
                                 value={form.label}
                                 onChange={(e) => onChange({ label: e.target.value })}
-                                className="h-10 bg-secondary text-sm"
+                                className="h-10"
                                 placeholder="e.g. root@production"
                             />
                         </div>
@@ -128,7 +128,7 @@ export function KeychainEntryModal({
                             <Input
                                 value={form.username}
                                 onChange={(e) => onChange({ username: e.target.value })}
-                                className="h-10 bg-secondary text-sm"
+                                className="h-10"
                                 placeholder="root"
                             />
                         </div>

@@ -50,7 +50,7 @@ export function TwoFactorForm({ state }: { state: LoginState }) {
             <form onSubmit={state.submitVerify} method="POST" className="space-y-4">
                 <div className="space-y-1.5">
                     <Label htmlFor="code">
-                        {isRecoveryMode ? 'Recovery Code' : 'Verification Code'}
+                        {isRecoveryMode ? 'Recovery code' : 'Verification code'}
                     </Label>
                     <Input
                         type="text"
@@ -64,7 +64,7 @@ export function TwoFactorForm({ state }: { state: LoginState }) {
                                     : v.replace(/\D/g, '').slice(0, 6),
                             );
                         }}
-                        className="bg-secondary border-border text-center text-2xl tracking-[0.5em] font-mono"
+                        className="text-center text-2xl tracking-[0.5em] font-mono"
                         placeholder={isRecoveryMode ? 'XXXX-XXXX' : '000000'}
                         required
                         autoComplete="one-time-code"

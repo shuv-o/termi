@@ -145,7 +145,6 @@ export function LiveMonitoringSection({ serverId }: { serverId: string }) {
                 latest={latest}
                 error={error}
                 idle={!enabled}
-                className="max-w-2xl"
             />
 
             <p className="mt-4 border-t border-border/50 pt-3 text-[11px] text-muted-foreground">

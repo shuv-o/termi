@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as jose from 'jose';
-import { mintConnectionToken, getJWEKey, type ConnectionTokenClaims } from './connectionToken';
+import {
+    mintConnectionToken,
+    getJWEKey,
+    jumpClaim,
+    type ConnectionTokenClaims,
+} from './connectionToken';
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -95,5 +100,39 @@ describe('connectionToken', () => {
 
             await expect(jose.jwtDecrypt(token, wrongKey)).rejects.toThrow();
         });
+    });
+});
+
+describe('jumpClaim', () => {
+    it('is null without a jump host', () => {
+        expect(jumpClaim(null)).toBeNull();
+        expect(jumpClaim(undefined)).toBeNull();
+    });
+
+    it('carries the bastion credentials, with absent secrets as null', () => {
+        expect(
+            jumpClaim({ host: 'bastion', port: 22, username: 'jump', privateKey: 'KEY' }),
+        ).toEqual({
+            host: 'bastion',
+            port: 22,
+            username: 'jump',
+            password: null,
+            privateKey: 'KEY',
+            passphrase: null,
+        });
+    });
+
+    it('survives the JWE round trip inside a connection token', async () => {
+        const token = await mintConnectionToken({
+            userId: 'u1',
+            serverId: 's1',
+            protocol: 'ssh',
+            host: '10.0.2.4',
+            port: 22,
+            username: 'deploy',
+            jump: jumpClaim({ host: 'bastion', port: 2222, username: 'jump', password: 'pw' }),
+        });
+        const { payload } = await jose.jwtDecrypt(token, getJWEKey());
+        expect(payload.jump).toMatchObject({ host: 'bastion', port: 2222, password: 'pw' });
     });
 });

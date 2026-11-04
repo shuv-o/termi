@@ -169,7 +169,7 @@ export function GroupSidebar({
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
                         type="text"
-                        className="pl-8 h-8 text-sm"
+                        className="pl-8"
                         placeholder="Search groups…"
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}

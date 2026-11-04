@@ -54,6 +54,7 @@ export default function EditServerPage() {
                     displayWidth: s.displayWidth ?? 1920,
                     displayHeight: s.displayHeight ?? 1080,
                     rdpSecurity: (s.rdpSecurity ?? 'any') as RdpSecurity,
+                    jumpServerId: s.jumpServerId ?? '',
                 });
             })
             .catch(() => router.push('/panel'))
@@ -84,6 +85,11 @@ export default function EditServerPage() {
                     ? { displayWidth: form.displayWidth, displayHeight: form.displayHeight }
                     : {}),
                 ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
+                // Explicit null clears it, and switching to RDP/VNC/Telnet drops it.
+                jumpServerId:
+                    (form.protocol !== 'TELNET') && form.jumpServerId
+                        ? form.jumpServerId
+                        : null,
             };
             // Blank credential fields are omitted so the stored ones survive.
             if (form.authMethod === 'password' && form.password.trim()) {
@@ -124,6 +130,7 @@ export default function EditServerPage() {
         <ServerForm
             mode="edit"
             state={state}
+            serverId={id}
             subtitle={state.form.name}
             storedCreds={storedCreds}
             submitting={saving}

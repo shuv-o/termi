@@ -67,7 +67,7 @@ export default function StarNudge({ userCreatedAt, serverCount }: Props) {
     if (!visible) return null;
 
     return (
-        <div className="fixed top-16 right-4 z-[60] max-w-sm animate-fade-in lg:top-4">
+        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] z-[60] animate-fade-in sm:inset-x-auto sm:right-4 sm:max-w-sm lg:bottom-6 lg:right-6">
             <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/95 p-4 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-background/80">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
                     <Star className="h-4.5 w-4.5" />

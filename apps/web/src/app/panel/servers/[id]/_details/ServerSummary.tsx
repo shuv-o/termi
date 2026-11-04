@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Pencil, QrCode } from 'lucide-react';
+import { ArrowLeft, Pencil, QrCode, Waypoints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
@@ -96,6 +96,16 @@ export function ServerInfoCard({
                 <span className="data text-sm text-foreground/85">
                     {server.host}:{server.port}
                 </span>
+                {server.jumpServer && (
+                    <Link
+                        href={`/panel/servers/${server.jumpServer.id}`}
+                        className="flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-foreground/80 transition-colors hover:border-input hover:text-foreground"
+                        title="This server is reached through a jump host"
+                    >
+                        <Waypoints className="h-3 w-3" aria-hidden />
+                        via {server.jumpServer.name}
+                    </Link>
+                )}
                 {server.group && (
                     <span className="rounded-full border border-border px-2 py-0.5 text-xs text-foreground/80">
                         {server.group.name}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { useTerminalSearch } from './TerminalSearch';
 
 import '@xterm/xterm/css/xterm.css';
 
@@ -13,6 +14,8 @@ const MAX_AUTO_RETRIES = 3;
 const getBackoffMs = (attempt: number) => Math.min(Math.pow(1.5, attempt) * 1000, 15_000);
 
 interface TelnetTerminalProps {
+    /** Hands the parent a function that opens the find-in-output bar. */
+    onSearchReady?: (open: () => void) => void;
     serverId: string;
     connectionToken: string;
     renewToken?: () => Promise<string>;
@@ -36,7 +39,14 @@ export default function TelnetTerminal({
     onKeyHandlerReady,
     onWebSocketCreated,
     onReconnectReady,
+    onSearchReady,
 }: TelnetTerminalProps) {
+    const search = useTerminalSearch();
+    const attachSearchRef = useRef(search.attach);
+    attachSearchRef.current = search.attach;
+    useEffect(() => {
+        onSearchReady?.(search.openSearch);
+    }, [onSearchReady, search.openSearch]);
     const terminalRef = useRef<HTMLDivElement>(null);
     const terminalInstance = useRef<Terminal | null>(null);
     const fitAddon = useRef<FitAddon | null>(null);
@@ -243,6 +253,7 @@ export default function TelnetTerminal({
         fitAddon.current = fit;
         terminal.loadAddon(fit);
         terminal.loadAddon(new WebLinksAddon());
+        attachSearchRef.current(terminal);
         terminal.open(terminalRef.current);
         fit.fit();
 
@@ -316,6 +327,7 @@ export default function TelnetTerminal({
                 ref={terminalRef}
                 className="h-full terminal-container rounded-lg overflow-hidden"
             />
+            {search.bar}
         </div>
     );
 }

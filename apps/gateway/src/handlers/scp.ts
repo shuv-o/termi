@@ -7,6 +7,7 @@
 import { WebSocket } from 'ws';
 import { Client, SFTPWrapper } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
+import { connectSSH } from './jump.js';
 
 interface FileEntry {
     name: string;
@@ -82,7 +83,7 @@ export class SCPHandler {
         });
 
         try {
-            this.ssh.connect(config);
+            connectSSH(this.ssh, config, token.jump);
         } catch (error) {
             this.sendError('Connection failed: ' + (error as Error).message);
             this.close();

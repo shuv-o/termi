@@ -388,7 +388,9 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                     <p className="text-[11px] text-muted-foreground">
                                         To include secrets, add <code>Password</code>,{' '}
                                         <code>Private Key</code>, <code>Key Passphrase</code> and{' '}
-                                        <code>Notes</code> columns.
+                                        <code>Notes</code> columns. To reach a server through a
+                                        bastion, add a <code>Jump host</code> column with the
+                                        bastion&apos;s name.
                                     </p>
                                 )}
                             </div>

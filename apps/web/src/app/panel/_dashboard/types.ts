@@ -12,6 +12,8 @@ export interface ServerItem {
     host: string;
     username: string;
     port: number;
+    /** Set when this server is reached through another one (a bastion). */
+    jumpServerId?: string | null;
     group: {
         id: string;
         name: string;
@@ -49,11 +51,11 @@ interface SortOption {
 export const SORT_OPTIONS: SortOption[] = [
     { field: 'name', dir: 'asc', label: 'Name A → Z' },
     { field: 'name', dir: 'desc', label: 'Name Z → A' },
-    { field: 'lastUsed', dir: 'desc', label: 'Recently Used' },
-    { field: 'lastUsed', dir: 'asc', label: 'Least Recently Used' },
-    { field: 'favorite', dir: 'desc', label: 'Favorites First' },
-    { field: 'status', dir: 'asc', label: 'Online First' },
-    { field: 'status', dir: 'desc', label: 'Offline First' },
+    { field: 'lastUsed', dir: 'desc', label: 'Recently used' },
+    { field: 'lastUsed', dir: 'asc', label: 'Least recently used' },
+    { field: 'favorite', dir: 'desc', label: 'Favorites first' },
+    { field: 'status', dir: 'asc', label: 'Online first' },
+    { field: 'status', dir: 'desc', label: 'Offline first' },
     { field: 'cpu', dir: 'desc', label: 'CPU Usage (High → Low)' },
     { field: 'ram', dir: 'desc', label: 'RAM Usage (High → Low)' },
     { field: 'latency', dir: 'asc', label: 'Latency (Low → High)' },
@@ -66,6 +68,8 @@ export interface ServerCardProps {
     m: ServerMetrics | null;
     mLoading: boolean;
     hasSession: boolean;
+    /** Name of the bastion this server is reached through, if any. */
+    jumpVia: string | null;
     onOpen: () => void;
     onFavorite: () => void;
     onEdit: () => void;

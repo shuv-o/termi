@@ -8,7 +8,8 @@
  */
 
 import { prisma } from '@/lib/db';
-import { checkReachability, getSSHMetrics } from './metrics.service';
+import { checkReachabilityVia, getSSHMetrics } from './metrics.service';
+import { loadJump } from './server.service';
 import { sendServerDownAlert, sendServerUpAlert } from './alert.service';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 
@@ -37,6 +38,8 @@ export async function runMonitoringPass(): Promise<void> {
                     password: true,
                     privateKey: true,
                     passphrase: true,
+                    userId: true,
+                    jumpServerId: true,
                 },
             },
         },
@@ -72,6 +75,8 @@ interface MonitorConfig {
         password: string | null;
         privateKey: string | null;
         passphrase: string | null;
+        userId: string;
+        jumpServerId: string | null;
     };
 }
 
@@ -115,8 +120,10 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
     let ramPercent: number | null = null;
     let diskPercent: number | null = null;
 
+    const jump = await loadJump(cfg.server.jumpServerId, cfg.server.userId).catch(() => null);
+
     try {
-        const result = await checkReachability(host, cfg.server.port, 5000);
+        const result = await checkReachabilityVia(host, cfg.server.port, jump, 5000);
         reachable = result.reachable;
         latencyMs = result.latencyMs;
     } catch {
@@ -135,6 +142,7 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
                     password,
                     privateKey,
                     passphrase,
+                    jump,
                 },
                 10000,
             );
@@ -223,7 +231,7 @@ export async function checkSingleServer(
     // Scope the lookup to the requesting user — never check a server they don't own.
     const server = await prisma.server.findFirst({
         where: { id: serverId, userId },
-        select: { host: true, username: true, port: true },
+        select: { host: true, username: true, port: true, userId: true, jumpServerId: true },
     });
     if (!server) return { reachable: false };
 
@@ -236,5 +244,6 @@ export async function checkSingleServer(
         return { reachable: false };
     }
 
-    return checkReachability(host, server.port, 5000);
+    const jump = await loadJump(server.jumpServerId, server.userId).catch(() => null);
+    return checkReachabilityVia(host, server.port, jump, 5000);
 }

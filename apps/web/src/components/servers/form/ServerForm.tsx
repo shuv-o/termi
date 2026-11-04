@@ -3,8 +3,14 @@
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
 import { AuthCard } from './AuthCard';
-import { DisplaySettingsCard, IdentityCard, ProtocolSelector } from './ConnectionCards';
+import {
+    DisplaySettingsCard,
+    IdentityCard,
+    JumpHostCard,
+    ProtocolSelector,
+} from './ConnectionCards';
 import { AdvancedCard, PreviewCard, TestConnectionCard } from './SidebarCards';
 import { NO_STORED_CREDENTIALS, type StoredCredentials } from './types';
 import type { ServerFormState } from './useServerForm';
@@ -17,17 +23,17 @@ const MODE_COPY: Record<
     { heading: string; untitledLabel: string; testHint: string; submit: string; submitting: string }
 > = {
     create: {
-        heading: 'Add Server',
-        untitledLabel: 'Untitled Server',
+        heading: 'Add server',
+        untitledLabel: 'Untitled server',
         testHint: 'Enter host, username & credentials first',
-        submit: 'Create Server',
+        submit: 'Create server',
         submitting: 'Creating…',
     },
     edit: {
-        heading: 'Edit Server',
+        heading: 'Edit server',
         untitledLabel: 'Untitled',
         testHint: 'Enter new credentials to test',
-        submit: 'Save Changes',
+        submit: 'Save changes',
         submitting: 'Saving…',
     },
 };
@@ -41,6 +47,7 @@ const MODE_COPY: Record<
 export function ServerForm({
     mode,
     state,
+    serverId,
     subtitle,
     storedCreds = NO_STORED_CREDENTIALS,
     submitting,
@@ -49,6 +56,8 @@ export function ServerForm({
 }: {
     mode: ServerFormMode;
     state: ServerFormState;
+    /** The server being edited (edit mode), so it is never its own jump host. */
+    serverId?: string;
     /** Line under the heading — the server name in edit mode. */
     subtitle: string;
     storedCreds?: StoredCredentials;
@@ -61,17 +70,18 @@ export function ServerForm({
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
-            <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-xl">
-                    <Link href="/panel">
-                        <ArrowLeft className="w-4 h-4" />
-                    </Link>
-                </Button>
-                <div>
-                    <h1 className="mt-0.5 text-xl sm:text-2xl font-bold">{copy.heading}</h1>
-                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
-                </div>
-            </div>
+            <PageHeader
+                title={copy.heading}
+                description={subtitle}
+                actions={
+                    // Phones already have a Back button in the top bar.
+                    <Button variant="ghost" asChild className="hidden lg:inline-flex">
+                        <Link href="/panel">
+                            <ArrowLeft /> All servers
+                        </Link>
+                    </Button>
+                }
+            />
 
             <form onSubmit={onSubmit} method="POST" action="#">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:gap-6">
@@ -83,6 +93,14 @@ export function ServerForm({
                             groups={groups}
                             onConnectionFieldChange={resetTest}
                         />
+                        {form.protocol !== 'TELNET' && (
+                            <JumpHostCard
+                                form={form}
+                                update={update}
+                                selfId={serverId}
+                                onConnectionFieldChange={resetTest}
+                            />
+                        )}
                         <DisplaySettingsCard form={form} update={update} />
                         {/* Lives here (not the sidebar) so the left column keeps
                             pace with the right one for protocols — SSH, SCP,

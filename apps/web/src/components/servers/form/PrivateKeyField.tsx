@@ -31,7 +31,7 @@ function MethodToggle({
                     }`}
                 >
                     {m === 'paste' ? <Key className="w-3 h-3" /> : <Upload className="w-3 h-3" />}
-                    {m === 'paste' ? 'Paste Key' : 'Upload File'}
+                    {m === 'paste' ? 'Paste key' : 'Upload file'}
                 </button>
             ))}
         </div>
@@ -135,7 +135,7 @@ export function PrivateKeyField({
                     <Textarea
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
-                        className="min-h-[140px] resize-none bg-secondary font-mono text-xs leading-relaxed"
+                        className="min-h-[140px] resize-none font-mono text-xs leading-relaxed"
                         placeholder={KEY_PLACEHOLDER}
                     />
                 </div>

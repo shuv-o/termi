@@ -66,7 +66,7 @@ export function TunnelsPanel() {
             >
                 {tunnels.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
-                        No tunnels opened yet — use Port Forwarding on a server&apos;s detail page
+                        No tunnels opened yet — use port forwarding on a server&apos;s detail page
                         to open one.
                     </p>
                 ) : (

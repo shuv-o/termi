@@ -36,7 +36,7 @@ function SecretInput({
                 type={visible ? 'text' : 'password'}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="h-9 bg-secondary pr-10 text-sm"
+                className="pr-10"
                 placeholder="••••••••"
                 autoComplete={autoComplete}
             />
@@ -193,7 +193,7 @@ export function AuthCard({
                                         ) : (
                                             <Key className="w-3 h-3" />
                                         )}
-                                        {method === 'password' ? 'Password' : 'SSH Key'}
+                                        {method === 'password' ? 'Password' : 'SSH key'}
                                     </button>
                                 ))}
                             </div>
@@ -292,7 +292,7 @@ export function AuthCard({
                                     type="text"
                                     value={keychainLabel}
                                     onChange={(e) => setKeychainLabel(e.target.value)}
-                                    className="h-9 bg-secondary text-sm"
+                                   
                                     placeholder="Label (e.g. root@production)"
                                 />
                             )}

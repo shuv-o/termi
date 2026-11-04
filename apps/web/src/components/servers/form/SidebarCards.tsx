@@ -73,7 +73,7 @@ export function AdvancedCard({
                             type="text"
                             value={form.description}
                             onChange={(e) => update({ description: e.target.value })}
-                            className="h-9 bg-secondary text-sm"
+                           
                             placeholder="Production web server"
                         />
                     </div>
@@ -91,7 +91,7 @@ export function AdvancedCard({
                                         addTag();
                                     }
                                 }}
-                                className="h-9 flex-1 bg-secondary text-sm"
+                                className="flex-1"
                                 placeholder="production, linux, aws…"
                             />
                             <Button
@@ -134,7 +134,7 @@ export function AdvancedCard({
                         <Textarea
                             value={form.notes}
                             onChange={(e) => update({ notes: e.target.value })}
-                            className="min-h-[96px] resize-none bg-secondary text-sm"
+                            className="min-h-[96px] resize-none"
                             placeholder="Additional notes…"
                         />
                     </div>
@@ -262,7 +262,7 @@ export function TestConnectionCard({
         <Card className={CARD_CLASS}>
             <CardContent className="p-4">
                 <p className={`${SECTION_LABEL} mb-3`}>
-                    {isSSHProto ? 'Authentication Test' : 'Connectivity'}
+                    {isSSHProto ? 'Authentication test' : 'Connectivity'}
                 </p>
 
                 <button
@@ -294,7 +294,7 @@ export function TestConnectionCard({
                     ) : (
                         <>
                             <Activity className="w-3.5 h-3.5" />{' '}
-                            {isSSHProto ? 'Test Authentication' : 'Test Connection'}
+                            {isSSHProto ? 'Test authentication' : 'Test connection'}
                         </>
                     )}
                 </button>

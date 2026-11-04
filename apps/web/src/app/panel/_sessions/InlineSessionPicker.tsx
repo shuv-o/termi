@@ -169,7 +169,7 @@ export function InlineSessionPicker({
                         placeholder="Search servers…"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        className="pl-9 bg-secondary border-transparent focus:border-border text-sm"
+                        className="pl-9 border-transparent focus:"
                     />
                 </div>
             </div>

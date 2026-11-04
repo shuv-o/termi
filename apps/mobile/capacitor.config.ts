@@ -35,18 +35,18 @@ const config: CapacitorConfig = {
     // Thin remote shell: the WebView loads the hosted Termi deployment directly,
     // so no local web build is bundled. `webDir` is only a fallback page.
     webDir: 'www',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#0e1319',
     server: {
         url: remoteUrl,
         cleartext: !isHttps,
     },
     ios: {
         contentInset: 'always',
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0e1319',
     },
     android: {
         allowMixedContent: false,
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0e1319',
     },
 };
 

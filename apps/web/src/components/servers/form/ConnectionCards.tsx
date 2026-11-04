@@ -1,6 +1,8 @@
 'use client';
 
+import { Waypoints } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -90,7 +92,7 @@ export function IdentityCard({
                         type="text"
                         value={form.name}
                         onChange={(e) => update({ name: e.target.value })}
-                        className="bg-secondary border-border text-sm h-9"
+                       
                         placeholder="Production Web"
                         required
                     />
@@ -131,7 +133,7 @@ export function IdentityCard({
                                 update({ host: e.target.value });
                                 onConnectionFieldChange();
                             }}
-                            className="bg-secondary border-border text-sm h-9 font-mono"
+                            className="font-mono"
                             placeholder="192.168.1.100"
                             required
                         />
@@ -145,7 +147,7 @@ export function IdentityCard({
                                 update({ port: parseInt(e.target.value) || 0 });
                                 onConnectionFieldChange();
                             }}
-                            className="bg-secondary border-border text-sm h-9 font-mono"
+                            className="font-mono"
                             min={1}
                             max={65535}
                             required
@@ -160,7 +162,7 @@ export function IdentityCard({
                         type="text"
                         value={form.username}
                         onChange={(e) => update({ username: e.target.value })}
-                        className="bg-secondary border-border text-sm h-9"
+                       
                         placeholder="root"
                         required
                     />
@@ -200,7 +202,7 @@ export function DisplaySettingsCard({
                             onChange={(e) =>
                                 update({ displayWidth: parseInt(e.target.value) || 1920 })
                             }
-                            className="bg-secondary border-border text-sm h-9 font-mono"
+                            className="font-mono"
                             min={640}
                             max={7680}
                         />
@@ -213,7 +215,7 @@ export function DisplaySettingsCard({
                             onChange={(e) =>
                                 update({ displayHeight: parseInt(e.target.value) || 1080 })
                             }
-                            className="bg-secondary border-border text-sm h-9 font-mono"
+                            className="font-mono"
                             min={480}
                             max={4320}
                         />
@@ -253,6 +255,92 @@ export function DisplaySettingsCard({
                             </SelectContent>
                         </Select>
                     </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+const NO_JUMP = '__direct__';
+
+/**
+ * "Connect through" — pick one of the user's SSH servers as a jump host
+ * (bastion), like `ssh -J`. Only SSH servers that are themselves reached
+ * directly are offered, since only one hop is supported.
+ */
+export function JumpHostCard({
+    form,
+    update,
+    selfId,
+    onConnectionFieldChange,
+}: {
+    form: ServerFormValues;
+    update: (patch: Partial<ServerFormValues>) => void;
+    /** The server being edited, so it is not offered as its own jump host. */
+    selfId?: string;
+    onConnectionFieldChange: () => void;
+}) {
+    const { data } = useCachedFetch<{
+        servers: { id: string; name: string; protocol: string; host: string; jumpServerId: string | null }[];
+    }>('/api/servers');
+    const candidates = (data?.servers ?? []).filter(
+        (s) => s.protocol === 'SSH' && s.id !== selfId && !s.jumpServerId,
+    );
+    const selected = candidates.find((s) => s.id === form.jumpServerId);
+
+    return (
+        <Card className={CARD_CLASS}>
+            <CardContent className="space-y-3 p-4">
+                <div className="flex items-start gap-3">
+                    <Waypoints className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                        <p className="text-sm font-medium">Connect through</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                            Reach a server on a private network via a bastion you have already
+                            added. Its credentials are used for the first hop.
+                        </p>
+                    </div>
+                </div>
+                <Select
+                    value={form.jumpServerId || NO_JUMP}
+                    onValueChange={(v) => {
+                        update({ jumpServerId: v === NO_JUMP ? '' : v });
+                        onConnectionFieldChange();
+                    }}
+                >
+                    <SelectTrigger aria-label="Jump host">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={NO_JUMP}>Direct connection</SelectItem>
+                        {candidates.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                                {s.name}
+                                <span className="data ml-2 text-xs text-muted-foreground">
+                                    {s.host}
+                                </span>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                {selected && (form.protocol === 'RDP' || form.protocol === 'VNC') && (
+                    <p className="text-xs text-muted-foreground">
+                        {form.protocol} through a jump host needs the gateway&apos;s{' '}
+                        <code className="data">GUACD_TUNNEL_HOST</code> setting.
+                    </p>
+                )}
+                {selected ? (
+                    <p className="data text-xs text-muted-foreground">
+                        Like <span className="text-foreground/85">ssh -J {selected.host}</span>.
+                        The host above is dialed from {selected.name}, so a private address such as
+                        10.0.0.5 is fine.
+                    </p>
+                ) : (
+                    candidates.length === 0 && (
+                        <p className="text-xs text-muted-foreground">
+                            Add the bastion as an SSH server first, then pick it here.
+                        </p>
+                    )
                 )}
             </CardContent>
         </Card>

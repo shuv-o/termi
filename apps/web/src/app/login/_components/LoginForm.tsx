@@ -53,7 +53,7 @@ export function LoginForm({ state }: { state: LoginState }) {
                         name="username"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="bg-secondary border-border"
+                       
                         placeholder="you@example.com"
                         required
                         autoComplete="username email"
@@ -77,7 +77,7 @@ export function LoginForm({ state }: { state: LoginState }) {
                             name="password"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="bg-secondary border-border pr-12"
+                            className="pr-12"
                             placeholder="••••••••"
                             required
                             autoComplete="current-password"

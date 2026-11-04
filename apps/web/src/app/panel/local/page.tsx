@@ -6,12 +6,15 @@ import {
     Laptop,
     Loader2,
     RotateCcw,
+    Search,
     WifiOff,
     Plus,
     X,
     Terminal as TerminalIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+import { useFindShortcutLabel } from '@/components/terminal/find-shortcut';
 
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
 
@@ -48,6 +51,9 @@ export default function LocalTerminalPage() {
     const envRef = useRef<Env | null>(null);
     const [tabs, setTabs] = useState<LocalTab[]>([]);
     const [activeId, setActiveId] = useState<string>('');
+    // Per-tab "open find bar" functions, handed up by each terminal.
+    const searchOpeners = useRef(new Map<string, () => void>());
+    const findLabel = useFindShortcutLabel();
 
     //   Helpers
 
@@ -139,7 +145,7 @@ export default function LocalTerminalPage() {
         if (e === 'cloud') loadCloudToken(tab.id);
     }, [loadCloudToken]);
 
-    const title = env === 'electron' ? 'Local Terminal' : 'Gateway Shell';
+    const title = env === 'electron' ? 'Local terminal' : 'Gateway Shell';
     const subtitle = env === 'electron' ? 'Running on this device' : 'Shell on the gateway host';
     const activeTab = tabs.find((t) => t.id === activeId) ?? null;
     const activeStatus: Status = activeTab?.status ?? 'connecting';
@@ -172,6 +178,16 @@ export default function LocalTerminalPage() {
                     </span>
                 </div>
                 <div className="flex-1" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => searchOpeners.current.get(activeId)?.()}
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    title={`Find in output (${findLabel})`}
+                    aria-label="Find in output"
+                >
+                    <Search className="w-3.5 h-3.5" />
+                </Button>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -282,6 +298,7 @@ export default function LocalTerminalPage() {
                                         gatewayUrl={tab.gatewayUrl ?? undefined}
                                         onReady={() => setTabStatus(tab.id, 'connected')}
                                         onExit={() => setTabStatus(tab.id, 'disconnected')}
+                                        onSearchReady={(fn) => searchOpeners.current.set(tab.id, fn)}
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center h-full text-muted-foreground gap-3">

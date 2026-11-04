@@ -7,6 +7,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
+import { jumpClaim } from '@/lib/auth/connectionToken';
 import { getServerForConnection } from '@/lib/services';
 import {
     validateBody,
@@ -77,11 +78,16 @@ export async function POST(request: Request) {
             return errorResponse('Port forwarding requires an SSH server', 400);
         }
 
-        // Re-validate host at token issuance time (defence-in-depth against tampered DB entries)
-        const hostValidation = await validateHost(
-            server.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
-        );
+        if (server.jump && protocol === 'telnet') {
+            return errorResponse('Telnet connections cannot use a jump host', 400);
+        }
+
+        // Re-validate at token issuance time (defence-in-depth against tampered
+        // DB entries). Behind a jump host this server only ever dials the
+        // bastion, so that is the host the SSRF rules apply to.
+        const hostValidation = server.jump
+            ? await validateHost(server.jump.host, process.env.ALLOW_PRIVATE_NETWORKS === 'true')
+            : await validateHost(server.host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
         if (!hostValidation.valid) {
             return errorResponse('Invalid server host configuration', 400);
         }
@@ -100,6 +106,7 @@ export async function POST(request: Request) {
             displayHeight: server.displayHeight ?? 1080,
             colorDepth: server.colorDepth ?? 24,
             rdpSecurity: server.rdpSecurity ?? 'any',
+            jump: jumpClaim(server.jump),
             ...(protocol === 'tunnel' && {
                 remoteHost: tokenData.remoteHost,
                 remotePort: tokenData.remotePort,

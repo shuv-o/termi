@@ -297,11 +297,28 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             return;
         }
 
-        //   SSRF guard (skipped for local protocol — no remote host involved)
+        //   Jump hosts work for the SSH-based handlers and, through the relay,
+        //   RDP/VNC can also use one, via the guacd relay (GUACD_TUNNEL_HOST).
+        if (
+            tokenPayload.jump &&
+            !['ssh', 'scp', 'tunnel', 'rdp', 'vnc'].includes(protocol)
+        ) {
+            ws.send(
+                JSON.stringify({ type: 'error', message: 'Jump hosts are not supported for this protocol' }),
+            );
+            ws.close(1008, 'Invalid jump host');
+            return;
+        }
+
+        //   SSRF guard (skipped for local protocol — no remote host involved).
+        //   It applies to the host the gateway itself dials: the bastion when
+        //   there is one. The target behind a bastion is dialed by the bastion
+        //   (like `ssh -J`), so a private address there is expected.
+        const dialedHost = tokenPayload.jump ? tokenPayload.jump.host : tokenPayload.host;
         if (
             protocol !== 'local' &&
             process.env.ALLOW_PRIVATE_NETWORKS !== 'true' &&
-            (await isPrivateHostAsync(tokenPayload.host))
+            (await isPrivateHostAsync(dialedHost))
         ) {
             ws.send(
                 JSON.stringify({

@@ -15,6 +15,102 @@ import {
 
 // TYPES
 
+/**
+ * Decrypted credentials for the bastion a server is reached through. Only ever
+ * built server-side and handed to the SSH pool or sealed inside a gateway JWE.
+ */
+export interface JumpConfig {
+    serverId: string;
+    host: string;
+    port: number;
+    username: string;
+    password?: string;
+    privateKey?: string;
+    passphrase?: string;
+}
+
+/** A user-facing reason a jump-host choice was rejected (shown as a 400). */
+export class JumpHostError extends Error {}
+
+/**
+ * Protocols that can be reached through an SSH jump host. RDP and VNC go
+ * through the gateway's guacd relay, which needs GUACD_TUNNEL_HOST there.
+ */
+const JUMPABLE_PROTOCOLS: Protocol[] = ['SSH', 'SCP', 'RDP', 'VNC'];
+
+/**
+ * Checks that `jumpServerId` is a valid bastion for a server owned by `userId`.
+ * Rules: it is the user's own SSH server, not the server itself, it is not
+ * itself behind a jump (one hop only), and the target speaks SSH or SCP.
+ * A server that other servers already jump through cannot get a jump of its
+ * own either, since that would make those servers two hops deep.
+ */
+export async function assertValidJumpHost(
+    userId: string,
+    jumpServerId: string,
+    targetProtocol: Protocol,
+    selfId?: string,
+): Promise<void> {
+    if (!JUMPABLE_PROTOCOLS.includes(targetProtocol)) {
+        throw new JumpHostError('Telnet servers cannot connect through a jump host');
+    }
+    if (selfId && jumpServerId === selfId) {
+        throw new JumpHostError('A server cannot be its own jump host');
+    }
+    const jump = await prisma.server.findFirst({
+        where: { id: jumpServerId, userId },
+        select: { protocol: true, jumpServerId: true, name: true },
+    });
+    if (!jump) throw new JumpHostError('Jump host not found');
+    if (jump.protocol !== 'SSH') {
+        throw new JumpHostError(`${jump.name} is not an SSH server, so it cannot be a jump host`);
+    }
+    if (jump.jumpServerId) {
+        throw new JumpHostError(
+            `${jump.name} is itself reached through a jump host. Only one hop is supported.`,
+        );
+    }
+    if (selfId) {
+        const dependants = await prisma.server.count({ where: { jumpServerId: selfId } });
+        if (dependants > 0) {
+            throw new JumpHostError(
+                'Other servers connect through this one, so it cannot use a jump host itself',
+            );
+        }
+    }
+}
+
+/** Loads and decrypts the jump host for a server row, if it has one. */
+export async function loadJump(
+    jumpServerId: string | null,
+    ownerId: string,
+    encryptionContext?: EncryptionContext,
+): Promise<JumpConfig | null> {
+    if (!jumpServerId) return null;
+    const jump = await prisma.server.findFirst({ where: { id: jumpServerId, userId: ownerId } });
+    if (!jump) return null;
+    const creds = decryptCredentials(
+        {
+            host: jump.host,
+            username: jump.username,
+            password: jump.password || undefined,
+            privateKey: jump.privateKey || undefined,
+            passphrase: jump.passphrase || undefined,
+            notes: undefined,
+        },
+        encryptionContext,
+    );
+    return {
+        serverId: jump.id,
+        host: creds.host,
+        port: jump.port,
+        username: creds.username,
+        password: creds.password,
+        privateKey: creds.privateKey,
+        passphrase: creds.passphrase,
+    };
+}
+
 export interface CreateServerInput {
     userId: string;
     name: string;
@@ -33,6 +129,7 @@ export interface CreateServerInput {
     displayHeight?: number;
     colorDepth?: number;
     rdpSecurity?: string;
+    jumpServerId?: string | null;
 }
 
 export interface UpdateServerInput {
@@ -53,6 +150,7 @@ export interface UpdateServerInput {
     colorDepth?: number;
     rdpSecurity?: string;
     isFavorite?: boolean;
+    jumpServerId?: string | null;
 }
 
 export interface ServerListItem {
@@ -67,6 +165,8 @@ export interface ServerListItem {
     host: string;
     username: string;
     port: number;
+    /** The server this one is reached through, if any. */
+    jumpServerId: string | null;
     group: {
         id: string;
         name: string;
@@ -101,6 +201,10 @@ export async function createServer(
     if (groupId) {
         const group = await prisma.serverGroup.findFirst({ where: { id: groupId, userId } });
         if (!group) throw new Error('Group not found or access denied');
+    }
+
+    if (settings.jumpServerId) {
+        await assertValidJumpHost(userId, settings.jumpServerId, protocol);
     }
 
     // Encrypt sensitive credentials
@@ -169,6 +273,7 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
             host: true,
             username: true,
             port: true,
+            jumpServerId: true,
             group: {
                 select: {
                     id: true,
@@ -237,6 +342,7 @@ export async function getServerById(
         privateKey: credentials.privateKey,
         passphrase: credentials.passphrase,
         notes: credentials.notes,
+        jump: await loadJump(server.jumpServerId, server.userId, encryptionContext),
     };
 }
 
@@ -254,6 +360,7 @@ export async function getServerForConnection(
           displayHeight: number | null;
           colorDepth: number | null;
           rdpSecurity: string | null;
+          jump: JumpConfig | null;
       })
     | null
 > {
@@ -309,6 +416,9 @@ export async function getServerForConnection(
         colorDepth: server.colorDepth,
         rdpSecurity: server.rdpSecurity ?? null,
         ...credentials,
+        // The jump host always belongs to the server's owner — for a shared
+        // server too, so a recipient never needs the bastion shared with them.
+        jump: await loadJump(server.jumpServerId, server.userId, encryptionContext),
     };
 }
 
@@ -335,6 +445,12 @@ export async function updateServer(
         if (!group) throw new Error('Group not found or access denied');
     }
 
+    // Re-check the jump whenever the jump or the protocol changes.
+    const finalJump = input.jumpServerId !== undefined ? input.jumpServerId : existing.jumpServerId;
+    if (finalJump && (input.jumpServerId !== undefined || input.protocol !== undefined)) {
+        await assertValidJumpHost(userId, finalJump, input.protocol ?? existing.protocol, serverId);
+    }
+
     // Build update data
     const updateData: Record<string, unknown> = {};
 
@@ -350,6 +466,7 @@ export async function updateServer(
     if (input.colorDepth !== undefined) updateData.colorDepth = input.colorDepth;
     if (input.rdpSecurity !== undefined) updateData.rdpSecurity = input.rdpSecurity;
     if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+    if (input.jumpServerId !== undefined) updateData.jumpServerId = input.jumpServerId;
 
     // Encrypted fields - need to re-encrypt if changed
     const needsEncryption =
@@ -429,6 +546,20 @@ export async function deleteServer(serverId: string, userId: string) {
         return false;
     }
 
+    // Refuse to delete a bastion that is still in use: its targets would
+    // otherwise be left pointing at hosts this server must never dial directly.
+    const dependants = await prisma.server.findMany({
+        where: { jumpServerId: serverId },
+        select: { name: true },
+        take: 3,
+    });
+    if (dependants.length > 0) {
+        const names = dependants.map((d) => d.name).join(', ');
+        throw new JumpHostError(
+            `Other servers connect through ${existing.name} (${names}). Change their jump host first.`,
+        );
+    }
+
     await prisma.server.delete({
         where: { id: serverId },
     });
@@ -485,6 +616,7 @@ export async function searchServers(
             host: true,
             username: true,
             port: true,
+            jumpServerId: true,
             group: {
                 select: {
                     id: true,

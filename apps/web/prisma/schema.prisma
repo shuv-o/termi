@@ -152,6 +152,11 @@ model Server {
   privateKey String? // Encrypted (optional - for SSH key auth)
   passphrase String? // Encrypted (optional - key passphrase)
 
+  // Jump host (bastion): connect to this server *through* another of the
+  // owner's SSH servers. One hop only. The target host is then dialed by the
+  // jump server, not by Termi, so it may be a private address.
+  jumpServerId String?
+
   // Additional settings
   notes      String? // Encrypted notes
   sshOptions Json? // Additional SSH options
@@ -184,11 +189,17 @@ model Server {
   tunnelSessions TunnelSession[]
   invitations    ServerInvitation[]
   shares         ServerShare[]
+  // NoAction, not SetNull: if a bastion vanished, its targets (often private
+  // addresses) would start being dialed directly by this server. Deleting a
+  // jump host that is still in use is refused instead (see deleteServer).
+  jumpServer     Server?              @relation("JumpHost", fields: [jumpServerId], references: [id], onDelete: NoAction)
+  jumpTargets    Server[]             @relation("JumpHost")
 
   @@index([userId])
   @@index([groupId])
   @@index([protocol])
   @@index([isFavorite])
+  @@index([jumpServerId])
 }
 
 // CONNECTION TRACKING

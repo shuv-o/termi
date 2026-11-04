@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
+import { jumpClaim } from '@/lib/auth/connectionToken';
 import { getServerForConnection } from '@/lib/services';
 import { probeTunnelTarget } from '@/lib/services/tunnel.service';
 import { tunnelCreateRateLimit } from '@/lib/rate-limit';
@@ -146,6 +147,7 @@ export async function POST(request: Request) {
             password: server.password ?? null,
             privateKey: server.privateKey ?? null,
             passphrase: server.passphrase ?? null,
+            jump: jumpClaim(server.jump),
             remoteHost,
             remotePort,
         });

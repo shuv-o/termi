@@ -248,7 +248,7 @@ export function SessionSidebar({
                         placeholder="Filter sessions…"
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="pl-8 h-8 text-xs bg-secondary border-transparent focus:border-border"
+                        className="pl-8 text-xs border-transparent focus:"
                     />
                 </div>
             </div>

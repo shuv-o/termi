@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import { getServerById, updateServer, deleteServer } from '@/lib/services';
+import { getServerById, updateServer, deleteServer, JumpHostError } from '@/lib/services';
 import {
     validateBody,
     successResponse,
@@ -15,7 +15,8 @@ import {
     notFoundResponse,
 } from '@/lib/api';
 import { Protocol } from '@/app/generated/prisma/client';
-import { validateHost } from '@/lib/security/ssrf';
+import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
+import { prisma } from '@/lib/db';
 
 const updateServerSchema = z.object({
     name: z.string().min(1).max(100).optional(),
@@ -35,6 +36,7 @@ const updateServerSchema = z.object({
     displayHeight: z.number().int().min(480).max(4320).optional(),
     colorDepth: z.union([z.literal(8), z.literal(16), z.literal(24), z.literal(32)]).optional(),
     rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
+    jumpServerId: z.string().nullable().optional(),
 });
 
 interface RouteParams {
@@ -59,13 +61,22 @@ export async function GET(request: Request, { params }: RouteParams) {
 
         // Never send credentials back to the client — only expose whether they are set.
         // Callers that need credentials use getServerForConnection() server-side.
-        const { password, privateKey, passphrase, ...safeFields } = server;
+        // `jump` holds the bastion's *decrypted* credentials — strip it too and
+        // expose only which server it is.
+        const { password, privateKey, passphrase, jump, ...safeFields } = server;
+        const jumpServer = jump
+            ? await prisma.server.findUnique({
+                  where: { id: jump.serverId },
+                  select: { id: true, name: true },
+              })
+            : null;
         return successResponse({
             server: {
                 ...safeFields,
                 hasPassword: !!password,
                 hasPrivateKey: !!privateKey,
                 hasPassphrase: !!passphrase,
+                jumpServer,
             },
         });
     } catch (error) {
@@ -88,14 +99,26 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         return validation.error;
     }
 
-    // Re-validate host against SSRF rules if the host is being changed
-    if (validation.data.host) {
-        const ssrfCheck = await validateHost(
-            validation.data.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
-        );
+    // Re-validate the host against SSRF rules whenever the *resulting* config
+    // has this server dialing it directly: the host changed, or a jump host is
+    // being removed (a private address that was fine behind a bastion is not
+    // fine for this server to dial itself).
+    const { host: newHost, jumpServerId: newJump } = validation.data;
+    if (newHost !== undefined || newJump !== undefined) {
+        const existing = await getServerById(id, user.id);
+        if (!existing) return notFoundResponse('Server not found');
+        const finalHost = newHost ?? existing.host;
+        const finalJump = newJump !== undefined ? newJump : existing.jumpServerId;
+        const ssrfCheck = finalJump
+            ? validateJumpTargetHost(finalHost)
+            : await validateHost(finalHost, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
         if (!ssrfCheck.valid) {
-            return errorResponse(ssrfCheck.error || 'Invalid host', 400);
+            return errorResponse(
+                !newHost && newJump === null
+                    ? `Without a jump host, ${ssrfCheck.error?.toLowerCase() ?? 'this host is not allowed'}`
+                    : ssrfCheck.error || 'Invalid host',
+                400,
+            );
         }
     }
 
@@ -108,6 +131,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
         return successResponse({ server });
     } catch (error) {
+        if (error instanceof JumpHostError) return errorResponse(error.message, 400);
         console.error('Update server error:', error);
         return errorResponse('Failed to update server', 500);
     }
@@ -131,6 +155,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
         return successResponse({ message: 'Server deleted' });
     } catch (error) {
+        if (error instanceof JumpHostError) return errorResponse(error.message, 409);
         console.error('Delete server error:', error);
         return errorResponse('Failed to delete server', 500);
     }

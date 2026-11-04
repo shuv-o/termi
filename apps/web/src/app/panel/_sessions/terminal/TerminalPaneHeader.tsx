@@ -11,6 +11,7 @@ import {
     Laptop,
     Plus,
     RotateCcw,
+    Search,
     Terminal,
     TerminalSquare,
     User,
@@ -19,6 +20,7 @@ import {
     X,
 } from 'lucide-react';
 import { IconButton, IconButtonDivider } from '@/components/ui/icon-button';
+import { FIND_SHORTCUT_LABEL } from '@/components/terminal/TerminalSearch';
 import { StatusDot, statusColor, statusLabel } from '../status';
 import { HostChip, sshCommand, useCopyToClipboard, type SessionServerMeta } from './ServerMeta';
 import type { Session } from '../../sessions-context';
@@ -108,6 +110,7 @@ export function TerminalPaneHeader({
     onCloseShell,
     onAddShell,
     onReconnectShell,
+    onFind,
     onCopyPassword,
     onToggleFiles,
     showMetrics,
@@ -130,6 +133,8 @@ export function TerminalPaneHeader({
     onCloseShell: (id: string) => void;
     onAddShell: () => void;
     onReconnectShell: () => void;
+    /** Opens find-in-output for the visible shell. */
+    onFind: () => void;
     onCopyPassword: () => void;
     onToggleFiles: () => void;
     showMetrics: boolean;
@@ -177,6 +182,13 @@ export function TerminalPaneHeader({
                 </>
             )}
 
+            <IconButton
+                size="sm"
+                label="Find in output"
+                hint={FIND_SHORTCUT_LABEL()}
+                icon={Search}
+                onClick={onFind}
+            />
             <IconButton
                 size="sm"
                 label={showKeyboard ? 'Hide keyboard' : 'On-screen keyboard'}

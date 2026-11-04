@@ -115,7 +115,7 @@ export function MonitorSettingsSection({
         <div>
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
                 <Bell className="w-4 h-4 text-warning" />
-                Monitoring &amp; Alerts
+                Monitoring &amp; alerts
             </h2>
 
             <Card className="divide-y divide-border/50">

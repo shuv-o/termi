@@ -78,3 +78,23 @@ describe('validateHost', () => {
         expect(lookupMock).not.toHaveBeenCalled();
     });
 });
+
+import { validateJumpTargetHost } from './ssrf';
+
+describe('validateJumpTargetHost', () => {
+    it('accepts private addresses, since the bastion dials them', () => {
+        expect(validateJumpTargetHost('10.0.2.4').valid).toBe(true);
+        expect(validateJumpTargetHost('192.168.1.40').valid).toBe(true);
+        expect(validateJumpTargetHost('db.internal').valid).toBe(true);
+        expect(validateJumpTargetHost('[fd00::1]').valid).toBe(true);
+    });
+
+    it('rejects empty, oversized and malformed hosts', () => {
+        expect(validateJumpTargetHost('').valid).toBe(false);
+        expect(validateJumpTargetHost('   ').valid).toBe(false);
+        expect(validateJumpTargetHost('a'.repeat(254)).valid).toBe(false);
+        expect(validateJumpTargetHost('host name').valid).toBe(false);
+        expect(validateJumpTargetHost('evil.com/path').valid).toBe(false);
+        expect(validateJumpTargetHost('user@host').valid).toBe(false);
+    });
+});

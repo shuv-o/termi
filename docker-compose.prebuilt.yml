@@ -123,6 +123,8 @@ services:
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
       GUACD_HOST: guacd
       GUACD_PORT: 4822
+      # Uncomment to allow RDP/VNC through a jump host (guacd reaches the relay here).
+      # GUACD_TUNNEL_HOST: gateway
       NODE_ENV: production
     networks:
       - termi-network

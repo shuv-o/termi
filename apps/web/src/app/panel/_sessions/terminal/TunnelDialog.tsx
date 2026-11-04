@@ -33,7 +33,7 @@ export function TunnelDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Port Forwarding — {serverName}</DialogTitle>
+                    <DialogTitle>Port forwarding — {serverName}</DialogTitle>
                 </DialogHeader>
 
                 <p className="text-xs text-muted-foreground">
@@ -65,7 +65,7 @@ export function TunnelDialog({
                         {tunnels.opening ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                            'Create Tunnel'
+                            'Create tunnel'
                         )}
                     </Button>
                 </div>

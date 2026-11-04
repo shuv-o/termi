@@ -7,7 +7,7 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
-import { checkReachability, getSSHMetrics } from '@/lib/services/metrics.service';
+import { checkReachabilityVia, getSSHMetrics } from '@/lib/services/metrics.service';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 interface RouteParams {
@@ -24,7 +24,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
         const server = await getServerById(id, user.id);
         if (!server) return notFoundResponse('Server not found');
 
-        const { reachable, latencyMs } = await checkReachability(server.host, server.port);
+        const { reachable, latencyMs } = await checkReachabilityVia(
+            server.host,
+            server.port,
+            server.jump,
+        );
 
         if (!reachable) {
             return successResponse({ metrics: { reachable: false } });
@@ -39,6 +43,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
                 password: server.password ?? undefined,
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
+                jump: server.jump,
             });
             return successResponse({ metrics: { ...metrics, latencyMs } });
         }

@@ -30,6 +30,18 @@ export interface TokenPayload {
     // could already reach with a normal interactive session on this server.
     remoteHost?: string;
     remotePort?: number;
+    /**
+     * Optional bastion. When present the gateway connects here first and
+     * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
+     */
+    jump?: {
+        host: string;
+        port: number;
+        username: string;
+        password?: string | null;
+        privateKey?: string | null;
+        passphrase?: string | null;
+    } | null;
     exp: number;
 }
 

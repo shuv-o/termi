@@ -166,6 +166,7 @@ export const ServerScalarFieldEnum = {
   password: 'password',
   privateKey: 'privateKey',
   passphrase: 'passphrase',
+  jumpServerId: 'jumpServerId',
   notes: 'notes',
   sshOptions: 'sshOptions',
   displayWidth: 'displayWidth',

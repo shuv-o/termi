@@ -12,6 +12,8 @@ export interface ServerInfo {
     isFavorite: boolean;
     lastUsedAt: string | null;
     group: { id: string; name: string; color: string | null } | null;
+    /** The bastion this server is reached through, if any. */
+    jumpServer?: { id: string; name: string } | null;
 }
 
 export type WebhookPlatform = 'SLACK' | 'DISCORD' | 'GENERIC';
@@ -156,7 +158,7 @@ export type BenchmarkPhase =
 
 export const BENCHMARK_PHASES: { key: BenchmarkPhase; label: string }[] = [
     { key: 'connecting', label: 'Connect' },
-    { key: 'hardware', label: 'HW Info' },
+    { key: 'hardware', label: 'HW info' },
     { key: 'cpu_single', label: 'CPU 1C' },
     { key: 'cpu_multi', label: 'CPU NC' },
     { key: 'ram_write', label: 'RAM W' },

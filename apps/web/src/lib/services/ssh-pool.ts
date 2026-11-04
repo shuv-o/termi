@@ -27,6 +27,7 @@
  */
 
 import { Client, ConnectConfig, SFTPWrapper } from 'ssh2';
+import { connectSSH, type SSHJumpConfig } from './ssh-jump';
 
 //  ─ Tuning constants                             ─
 
@@ -50,6 +51,8 @@ export interface SSHPoolConfig {
     password?: string;
     privateKey?: string;
     passphrase?: string;
+    /** Reach this server through a bastion (see ssh-jump.ts). */
+    jump?: SSHJumpConfig | null;
 }
 
 //  ─ Internal types                              ─
@@ -81,7 +84,10 @@ export class SSHConnectionPool {
     //   Key
 
     static makeKey(cfg: SSHPoolConfig): string {
-        return cfg.id ?? `${cfg.username}@${cfg.host}:${cfg.port}`;
+        const base = cfg.id ?? `${cfg.username}@${cfg.host}:${cfg.port}`;
+        // The route is part of the identity: after a jump host is added,
+        // changed or removed, the old pooled connection must not be reused.
+        return cfg.jump ? `${base}~via~${cfg.jump.username}@${cfg.jump.host}:${cfg.jump.port}` : base;
     }
 
     //   acquire
@@ -271,7 +277,7 @@ export class SSHConnectionPool {
             }
 
             try {
-                client.connect(cc);
+                connectSSH(client, cc, cfg.jump);
             } catch (err) {
                 this.entries.delete(key);
                 reject(err);

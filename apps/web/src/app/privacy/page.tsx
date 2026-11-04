@@ -3,7 +3,7 @@ import Link from 'next/link';
 import LegalShell, { Section, type TocItem } from '@/components/legal/LegalShell';
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy',
+    title: 'Privacy policy',
     description:
         'How Termi handles your data. As an open-source, self-hosted platform, your data stays on infrastructure you control.',
     alternates: { canonical: '/privacy' },

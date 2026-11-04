@@ -34,8 +34,8 @@ import {
     getDeviceInfo,
 } from '@/lib/api';
 import { serverImportRateLimit } from '@/lib/rate-limit';
-import { validateHost } from '@/lib/security/ssrf';
-import { createServer, createServerGroup } from '@/lib/services';
+import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
+import { createServer, createServerGroup, JumpHostError } from '@/lib/services';
 import { Protocol } from '@/app/generated/prisma/client';
 import {
     parseExportFile,
@@ -150,14 +150,14 @@ export async function POST(request: Request) {
 
         const hostErrors = await validateHosts(payload.servers.map((s) => s.host));
 
-        const existingNames = new Set(
-            (
-                await prisma.server.findMany({
-                    where: { userId: user.id },
-                    select: { name: true },
-                })
-            ).map((s) => s.name),
-        );
+        const existingServers = await prisma.server.findMany({
+            where: { userId: user.id },
+            select: { id: true, name: true },
+        });
+        const existingNames = new Set(existingServers.map((s) => s.name));
+        // Name → id of every server a jump reference may point at: the
+        // account's own servers now, plus each one this import creates.
+        const serverIdsByName = new Map(existingServers.map((s) => [s.name, s.id]));
 
         //   Groups: match by name within this account, create what is missing
 
@@ -191,10 +191,31 @@ export async function POST(request: Request) {
         let skipped = 0;
         const failed: ImportFailure[] = [];
 
-        for (const server of payload.servers) {
-            const hostError = hostErrors.get(server.host);
+        // Bastions first, so a jumped server later in the same file can find
+        // the one it references.
+        const ordered = [...payload.servers].sort(
+            (a, b) => Number(Boolean(a.jumpServerName)) - Number(Boolean(b.jumpServerName)),
+        );
+
+        for (const server of ordered) {
+            // A host behind a jump host is dialed by the bastion, so it only
+            // needs valid syntax — but only if that bastion actually resolves.
+            // Otherwise the server would be dialed directly by this one, and
+            // the normal SSRF result for its host decides.
+            const jumpServerId = server.jumpServerName
+                ? (serverIdsByName.get(server.jumpServerName) ?? null)
+                : null;
+            const hostError = jumpServerId
+                ? (validateJumpTargetHost(server.host).error ?? null)
+                : hostErrors.get(server.host);
             if (hostError) {
-                failed.push({ name: server.name, reason: hostError });
+                failed.push({
+                    name: server.name,
+                    reason:
+                        server.jumpServerName && !jumpServerId
+                            ? `Jump host "${server.jumpServerName}" was not found, and ${hostError.toLowerCase()}`
+                            : hostError,
+                });
                 continue;
             }
 
@@ -205,7 +226,7 @@ export async function POST(request: Request) {
             }
 
             try {
-                await createServer({
+                const created = await createServer({
                     userId: user.id,
                     name,
                     description: server.description ?? undefined,
@@ -226,11 +247,20 @@ export async function POST(request: Request) {
                     displayHeight: server.displayHeight ?? undefined,
                     colorDepth: server.colorDepth ?? undefined,
                     rdpSecurity: server.rdpSecurity ?? undefined,
+                    jumpServerId: jumpServerId ?? undefined,
                 });
 
                 existingNames.add(name);
+                // Keyed by the name in the *file*, which is what other rows
+                // reference — even when this one was stored renamed. A server
+                // in the same file wins over an existing one of the same name.
+                serverIdsByName.set(server.name, created.id);
                 imported++;
             } catch (error) {
+                if (error instanceof JumpHostError) {
+                    failed.push({ name: server.name, reason: error.message });
+                    continue;
+                }
                 console.error(`Import: could not create server "${server.name}":`, error);
                 failed.push({ name: server.name, reason: 'Could not be saved' });
             }

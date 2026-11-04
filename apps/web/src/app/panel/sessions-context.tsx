@@ -173,7 +173,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         const tabId = `${uid}-local-${Date.now()}`;
         const isElectronMode =
             typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
-        const serverName = isElectronMode ? 'Local Terminal' : 'Gateway Shell';
+        const serverName = isElectronMode ? 'Local terminal' : 'Gateway Shell';
 
         setSessions((prev) => [
             ...prev,

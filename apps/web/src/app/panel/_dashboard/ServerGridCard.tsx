@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, Clock, Layers, Star } from 'lucide-react';
+import { ArrowDown, ArrowUp, Clock, Layers, Star, Waypoints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CopyButton } from '@/components/common/CopyButton';
@@ -54,6 +54,7 @@ export function ServerGridCard({
     m,
     mLoading,
     hasSession,
+    jumpVia,
     onOpen,
     onFavorite,
     onEdit,
@@ -90,6 +91,12 @@ export function ServerGridCard({
                                 className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                             />
                         </div>
+                        {jumpVia && (
+                            <p className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+                                <Waypoints className="h-3 w-3 shrink-0" aria-hidden />
+                                <span className="truncate">via {jumpVia}</span>
+                            </p>
+                        )}
                     </div>
                     <Button
                         variant="ghost"

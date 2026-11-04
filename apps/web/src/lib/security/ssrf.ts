@@ -103,3 +103,20 @@ export async function validateHost(
 
     return { valid: true };
 }
+
+/**
+ * Host check for a server reached through a jump host.
+ *
+ * Such a host is dialed by the *bastion*, inside its own network — the same
+ * capability `ssh -J` grants — never by this server, so private addresses are
+ * exactly what it is for and the SSRF ruleset does not apply. Only the syntax
+ * is checked. The bastion's own host went through `validateHost` when it was
+ * saved, and is re-checked when tokens are minted.
+ */
+export function validateJumpTargetHost(host: string): { valid: boolean; error?: string } {
+    const trimmed = host.trim();
+    if (!trimmed || trimmed.length > 253 || !/^[A-Za-z0-9._:[\]-]+$/.test(trimmed)) {
+        return { valid: false, error: 'Enter a valid hostname or IP address' };
+    }
+    return { valid: true };
+}

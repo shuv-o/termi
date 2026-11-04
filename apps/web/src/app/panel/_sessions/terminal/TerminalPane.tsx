@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Loader2, RotateCcw, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -120,6 +120,8 @@ export function TerminalPane({
     const [showMetrics, setShowMetrics] = useState(false);
 
     const { registerSendHandler } = useSessionsContext();
+    // Per-shell "open find bar" functions, handed up by each terminal.
+    const searchOpeners = useRef(new Map<string, () => void>());
 
     const {
         shells,
@@ -244,6 +246,9 @@ export function TerminalPane({
                 onCloseShell={closeShell}
                 onAddShell={addShell}
                 onReconnectShell={() => reconnectShell(activeShellId, activeShellIndex === 0)}
+                onFind={() =>
+                    searchOpeners.current.get(session.type === 'local' ? 'local' : activeShellId)?.()
+                }
                 onCopyPassword={onCopyPassword}
                 onToggleFiles={() => {
                     // The two side panels share one slot; opening either closes
@@ -293,6 +298,7 @@ export function TerminalPane({
                             gatewayUrl={session.gatewayUrl ?? undefined}
                             onReady={() => updateSessionStatus(session.tabId, 'connected')}
                             onExit={() => updateSessionStatus(session.tabId, 'disconnected')}
+                            onSearchReady={(fn) => searchOpeners.current.set('local', fn)}
                         />
                     ) : session.status === 'detached' ? (
                         <RestoringPlaceholder serverName={session.serverName} />
@@ -333,6 +339,9 @@ export function TerminalPane({
                                                 connectionToken={shell.token}
                                                 gatewayUrl={session.gatewayUrl ?? undefined}
                                                 disableNativeKeyboard={isMobile}
+                                                onSearchReady={(fn) =>
+                                                    searchOpeners.current.set(shell.id, fn)
+                                                }
                                                 onDisconnect={() => {
                                                     if (isFirst)
                                                         updateSessionStatus(

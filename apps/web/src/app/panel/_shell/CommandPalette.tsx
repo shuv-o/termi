@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     BookKey,
@@ -31,6 +31,7 @@ import {
 import { DialogTitle } from '@/components/ui/dialog';
 import { mutateCache, useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { protocolIcons } from '@/lib/protocol-style';
+import { connectHref } from '@/lib/connect-route';
 import type { Snippet } from '@/components/terminal/TerminalToolbar';
 import { NewSnippetDialog } from './NewSnippetDialog';
 import { useSessionsContext } from '../sessions-context';
@@ -47,7 +48,7 @@ const SETTINGS_SECTIONS = [
     { id: 'passkeys', label: 'Passkeys', icon: Key },
     { id: 'encryption', label: 'Encryption', icon: Lock },
     { id: 'notifications', label: 'Alerts', icon: BookKey },
-    { id: 'sessions', label: 'Active Sessions', icon: Monitor },
+    { id: 'sessions', label: 'Active sessions', icon: Monitor },
 ];
 
 /**
@@ -60,9 +61,28 @@ const SETTINGS_SECTIONS = [
  */
 export function CommandPalette() {
     const router = useRouter();
-    const { activeTabId, sendToSession } = useSessionsContext();
+    const { activeTabId, sendToSession, sessions } = useSessionsContext();
     const [open, setOpen] = useState(false);
     const [showNewSnippet, setShowNewSnippet] = useState(false);
+    // cmdk's onSelect carries no event, so the modifier is tracked here:
+    // Enter connects, Shift+Enter (or Shift+click) opens the server's page.
+    const shiftHeld = useRef(false);
+
+    useEffect(() => {
+        if (!open) return;
+        const track = (e: KeyboardEvent | MouseEvent) => {
+            shiftHeld.current = e.shiftKey;
+        };
+        window.addEventListener('keydown', track, true);
+        window.addEventListener('keyup', track, true);
+        window.addEventListener('mousedown', track, true);
+        return () => {
+            window.removeEventListener('keydown', track, true);
+            window.removeEventListener('keyup', track, true);
+            window.removeEventListener('mousedown', track, true);
+            shiftHeld.current = false;
+        };
+    }, [open]);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -92,7 +112,17 @@ export function CommandPalette() {
         open ? '/api/snippets' : null,
     );
 
-    const servers = serversData?.servers ?? [];
+    // Most recently used first, so the box you were just on is one keystroke away.
+    const servers = useMemo(
+        () =>
+            [...(serversData?.servers ?? [])].sort(
+                (a, b) =>
+                    (b.lastUsedAt ? Date.parse(b.lastUsedAt) : 0) -
+                    (a.lastUsedAt ? Date.parse(a.lastUsedAt) : 0),
+            ),
+        [serversData],
+    );
+    const openServerIds = useMemo(() => new Set(sessions.map((t) => t.serverId)), [sessions]);
     const groups = groupsData?.groups ?? [];
     const entries = keychainData?.entries ?? [];
     const snippets = snippetsData?.snippets ?? [];
@@ -122,9 +152,44 @@ export function CommandPalette() {
         <>
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <DialogTitle className="sr-only">Command palette</DialogTitle>
-                <CommandInput placeholder="Search servers, groups, settings…" />
+                <CommandInput placeholder="Connect to a server, or search anything…" />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
+
+                    {servers.length > 0 && (
+                        <>
+                            <CommandGroup heading="Connect">
+                                {servers.map((s) => {
+                                    const Icon = protocolIcons[s.protocol] ?? Server;
+                                    return (
+                                        <CommandItem
+                                            key={s.id}
+                                            value={`${s.name} ${s.host} ${s.username} ${s.protocol}`}
+                                            onSelect={() =>
+                                                go(
+                                                    shiftHeld.current
+                                                        ? `/panel/servers/${s.id}`
+                                                        : connectHref(s.id, s.protocol),
+                                                )
+                                            }
+                                        >
+                                            <Icon />
+                                            <span className="truncate">{s.name}</span>
+                                            {openServerIds.has(s.id) && (
+                                                <span className="shrink-0 rounded-full border border-primary/30 px-1.5 text-[11px] text-primary">
+                                                    open
+                                                </span>
+                                            )}
+                                            <CommandShortcut className="data truncate">
+                                                {s.host}
+                                            </CommandShortcut>
+                                        </CommandItem>
+                                    );
+                                })}
+                            </CommandGroup>
+                            <CommandSeparator />
+                        </>
+                    )}
 
                     <CommandGroup heading="Quick actions">
                         <CommandItem
@@ -200,30 +265,6 @@ export function CommandPalette() {
                             Settings
                         </CommandItem>
                     </CommandGroup>
-
-                    {servers.length > 0 && (
-                        <>
-                            <CommandSeparator />
-                            <CommandGroup heading="Servers">
-                                {servers.map((s) => {
-                                    const Icon = protocolIcons[s.protocol] ?? Server;
-                                    return (
-                                        <CommandItem
-                                            key={s.id}
-                                            value={`${s.name} ${s.host} ${s.username} ${s.protocol}`}
-                                            onSelect={() => go(`/panel/servers/${s.id}`)}
-                                        >
-                                            <Icon />
-                                            <span className="truncate">{s.name}</span>
-                                            <CommandShortcut className="font-mono">
-                                                {s.host}
-                                            </CommandShortcut>
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
-                        </>
-                    )}
 
                     {groups.length > 0 && (
                         <>
@@ -303,6 +344,17 @@ export function CommandPalette() {
                         ))}
                     </CommandGroup>
                 </CommandList>
+                <div className="hidden items-center gap-4 border-t border-border px-3 py-2 text-[11px] text-muted-foreground sm:flex">
+                    <span>
+                        <kbd className="data">↵</kbd> connect
+                    </span>
+                    <span>
+                        <kbd className="data">⇧↵</kbd> server details
+                    </span>
+                    <span className="ml-auto">
+                        <kbd className="data">esc</kbd> close
+                    </span>
+                </div>
             </CommandDialog>
             <NewSnippetDialog
                 open={showNewSnippet}

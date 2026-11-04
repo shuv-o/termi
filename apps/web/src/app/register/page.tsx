@@ -164,7 +164,7 @@ function VerifyStep({
                 )}
 
                 <Button type="submit" disabled={loading || code.length < 6} className="w-full">
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Email'}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify email'}
                 </Button>
             </form>
 
@@ -334,7 +334,7 @@ function RegisterContent() {
                                                         name: e.target.value,
                                                     })
                                                 }
-                                                className="bg-secondary border-border"
+                                               
                                                 placeholder="Jane Smith"
                                                 required
                                                 autoComplete="name"
@@ -353,7 +353,7 @@ function RegisterContent() {
                                                         email: e.target.value,
                                                     })
                                                 }
-                                                className="bg-secondary border-border"
+                                               
                                                 placeholder="you@example.com"
                                                 required
                                                 autoComplete="email"
@@ -373,7 +373,7 @@ function RegisterContent() {
                                                             password: e.target.value,
                                                         })
                                                     }
-                                                    className="bg-secondary border-border pr-12"
+                                                    className="pr-12"
                                                     placeholder="••••••••"
                                                     required
                                                     autoComplete="new-password"

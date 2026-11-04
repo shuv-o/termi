@@ -7,6 +7,7 @@
 
 import * as net from 'net';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
+import type { SSHJumpConfig } from './ssh-jump';
 
 // TYPES
 
@@ -62,6 +63,43 @@ export function checkReachability(
         socket.on('error', () => done({ reachable: false }));
         socket.on('timeout', () => done({ reachable: false }));
     });
+}
+
+/**
+ * Reachability for a server that sits behind a jump host. A direct TCP probe
+ * from here would be meaningless (the target is often a private address only
+ * the bastion can see), so instead the bastion is asked to open a channel to
+ * the target — exactly what a real connection will do. Uses the pooled
+ * bastion connection, so a minute-by-minute monitor does not re-handshake.
+ */
+export async function checkReachabilityVia(
+    host: string,
+    port: number,
+    jump: SSHJumpConfig | null | undefined,
+    timeoutMs = 5000,
+): Promise<{ reachable: boolean; latencyMs?: number }> {
+    if (!jump) return checkReachability(host, port, timeoutMs);
+
+    let key: string | undefined;
+    try {
+        const acquired = await sshPool.acquire({ ...jump, jump: null });
+        key = acquired.key;
+        const client = acquired.client;
+        const start = Date.now();
+        return await new Promise((resolve) => {
+            const timer = setTimeout(() => resolve({ reachable: false }), timeoutMs);
+            client.forwardOut('127.0.0.1', 0, host, port, (err, stream) => {
+                clearTimeout(timer);
+                if (err) return resolve({ reachable: false });
+                stream.end();
+                resolve({ reachable: true, latencyMs: Date.now() - start });
+            });
+        });
+    } catch {
+        return { reachable: false };
+    } finally {
+        if (key) sshPool.release(key);
+    }
 }
 
 // SSH METRICS

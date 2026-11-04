@@ -9,6 +9,7 @@
 import { prisma } from '@/lib/db';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 import { sshPool, type SSHPoolConfig } from './ssh-pool';
+import { loadJump } from './server.service';
 
 /** How many servers to run the command on at once. */
 const CONCURRENCY = 5;
@@ -36,6 +37,8 @@ interface BroadcastServer {
     password: string | null;
     privateKey: string | null;
     passphrase: string | null;
+    userId: string;
+    jumpServerId: string | null;
 }
 
 /**
@@ -61,6 +64,8 @@ export async function getBroadcastableServers(
                     password: true,
                     privateKey: true,
                     passphrase: true,
+                    userId: true,
+                    jumpServerId: true,
                 },
             },
         },
@@ -116,7 +121,7 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
             return;
         }
 
-        const config: SSHPoolConfig = {
+        const config = (jump: SSHPoolConfig['jump']): SSHPoolConfig => ({
             id: server.id,
             host: creds.host,
             port: server.port,
@@ -124,10 +129,11 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
             password: creds.password,
             privateKey: creds.privateKey,
             passphrase: creds.passphrase,
-        };
+            jump,
+        });
 
-        sshPool
-            .acquire(config)
+        loadJump(server.jumpServerId, server.userId)
+            .then((jump) => sshPool.acquire(config(jump)))
             .then(({ client, key }) => {
                 poolKey = key;
 

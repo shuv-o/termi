@@ -5,10 +5,10 @@
 
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import { getServers, createServer, searchServers } from '@/lib/services';
+import { getServers, createServer, searchServers, JumpHostError } from '@/lib/services';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 import { Protocol } from '@/app/generated/prisma/client';
-import { validateHost } from '@/lib/security/ssrf';
+import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
 
 const createServerSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100),
@@ -27,6 +27,7 @@ const createServerSchema = z.object({
     displayHeight: z.number().int().min(480).max(4320).optional(),
     colorDepth: z.union([z.literal(8), z.literal(16), z.literal(24), z.literal(32)]).optional(),
     rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
+    jumpServerId: z.string().nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -78,11 +79,14 @@ export async function POST(request: Request) {
     }
 
     try {
-        // SSRF protection: validate host doesn't point to internal network
-        const ssrfCheck = await validateHost(
-            validation.data.host,
-            process.env.ALLOW_PRIVATE_NETWORKS === 'true',
-        );
+        // SSRF protection: validate host doesn't point to internal network.
+        // Behind a jump host, the bastion dials it instead — see validateJumpTargetHost.
+        const ssrfCheck = validation.data.jumpServerId
+            ? validateJumpTargetHost(validation.data.host)
+            : await validateHost(
+                  validation.data.host,
+                  process.env.ALLOW_PRIVATE_NETWORKS === 'true',
+              );
         if (!ssrfCheck.valid) {
             return errorResponse(ssrfCheck.error || 'Invalid host', 400);
         }
@@ -94,6 +98,7 @@ export async function POST(request: Request) {
 
         return successResponse({ server }, 201);
     } catch (error) {
+        if (error instanceof JumpHostError) return errorResponse(error.message, 400);
         console.error('Create server error:', error);
         return errorResponse('Failed to create server', 500);
     }

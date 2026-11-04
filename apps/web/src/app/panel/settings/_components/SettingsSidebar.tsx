@@ -42,18 +42,18 @@ function SidebarNav({
         { id: 'notifications', label: 'Notifications', icon: Bell },
         {
             id: 'sessions',
-            label: 'Active Sessions',
+            label: 'Active sessions',
             icon: Monitor,
             badge: sessionCount || undefined,
         },
         { id: 'recordings', label: 'Recordings', icon: ScreenShare },
         {
             id: 'tunnels',
-            label: 'Active Tunnels',
+            label: 'Active tunnels',
             icon: Waypoints,
             badge: tunnelCount || undefined,
         },
-        { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
+        { id: 'danger', label: 'Danger zone', icon: AlertTriangle },
     ];
 
     return (

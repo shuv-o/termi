@@ -125,6 +125,7 @@ export async function POST(request: Request) {
             orderBy: { name: 'asc' },
             include: {
                 group: { select: { name: true, description: true, color: true, icon: true } },
+                jumpServer: { select: { name: true } },
             },
         })) as unknown as StoredServer[];
 

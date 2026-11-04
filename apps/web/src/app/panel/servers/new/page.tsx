@@ -41,6 +41,9 @@ export default function NewServerPage() {
                         ? { displayWidth: form.displayWidth, displayHeight: form.displayHeight }
                         : {}),
                     ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
+                    ...((form.protocol !== 'TELNET') && form.jumpServerId
+                        ? { jumpServerId: form.jumpServerId }
+                        : {}),
                 }),
             });
             const data = await res.json();

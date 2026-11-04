@@ -14,6 +14,7 @@
 
 import { Client } from 'ssh2';
 import type { TokenPayload } from '../auth/token.js';
+import { connectSSH } from './jump.js';
 import type { SSHOutputSink } from './ssh.js';
 
 export class TunnelHandler {
@@ -139,7 +140,7 @@ export class TunnelHandler {
         });
 
         try {
-            this.ssh.connect(config);
+            connectSSH(this.ssh, config, token.jump);
         } catch (error) {
             this.sink.onMessage('error', {
                 message: 'Connection failed: ' + (error as Error).message,

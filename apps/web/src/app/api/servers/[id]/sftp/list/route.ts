@@ -32,6 +32,7 @@ export async function GET(request: Request, { params }: RouteParams) {
                 password: server.password ?? undefined,
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
+                jump: server.jump,
             },
             dirPath,
         );

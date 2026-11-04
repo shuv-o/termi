@@ -1,6 +1,6 @@
 'use client';
 
-import { Cpu, HardDrive, Layers, MemoryStick, Star } from 'lucide-react';
+import { Cpu, HardDrive, Layers, MemoryStick, Star, Waypoints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/common/CopyButton';
 import { formatRelativeTime } from '@/lib/format';
@@ -31,6 +31,7 @@ export function ServerListRow({
     m,
     mLoading,
     hasSession,
+    jumpVia,
     onOpen,
     onFavorite,
     onEdit,
@@ -70,6 +71,7 @@ export function ServerListRow({
                 </div>
                 <p className="data mt-0.5 truncate text-xs text-muted-foreground md:hidden">
                     {server.host}
+                    {jumpVia && <span className="font-sans"> via {jumpVia}</span>}
                 </p>
                 <div className="hidden 2xl:flex items-center gap-2 mt-0.5">
                     <span className="truncate text-[11px] text-muted-foreground">
@@ -112,6 +114,15 @@ export function ServerListRow({
                     :{server.port}
                 </span>
                 <CopyButton text={`${server.host}:${server.port}`} className="shrink-0" />
+                {jumpVia && (
+                    <span
+                        className="flex min-w-0 shrink items-center gap-1 text-[11px] text-muted-foreground"
+                        title={`Reached through ${jumpVia}`}
+                    >
+                        <Waypoints className="h-3 w-3 shrink-0" aria-hidden />
+                        <span className="truncate">via {jumpVia}</span>
+                    </span>
+                )}
             </div>
 
             <div className="hidden w-28 shrink-0 items-center lg:flex">

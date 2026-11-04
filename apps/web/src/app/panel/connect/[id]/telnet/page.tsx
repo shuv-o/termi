@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Keyboard, Loader2, Maximize2, Minimize2, RotateCcw, X } from 'lucide-react';
+import { Keyboard, Loader2, Maximize2, Minimize2, RotateCcw, Search, X } from 'lucide-react';
+import { useFindShortcutLabel } from '@/components/terminal/find-shortcut';
 import { Button } from '@/components/ui/button';
 
 const TelnetTerminal = dynamic(() => import('@/components/terminal/TelnetTerminal'), {
@@ -33,6 +34,8 @@ export default function TelnetConnectionPage() {
     const containerRef = useRef<HTMLDivElement>(null);
     const keyHandlerRef = useRef<((key: string) => void) | null>(null);
     const reconnectRef = useRef<(() => void) | null>(null);
+    const openSearchRef = useRef<(() => void) | null>(null);
+    const findLabel = useFindShortcutLabel();
     const wsRef = useRef<WebSocket | null>(null);
 
     const fetchToken = useCallback(async () => {
@@ -178,6 +181,16 @@ export default function TelnetConnectionPage() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
+                        onClick={() => openSearchRef.current?.()}
+                        title={`Find in output (${findLabel})`}
+                        aria-label="Find in output"
+                    >
+                        <Search className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
                         onClick={() => reconnectRef.current?.()}
                         title="Reconnect"
                     >
@@ -189,7 +202,7 @@ export default function TelnetConnectionPage() {
                         size="icon"
                         className="hidden sm:flex h-7 w-7"
                         onClick={toggleFullscreen}
-                        title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                        title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                     >
                         {isFullscreen ? (
                             <Minimize2 className="w-3.5 h-3.5" />
@@ -239,6 +252,9 @@ export default function TelnetConnectionPage() {
                         }}
                         onWebSocketCreated={(ws) => {
                             wsRef.current = ws;
+                        }}
+                        onSearchReady={(fn) => {
+                            openSearchRef.current = fn;
                         }}
                         onReconnectReady={(fn) => {
                             reconnectRef.current = fn;

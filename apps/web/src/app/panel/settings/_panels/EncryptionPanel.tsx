@@ -63,7 +63,7 @@ export function EncryptionPanel({
                                 placeholder="New passphrase (min 8 characters)"
                                 value={encryption.passphrase}
                                 onChange={(e) => encryption.setPassphrase(e.target.value)}
-                                className="bg-secondary border-border"
+                               
                                 required
                                 minLength={8}
                             />
@@ -95,7 +95,7 @@ export function EncryptionPanel({
                                 ) : (
                                     <>
                                         <Key className="w-4 h-4" />{' '}
-                                        {user.hasMasterKey ? 'Update Passphrase' : 'Set Passphrase'}
+                                        {user.hasMasterKey ? 'Update passphrase' : 'Set passphrase'}
                                     </>
                                 )}
                             </Button>

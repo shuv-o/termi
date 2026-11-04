@@ -38,7 +38,7 @@ type Step = 'authenticating' | 'password-fallback' | 'revealed' | 'error';
 
 const fieldLabel: Record<RevealField, string> = {
     password: 'Password',
-    privateKey: 'Private Key',
+    privateKey: 'Private key',
     passphrase: 'Passphrase',
 };
 

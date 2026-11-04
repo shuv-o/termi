@@ -39,6 +39,43 @@ export interface ConnectionTokenClaims {
     rdpSecurity?: string;
     remoteHost?: string;
     remotePort?: number;
+    /**
+     * Optional bastion. When present the gateway connects here first and
+     * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
+     */
+    jump?: {
+        host: string;
+        port: number;
+        username: string;
+        password?: string | null;
+        privateKey?: string | null;
+        passphrase?: string | null;
+    } | null;
+}
+
+/** The `jump` claim for a server's (already decrypted) jump host, if any. */
+export function jumpClaim(
+    jump:
+        | {
+              host: string;
+              port: number;
+              username: string;
+              password?: string;
+              privateKey?: string;
+              passphrase?: string;
+          }
+        | null
+        | undefined,
+): ConnectionTokenClaims['jump'] {
+    if (!jump) return null;
+    return {
+        host: jump.host,
+        port: jump.port,
+        username: jump.username,
+        password: jump.password ?? null,
+        privateKey: jump.privateKey ?? null,
+        passphrase: jump.passphrase ?? null,
+    };
 }
 
 /** Mints a 5-minute JWE connection token — only long enough to bootstrap the

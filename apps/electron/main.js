@@ -387,7 +387,7 @@ function createWindow(appUrl) {
         // frame. Electron's default is white, so without this the window flashes
         // white on launch and on every full reload before the page paints — the
         // "blinking" the app otherwise shows against a dark UI.
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0e1319',
         // Don't show the window until the renderer has something to paint;
         // otherwise the empty (dark) frame appears a beat before the content.
         show: false,

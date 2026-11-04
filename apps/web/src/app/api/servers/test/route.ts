@@ -10,7 +10,10 @@ import net from 'net';
 import { Client, type ConnectConfig } from 'ssh2';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-import { validateHost } from '@/lib/security/ssrf';
+import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
+import { assertValidJumpHost, JumpHostError, loadJump } from '@/lib/services/server.service';
+import { connectSSH, type SSHJumpConfig } from '@/lib/services/ssh-jump';
+import { checkReachabilityVia } from '@/lib/services/metrics.service';
 import { connectionTestRateLimit } from '@/lib/rate-limit';
 
 const schema = z.object({
@@ -21,6 +24,8 @@ const schema = z.object({
     password: z.string().optional(),
     privateKey: z.string().optional(),
     passphrase: z.string().optional(),
+    /** Test through this saved SSH server instead of dialing the host directly. */
+    jumpServerId: z.string().nullable().optional(),
 });
 
 //   TCP reachability (RDP / VNC)                       ─
@@ -72,6 +77,7 @@ function sshAuthTest(
         password?: string;
         privateKey?: string;
         passphrase?: string;
+        jump?: SSHJumpConfig | null;
     },
     timeoutMs = 12000,
 ): Promise<{ ok: boolean; latencyMs?: number; error?: string }> {
@@ -143,7 +149,7 @@ function sshAuthTest(
             cc.tryKeyboard = true;
         }
 
-        client.connect(cc);
+        connectSSH(client, cc, config.jump);
     });
 }
 
@@ -179,10 +185,35 @@ export async function POST(request: Request) {
         return Response.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
     }
 
-    const { host, port, protocol, username, password, privateKey, passphrase } = parsed.data;
+    const { host, port, protocol, username, password, privateKey, passphrase, jumpServerId } =
+        parsed.data;
+
+    // Through a jump host the bastion dials the target, so the SSRF rules apply
+    // to the bastion (re-checked here) and the target only needs valid syntax.
+    let jump: SSHJumpConfig | null = null;
+    if (jumpServerId) {
+        try {
+            await assertValidJumpHost(user.id, jumpServerId, protocol);
+        } catch (err) {
+            const message = err instanceof JumpHostError ? err.message : 'Invalid jump host';
+            return Response.json({ success: false, error: message }, { status: 400 });
+        }
+        jump = await loadJump(jumpServerId, user.id);
+        const bastionCheck = jump
+            ? await validateHost(jump.host, process.env.ALLOW_PRIVATE_NETWORKS === 'true')
+            : { valid: false, error: 'Jump host not found' };
+        if (!bastionCheck.valid) {
+            return Response.json(
+                { success: false, error: bastionCheck.error || 'Invalid jump host' },
+                { status: 400 },
+            );
+        }
+    }
 
     // SSRF protection: block connections to private/reserved addresses
-    const ssrfCheck = await validateHost(host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
+    const ssrfCheck = jump
+        ? validateJumpTargetHost(host)
+        : await validateHost(host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
     if (!ssrfCheck.valid) {
         return Response.json(
             { success: false, error: ssrfCheck.error || 'Invalid host' },
@@ -193,6 +224,24 @@ export async function POST(request: Request) {
     const isSSH = protocol === 'SSH' || protocol === 'SCP';
     // TELNET uses TCP check only (no SSH auth)
 
+    // Never fall through to the direct TCP probe below for a jumped server:
+    // that would make this server dial a host only the bastion should reach.
+    if (jump && isSSH && !username) {
+        return Response.json(
+            { success: false, error: 'Enter a username to test through a jump host' },
+            { status: 400 },
+        );
+    }
+    if (jump && !isSSH) {
+        // RDP/VNC: ask the bastion whether it can open the port.
+        const via = await checkReachabilityVia(host, port, jump, 6000);
+        return Response.json({
+            success: via.reachable,
+            latency: via.latencyMs,
+            error: via.reachable ? undefined : `${jump.host} could not reach ${host}:${port}`,
+        });
+    }
+
     if (isSSH && username) {
         const result = await sshAuthTest({
             host,
@@ -201,6 +250,7 @@ export async function POST(request: Request) {
             password,
             privateKey,
             passphrase,
+            jump,
         });
         return Response.json({
             success: result.ok,

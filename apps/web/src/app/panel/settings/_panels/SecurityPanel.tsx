@@ -99,7 +99,7 @@ function TotpEnrolment({ twoFactor }: { twoFactor: TwoFactor }) {
                     onChange={(e) =>
                         twoFactor.setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))
                     }
-                    className="bg-secondary border-border text-center text-2xl tracking-[0.5em] font-mono h-12"
+                    className="text-center text-2xl tracking-[0.5em] font-mono h-12"
                     placeholder="000000"
                     maxLength={6}
                     inputMode="numeric"
@@ -140,7 +140,7 @@ function DisableConfirm({ twoFactor }: { twoFactor: TwoFactor }) {
                     type="password"
                     value={twoFactor.disablePassword}
                     onChange={(e) => twoFactor.setDisablePassword(e.target.value)}
-                    className="bg-secondary border-border"
+                   
                     placeholder="Your current password"
                     autoFocus
                 />
@@ -276,7 +276,7 @@ function ChangePasswordCard({ password }: { password: PasswordState }) {
                         ) : (
                             <Key className="w-4 h-4" />
                         )}
-                        {changing ? 'Changing…' : 'Change Password'}
+                        {changing ? 'Changing…' : 'Change password'}
                     </Button>
                 </form>
             </SettingsSection>

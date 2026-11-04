@@ -17,11 +17,11 @@ export interface KeychainEntry {
 }
 
 export const protocols = [
-    { value: 'SSH', label: 'SSH', icon: Terminal, desc: 'Secure Shell' },
-    { value: 'SCP', label: 'SCP', icon: FolderOpen, desc: 'File Transfer' },
-    { value: 'RDP', label: 'RDP', icon: Monitor, desc: 'Remote Desktop' },
-    { value: 'VNC', label: 'VNC', icon: Tv, desc: 'Virtual Console' },
-    { value: 'TELNET', label: 'Telnet', icon: Terminal, desc: 'Telnet Terminal' },
+    { value: 'SSH', label: 'SSH', icon: Terminal, desc: 'Secure shell' },
+    { value: 'SCP', label: 'SCP', icon: FolderOpen, desc: 'File transfer' },
+    { value: 'RDP', label: 'RDP', icon: Monitor, desc: 'Remote desktop' },
+    { value: 'VNC', label: 'VNC', icon: Tv, desc: 'Virtual console' },
+    { value: 'TELNET', label: 'Telnet', icon: Terminal, desc: 'Telnet terminal' },
 ] as const;
 
 export const defaultPorts = { SSH: 22, SCP: 22, RDP: 3389, VNC: 5900, TELNET: 23 };
@@ -69,6 +69,8 @@ export interface ServerFormValues {
     displayWidth: number;
     displayHeight: number;
     rdpSecurity: RdpSecurity;
+    /** Jump host server id; '' for a direct connection. SSH/SCP only. */
+    jumpServerId: string;
 }
 
 export const EMPTY_SERVER_FORM: ServerFormValues = {
@@ -88,6 +90,7 @@ export const EMPTY_SERVER_FORM: ServerFormValues = {
     displayWidth: 1920,
     displayHeight: 1080,
     rdpSecurity: 'any',
+    jumpServerId: '',
 };
 
 /**

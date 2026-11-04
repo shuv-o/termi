@@ -39,6 +39,7 @@ export interface StoredServer {
     colorDepth: number | null;
     rdpSecurity: string | null;
     isFavorite: boolean;
+    jumpServer?: { name: string } | null;
     group: {
         name: string;
         description: string | null;
@@ -89,6 +90,7 @@ export function buildPayload(
             name: server.name,
             description: server.description,
             groupName: server.group?.name ?? null,
+            jumpServerName: server.jumpServer?.name ?? null,
 
             host: decrypted.host,
             port: server.port,
@@ -157,6 +159,7 @@ function spreadsheetColumns(includeCredentials: boolean): SheetColumn[] {
         { header: 'Description', width: 32 },
         { header: 'Tags', width: 22 },
         { header: 'Favorite', width: 10 },
+        { header: 'Jump host', width: 18 },
     ];
 
     if (includeCredentials) {
@@ -183,6 +186,7 @@ function spreadsheetRows(payload: ExportPayload, includeCredentials: boolean): C
             server.description ?? '',
             (server.tags ?? []).join(', '),
             server.isFavorite ?? false,
+            server.jumpServerName ?? '',
         ];
 
         if (includeCredentials) {

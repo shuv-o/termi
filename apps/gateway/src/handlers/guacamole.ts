@@ -8,6 +8,7 @@
 import { WebSocket } from 'ws';
 import { Socket } from 'net';
 import type { TokenPayload } from '../auth/token.js';
+import { jumpRelayEnabled, openJumpRelay, type JumpRelay } from './jump-relay.js';
 
 // Read guacd connection settings lazily (at call time, not module load time)
 // so that dotenv.config() in index.ts has already populated process.env.
@@ -71,6 +72,8 @@ export class GuacamoleHandler {
     private guacdSocket: Socket;
     private buffer: string = '';
     private closing = false;
+    /** Relay through a jump host, when the server has one (see jump-relay.ts). */
+    private relay: JumpRelay | null = null;
     // Callbacks used during the guacd protocol handshake phase
     private handshakeResolve: ((args: string[]) => void) | null = null;
     private handshakeReject: ((err: Error) => void) | null = null;
@@ -106,6 +109,7 @@ export class GuacamoleHandler {
 
         this.guacdSocket.on('close', () => {
             console.log('[Guacamole] guacd socket closed');
+            this.relay?.close();
             if (this.buffer.length > 0) {
                 console.warn(
                     '[Guacamole] Unprocessed buffer on close (possible truncated error):',
@@ -267,14 +271,37 @@ export class GuacamoleHandler {
             return;
         }
 
+        // Behind a jump host, guacd connects to a relay on this gateway instead
+        // of the target, and the relay forwards through the bastion.
+        let targetHost = payload.host;
+        let targetPort = payload.port || (protocol === 'rdp' ? 3389 : 5900);
+        if (payload.jump) {
+            if (!jumpRelayEnabled()) {
+                this.sendError(
+                    'RDP and VNC through a jump host need GUACD_TUNNEL_HOST set on the gateway',
+                );
+                this.ws.close();
+                return;
+            }
+            try {
+                this.relay = await openJumpRelay(payload.jump, targetHost, targetPort);
+                targetHost = this.relay.host;
+                targetPort = this.relay.port;
+            } catch (err) {
+                this.sendError(`Could not open the jump host relay: ${(err as Error).message}`);
+                this.ws.close();
+                return;
+            }
+        }
+
         // Build connection args based on what guacd expects
         const connectionArgs: string[] = [];
 
         // Map of available parameter values
         const paramMap: Record<string, string> = {
             // Basic connection
-            hostname: payload.host,
-            port: String(payload.port || (protocol === 'rdp' ? 3389 : 5900)),
+            hostname: targetHost,
+            port: String(targetPort),
             username: payload.username || '',
             password: payload.password || '',
             domain: '',
@@ -501,5 +528,6 @@ export class GuacamoleHandler {
         this.closing = true;
 
         this.guacdSocket.end();
+        this.relay?.close();
     }
 }

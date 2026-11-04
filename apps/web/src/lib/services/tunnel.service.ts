@@ -37,6 +37,7 @@ export async function probeTunnelTarget(
         password: server.password,
         privateKey: server.privateKey,
         passphrase: server.passphrase,
+        jump: server.jump,
     };
 
     let client;

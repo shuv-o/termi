@@ -3,7 +3,7 @@ import Link from 'next/link';
 import LegalShell, { Section, type TocItem } from '@/components/legal/LegalShell';
 
 export const metadata: Metadata = {
-    title: 'Security Policy',
+    title: 'Security policy',
     description:
         "Termi's security model and how to responsibly report a vulnerability. Built with AES-256-GCM encryption, Argon2id hashing, TOTP 2FA, and short-lived JWE tokens.",
     alternates: { canonical: '/security' },

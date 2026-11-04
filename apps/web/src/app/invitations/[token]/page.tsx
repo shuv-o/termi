@@ -87,7 +87,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
     };
 
     const protocolLabel = (p: string) => p.toUpperCase();
-    const permLabel = (p: string) => (p === 'manage' ? 'Manage & Connect' : 'Connect Only');
+    const permLabel = (p: string) => (p === 'manage' ? 'Manage & Connect' : 'Connect only');
 
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">

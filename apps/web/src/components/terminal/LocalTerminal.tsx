@@ -4,9 +4,12 @@ import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { useTerminalSearch } from './TerminalSearch';
 import '@xterm/xterm/css/xterm.css';
 
 interface LocalTerminalProps {
+    /** Hands the parent a function that opens the find-in-output bar. */
+    onSearchReady?: (open: () => void) => void;
     tabId: string;
     /** Cloud mode: JWE token from /api/connection/token with protocol=local */
     connectionToken?: string;
@@ -196,7 +199,14 @@ export default function LocalTerminal({
     gatewayUrl,
     onReady,
     onExit,
+    onSearchReady,
 }: LocalTerminalProps) {
+    const search = useTerminalSearch();
+    const attachSearchRef = useRef(search.attach);
+    attachSearchRef.current = search.attach;
+    useEffect(() => {
+        onSearchReady?.(search.openSearch);
+    }, [onSearchReady, search.openSearch]);
     const containerRef = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<'starting' | 'ready' | 'exited' | 'error'>('starting');
 
@@ -229,6 +239,7 @@ export default function LocalTerminal({
         const fit = new FitAddon();
         terminal.loadAddon(fit);
         terminal.loadAddon(new WebLinksAddon());
+        attachSearchRef.current(terminal);
         terminal.open(containerRef.current);
         fit.fit();
 
@@ -271,6 +282,7 @@ export default function LocalTerminal({
                 ref={containerRef}
                 className="h-full terminal-container rounded-lg overflow-hidden"
             />
+            {search.bar}
         </div>
     );
 }

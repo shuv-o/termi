@@ -133,7 +133,7 @@ export function GroupModal({
                         >
                             <IconPreview className="w-4.5 h-4.5" style={{ color: previewColor }} />
                         </div>
-                        {mode === 'create' ? 'Create Group' : 'Edit Group'}
+                        {mode === 'create' ? 'Create group' : 'Edit group'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -215,7 +215,7 @@ export function GroupModal({
                             ) : (
                                 <Check className="w-4 h-4" />
                             )}
-                            {mode === 'create' ? 'Create Group' : 'Save Changes'}
+                            {mode === 'create' ? 'Create group' : 'Save changes'}
                         </Button>
                     </div>
                 </form>

@@ -47,7 +47,7 @@ export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePas
                             value={passkeys.newName}
                             onChange={(e) => passkeys.setNewName(e.target.value)}
                             placeholder="My passkey"
-                            className="bg-card border-border"
+                            className="bg-card"
                             maxLength={64}
                             disabled={passkeys.adding}
                             autoFocus

@@ -21,9 +21,9 @@ const svgSource = readFileSync(join(iconsDir, 'source.svg'));
 // SVG with full-bleed background for maskable icons (no safe-zone padding)
 const maskableSvg =
     Buffer.from(`<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" fill="#0f172a"/>
-  <path d="M 136 192 L 252 256 L 136 320" stroke="#0ea5e9" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <rect x="278" y="232" width="100" height="48" rx="8" fill="#0ea5e9"/>
+  <rect width="512" height="512" fill="#0e1319"/>
+  <path d="M 136 192 L 252 256 L 136 320" stroke="#38b2f0" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="278" y="232" width="100" height="48" rx="8" fill="#38b2f0"/>
 </svg>`);
 
 const sizes = [72, 96, 128, 144, 152, 180, 192, 384, 512];

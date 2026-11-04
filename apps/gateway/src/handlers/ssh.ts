@@ -8,6 +8,7 @@
 
 import { Client, ClientChannel } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
+import { connectSSH } from './jump.js';
 
 export interface SSHOutputSink {
     /** Called with a raw chunk of SSH output bytes. */
@@ -150,7 +151,7 @@ export class SSHHandler {
         });
 
         try {
-            this.ssh.connect(config);
+            connectSSH(this.ssh, config, token.jump);
         } catch (error) {
             this.sink.onMessage('error', {
                 message: 'Connection failed: ' + (error as Error).message,

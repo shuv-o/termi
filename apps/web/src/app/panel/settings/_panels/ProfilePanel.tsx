@@ -117,7 +117,7 @@ export function ProfilePanel({
                             value={name.value}
                             onChange={(e) => name.set(e.target.value)}
                             placeholder="Your name"
-                            className="bg-secondary border-border"
+                           
                             maxLength={100}
                             autoComplete="name"
                         />
@@ -165,7 +165,7 @@ export function ProfilePanel({
                             className={`text-sm font-medium ${has2FA ? 'text-success' : 'text-muted-foreground'}`}
                         >
                             {user.twoFactorMethod === 'TOTP'
-                                ? 'Authenticator App'
+                                ? 'Authenticator app'
                                 : user.twoFactorMethod === 'EMAIL'
                                   ? 'Email OTP'
                                   : 'Disabled'}

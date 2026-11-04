@@ -36,7 +36,7 @@ export function PasskeySetup({ state }: { state: LoginState }) {
                     id="passkeyName"
                     value={state.passkeySetupName}
                     onChange={(e) => state.setPasskeySetupName(e.target.value)}
-                    className="bg-secondary border-border"
+                   
                     placeholder="e.g. MacBook Pro, iPhone 15"
                     maxLength={64}
                 />
@@ -56,7 +56,7 @@ export function PasskeySetup({ state }: { state: LoginState }) {
                 ) : (
                     <Fingerprint className="w-4 h-4" />
                 )}
-                {passkeySetupLoading ? 'Waiting for system dialog…' : 'Create Passkey'}
+                {passkeySetupLoading ? 'Waiting for system dialog…' : 'Create passkey'}
             </Button>
             {passkeySetupLoading && (
                 <p className="text-xs text-muted-foreground text-center mb-3">

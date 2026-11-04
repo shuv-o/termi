@@ -39,6 +39,11 @@ const serverSchema = z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(500).nullish(),
     groupName: z.string().max(100).nullish(),
+    /**
+     * Name of the server this one is reached through (a bastion). Resolved on
+     * import against servers in the same file, then the account's own.
+     */
+    jumpServerName: z.string().max(100).nullish(),
 
     host: z.string().min(1).max(255),
     port: z.number().int().min(1).max(65535),

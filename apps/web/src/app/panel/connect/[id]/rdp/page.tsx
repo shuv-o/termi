@@ -239,7 +239,7 @@ export default function RDPConnectionPage() {
                     size="icon"
                     onClick={toggleFullscreen}
                     title={
-                        isFullscreen ? 'Exit Fullscreen' : 'Fullscreen — auto-fits to screen size'
+                        isFullscreen ? 'Exit fullscreen' : 'Fullscreen — auto-fits to screen size'
                     }
                     className={
                         isFullscreen
