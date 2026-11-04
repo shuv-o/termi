@@ -285,7 +285,7 @@ export function TestConnectionCard({
                         </>
                     ) : testStatus === 'success' ? (
                         <>
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Test Again
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Test again
                         </>
                     ) : testStatus === 'failed' ? (
                         <>

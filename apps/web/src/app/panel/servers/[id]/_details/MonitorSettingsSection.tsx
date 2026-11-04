@@ -121,7 +121,7 @@ export function MonitorSettingsSection({
             <Card className="divide-y divide-border/50">
                 <div className="p-4 flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium">Enable Monitoring</p>
+                        <p className="text-sm font-medium">Enable monitoring</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                             Periodically check if this server is reachable
                         </p>
@@ -136,7 +136,7 @@ export function MonitorSettingsSection({
                     <div className="mb-2">
                         <p className="text-sm font-medium flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                            Check Interval
+                            Check interval
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                             How often to ping the server
@@ -168,7 +168,7 @@ export function MonitorSettingsSection({
                     <div className="mb-2">
                         <p className="text-sm font-medium flex items-center gap-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 text-warning" />
-                            Failure Threshold
+                            Failure threshold
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                             Alert after this many consecutive failed checks
@@ -203,7 +203,7 @@ export function MonitorSettingsSection({
                 </div>
 
                 <div className="p-4 space-y-3">
-                    <p className="text-sm font-medium text-foreground/80">Alert Channels</p>
+                    <p className="text-sm font-medium text-foreground/80">Alert channels</p>
                     <AlertChannel
                         icon={Mail}
                         title="Email"
@@ -281,7 +281,7 @@ export function MonitorSettingsSection({
                             </>
                         ) : (
                             <>
-                                <Bell className="w-4 h-4" /> Save Monitoring Settings
+                                <Bell className="w-4 h-4" /> Save monitoring settings
                             </>
                         )}
                     </Button>

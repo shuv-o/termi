@@ -100,7 +100,7 @@ export default function UnlockEncryptionPage() {
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                         <Lock className="w-6 h-6 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold">Unlock Encryption</h1>
+                    <h1 className="text-2xl font-bold">Unlock encryption</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
                         Enter your encryption passphrase to unlock your server credentials.
                     </p>

@@ -30,7 +30,7 @@ export function DangerZonePanel({
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium text-danger">
-                                        Reset Encryption Key
+                                        Reset encryption key
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
                                         Permanently deletes all stored servers and credentials.

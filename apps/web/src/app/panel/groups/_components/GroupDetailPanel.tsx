@@ -177,7 +177,7 @@ function GroupHeader({
                         title="Run a command on every SSH server in this group"
                     >
                         <Radio className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Run Command</span>
+                        <span className="hidden sm:inline">Run command</span>
                     </Button>
                     <Button
                         variant="ghost"
@@ -294,7 +294,7 @@ export function GroupDetailPanel({
                         <Button variant="secondary" size="sm" className="gap-1.5 text-xs" asChild>
                             <Link href="/panel/servers/new">
                                 <Plus className="w-3.5 h-3.5" />
-                                Add Server
+                                Add server
                             </Link>
                         </Button>
                         <Button

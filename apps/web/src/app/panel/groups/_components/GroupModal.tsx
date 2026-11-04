@@ -161,7 +161,7 @@ export function GroupModal({
                         <Textarea
                             className="resize-none"
                             rows={2}
-                            placeholder="Brief description..."
+                            placeholder="Brief description…"
                             maxLength={200}
                             value={form.description}
                             onChange={(e) => update({ description: e.target.value })}

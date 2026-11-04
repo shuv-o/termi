@@ -132,28 +132,28 @@ export function CommandPalette() {
                             onSelect={() => go('/panel/servers/new')}
                         >
                             <Plus />
-                            Add Server
+                            Add server
                         </CommandItem>
                         <CommandItem
                             value="create group new"
                             onSelect={() => go('/panel/groups?new=1')}
                         >
                             <FolderOpen />
-                            Create Group
+                            Create group
                         </CommandItem>
                         <CommandItem
                             value="new keychain entry credential"
                             onSelect={() => go('/panel/keychain?new=1')}
                         >
                             <BookKey />
-                            New Keychain Entry
+                            New keychain entry
                         </CommandItem>
                         <CommandItem
                             value="open local terminal"
                             onSelect={() => go('/panel/local')}
                         >
                             <Laptop />
-                            Open Local Terminal
+                            Open local terminal
                         </CommandItem>
                         <CommandItem
                             value="new snippet command create"
@@ -163,7 +163,7 @@ export function CommandPalette() {
                             }}
                         >
                             <SquareTerminal />
-                            New Snippet
+                            New snippet
                         </CommandItem>
                     </CommandGroup>
 

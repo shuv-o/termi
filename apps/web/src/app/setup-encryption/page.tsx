@@ -88,7 +88,7 @@ export default function SetupEncryptionPage() {
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                         <Lock className="w-6 h-6 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold">Set Up Encryption</h1>
+                    <h1 className="text-2xl font-bold">Set up encryption</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
                         Your server credentials will be encrypted with this passphrase. You&apos;ll
                         enter it each time you sign in with Google.

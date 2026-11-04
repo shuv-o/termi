@@ -37,7 +37,7 @@ export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passke
                     ) : (
                         <ShieldAlert className="w-5 h-5 text-danger" />
                     )}
-                    <span className="font-semibold text-sm">Security Score</span>
+                    <span className="font-semibold text-sm">Security score</span>
                 </div>
                 <span className={`text-sm font-bold ${scoreColor}`}>
                     {label} · {score}/{checks.length}

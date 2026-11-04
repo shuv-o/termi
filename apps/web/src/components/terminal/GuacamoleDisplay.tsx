@@ -518,7 +518,7 @@ export default function GuacamoleDisplay({
             {errorMsg && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20">
                     <div className="text-center px-6 max-w-md">
-                        <p className="text-danger text-sm font-semibold mb-2">Connection Error</p>
+                        <p className="text-danger text-sm font-semibold mb-2">Connection error</p>
                         <p className="text-foreground text-xs leading-relaxed">{errorMsg}</p>
                         <button
                             onClick={() => window.location.reload()}

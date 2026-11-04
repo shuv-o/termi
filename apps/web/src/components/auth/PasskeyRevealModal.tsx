@@ -265,7 +265,7 @@ export default function PasskeyRevealModal({
                         </div>
                         <div>
                             <label className="text-xs text-muted-foreground mb-1.5 block">
-                                Account Password
+                                Account password
                             </label>
                             <input
                                 ref={passwordRef}
@@ -299,7 +299,7 @@ export default function PasskeyRevealModal({
                             <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
                             <div className="space-y-1">
                                 <p className="text-sm font-medium text-danger">
-                                    Authentication Failed
+                                    Authentication failed
                                 </p>
                                 <p className="text-sm text-danger/80">{errorMsg}</p>
                             </div>
@@ -316,7 +316,7 @@ export default function PasskeyRevealModal({
                                 }
                             >
                                 <RefreshCw className="w-4 h-4" />
-                                Try Again
+                                Try again
                             </Button>
                         </div>
                     </div>

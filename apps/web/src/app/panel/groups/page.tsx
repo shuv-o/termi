@@ -96,7 +96,7 @@ export default function GroupsPage() {
                 actions={
                     <Button onClick={() => setShowCreate(true)}>
                         <Plus className="w-4 h-4" />
-                        <span className="hidden sm:inline">Create Group</span>
+                        <span className="hidden sm:inline">Create group</span>
                         <span className="sm:hidden">Create</span>
                     </Button>
                 }

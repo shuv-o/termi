@@ -198,7 +198,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                                             {state === 'accepting' && (
                                                 <Loader2 className="w-4 h-4 animate-spin" />
                                             )}
-                                            Accept Invitation
+                                            Accept invitation
                                         </Button>
                                     </div>
                                 ) : (
@@ -208,14 +208,14 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                                         </p>
                                         <Button asChild className="w-full">
                                             <Link href={`/login?next=/invitations/${token}`}>
-                                                <LogIn className="w-4 h-4" /> Sign In
+                                                <LogIn className="w-4 h-4" /> Sign in
                                             </Link>
                                         </Button>
                                         <Button asChild variant="outline" className="w-full">
                                             <Link
                                                 href={`/register?next=/invitations/${token}&email=${encodeURIComponent(invitation.inviteeEmail)}`}
                                             >
-                                                <UserPlus className="w-4 h-4" /> Create Account
+                                                <UserPlus className="w-4 h-4" /> Create account
                                             </Link>
                                         </Button>
                                     </div>
@@ -240,7 +240,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                             <h2 className="text-lg font-semibold">Something went wrong</h2>
                             <p className="text-sm text-muted-foreground">{errorMsg}</p>
                             <Button variant="outline" onClick={() => setState('valid')}>
-                                Try Again
+                                Try again
                             </Button>
                         </div>
                     )}

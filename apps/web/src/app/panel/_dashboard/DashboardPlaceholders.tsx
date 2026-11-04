@@ -13,7 +13,7 @@ import type { ViewMode } from './types';
 export function DashboardSkeleton({ viewMode }: { viewMode: ViewMode }) {
     if (viewMode === 'grid') {
         return (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4 min-[1900px]:grid-cols-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                     <Card key={i} className="min-h-[320px] border-border p-4">
                         <div className="flex items-center gap-3">

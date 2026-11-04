@@ -38,7 +38,7 @@ function MethodPicker({ twoFactor }: { twoFactor: TwoFactor }) {
                 >
                     <div className="flex items-center gap-2">
                         <Smartphone className="w-4 h-4 text-local" />
-                        <span className="text-sm font-medium">Authenticator App</span>
+                        <span className="text-sm font-medium">Authenticator app</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                         Google Authenticator, Authy, 1Password, etc.

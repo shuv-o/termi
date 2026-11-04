@@ -104,7 +104,7 @@ export function ScoreSummaryCard({ scores }: { scores: BenchmarkScores }) {
             <div className="flex items-center gap-2 mb-4">
                 <Zap className="w-4 h-4 text-warning" />
                 <span className="text-xs font-semibold text-foreground/80">
-                    Benchmark Score
+                    Benchmark score
                 </span>
                 <span className="text-[11px] text-muted-foreground ml-auto">
                     scored vs. high-end server reference

@@ -353,10 +353,10 @@ export function NoSessionsState({
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={onOpenPicker} className="gap-2">
-                    <Plus className="w-4 h-4" /> Open Server
+                    <Plus className="w-4 h-4" /> Open server
                 </Button>
                 <Button variant="secondary" onClick={onAddLocal} className="gap-2">
-                    <Laptop className="w-4 h-4" /> Local Terminal
+                    <Laptop className="w-4 h-4" /> Local terminal
                 </Button>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-4 py-2 rounded-full">

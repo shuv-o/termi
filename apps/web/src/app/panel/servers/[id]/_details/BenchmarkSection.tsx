@@ -32,7 +32,7 @@ function ScoreTrendCard({ history }: { history: BenchmarkRunSummary[] }) {
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-medium text-muted-foreground">Score Trend</span>
+                    <span className="text-xs font-medium text-muted-foreground">Score trend</span>
                     <span className="text-[11px] text-muted-foreground/60">
                         ({history.length} runs)
                     </span>
@@ -124,7 +124,7 @@ export function BenchmarkSection({
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
                     <Zap className="w-4 h-4 text-warning" />
-                    Hardware Benchmark
+                    Hardware benchmark
                 </h2>
                 <Button
                     variant="secondary"
@@ -139,7 +139,7 @@ export function BenchmarkSection({
                         </>
                     ) : (
                         <>
-                            <Play className="w-3.5 h-3.5" /> Run Benchmark
+                            <Play className="w-3.5 h-3.5" /> Run benchmark
                         </>
                     )}
                 </Button>

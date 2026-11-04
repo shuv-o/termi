@@ -84,7 +84,7 @@ export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePas
                                     </>
                                 ) : (
                                     <>
-                                        <Fingerprint className="w-4 h-4" /> Create Passkey
+                                        <Fingerprint className="w-4 h-4" /> Create passkey
                                     </>
                                 )}
                             </Button>
@@ -100,7 +100,7 @@ export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePas
                         }}
                         className="gap-2"
                     >
-                        <Plus className="w-4 h-4" /> Add Passkey
+                        <Plus className="w-4 h-4" /> Add passkey
                     </Button>
                 )}
 

@@ -201,7 +201,7 @@ export default function KeychainPage() {
                     actions={
                         <Button onClick={openCreate}>
                             <Plus className="w-4 h-4" />
-                            <span className="hidden sm:inline">New Entry</span>
+                            <span className="hidden sm:inline">New entry</span>
                             <span className="sm:hidden">New</span>
                         </Button>
                     }

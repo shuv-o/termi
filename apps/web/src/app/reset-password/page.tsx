@@ -164,7 +164,7 @@ export default function ResetPasswordPage() {
             <CardContent className="pt-8 pb-6 px-8">
                 <div className="flex flex-col items-center mb-6">
                     <TerminalLogo width={48} height={48} className="rounded-xl mb-3" />
-                    <h1 className="text-2xl font-bold">Reset Password</h1>
+                    <h1 className="text-2xl font-bold">Reset password</h1>
                 </div>
                 <Suspense fallback={<div className="h-8 bg-muted rounded-sm animate-pulse" />}>
                     <ResetPasswordForm />

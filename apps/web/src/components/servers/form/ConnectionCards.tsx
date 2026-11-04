@@ -190,7 +190,7 @@ export function DisplaySettingsCard({
     return (
         <Card className={CARD_CLASS}>
             <CardContent className="p-4 space-y-3">
-                <p className={SECTION_LABEL}>Display Settings</p>
+                <p className={SECTION_LABEL}>Display settings</p>
                 <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
                         <Label className="text-xs">Width (px)</Label>

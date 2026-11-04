@@ -337,7 +337,7 @@ export function TunnelSection({
         <div>
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
                 <Waypoints className="w-4 h-4 text-info" />
-                Port Forwarding
+                Port forwarding
             </h2>
 
             <Card className="p-4 space-y-3">

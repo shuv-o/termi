@@ -330,7 +330,7 @@ export default function DashboardPage() {
                             }}
                         />
                     ) : viewMode === 'grid' ? (
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4 min-[1900px]:grid-cols-5">
                             {sortedServers.map((server) => (
                                 <ServerGridCard key={server.id} {...cardProps(server)} />
                             ))}

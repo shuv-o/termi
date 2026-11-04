@@ -53,7 +53,7 @@ export function ServerActionsMenu({
                 </DropdownMenuItem>
                 {server.hasPassword && (
                     <DropdownMenuItem onClick={onCopyPassword} className="gap-2">
-                        <KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Copy Password
+                        <KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Copy password
                     </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator className="bg-border" />

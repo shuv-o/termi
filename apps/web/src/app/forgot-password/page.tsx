@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
             <CardContent className="pt-8 pb-6 px-8">
                 <div className="flex flex-col items-center mb-6">
                     <TerminalLogo width={48} height={48} className="rounded-xl mb-3" />
-                    <h1 className="text-2xl font-bold">Forgot Password</h1>
+                    <h1 className="text-2xl font-bold">Forgot password</h1>
                 </div>
 
                 {sent ? (

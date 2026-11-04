@@ -74,7 +74,7 @@ export function HealthHistorySection({
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
                     <Activity className="w-4 h-4 text-primary" />
-                    Health History
+                    Health history
                     <span className="text-[11px] text-muted-foreground font-normal">
                         ({records.length} records)
                     </span>

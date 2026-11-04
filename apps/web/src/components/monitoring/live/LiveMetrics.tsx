@@ -201,7 +201,7 @@ export function LiveMetricsPanel({
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5">
                 <div className="flex items-center gap-1.5 text-sm font-medium">
                     <Activity className="h-3.5 w-3.5 text-primary" />
-                    Live Metrics
+                    Live metrics
                 </div>
                 <Button
                     variant="ghost"
