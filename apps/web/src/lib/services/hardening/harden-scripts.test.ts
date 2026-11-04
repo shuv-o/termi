@@ -10,6 +10,7 @@ import {
     assertUsername,
     buildAccessScript,
     buildCancelScript,
+    buildClosePortScript,
     buildExtrasScript,
     buildRollbackNowScript,
     generatePassword,
@@ -32,19 +33,33 @@ const base = {
     publicKeys: [key],
     disablePasswordLogin: true,
     permitRootLogin: 'no' as const,
+    sshPort: 22,
+    newPort: null as number | null,
+    firewall: null as Parameters<typeof buildAccessScript>[0]['firewall'],
 };
 
 describe('input validation', () => {
     it('accepts ordinary usernames and refuses root and anything shell-ish', () => {
         expect(assertUsername('termi-admin')).toBe('termi-admin');
-        for (const bad of ['root', 'Admin', '1user', 'a b', "x';rm -rf /;'", '$(id)', 'a'.repeat(33), '']) {
+        for (const bad of [
+            'root',
+            'Admin',
+            '1user',
+            'a b',
+            "x';rm -rf /;'",
+            '$(id)',
+            'a'.repeat(33),
+            '',
+        ]) {
             expect(() => assertUsername(bad)).toThrow(HardeningInputError);
         }
     });
 
     it('accepts real OpenSSH public keys and rejects injection attempts', () => {
         expect(assertPublicKey(`  ${key}  `)).toBe(key);
-        expect(assertPublicKey('ssh-rsa AAAAB3NzaC1yc2EAAAADAQAB user@laptop')).toContain('user@laptop');
+        expect(assertPublicKey('ssh-rsa AAAAB3NzaC1yc2EAAAADAQAB user@laptop')).toContain(
+            'user@laptop',
+        );
         for (const bad of [
             'not a key',
             `${key} '; touch /tmp/pwned; '`,
@@ -67,8 +82,12 @@ describe('input validation', () => {
     });
 
     it('refuses to build a script from unvalidated values', () => {
-        expect(() => buildAccessScript({ ...base, runId: '../../etc' })).toThrow(HardeningInputError);
-        expect(() => buildAccessScript({ ...base, newPassword: "pa'ss" })).toThrow(HardeningInputError);
+        expect(() => buildAccessScript({ ...base, runId: '../../etc' })).toThrow(
+            HardeningInputError,
+        );
+        expect(() => buildAccessScript({ ...base, newPassword: "pa'ss" })).toThrow(
+            HardeningInputError,
+        );
         expect(() => buildAccessScript({ ...base, publicKeys: [] })).toThrow(HardeningInputError);
         expect(() => buildCancelScript('x; reboot')).toThrow(HardeningInputError);
     });
@@ -122,9 +141,14 @@ describe('generated scripts', () => {
         const keep = buildAccessScript({ ...base, disablePasswordLogin: false });
         expect(keep).toContain('PasswordAuthentication yes');
         expect(keep).not.toContain('KbdInteractiveAuthentication no');
-        expect(buildAccessScript({ ...base, targetUser: 'root', createUser: false, permitRootLogin: 'prohibit-password' })).toContain(
-            'PermitRootLogin prohibit-password',
-        );
+        expect(
+            buildAccessScript({
+                ...base,
+                targetUser: 'root',
+                createUser: false,
+                permitRootLogin: 'prohibit-password',
+            }),
+        ).toContain('PermitRootLogin prohibit-password');
     });
 
     it('only adds a sudoers entry for a user it creates', () => {
@@ -144,5 +168,41 @@ describe('generated scripts', () => {
         });
         expect(s).toContain('ignoreip = 127.0.0.1/8 ::1 203.0.113.7');
         expect(s).not.toContain('rm -rf');
+    });
+
+    it('covers every firewall tool, mode and port combination as valid sh', () => {
+        for (const tool of ['ufw', 'firewalld'] as const)
+            for (const mode of ['enable', 'open-only'] as const)
+                for (const newPort of [null, 2201])
+                    shSyntaxOk(
+                        buildAccessScript({ ...base, newPort, firewall: { mode, tool, allowPorts: [80, 443] } }),
+                    );
+        for (const firewallTool of ['ufw', 'firewalld', null] as const)
+            for (const oldPort of [22, 2200])
+                shSyntaxOk(buildClosePortScript({ runId: base.runId, oldPort, newPort: 2201, firewallTool }));
+    });
+
+    it('writes each undo hook before the change it undoes, and opens ports before enabling ufw', () => {
+        const s = buildAccessScript({
+            ...base,
+            newPort: 2201,
+            firewall: { mode: 'enable', tool: 'ufw', allowPorts: [80] },
+        }).replace(/<<'TERMI_ROLLBACK'[\s\S]*?\nTERMI_ROLLBACK\n/, '');
+        expect(s.indexOf('undo-20-firewall.sh')).toBeLessThan(s.indexOf('ufw allow'));
+        // (The undo hook's text also mentions enable — the real command is the last one.)
+        expect(s.indexOf('ufw allow')).toBeLessThan(s.lastIndexOf('ufw --force enable'));
+        expect(s.indexOf('undo-10-selinux.sh')).toBeLessThan(s.indexOf('semanage port -a'));
+        // Both ports while moving; every one of them allowed through the firewall.
+        expect(s).toContain('Port 22\\nPort 2201');
+        expect(s).toContain('for p in 22 2201 80;');
+    });
+
+    it('rejects ports that are out of range, privileged, or unchanged', () => {
+        expect(() => buildAccessScript({ ...base, newPort: 80 })).toThrow(/1024 or higher/);
+        expect(() => buildAccessScript({ ...base, sshPort: 2200, newPort: 2200 })).toThrow(/already the SSH port/);
+        expect(() => buildAccessScript({ ...base, newPort: 70000 })).toThrow(HardeningInputError);
+        expect(() =>
+            buildAccessScript({ ...base, firewall: { mode: 'enable', tool: 'ufw', allowPorts: [0] } }),
+        ).toThrow(HardeningInputError);
     });
 });

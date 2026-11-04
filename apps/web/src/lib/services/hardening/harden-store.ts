@@ -72,6 +72,7 @@ export async function commitCredentials(
                 username: encrypted.username,
                 privateKey: encrypted.privateKey,
                 passphrase: null,
+                port: creds.port,
                 ...(encrypted.password ? { password: encrypted.password } : {}),
             },
         }),

@@ -82,6 +82,28 @@ export interface AccessScriptInput {
     disablePasswordLogin: boolean;
     /** 'no' once Termi stops logging in as root; else key-only root. */
     permitRootLogin: 'no' | 'prohibit-password';
+    /** The port sshd listens on now. */
+    sshPort: number;
+    /**
+     * Move SSH here. sshd listens on BOTH ports until Termi has logged in on
+     * the new one; buildClosePortScript closes the old one after commit.
+     */
+    newPort: number | null;
+    /**
+     * 'enable': turn the firewall on (default deny) with allowPorts open.
+     * 'open-only': it is already on — just make sure allowPorts are open
+     * (used when moving the port behind an existing firewall).
+     */
+    firewall: { mode: 'enable' | 'open-only'; tool: FirewallTool; allowPorts: number[] } | null;
+}
+
+export type FirewallTool = 'ufw' | 'firewalld';
+
+export function assertPort(port: number, what = 'port'): number {
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        throw new HardeningInputError(`Invalid ${what}: ${port}`);
+    }
+    return port;
 }
 
 /** sh single-quoted literal. Inputs are pre-validated to contain no quotes. */
@@ -96,6 +118,23 @@ export function buildAccessScript(input: AccessScriptInput): string {
     if (input.newPassword !== null) check(PASSWORD, input.newPassword, 'password');
     if (input.publicKeys.length === 0) throw new HardeningInputError('No public key to install');
     const keys = input.publicKeys.map(assertPublicKey);
+    assertPort(input.sshPort, 'SSH port');
+    if (input.newPort !== null) {
+        assertPort(input.newPort, 'new SSH port');
+        if (input.newPort < 1024)
+            throw new HardeningInputError('Pick an SSH port of 1024 or higher');
+        if (input.newPort === input.sshPort)
+            throw new HardeningInputError('That is already the SSH port');
+    }
+    const allowPorts = input.firewall
+        ? [
+              ...new Set([
+                  input.sshPort,
+                  ...(input.newPort ? [input.newPort] : []),
+                  ...input.firewall.allowPorts.map((p) => assertPort(p)),
+              ]),
+          ]
+        : [];
 
     const B = `${BACKUP_ROOT}/${input.runId}`;
     const dropin = [
@@ -108,6 +147,8 @@ export function buildAccessScript(input: AccessScriptInput): string {
         'MaxAuthTries 3',
         'LoginGraceTime 30',
         'X11Forwarding no',
+        // Both ports while the move is in progress; the old one is dropped later.
+        ...(input.newPort ? [`Port ${input.sshPort}`, `Port ${input.newPort}`] : []),
     ].join('\\n');
 
     return `set -u
@@ -134,7 +175,7 @@ fi
 # 1. Backups ───────────────────────────────────────────────────────────────
 mkdir -p "$B" || fail backup "could not create $B"
 cp -p /etc/ssh/sshd_config "$B/sshd_config" || fail backup "could not back up sshd_config"
-if [ -e "$DROPIN" ]; then cp -p "$DROPIN" "$B/dropin.prev"; fi
+if [ -d /etc/ssh/sshd_config.d ]; then cp -a /etc/ssh/sshd_config.d "$B/sshd_config.d"; else : > "$B/sshd_config.d.none"; fi
 if id "$U" >/dev/null 2>&1; then
     H=$(home_of "$U")
     if [ -f "$H/.ssh/authorized_keys" ]; then cp -p "$H/.ssh/authorized_keys" "$B/authorized_keys"; else : > "$B/authorized_keys.none"; fi
@@ -148,8 +189,11 @@ cat > "$B/rollback.sh" <<'TERMI_ROLLBACK'
 B="$(dirname "$0")"
 [ -f "$B/CANCELLED" ] && exit 0
 [ -f "$B/ROLLED_BACK" ] && exit 0
+# Step-specific undo hooks, newest first (firewall, ssh.socket, SELinux…).
+for f in $(ls "$B"/undo-*.sh 2>/dev/null | sort -r); do sh "$f"; done
 cp -p "$B/sshd_config" /etc/ssh/sshd_config
-if [ -f "$B/dropin.prev" ]; then cp -p "$B/dropin.prev" "$(cat "$B/dropin_path")"; else rm -f "$(cat "$B/dropin_path")"; fi
+rm -rf /etc/ssh/sshd_config.d
+[ -d "$B/sshd_config.d" ] && cp -a "$B/sshd_config.d" /etc/ssh/sshd_config.d
 U="$(cat "$B/user")"
 if [ -f "$B/created_user" ]; then
     userdel -r "$U" 2>/dev/null || deluser --remove-home "$U" 2>/dev/null
@@ -167,10 +211,13 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
 elif command -v rc-service >/dev/null 2>&1; then rc-service sshd reload
 else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
+# Socket-activated sshd (Ubuntu 22.10+) takes its port from ssh.socket.
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet ssh.socket 2>/dev/null; then
+    systemctl daemon-reload; systemctl restart ssh.socket
+fi
 date > "$B/ROLLED_BACK"
 TERMI_ROLLBACK
 printf '%s\\n' "$U" > "$B/user"
-printf '%s\\n' "$DROPIN" > "$B/dropin_path"
 if has systemd-run && [ -d /run/systemd/system ]; then
     systemd-run --quiet --unit "termi-rollback-$R" --on-active=${ROLLBACK_SECONDS} /bin/sh "$B/rollback.sh" \\
         || fail rollback "could not schedule the automatic rollback"
@@ -221,10 +268,49 @@ chown -R "$U:$(id -gn "$U")" "$H/.ssh"
 has restorecon && restorecon -R "$H/.ssh" >/dev/null 2>&1
 step key "Authorised ${keys.length} SSH key${keys.length === 1 ? '' : 's'} for $U"
 
+# 5a. New SSH port: checks + SELinux ─────────────────────────────────────────
+NEWPORT=${input.newPort ?? 0}
+OLDPORT=${input.sshPort}
+if [ "$NEWPORT" != "0" ]; then
+    if grep -hiE '^[[:space:]]*ListenAddress[[:space:]]+[^[:space:]]*:[0-9]+' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null | grep -q .; then
+        fail port "a ListenAddress line pins the SSH port; change it by hand instead"
+    fi
+    if has ss && ss -Htln 2>/dev/null | awk '{print $4}' | grep -qE "[:.]$NEWPORT\$"; then
+        fail port "port $NEWPORT is already in use on the server"
+    fi
+    if has getenforce && [ "$(getenforce 2>/dev/null)" != "Disabled" ]; then
+        if ! has semanage; then dnf install -y -q policycoreutils-python-utils >/dev/null 2>&1 || yum install -y -q policycoreutils-python-utils >/dev/null 2>&1; fi
+        has semanage || fail port "SELinux is on, but semanage is not installed, so the new port cannot be allowed"
+        printf 'semanage port -d -t ssh_port_t -p tcp %s 2>/dev/null\n' "$NEWPORT" > "$B/undo-10-selinux.sh"
+        semanage port -a -t ssh_port_t -p tcp "$NEWPORT" 2>/dev/null || semanage port -m -t ssh_port_t -p tcp "$NEWPORT" 2>/dev/null \
+            || fail port "SELinux would not allow sshd on port $NEWPORT"
+        step selinux "SELinux allows sshd on port $NEWPORT"
+    fi
+fi
+${input.firewall ? buildFirewallSection(input.firewall.tool, input.firewall.mode, allowPorts) : ''}
+# 5c. Socket-activated sshd (Ubuntu 22.10+) ────────────────────────────────
+SOCKET=0
+if [ "$NEWPORT" != "0" ] && has systemctl && systemctl is-active --quiet ssh.socket 2>/dev/null; then
+    SOCKET=1
+    if [ ! -x /usr/lib/systemd/system-generators/sshd-socket-generator ] && [ ! -x /lib/systemd/system-generators/sshd-socket-generator ]; then
+        # No generator to read Port from sshd_config: set the socket's ports directly.
+        mkdir -p /etc/systemd/system/ssh.socket.d
+        printf 'rm -f /etc/systemd/system/ssh.socket.d/00-termi-port.conf\n' > "$B/undo-30-socket.sh"
+        printf '[Socket]\nListenStream=\nListenStream=%s\nListenStream=%s\n' "$OLDPORT" "$NEWPORT" > /etc/systemd/system/ssh.socket.d/00-termi-port.conf
+    fi
+fi
+
 # 5. sshd settings ──────────────────────────────────────────────────────────
 mkdir -p /etc/ssh/sshd_config.d
 if ! grep -qiE '^[[:space:]]*Include[[:space:]]+/etc/ssh/sshd_config\\.d/' /etc/ssh/sshd_config; then
     { printf 'Include /etc/ssh/sshd_config.d/*.conf\\n'; cat "$B/sshd_config"; } > /etc/ssh/sshd_config
+fi
+if [ "$NEWPORT" != "0" ]; then
+    # Port is additive, not first-match: silence every other Port line so the
+    # drop-in's pair is the whole list. (All of these files are backed up.)
+    for f in /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf; do
+        [ -f "$f" ] && [ "$f" != "$DROPIN" ] && sed -i 's/^[[:space:]]*[Pp][Oo][Rr][Tt][[:space:]]/#termi# &/' "$f"
+    done
 fi
 printf '${dropin}\\n' > "$DROPIN"
 chmod 644 "$DROPIN"
@@ -238,6 +324,11 @@ if has systemctl && [ -d /run/systemd/system ]; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
 elif has rc-service; then rc-service sshd reload >/dev/null 2>&1
 else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
+if [ "$SOCKET" = "1" ]; then systemctl daemon-reload; systemctl restart ssh.socket || fail port "ssh.socket did not restart on the new port"; fi
+if [ "$NEWPORT" != "0" ]; then
+    ports=$("$SSHD" -T 2>/dev/null | awk '$1=="port" {print $2}' | tr '\n' ' ')
+    step port "sshd now listens on $ports(the old port closes once Termi has logged in on $NEWPORT)"
+fi
 step sshd "Applied the SSH settings and reloaded sshd"
 
 echo "ACCESS_DONE=1"
@@ -375,5 +466,121 @@ mkdir -p "$B"
 if [ "$FAMILY" = "debian" ]; then DEBIAN_FRONTEND=noninteractive apt-get update -qq >/dev/null 2>&1; fi
 ${fail2ban}${updates}
 echo "EXTRAS_DONE=1"
+`;
+}
+
+function buildFirewallSection(
+    tool: FirewallTool,
+    mode: 'enable' | 'open-only',
+    ports: number[],
+): string {
+    const list = ports.map((p) => assertPort(p)).join(' ');
+    if (tool === 'ufw') {
+        return `
+# 5b. Firewall (ufw) ────────────────────────────────────────────────────────
+if ! has ufw; then
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ufw >/dev/null 2>&1 || fail firewall "ufw could not be installed"
+fi
+cp -a /etc/ufw "$B/ufw"
+if ufw status 2>/dev/null | head -n 1 | grep -q 'Status: active'; then was=active; else was=inactive; fi
+# Undo: put the rules back exactly, and leave ufw as on/off as it was.
+{
+    echo 'ufw --force disable >/dev/null 2>&1'
+    echo "rm -rf /etc/ufw && cp -a '$B/ufw' /etc/ufw"
+    [ "$was" = "active" ] && echo 'ufw --force enable >/dev/null 2>&1'
+} > "$B/undo-20-firewall.sh"
+# Allow first, enable after — the open SSH session is never cut.
+for p in ${list}; do ufw allow "$p/tcp" >/dev/null 2>&1 || fail firewall "could not allow port $p"; done
+${
+    mode === 'enable'
+        ? `ufw default deny incoming >/dev/null 2>&1
+ufw default allow outgoing >/dev/null 2>&1
+ufw --force enable >/dev/null 2>&1 || fail firewall "ufw could not be turned on"
+step firewall "Firewall on: incoming traffic blocked except ports ${list}"`
+        : `step firewall "Opened port(s) ${list} in the existing firewall"`
+}
+`;
+    }
+    return `
+# 5b. Firewall (firewalld) ──────────────────────────────────────────────────
+has systemctl && [ -d /run/systemd/system ] || fail firewall "firewalld needs systemd"
+if ! has firewall-cmd; then
+    dnf install -y -q firewalld >/dev/null 2>&1 || yum install -y -q firewalld >/dev/null 2>&1 || fail firewall "firewalld could not be installed"
+fi
+cp -a /etc/firewalld "$B/firewalld"
+if [ "$(firewall-cmd --state 2>/dev/null)" = "running" ]; then was=running; else was=stopped; fi
+if [ "$was" = "running" ]; then
+    printf '%s\\n' "rm -rf /etc/firewalld && cp -a '$B/firewalld' /etc/firewalld && firewall-cmd --reload >/dev/null 2>&1" > "$B/undo-20-firewall.sh"
+    for p in ${list}; do firewall-cmd --permanent --add-port="$p/tcp" >/dev/null 2>&1 || fail firewall "could not allow port $p"; done
+    firewall-cmd --reload >/dev/null 2>&1 || fail firewall "firewalld could not reload"
+    step firewall "Opened port(s) ${list} in firewalld"
+else
+${
+    mode === 'enable'
+        ? `    printf '%s\\n' "systemctl stop firewalld; systemctl disable firewalld >/dev/null 2>&1; rm -rf /etc/firewalld && cp -a '$B/firewalld' /etc/firewalld" > "$B/undo-20-firewall.sh"
+    # Write the rules while it is stopped, so it starts with SSH already open.
+    for p in ${list}; do firewall-offline-cmd --add-port="$p/tcp" >/dev/null 2>&1 || fail firewall "could not allow port $p"; done
+    systemctl enable --now firewalld >/dev/null 2>&1 || fail firewall "firewalld could not be started"
+    step firewall "Firewall on: incoming traffic blocked except ports ${list}"`
+        : `    step firewall-skip "firewalld is not running, so no ports needed opening"`
+}
+fi
+`;
+}
+
+export interface ClosePortInput {
+    runId: string;
+    oldPort: number;
+    newPort: number;
+    /** The firewall that had the old port open, if any. */
+    firewallTool: FirewallTool | null;
+}
+
+/**
+ * After commit: stop listening on the old SSH port and close it in the
+ * firewall. Runs over the new port, which Termi has already logged in on, so
+ * nothing here can cut off access. Failure just leaves the old port open.
+ */
+export function buildClosePortScript(input: ClosePortInput): string {
+    check(RUN_ID, input.runId, 'run id');
+    assertPort(input.oldPort);
+    assertPort(input.newPort);
+    const fw =
+        input.firewallTool === 'ufw'
+            ? `if has ufw; then
+    ufw delete allow ${input.oldPort}/tcp >/dev/null 2>&1
+    ${input.oldPort === 22 ? 'ufw delete allow 22 >/dev/null 2>&1; ufw delete allow OpenSSH >/dev/null 2>&1' : ':'}
+fi`
+            : input.firewallTool === 'firewalld'
+              ? `if has firewall-cmd && [ "$(firewall-cmd --state 2>/dev/null)" = "running" ]; then
+    firewall-cmd --permanent --remove-port=${input.oldPort}/tcp >/dev/null 2>&1
+    ${input.oldPort === 22 ? 'firewall-cmd --permanent --remove-service=ssh >/dev/null 2>&1' : ':'}
+    firewall-cmd --reload >/dev/null 2>&1
+fi`
+              : ':';
+    return `set -u
+DROPIN=${q(DROPIN_PATH)}
+step() { printf 'STEP=%s %s\\n' "$1" "$2"; }
+has() { command -v "$1" >/dev/null 2>&1; }
+[ "$(id -u)" = "0" ] || { echo "FAIL=privilege not running as root"; exit 1; }
+SSHD=$(command -v sshd 2>/dev/null || echo /usr/sbin/sshd)
+cp -p "$DROPIN" "$DROPIN.termi-prev"
+sed -i '/^Port ${input.oldPort}$/d' "$DROPIN"
+if ! "$SSHD" -t 2>/dev/null; then
+    mv "$DROPIN.termi-prev" "$DROPIN"
+    step close-port-fail "Port ${input.oldPort} was left open: the updated SSH settings did not validate"
+    exit 0
+fi
+rm -f "$DROPIN.termi-prev"
+OVR=/etc/systemd/system/ssh.socket.d/00-termi-port.conf
+[ -f "$OVR" ] && printf '[Socket]\\nListenStream=\\nListenStream=%s\\n' ${input.newPort} > "$OVR"
+if has systemctl && [ -d /run/systemd/system ]; then
+    systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
+    if systemctl is-active --quiet ssh.socket 2>/dev/null; then systemctl daemon-reload; systemctl restart ssh.socket; fi
+elif has rc-service; then rc-service sshd reload >/dev/null 2>&1
+else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
+${fw}
+step close-port "SSH no longer listens on port ${input.oldPort}"
+echo "CLOSE_DONE=1"
 `;
 }

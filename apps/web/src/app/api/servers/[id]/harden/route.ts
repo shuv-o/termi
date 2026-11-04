@@ -38,6 +38,9 @@ const optionsSchema = z.object({
     fail2ban: z.boolean(),
     autoUpdates: z.boolean(),
     extraPublicKey: z.string().max(4096).optional(),
+    firewall: z.boolean().default(false),
+    allowPorts: z.array(z.number().int().min(1).max(65535)).max(50).default([]),
+    newPort: z.number().int().min(1024).max(65535).nullable().optional(),
 });
 
 interface RouteParams {

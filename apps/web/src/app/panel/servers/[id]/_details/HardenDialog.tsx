@@ -23,10 +23,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import PasskeyRevealModal from '@/components/auth/PasskeyRevealModal';
 import type { HardenEvent, StepStatus } from '@/lib/services/hardening/harden.service';
-import type { SecurityReport } from '@/lib/services/hardening/evaluate';
+import { RISKY_PORTS, type SecurityReport } from '@/lib/services/hardening/evaluate';
 import { cn } from '@/lib/utils';
 
 type Done = Extract<HardenEvent, { type: 'done' }>;
@@ -114,13 +115,44 @@ export function HardenDialog({
     const [autoUpdates, setAutoUpdates] = useState(true);
     const [extraKey, setExtraKey] = useState('');
 
+    // Phase 3 — both opt-in, both can cut off access, so both are off by default.
+    const publicPorts = [
+        ...new Map(
+            report.ports
+                .filter((p) => p.public && p.port !== report.sshPort)
+                .map((p) => [p.port, p] as const),
+        ).values(),
+    ];
+    const [firewall, setFirewall] = useState(false);
+    const [allowed, setAllowed] = useState<Set<number>>(
+        () => new Set(publicPorts.filter((p) => !RISKY_PORTS[p.port]).map((p) => p.port)),
+    );
+    const [customPort, setCustomPort] = useState('');
+    const [movePort, setMovePort] = useState(false);
+    const used = new Set(report.ports.map((p) => p.port));
+    const [newPort, setNewPort] = useState(() => {
+        for (;;) {
+            const p = 20000 + Math.floor(Math.random() * 40000);
+            if (!used.has(p)) return String(p);
+        }
+    });
+    const newPortNum = Number(newPort);
+    const newPortValid =
+        Number.isInteger(newPortNum) &&
+        newPortNum >= 1024 &&
+        newPortNum <= 65535 &&
+        newPortNum !== report.sshPort &&
+        !used.has(newPortNum);
+    const firewallManaged = report.firewall === 'ufw' || report.firewall === 'firewalld';
+    const firewallForeign = report.firewall === 'nftables' || report.firewall === 'iptables';
+
     const [running, setRunning] = useState(false);
     const [steps, setSteps] = useState<StepRow[]>([]);
     const [result, setResult] = useState<Done | null>(null);
     const [showKey, setShowKey] = useState(false);
 
     const usernameValid = /^[a-z_][a-z0-9_-]{0,31}$/.test(newUsername) && newUsername !== 'root';
-    const canStart = !running && (!createUser || usernameValid);
+    const canStart = !running && (!createUser || usernameValid) && (!movePort || newPortValid);
     const started = running || result !== null;
 
     const apply = async () => {
@@ -139,6 +171,9 @@ export function HardenDialog({
                     fail2ban,
                     autoUpdates,
                     extraPublicKey: extraKey.trim() || undefined,
+                    firewall,
+                    allowPorts: firewall ? [...allowed] : [],
+                    newPort: movePort ? newPortNum : null,
                 }),
             });
             if (!res.ok || !res.body) {
@@ -296,6 +331,126 @@ export function HardenDialog({
                                 checked={autoUpdates}
                                 onChange={setAutoUpdates}
                             />
+
+                            <OptionRow
+                                id="harden-firewall"
+                                title={firewallManaged ? 'Firewall rules' : 'Turn on the firewall'}
+                                hint={
+                                    firewallForeign
+                                        ? `A hand-made ${report.firewall} firewall is already active, so Termi will not manage it.`
+                                        : firewallManaged
+                                          ? `${report.firewall} is already on. Termi keeps SSH and the ports below open, and blocks everything else.`
+                                          : 'Blocks every incoming connection except SSH and the ports you keep open below.'
+                                }
+                                checked={firewall}
+                                onChange={setFirewall}
+                                disabled={firewallForeign}
+                            >
+                                <div className="mt-2.5 space-y-1.5">
+                                    <p className="text-xs text-muted-foreground">
+                                        SSH (port{' '}
+                                        {movePort && newPortValid ? newPort : report.sshPort})
+                                        always stays open.
+                                    </p>
+                                    {[
+                                        ...publicPorts.map((p) => p.port),
+                                        ...[...allowed].filter(
+                                            (p) => !publicPorts.some((x) => x.port === p),
+                                        ),
+                                    ].map((port) => {
+                                        const info = publicPorts.find((p) => p.port === port);
+                                        const risky = RISKY_PORTS[port];
+                                        return (
+                                            <label
+                                                key={port}
+                                                className="flex min-h-9 cursor-pointer items-center gap-2.5 text-sm"
+                                            >
+                                                <Checkbox
+                                                    checked={allowed.has(port)}
+                                                    onCheckedChange={(v) =>
+                                                        setAllowed((prev) => {
+                                                            const next = new Set(prev);
+                                                            if (v) next.add(port);
+                                                            else next.delete(port);
+                                                            return next;
+                                                        })
+                                                    }
+                                                />
+                                                <span className="data">{port}</span>
+                                                <span className="truncate text-muted-foreground">
+                                                    {risky ?? info?.process ?? 'custom'}
+                                                </span>
+                                                {risky && (
+                                                    <span className="ml-auto shrink-0 text-[11px] text-warning">
+                                                        usually should not be public
+                                                    </span>
+                                                )}
+                                            </label>
+                                        );
+                                    })}
+                                    <div className="flex gap-2 pt-1">
+                                        <Input
+                                            value={customPort}
+                                            onChange={(e) =>
+                                                setCustomPort(e.target.value.replace(/\D/g, ''))
+                                            }
+                                            placeholder="Another port, e.g. 443"
+                                            inputMode="numeric"
+                                            aria-label="Port to keep open"
+                                            className="data"
+                                        />
+                                        <Button
+                                            variant="outline"
+                                            disabled={
+                                                !(
+                                                    Number(customPort) >= 1 &&
+                                                    Number(customPort) <= 65535
+                                                )
+                                            }
+                                            onClick={() => {
+                                                setAllowed((prev) =>
+                                                    new Set(prev).add(Number(customPort)),
+                                                );
+                                                setCustomPort('');
+                                            }}
+                                        >
+                                            Keep open
+                                        </Button>
+                                    </div>
+                                    {report.os.family === 'debian' && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Ports published by Docker containers bypass ufw and are
+                                            not affected.
+                                        </p>
+                                    )}
+                                </div>
+                            </OptionRow>
+
+                            <OptionRow
+                                id="harden-port"
+                                title="Move SSH to another port"
+                                hint={`Cuts the automated login attempts that hammer port ${report.sshPort}. sshd listens on both ports until Termi has logged in on the new one. If your provider has its own firewall (AWS, GCP, Azure…), allow the new port there first — otherwise Termi cannot reach it and rolls everything back.`}
+                                checked={movePort}
+                                onChange={setMovePort}
+                            >
+                                <div className="mt-2.5">
+                                    <Input
+                                        value={newPort}
+                                        onChange={(e) =>
+                                            setNewPort(e.target.value.replace(/\D/g, ''))
+                                        }
+                                        inputMode="numeric"
+                                        aria-label="New SSH port"
+                                        aria-invalid={!newPortValid || undefined}
+                                        className="data"
+                                    />
+                                    {!newPortValid && (
+                                        <p className="mt-1 text-xs text-danger">
+                                            Pick a free port between 1024 and 65535.
+                                        </p>
+                                    )}
+                                </div>
+                            </OptionRow>
 
                             <div className="pt-3">
                                 <Label htmlFor="harden-key" className="text-sm">

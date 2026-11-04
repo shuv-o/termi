@@ -43,6 +43,10 @@ export interface SecurityReport {
     grade: 'A' | 'B' | 'C' | 'D' | 'F';
     checks: SecurityCheck[];
     ports: ListeningPort[];
+    /** The port sshd listens on. */
+    sshPort: number;
+    /** The firewall the scan found active, if any. */
+    firewall: 'ufw' | 'firewalld' | 'nftables' | 'iptables' | 'none' | 'unknown';
 }
 
 /** What Termi itself knows about how it logs in, from the stored server record. */
@@ -108,7 +112,7 @@ export function parseListen(entries: string[]): ListeningPort[] {
 // ── Rules ────────────────────────────────────────────────────────────────────
 
 /** Services that should almost never face the internet directly. */
-const RISKY_PORTS: Record<number, string> = {
+export const RISKY_PORTS: Record<number, string> = {
     21: 'FTP',
     23: 'Telnet',
     2375: 'Docker API (unencrypted)',
@@ -473,6 +477,10 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
         grade: score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F',
         checks,
         ports,
+        sshPort,
+        firewall: (['ufw', 'firewalld', 'nftables', 'iptables', 'none'].includes(fw)
+            ? fw
+            : 'unknown') as SecurityReport['firewall'],
     };
 }
 

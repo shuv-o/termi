@@ -25,10 +25,13 @@ import {
     assertUsername,
     buildAccessScript,
     buildCancelScript,
+    buildClosePortScript,
     buildExtrasScript,
     buildRollbackNowScript,
     generatePassword,
     HardeningInputError,
+    type AccessScriptInput,
+    type FirewallTool,
 } from './harden-scripts';
 
 export interface HardenTarget {
@@ -54,6 +57,12 @@ export interface HardenOptions {
     autoUpdates: boolean;
     /** The user's own public key, so they keep a way in outside Termi. */
     extraPublicKey?: string;
+    /** Turn the firewall on (default deny), keeping SSH and `allowPorts` open. */
+    firewall: boolean;
+    /** Extra TCP ports to keep open when the firewall is turned on. */
+    allowPorts: number[];
+    /** Move SSH to this port (opt-in). */
+    newPort?: number | null;
 }
 
 export interface NewCredentials {
@@ -61,6 +70,8 @@ export interface NewCredentials {
     /** Null when the password was left unchanged. */
     password: string | null;
     privateKey: string;
+    /** The SSH port after the run. */
+    port: number;
 }
 
 export type StepStatus = 'running' | 'done' | 'warning' | 'failed' | 'skipped';
@@ -195,6 +206,10 @@ const STEP_LABELS: Record<string, string> = {
     verify: 'Log in with the new credentials',
     confirm: 'Disarm the rollback',
     save: 'Save the new credentials',
+    selinux: 'Allow the new port in SELinux',
+    firewall: 'Firewall',
+    port: 'Listen on the new SSH port',
+    'close-port': 'Close the old SSH port',
     fail2ban: 'Brute-force protection',
     updates: 'Automatic security updates',
 };
@@ -273,6 +288,60 @@ export async function hardenServer(
             emit('check', 'failed');
             return done('failed', `${report.os.name} is not supported yet. Nothing was changed.`);
         }
+
+        // Scan again as root: without it the firewall and sshd's effective
+        // settings may have been invisible, and the plan below depends on them.
+        const rootScan = await runAsRoot(oldClient, elev, SCAN_SCRIPT, 60_000);
+        const rootRaw = parseScanOutput(rootScan.out);
+        const sshdPort = Number(rootRaw.values.get('sshd_port')) || target.port;
+        const fwNow = rootRaw.values.get('firewall') ?? 'unknown';
+        const stop = (message: string) => {
+            emit('check', 'failed');
+            return done('failed', `${message} Nothing was changed.`);
+        };
+
+        const newPort = options.newPort ?? null;
+        if (newPort !== null) {
+            if (sshdPort !== target.port) {
+                return stop(
+                    `Termi reaches SSH on port ${target.port}, but sshd listens on ${sshdPort} — there is port forwarding in between, so moving the port would break it.`,
+                );
+            }
+            if (
+                rootRaw.listen.some((l) =>
+                    new RegExp(`[:.]${newPort} `).test(`${l.split(' ')[0]} `),
+                )
+            ) {
+                return stop(`Port ${newPort} is already in use on the server.`);
+            }
+        }
+
+        let firewallPlan: AccessScriptInput['firewall'] = null;
+        const managed: FirewallTool | null =
+            fwNow === 'ufw' || fwNow === 'firewalld' ? fwNow : null;
+        const defaultTool: FirewallTool | null =
+            report.os.family === 'debian'
+                ? 'ufw'
+                : report.os.family === 'rhel'
+                  ? 'firewalld'
+                  : null;
+        if (options.firewall) {
+            if (fwNow === 'nftables' || fwNow === 'iptables') {
+                return stop(
+                    `A hand-made ${fwNow} firewall is already active. Termi will not replace it — add rules to it directly.`,
+                );
+            }
+            const tool = managed ?? defaultTool;
+            if (!tool) return stop(`Termi cannot manage a firewall on ${report.os.name} yet.`);
+            firewallPlan = { mode: 'enable', tool, allowPorts: options.allowPorts };
+        } else if (newPort !== null) {
+            if (managed) firewallPlan = { mode: 'open-only', tool: managed, allowPorts: [] };
+            else if (fwNow === 'nftables' || fwNow === 'iptables') {
+                return stop(
+                    `A ${fwNow} firewall is active. Allow port ${newPort} in it first, then move the port.`,
+                );
+            }
+        }
         if (newUsername) {
             const exists = await exec(
                 oldClient,
@@ -302,6 +371,7 @@ export async function hardenServer(
             username: targetUser,
             password: newPassword,
             privateKey: keyPair.private,
+            port: newPort ?? target.port,
         };
         await hooks.savePending(creds);
 
@@ -318,12 +388,18 @@ export async function hardenServer(
                 publicKeys: [keyPair.public.trim(), ...(extraKey ? [extraKey] : [])],
                 disablePasswordLogin: options.disablePasswordLogin,
                 permitRootLogin: targetUser === 'root' ? 'prohibit-password' : 'no',
+                sshPort: sshdPort,
+                newPort,
+                firewall: firewallPlan,
             }),
             120_000,
         );
         for (const line of lines(access.out, 'STEP=')) {
             const [id, ...rest] = line.split(' ');
             if (id === 'sshd-warn') emit('sshd', 'warning', rest.join(' '));
+            else if (id.endsWith('-skip')) emit(id.slice(0, -5), 'skipped', rest.join(' '));
+            // These carry useful detail (ports, rules) — show it.
+            else if (id === 'firewall' || id === 'port') emit(id, 'done', rest.join(' '));
             else emit(id, 'done');
         }
         const failure = lines(access.out, 'FAIL=')[0];
@@ -339,6 +415,7 @@ export async function hardenServer(
         emit('verify', 'running');
         const newTarget: HardenTarget = {
             ...target,
+            port: newPort ?? target.port,
             username: targetUser,
             privateKey: keyPair.private,
             passphrase: undefined,
@@ -402,6 +479,25 @@ export async function hardenServer(
         pendingRollback = null;
         emit('save', 'done');
 
+        // ── Close the old port: Termi is already in on the new one ───────────
+        if (newPort !== null) {
+            emit('close-port', 'running');
+            const closed = await runAsRoot(
+                newClient,
+                newElev,
+                buildClosePortScript({
+                    runId,
+                    oldPort: sshdPort,
+                    newPort,
+                    firewallTool: firewallPlan?.tool ?? null,
+                }),
+                60_000,
+            ).catch(() => null);
+            const warn = lines(closed?.out ?? '', 'STEP=close-port-fail ')[0];
+            if (closed?.out.includes('CLOSE_DONE=1')) emit('close-port', 'done');
+            else emit('close-port', 'warning', warn ?? `Port ${sshdPort} may still be open`);
+        }
+
         // ── Extras: cannot lock anyone out ───────────────────────────────────
         if (options.fail2ban || options.autoUpdates) {
             if (options.fail2ban) emit('fail2ban', 'running');
@@ -415,7 +511,7 @@ export async function hardenServer(
                     family: report.os.family,
                     fail2ban: options.fail2ban,
                     autoUpdates: options.autoUpdates,
-                    sshPort: Number(raw.values.get('sshd_port')) || target.port,
+                    sshPort: newPort ?? sshdPort,
                     ignoreIps,
                 }),
                 600_000,
