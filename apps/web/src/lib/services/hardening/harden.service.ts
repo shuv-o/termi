@@ -63,6 +63,11 @@ export interface HardenOptions {
     allowPorts: number[];
     /** Move SSH to this port (opt-in). */
     newPort?: number | null;
+    /**
+     * Root login over SSH: 'no', 'key' (key only), or 'password' (key or
+     * password). Defaults to 'key' when Termi logs in as root, else 'no'.
+     */
+    rootLogin?: 'no' | 'key' | 'password';
 }
 
 export interface NewCredentials {
@@ -363,6 +368,14 @@ export async function hardenServer(
 
         // ── New credentials, saved before use ────────────────────────────────
         const targetUser = newUsername ?? loginUser;
+        const rootLogin = options.rootLogin ?? (targetUser === 'root' ? 'key' : 'no');
+        if (rootLogin === 'no' && targetUser === 'root') {
+            emit('check', 'failed');
+            return done(
+                'failed',
+                'Termi logs in as root, so root login cannot be turned off — that would lock Termi out. Create an admin user, or keep root login with a key. Nothing was changed.',
+            );
+        }
         const runId = randomBytes(12).toString('hex');
         const keyPair = utils.generateKeyPairSync('ed25519', { comment: 'termi' });
         // A non-root account needs a known password for sudo; root does not.
@@ -389,7 +402,12 @@ export async function hardenServer(
                 newPassword,
                 publicKeys: [keyPair.public.trim(), ...(extraKey ? [extraKey] : [])],
                 disablePasswordLogin: options.disablePasswordLogin,
-                permitRootLogin: targetUser === 'root' ? 'prohibit-password' : 'no',
+                permitRootLogin:
+                    rootLogin === 'password'
+                        ? 'yes'
+                        : rootLogin === 'key'
+                          ? 'prohibit-password'
+                          : 'no',
                 sshPort: sshdPort,
                 newPort,
                 firewall: firewallPlan,

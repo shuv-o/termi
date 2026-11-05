@@ -81,7 +81,8 @@ export interface AccessScriptInput {
     publicKeys: string[];
     disablePasswordLogin: boolean;
     /** 'no' once Termi stops logging in as root; else key-only root. */
-    permitRootLogin: 'no' | 'prohibit-password';
+    /** 'yes' allows a root password too (only while PasswordAuthentication is on). */
+    permitRootLogin: 'no' | 'prohibit-password' | 'yes';
     /** The port sshd listens on now. */
     sshPort: number;
     /**

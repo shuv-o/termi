@@ -111,6 +111,16 @@ export function HardenDialog({
     const [newUsername, setNewUsername] = useState('termi-admin');
     const [disablePasswords, setDisablePasswords] = useState(true);
     const [rotatePassword, setRotatePassword] = useState(true);
+    // Root login: off by default when Termi has its own admin user; when
+    // Termi itself logs in as root, "off" would lock it out, so it is not offered.
+    const [rootLoginChoice, setRootLogin] = useState<'no' | 'key' | 'password'>('no');
+    const termiIsRoot = loggedInAsRoot && !createUser;
+    const rootLogin =
+        termiIsRoot && rootLoginChoice === 'no'
+            ? 'key'
+            : disablePasswords && rootLoginChoice === 'password'
+              ? 'key'
+              : rootLoginChoice;
     const [fail2ban, setFail2ban] = useState(true);
     const [autoUpdates, setAutoUpdates] = useState(true);
     const [extraKey, setExtraKey] = useState('');
@@ -174,6 +184,7 @@ export function HardenDialog({
                     firewall,
                     allowPorts: firewall ? [...allowed] : [],
                     newPort: movePort ? newPortNum : null,
+                    rootLogin,
                 }),
             });
             if (!res.ok || !res.body) {
@@ -258,11 +269,6 @@ export function HardenDialog({
                                 <p className="text-xs text-muted-foreground">Always applied</p>
                                 <ul className="mt-1.5 space-y-1 text-[13px] text-foreground/85">
                                     <li>A new SSH key that only Termi holds</li>
-                                    <li>
-                                        {createUser || !loggedInAsRoot
-                                            ? 'No root login over SSH'
-                                            : 'root can only log in with a key'}
-                                    </li>
                                     <li>3 login tries per connection, 30-second login timeout</li>
                                     <li>No empty passwords, no X11 forwarding</li>
                                 </ul>
@@ -297,6 +303,55 @@ export function HardenDialog({
                                     )}
                                 </div>
                             </OptionRow>
+
+                            <div className="py-3">
+                                <p className="text-sm font-medium">Root login over SSH</p>
+                                <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                                    root is the first account attackers try. Allow it only if you
+                                    need to log in as root directly.
+                                </p>
+                                <div
+                                    role="radiogroup"
+                                    aria-label="Root login over SSH"
+                                    className="mt-2.5 grid grid-cols-3 gap-1 rounded-md border border-input p-0.5"
+                                >
+                                    {(
+                                        [
+                                            ['no', 'Off', termiIsRoot],
+                                            ['key', 'Key only', false],
+                                            ['password', 'Password too', disablePasswords],
+                                        ] as const
+                                    ).map(([value, label, disabled]) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={rootLogin === value}
+                                            disabled={disabled}
+                                            onClick={() => setRootLogin(value)}
+                                            className={cn(
+                                                'h-9 rounded-[5px] px-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:h-8',
+                                                rootLogin === value
+                                                    ? 'bg-accent text-foreground'
+                                                    : 'text-muted-foreground hover:text-foreground',
+                                            )}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="mt-1.5 text-xs text-muted-foreground">
+                                    {termiIsRoot
+                                        ? 'Termi logs in as root, so root login stays on. Create an admin user above to turn it off.'
+                                        : rootLogin === 'key'
+                                          ? "root can log in only with a key already in root's authorized_keys."
+                                          : rootLogin === 'password'
+                                            ? 'root keeps its current password. If it is a provider default, change it.'
+                                            : 'Use sudo from your admin user instead.'}
+                                    {disablePasswords &&
+                                        ' "Password too" needs password logins left on.'}
+                                </p>
+                            </div>
 
                             <OptionRow
                                 id="harden-passwords"

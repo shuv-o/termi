@@ -141,6 +141,9 @@ describe('generated scripts', () => {
         const keep = buildAccessScript({ ...base, disablePasswordLogin: false });
         expect(keep).toContain('PasswordAuthentication yes');
         expect(keep).not.toContain('KbdInteractiveAuthentication no');
+        expect(buildAccessScript({ ...base, disablePasswordLogin: false, permitRootLogin: 'yes' })).toContain(
+            'PermitRootLogin yes',
+        );
         expect(
             buildAccessScript({
                 ...base,
