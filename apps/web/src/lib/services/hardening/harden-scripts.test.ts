@@ -208,4 +208,23 @@ describe('generated scripts', () => {
             buildAccessScript({ ...base, firewall: { mode: 'enable', tool: 'ufw', allowPorts: [0] } }),
         ).toThrow(HardeningInputError);
     });
+
+    it('an explicit undo runs even after the timer was disarmed', () => {
+        const s = buildRollbackNowScript(base.runId);
+        expect(s.indexOf('rm -f "$B/CANCELLED"')).toBeGreaterThan(-1);
+        expect(s.indexOf('rm -f "$B/CANCELLED"')).toBeLessThan(s.indexOf('sh "$B/rollback.sh"'));
+    });
+
+    it('matches systemd Listen output literally in the boot check (escaping survives the template)', () => {
+        const access = buildAccessScript({ ...base, sshPort: 2200, newPort: 2201 });
+        const close = buildClosePortScript({ runId: base.runId, oldPort: 2200, newPort: 2201, firewallTool: null });
+        for (const script of [access, close]) {
+            expect(script).toContain('\\(Stream\\)');
+            expect(script).not.toMatch(/[^\\]\(Stream\)"/);
+        }
+        // And the pattern really matches what systemd prints.
+        const listen = '0.0.0.0:2201 (Stream)\n[::]:2201 (Stream)';
+        const out = execFileSync('sh', ['-c', `printf '%s\\n' "$1" | grep -cE "(^|[]: ])2201 \\(Stream\\)"`, 'sh', listen], { encoding: 'utf8' });
+        expect(out.trim()).toBe('2');
+    });
 });

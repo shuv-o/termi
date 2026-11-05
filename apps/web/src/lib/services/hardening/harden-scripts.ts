@@ -212,9 +212,13 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
 elif command -v rc-service >/dev/null 2>&1; then rc-service sshd reload
 else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
-# Socket-activated sshd (Ubuntu 22.10+) takes its port from ssh.socket.
-if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet ssh.socket 2>/dev/null; then
-    systemctl daemon-reload; systemctl restart ssh.socket
+# Socket-activated sshd takes its port from ssh.socket / sshd.socket; the
+# undo hooks above removed Termi's overrides, so reload and restart them.
+if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+    systemctl daemon-reload
+    for u in ssh.socket sshd.socket; do
+        systemctl is-active --quiet "$u" 2>/dev/null && systemctl restart "$u"
+    done
 fi
 date > "$B/ROLLED_BACK"
 TERMI_ROLLBACK
@@ -289,17 +293,60 @@ if [ "$NEWPORT" != "0" ]; then
     fi
 fi
 ${input.firewall ? buildFirewallSection(input.firewall.tool, input.firewall.mode, allowPorts) : ''}
-# 5c. Socket-activated sshd (Ubuntu 22.10+) ────────────────────────────────
-SOCKET=0
-if [ "$NEWPORT" != "0" ] && has systemctl && systemctl is-active --quiet ssh.socket 2>/dev/null; then
-    SOCKET=1
-    if [ ! -x /usr/lib/systemd/system-generators/sshd-socket-generator ] && [ ! -x /lib/systemd/system-generators/sshd-socket-generator ]; then
-        # No generator to read Port from sshd_config: set the socket's ports directly.
-        mkdir -p /etc/systemd/system/ssh.socket.d
-        printf 'rm -f /etc/systemd/system/ssh.socket.d/00-termi-port.conf\n' > "$B/undo-30-socket.sh"
-        printf '[Socket]\nListenStream=\nListenStream=%s\nListenStream=%s\n' "$OLDPORT" "$NEWPORT" > /etc/systemd/system/ssh.socket.d/00-termi-port.conf
-    fi
+# 5c. Every way SSH can be started at boot ──────────────────────────────────
+# The port has to be right for whatever starts sshd at BOOT, not just for what
+# is running now: a server can run the ssh service today and boot from
+# ssh.socket tomorrow (or the reverse). So every socket unit that exists is
+# configured, active or not, and the result is checked further down.
+SOCKETS=""
+has_unit() { systemctl list-unit-files "$1" 2>/dev/null | grep -q "^$1"; }
+if [ "$NEWPORT" != "0" ] && has systemctl && [ -d /run/systemd/system ]; then
+    # A fixed port in sshd's start-up options beats sshd_config at every boot.
+    for f in /etc/default/ssh /etc/sysconfig/sshd; do
+        if [ -f "$f" ] && grep -qE '^[^#]*(-p[[:space:]]*[0-9]|-o[[:space:]]*Port)' "$f"; then
+            fail port "$f starts sshd with a fixed port option; remove it first, then move the port"
+        fi
+    done
+    for svc in ssh.service sshd.service; do
+        if systemctl show -p ExecStart --value "$svc" 2>/dev/null | grep -qE '(^|[[:space:]])(-p[[:space:]]*[0-9]|-oPort|-o[[:space:]]*Port)'; then
+            fail port "$svc starts sshd with a fixed port option; remove it first, then move the port"
+        fi
+    done
+    for u in ssh.socket sshd.socket; do
+        has_unit "$u" || continue
+        SOCKETS="$SOCKETS $u"
+        # Always an explicit override, named to sort LAST: drop-ins apply in
+        # name order across /etc, /run and /usr, so an admin's or provider's
+        # own ssh.socket.d/*.conf — or the generator's addresses.conf — would
+        # otherwise reset ListenStream after Termi's and win at boot.
+        mkdir -p "/etc/systemd/system/$u.d"
+        chmod 755 "/etc/systemd/system/$u.d"
+        printf 'rm -f /etc/systemd/system/%s.d/zz-termi-port.conf\n' "$u" > "$B/undo-30-$u.sh"
+        # Explicit IPv4 + IPv6 addresses with ipv6-only: a bare port under
+        # Ubuntu's BindIPv6Only=ipv6-only would listen on IPv6 alone.
+        printf '[Socket]\nListenStream=\nListenStream=0.0.0.0:%s\nListenStream=[::]:%s\nListenStream=0.0.0.0:%s\nListenStream=[::]:%s\nBindIPv6Only=ipv6-only\n' \
+            "$OLDPORT" "$OLDPORT" "$NEWPORT" "$NEWPORT" > "/etc/systemd/system/$u.d/zz-termi-port.conf"
+        chmod 644 "/etc/systemd/system/$u.d/zz-termi-port.conf"
+    done
 fi
+
+# Would SSH come up on port $1 after a reboot? Checks the configuration every
+# enabled boot path will use — not the processes running right now.
+boot_check() {
+    want="$1"
+    "$SSHD" -T 2>/dev/null | awk '$1=="port" {print $2}' | grep -qx "$want" \
+        || fail port "sshd's configuration does not include port $want"
+    has systemctl && [ -d /run/systemd/system ] || return 0
+    systemctl daemon-reload
+    for u in $SOCKETS; do
+        en=$(systemctl is-enabled "$u" 2>/dev/null)
+        act=$(systemctl is-active "$u" 2>/dev/null)
+        case "$en" in enabled|enabled-runtime|linked|linked-runtime|alias|indirect) ;; *) [ "$act" = "active" ] || continue ;; esac
+        listen=$(systemctl show -p Listen --value "$u" 2>/dev/null)
+        printf '%s\n' "$listen" | grep -qE "(^|[]: ])$want \\(Stream\\)" \
+            || fail port "$u starts SSH at boot and would listen on $(printf '%s' "$listen" | tr '\n' ' '), not on port $want"
+    done
+}
 
 # 5. sshd settings ──────────────────────────────────────────────────────────
 mkdir -p /etc/ssh/sshd_config.d
@@ -325,8 +372,14 @@ if has systemctl && [ -d /run/systemd/system ]; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
 elif has rc-service; then rc-service sshd reload >/dev/null 2>&1
 else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
-if [ "$SOCKET" = "1" ]; then systemctl daemon-reload; systemctl restart ssh.socket || fail port "ssh.socket did not restart on the new port"; fi
 if [ "$NEWPORT" != "0" ]; then
+    for u in $SOCKETS; do
+        if systemctl is-active --quiet "$u" 2>/dev/null; then
+            systemctl daemon-reload; systemctl restart "$u" || fail port "$u did not restart on the new port"
+        fi
+    done
+    boot_check "$NEWPORT"
+    boot_check "$OLDPORT"
     ports=$("$SSHD" -T 2>/dev/null | awk '$1=="port" {print $2}' | tr '\n' ' ')
     step port "sshd now listens on $ports(the old port closes once Termi has logged in on $NEWPORT)"
 fi
@@ -355,7 +408,11 @@ fi
 export function buildRollbackNowScript(runId: string): string {
     check(RUN_ID, runId, 'run id');
     const B = `${BACKUP_ROOT}/${runId}`;
+    // CANCELLED only exists to stop the *timer*. An explicit undo must run
+    // even after it was written — e.g. when saving the new credentials to
+    // Termi failed after the rollback had already been disarmed.
     return `B=${q(B)}
+rm -f "$B/CANCELLED"
 [ -f "$B/rollback.sh" ] && sh "$B/rollback.sh"
 [ -f "$B/ROLLED_BACK" ] && echo "ROLLED_BACK=1"
 if command -v systemctl >/dev/null 2>&1; then systemctl stop ${q(`termi-rollback-${runId}.timer`)} 2>/dev/null; fi
@@ -573,11 +630,23 @@ if ! "$SSHD" -t 2>/dev/null; then
     exit 0
 fi
 rm -f "$DROPIN.termi-prev"
-OVR=/etc/systemd/system/ssh.socket.d/00-termi-port.conf
-[ -f "$OVR" ] && printf '[Socket]\\nListenStream=\\nListenStream=%s\\n' ${input.newPort} > "$OVR"
+for u in ssh.socket sshd.socket; do
+    OVR="/etc/systemd/system/$u.d/zz-termi-port.conf"
+    [ -f "$OVR" ] && printf '[Socket]\\nListenStream=\\nListenStream=0.0.0.0:%s\\nListenStream=[::]:%s\\nBindIPv6Only=ipv6-only\\n' ${input.newPort} ${input.newPort} > "$OVR"
+done
 if has systemctl && [ -d /run/systemd/system ]; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || systemctl try-restart ssh sshd 2>/dev/null
-    if systemctl is-active --quiet ssh.socket 2>/dev/null; then systemctl daemon-reload; systemctl restart ssh.socket; fi
+    systemctl daemon-reload
+    for u in ssh.socket sshd.socket; do
+        systemctl is-active --quiet "$u" 2>/dev/null && systemctl restart "$u"
+    done
+    # Boot check for the port Termi now uses: every enabled socket unit must
+    # list it, or the next reboot would bring SSH up elsewhere.
+    for u in ssh.socket sshd.socket; do
+        case "$(systemctl is-enabled "$u" 2>/dev/null)" in enabled|enabled-runtime|linked|linked-runtime|alias|indirect) ;; *) continue ;; esac
+        systemctl show -p Listen --value "$u" 2>/dev/null | grep -qE "(^|[]: ])${input.newPort} \\(Stream\\)" \\
+            || step boot-warn "$u would not listen on port ${input.newPort} after a reboot"
+    done
 elif has rc-service; then rc-service sshd reload >/dev/null 2>&1
 else kill -HUP "$(cat /run/sshd.pid /var/run/sshd.pid 2>/dev/null | head -n 1)" 2>/dev/null; fi
 ${fw}

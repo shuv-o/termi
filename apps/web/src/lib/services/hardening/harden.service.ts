@@ -19,7 +19,7 @@ import { randomBytes } from 'crypto';
 import { Client, utils, type ConnectConfig } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from '../ssh-jump';
 import { SCAN_SCRIPT } from './scan-script';
-import { parseScanOutput, evaluateScan } from './evaluate';
+import { parseScanOutput, evaluateScan, parseListen } from './evaluate';
 import {
     assertPublicKey,
     assertUsername,
@@ -298,7 +298,14 @@ export async function hardenServer(
         // settings may have been invisible, and the plan below depends on them.
         const rootScan = await runAsRoot(oldClient, elev, SCAN_SCRIPT, 60_000);
         const rootRaw = parseScanOutput(rootScan.out);
-        const sshdPort = Number(rootRaw.values.get('sshd_port')) || target.port;
+        // What actually listens wins over what the config says: a server can be
+        // left with a stale Port line (e.g. a port move that a reboot undid)
+        // while SSH really answers on the port Termi just connected to.
+        const configPort = Number(rootRaw.values.get('sshd_port')) || target.port;
+        const sshListensOnTarget = parseListen(rootRaw.listen).some(
+            (p) => p.port === target.port && (!p.process || /sshd|systemd/.test(p.process)),
+        );
+        const sshdPort = sshListensOnTarget ? target.port : configPort;
         const fwNow = rootRaw.values.get('firewall') ?? 'unknown';
         const stop = (message: string) => {
             emit('check', 'failed');
@@ -513,8 +520,10 @@ export async function hardenServer(
                 }),
                 60_000,
             ).catch(() => null);
-            const warn = lines(closed?.out ?? '', 'STEP=close-port-fail ')[0];
-            if (closed?.out.includes('CLOSE_DONE=1')) emit('close-port', 'done');
+            const warn =
+                lines(closed?.out ?? '', 'STEP=close-port-fail ')[0] ??
+                lines(closed?.out ?? '', 'STEP=boot-warn ')[0];
+            if (closed?.out.includes('CLOSE_DONE=1') && !warn) emit('close-port', 'done');
             else emit('close-port', 'warning', warn ?? `Port ${sshdPort} may still be open`);
         }
 
