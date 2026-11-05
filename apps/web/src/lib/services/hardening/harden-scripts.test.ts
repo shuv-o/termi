@@ -141,9 +141,9 @@ describe('generated scripts', () => {
         const keep = buildAccessScript({ ...base, disablePasswordLogin: false });
         expect(keep).toContain('PasswordAuthentication yes');
         expect(keep).not.toContain('KbdInteractiveAuthentication no');
-        expect(buildAccessScript({ ...base, disablePasswordLogin: false, permitRootLogin: 'yes' })).toContain(
-            'PermitRootLogin yes',
-        );
+        expect(
+            buildAccessScript({ ...base, disablePasswordLogin: false, permitRootLogin: 'yes' }),
+        ).toContain('PermitRootLogin yes');
         expect(
             buildAccessScript({
                 ...base,
@@ -178,11 +178,22 @@ describe('generated scripts', () => {
             for (const mode of ['enable', 'open-only'] as const)
                 for (const newPort of [null, 2201])
                     shSyntaxOk(
-                        buildAccessScript({ ...base, newPort, firewall: { mode, tool, allowPorts: [80, 443] } }),
+                        buildAccessScript({
+                            ...base,
+                            newPort,
+                            firewall: { mode, tool, allowPorts: [80, 443] },
+                        }),
                     );
         for (const firewallTool of ['ufw', 'firewalld', null] as const)
             for (const oldPort of [22, 2200])
-                shSyntaxOk(buildClosePortScript({ runId: base.runId, oldPort, newPort: 2201, firewallTool }));
+                shSyntaxOk(
+                    buildClosePortScript({
+                        runId: base.runId,
+                        oldPort,
+                        newPort: 2201,
+                        firewallTool,
+                    }),
+                );
     });
 
     it('writes each undo hook before the change it undoes, and opens ports before enabling ufw', () => {
@@ -202,10 +213,15 @@ describe('generated scripts', () => {
 
     it('rejects ports that are out of range, privileged, or unchanged', () => {
         expect(() => buildAccessScript({ ...base, newPort: 80 })).toThrow(/1024 or higher/);
-        expect(() => buildAccessScript({ ...base, sshPort: 2200, newPort: 2200 })).toThrow(/already the SSH port/);
+        expect(() => buildAccessScript({ ...base, sshPort: 2200, newPort: 2200 })).toThrow(
+            /already the SSH port/,
+        );
         expect(() => buildAccessScript({ ...base, newPort: 70000 })).toThrow(HardeningInputError);
         expect(() =>
-            buildAccessScript({ ...base, firewall: { mode: 'enable', tool: 'ufw', allowPorts: [0] } }),
+            buildAccessScript({
+                ...base,
+                firewall: { mode: 'enable', tool: 'ufw', allowPorts: [0] },
+            }),
         ).toThrow(HardeningInputError);
     });
 
@@ -217,14 +233,61 @@ describe('generated scripts', () => {
 
     it('matches systemd Listen output literally in the boot check (escaping survives the template)', () => {
         const access = buildAccessScript({ ...base, sshPort: 2200, newPort: 2201 });
-        const close = buildClosePortScript({ runId: base.runId, oldPort: 2200, newPort: 2201, firewallTool: null });
+        const close = buildClosePortScript({
+            runId: base.runId,
+            oldPort: 2200,
+            newPort: 2201,
+            firewallTool: null,
+        });
         for (const script of [access, close]) {
             expect(script).toContain('\\(Stream\\)');
             expect(script).not.toMatch(/[^\\]\(Stream\)"/);
         }
         // And the pattern really matches what systemd prints.
         const listen = '0.0.0.0:2201 (Stream)\n[::]:2201 (Stream)';
-        const out = execFileSync('sh', ['-c', `printf '%s\\n' "$1" | grep -cE "(^|[]: ])2201 \\(Stream\\)"`, 'sh', listen], { encoding: 'utf8' });
+        const out = execFileSync(
+            'sh',
+            ['-c', `printf '%s\\n' "$1" | grep -cE "(^|[]: ])2201 \\(Stream\\)"`, 'sh', listen],
+            { encoding: 'utf8' },
+        );
         expect(out.trim()).toBe('2');
+    });
+
+    it("opens only the new port in the server's own nftables/iptables firewall, and keeps it across reboots", () => {
+        for (const tool of ['nftables', 'iptables'] as const) {
+            const script = buildAccessScript({
+                ...base,
+                sshPort: 22,
+                newPort: 2201,
+                firewall: { mode: 'open-only', tool, allowPorts: [] },
+            });
+            shSyntaxOk(script);
+            expect(script).toContain("FWP='2201'");
+            // Persisted through the service that loads the rules at boot, never by editing them.
+            expect(script).toContain('ExecStartPost=/bin/sh /etc/termi/ssh-port-');
+            expect(script).not.toMatch(
+                />\s*\/etc\/(nftables\.conf|iptables\/rules|sysconfig\/iptables)/,
+            );
+            // Undo hook written before the first rule is added.
+            expect(script.indexOf('undo-20-firewall.sh')).toBeLessThan(
+                script.indexOf('sh /etc/termi/ssh-port-'),
+            );
+        }
+        // The nft comment keeps its escaped quotes through the template.
+        const nft = buildAccessScript({
+            ...base,
+            newPort: 2201,
+            firewall: { mode: 'open-only', tool: 'nftables', allowPorts: [] },
+        });
+        expect(nft).toContain('comment "\\"termi_ssh_$p\\""');
+    });
+
+    it('never turns on or replaces a hand-made firewall', () => {
+        expect(() =>
+            buildAccessScript({
+                ...base,
+                firewall: { mode: 'enable', tool: 'nftables', allowPorts: [80] },
+            }),
+        ).toThrow(/does not turn on or replace/);
     });
 });

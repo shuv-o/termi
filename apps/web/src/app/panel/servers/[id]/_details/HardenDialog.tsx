@@ -484,7 +484,7 @@ export function HardenDialog({
                             <OptionRow
                                 id="harden-port"
                                 title="Move SSH to another port"
-                                hint={`Cuts the automated login attempts that hammer port ${report.sshPort}. sshd listens on both ports until Termi has logged in on the new one. If your provider has its own firewall (AWS, GCP, Azure…), allow the new port there first — otherwise Termi cannot reach it and rolls everything back.`}
+                                hint={`Cuts the automated login attempts that hammer port ${report.sshPort}. sshd listens on both ports until Termi has logged in on the new one, and the server's own firewall (ufw, firewalld, nftables or iptables) is opened for it and kept open across reboots. If your provider has its own firewall (AWS, GCP, Azure…), allow the new port there first — otherwise Termi cannot reach it and rolls everything back.`}
                                 checked={movePort}
                                 onChange={setMovePort}
                             >

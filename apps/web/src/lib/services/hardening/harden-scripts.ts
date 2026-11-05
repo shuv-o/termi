@@ -98,7 +98,12 @@ export interface AccessScriptInput {
     firewall: { mode: 'enable' | 'open-only'; tool: FirewallTool; allowPorts: number[] } | null;
 }
 
-export type FirewallTool = 'ufw' | 'firewalld';
+/**
+ * ufw / firewalld are managed by Termi. nftables / iptables are the server's
+ * own hand-made firewalls: Termi never enables or rewrites those, it only
+ * opens the SSH port it is moving to (mode 'open-only').
+ */
+export type FirewallTool = 'ufw' | 'firewalld' | 'nftables' | 'iptables';
 
 export function assertPort(port: number, what = 'port'): number {
     if (!Number.isInteger(port) || port < 1 || port > 65535) {
@@ -127,15 +132,22 @@ export function buildAccessScript(input: AccessScriptInput): string {
         if (input.newPort === input.sshPort)
             throw new HardeningInputError('That is already the SSH port');
     }
-    const allowPorts = input.firewall
-        ? [
-              ...new Set([
-                  input.sshPort,
-                  ...(input.newPort ? [input.newPort] : []),
-                  ...input.firewall.allowPorts.map((p) => assertPort(p)),
-              ]),
-          ]
-        : [];
+    const ownFirewall = input.firewall?.tool === 'nftables' || input.firewall?.tool === 'iptables';
+    const allowPorts = !input.firewall
+        ? []
+        : ownFirewall
+          ? // The admin's own rules already allow the current port; Termi only
+            // adds (and keeps re-adding at boot) the one it is moving to.
+            input.newPort
+              ? [input.newPort]
+              : []
+          : [
+                ...new Set([
+                    input.sshPort,
+                    ...(input.newPort ? [input.newPort] : []),
+                    ...input.firewall.allowPorts.map((p) => assertPort(p)),
+                ]),
+            ];
 
     const B = `${BACKUP_ROOT}/${input.runId}`;
     const dropin = [
@@ -533,6 +545,14 @@ function buildFirewallSection(
     ports: number[],
 ): string {
     const list = ports.map((p) => assertPort(p)).join(' ');
+    if (tool === 'nftables' || tool === 'iptables') {
+        if (mode !== 'open-only') {
+            throw new HardeningInputError(
+                `Termi does not turn on or replace a hand-made ${tool} firewall`,
+            );
+        }
+        return buildOwnFirewallSection(tool, list);
+    }
     if (tool === 'ufw') {
         return `
 # 5b. Firewall (ufw) ────────────────────────────────────────────────────────
@@ -584,6 +604,149 @@ ${
 }
 fi
 `;
+}
+
+/**
+ * Opens ports in the server's OWN nftables/iptables firewall, in a way that
+ * survives reboots and reloads without touching the admin's rule files:
+ *   - a tagged accept rule (comment termi_ssh_<port>) is inserted at the TOP
+ *     of every input-hook chain that blocks, so it wins over their drops;
+ *   - a drop-in on the service that loads the rules at boot (nftables.service,
+ *     netfilter-persistent or iptables.service) re-adds it after every start
+ *     and reload;
+ *   - if no such service is enabled, Termi cannot make it stick, so it stops
+ *     and names the exact table/chain for the admin to edit instead.
+ * Only Termi's own tagged rules are ever added or removed.
+ */
+function buildOwnFirewallSection(tool: 'nftables' | 'iptables', list: string): string {
+    const nft = String.raw`
+# 5b. The server's own nftables firewall: open the new SSH port ─────────────
+FWP='__PORTS__'
+has nft || fail firewall "nft is not installed"
+LOADER=""
+if has systemctl && [ "$(systemctl is-enabled nftables.service 2>/dev/null)" = "enabled" ]; then LOADER=nftables.service; fi
+# Input-hook chains that block (directly, or via a chain they jump to).
+CHAINS=$(nft list ruleset 2>/dev/null | awk '
+    $1=="table" { tbl=$2" "$3; next }
+    $1=="chain" && cur=="" { cur=tbl" "$2; next }
+    cur!="" {
+        if ($1=="}") { cur=""; next }
+        if ($0 ~ /hook input/) input[cur]=1
+        if ($0 ~ /policy drop/) blocks[cur]=1
+        else if ($0 ~ /(^|[[:space:]])(drop|reject)([[:space:];]|$)/) blocks[cur]=1
+        for (i=1; i<NF; i++) if ($i=="jump" || $i=="goto") { t=$(i+1); sub(/;$/, "", t); jumps[cur]=jumps[cur]"|"tbl" "t }
+    }
+    END {
+        for (c in input) {
+            hit=blocks[c]
+            n=split(jumps[c], j, "|")
+            for (k=1; k<=n; k++) if (j[k]!="" && blocks[j[k]]) hit=1
+            if (hit) print c
+        }
+    }')
+if [ -z "$CHAINS" ]; then
+    step firewall-skip "The nftables rules do not block incoming connections, so no port needed opening"
+else
+    first=$(printf '%s\n' "$CHAINS" | head -n 1)
+    [ -n "$LOADER" ] || fail firewall "This server's nftables rules are not loaded by nftables.service at boot, so Termi cannot keep port $FWP open after a reboot. Open it in your firewall config yourself (for example: nft insert rule $first tcp dport $FWP accept, and add it to the file your rules load from), then move the port."
+    mkdir -p /etc/termi && chmod 755 /etc/termi
+    # Undo first: remove only Termi's tagged rules, its hook and its helper.
+    printf 'LOADER=%s\nFWP="%s"\n' "$LOADER" "$FWP" > "$B/undo-20-firewall.sh"
+    cat >> "$B/undo-20-firewall.sh" <<'TERMI_UNDO'
+if [ -f /etc/termi/ssh-port-nftables.chains ]; then
+    while read -r fam tbl chain; do
+        for p in $FWP; do
+            for h in $(nft -a list chain "$fam" "$tbl" "$chain" 2>/dev/null | awk -v t="termi_ssh_$p" 'index($0, t) {print $NF}'); do
+                nft delete rule "$fam" "$tbl" "$chain" handle "$h" 2>/dev/null
+            done
+        done
+    done < /etc/termi/ssh-port-nftables.chains
+fi
+rm -f "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf" /etc/termi/ssh-port-nftables.sh /etc/termi/ssh-port-nftables.chains
+systemctl daemon-reload 2>/dev/null
+TERMI_UNDO
+    printf '%s\n' "$CHAINS" > /etc/termi/ssh-port-nftables.chains
+    cat > /etc/termi/ssh-port-nftables.sh <<'TERMI_HELPER'
+#!/bin/sh
+# Managed by Termi: keeps the SSH port open in this server's own nftables
+# firewall. nftables.service runs it after loading the rules (start + reload).
+ports="$*"
+while read -r fam tbl chain; do
+    [ -n "$chain" ] || continue
+    for p in $ports; do
+        nft list chain "$fam" "$tbl" "$chain" 2>/dev/null | grep -q "termi_ssh_$p" && continue
+        nft insert rule "$fam" "$tbl" "$chain" tcp dport "$p" accept comment "\"termi_ssh_$p\""
+    done
+done < /etc/termi/ssh-port-nftables.chains
+exit 0
+TERMI_HELPER
+    chmod 755 /etc/termi/ssh-port-nftables.sh
+    mkdir -p "/etc/systemd/system/$LOADER.d" && chmod 755 "/etc/systemd/system/$LOADER.d"
+    printf '[Service]\nExecStartPost=/bin/sh /etc/termi/ssh-port-nftables.sh %s\nExecReload=/bin/sh /etc/termi/ssh-port-nftables.sh %s\n' "$FWP" "$FWP" \
+        > "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf"
+    chmod 644 "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf"
+    systemctl daemon-reload
+    sh /etc/termi/ssh-port-nftables.sh $FWP
+    for p in $FWP; do nft list ruleset 2>/dev/null | grep -q "termi_ssh_$p" || fail firewall "could not open port $p in nftables"; done
+    systemctl show -p ExecStartPost --value "$LOADER" 2>/dev/null | grep -q ssh-port-nftables \
+        || fail firewall "$LOADER would not re-open port $FWP after a reboot"
+    step firewall "Opened port $FWP in this server's own nftables firewall ($(printf '%s' "$CHAINS" | tr '\n' ',' | sed 's/,$//')); $LOADER keeps it open across reboots"
+fi
+`;
+
+    const ipt = String.raw`
+# 5b. The server's own iptables firewall: open the new SSH port ─────────────
+FWP='__PORTS__'
+has iptables || fail firewall "iptables is not installed"
+LOADER=""
+if has systemctl; then
+    for svc in netfilter-persistent.service iptables.service; do
+        if [ "$(systemctl is-enabled "$svc" 2>/dev/null)" = "enabled" ]; then LOADER=$svc; break; fi
+    done
+fi
+if ! iptables -S INPUT 2>/dev/null | grep -qE '^-P INPUT (DROP|REJECT)|-j (DROP|REJECT)'; then
+    step firewall-skip "The iptables rules do not block incoming connections, so no port needed opening"
+else
+    [ -n "$LOADER" ] || fail firewall "This server's iptables rules are not restored at boot by netfilter-persistent or iptables.service, so Termi cannot keep port $FWP open after a reboot. Open it yourself (for example: iptables -I INPUT -p tcp --dport $FWP -j ACCEPT) and save it where your rules are restored from, then move the port."
+    mkdir -p /etc/termi && chmod 755 /etc/termi
+    printf 'LOADER=%s\nFWP="%s"\n' "$LOADER" "$FWP" > "$B/undo-20-firewall.sh"
+    cat >> "$B/undo-20-firewall.sh" <<'TERMI_UNDO'
+for p in $FWP; do
+    for t in iptables ip6tables; do
+        command -v "$t" >/dev/null 2>&1 || continue
+        while "$t" -D INPUT -p tcp --dport "$p" -m comment --comment "termi_ssh_$p" -j ACCEPT 2>/dev/null; do :; done
+    done
+done
+rm -f "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf" /etc/termi/ssh-port-iptables.sh
+systemctl daemon-reload 2>/dev/null
+TERMI_UNDO
+    cat > /etc/termi/ssh-port-iptables.sh <<'TERMI_HELPER'
+#!/bin/sh
+# Managed by Termi: keeps the SSH port open in this server's own iptables
+# firewall. Run after the rules are restored (start + reload).
+for p in "$@"; do
+    for t in iptables ip6tables; do
+        command -v "$t" >/dev/null 2>&1 || continue
+        "$t" -C INPUT -p tcp --dport "$p" -m comment --comment "termi_ssh_$p" -j ACCEPT 2>/dev/null \
+            || "$t" -I INPUT -p tcp --dport "$p" -m comment --comment "termi_ssh_$p" -j ACCEPT
+    done
+done
+exit 0
+TERMI_HELPER
+    chmod 755 /etc/termi/ssh-port-iptables.sh
+    mkdir -p "/etc/systemd/system/$LOADER.d" && chmod 755 "/etc/systemd/system/$LOADER.d"
+    printf '[Service]\nExecStartPost=/bin/sh /etc/termi/ssh-port-iptables.sh %s\nExecReload=/bin/sh /etc/termi/ssh-port-iptables.sh %s\n' "$FWP" "$FWP" \
+        > "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf"
+    chmod 644 "/etc/systemd/system/$LOADER.d/zz-termi-ssh-port.conf"
+    systemctl daemon-reload
+    sh /etc/termi/ssh-port-iptables.sh $FWP
+    for p in $FWP; do iptables -C INPUT -p tcp --dport "$p" -m comment --comment "termi_ssh_$p" -j ACCEPT 2>/dev/null || fail firewall "could not open port $p in iptables"; done
+    systemctl show -p ExecStartPost --value "$LOADER" 2>/dev/null | grep -q ssh-port-iptables \
+        || fail firewall "$LOADER would not re-open port $FWP after a reboot"
+    step firewall "Opened port $FWP in this server's own iptables firewall; $LOADER keeps it open across reboots"
+fi
+`;
+    return (tool === 'nftables' ? nft : ipt).replaceAll('__PORTS__', list);
 }
 
 export interface ClosePortInput {

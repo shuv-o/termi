@@ -349,11 +349,9 @@ export async function hardenServer(
         } else if (newPort !== null) {
             if (managed) firewallPlan = { mode: 'open-only', tool: managed, allowPorts: [] };
             else if (fwNow === 'nftables' || fwNow === 'iptables') {
-                return stop(
-                    fwNow === 'nftables'
-                        ? `This server has its own nftables firewall, which would block port ${newPort}. Allow it there first — for example: nft add rule inet filter input tcp dport ${newPort} accept (use your table and chain names) — then move the port.`
-                        : `This server has its own iptables firewall, which would block port ${newPort}. Allow it there first — for example: iptables -I INPUT -p tcp --dport ${newPort} -j ACCEPT — then move the port.`,
-                );
+                // The server's own firewall: open the new port in it (and keep
+                // it open across reboots) rather than asking the admin to.
+                firewallPlan = { mode: 'open-only', tool: fwNow, allowPorts: [] };
             }
         }
         if (newUsername) {
@@ -435,7 +433,10 @@ export async function hardenServer(
             emit(id, 'failed');
             await runAsRoot(oldClient, elev, buildRollbackNowScript(runId), 30_000).catch(() => {});
             pendingRollback = null;
-            return done('failed', `Stopped: ${msg.join(' ')}. Everything was rolled back.`);
+            return done(
+                'failed',
+                `Stopped: ${msg.join(' ').replace(/\.+$/, '')}. Everything was rolled back.`,
+            );
         }
 
         // ── Prove the new login works, on a fresh connection ─────────────────
