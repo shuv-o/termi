@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **Fresh installs were missing the database objects for several features.** Telnet servers, server sharing and invitations, session recordings, benchmark history, tunnel sessions, webhook alerts and nine audit actions were added to the Prisma schema without migrations, so any database built by `prisma migrate deploy` — every Docker install — lacked them, and those features failed. A new migration (`20261107000000_sync_schema_drift`) adds them. Every statement is idempotent, so databases that already have these objects (synced with `prisma db push`) apply it as a no-op.
+
+---
+
 ## [1.1.1] — 2026-11-07
 
 ### Added
