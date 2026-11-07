@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getIronSession } from 'iron-session';
 import { sessionOptions, isDesktopDevice, type SessionData } from '@/lib/auth/session-config';
+import { TUNNEL_SANDBOX } from '@/lib/security/tunnel-sandbox';
 
 // Slide the desktop session cookie at most once per hour. Each save re-issues
 // the cookie with a fresh 30-day maxAge, so any interaction within the window
@@ -46,9 +47,9 @@ export async function proxy(request: NextRequest) {
             status: 301, // Permanent redirect
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
+                Pragma: 'no-cache',
+                Expires: '0',
+            },
         });
     }
 
@@ -81,6 +82,9 @@ export async function proxy(request: NextRequest) {
         "base-uri 'self'",
         "form-action 'self'",
         'upgrade-insecure-requests',
+        // Tunneled apps are served from this origin but must never get it:
+        // the sandbox gives them an opaque origin (see app/tunnel/.../route.ts).
+        ...(url.pathname.startsWith('/tunnel/') ? [TUNNEL_SANDBOX] : []),
     ].join('; ');
 
     // Forward the nonce to server components via a request header
@@ -104,7 +108,13 @@ export async function proxy(request: NextRequest) {
         'max-age=31536000; includeSubDomains; preload',
     );
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-    response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+    // A sandboxed tunnel page has an opaque origin, so same-origin CORP would
+    // block it from loading even its own scripts and styles. Its resources are
+    // reachable only through the unguessable tunnel token in the URL.
+    response.headers.set(
+        'Cross-Origin-Resource-Policy',
+        url.pathname.startsWith('/tunnel/') ? 'cross-origin' : 'same-origin',
+    );
 
     // Roll the desktop (Electron) session cookie forward on any interaction.
     await slideDesktopSession(request, response);

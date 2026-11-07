@@ -456,6 +456,25 @@ function createWindow(appUrl) {
         }
     });
 
+    // will-navigate does not fire for server-side redirects, so an allowed page
+    // (an identity provider, or an open redirect) could otherwise 302 this
+    // window — preload bridge and all — onto any site. Same rule as above.
+    win.webContents.on('will-redirect', (event, url, _isInPlace, isMainFrame) => {
+        if (!isMainFrame) return;
+        let target;
+        try {
+            target = new URL(url);
+        } catch {
+            event.preventDefault();
+            return;
+        }
+        if (isAllowedNavigation(target)) return;
+        event.preventDefault();
+        if (target.protocol === 'https:' || target.protocol === 'http:') {
+            shell.openExternal(url);
+        }
+    });
+
     // The preload bridge must never be attached to a page we didn't ship.
     win.webContents.on('will-attach-webview', (event) => event.preventDefault());
 }
@@ -467,9 +486,33 @@ function startApp() {
     createWindow(startUrl);
 }
 
+/**
+ * True when an IPC call comes from Termi itself: the window's main frame, on
+ * the app's own origin, and not a /tunnel/ page (those are third-party apps
+ * served through Termi; they are sandboxed to an opaque origin, which this
+ * check also rejects). Every handler below refuses anything else, so a page
+ * that somehow ends up in this window can't reach the local shell, tunnels or
+ * passkeys.
+ */
+function isTrustedSender(event) {
+    const frame = event.senderFrame;
+    if (!frame || frame.parent !== null) return false;
+    try {
+        const url = new URL(frame.url);
+        return url.origin === new URL(REMOTE_URL).origin && !url.pathname.startsWith('/tunnel/');
+    } catch {
+        return false;
+    }
+}
+
+function assertTrustedSender(event) {
+    if (!isTrustedSender(event)) throw new Error('Untrusted IPC sender');
+}
+
 //   Local terminal IPC                                     ─
 
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
+    assertTrustedSender(event);
     if (!nodePty)
         return { success: false, error: 'node-pty not available — run: npm run setup:electron' };
 
@@ -531,16 +574,19 @@ ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) =>
 });
 
 ipcMain.on('local-terminal:write', (event, id, data) => {
+    if (!isTrustedSender(event)) return;
     const term = localPtys.get(id);
     if (term) term.write(data);
 });
 
 ipcMain.on('local-terminal:resize', (event, id, cols, rows) => {
+    if (!isTrustedSender(event)) return;
     const term = localPtys.get(id);
     if (term) term.resize(cols, rows);
 });
 
 ipcMain.on('local-terminal:kill', (event, id) => {
+    if (!isTrustedSender(event)) return;
     const term = localPtys.get(id);
     if (term) {
         try {
@@ -563,6 +609,7 @@ ipcMain.on('local-terminal:kill', (event, id) => {
 const tunnelServers = new Map(); // id -> net.Server
 
 ipcMain.handle('tunnel:open', (event, { gatewayUrl, serverId, token, localPort }) => {
+    assertTrustedSender(event);
     const net = require('net');
     const { randomUUID } = require('crypto');
     const wsUrl = `${gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(serverId)}`;
@@ -623,6 +670,7 @@ ipcMain.handle('tunnel:open', (event, { gatewayUrl, serverId, token, localPort }
 });
 
 ipcMain.on('tunnel:close', (event, id) => {
+    if (!isTrustedSender(event)) return;
     const server = tunnelServers.get(id);
     if (server) {
         server.close();
@@ -632,9 +680,13 @@ ipcMain.on('tunnel:close', (event, id) => {
 
 //   Native passkey IPC (macOS)                             ─
 
-ipcMain.handle('passkey:isAvailable', async () => !!(await loadElectronWebauthn()));
+ipcMain.handle('passkey:isAvailable', async (event) => {
+    assertTrustedSender(event);
+    return !!(await loadElectronWebauthn());
+});
 
-ipcMain.handle('passkey:create', async (_event, optionsJSON) => {
+ipcMain.handle('passkey:create', async (event, optionsJSON) => {
+    assertTrustedSender(event);
     const electronWebauthn = await loadElectronWebauthn();
     if (!electronWebauthn) {
         return {
@@ -703,7 +755,8 @@ ipcMain.handle('passkey:create', async (_event, optionsJSON) => {
     }
 });
 
-ipcMain.handle('passkey:get', async (_event, optionsJSON) => {
+ipcMain.handle('passkey:get', async (event, optionsJSON) => {
+    assertTrustedSender(event);
     const electronWebauthn = await loadElectronWebauthn();
     if (!electronWebauthn) {
         return {

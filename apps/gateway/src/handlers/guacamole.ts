@@ -67,11 +67,75 @@ function parseInstruction(data: string): { opcode: string; args: string[] } | nu
     };
 }
 
+/**
+ * Instructions the browser may never send. The gateway alone performs the
+ * handshake (select → args → size/audio/video/image/timezone → connect), so a
+ * client-sent `select` or `connect` could re-target guacd at any host with any
+ * parameters (drive/recording paths, sftp-hostname, …) and bypass the gateway's
+ * SSRF guard. `size` and `audio` stay allowed: after the handshake they are the
+ * normal runtime resize and microphone-stream instructions.
+ */
+const CLIENT_BLOCKED_OPCODES = new Set(['select', 'connect', 'video', 'image', 'timezone', 'name']);
+
+/**
+ * Parse the opcodes of every instruction in a frame. `unit` picks what the
+ * length prefixes count: code points (the Guacamole spec, and how guacd reads)
+ * or UTF-8 bytes (what this app's GatewayTunnel.sendMessage writes). Returns
+ * the opcodes parsed before any error, and whether the whole frame parsed.
+ */
+function parseOpcodes(frame: string, unit: 'codepoint' | 'byte') {
+    const units: string[] =
+        unit === 'codepoint'
+            ? Array.from(frame)
+            : Array.from(Buffer.from(frame, 'utf8')).map((b) => String.fromCharCode(b));
+    const opcodes: string[] = [];
+    let i = 0;
+    const fail = () => ({ opcodes, complete: false });
+    while (i < units.length) {
+        let first = true;
+        for (;;) {
+            let len = '';
+            while (i < units.length && units[i] >= '0' && units[i] <= '9') len += units[i++];
+            if (!len || len.length > 9 || units[i] !== '.') return fail();
+            i++;
+            const n = parseInt(len, 10);
+            if (i + n > units.length) return fail();
+            if (first) opcodes.push(units.slice(i, i + n).join(''));
+            first = false;
+            i += n;
+            const sep = units[i++];
+            if (sep === ';') break;
+            if (sep !== ',') return fail();
+        }
+    }
+    return { opcodes, complete: opcodes.length > 0 };
+}
+
+/**
+ * Decide whether a browser frame may go to guacd: it must parse completely
+ * under one of the two length conventions, and no blocked opcode may appear
+ * under either reading — including the prefix guacd would act on before
+ * hitting a parse error.
+ */
+export function clientFrameVerdict(frame: string): { ok: true } | { ok: false; reason: string } {
+    const asCodepoints = parseOpcodes(frame, 'codepoint');
+    const asBytes = parseOpcodes(frame, 'byte');
+    const blocked = [...asCodepoints.opcodes, ...asBytes.opcodes].find((op) =>
+        CLIENT_BLOCKED_OPCODES.has(op),
+    );
+    if (blocked) return { ok: false, reason: `'${blocked}' instruction` };
+    if (!asCodepoints.complete && !asBytes.complete)
+        return { ok: false, reason: 'malformed frame' };
+    return { ok: true };
+}
+
 export class GuacamoleHandler {
     private ws: WebSocket;
     private guacdSocket: Socket;
     private buffer: string = '';
     private closing = false;
+    /** True once the gateway has sent its own `connect`; browser frames are dropped until then. */
+    private handshakeSent = false;
     /** Relay through a jump host, when the server has one (see jump-relay.ts). */
     private relay: JumpRelay | null = null;
     // Callbacks used during the guacd protocol handshake phase
@@ -175,7 +239,7 @@ export class GuacamoleHandler {
 
                 // Check if it's a Guacamole instruction (contains period-length prefix)
                 if (data.match(/^\d+\./)) {
-                    this.guacdSocket.write(data);
+                    this.forwardClientInstructions(data);
                 } else {
                     // Try to parse as JSON
                     const parsed = JSON.parse(data);
@@ -188,8 +252,8 @@ export class GuacamoleHandler {
                     }
                 }
             } catch {
-                // If not JSON, forward as raw Guacamole instruction
-                this.guacdSocket.write(message.toString());
+                // Neither JSON nor a well-formed instruction: drop it rather than
+                // hand guacd bytes it might parse as something else.
             }
         });
 
@@ -506,8 +570,23 @@ export class GuacamoleHandler {
         // multi-byte characters in username/password do not misalign subsequent args.
         const connectBuf = encodeInstruction('connect', ...connectionArgs);
         this.guacdSocket.write(connectBuf);
+        this.handshakeSent = true;
 
         this.ws.send(JSON.stringify({ type: 'connected' }));
+    }
+
+    /**
+     * Forward browser instructions to guacd only after the gateway's handshake,
+     * and never the handshake instructions themselves (see CLIENT_BLOCKED_OPCODES).
+     */
+    private forwardClientInstructions(data: string): void {
+        if (!this.handshakeSent) return;
+        const verdict = clientFrameVerdict(data);
+        if (!verdict.ok) {
+            console.warn(`[Guacamole] Dropped client frame: ${verdict.reason}`);
+            return;
+        }
+        this.guacdSocket.write(data);
     }
 
     private sendError(message: string): void {

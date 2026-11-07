@@ -156,3 +156,25 @@ export function tunnelCreateRateLimit(userId: string): RateLimitResult {
 export function recordingCreateRateLimit(userId: string): RateLimitResult {
     return rateLimit(`recording-create:${userId}`, 20, 60 * 60 * 1000);
 }
+
+/**
+ * Per-account limits for code verification. The IP-based limiters can be
+ * sidestepped by rotating client IPs (or forwarding headers), so 2FA and
+ * signup codes are also bounded per user: 10 tries per 15 minutes.
+ */
+export function verify2FAAccountRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`verify2fa-user:${userId}`, 10, 15 * 60 * 1000);
+}
+
+export function verifySignupRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`verify-signup:${userId}`, 10, 15 * 60 * 1000);
+}
+
+/**
+ * Decrypted keychain reads: 30 per 5 minutes per user. Generous enough for
+ * the keychain page and the server form, but caps bulk extraction from a
+ * hijacked session or injected script.
+ */
+export function keychainReadRateLimit(userId: string): RateLimitResult {
+    return rateLimit(`keychain-read:${userId}`, 30, 5 * 60 * 1000);
+}

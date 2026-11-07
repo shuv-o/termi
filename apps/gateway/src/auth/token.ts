@@ -56,7 +56,7 @@ const PLACEHOLDER_SECRET = 'gateway-secret-key-change-in-production';
 
 function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
-    if (!secret || secret === PLACEHOLDER_SECRET) {
+    if (!secret || secret === PLACEHOLDER_SECRET || /^change-me/i.test(secret)) {
         if (process.env.NODE_ENV === 'production') {
             throw new Error(
                 'GATEWAY_JWT_SECRET must be set to a strong random value in production',

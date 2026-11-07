@@ -135,10 +135,19 @@ export async function findOrCreateGoogleUser(
     // Case C: existing user with same email
     const existingUser = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
-        select: { id: true, email: true, masterKeyHash: true },
+        select: { id: true, email: true, masterKeyHash: true, isVerified: true },
     });
 
     if (existingUser) {
+        // An unverified account's password was set by whoever registered the
+        // email, never proven to own it. Linking Google to it would hand the
+        // real owner an account the registrant can still sign in to (account
+        // pre-hijacking). Only verified accounts are linked; the owner of an
+        // unverified one signs in with its password (or resets it) first.
+        if (!existingUser.isVerified) {
+            throw new Error('ACCOUNT_UNVERIFIED');
+        }
+
         // Link Google account to existing user
         await prisma.$transaction([
             prisma.oAuthAccount.create({

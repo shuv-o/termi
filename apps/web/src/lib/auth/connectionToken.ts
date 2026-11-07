@@ -11,7 +11,11 @@ import { createHash } from 'crypto';
 
 export function getJWEKey(): Uint8Array {
     const secret = process.env.GATEWAY_JWT_SECRET;
-    if (!secret || secret === 'gateway-secret-key-change-in-production') {
+    if (
+        !secret ||
+        secret === 'gateway-secret-key-change-in-production' ||
+        /^change-me/i.test(secret)
+    ) {
         if (process.env.NODE_ENV === 'production') {
             throw new Error(
                 'GATEWAY_JWT_SECRET must be set to a strong random value in production',

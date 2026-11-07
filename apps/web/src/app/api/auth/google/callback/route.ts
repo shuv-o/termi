@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server';
 import { getSession, createSession } from '@/lib/auth/session';
 import { exchangeGoogleCode, findOrCreateGoogleUser } from '@/lib/auth/google-oauth';
 import { consumeOAuthStateCookie, oauthStateCookieDeletion } from '@/lib/auth/oauth-state';
+import { sendEmailOTP } from '@/lib/auth/email-otp';
+import { prisma } from '@/lib/db';
 
 export async function GET(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
@@ -45,6 +47,30 @@ export async function GET(request: Request) {
             request.headers.get('x-real-ip') ||
             '0.0.0.0';
 
+        const nextPath = isNewUser || !hasMasterKey ? '/setup-encryption' : '/unlock-encryption';
+
+        // Google proves who owns the email, not the second factor. An account
+        // with 2FA goes through the same pending-2FA step as a password login
+        // (verify2FA completes it), instead of being logged in here.
+        const { twoFactorMethod } = (await prisma.user.findUnique({
+            where: { id: userId },
+            select: { twoFactorMethod: true },
+        })) ?? { twoFactorMethod: 'NONE' };
+        if (twoFactorMethod !== 'NONE') {
+            const pending = await getSession();
+            pending.isLoggedIn = false;
+            pending.requires2FA = true;
+            pending.tempUserId = userId;
+            pending.tempMasterKey = undefined;
+            await pending.save();
+            if (twoFactorMethod === 'EMAIL') await sendEmailOTP(userId, email, ipAddress);
+            return deleteOAuthCookie(
+                NextResponse.redirect(
+                    `${appUrl}/login?twofa=${twoFactorMethod}&next=${encodeURIComponent(nextPath)}`,
+                ),
+            );
+        }
+
         const sessionToken = await createSession(userId, email, deviceInfo, ipAddress);
 
         const session = await getSession();
@@ -54,16 +80,16 @@ export async function GET(request: Request) {
         session.isLoggedIn = true;
         await session.save();
 
-        const redirectUrl =
-            isNewUser || !hasMasterKey
-                ? `${appUrl}/setup-encryption`
-                : `${appUrl}/unlock-encryption`;
-
-        return deleteOAuthCookie(NextResponse.redirect(redirectUrl));
+        return deleteOAuthCookie(NextResponse.redirect(`${appUrl}${nextPath}`));
     } catch (err) {
         console.error('Google OAuth callback error:', err);
         // Google returned an unverified email — refuse to link/register and tell
         // the user why, rather than showing a generic failure.
+        if (err instanceof Error && err.message === 'ACCOUNT_UNVERIFIED') {
+            return deleteOAuthCookie(
+                NextResponse.redirect(`${appUrl}/login?error=oauth_account_unverified`),
+            );
+        }
         if (err instanceof Error && err.message === 'GOOGLE_EMAIL_UNVERIFIED') {
             return deleteOAuthCookie(
                 NextResponse.redirect(`${appUrl}/login?error=oauth_email_unverified`),

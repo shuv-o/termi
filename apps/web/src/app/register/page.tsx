@@ -33,7 +33,6 @@ function GoogleIcon({ className }: { className?: string }) {
     );
 }
 
-
 // ── OTP verification step ────────────────────────────────────────────────────
 
 function VerifyStep({
@@ -45,6 +44,7 @@ function VerifyStep({
     userId: string;
     onSuccess: () => void;
 }) {
+    const router = useRouter();
     const [digits, setDigits] = useState(['', '', '', '', '', '']);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -101,6 +101,11 @@ function VerifyStep({
                 setError(data.error || 'Verification failed');
                 setDigits(['', '', '', '', '', '']);
                 inputRefs.current[0]?.focus();
+                return;
+            }
+            // Accounts with 2FA are verified but not signed in by this step.
+            if (data.data?.requiresLogin) {
+                router.push('/login?verified=1');
                 return;
             }
             onSuccess();
@@ -272,212 +277,207 @@ function RegisterContent() {
 
     return (
         <PageShell fullWidth>
-                    <div className="flex min-h-0">
-                        <BrandPanel />
+            <div className="flex min-h-0">
+                <BrandPanel />
 
-                        {/* Right form / verify panel */}
-                        <div className="flex flex-1 flex-col justify-center p-6 sm:p-8">
-                            {/* Mobile logo */}
-                            <div className="mb-6 flex items-center gap-2.5 md:hidden">
-                                <TerminalLogo width={28} height={28} className="rounded-md" />
-                                <span className="text-[15px] font-semibold">Termi</span>
+                {/* Right form / verify panel */}
+                <div className="flex flex-1 flex-col justify-center p-6 sm:p-8">
+                    {/* Mobile logo */}
+                    <div className="mb-6 flex items-center gap-2.5 md:hidden">
+                        <TerminalLogo width={28} height={28} className="rounded-md" />
+                        <span className="text-[15px] font-semibold">Termi</span>
+                    </div>
+
+                    {verifying ? (
+                        <VerifyStep
+                            email={pendingEmail}
+                            userId={pendingUserId}
+                            onSuccess={handleVerified}
+                        />
+                    ) : (
+                        <>
+                            <h1 className="text-2xl font-bold mb-1">Create account</h1>
+                            <p className="text-muted-foreground text-sm mb-6">
+                                Start managing your servers securely
+                            </p>
+
+                            {/* Google Sign-Up */}
+                            <a
+                                href="/api/auth/google/authorize"
+                                className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium mb-5"
+                            >
+                                <GoogleIcon className="w-5 h-5" />
+                                Continue with Google
+                            </a>
+
+                            <div className="relative mb-5">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-border" />
+                                </div>
+                                <div className="relative flex justify-center text-xs">
+                                    <span className="bg-card px-2 text-muted-foreground">
+                                        or register with email
+                                    </span>
+                                </div>
                             </div>
 
-                            {verifying ? (
-                                <VerifyStep
-                                    email={pendingEmail}
-                                    userId={pendingUserId}
-                                    onSuccess={handleVerified}
-                                />
-                            ) : (
-                                <>
-                                    <h1 className="text-2xl font-bold mb-1">Create account</h1>
-                                    <p className="text-muted-foreground text-sm mb-6">
-                                        Start managing your servers securely
-                                    </p>
+                            <form
+                                onSubmit={handleSubmit}
+                                method="POST"
+                                action="#"
+                                className="space-y-4"
+                            >
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="name">Full name</Label>
+                                    <Input
+                                        type="text"
+                                        id="name"
+                                        value={formData.name}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                name: e.target.value,
+                                            })
+                                        }
 
-                                    {/* Google Sign-Up */}
-                                    <a
-                                        href="/api/auth/google/authorize"
-                                        className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-secondary hover:bg-accent transition-colors text-sm font-medium mb-5"
-                                    >
-                                        <GoogleIcon className="w-5 h-5" />
-                                        Continue with Google
-                                    </a>
+                                        placeholder="Jane Smith"
+                                        required
+                                        autoComplete="name"
+                                    />
+                                </div>
 
-                                    <div className="relative mb-5">
-                                        <div className="absolute inset-0 flex items-center">
-                                            <div className="w-full border-t border-border" />
-                                        </div>
-                                        <div className="relative flex justify-center text-xs">
-                                            <span className="bg-card px-2 text-muted-foreground">
-                                                or register with email
-                                            </span>
-                                        </div>
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="email">Email address</Label>
+                                    <Input
+                                        type="email"
+                                        id="email"
+                                        value={formData.email}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                email: e.target.value,
+                                            })
+                                        }
 
-                                    <form
-                                        onSubmit={handleSubmit}
-                                        method="POST"
-                                        action="#"
-                                        className="space-y-4"
-                                    >
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="name">Full name</Label>
-                                            <Input
-                                                type="text"
-                                                id="name"
-                                                value={formData.name}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        name: e.target.value,
-                                                    })
-                                                }
-                                               
-                                                placeholder="Jane Smith"
-                                                required
-                                                autoComplete="name"
-                                            />
-                                        </div>
+                                        placeholder="you@example.com"
+                                        required
+                                        autoComplete="email"
+                                    />
+                                </div>
 
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="email">Email address</Label>
-                                            <Input
-                                                type="email"
-                                                id="email"
-                                                value={formData.email}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        email: e.target.value,
-                                                    })
-                                                }
-                                               
-                                                placeholder="you@example.com"
-                                                required
-                                                autoComplete="email"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="password">Password</Label>
-                                            <div className="relative">
-                                                <Input
-                                                    type={showPassword ? 'text' : 'password'}
-                                                    id="password"
-                                                    value={formData.password}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            password: e.target.value,
-                                                        })
-                                                    }
-                                                    className="pr-12"
-                                                    placeholder="••••••••"
-                                                    required
-                                                    autoComplete="new-password"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-                                                >
-                                                    {showPassword ? (
-                                                        <EyeOff className="w-4 h-4" />
-                                                    ) : (
-                                                        <Eye className="w-4 h-4" />
-                                                    )}
-                                                </Button>
-                                            </div>
-
-                                            {formData.password && (
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
-                                                    {passwordRequirements.map((req, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-success' : 'text-muted-foreground'}`}
-                                                        >
-                                                            {req.met ? (
-                                                                <Check className="w-3 h-3 shrink-0" />
-                                                            ) : (
-                                                                <X className="w-3 h-3 shrink-0" />
-                                                            )}
-                                                            {req.label}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="confirmPassword">Confirm password</Label>
-                                            <Input
-                                                type="password"
-                                                id="confirmPassword"
-                                                value={formData.confirmPassword}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        confirmPassword: e.target.value,
-                                                    })
-                                                }
-                                                className={`bg-secondary border-border ${formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''}`}
-                                                placeholder="••••••••"
-                                                required
-                                                autoComplete="new-password"
-                                            />
-                                            {formData.confirmPassword && !passwordsMatch && (
-                                                <p className="text-xs text-danger">
-                                                    Passwords do not match
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="flex gap-2 p-3 rounded-lg bg-info/10 border border-info/30 text-xs text-info">
-                                            <span className="shrink-0">🔒</span>
-                                            <span>
-                                                Credentials are encrypted using a key derived from
-                                                your password. Keep it safe.
-                                            </span>
-                                        </div>
-
-                                        {error && (
-                                            <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
-                                                {error}
-                                            </div>
-                                        )}
-
-                                        <Button
-                                            type="submit"
-                                            disabled={
-                                                loading || !allRequirementsMet || !passwordsMatch
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="relative">
+                                        <Input
+                                            type={showPassword ? 'text' : 'password'}
+                                            id="password"
+                                            value={formData.password}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    password: e.target.value,
+                                                })
                                             }
-                                            className="w-full"
+                                            className="pr-12"
+                                            placeholder="••••••••"
+                                            required
+                                            autoComplete="new-password"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                                         >
-                                            {loading ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            {showPassword ? (
+                                                <EyeOff className="w-4 h-4" />
                                             ) : (
-                                                'Create account'
+                                                <Eye className="w-4 h-4" />
                                             )}
                                         </Button>
-                                    </form>
+                                    </div>
 
-                                    <p className="mt-6 text-center text-sm text-muted-foreground">
-                                        Already have an account?{' '}
-                                        <Link
-                                            href="/login"
-                                            className="text-primary hover:text-primary/80"
-                                        >
-                                            Sign in
-                                        </Link>
-                                    </p>
-                                </>
-                            )}
-                        </div>
-                    </div>
+                                    {formData.password && (
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+                                            {passwordRequirements.map((req, i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`flex items-center gap-1.5 text-xs ${req.met ? 'text-success' : 'text-muted-foreground'}`}
+                                                >
+                                                    {req.met ? (
+                                                        <Check className="w-3 h-3 shrink-0" />
+                                                    ) : (
+                                                        <X className="w-3 h-3 shrink-0" />
+                                                    )}
+                                                    {req.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="confirmPassword">Confirm password</Label>
+                                    <Input
+                                        type="password"
+                                        id="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                confirmPassword: e.target.value,
+                                            })
+                                        }
+                                        className={`bg-secondary border-border ${formData.confirmPassword && !passwordsMatch ? 'border-destructive' : ''}`}
+                                        placeholder="••••••••"
+                                        required
+                                        autoComplete="new-password"
+                                    />
+                                    {formData.confirmPassword && !passwordsMatch && (
+                                        <p className="text-xs text-danger">
+                                            Passwords do not match
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2 p-3 rounded-lg bg-info/10 border border-info/30 text-xs text-info">
+                                    <span className="shrink-0">🔒</span>
+                                    <span>
+                                        Credentials are encrypted using a key derived from your
+                                        password. Keep it safe.
+                                    </span>
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !allRequirementsMet || !passwordsMatch}
+                                    className="w-full"
+                                >
+                                    {loading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        'Create account'
+                                    )}
+                                </Button>
+                            </form>
+
+                            <p className="mt-6 text-center text-sm text-muted-foreground">
+                                Already have an account?{' '}
+                                <Link href="/login" className="text-primary hover:text-primary/80">
+                                    Sign in
+                                </Link>
+                            </p>
+                        </>
+                    )}
+                </div>
+            </div>
         </PageShell>
     );
 }

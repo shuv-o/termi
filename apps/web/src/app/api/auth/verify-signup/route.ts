@@ -15,6 +15,7 @@ import {
     getDeviceInfo,
 } from '@/lib/api';
 import { prisma } from '@/lib/db';
+import { verifySignupRateLimit } from '@/lib/rate-limit';
 
 const schema = z.object({
     userId: z.string().min(1),
@@ -30,9 +31,13 @@ export async function POST(request: Request) {
 
     const { userId, code } = validation.data;
 
+    if (!verifySignupRateLimit(userId).allowed) {
+        return errorResponse('Too many attempts. Please request a new code later.', 429);
+    }
+
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, email: true, isVerified: true, isActive: true },
+        select: { id: true, email: true, isVerified: true, isActive: true, twoFactorMethod: true },
     });
 
     if (!user || !user.isActive) {
@@ -56,6 +61,15 @@ export async function POST(request: Request) {
     await prisma.auditLog.create({
         data: { userId, action: 'USER_EMAIL_VERIFIED' },
     });
+
+    // Verifying an email proves the mailbox, not the second factor: an account
+    // with 2FA must still sign in normally.
+    if (user.twoFactorMethod !== 'NONE') {
+        return successResponse({
+            message: 'Email verified. Please sign in.',
+            requiresLogin: true,
+        });
+    }
 
     const ipAddress = getClientIP(request);
     const deviceInfo = getDeviceInfo(request);

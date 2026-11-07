@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { filterForwardHeaders, scopeCookiePath, injectBaseTag } from './route';
+import {
+    filterForwardHeaders,
+    scopeCookiePath,
+    injectBaseTag,
+    isBlockedResponseHeader,
+} from './route';
 
 describe('filterForwardHeaders', () => {
     it('drops the session cookie — this route is same-origin, so the browser attaches it automatically', () => {
@@ -54,7 +59,45 @@ describe('scopeCookiePath', () => {
     it('preserves other cookie attributes untouched', () => {
         expect(
             scopeCookiePath('session=abc; Path=/app; HttpOnly; Secure', '/tunnel/srv1/8080/'),
-        ).toBe('session=abc; Path=/tunnel/srv1/8080/; HttpOnly; Secure');
+        ).toBe('session=abc; HttpOnly; Secure; Path=/tunnel/srv1/8080/');
+    });
+
+    it('replaces every Path, not just the first — the last one wins in browsers', () => {
+        expect(scopeCookiePath('a=b; Path=/x; Path=/', '/tunnel/s/80/')).toBe(
+            'a=b; Path=/tunnel/s/80/',
+        );
+    });
+
+    it('drops Domain so a target cannot plant cookies on the whole site', () => {
+        expect(scopeCookiePath('a=b; Domain=termi.run; Secure', '/tunnel/s/80/')).toBe(
+            'a=b; Secure; Path=/tunnel/s/80/',
+        );
+    });
+
+    it('drops __Host- and __Secure- cookies, which cannot be path-scoped', () => {
+        expect(scopeCookiePath('__Host-sid=x; Path=/; Secure', '/tunnel/s/80/')).toBeNull();
+        expect(scopeCookiePath('__Secure-sid=x; Secure', '/tunnel/s/80/')).toBeNull();
+    });
+});
+
+describe('isBlockedResponseHeader', () => {
+    it('blocks headers that would affect the whole Termi origin', () => {
+        for (const h of [
+            'Service-Worker-Allowed',
+            'Clear-Site-Data',
+            'Content-Security-Policy',
+            'Strict-Transport-Security',
+            'Refresh',
+            'Access-Control-Allow-Origin',
+        ]) {
+            expect(isBlockedResponseHeader(h)).toBe(true);
+        }
+    });
+
+    it('passes ordinary content headers', () => {
+        for (const h of ['content-type', 'etag', 'last-modified', 'content-disposition']) {
+            expect(isBlockedResponseHeader(h)).toBe(false);
+        }
     });
 });
 

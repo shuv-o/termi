@@ -254,6 +254,20 @@ export class SCPHandler {
     }
 
     private uploadChunks = new Map<string, { chunks: Buffer[]; received: number; total: number }>();
+    /** Bytes currently held across all in-progress chunked uploads. */
+    private bufferedUploadBytes = 0;
+
+    /** Chunked uploads are assembled in memory, so bound what one connection can hold. */
+    private static readonly MAX_BUFFERED_UPLOAD_BYTES = 512 * 1024 * 1024;
+    private static readonly MAX_TOTAL_CHUNKS = 100_000;
+    private static readonly MAX_PENDING_UPLOADS = 8;
+
+    private dropUpload(path: string): void {
+        const entry = this.uploadChunks.get(path);
+        if (!entry) return;
+        for (const c of entry.chunks) if (c) this.bufferedUploadBytes -= c.length;
+        this.uploadChunks.delete(path);
+    }
 
     private uploadFile(path: string, data: string, chunk = 0, totalChunks = 1): void {
         if (!this.sftp) return;
@@ -268,8 +282,14 @@ export class SCPHandler {
 
         // Reject malformed chunk metadata so a bad/out-of-range index can't
         // corrupt assembly (e.g. leave a hole that makes Buffer.concat throw).
-        if (!Number.isInteger(chunk) || chunk < 0 || chunk >= totalChunks) {
-            this.uploadChunks.delete(path);
+        if (
+            !Number.isInteger(totalChunks) ||
+            totalChunks > SCPHandler.MAX_TOTAL_CHUNKS ||
+            !Number.isInteger(chunk) ||
+            chunk < 0 ||
+            chunk >= totalChunks
+        ) {
+            this.dropUpload(path);
             this.sendError(`Invalid chunk index ${chunk} for ${totalChunks} total chunks`);
             return;
         }
@@ -278,6 +298,11 @@ export class SCPHandler {
         // (Re)start if this is the first chunk for the path or the client changed
         // totalChunks mid-stream.
         if (!entry || entry.total !== totalChunks) {
+            this.dropUpload(path);
+            if (this.uploadChunks.size >= SCPHandler.MAX_PENDING_UPLOADS) {
+                this.sendError('Too many uploads in progress on this connection');
+                return;
+            }
             entry = { chunks: new Array<Buffer>(totalChunks), received: 0, total: totalChunks };
             this.uploadChunks.set(path, entry);
         }
@@ -285,8 +310,14 @@ export class SCPHandler {
         // Count each index only once — duplicate re-sends must not inflate the
         // received count past the number of distinct chunks actually present.
         if (!entry.chunks[chunk]) {
+            if (this.bufferedUploadBytes + buffer.length > SCPHandler.MAX_BUFFERED_UPLOAD_BYTES) {
+                this.dropUpload(path);
+                this.sendError('Upload too large to buffer on this connection');
+                return;
+            }
             entry.chunks[chunk] = buffer;
             entry.received++;
+            this.bufferedUploadBytes += buffer.length;
         }
 
         if (entry.received < totalChunks) {
@@ -303,7 +334,7 @@ export class SCPHandler {
 
         // Every distinct index is now present, so the array has no holes.
         const fullData = Buffer.concat(entry.chunks);
-        this.uploadChunks.delete(path);
+        this.dropUpload(path);
         this.writeFile(path, fullData);
     }
 

@@ -81,6 +81,10 @@ export async function sendWebhookAlert(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(buildBody(platform, payload)),
             signal: controller.signal,
+            // validateHost checked this URL only: a 30x could point the request
+            // at an internal address (e.g. cloud metadata). Slack and Discord
+            // webhooks never redirect, so don't follow.
+            redirect: 'manual',
         });
         if (!res.ok) {
             console.error(`[Webhook] Non-OK response from ${url.hostname}: ${res.status}`);

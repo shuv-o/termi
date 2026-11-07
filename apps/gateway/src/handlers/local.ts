@@ -56,6 +56,8 @@ const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 export class LocalHandler {
     private pty: IPty | null = null;
     private closing = false;
+    /** Whether this connection holds one of the user's local-PTY slots. */
+    private counted = false;
     private userId: string;
     private idleTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -95,7 +97,9 @@ export class LocalHandler {
             return;
         }
 
-        if (!incrementUser(this.userId)) {
+        if (incrementUser(this.userId)) {
+            this.counted = true;
+        } else {
             this.ws.send(
                 JSON.stringify({
                     type: 'error',
@@ -136,7 +140,7 @@ export class LocalHandler {
             });
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
-            decrementUser(this.userId);
+            this.releaseSlot();
             this.ws.send(
                 JSON.stringify({ type: 'error', message: `Failed to spawn shell: ${message}` }),
             );
@@ -200,6 +204,18 @@ export class LocalHandler {
             }
             this.pty = null;
         }
+        this.releaseSlot();
+    }
+
+    /**
+     * Give back this connection's per-user slot exactly once. cleanup() runs
+     * from both onExit and close(), and a rejected spawn never took a slot —
+     * decrementing on every path let a user push their count negative and
+     * exceed MAX_LOCAL_PTYS_PER_USER.
+     */
+    private releaseSlot(): void {
+        if (!this.counted) return;
+        this.counted = false;
         decrementUser(this.userId);
     }
 }

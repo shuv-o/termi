@@ -48,13 +48,14 @@ export function isDesktopDevice(deviceInfo?: string | null): boolean {
 
 function getSessionSecret(): string {
     const secret = process.env.SESSION_SECRET;
-    if (!secret || secret.length < 32) {
+    // The .env.example placeholder is long enough to pass the length check.
+    if (!secret || secret.length < 32 || /^change-me/i.test(secret)) {
         if (
             process.env.NODE_ENV === 'production' &&
             process.env.NEXT_PHASE !== 'phase-production-build'
         ) {
             throw new Error(
-                'SESSION_SECRET must be set and at least 32 characters long. ' +
+                'SESSION_SECRET must be set to a random value of at least 32 characters (not the example placeholder). ' +
                     'Generate one with: openssl rand -base64 32',
             );
         }

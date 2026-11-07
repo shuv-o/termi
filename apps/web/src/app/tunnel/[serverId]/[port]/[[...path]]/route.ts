@@ -2,9 +2,11 @@
  * /tunnel/[serverId]/[port]/[...path] — one-click HTTP reverse proxy for
  * port-forward tunnels.
  *
- * Visited directly in the browser (or via an iframe/new tab from the
- * server's detail page) — authenticated by the normal session cookie, no
- * token in the URL. Proxies the request through the SSH forwardOut channel
+ * The first visit is authenticated by the normal session cookie and redirected
+ * to a URL carrying a tunnel token (lib/auth/tunnel-token.ts). Every proxied
+ * response is sandboxed (TUNNEL_SANDBOX), so the tunneled page never gets
+ * Termi's origin — its requests carry no session cookie and are authorised by
+ * that token instead, which only ever grants this one host:port. Proxies the request through the SSH forwardOut channel
  * to the target, using this exact same origin/port, so it works behind a
  * reverse proxy that only forwards 80/443 (no arbitrary TCP listener needed).
  *
@@ -27,6 +29,8 @@ import { Readable } from 'node:stream';
 import type { Duplex } from 'node:stream';
 import { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
+import { mintTunnelToken, readTunnelToken, TUNNEL_TOKEN_PREFIX } from '@/lib/auth/tunnel-token';
+import { TUNNEL_SANDBOX } from '@/lib/security/tunnel-sandbox';
 import { getServerForConnection } from '@/lib/services';
 import { sshPool, type SSHPoolConfig } from '@/lib/services/ssh-pool';
 
@@ -82,13 +86,45 @@ export function filterForwardHeaders(requestHeaders: Headers): Record<string, st
     return headers;
 }
 
-/** Re-scopes a Set-Cookie header's Path to this tunnel's own path, so a
- *  tunneled target's cookies never collide with Termi's own or another
- *  tunnel's. */
-export function scopeCookiePath(cookie: string, basePath: string): string {
-    return /;\s*Path=/i.test(cookie)
-        ? cookie.replace(/;\s*Path=[^;]*/i, `; Path=${basePath}`)
-        : `${cookie}; Path=${basePath}`;
+/**
+ * Response headers from the target that could change how the browser treats
+ * Termi's origin as a whole — never passed through.
+ */
+const BLOCKED_RESPONSE_HEADERS = new Set([
+    'content-security-policy',
+    'content-security-policy-report-only',
+    'service-worker-allowed',
+    'clear-site-data',
+    'strict-transport-security',
+    'refresh',
+    'link',
+    'alt-svc',
+    'origin-agent-cluster',
+    'permissions-policy',
+    'reporting-endpoints',
+    'report-to',
+    'nel',
+]);
+
+export function isBlockedResponseHeader(name: string): boolean {
+    const lower = name.toLowerCase();
+    return BLOCKED_RESPONSE_HEADERS.has(lower) || lower.startsWith('access-control-');
+}
+
+/**
+ * Rebuild a target's Set-Cookie so it can only ever apply to this tunnel:
+ * every Path is replaced (not just the first), Domain is dropped, and a
+ * __Host-/__Secure- prefix — which would demand Path=/ or a host-wide scope —
+ * makes the cookie unusable here, so it is dropped entirely.
+ */
+export function scopeCookiePath(cookie: string, basePath: string): string | null {
+    const [pair, ...attrs] = cookie.split(';');
+    const name = pair.split('=')[0]?.trim() ?? '';
+    if (!name || /^__(host|secure)-/i.test(name)) return null;
+    const kept = attrs
+        .map((a) => a.trim())
+        .filter((a) => a && !/^(path|domain)\s*=/i.test(a) && !/^(path|domain)$/i.test(a));
+    return [pair.trim(), ...kept, `Path=${basePath}`].join('; ');
 }
 
 /** Injects a <base> tag right after <head> so relative links/assets resolve
@@ -100,9 +136,6 @@ export function injectBaseTag(html: string, basePath: string): string {
 }
 
 async function handleProxy(request: NextRequest, { params }: RouteParams): Promise<Response> {
-    const user = await getCurrentUser();
-    if (!user) return new Response('Unauthorized', { status: 401 });
-
     // Targets that expect a WebSocket upgrade need a completely different
     // handshake (HTTP 101 + a persistent bidirectional pipe) that this
     // request/response proxy doesn't implement. In practice, requests that
@@ -126,19 +159,83 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
         return new Response('Invalid port', { status: 400 });
     }
 
-    const server = await getServerForConnection(serverId, user.id);
+    const url = new URL(request.url);
+    const segments = path ?? [];
+    const forwardedQuery = new URLSearchParams(url.searchParams);
+    forwardedQuery.delete('host');
+    const qs = forwardedQuery.toString();
+
+    // Tokenized request (everything from inside the sandboxed page).
+    const tokenSegment = segments[0]?.startsWith(TUNNEL_TOKEN_PREFIX) ? segments[0] : null;
+    if (!tokenSegment) {
+        // First visit, from Termi itself: authenticate by session, then move to
+        // the tokenized URL that the sandboxed page will keep using.
+        const user = await getCurrentUser();
+        if (!user) return new Response('Unauthorized', { status: 401 });
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+            return new Response('Open this tunnel from Termi first.', { status: 400 });
+        }
+        const server = await getServerForConnection(serverId, user.id);
+        if (!server) return new Response('Server not found', { status: 404 });
+        const token = mintTunnelToken({
+            userId: user.id,
+            serverId,
+            port: remotePort,
+            host: url.searchParams.get('host') || '127.0.0.1',
+        });
+        const rest = segments.map(encodeURIComponent).join('/');
+        const location =
+            `/tunnel/${encodeURIComponent(serverId)}/${remotePort}/${TUNNEL_TOKEN_PREFIX}${token}/` +
+            rest +
+            (qs ? `?${qs}` : '');
+        return new Response(null, {
+            status: 302,
+            headers: {
+                location,
+                'cache-control': 'private, no-store',
+                'referrer-policy': 'no-referrer',
+            },
+        });
+    }
+
+    const grant = readTunnelToken(tokenSegment.slice(TUNNEL_TOKEN_PREFIX.length));
+    if (!grant || grant.serverId !== serverId || grant.port !== remotePort) {
+        return new Response('This tunnel link has expired. Open it again from Termi.', {
+            status: 401,
+        });
+    }
+
+    // The sandboxed page has an opaque origin, so even its own requests to this
+    // tunnel are cross-origin ("Origin: null") and need CORS. Answering them is
+    // safe: no credentials are allowed, and the unguessable token in the path
+    // is the only thing that grants access. Preflights are answered here
+    // rather than forwarded.
+    const fromSandbox = request.headers.get('origin') === 'null';
+    if (request.method === 'OPTIONS' && request.headers.get('access-control-request-method')) {
+        return new Response(null, {
+            status: 204,
+            headers: {
+                'access-control-allow-origin': 'null',
+                'access-control-allow-methods':
+                    request.headers.get('access-control-request-method') ?? 'GET',
+                'access-control-allow-headers':
+                    request.headers.get('access-control-request-headers') ?? '',
+                'access-control-max-age': '600',
+                vary: 'Origin',
+                'cache-control': 'private, no-store',
+            },
+        });
+    }
+
+    // Re-checked on every request, so a revoked share stops working at once.
+    const server = await getServerForConnection(serverId, grant.userId);
     if (!server) return new Response('Server not found', { status: 404 });
     if (server.protocol !== 'SSH') {
         return new Response('Port forwarding requires an SSH server', { status: 400 });
     }
 
-    const url = new URL(request.url);
-    const remoteHost = url.searchParams.get('host') || '127.0.0.1';
-
-    const forwardedQuery = new URLSearchParams(url.searchParams);
-    forwardedQuery.delete('host');
-    const qs = forwardedQuery.toString();
-    const targetPath = '/' + (path?.join('/') ?? '') + (qs ? `?${qs}` : '');
+    const remoteHost = grant.host;
+    const targetPath = '/' + segments.slice(1).join('/') + (qs ? `?${qs}` : '');
 
     const config: SSHPoolConfig = {
         id: server.id,
@@ -218,15 +315,13 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                     headers,
                 },
                 (proxyRes) => {
-                    const hostSuffix = url.searchParams.get('host')
-                        ? `?host=${encodeURIComponent(remoteHost)}`
-                        : '';
-                    const basePath = `/tunnel/${serverId}/${port}${hostSuffix}/`;
+                    const basePath = `/tunnel/${encodeURIComponent(serverId)}/${remotePort}/${tokenSegment}/`;
 
                     const resHeaders = new Headers();
                     for (const [key, value] of Object.entries(proxyRes.headers)) {
                         const lower = key.toLowerCase();
                         if (value === undefined || HOP_BY_HOP_HEADERS.has(lower)) continue;
+                        if (isBlockedResponseHeader(lower)) continue;
 
                         if (lower === 'set-cookie') {
                             // Multiple Set-Cookie headers must stay separate lines, not
@@ -235,7 +330,8 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                             // real pages or collides with a different tunnel.
                             const cookies = Array.isArray(value) ? value : [value];
                             for (const cookie of cookies) {
-                                resHeaders.append('set-cookie', scopeCookiePath(cookie, basePath));
+                                const scoped = scopeCookiePath(cookie, basePath);
+                                if (scoped) resHeaders.append('set-cookie', scoped);
                             }
                             continue;
                         }
@@ -251,6 +347,14 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                     // entirely, serving one user's private tunneled content to
                     // anyone who requests the same /tunnel/<serverId>/<port> URL.
                     resHeaders.set('cache-control', 'private, no-store');
+                    resHeaders.set('content-security-policy', TUNNEL_SANDBOX);
+                    resHeaders.set('x-content-type-options', 'nosniff');
+                    // The token is in the URL; never leak it to sites the page links to.
+                    resHeaders.set('referrer-policy', 'no-referrer');
+                    if (fromSandbox) {
+                        resHeaders.set('access-control-allow-origin', 'null');
+                        resHeaders.append('vary', 'Origin');
+                    }
 
                     const status = proxyRes.statusCode ?? 502;
                     const contentType = resHeaders.get('content-type') || '';
@@ -343,5 +447,9 @@ export async function PATCH(request: NextRequest, ctx: RouteParams) {
     return handleProxy(request, ctx);
 }
 export async function HEAD(request: NextRequest, ctx: RouteParams) {
+    return handleProxy(request, ctx);
+}
+
+export async function OPTIONS(request: NextRequest, ctx: RouteParams) {
     return handleProxy(request, ctx);
 }

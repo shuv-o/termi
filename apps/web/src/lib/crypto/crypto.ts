@@ -47,6 +47,8 @@ const SALT_LENGTH = 32;
  * System encryption key derived from environment variable
  * This key is used for encrypting data at rest when no master key is set
  */
+let warnedPlaceholderKey = false;
+
 function getSystemKey(): Buffer {
     const envKey = process.env.ENCRYPTION_KEY;
 
@@ -54,6 +56,18 @@ function getSystemKey(): Buffer {
         throw new Error(
             'ENCRYPTION_KEY environment variable is required. ' +
                 'Generate one with: openssl rand -base64 32',
+        );
+    }
+
+    // The .env.example placeholder is public. Refusing to start would lock an
+    // instance that already encrypted its data with it out of that data, so
+    // warn loudly instead (once per process).
+    if (/^change-me/i.test(envKey) && !warnedPlaceholderKey) {
+        warnedPlaceholderKey = true;
+        console.error(
+            '[security] ENCRYPTION_KEY is the public example placeholder. Anyone with a ' +
+                'database dump can decrypt every stored credential. Set a random key ' +
+                '(openssl rand -base64 32) and re-enter your server credentials.',
         );
     }
 

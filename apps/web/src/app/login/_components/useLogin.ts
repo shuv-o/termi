@@ -58,7 +58,8 @@ export function useLogin() {
     /** Honour ?next= only for same-site paths. */
     const nextDestination = useCallback(() => {
         const nextUrl = searchParams.get('next');
-        return nextUrl && nextUrl.startsWith('/') ? nextUrl : '/panel';
+        // "//host" and "/\\host" are protocol-relative: they would leave the site.
+        return nextUrl && /^\/(?![/\\])/.test(nextUrl) ? nextUrl : '/panel';
     }, [searchParams]);
 
     useEffect(() => {
@@ -110,6 +111,16 @@ export function useLogin() {
             setError(
                 'Your Google account email is not verified. Verify it with Google, or sign in with your password.',
             );
+        if (err === 'oauth_account_unverified')
+            setError(
+                'An account with this email exists but its email was never verified. Sign in with its password, or reset the password, then use Google.',
+            );
+        // Google sign-in on an account with 2FA: show the code step.
+        const twofa = searchParams.get('twofa');
+        if (twofa === 'TOTP' || twofa === 'EMAIL') {
+            setRequires2FA(true);
+            setTwoFactorMethod(twofa);
+        }
         if (searchParams.get('reset') === '1')
             setInfo('Password reset successfully. Please sign in with your new password.');
     }, [searchParams]);

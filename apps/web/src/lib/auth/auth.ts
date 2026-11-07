@@ -17,6 +17,7 @@ import {
 import { createSession, getSession, validateSession } from './session';
 import { verifyTOTP, generateRecoveryCodes, normalizeRecoveryCode } from './totp';
 import { sendEmailOTP, verifyEmailOTP } from './email-otp';
+import { verify2FAAccountRateLimit } from '@/lib/rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 
 // TYPES
@@ -273,6 +274,11 @@ export async function verify2FA(
 
     if (!session.requires2FA || !session.tempUserId) {
         return { success: false, error: '2FA not required or session expired' };
+    }
+
+    // Per account, not just per IP: rotating addresses must not buy more guesses.
+    if (!verify2FAAccountRateLimit(session.tempUserId).allowed) {
+        return { success: false, error: 'Too many attempts. Please wait and try again.' };
     }
 
     const user = await prisma.user.findUnique({
@@ -533,12 +539,6 @@ export async function changePassword(
     const passwordValid = await verifyPassword(user.passwordHash, currentPassword);
     if (!passwordValid) return { success: false, error: 'Current password is incorrect' };
 
-    // Derive old master key to re-encrypt servers
-    let oldMasterKey: Buffer | undefined;
-    if (user.masterKeySalt) {
-        oldMasterKey = deriveMasterKey(currentPassword, Buffer.from(user.masterKeySalt, 'base64'));
-    }
-
     // Derive new master key
     const newSalt = generateSalt();
     const newMasterKey = deriveMasterKey(newPassword, newSalt);
@@ -546,24 +546,12 @@ export async function changePassword(
     const newMasterKeySalt = newSalt.toString('base64');
     const newPasswordHash = await hashPassword(newPassword);
 
-    // Re-encrypt all server credentials with new masterKey
-    const { reEncryptCredentials } = await import('@/lib/crypto/credentials');
-
+    // Server credentials are encrypted with the system key only (no caller
+    // passes a master-key EncryptionContext), so there is nothing to
+    // re-encrypt. Decrypting them with a password-derived key — as this used
+    // to — always failed GCM authentication and rolled back the whole change,
+    // so users with servers could not change their password at all.
     await prisma.$transaction(async (tx) => {
-        const servers = await tx.server.findMany({
-            where: { userId },
-            select: {
-                id: true,
-                host: true,
-                username: true,
-                password: true,
-                privateKey: true,
-                passphrase: true,
-                notes: true,
-            },
-        });
-
-        // Update password + masterKey
         await tx.user.update({
             where: { id: userId },
             data: {
@@ -572,26 +560,6 @@ export async function changePassword(
                 masterKeySalt: newMasterKeySalt,
             },
         });
-
-        // Re-encrypt each server
-        for (const server of servers) {
-            const reEncrypted = reEncryptCredentials(
-                {
-                    host: server.host,
-                    username: server.username,
-                    password: server.password ?? undefined,
-                    privateKey: server.privateKey ?? undefined,
-                    passphrase: server.passphrase ?? undefined,
-                    notes: server.notes ?? undefined,
-                },
-                oldMasterKey ? { masterKey: oldMasterKey } : undefined,
-                { masterKey: newMasterKey },
-            );
-            await tx.server.update({
-                where: { id: server.id },
-                data: reEncrypted,
-            });
-        }
 
         await tx.session.updateMany({
             where: { userId, isRevoked: false },

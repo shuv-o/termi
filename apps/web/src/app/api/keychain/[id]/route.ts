@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { keychainReadRateLimit } from '@/lib/rate-limit';
 import { getCurrentUser } from '@/lib/auth';
 import {
     getKeychainCredentialById,
@@ -24,6 +25,11 @@ const updateSchema = z.object({
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
+
+    // Returns decrypted secrets: bound how fast one session can read them all.
+    if (!keychainReadRateLimit(user.id).allowed) {
+        return errorResponse('Too many requests. Please wait a few minutes.', 429);
+    }
 
     const { id } = await params;
 

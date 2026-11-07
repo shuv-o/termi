@@ -95,24 +95,25 @@ function isPrivateHost(host: string): boolean {
 }
 
 /**
- * Async extension: if host is a hostname, resolve all IPs and check each.
- * Falls back to allowing on DNS failure (let SSH connect fail naturally).
+ * Resolve the host the gateway will dial and return the address to connect
+ * to, or null if any resolved address is private. Connecting to this exact
+ * address — instead of the hostname, which ssh2/net/guacd would look up again —
+ * closes the DNS-rebinding window between the check and the connect.
  */
-async function isPrivateHostAsync(host: string): Promise<boolean> {
-    if (isPrivateHost(host)) return true;
-    // Strip brackets/prefix for isIP check
+async function resolvePublicAddress(host: string): Promise<string | null> {
+    if (isPrivateHost(host)) return null;
     const stripped = host
         .trim()
         .toLowerCase()
         .replace(/^\[|]$/g, '')
         .replace(/^::ffff:/i, '');
-    if (isIP(stripped) !== 0) return false; // raw IP already checked above
-    // Hostname — resolve DNS and check each returned address
+    if (isIP(stripped) !== 0) return host;
     try {
         const addrs = await dns.lookup(stripped, { all: true });
-        return addrs.some((a) => isPrivateHost(a.address));
+        if (addrs.length === 0 || addrs.some((a) => isPrivateHost(a.address))) return null;
+        return addrs[0].address;
     } catch {
-        return true; // DNS failure — block to prevent SSRF via unresolvable hostnames
+        return null; // unresolvable — block rather than let the connect resolve it
     }
 }
 
@@ -215,8 +216,10 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
-    const browserWidth = parseInt(url.searchParams.get('width') || '0', 10) || 0;
-    const browserHeight = parseInt(url.searchParams.get('height') || '0', 10) || 0;
+    // Bounded: guacd/FreeRDP allocate a framebuffer of this size.
+    const clampDim = (v: string | null) => Math.min(Math.max(parseInt(v || '0', 10) || 0, 0), 8192);
+    const browserWidth = clampDim(url.searchParams.get('width'));
+    const browserHeight = clampDim(url.searchParams.get('height'));
 
     if (!protocol || !serverId) {
         ws.send(JSON.stringify({ type: 'error', message: 'Missing required parameters' }));
@@ -299,12 +302,12 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
         //   Jump hosts work for the SSH-based handlers and, through the relay,
         //   RDP/VNC can also use one, via the guacd relay (GUACD_TUNNEL_HOST).
-        if (
-            tokenPayload.jump &&
-            !['ssh', 'scp', 'tunnel', 'rdp', 'vnc'].includes(protocol)
-        ) {
+        if (tokenPayload.jump && !['ssh', 'scp', 'tunnel', 'rdp', 'vnc'].includes(protocol)) {
             ws.send(
-                JSON.stringify({ type: 'error', message: 'Jump hosts are not supported for this protocol' }),
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Jump hosts are not supported for this protocol',
+                }),
             );
             ws.close(1008, 'Invalid jump host');
             return;
@@ -315,19 +318,22 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         //   there is one. The target behind a bastion is dialed by the bastion
         //   (like `ssh -J`), so a private address there is expected.
         const dialedHost = tokenPayload.jump ? tokenPayload.jump.host : tokenPayload.host;
-        if (
-            protocol !== 'local' &&
-            process.env.ALLOW_PRIVATE_NETWORKS !== 'true' &&
-            (await isPrivateHostAsync(dialedHost))
-        ) {
-            ws.send(
-                JSON.stringify({
-                    type: 'error',
-                    message: 'Connection to private/internal hosts is not allowed',
-                }),
-            );
-            ws.close(1008, 'SSRF protection');
-            return;
+        if (protocol !== 'local' && process.env.ALLOW_PRIVATE_NETWORKS !== 'true') {
+            const address = await resolvePublicAddress(dialedHost);
+            if (!address) {
+                ws.send(
+                    JSON.stringify({
+                        type: 'error',
+                        message: 'Connection to private/internal hosts is not allowed',
+                    }),
+                );
+                ws.close(1008, 'SSRF protection');
+                return;
+            }
+            // Pin the dial to the address that was just checked.
+            tokenPayload = tokenPayload.jump
+                ? { ...tokenPayload, jump: { ...tokenPayload.jump, host: address } }
+                : { ...tokenPayload, host: address };
         }
 
         //   Local terminal: PTY on this machine              ─
@@ -396,7 +402,13 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
             if (existing) {
                 //   Reattach to existing session
-                if (existing.userId !== tokenPayload.userId) {
+                // The token must be for this session's own server too: otherwise a
+                // user whose share was revoked could keep reattaching to a live
+                // session on it with a token minted for any other server.
+                if (
+                    existing.userId !== tokenPayload.userId ||
+                    existing.serverId !== tokenPayload.serverId
+                ) {
                     ws.send(JSON.stringify({ type: 'error', message: 'Session access denied' }));
                     ws.close(4003, 'Forbidden');
                     return;
@@ -709,11 +721,20 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             meta.handler = new GuacamoleHandler(ws, payloadWithDims, protocol as 'rdp' | 'vnc');
         }
 
+        // ws emits 'close' after 'error', and both release — without this flag
+        // one errored tunnel freed two slots, defeating the per-user cap.
+        let tunnelSlotReleased = false;
+        const releaseTunnelSlot = () => {
+            if (meta.protocol !== 'tunnel' || tunnelSlotReleased) return;
+            tunnelSlotReleased = true;
+            tunnelSlotLimiter.release(meta.userId);
+        };
+
         ws.on('close', () => {
             if (timeoutId) clearTimeout(timeoutId);
             meta.handler?.close();
             nonSshConnections.delete(ws);
-            if (meta.protocol === 'tunnel') tunnelSlotLimiter.release(meta.userId);
+            releaseTunnelSlot();
         });
 
         ws.on('error', (err) => {
@@ -721,7 +742,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             if (timeoutId) clearTimeout(timeoutId);
             meta.handler?.close();
             nonSshConnections.delete(ws);
-            if (meta.protocol === 'tunnel') tunnelSlotLimiter.release(meta.userId);
+            releaseTunnelSlot();
         });
     };
 

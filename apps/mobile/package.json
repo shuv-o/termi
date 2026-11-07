@@ -23,6 +23,6 @@
         "@capacitor/status-bar": "^8.0.2"
     },
     "devDependencies": {
-        "@capacitor/cli": "^8.4.0"
+        "@capacitor/cli": "^8.6.0"
     }
 }

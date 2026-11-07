@@ -46,10 +46,19 @@ export function buildBridgeScript(opts: {
     const wsUrl = `${opts.gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(opts.serverId)}`;
     // Ports below 1024 need root to bind locally on Unix — default to an
     // OS-assigned ephemeral port instead of blindly mirroring the remote one.
-    const defaultLocalPort = opts.localPort >= 1024 ? opts.localPort : 0;
+    const defaultLocalPort =
+        Number.isInteger(opts.localPort) && opts.localPort >= 1024 && opts.localPort <= 65535
+            ? opts.localPort
+            : 0;
+    const remotePort = Number.isInteger(opts.remotePort) ? opts.remotePort : 0;
+    // Server names and hosts come from users (including whoever shared the
+    // server), and this script is run on the user's own machine. They only ever
+    // enter it as JSON string literals; comments get a single-line printable copy.
+    const commentSafe = (v: string) => v.replace(/[^\x20-\x7e]/g, '?').slice(0, 120);
+    const target = `${opts.remoteHost}:${remotePort}`;
     return `#!/usr/bin/env node
-// Termi tunnel bridge — forwards a local port to ${opts.remoteHost}:${opts.remotePort}
-// on "${opts.serverName}" via Termi. Requires Node 22+ (built-in WebSocket).
+// Termi tunnel bridge — forwards a local port to ${commentSafe(target)}
+// on "${commentSafe(opts.serverName)}" via Termi. Requires Node 22+ (built-in WebSocket).
 // This token expires in 5 minutes if unused — regenerate from Termi if this fails.
 //
 // Run: node termi-tunnel.mjs
@@ -58,6 +67,8 @@ import net from 'node:net';
 
 const WS_URL = ${JSON.stringify(wsUrl)};
 const TOKEN = ${JSON.stringify(opts.token)};
+const TARGET = ${JSON.stringify(target)};
+const SERVER_NAME = ${JSON.stringify(opts.serverName)};
 // 0 = let the OS pick a free port (printed once the server starts). Set a
 // specific port here if you want one — ports below 1024 need root on Unix.
 const LOCAL_PORT = ${defaultLocalPort};
@@ -101,7 +112,7 @@ const server = net.createServer((socket) => {
 
 server.listen(LOCAL_PORT, '127.0.0.1', () => {
     const boundPort = server.address().port;
-    console.log(\`[termi-tunnel] Listening on 127.0.0.1:\${boundPort} -> ${opts.remoteHost}:${opts.remotePort} via ${opts.serverName}\`);
+    console.log('[termi-tunnel] Listening on 127.0.0.1:' + boundPort + ' -> ' + TARGET + ' via ' + SERVER_NAME);
     console.log('[termi-tunnel] Point your tool at 127.0.0.1:' + boundPort);
 });
 `;
