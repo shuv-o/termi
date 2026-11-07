@@ -1,0 +1,49 @@
+# Dependabot version updates. Day-to-day work lands on `canary` (main is only
+# fast-forwarded at release time), so every ecosystem targets canary.
+#
+# Security updates are raised by Dependabot security updates (enabled in repo
+# settings) and are NOT grouped: the npm group below sets
+# `applies-to: version-updates`, so each advisory fix arrives as its own PR.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: canary
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
+
+  # npm workspaces: the root manifest + package-lock.json cover apps/*.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: canary
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+      prefix-development: deps-dev
+
+  - package-ecosystem: docker
+    directory: /apps/web
+    target-branch: canary
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: docker
+
+  - package-ecosystem: docker
+    directory: /apps/gateway
+    target-branch: canary
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: docker
