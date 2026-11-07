@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.1.1] — 2026-11-07
+
+### Added
+
+- **Server hardening (Security card on each server).** A read-only scan checks SSH settings, users, firewall, open ports, fail2ban and pending updates, and gives a 0–100 security score with a list of findings. "Fix automatically" can then:
+  - switch to key-only login with a freshly generated ed25519 key, optionally under a new dedicated sudo user;
+  - choose how root may log in over SSH: off, key only, or with a password too;
+  - turn off password logins, rotate the password, install fail2ban and enable unattended security updates;
+  - enable a firewall (ufw or firewalld) with a checklist of the ports to keep open;
+  - move SSH to a new port, including servers that use socket activation (Ubuntu 22.10+) and servers with their own hand-written nftables/iptables firewall (Termi opens only the new port with a tagged rule and keeps it across reboots and firewall reloads, without editing the admin's rule files).
+
+  Every run is protected: new credentials are stored encrypted *before* use, an on-server rollback is armed *before* any change, sshd config is validated before reload, the new login is proven on a fresh connection, and only then are the server's credentials in Termi switched over. If anything fails, the server restores itself within five minutes even if Termi loses the connection. Each run is recorded and audit-logged.
+- **Jump hosts (bastions).** Any saved server can be the jump host for another, like `ssh -J`. Works for SSH, SFTP, port-forward tunnels, metrics and the connection test. RDP/VNC behind a jump host are relayed by the gateway when the new `GUACD_TUNNEL_HOST` setting is set. Jump hosts are included in import/export, shown as "via <bastion>" in the server list, and a bastion that other servers still use cannot be deleted.
+- **Terminal search.** Find text in the scrollback of SSH, Telnet and local terminals with ⌘F on macOS or Ctrl+Shift+F elsewhere (plain Ctrl+F stays readline's forward-char).
+- **Connect from the command palette.** Enter on a server in ⌘K connects to it straight away; Shift+Enter opens its details.
+- **Live metrics panel** beside the SSH terminal and on the server details page, with sparklines for CPU, memory, disk and network.
+- The panel remembers the last page you visited.
+
+### Changed
+
+- **Redesigned interface.** One consistent design system across the landing page, dashboard, server pages, sessions, settings and dialogs: new colour tokens, IBM Plex Sans and JetBrains Mono, a new sidebar and mobile navigation, a fleet status strip on the dashboard, shared empty states and toasts, and dialogs that become bottom sheets on phones. Title casing and status colours are now consistent everywhere. The desktop app's window background matches the new theme, so there is no colour flash on launch.
+- Docker images are pinned to Node.js 24.22.1.
+
+### Fixed
+
+- **Container start-up took about 3 minutes on every redeploy**, because the entrypoint installed the Prisma CLI from the registry each time a container was recreated. The CLI is now baked into the image; a fresh container is ready in about 2 seconds.
+- **One failing alert channel silenced the others.** An SMTP timeout stopped webhook (Slack/Discord) and push alerts for the same event from being sent. Each channel now fails independently.
+- The landing page and README said passwords are hashed with Argon2id; Termi uses scrypt.
+
+### Security
+
+- Resolved 23 Dependabot alerts: Next.js 16.3.5 (GHSA-2xp9-vwfh-vxw4, GHSA-p293-qw3h-jr36), sharp 0.35.4, nodemailer 9.1.1, vitest 4.1.11, Prisma 7.10.0, and overrides for vulnerable transitive `mysql2`, `fast-uri`, `js-yaml` and `@xmldom/xmldom`.
+- Jump-host connections apply the SSRF checks to the bastion (which this server dials), and removing a server's jump host re-checks its own address, so a private target can't start being dialed directly.
+
+### Upgrade notes
+
+- Two database migrations (`add_server_jump_host`, `add_server_hardening`) run automatically on container start.
+- Optional: set `GUACD_TUNNEL_HOST` on the gateway to allow RDP/VNC behind a jump host (`gateway` on the bundled Docker network). Without it, those connections are refused with a clear message; SSH-based jump connections need no setting.
+
+---
+
 ## [1.1.0] — 2026-08-18
 
 ### Added

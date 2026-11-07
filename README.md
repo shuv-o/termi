@@ -60,12 +60,13 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 ### 🔐 Security & Authentication
 
 - **AES-256-GCM** encryption for all stored server credentials
-- **Argon2id** password hashing with secure parameters
+- **scrypt** password hashing with secure parameters
 - **TOTP-based 2FA** — works with Google Authenticator, Authy, and any TOTP app
 - **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
 - **Google OAuth** — "Sign in with Google" support
 - **Optional master key** — adds a second encryption layer derived via PBKDF2
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
+- **One-click server hardening** — scan a server's SSH and firewall setup, get a security score, and fix it automatically: key-only login, a dedicated admin user, root-login choice, fail2ban, unattended updates, firewall and SSH port move. Every change is armed with an on-server rollback and verified on a fresh login before Termi stores the new credentials
 
 ### 🖥️ Multi-Protocol Remote Access
 
@@ -74,11 +75,13 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/), with touch-to-mouse translation and an on-screen keyboard on mobile
 - **VNC** — Virtual Network Computing via Apache Guacamole, same mobile touch support
 - **Telnet** — direct terminal access for legacy/unencrypted devices
+- **Jump hosts** — reach servers behind a bastion, like `ssh -J`, for SSH, SFTP, tunnels, and RDP/VNC
 - **Port forwarding** — forward any port reachable from a server, like `ssh -L`, with no terminal needed. Auto-detects HTTP targets for a one-click browser link; anything else gets a copyable local-bridge script (or, in the desktop app, a real local port)
 
 ### ⚡ Productivity
 
-- **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard
+- **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard; press Enter on a server to connect straight away
+- **Terminal search** — find text in the scrollback of SSH, Telnet, and local terminals (⌘F / Ctrl+Shift+F)
 - **Command snippets** — save frequently-used shell commands and run them into the active terminal with one click
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
@@ -92,7 +95,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 ### 📊 Server Monitoring
 
-- Real-time **CPU, memory, and disk** metrics fetched over SSH
+- Real-time **CPU, memory, and disk** metrics fetched over SSH, with a live metrics panel beside the terminal
 - **Health history** charts
 - Configurable **email, web push, and webhook** alerts (Slack, Discord, or any generic URL)
 - Built-in **benchmark tool** with persisted history and a trend chart over time
@@ -329,6 +332,7 @@ npm run build:electron            # Package Electron app
 | ---------------------------------- | --------------------- | ---------------------------------------------------------- |
 | `GUACD_HOST`                       | `localhost`           | guacd host for RDP/VNC                                     |
 | `GUACD_PORT`                       | `4822`                | guacd port                                                 |
+| `GUACD_TUNNEL_HOST`                | —                     | Gateway address guacd dials for RDP/VNC behind a jump host |
 | `ALLOW_PRIVATE_NETWORKS`           | `false`               | Allow connections to private/internal IPs                  |
 | `TRUSTED_PROXY`                    | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik)      |
 | `ALLOWED_ORIGINS`                  | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                               |
