@@ -5,6 +5,7 @@
  * Session data is encrypted and stored in an HTTP-only cookie.
  */
 
+import { notifySecurityEvent, deviceFingerprint } from '@/lib/services/security-alerts.service';
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/db';
@@ -61,6 +62,22 @@ export async function createSession(
     // Calculate expiry — desktop (Electron) sessions get a longer, rolling window
     const ttl = isDesktopDevice(deviceInfo) ? DESKTOP_SESSION_TTL : SESSION_TTL;
     const expiresAt = new Date(Date.now() + ttl * 1000);
+
+    // A sign-in from a browser/OS this account has never used before gets an
+    // email to the owner (not on an account's very first sign-in).
+    const previous = await prisma.session.findMany({
+        where: { userId },
+        select: { deviceInfo: true },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+    });
+    const fingerprint = deviceFingerprint(deviceInfo);
+    if (
+        previous.length > 0 &&
+        !previous.some((p) => p.deviceInfo && deviceFingerprint(p.deviceInfo) === fingerprint)
+    ) {
+        notifySecurityEvent(userId, 'new_device', { ipAddress, deviceInfo });
+    }
 
     // Store session in database
     await prisma.session.create({

@@ -52,6 +52,8 @@ model User {
 
   // Passkeys
   passkeyEnabled Boolean @default(false)
+  /// "Passkey only": refuse password sign-in (needs a passkey; cleared when the last one is removed or on password reset)
+  passwordLoginDisabled Boolean @default(false)
 
   // Relations
   sessions            Session[]
@@ -395,6 +397,7 @@ enum AuditAction {
   KEYCHAIN_UPDATED
   KEYCHAIN_DELETED
   KEYCHAIN_REVEALED
+  USER_PASSWORD_LOGIN_TOGGLED
 
   // Bulk transfer events — every export is a credential-exposure event and is
   // logged whether or not it succeeded.

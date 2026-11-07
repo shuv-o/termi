@@ -46,11 +46,53 @@ function isBlockedIPv6(ip: string): boolean {
     );
 }
 
+/**
+ * Cloud metadata endpoints and the link-local range they live in. These are
+ * refused even with ALLOW_PRIVATE_NETWORKS=true: a home lab never needs them,
+ * and they are how an SSRF turns into stolen cloud credentials.
+ */
+const METADATA_HOSTNAMES = new Set([
+    'metadata',
+    'metadata.google.internal',
+    'metadata.goog',
+    'instance-data',
+    'instance-data.ec2.internal',
+]);
+
+export function isAlwaysBlockedAddress(address: string): boolean {
+    let a = address.trim().toLowerCase().replace(/\.$/, '');
+    if (a.startsWith('[') && a.endsWith(']')) a = a.slice(1, -1);
+    if (a.startsWith('::ffff:')) a = a.slice(7);
+    if (METADATA_HOSTNAMES.has(a)) return true;
+    if (isIP(a) === 4) {
+        return (
+            a.startsWith('169.254.') || // link-local, incl. 169.254.169.254 / 169.254.170.2
+            a === '168.63.129.16' || // Azure wire server
+            a === '100.100.100.200' // Alibaba Cloud metadata
+        );
+    }
+    if (isIP(a) === 6) return a.startsWith('fe80:') || a === 'fd00:ec2::254';
+    return false;
+}
+
 export async function validateHost(
     host: string,
     allowPrivateNetworks = false,
 ): Promise<{ valid: boolean; error?: string }> {
-    if (allowPrivateNetworks) return { valid: true };
+    const metadataError = { valid: false, error: 'Cloud metadata addresses are not allowed' };
+    if (isAlwaysBlockedAddress(host)) return metadataError;
+    if (allowPrivateNetworks) {
+        // Private ranges are allowed, but a hostname may still point at metadata.
+        if (isIP(host.trim().replace(/^\[|\]$/g, '')) === 0) {
+            try {
+                const addrs = await dns.lookup(host.trim().toLowerCase(), { all: true });
+                if (addrs.some((a) => isAlwaysBlockedAddress(a.address))) return metadataError;
+            } catch {
+                // Labs without DNS: unresolvable names stay allowed in this mode.
+            }
+        }
+        return { valid: true };
+    }
 
     const trimmed = host.trim().toLowerCase();
 

@@ -100,6 +100,44 @@ function isPrivateHost(host: string): boolean {
  * address — instead of the hostname, which ssh2/net/guacd would look up again —
  * closes the DNS-rebinding window between the check and the connect.
  */
+/** Cloud metadata endpoints: refused even with ALLOW_PRIVATE_NETWORKS=true. */
+function isMetadataAddress(address: string): boolean {
+    let a = address.trim().toLowerCase().replace(/\.$/, '');
+    if (a.startsWith('[') && a.endsWith(']')) a = a.slice(1, -1);
+    if (a.startsWith('::ffff:')) a = a.slice(7);
+    if (
+        [
+            'metadata',
+            'metadata.google.internal',
+            'metadata.goog',
+            'instance-data',
+            'instance-data.ec2.internal',
+        ].includes(a)
+    )
+        return true;
+    if (isIP(a) === 4)
+        return a.startsWith('169.254.') || a === '168.63.129.16' || a === '100.100.100.200';
+    if (isIP(a) === 6) return a.startsWith('fe80:') || a === 'fd00:ec2::254';
+    return false;
+}
+
+/** Private networks allowed: still refuse metadata, by name or by what it resolves to. */
+async function resolveAllowingPrivate(host: string): Promise<string | null> {
+    if (isMetadataAddress(host)) return null;
+    const stripped = host
+        .trim()
+        .toLowerCase()
+        .replace(/^\[|]$/g, '');
+    if (isIP(stripped) !== 0) return host;
+    try {
+        const addrs = await dns.lookup(stripped, { all: true });
+        if (addrs.some((a) => isMetadataAddress(a.address))) return null;
+        return addrs[0]?.address ?? host;
+    } catch {
+        return host; // labs without DNS: let the connect resolve it
+    }
+}
+
 async function resolvePublicAddress(host: string): Promise<string | null> {
     if (isPrivateHost(host)) return null;
     const stripped = host
@@ -318,8 +356,11 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         //   there is one. The target behind a bastion is dialed by the bastion
         //   (like `ssh -J`), so a private address there is expected.
         const dialedHost = tokenPayload.jump ? tokenPayload.jump.host : tokenPayload.host;
-        if (protocol !== 'local' && process.env.ALLOW_PRIVATE_NETWORKS !== 'true') {
-            const address = await resolvePublicAddress(dialedHost);
+        if (protocol !== 'local') {
+            const address =
+                process.env.ALLOW_PRIVATE_NETWORKS === 'true'
+                    ? await resolveAllowingPrivate(dialedHost)
+                    : await resolvePublicAddress(dialedHost);
             if (!address) {
                 ws.send(
                     JSON.stringify({

@@ -19,6 +19,7 @@ import {
     scrypt,
     timingSafeEqual,
 } from 'crypto';
+import { readFileSync } from 'fs';
 
 // CONSTANTS
 
@@ -47,15 +48,46 @@ const SALT_LENGTH = 32;
 // ENCRYPTION KEY MANAGEMENT
 
 /**
- * System encryption key derived from environment variable
- * This key is used for encrypting data at rest when no master key is set
+ * The system encryption keys.
+ *
+ * ENCRYPTION_KEY (or a file named by ENCRYPTION_KEY_FILE, e.g. a Docker/K8s
+ * secret) is the current key: everything new is encrypted with it.
+ * ENCRYPTION_KEY_PREVIOUS (or ENCRYPTION_KEY_PREVIOUS_FILE), comma-separated,
+ * lists retired keys that can still decrypt — set it while rotating, run
+ * `npm run db:reseal` to re-encrypt everything under the current key, then
+ * remove it.
+ *
+ * Each key is identified by a short, non-secret id derived from it, which
+ * bound values record (see credentials.ts) so decryption picks the right key.
  */
+export interface KeyEntry {
+    kid: string;
+    key: Buffer;
+}
+
 let warnedPlaceholderKey = false;
+let keyringCache: { source: string; current: KeyEntry; all: Map<string, KeyEntry> } | null = null;
 
-function getSystemKey(): Buffer {
-    const envKey = process.env.ENCRYPTION_KEY;
+function readSecret(name: string): string | undefined {
+    const file = process.env[`${name}_FILE`];
+    if (file) return readFileSync(file, 'utf8').trim();
+    return process.env[name];
+}
 
-    if (!envKey) {
+function keyEntry(secret: string): KeyEntry {
+    // Hash the env key to ensure consistent 32-byte length
+    const key = createHash('sha256').update(secret).digest();
+    const kid = createHash('sha256').update('termi:key-id:').update(key).digest('hex').slice(0, 8);
+    return { kid, key };
+}
+
+export function getKeyring(): { current: KeyEntry; all: Map<string, KeyEntry> } {
+    const currentSecret = readSecret('ENCRYPTION_KEY');
+    const previous = readSecret('ENCRYPTION_KEY_PREVIOUS') ?? '';
+    const source = `${currentSecret}\u0000${previous}`;
+    if (keyringCache && keyringCache.source === source) return keyringCache;
+
+    if (!currentSecret) {
         throw new Error(
             'ENCRYPTION_KEY environment variable is required. ' +
                 'Generate one with: openssl rand -base64 32',
@@ -65,17 +97,29 @@ function getSystemKey(): Buffer {
     // The .env.example placeholder is public. Refusing to start would lock an
     // instance that already encrypted its data with it out of that data, so
     // warn loudly instead (once per process).
-    if (/^change-me/i.test(envKey) && !warnedPlaceholderKey) {
+    if (/^change-me/i.test(currentSecret) && !warnedPlaceholderKey) {
         warnedPlaceholderKey = true;
         console.error(
             '[security] ENCRYPTION_KEY is the public example placeholder. Anyone with a ' +
                 'database dump can decrypt every stored credential. Set a random key ' +
-                '(openssl rand -base64 32) and re-enter your server credentials.',
+                '(openssl rand -base64 32), keep the old one in ENCRYPTION_KEY_PREVIOUS, ' +
+                'and run `npm run db:reseal`.',
         );
     }
 
-    // Hash the env key to ensure consistent 32-byte length
-    return createHash('sha256').update(envKey).digest();
+    const current = keyEntry(currentSecret);
+    const all = new Map<string, KeyEntry>([[current.kid, current]]);
+    for (const secret of previous.split(',').map((s) => s.trim()).filter(Boolean)) {
+        const entry = keyEntry(secret);
+        if (!all.has(entry.kid)) all.set(entry.kid, entry);
+    }
+    keyringCache = { source, current, all };
+    return keyringCache;
+}
+
+/** The current system key (what `encrypt` uses when no key is given). */
+function getSystemKey(): Buffer {
+    return getKeyring().current.key;
 }
 
 /**

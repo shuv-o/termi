@@ -23,6 +23,7 @@ export async function GET() {
                 emailOtpEnabled: user.emailOtpEnabled,
                 twoFactorMethod: user.twoFactorMethod,
                 passkeyEnabled: user.passkeyEnabled,
+                passwordLoginDisabled: user.passwordLoginDisabled,
                 isVerified: user.isVerified,
                 createdAt: user.createdAt,
                 isGoogleUser: !user.passwordHash,

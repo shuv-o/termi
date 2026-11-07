@@ -2,6 +2,7 @@
  * Authentication Service
  */
 
+import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
 import { prisma } from '@/lib/db';
 import {
     hashPassword,
@@ -116,6 +117,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
             id: true,
             email: true,
             passwordHash: true,
+            passwordLoginDisabled: true,
             isActive: true,
             lockoutUntil: true,
             failedLoginCount: true,
@@ -137,6 +139,15 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
 
     if (!user.isActive) {
         return { success: false, error: 'Account is disabled' };
+    }
+
+    // "Passkey only" accounts never accept a password. Checked before the
+    // password itself, so this can't be used to test whether a guess is right.
+    if (user.passwordLoginDisabled) {
+        return {
+            success: false,
+            error: 'Password sign-in is turned off for this account. Sign in with your passkey.',
+        };
     }
 
     // Google-only users have no password
@@ -386,6 +397,7 @@ export async function enable2FA(
             data: { userId, action: 'USER_2FA_ENABLED', details: { method: 'TOTP' } },
         }),
     ]);
+    notifySecurityEvent(userId, '2fa_enabled');
 
     return { success: true, recoveryCodes: plainCodes };
 }
@@ -409,6 +421,7 @@ export async function enableEmailOTP(
     await prisma.auditLog.create({
         data: { userId, action: 'USER_2FA_ENABLED', details: { method: 'EMAIL' } },
     });
+    notifySecurityEvent(userId, '2fa_enabled');
 
     return { success: true };
 }
@@ -455,6 +468,7 @@ export async function disable2FA(
             data: { userId, action: 'USER_2FA_DISABLED' },
         }),
     ]);
+    notifySecurityEvent(userId, '2fa_disabled');
 
     return { success: true };
 }
@@ -481,6 +495,7 @@ export async function getCurrentUser() {
             emailOtpEnabled: true,
             twoFactorMethod: true,
             passkeyEnabled: true,
+            passwordLoginDisabled: true,
             isActive: true,
             isVerified: true,
             createdAt: true,
@@ -530,6 +545,7 @@ export async function changePassword(
             data: { userId, action: 'USER_PASSWORD_CHANGED' },
         });
     });
+    notifySecurityEvent(userId, 'password_changed');
 
     return { success: true };
 }
@@ -634,6 +650,8 @@ export async function resetPassword(
             where: { id: user.id },
             data: {
                 passwordHash: newPasswordHash,
+                // The emailed link proves ownership; let the owner back in by password.
+                passwordLoginDisabled: false,
                 passwordResetToken: null,
                 passwordResetExpiresAt: null,
             },
@@ -653,6 +671,7 @@ export async function resetPassword(
             },
         });
     });
+    notifySecurityEvent(user.id, 'password_reset');
 
     return { success: true };
 }

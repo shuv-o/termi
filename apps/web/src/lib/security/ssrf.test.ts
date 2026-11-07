@@ -71,11 +71,15 @@ describe('validateHost', () => {
         expect(result.valid).toBe(false);
     });
 
-    it('bypasses every check when allowPrivateNetworks is true', async () => {
+    it('allows private and loopback addresses when allowPrivateNetworks is true', async () => {
         expect((await validateHost('127.0.0.1', true)).valid).toBe(true);
         expect((await validateHost('localhost', true)).valid).toBe(true);
         expect((await validateHost('192.168.1.1', true)).valid).toBe(true);
-        expect(lookupMock).not.toHaveBeenCalled();
+    });
+
+    it('still resolves hostnames in that mode, refusing ones that point at metadata', async () => {
+        lookupMock.mockResolvedValueOnce([{ address: '169.254.169.254', family: 4 }]);
+        expect((await validateHost('sneaky.example', true)).valid).toBe(false);
     });
 });
 
@@ -96,5 +100,28 @@ describe('validateJumpTargetHost', () => {
         expect(validateJumpTargetHost('host name').valid).toBe(false);
         expect(validateJumpTargetHost('evil.com/path').valid).toBe(false);
         expect(validateJumpTargetHost('user@host').valid).toBe(false);
+    });
+});
+
+describe('cloud metadata is always blocked', () => {
+    it('refuses metadata even with private networks allowed', async () => {
+        for (const host of [
+            '169.254.169.254',
+            '169.254.170.2',
+            '[fd00:ec2::254]',
+            '168.63.129.16',
+            '100.100.100.200',
+            'metadata.google.internal',
+            '::ffff:169.254.169.254',
+        ]) {
+            expect((await validateHost(host, true)).valid).toBe(false);
+            expect((await validateHost(host, false)).valid).toBe(false);
+        }
+    });
+
+    it('still allows ordinary private addresses when private networks are allowed', async () => {
+        for (const host of ['10.0.0.5', '192.168.1.10', '172.16.0.2']) {
+            expect((await validateHost(host, true)).valid).toBe(true);
+        }
     });
 });

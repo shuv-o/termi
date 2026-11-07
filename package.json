@@ -35,7 +35,8 @@
         "mobile:add:ios": "npm run add:ios --workspace=apps/mobile",
         "mobile:add:android": "npm run add:android --workspace=apps/mobile",
         "mobile:open:ios": "npm run open:ios --workspace=apps/mobile",
-        "mobile:open:android": "npm run open:android --workspace=apps/mobile"
+        "mobile:open:android": "npm run open:android --workspace=apps/mobile",
+        "db:reseal": "npm run db:reseal --workspace=apps/web --"
     },
     "dependencies": {
         "electron-updater": "^6.6.2",

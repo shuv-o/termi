@@ -4,6 +4,7 @@ import {
     sealField,
     openField,
     isLegacySealed,
+    needsReseal,
     encryptCredentials,
     decryptCredentials,
 } from './credentials';
@@ -43,6 +44,34 @@ describe('field binding (AAD)', () => {
 
     it('requires an owner', () => {
         expect(() => sealField('x', 'Server', 'password', '')).toThrow();
+    });
+});
+
+describe('key rotation', () => {
+    const ORIGINAL = 'test-key-for-credentials-binding-0123456789';
+
+    it('opens values sealed under a retired key listed in ENCRYPTION_KEY_PREVIOUS', () => {
+        process.env.ENCRYPTION_KEY = ORIGINAL;
+        const old = sealField('rotate-me', 'Server', 'password', 'u1');
+        const legacy = serializeEncrypted(encrypt('legacy-old-key'));
+
+        process.env.ENCRYPTION_KEY = 'a-brand-new-key-after-rotation-9876543210';
+        // Without the old key: a clear error, not garbage.
+        delete process.env.ENCRYPTION_KEY_PREVIOUS;
+        expect(() => openField(old, 'Server', 'password', 'u1')).toThrow(/unknown key/);
+
+        process.env.ENCRYPTION_KEY_PREVIOUS = ORIGINAL;
+        expect(openField(old, 'Server', 'password', 'u1')).toBe('rotate-me');
+        expect(openField(legacy, 'Server', 'password', 'u1')).toBe('legacy-old-key');
+        expect(needsReseal(old)).toBe(true);
+        expect(needsReseal(legacy)).toBe(true);
+
+        const fresh = sealField('rotate-me', 'Server', 'password', 'u1');
+        expect(needsReseal(fresh)).toBe(false);
+        expect(fresh.split(':')[1]).not.toBe(old.split(':')[1]); // different key id
+
+        process.env.ENCRYPTION_KEY = ORIGINAL;
+        delete process.env.ENCRYPTION_KEY_PREVIOUS;
     });
 });
 

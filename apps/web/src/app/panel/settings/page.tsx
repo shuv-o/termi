@@ -152,7 +152,7 @@ export default function SettingsPage() {
                         />
                     )}
 
-                    {activeSection === 'passkeys' && <PasskeysPanel passkeys={passkeys} />}
+                    {activeSection === 'passkeys' && <PasskeysPanel passkeys={passkeys} user={user} setUser={setUser} />}
 
                     {activeSection === 'notifications' && <NotificationsPanel push={push} />}
 

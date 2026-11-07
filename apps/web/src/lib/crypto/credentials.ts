@@ -14,7 +14,13 @@
  * the bound format, so data upgrades as it is saved.
  */
 
-import { encrypt, decrypt, serializeEncrypted, deserializeEncrypted } from './crypto';
+import {
+    encrypt,
+    decrypt,
+    serializeEncrypted,
+    deserializeEncrypted,
+    getKeyring,
+} from './crypto';
 
 const BOUND_PREFIX = 'v2:';
 
@@ -32,35 +38,64 @@ export function fieldAad(model: SealedModel, field: string, ownerId: string): st
     return `termi:v2:${model}.${field}:${ownerId}`;
 }
 
-/** Encrypt one value, bound to its field and owner. */
+/**
+ * Encrypt one value with the current key, bound to its field and owner.
+ * Stored as "v2:<key id>:<iv>:<data>:<tag>".
+ */
 export function sealField(
     value: string,
     model: SealedModel,
     field: string,
     ownerId: string,
 ): string {
-    return (
-        BOUND_PREFIX +
-        serializeEncrypted(encrypt(value, undefined, fieldAad(model, field, ownerId)))
-    );
+    const { current } = getKeyring();
+    const sealed = encrypt(value, current.key, fieldAad(model, field, ownerId));
+    return `${BOUND_PREFIX}${current.kid}:${serializeEncrypted(sealed)}`;
 }
 
-/** Decrypt one value; throws if it belongs to another field or owner. */
+/** Decrypt one value; throws if it belongs to another field or owner, or its key is unknown. */
 export function openField(
     stored: string,
     model: SealedModel,
     field: string,
     ownerId: string,
 ): string {
+    const { current, all } = getKeyring();
     if (stored.startsWith(BOUND_PREFIX)) {
+        const rest = stored.slice(BOUND_PREFIX.length);
+        const sep = rest.indexOf(':');
+        const kid = rest.slice(0, sep);
+        const entry = all.get(kid);
+        if (!entry) {
+            throw new Error(
+                `Encrypted with an unknown key (${kid}); add it to ENCRYPTION_KEY_PREVIOUS`,
+            );
+        }
         return decrypt(
-            deserializeEncrypted(stored.slice(BOUND_PREFIX.length)),
-            undefined,
+            deserializeEncrypted(rest.slice(sep + 1)),
+            entry.key,
             fieldAad(model, field, ownerId),
         );
     }
-    // Written before field binding: readable, re-sealed on the next save.
-    return decrypt(deserializeEncrypted(stored));
+    // Written before field binding (and key ids): try the current key, then
+    // any previous ones. Re-sealed on the next save or by `npm run db:reseal`.
+    const legacy = deserializeEncrypted(stored);
+    let lastError: unknown;
+    for (const entry of [current, ...[...all.values()].filter((e) => e !== current)]) {
+        try {
+            return decrypt(legacy, entry.key);
+        } catch (err) {
+            lastError = err;
+        }
+    }
+    throw lastError;
+}
+
+/** True when a stored value should be re-sealed: unbound, or under a retired key. */
+export function needsReseal(stored: string): boolean {
+    if (!stored.startsWith(BOUND_PREFIX)) return true;
+    const kid = stored.slice(BOUND_PREFIX.length).split(':', 1)[0];
+    return kid !== getKeyring().current.kid;
 }
 
 /** True when a stored value still uses the unbound pre-v2 format. */

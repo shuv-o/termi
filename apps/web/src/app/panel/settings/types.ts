@@ -8,6 +8,7 @@ export interface User {
     emailOtpEnabled: boolean;
     twoFactorMethod: 'NONE' | 'TOTP' | 'EMAIL';
     passkeyEnabled: boolean;
+    passwordLoginDisabled: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
 }

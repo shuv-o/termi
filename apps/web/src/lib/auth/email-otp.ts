@@ -64,7 +64,7 @@ function createTransporter() {
     });
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
     const transporter = createTransporter();
     await transporter.sendMail({
         from: process.env.SMTP_FROM || '"Termi Security" <noreply@termi.run>',

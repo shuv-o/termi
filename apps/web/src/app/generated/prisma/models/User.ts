@@ -57,6 +57,7 @@ export type UserMinAggregateOutputType = {
   updatedAt: Date | null
   lastLoginAt: Date | null
   passkeyEnabled: boolean | null
+  passwordLoginDisabled: boolean | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -82,6 +83,7 @@ export type UserMaxAggregateOutputType = {
   updatedAt: Date | null
   lastLoginAt: Date | null
   passkeyEnabled: boolean | null
+  passwordLoginDisabled: boolean | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -107,6 +109,7 @@ export type UserCountAggregateOutputType = {
   updatedAt: number
   lastLoginAt: number
   passkeyEnabled: number
+  passwordLoginDisabled: number
   _all: number
 }
 
@@ -142,6 +145,7 @@ export type UserMinAggregateInputType = {
   updatedAt?: true
   lastLoginAt?: true
   passkeyEnabled?: true
+  passwordLoginDisabled?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -167,6 +171,7 @@ export type UserMaxAggregateInputType = {
   updatedAt?: true
   lastLoginAt?: true
   passkeyEnabled?: true
+  passwordLoginDisabled?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -192,6 +197,7 @@ export type UserCountAggregateInputType = {
   updatedAt?: true
   lastLoginAt?: true
   passkeyEnabled?: true
+  passwordLoginDisabled?: true
   _all?: true
 }
 
@@ -304,6 +310,7 @@ export type UserGroupByOutputType = {
   updatedAt: Date
   lastLoginAt: Date | null
   passkeyEnabled: boolean
+  passwordLoginDisabled: boolean
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -352,6 +359,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   passkeyEnabled?: Prisma.BoolFilter<"User"> | boolean
+  passwordLoginDisabled?: Prisma.BoolFilter<"User"> | boolean
   sessions?: Prisma.SessionListRelationFilter
   servers?: Prisma.ServerListRelationFilter
   serverGroups?: Prisma.ServerGroupListRelationFilter
@@ -395,6 +403,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   passkeyEnabled?: Prisma.SortOrder
+  passwordLoginDisabled?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   servers?: Prisma.ServerOrderByRelationAggregateInput
   serverGroups?: Prisma.ServerGroupOrderByRelationAggregateInput
@@ -441,6 +450,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   passkeyEnabled?: Prisma.BoolFilter<"User"> | boolean
+  passwordLoginDisabled?: Prisma.BoolFilter<"User"> | boolean
   sessions?: Prisma.SessionListRelationFilter
   servers?: Prisma.ServerListRelationFilter
   serverGroups?: Prisma.ServerGroupListRelationFilter
@@ -484,6 +494,7 @@ export type UserOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   passkeyEnabled?: Prisma.SortOrder
+  passwordLoginDisabled?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -517,6 +528,7 @@ export type UserScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   passkeyEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  passwordLoginDisabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
 }
 
 export type UserCreateInput = {
@@ -542,6 +554,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -585,6 +598,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -628,6 +642,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -671,6 +686,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -714,6 +730,7 @@ export type UserCreateManyInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
 }
 
 export type UserUpdateManyMutationInput = {
@@ -739,6 +756,7 @@ export type UserUpdateManyMutationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -764,6 +782,7 @@ export type UserUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -789,6 +808,7 @@ export type UserCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   passkeyEnabled?: Prisma.SortOrder
+  passwordLoginDisabled?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -818,6 +838,7 @@ export type UserMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   passkeyEnabled?: Prisma.SortOrder
+  passwordLoginDisabled?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -843,6 +864,7 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   passkeyEnabled?: Prisma.SortOrder
+  passwordLoginDisabled?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -1168,6 +1190,7 @@ export type UserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
@@ -1210,6 +1233,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -1268,6 +1292,7 @@ export type UserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
@@ -1310,6 +1335,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1352,6 +1378,7 @@ export type UserCreateWithoutServerGroupsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
@@ -1394,6 +1421,7 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -1452,6 +1480,7 @@ export type UserUpdateWithoutServerGroupsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
@@ -1494,6 +1523,7 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1536,6 +1566,7 @@ export type UserCreateWithoutServersInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
@@ -1578,6 +1609,7 @@ export type UserUncheckedCreateWithoutServersInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -1636,6 +1668,7 @@ export type UserUpdateWithoutServersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
@@ -1678,6 +1711,7 @@ export type UserUncheckedUpdateWithoutServersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1720,6 +1754,7 @@ export type UserCreateWithoutPersistentSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -1762,6 +1797,7 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -1820,6 +1856,7 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -1862,6 +1899,7 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -1904,6 +1942,7 @@ export type UserCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -1946,6 +1985,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2004,6 +2044,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2046,6 +2087,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -2088,6 +2130,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -2130,6 +2173,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2188,6 +2232,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2230,6 +2275,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -2272,6 +2318,7 @@ export type UserCreateWithoutPasskeysInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -2314,6 +2361,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2372,6 +2420,7 @@ export type UserUpdateWithoutPasskeysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2414,6 +2463,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -2456,6 +2506,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -2498,6 +2549,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2556,6 +2608,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2598,6 +2651,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -2640,6 +2694,7 @@ export type UserCreateWithoutMonitorConfigsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -2682,6 +2737,7 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2740,6 +2796,7 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2782,6 +2839,7 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -2824,6 +2882,7 @@ export type UserCreateWithoutRecordingsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -2866,6 +2925,7 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -2924,6 +2984,7 @@ export type UserUpdateWithoutRecordingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -2966,6 +3027,7 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3008,6 +3070,7 @@ export type UserCreateWithoutTunnelSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3050,6 +3113,7 @@ export type UserUncheckedCreateWithoutTunnelSessionsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -3108,6 +3172,7 @@ export type UserUpdateWithoutTunnelSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -3150,6 +3215,7 @@ export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3192,6 +3258,7 @@ export type UserCreateWithoutRecoveryCodesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3234,6 +3301,7 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -3292,6 +3360,7 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -3334,6 +3403,7 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3376,6 +3446,7 @@ export type UserCreateWithoutEmailOTPsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3418,6 +3489,7 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -3476,6 +3548,7 @@ export type UserUpdateWithoutEmailOTPsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -3518,6 +3591,7 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3560,6 +3634,7 @@ export type UserCreateWithoutCommandSnippetsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3602,6 +3677,7 @@ export type UserUncheckedCreateWithoutCommandSnippetsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -3660,6 +3736,7 @@ export type UserUpdateWithoutCommandSnippetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -3702,6 +3779,7 @@ export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3744,6 +3822,7 @@ export type UserCreateWithoutKeychainCredentialsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3786,6 +3865,7 @@ export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -3844,6 +3924,7 @@ export type UserUpdateWithoutKeychainCredentialsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -3886,6 +3967,7 @@ export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -3928,6 +4010,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -3970,6 +4053,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -4028,6 +4112,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -4070,6 +4155,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -4112,6 +4198,7 @@ export type UserCreateWithoutOwnedSharesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -4154,6 +4241,7 @@ export type UserUncheckedCreateWithoutOwnedSharesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -4201,6 +4289,7 @@ export type UserCreateWithoutReceivedSharesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
@@ -4243,6 +4332,7 @@ export type UserUncheckedCreateWithoutReceivedSharesInput = {
   updatedAt?: Date | string
   lastLoginAt?: Date | string | null
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
   serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
@@ -4301,6 +4391,7 @@ export type UserUpdateWithoutOwnedSharesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -4343,6 +4434,7 @@ export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -4396,6 +4488,7 @@ export type UserUpdateWithoutReceivedSharesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
@@ -4438,6 +4531,7 @@ export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
   serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
@@ -4664,6 +4758,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   lastLoginAt?: boolean
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   servers?: boolean | Prisma.User$serversArgs<ExtArgs>
   serverGroups?: boolean | Prisma.User$serverGroupsArgs<ExtArgs>
@@ -4708,6 +4803,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   lastLoginAt?: boolean
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -4733,6 +4829,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   lastLoginAt?: boolean
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -4758,9 +4855,10 @@ export type UserSelectScalar = {
   updatedAt?: boolean
   lastLoginAt?: boolean
   passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "totpSecret" | "totpEnabled" | "emailOtpEnabled" | "twoFactorMethod" | "masterKeyHash" | "masterKeySalt" | "passwordResetToken" | "passwordResetExpiresAt" | "isActive" | "isVerified" | "emailVerificationToken" | "emailVerificationExpiresAt" | "failedLoginCount" | "lockoutUntil" | "createdAt" | "updatedAt" | "lastLoginAt" | "passkeyEnabled", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "totpSecret" | "totpEnabled" | "emailOtpEnabled" | "twoFactorMethod" | "masterKeyHash" | "masterKeySalt" | "passwordResetToken" | "passwordResetExpiresAt" | "isActive" | "isVerified" | "emailVerificationToken" | "emailVerificationExpiresAt" | "failedLoginCount" | "lockoutUntil" | "createdAt" | "updatedAt" | "lastLoginAt" | "passkeyEnabled" | "passwordLoginDisabled", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   servers?: boolean | Prisma.User$serversArgs<ExtArgs>
@@ -4830,6 +4928,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     updatedAt: Date
     lastLoginAt: Date | null
     passkeyEnabled: boolean
+    /**
+     * "Passkey only": refuse password sign-in (needs a passkey; cleared when the last one is removed or on password reset)
+     */
+    passwordLoginDisabled: boolean
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -5293,6 +5395,7 @@ export interface UserFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly passkeyEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly passwordLoginDisabled: Prisma.FieldRef<"User", 'Boolean'>
 }
     
 

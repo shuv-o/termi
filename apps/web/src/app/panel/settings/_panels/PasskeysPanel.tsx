@@ -7,8 +7,18 @@ import { Input } from '@/components/ui/input';
 import { PasskeyRow } from '../_components/PasskeyRow';
 import { SettingsSection } from '../_components/SettingsSection';
 import type { usePasskeys } from '../_hooks/usePasskeys';
+import { PasswordLoginToggle } from '../_components/PasswordLoginToggle';
+import type { SetUser, User } from '../types';
 
-export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePasskeys> }) {
+export function PasskeysPanel({
+    passkeys,
+    user,
+    setUser,
+}: {
+    passkeys: ReturnType<typeof usePasskeys>;
+    user: User | null;
+    setUser: SetUser;
+}) {
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
@@ -108,6 +118,14 @@ export function PasskeysPanel({ passkeys }: { passkeys: ReturnType<typeof usePas
                     Requires a device with biometrics or hardware security key, and a modern browser
                     (Chrome 108+, Safari 16+, Firefox 119+).
                 </p>
+
+                {user && (
+                    <PasswordLoginToggle
+                        user={user}
+                        setUser={setUser}
+                        passkeyCount={passkeys.passkeys.length}
+                    />
+                )}
             </SettingsSection>
         </Card>
     );

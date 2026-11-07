@@ -20,6 +20,7 @@
  * intermediaries as a normal API payload.
  */
 
+import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
 import { z } from 'zod';
 
 import { getCurrentUser } from '@/lib/auth';
@@ -164,6 +165,7 @@ export async function POST(request: Request) {
                   };
 
         await audit(true);
+        notifySecurityEvent(user.id, 'servers_exported', { ipAddress, deviceInfo });
 
         return new Response(new Uint8Array(body), {
             status: 200,

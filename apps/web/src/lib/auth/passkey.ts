@@ -5,6 +5,7 @@
  * using @simplewebauthn/server.
  */
 
+import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
 import { createHmac } from 'crypto';
 import {
     generateRegistrationOptions,
@@ -152,6 +153,7 @@ export async function verifyPasskeyRegistration(
             },
         }),
     ]);
+    notifySecurityEvent(userId, 'passkey_added');
 
     // Clear challenge
     session.passkeyChallenge = undefined;
@@ -373,7 +375,14 @@ export async function deletePasskey(
         prisma.passkey.delete({ where: { id: passkeyId } }),
         // If no passkeys remain, disable passkeyEnabled
         ...(remaining <= 1
-            ? [prisma.user.update({ where: { id: userId }, data: { passkeyEnabled: false } })]
+            ? [
+                  // No passkey left: password sign-in must work again, or the
+                  // account would have no way in.
+                  prisma.user.update({
+                      where: { id: userId },
+                      data: { passkeyEnabled: false, passwordLoginDisabled: false },
+                  }),
+              ]
             : []),
         prisma.auditLog.create({
             data: {
@@ -383,6 +392,7 @@ export async function deletePasskey(
             },
         }),
     ]);
+    notifySecurityEvent(userId, 'passkey_removed');
 
     return { success: true };
 }

@@ -14,7 +14,8 @@
         "db:generate": "prisma generate",
         "db:seed": "tsx prisma/seed.ts",
         "db:studio": "prisma studio",
-        "generate-icons": "node ../../scripts/generate-icons.js"
+        "generate-icons": "node ../../scripts/generate-icons.js",
+        "db:reseal": "tsx --env-file-if-exists=.env --tsconfig tsconfig.json prisma/reseal.ts"
     },
     "dependencies": {
         "@prisma/adapter-pg": "^7.2.0",
