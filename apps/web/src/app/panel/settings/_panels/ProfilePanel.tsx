@@ -117,7 +117,7 @@ export function ProfilePanel({
                             value={name.value}
                             onChange={(e) => name.set(e.target.value)}
                             placeholder="Your name"
-                           
+
                             maxLength={100}
                             autoComplete="name"
                         />
@@ -137,7 +137,9 @@ export function ProfilePanel({
             </Card>
 
             <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
-                <h2 className="text-xs font-semibold text-muted-foreground mb-4">Account details</h2>
+                <h2 className="text-xs font-semibold text-muted-foreground mb-4">
+                    Account details
+                </h2>
                 <div className="space-y-0">
                     <DetailRow label="Email">
                         <span className="text-sm flex items-center gap-1.5 min-w-0">
@@ -171,22 +173,11 @@ export function ProfilePanel({
                                   : 'Disabled'}
                         </span>
                     </DetailRow>
-                    <DetailRow label="Passkeys">
+                    <DetailRow label="Passkeys" last>
                         <span
                             className={`text-sm font-medium ${user.passkeyEnabled ? 'text-success' : 'text-muted-foreground'}`}
                         >
                             {user.passkeyEnabled ? `${passkeys.length} registered` : 'None'}
-                        </span>
-                    </DetailRow>
-                    <DetailRow label="Encryption key" last>
-                        <span
-                            className={`text-sm font-medium ${user.hasMasterKey || !user.isGoogleUser ? 'text-success' : 'text-warning'}`}
-                        >
-                            {!user.isGoogleUser
-                                ? 'Auto (password-derived)'
-                                : user.hasMasterKey
-                                  ? 'Configured'
-                                  : 'Not set'}
                         </span>
                     </DetailRow>
                 </div>

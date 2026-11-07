@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     try {
         await sendEmailOTP(userId, user.email, ipAddress);
-        return successResponse({ message: 'Verification code resent.' });
+        return successResponse({ message: 'If eligible, a new code has been sent.' });
     } catch (err) {
         console.error('Resend signup OTP error:', err);
         return errorResponse('Failed to resend code. Please try again.', 500);

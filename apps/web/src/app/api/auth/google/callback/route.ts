@@ -9,6 +9,7 @@ import { exchangeGoogleCode, findOrCreateGoogleUser } from '@/lib/auth/google-oa
 import { consumeOAuthStateCookie, oauthStateCookieDeletion } from '@/lib/auth/oauth-state';
 import { sendEmailOTP } from '@/lib/auth/email-otp';
 import { prisma } from '@/lib/db';
+import { getClientIP } from '@/lib/api';
 
 export async function GET(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
@@ -39,15 +40,12 @@ export async function GET(request: Request) {
 
     try {
         const googleUser = await exchangeGoogleCode(code, oauthState.codeVerifier);
-        const { userId, email, isNewUser, hasMasterKey } = await findOrCreateGoogleUser(googleUser);
+        const { userId, email } = await findOrCreateGoogleUser(googleUser);
 
         const deviceInfo = request.headers.get('user-agent') || 'Unknown';
-        const ipAddress =
-            request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-            request.headers.get('x-real-ip') ||
-            '0.0.0.0';
+        const ipAddress = getClientIP(request);
 
-        const nextPath = isNewUser || !hasMasterKey ? '/setup-encryption' : '/unlock-encryption';
+        const nextPath = '/panel';
 
         // Google proves who owns the email, not the second factor. An account
         // with 2FA goes through the same pending-2FA step as a password login
@@ -61,7 +59,6 @@ export async function GET(request: Request) {
             pending.isLoggedIn = false;
             pending.requires2FA = true;
             pending.tempUserId = userId;
-            pending.tempMasterKey = undefined;
             await pending.save();
             if (twoFactorMethod === 'EMAIL') await sendEmailOTP(userId, email, ipAddress);
             return deleteOAuthCookie(

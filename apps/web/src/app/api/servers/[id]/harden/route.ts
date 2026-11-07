@@ -103,7 +103,7 @@ export async function POST(request: Request, { params }: RouteParams) {
                         if (e.type === 'done') result = e;
                         send(e);
                     },
-                    savePending: (creds) => savePending(run.id, creds),
+                    savePending: (creds) => savePending(run.id, user.id, creds),
                     commit: async (creds) => {
                         await commitCredentials(
                             run.id,

@@ -5,7 +5,7 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { decrypt, deserializeEncrypted } from '@/lib/crypto/crypto';
+import { openField } from '@/lib/crypto/credentials';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '@/lib/api';
 
 interface RouteParams {
@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     let content: string;
     try {
-        content = decrypt(deserializeEncrypted(recording.content));
+        content = openField(recording.content, 'Recording', 'content', recording.userId);
     } catch (err) {
         console.error('[Recordings] Failed to decrypt content:', err);
         return errorResponse('Failed to read recording', 500);

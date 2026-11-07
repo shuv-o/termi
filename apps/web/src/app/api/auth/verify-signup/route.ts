@@ -40,12 +40,10 @@ export async function POST(request: Request) {
         select: { id: true, email: true, isVerified: true, isActive: true, twoFactorMethod: true },
     });
 
-    if (!user || !user.isActive) {
-        return errorResponse('Invalid request', 400);
-    }
-
-    if (user.isVerified) {
-        return errorResponse('Email already verified', 400);
+    // Unknown, inactive and already-verified accounts all get the same answer
+    // as a wrong code, so this endpoint can't confirm that an account exists.
+    if (!user || !user.isActive || user.isVerified) {
+        return errorResponse('Invalid or expired verification code', 400);
     }
 
     const valid = await verifyEmailOTP(userId, code);

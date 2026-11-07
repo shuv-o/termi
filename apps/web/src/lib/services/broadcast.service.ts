@@ -104,13 +104,16 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
         let creds;
         try {
             // Decrypt credentials first — the DB stores them encrypted.
-            creds = decryptCredentials({
-                host: server.host,
-                username: server.username,
-                password: server.password ?? undefined,
-                privateKey: server.privateKey ?? undefined,
-                passphrase: server.passphrase ?? undefined,
-            });
+            creds = decryptCredentials(
+                {
+                    host: server.host,
+                    username: server.username,
+                    password: server.password ?? undefined,
+                    privateKey: server.privateKey ?? undefined,
+                    passphrase: server.passphrase ?? undefined,
+                },
+                server.userId,
+            );
         } catch {
             done({
                 success: false,

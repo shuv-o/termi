@@ -95,6 +95,7 @@ export async function getServerGroupById(groupId: string, userId: string) {
                     host: true,
                     username: true,
                     port: true,
+                    userId: true,
                 },
                 orderBy: { name: 'asc' },
             },
@@ -106,8 +107,8 @@ export async function getServerGroupById(groupId: string, userId: string) {
     // `host`/`username` are AES-256-GCM encrypted at rest — decrypt for display.
     return {
         ...group,
-        servers: group.servers.map(({ host, username, ...rest }) => {
-            const creds = decryptCredentials({ host, username });
+        servers: group.servers.map(({ host, username, userId: ownerId, ...rest }) => {
+            const creds = decryptCredentials({ host, username }, ownerId);
             return { ...rest, host: creds.host, username: creds.username };
         }),
     };

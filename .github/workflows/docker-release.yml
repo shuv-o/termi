@@ -14,9 +14,10 @@ name: Docker Release
 # GHCR needs no secrets: it authenticates with the automatically-provided
 # GITHUB_TOKEN via the `packages: write` permission below.
 #
-# Note: apps/web/Dockerfile and apps/gateway/Dockerfile are the standalone,
-# single-app-context Dockerfiles (see CLAUDE.md) - distinct from
-# compose.Dockerfile, which builds from the full monorepo for docker-compose.
+# Note: apps/web/Dockerfile and apps/gateway/Dockerfile build from the repo
+# root with `npm ci` against package-lock.json, so a release installs exactly
+# the audited dependency versions - distinct from compose.Dockerfile, which
+# docker-compose uses for local builds.
 # NEXT_PUBLIC_* build args are intentionally left unset here so the published
 # images stay deployment-agnostic; self-hosters who need custom values should
 # build locally via docker-compose as documented in README.md.
@@ -39,10 +40,10 @@ jobs:
       matrix:
         include:
           - image: web
-            context: apps/web
+            context: .
             dockerfile: apps/web/Dockerfile
           - image: gateway
-            context: apps/gateway
+            context: .
             dockerfile: apps/gateway/Dockerfile
 
     steps:

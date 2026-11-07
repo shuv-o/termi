@@ -41,9 +41,11 @@ export default function NewServerPage() {
                         ? { displayWidth: form.displayWidth, displayHeight: form.displayHeight }
                         : {}),
                     ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
-                    ...((form.protocol !== 'TELNET') && form.jumpServerId
+                    ...(form.protocol !== 'TELNET' && form.jumpServerId
                         ? { jumpServerId: form.jumpServerId }
                         : {}),
+                    // The server fills the secrets from this entry itself.
+                    ...(state.keychainId ? { keychainId: state.keychainId } : {}),
                 }),
             });
             const data = await res.json();

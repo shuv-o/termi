@@ -28,8 +28,6 @@ vi.mock('@/lib/crypto', async (importOriginal) => {
         ...actual,
         hashPassword: vi.fn().mockResolvedValue('hashed-password'),
         generateSalt: vi.fn().mockReturnValue(Buffer.alloc(32, 1)),
-        deriveMasterKey: vi.fn().mockReturnValue(Buffer.alloc(32, 2)),
-        hashDerivedKey: vi.fn().mockReturnValue('hashed-derived-key'),
         generateSecureToken: vi.fn().mockReturnValue('test-token'),
         hashToken: vi.fn().mockReturnValue('hashed-token'),
     };
@@ -63,14 +61,14 @@ describe('registerUser', () => {
         (prisma.auditLog.create as ReturnType<typeof vi.fn>).mockResolvedValue({});
     });
 
-    it('always creates user with masterKeyHash and masterKeySalt derived from password', async () => {
+    it('stores only the password hash — no password-derived key material', async () => {
         const result = await registerUser({ email: 'test@example.com', password: 'Password1' });
 
         expect(result.success).toBe(true);
         const createCall = (prisma.user.create as ReturnType<typeof vi.fn>).mock.calls[0][0];
-        expect(createCall.data.masterKeyHash).toBe('hashed-derived-key');
-        expect(createCall.data.masterKeySalt).toBeDefined();
         expect(createCall.data.passwordHash).toBe('hashed-password');
+        expect(createCall.data.masterKeyHash).toBeUndefined();
+        expect(createCall.data.masterKeySalt).toBeUndefined();
     });
 
     it('normalizes email to lowercase', async () => {

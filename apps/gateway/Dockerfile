@@ -1,4 +1,8 @@
-# Termi Gateway compose.Dockerfile
+# Termi Gateway — published image.
+#
+# Built from the REPOSITORY ROOT (docker build -f apps/gateway/Dockerfile .) so
+# the root package-lock.json pins every dependency, transitive ones included:
+# `npm ci` installs exactly what the lockfile says or fails.
 
 # Stage 1: Build
 FROM node:20-bookworm-slim AS builder
@@ -11,17 +15,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
-COPY package.json ./
+# The lockfile covers every workspace, so npm ci needs all their manifests.
+COPY package.json package-lock.json ./
+COPY apps/web/package.json ./apps/web/
+COPY apps/gateway/package.json ./apps/gateway/
+COPY apps/mobile/package.json ./apps/mobile/
 
-# Install dependencies (includes node-pty native compilation)
-RUN npm install
+# Install the gateway's dependencies (includes node-pty native compilation)
+RUN npm ci --workspace=apps/gateway --no-audit --no-fund
 
-# Copy source code
-COPY . .
-
-# Build TypeScript
-RUN npm run build
+# Copy source code and build TypeScript
+COPY apps/gateway ./apps/gateway
+RUN npm run build --workspace=apps/gateway
 
 # Stage 2: Production
 FROM node:20-bookworm-slim AS runner
@@ -33,15 +38,17 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 gateway
 RUN adduser --system --uid 1001 gateway
 
-# Copy built files and compiled native modules from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+# Built gateway plus its dependencies (hoisted to /app/node_modules, with any
+# workspace-local ones under apps/gateway/node_modules).
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/gateway ./apps/gateway
 
 # Set permissions
 RUN chown -R gateway:gateway /app
 
 USER gateway
+
+WORKDIR /app/apps/gateway
 
 EXPOSE 22081
 

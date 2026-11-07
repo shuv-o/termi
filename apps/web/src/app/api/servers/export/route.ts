@@ -130,7 +130,7 @@ export async function POST(request: Request) {
         })) as unknown as StoredServer[];
 
         const now = new Date();
-        const payload = buildPayload(servers, { includeCredentials });
+        const payload = buildPayload(servers, { includeCredentials, ownerId: user.id });
 
         const { body, contentType, extension } =
             format === 'json'

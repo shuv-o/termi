@@ -7,7 +7,6 @@ export interface User {
     totpEnabled: boolean;
     emailOtpEnabled: boolean;
     twoFactorMethod: 'NONE' | 'TOTP' | 'EMAIL';
-    hasMasterKey: boolean;
     passkeyEnabled: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
@@ -34,26 +33,16 @@ export interface AuthSession {
 
 /** Which settings panel is on screen. */
 export type SectionId =
-    | 'profile'
-    | 'security'
-    | 'passkeys'
-    | 'encryption'
-    | 'notifications'
-    | 'sessions'
-    | 'recordings'
-    | 'tunnels'
-    | 'danger';
+    'profile' | 'security' | 'passkeys' | 'notifications' | 'sessions' | 'recordings' | 'tunnels';
 
 export const SECTION_IDS: SectionId[] = [
     'profile',
     'security',
     'passkeys',
-    'encryption',
     'notifications',
     'sessions',
     'recordings',
     'tunnels',
-    'danger',
 ];
 
 /** Short labels used by the mobile section picker. */
@@ -61,12 +50,10 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     profile: 'Profile',
     security: 'Security',
     passkeys: 'Passkeys',
-    encryption: 'Encrypt',
     notifications: 'Alerts',
     sessions: 'Sessions',
     recordings: 'Recordings',
     tunnels: 'Tunnels',
-    danger: 'Danger',
 };
 
 /**

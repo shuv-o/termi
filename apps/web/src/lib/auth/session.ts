@@ -264,12 +264,10 @@ export async function destroySession(): Promise<void> {
     session.isLoggedIn = false;
     session.requires2FA = undefined;
     session.tempUserId = undefined;
-    session.masterKey = undefined;
     session.passkeyChallenge = undefined;
     session.passkeyAuthUserId = undefined;
     session.googleOAuthState = undefined;
     session.googleCodeVerifier = undefined;
-    session.tempMasterKey = undefined;
 
     await session.save();
 }

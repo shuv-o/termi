@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AddToast, SetUser, User } from '../types';
-import {useRouter} from "next/navigation";
 
 /**
- * Display name, login password, encryption passphrase and email verification —
+ * Display name, login password and email verification —
  * the plain account-maintenance actions, none of which need their own hook.
  */
 export function useAccountSettings(user: User | null, setUser: SetUser, addToast: AddToast) {
@@ -13,7 +12,6 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
     const [nameInput, setNameInput] = useState('');
     const [savingName, setSavingName] = useState(false);
     const nameSeeded = useRef(false);
-    const router = useRouter();
 
     useEffect(() => {
         if (user && !nameSeeded.current) {
@@ -109,61 +107,6 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
         [addToast, passwordForm],
     );
 
-    //  Encryption passphrase (Google accounts only)
-    const [passphrase, setPassphrase] = useState('');
-    const [passphraseConfirm, setPassphraseConfirm] = useState('');
-    const [savingPassphrase, setSavingPassphrase] = useState(false);
-    const [resettingEncryption, setResettingEncryption] = useState(false);
-    const [showEncryptionResetConfirm, setShowEncryptionResetConfirm] = useState(false);
-
-    const changePassphrase = useCallback(
-        async (e: React.FormEvent) => {
-            e.preventDefault();
-            if (passphrase !== passphraseConfirm || passphrase.length < 8) return;
-            setSavingPassphrase(true);
-            try {
-                const res = await fetch('/api/auth/setup-encryption', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passphrase }),
-                });
-                const data = await res.json();
-                if (data.success) {
-                    addToast('success', 'Encryption passphrase updated');
-                    setPassphrase('');
-                    setPassphraseConfirm('');
-                    setUser((u) => (u ? { ...u, hasMasterKey: true } : u));
-                } else addToast('error', data.error || 'Failed to update passphrase');
-            } catch {
-                addToast('error', 'Something went wrong');
-            } finally {
-                setSavingPassphrase(false);
-            }
-        },
-        [addToast, passphrase, passphraseConfirm, setUser],
-    );
-
-    const resetEncryption = useCallback(async () => {
-        setResettingEncryption(true);
-        try {
-            const res = await fetch('/api/auth/reset-encryption-key', { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                addToast('success', 'Encryption key reset successfully.');
-                // window.location.href = '/setup-encryption';
-                router.push('/setup-encryption');
-            } else {
-                addToast('error', data.error || 'Failed to reset encryption key.');
-                setShowEncryptionResetConfirm(false);
-            }
-        } catch {
-            addToast('error', 'Something went wrong.');
-            setShowEncryptionResetConfirm(false);
-        } finally {
-            setResettingEncryption(false);
-        }
-    }, [addToast, router]);
-
     //  Email verification
     const [resendingVerification, setResendingVerification] = useState(false);
     const [verificationSent, setVerificationSent] = useState(false);
@@ -188,18 +131,6 @@ export function useAccountSettings(user: User | null, setUser: SetUser, addToast
             changing: changingPassword,
             matches: passwordsMatch,
             change: changePassword,
-        },
-        encryption: {
-            passphrase,
-            setPassphrase,
-            confirm: passphraseConfirm,
-            setConfirm: setPassphraseConfirm,
-            saving: savingPassphrase,
-            change: changePassphrase,
-            resetting: resettingEncryption,
-            showResetConfirm: showEncryptionResetConfirm,
-            setShowResetConfirm: setShowEncryptionResetConfirm,
-            reset: resetEncryption,
         },
         verification: {
             resending: resendingVerification,

@@ -1,29 +1,22 @@
 'use client';
 
-import {
-    CheckCircle2,
-    Fingerprint,
-    Lock,
-    Mail,
-    Shield,
-    ShieldAlert,
-    ShieldCheck,
-} from 'lucide-react';
+import { CheckCircle2, Fingerprint, Mail, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import type { Passkey, User } from '../types';
 
-/** Four-point hardening checklist shown at the top of the Profile panel. */
+/** Hardening checklist shown at the top of the Profile panel. */
 export function SecurityScore({ user, passkeys }: { user: User; passkeys: Passkey[] }) {
     const checks = [
         { label: 'Email verified', done: user.isVerified, icon: Mail },
         { label: '2FA enabled', done: user.twoFactorMethod !== 'NONE', icon: Shield },
         { label: 'Passkey registered', done: passkeys.length > 0, icon: Fingerprint },
-        { label: 'Encryption key set', done: user.hasMasterKey || !user.isGoogleUser, icon: Lock },
     ];
     const score = checks.filter((c) => c.done).length;
     const pct = (score / checks.length) * 100;
 
-    const scoreColor = score === 4 ? 'text-success' : score >= 2 ? 'text-warning' : 'text-danger';
-    const barColor = score === 4 ? 'bg-success' : score >= 2 ? 'bg-warning' : 'bg-danger';
+    const scoreColor =
+        score === checks.length ? 'text-success' : score >= 2 ? 'text-warning' : 'text-danger';
+    const barColor =
+        score === checks.length ? 'bg-success' : score >= 2 ? 'bg-warning' : 'bg-danger';
     const label = score === 4 ? 'Excellent' : score >= 3 ? 'Good' : score >= 2 ? 'Fair' : 'Weak';
 
     return (

@@ -89,7 +89,6 @@ export interface FindOrCreateGoogleUserResult {
     userId: string;
     email: string;
     isNewUser: boolean;
-    hasMasterKey: boolean;
 }
 
 /**
@@ -110,7 +109,7 @@ export async function findOrCreateGoogleUser(
         where: {
             provider_providerAccountId: { provider: OAuthProvider.GOOGLE, providerAccountId: sub },
         },
-        include: { user: { select: { id: true, email: true, masterKeyHash: true } } },
+        include: { user: { select: { id: true, email: true } } },
     });
 
     if (existingOAuth) {
@@ -118,7 +117,6 @@ export async function findOrCreateGoogleUser(
             userId: existingOAuth.user.id,
             email: existingOAuth.user.email,
             isNewUser: false,
-            hasMasterKey: !!existingOAuth.user.masterKeyHash,
         };
     }
 
@@ -135,7 +133,7 @@ export async function findOrCreateGoogleUser(
     // Case C: existing user with same email
     const existingUser = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
-        select: { id: true, email: true, masterKeyHash: true, isVerified: true },
+        select: { id: true, email: true, isVerified: true },
     });
 
     if (existingUser) {
@@ -171,7 +169,6 @@ export async function findOrCreateGoogleUser(
             userId: existingUser.id,
             email: existingUser.email,
             isNewUser: false,
-            hasMasterKey: !!existingUser.masterKeyHash,
         };
     }
 
@@ -208,6 +205,5 @@ export async function findOrCreateGoogleUser(
         userId: newUser.id,
         email: newUser.email,
         isNewUser: true,
-        hasMasterKey: false,
     };
 }

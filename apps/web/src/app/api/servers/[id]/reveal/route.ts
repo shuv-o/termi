@@ -83,13 +83,16 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Decrypt credentials
     let plainValue: string | null = null;
     try {
-        const decrypted = decryptCredentials({
-            host: server.host,
-            username: server.username,
-            password: server.password ?? undefined,
-            privateKey: server.privateKey ?? undefined,
-            passphrase: server.passphrase ?? undefined,
-        });
+        const decrypted = decryptCredentials(
+            {
+                host: server.host,
+                username: server.username,
+                password: server.password ?? undefined,
+                privateKey: server.privateKey ?? undefined,
+                passphrase: server.passphrase ?? undefined,
+            },
+            server.userId,
+        );
         plainValue = (decrypted[field as keyof typeof decrypted] as string | undefined) ?? null;
     } catch {
         return errorResponse('Failed to decrypt credential', 500);

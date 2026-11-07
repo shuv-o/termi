@@ -8,7 +8,6 @@ import {
     Key,
     Keyboard,
     Laptop,
-    Lock,
     Monitor,
     Play,
     Plus,
@@ -46,7 +45,6 @@ const SETTINGS_SECTIONS = [
     { id: 'profile', label: 'Profile', icon: UserCog },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'passkeys', label: 'Passkeys', icon: Key },
-    { id: 'encryption', label: 'Encryption', icon: Lock },
     { id: 'notifications', label: 'Alerts', icon: BookKey },
     { id: 'sessions', label: 'Active sessions', icon: Monitor },
 ];

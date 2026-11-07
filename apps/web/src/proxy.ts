@@ -103,9 +103,15 @@ export async function proxy(request: NextRequest) {
         'Permissions-Policy',
         'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
     );
+    // includeSubDomains/preload commit every subdomain of the deployment's
+    // domain to HTTPS for a year (and, once preloaded, into browsers' built-in
+    // lists). That's the operator's decision for their own domain, so it's
+    // opt-in; plain HSTS is always sent.
     response.headers.set(
         'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains; preload',
+        process.env.HSTS_PRELOAD === 'true'
+            ? 'max-age=31536000; includeSubDomains; preload'
+            : 'max-age=31536000',
     );
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     // A sandboxed tunnel page has an opaque origin, so same-origin CORP would

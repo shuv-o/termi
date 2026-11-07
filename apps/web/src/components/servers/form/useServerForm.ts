@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import {
     EMPTY_SERVER_FORM,
@@ -30,7 +30,7 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
     const { data: groupsData } = useCachedFetch<{ groups: Group[] }>('/api/groups');
     const groups = groupsData?.groups ?? [];
     const { data: keychainData } = useCachedFetch<{ entries: KeychainEntry[] }>('/api/keychain');
-    const keychainEntries = keychainData?.entries ?? [];
+    const keychainEntries = useMemo(() => keychainData?.entries ?? [], [keychainData]);
 
     const [credSource, setCredSource] = useState<CredentialSource>('new');
     const [selectedKeychainId, setSelectedKeychainId] = useState('');
@@ -61,32 +61,35 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
         [update, resetTest],
     );
 
+    /**
+     * Picks a keychain entry. Only its username and auth type come to the
+     * browser; the secret stays on the server, which resolves `keychainId`
+     * when the server is saved or tested.
+     */
     const applyKeychain = useCallback(
-        async (keychainId: string) => {
-            if (!keychainId) return;
-            try {
-                const res = await fetch(`/api/keychain/${keychainId}`);
-                const data = await res.json();
-                if (data.success) {
-                    const entry = data.data.entry;
-                    update({
-                        username: entry.username,
-                        password: entry.password ?? '',
-                        privateKey: entry.privateKey ?? '',
-                        passphrase: entry.passphrase ?? '',
-                        authMethod: entry.privateKey ? 'key' : 'password',
-                    });
-                }
-            } catch {
-                // silently ignore – user can still enter manually
-            }
+        (keychainId: string) => {
+            const entry = keychainEntries.find((k) => k.id === keychainId);
+            if (!entry) return;
+            update({
+                username: entry.username,
+                password: '',
+                privateKey: '',
+                passphrase: '',
+                authMethod: entry.hasPrivateKey ? 'key' : 'password',
+            });
         },
-        [update],
+        [keychainEntries, update],
     );
+
+    /** The keychain entry to send instead of secrets, when one is in use. */
+    const keychainId =
+        credSource === 'keychain' && selectedKeychainId ? selectedKeychainId : undefined;
 
     const isSSHProto = isSshLike(form.protocol);
     const hasAuth =
-        form.authMethod === 'password' ? !!form.password.trim() : !!form.privateKey.trim();
+        !!keychainId || form.authMethod === 'password'
+            ? !!form.password.trim()
+            : !!form.privateKey.trim();
     const canTest = !!(
         form.host.trim() &&
         form.port > 0 &&
@@ -111,9 +114,10 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
                     privateKey: form.authMethod === 'key' ? form.privateKey : undefined,
                     passphrase: form.authMethod === 'key' ? form.passphrase : undefined,
                     jumpServerId:
-                        (form.protocol !== 'TELNET') && form.jumpServerId
+                        form.protocol !== 'TELNET' && form.jumpServerId
                             ? form.jumpServerId
                             : undefined,
+                    keychainId,
                 }),
             });
             const data = await res.json();
@@ -128,7 +132,7 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
             setTestStatus('failed');
             setTestResult({ error: 'Network error' });
         }
-    }, [canTest, form]);
+    }, [canTest, form, keychainId]);
 
     /**
      * Persists the entered credentials as a keychain entry, when the user asked
@@ -173,6 +177,7 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
         selectedKeychainId,
         setSelectedKeychainId,
         applyKeychain,
+        keychainId,
         saveToKeychain,
         setSaveToKeychain,
         keychainLabel,

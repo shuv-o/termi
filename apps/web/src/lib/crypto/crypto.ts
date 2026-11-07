@@ -16,7 +16,7 @@ import {
     randomBytes,
     pbkdf2Sync,
     createHash,
-    scryptSync,
+    scrypt,
     timingSafeEqual,
 } from 'crypto';
 
@@ -29,10 +29,13 @@ const TAG_LENGTH = 16; // 128 bits auth tag
 const KEY_LENGTH = 32; // 256 bits
 
 // Scrypt parameters (used as Argon2 alternative for better compatibility)
+// OWASP's scrypt guidance lists N=2^17,r=8,p=1 and the equal-cost
+// N=2^15,r=8,p=3; the latter needs ~32 MiB per hash instead of ~128 MiB, so a
+// burst of concurrent logins can't exhaust the server's memory.
 const SCRYPT_OPTIONS = {
-    N: 16384, // CPU/memory cost parameter
+    N: 32768, // CPU/memory cost parameter (2^15)
     r: 8, // Block size
-    p: 1, // Parallelization
+    p: 3, // Parallelization
     maxmem: 64 * 1024 * 1024, // 64 MB
 };
 
@@ -118,9 +121,10 @@ export interface EncryptedData {
  *
  * @param plaintext - The data to encrypt
  * @param key - Optional encryption key (uses system key if not provided)
+ * @param aad - Optional additional authenticated data the ciphertext is bound to
  * @returns Encrypted data structure with IV, ciphertext, and auth tag
  */
-export function encrypt(plaintext: string, key?: Buffer): EncryptedData {
+export function encrypt(plaintext: string, key?: Buffer, aad?: string): EncryptedData {
     const encryptionKey = key || getSystemKey();
 
     // Generate random IV for each encryption (NEVER reuse IVs with GCM)
@@ -128,6 +132,7 @@ export function encrypt(plaintext: string, key?: Buffer): EncryptedData {
 
     // Create cipher
     const cipher = createCipheriv(ALGORITHM, encryptionKey, iv);
+    if (aad !== undefined) cipher.setAAD(Buffer.from(aad, 'utf8'));
 
     // Encrypt
     const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
@@ -147,10 +152,11 @@ export function encrypt(plaintext: string, key?: Buffer): EncryptedData {
  *
  * @param encryptedData - The encrypted data structure
  * @param key - Optional decryption key (uses system key if not provided)
+ * @param aad - The additional authenticated data used at encryption, if any
  * @returns Decrypted plaintext
- * @throws Error if decryption or authentication fails
+ * @throws Error if decryption or authentication fails (including an AAD mismatch)
  */
-export function decrypt(encryptedData: EncryptedData, key?: Buffer): string {
+export function decrypt(encryptedData: EncryptedData, key?: Buffer, aad?: string): string {
     const decryptionKey = key || getSystemKey();
 
     // Decode from base64
@@ -171,6 +177,7 @@ export function decrypt(encryptedData: EncryptedData, key?: Buffer): string {
     // Create decipher
     const decipher = createDecipheriv(ALGORITHM, decryptionKey, iv);
     decipher.setAuthTag(tag);
+    if (aad !== undefined) decipher.setAAD(Buffer.from(aad, 'utf8'));
 
     // Decrypt (will throw if authentication fails)
     const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
@@ -203,7 +210,7 @@ export function decryptJson<T>(encryptedData: EncryptedData, key?: Buffer): T {
  */
 export async function hashPassword(password: string): Promise<string> {
     const salt = randomBytes(SALT_LENGTH);
-    const hash = scryptSync(password, salt, 64, SCRYPT_OPTIONS);
+    const hash = await scryptAsync(password, salt, 64, SCRYPT_OPTIONS);
 
     // Format: $scrypt$N$r$p$salt$hash
     return `$scrypt$${SCRYPT_OPTIONS.N}$${SCRYPT_OPTIONS.r}$${SCRYPT_OPTIONS.p}$${salt.toString('base64')}$${hash.toString('base64')}`;
@@ -229,7 +236,15 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
         const salt = Buffer.from(parts[5], 'base64');
         const storedHash = Buffer.from(parts[6], 'base64');
 
-        const computedHash = scryptSync(password, salt, 64, { N, r, p, maxmem: 64 * 1024 * 1024 });
+        // Bound the parameters a stored hash may ask for, so a tampered row
+        // can't make verification allocate unbounded memory.
+        if (!(N > 1 && N <= 2 ** 17 && r >= 1 && r <= 16 && p >= 1 && p <= 16)) return false;
+        const computedHash = await scryptAsync(password, salt, 64, {
+            N,
+            r,
+            p,
+            maxmem: 256 * 1024 * 1024,
+        });
 
         // Constant-time comparison to prevent timing attacks
         return (
@@ -238,6 +253,32 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
     } catch {
         return false;
     }
+}
+
+/**
+ * True when a stored hash uses weaker parameters than the current ones, so it
+ * should be replaced with a fresh hash after a successful sign-in.
+ */
+export function passwordNeedsRehash(hash: string): boolean {
+    const parts = hash.split('$');
+    if (parts.length !== 7 || parts[1] !== 'scrypt') return true;
+    return (
+        parseInt(parts[2], 10) !== SCRYPT_OPTIONS.N ||
+        parseInt(parts[3], 10) !== SCRYPT_OPTIONS.r ||
+        parseInt(parts[4], 10) !== SCRYPT_OPTIONS.p
+    );
+}
+
+/** scrypt off the event loop (scryptSync blocked every other request while hashing). */
+function scryptAsync(
+    password: string,
+    salt: Buffer,
+    keylen: number,
+    options: { N: number; r: number; p: number; maxmem: number },
+): Promise<Buffer> {
+    return new Promise((resolve, reject) =>
+        scrypt(password, salt, keylen, options, (err, key) => (err ? reject(err) : resolve(key))),
+    );
 }
 
 // UTILITY FUNCTIONS
@@ -305,9 +346,5 @@ export function deserializeEncrypted(serialized: string): EncryptedData {
     };
 }
 
-/**
- * Encrypt a single field (for TOTP secret, etc.)
- */
-export function encryptField(value: string, key?: Buffer): string {
-    return serializeEncrypted(encrypt(value, key));
-}
+// Stored secrets go through sealField/openField (credentials.ts), which bind
+// each value to its field and owner.

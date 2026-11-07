@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    // Returns decrypted secrets: bound how fast one session can read them all.
+    // Decrypts the entry server-side; bound how fast one session can do it.
     if (!keychainReadRateLimit(user.id).allowed) {
         return errorResponse('Too many requests. Please wait a few minutes.', 429);
     }
@@ -36,7 +36,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     try {
         const entry = await getKeychainCredentialById(id, user.id);
         if (!entry) return errorResponse('Not found', 404);
-        return successResponse({ entry });
+        // No secrets here: they come from POST ./reveal (step-up protected), and
+        // the server form sends a keychainId that the server resolves itself.
+        return successResponse({
+            entry: {
+                id: entry.id,
+                label: entry.label,
+                username: entry.username,
+                hasPassword: !!entry.password,
+                hasPrivateKey: !!entry.privateKey,
+                hasPassphrase: !!entry.passphrase,
+            },
+        });
     } catch (error) {
         console.error('Get keychain entry error:', error);
         return errorResponse('Failed to fetch keychain entry', 500);

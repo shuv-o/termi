@@ -17,8 +17,6 @@ import { usePushNotifications } from './_hooks/usePushNotifications';
 import { useToasts } from './_hooks/useToasts';
 import { useTwoFactor } from './_hooks/useTwoFactor';
 
-import { DangerZonePanel } from './_panels/DangerZonePanel';
-import { EncryptionPanel } from './_panels/EncryptionPanel';
 import { NotificationsPanel } from './_panels/NotificationsPanel';
 import { PasskeysPanel } from './_panels/PasskeysPanel';
 import { ProfilePanel } from './_panels/ProfilePanel';
@@ -156,10 +154,6 @@ export default function SettingsPage() {
 
                     {activeSection === 'passkeys' && <PasskeysPanel passkeys={passkeys} />}
 
-                    {activeSection === 'encryption' && (
-                        <EncryptionPanel user={user} encryption={account.encryption} />
-                    )}
-
                     {activeSection === 'notifications' && <NotificationsPanel push={push} />}
 
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
@@ -167,10 +161,6 @@ export default function SettingsPage() {
                     {activeSection === 'recordings' && <RecordingsPanel />}
 
                     {activeSection === 'tunnels' && <TunnelsPanel />}
-
-                    {activeSection === 'danger' && (
-                        <DangerZonePanel user={user} encryption={account.encryption} />
-                    )}
                 </div>
             </div>
         </div>

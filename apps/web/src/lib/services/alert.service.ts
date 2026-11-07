@@ -8,12 +8,12 @@ import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
 import { sendPushToUser } from './push.service';
 import { sendWebhookAlert, type WebhookPlatform } from './webhook.service';
-import { decrypt, deserializeEncrypted } from '@/lib/crypto/crypto';
+import { openField } from '@/lib/crypto/credentials';
 
 /** `server.host` is AES-256-GCM encrypted at rest — decrypt before display. */
-function decryptServerAddr(server: { host: string; port: number }): string {
+function decryptServerAddr(server: { host: string; port: number; userId: string }): string {
     try {
-        const host = decrypt(deserializeEncrypted(server.host));
+        const host = openField(server.host, 'Server', 'host', server.userId);
         return `${host}:${server.port}`;
     } catch (err) {
         console.error('[Alert] Failed to decrypt server host:', err);
@@ -22,9 +22,9 @@ function decryptServerAddr(server: { host: string; port: number }): string {
 }
 
 /** `webhookUrl` is AES-256-GCM encrypted at rest, same as credential fields. */
-function decryptWebhookUrl(encrypted: string): string | null {
+function decryptWebhookUrl(encrypted: string, ownerId: string): string | null {
     try {
-        return decrypt(deserializeEncrypted(encrypted));
+        return openField(encrypted, 'ServerMonitorConfig', 'webhookUrl', ownerId);
     } catch (err) {
         console.error('[Alert] Failed to decrypt webhook URL:', err);
         return null;
@@ -33,6 +33,7 @@ function decryptWebhookUrl(encrypted: string): string | null {
 
 async function fireWebhook(
     config: {
+        userId: string;
         webhookEnabled: boolean;
         webhookUrl: string | null;
         webhookPlatform: WebhookPlatform | null;
@@ -41,7 +42,7 @@ async function fireWebhook(
 ): Promise<void> {
     if (!config.webhookEnabled || !config.webhookUrl || !config.webhookPlatform) return;
 
-    const webhookUrl = decryptWebhookUrl(config.webhookUrl);
+    const webhookUrl = decryptWebhookUrl(config.webhookUrl, config.userId);
     if (!webhookUrl) return;
 
     await sendWebhookAlert(webhookUrl, config.webhookPlatform, payload);
@@ -80,7 +81,7 @@ export async function sendServerDownAlert(serverId: string): Promise<void> {
     const config = await prisma.serverMonitorConfig.findUnique({
         where: { serverId },
         include: {
-            server: { select: { name: true, host: true, port: true } },
+            server: { select: { name: true, host: true, port: true, userId: true } },
             user: { select: { email: true } },
         },
     });
@@ -154,7 +155,7 @@ export async function sendServerUpAlert(serverId: string): Promise<void> {
     const config = await prisma.serverMonitorConfig.findUnique({
         where: { serverId },
         include: {
-            server: { select: { name: true, host: true, port: true } },
+            server: { select: { name: true, host: true, port: true, userId: true } },
             user: { select: { email: true } },
         },
     });

@@ -5,7 +5,8 @@
 
 import { z } from 'zod';
 import { registerUser } from '@/lib/auth';
-import { sendEmailOTP } from '@/lib/auth/email-otp';
+import { randomBytes } from 'crypto';
+import { sendEmailOTP, sendAccountExistsNotice } from '@/lib/auth/email-otp';
 import { validateBody, successResponse, errorResponse, getClientIP } from '@/lib/api';
 import { registerRateLimit } from '@/lib/rate-limit';
 
@@ -21,6 +22,13 @@ const registerSchema = z.object({
             'Password must contain uppercase, lowercase, and a number',
         ),
 });
+
+/** Looks like a real user id (cuid); refers to no account. */
+function decoyUserId(): string {
+    const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+    const bytes = randomBytes(24);
+    return 'c' + Array.from(bytes, (b) => alphabet[b % 36]).join('');
+}
 
 export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
@@ -40,6 +48,22 @@ export async function POST(request: Request) {
 
     try {
         const result = await registerUser({ name, email, password });
+
+        // An existing email gets the same answer as a new sign-up, so this form
+        // can't be used to find out who has an account. The owner is emailed.
+        if (result.duplicate) {
+            sendAccountExistsNotice(email).catch((err) =>
+                console.error('Failed to send account-exists notice:', err),
+            );
+            return successResponse(
+                {
+                    message: 'Account created. Check your email for a 6-digit verification code.',
+                    userId: decoyUserId(),
+                    email: email.toLowerCase(),
+                },
+                201,
+            );
+        }
 
         if (!result.success) {
             return errorResponse(result.error || 'Registration failed');

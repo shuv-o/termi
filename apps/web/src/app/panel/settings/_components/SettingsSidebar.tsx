@@ -1,11 +1,9 @@
 'use client';
 
 import {
-    AlertTriangle,
     Bell,
     CheckCircle,
     Fingerprint,
-    Lock,
     Monitor,
     ScreenShare,
     Shield,
@@ -38,7 +36,6 @@ function SidebarNav({
         { id: 'profile', label: 'Profile', icon: UserIcon },
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'passkeys', label: 'Passkeys', icon: Fingerprint, badge: passkeyCount || undefined },
-        { id: 'encryption', label: 'Encryption', icon: Lock },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         {
             id: 'sessions',
@@ -53,7 +50,6 @@ function SidebarNav({
             icon: Waypoints,
             badge: tunnelCount || undefined,
         },
-        { id: 'danger', label: 'Danger zone', icon: AlertTriangle },
     ];
 
     return (
@@ -61,19 +57,14 @@ function SidebarNav({
             {items.map((item) => {
                 const Icon = item.icon;
                 const isActive = active === item.id;
-                const isDanger = item.id === 'danger';
                 return (
                     <button
                         key={item.id}
                         onClick={() => onChange(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
                             isActive
-                                ? isDanger
-                                    ? 'bg-danger/15 text-danger'
-                                    : 'bg-primary/15 text-primary'
-                                : isDanger
-                                  ? 'text-danger/70 hover:bg-danger/10 hover:text-danger'
-                                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                ? 'bg-primary/15 text-primary'
+                                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                         }`}
                     >
                         <Icon className="w-4 h-4 shrink-0" />
@@ -115,9 +106,7 @@ export function SettingsSidebar({
     return (
         <div className="sticky top-24 space-y-4">
             <div className="rounded-2xl border border-border bg-card p-4">
-                <p className="text-xs font-semibold text-muted-foreground">
-                    Settings
-                </p>
+                <p className="text-xs font-semibold text-muted-foreground">Settings</p>
                 <div className="mt-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border border-input bg-accent flex items-center justify-center text-foreground font-semibold text-sm shrink-0">
                         {(user.name || user.email)[0].toUpperCase()}

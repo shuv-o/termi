@@ -39,9 +39,15 @@ const nextConfig = {
     //   /tunnel/*            — same-origin reverse proxy into a user's own tunneled server
     //   /panel/*             — the authenticated dashboard (servers, keychain, settings, sessions)
     //   /invitations/*       — single-use server-share invitation tokens
-    //   /setup-encryption    — master-key setup flow
-    //   /unlock-encryption   — master-key unlock flow
     //   /reset-password      — single-use password-reset token flow
+    // The master-key passphrase steps were removed in 1.2.0 (they encrypted
+    // nothing); send old links and bookmarks to the panel.
+    async redirects() {
+        return [
+            { source: '/setup-encryption', destination: '/panel', permanent: false },
+            { source: '/unlock-encryption', destination: '/panel', permanent: false },
+        ];
+    },
     async headers() {
         const noStore = [{ key: 'Cache-Control', value: 'private, no-store' }];
         return [
@@ -49,8 +55,6 @@ const nextConfig = {
             { source: '/tunnel/:path*', headers: noStore },
             { source: '/panel/:path*', headers: noStore },
             { source: '/invitations/:path*', headers: noStore },
-            { source: '/setup-encryption', headers: noStore },
-            { source: '/unlock-encryption', headers: noStore },
             { source: '/reset-password', headers: noStore },
         ];
     },

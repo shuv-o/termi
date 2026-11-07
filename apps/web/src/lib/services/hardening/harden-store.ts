@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import { encryptCredentials, encryptField } from '@/lib/crypto';
+import { encryptCredentials, sealField } from '@/lib/crypto';
 import type { Prisma } from '@/app/generated/prisma/client';
 import type { HardenEvent, HardenOptions, NewCredentials } from './harden.service';
 
@@ -38,10 +38,17 @@ export async function startRun(serverId: string, userId: string, options: Harden
     });
 }
 
-export async function savePending(runId: string, creds: NewCredentials) {
+export async function savePending(runId: string, userId: string, creds: NewCredentials) {
     await prisma.serverHardeningRun.update({
         where: { id: runId },
-        data: { pendingSecret: encryptField(JSON.stringify(creds)) },
+        data: {
+            pendingSecret: sealField(
+                JSON.stringify(creds),
+                'ServerHardeningRun',
+                'pendingSecret',
+                userId,
+            ),
+        },
     });
 }
 
@@ -59,12 +66,15 @@ export async function commitCredentials(
     host: string,
 ) {
     const password = creds.password ?? existingPassword;
-    const encrypted = encryptCredentials({
-        host,
-        username: creds.username,
-        password,
-        privateKey: creds.privateKey,
-    });
+    const encrypted = encryptCredentials(
+        {
+            host,
+            username: creds.username,
+            password,
+            privateKey: creds.privateKey,
+        },
+        userId,
+    );
     await prisma.$transaction([
         prisma.server.update({
             where: { id: serverId, userId },

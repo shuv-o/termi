@@ -9,6 +9,7 @@
 import net from 'net';
 import { Client, type ConnectConfig } from 'ssh2';
 import { z } from 'zod';
+import { withKeychainCredentials } from '@/lib/services/keychain.service';
 import { getCurrentUser } from '@/lib/auth';
 import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
 import { assertValidJumpHost, JumpHostError, loadJump } from '@/lib/services/server.service';
@@ -26,6 +27,8 @@ const schema = z.object({
     passphrase: z.string().optional(),
     /** Test through this saved SSH server instead of dialing the host directly. */
     jumpServerId: z.string().nullable().optional(),
+    /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
+    keychainId: z.string().optional(),
 });
 
 //   TCP reachability (RDP / VNC)                       ─
@@ -185,8 +188,15 @@ export async function POST(request: Request) {
         return Response.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
     }
 
+    const resolved = await withKeychainCredentials(parsed.data, user.id);
+    if (!resolved) {
+        return Response.json(
+            { success: false, error: 'Keychain entry not found' },
+            { status: 404 },
+        );
+    }
     const { host, port, protocol, username, password, privateKey, passphrase, jumpServerId } =
-        parsed.data;
+        resolved;
 
     // Through a jump host the bastion dials the target, so the SSRF rules apply
     // to the bastion (re-checked here) and the target only needs valid syntax.

@@ -87,7 +87,9 @@ export class SSHConnectionPool {
         const base = cfg.id ?? `${cfg.username}@${cfg.host}:${cfg.port}`;
         // The route is part of the identity: after a jump host is added,
         // changed or removed, the old pooled connection must not be reused.
-        return cfg.jump ? `${base}~via~${cfg.jump.username}@${cfg.jump.host}:${cfg.jump.port}` : base;
+        return cfg.jump
+            ? `${base}~via~${cfg.jump.username}@${cfg.jump.host}:${cfg.jump.port}`
+            : base;
     }
 
     //   acquire

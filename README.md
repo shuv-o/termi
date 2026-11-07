@@ -86,7 +86,6 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **TOTP-based 2FA** — works with Google Authenticator, Authy, and any TOTP app
 - **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
 - **Google OAuth** — "Sign in with Google" support
-- **Optional master key** — adds a second encryption layer derived via PBKDF2
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
 - **One-click server hardening** — scan a server's SSH and firewall setup, get a security score, and fix it automatically: key-only login, a dedicated admin user, root-login choice, fail2ban, unattended updates, firewall and SSH port move. Every change is armed with an on-server rollback and verified on a fresh login before Termi stores the new credentials
 
@@ -355,8 +354,9 @@ npm run build:electron            # Package Electron app
 | `GUACD_HOST`                       | `localhost`           | guacd host for RDP/VNC                                     |
 | `GUACD_PORT`                       | `4822`                | guacd port                                                 |
 | `GUACD_TUNNEL_HOST`                | —                     | Gateway address guacd dials for RDP/VNC behind a jump host |
+| `HSTS_PRELOAD`                     | `false`               | Send `includeSubDomains; preload` with HSTS (only for a domain you put on the preload list) |
 | `ALLOW_PRIVATE_NETWORKS`           | `false`               | Allow connections to private/internal IPs                  |
-| `TRUSTED_PROXY`                    | `false`               | Trust `X-Forwarded-For` (enable behind Nginx/Traefik)      |
+| `TRUSTED_PROXY`                    | —                     | Proxy that sets the client IP: `cloudflare`, `x-real-ip` or `x-forwarded-for` |
 | `ALLOWED_ORIGINS`                  | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                               |
 | `ALLOW_LOCAL_TERMINAL`             | `false`               | Enable local PTY terminal on the gateway host              |
 | `GATEWAY_DETACHED_TTL_MIN`         | `30`                  | Minutes a detached SSH session is kept alive for reconnect |

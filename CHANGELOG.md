@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.0] — 2026-11-07
+
+Security hardening follow-ups to 1.1.2, and the removal of the unused "master key".
+
+### Security
+
+- **Encrypted values are bound to their field and owner.** Every stored secret (server credentials, keychain entries, TOTP secrets, webhook URLs, recordings) is now authenticated (AES-GCM AAD) against the field it belongs to and the user who owns it. Someone with write access to the database can no longer move a private key into a notes field — or into their own account — to read it. Existing values stay readable and are upgraded the next time they are saved.
+- **Keychain secrets no longer reach the browser without re-authentication.** Picking a keychain entry in the server form sends only its id; the server fills in the secret itself. Copying a secret on the Keychain page asks for your password or passkey (once per 5 minutes) and is audit-logged. Editing an entry no longer loads its secret — blank fields keep the stored value.
+- **Client IP headers are only trusted when configured.** `TRUSTED_PROXY` now names the proxy that sets the client IP: `cloudflare`, `x-real-ip` or `x-forwarded-for` (`true` keeps its old meaning). Previously `CF-Connecting-IP` and `X-Real-IP` were trusted from anyone, so rate limits could be dodged by sending a fake header.
+- **Docker images install exactly the locked dependency versions.** The published images now build from the repository root with `npm ci` against `package-lock.json`, instead of resolving the newest matching versions at build time.
+- **Stronger password hashing, off the event loop.** scrypt now runs asynchronously at N=2^15, r=8, p=3 (OWASP's equal-cost alternative to N=2^17 that needs ~32 MiB instead of ~128 MiB per hash). Existing passwords are upgraded automatically at the next sign-in.
+- **No more account enumeration.** Registering an email that already has an account answers exactly like a new sign-up (the real owner gets an email about it); signup verification and code resends answer the same for unknown accounts; passkey sign-in options look the same whether or not an email has passkeys.
+- HSTS no longer forces `includeSubDomains; preload` on every self-hosted domain; set `HSTS_PRELOAD=true` to opt in.
+
+### Removed
+
+- **The optional "master key".** It was presented as a second encryption layer but never encrypted anything, while Google sign-in users had to create and unlock a passphrase on every login. The setup and unlock steps, the Settings → Encryption section and Danger zone (whose only action deleted all servers) are gone; old links redirect to the panel. Sign-in no longer derives a key from the password (600,000 PBKDF2 iterations per login).
+
+### Changed
+
+- **Resetting a forgotten password keeps your servers.** It used to delete every stored server, on the grounds that the credentials became unreadable — which they never did. All existing sessions are still signed out.
+
+### Upgrade notes
+
+- Behind Cloudflare, set `TRUSTED_PROXY=cloudflare` (and make sure the origin only accepts Cloudflare traffic); behind nginx/Traefik/Caddy, set `x-real-ip` or `x-forwarded-for`. Without it, per-IP rate limits are shared by all clients (per-account limits still apply), and the app logs a warning.
+- One new migration (`add_keychain_revealed_audit`) applies automatically on start.
+- If you build the Docker images yourself with `apps/web/Dockerfile` or `apps/gateway/Dockerfile`, the build context is now the repository root: `docker build -f apps/web/Dockerfile .`
+
+---
+
 ## [1.1.2] — 2026-11-07
 
 A security release. Upgrading is recommended for every installation.

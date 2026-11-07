@@ -440,18 +440,23 @@ describe('parseCsvExport', () => {
 
 // PAYLOAD CONSTRUCTION
 
+const OWNER = 'user-1';
+
 describe('buildPayload', () => {
     /** A stored row with the encrypted-at-rest fields already encrypted. */
     function stored(): StoredServer {
         // Encrypt through the real path so the test exercises decryption too.
-        const encrypted = encryptCredentials({
-            host: 'example.com',
-            username: 'deploy',
-            password: 'hunter2',
-            privateKey: 'PRIVATE-KEY-BODY',
-            passphrase: 'key-pass',
-            notes: 'internal notes',
-        });
+        const encrypted = encryptCredentials(
+            {
+                host: 'example.com',
+                username: 'deploy',
+                password: 'hunter2',
+                privateKey: 'PRIVATE-KEY-BODY',
+                passphrase: 'key-pass',
+                notes: 'internal notes',
+            },
+            OWNER,
+        );
 
         return {
             name: 'web-01',
@@ -472,7 +477,7 @@ describe('buildPayload', () => {
     }
 
     it('decrypts credentials when asked for them', () => {
-        const result = buildPayload([stored()], { includeCredentials: true });
+        const result = buildPayload([stored()], { includeCredentials: true, ownerId: OWNER });
 
         expect(result.servers[0]).toMatchObject({
             host: 'example.com',
@@ -485,7 +490,7 @@ describe('buildPayload', () => {
     });
 
     it('omits every secret when credentials are excluded', () => {
-        const result = buildPayload([stored()], { includeCredentials: false });
+        const result = buildPayload([stored()], { includeCredentials: false, ownerId: OWNER });
         const server = result.servers[0];
 
         // Host and username are still needed to describe the server at all.
@@ -505,11 +510,14 @@ describe('buildPayload', () => {
     });
 
     it('omits the credential columns entirely from a no-credentials spreadsheet', () => {
-        const csv = buildSpreadsheet(buildPayload([stored()], { includeCredentials: false }), {
-            format: 'csv',
-            includesCredentials: false,
-            now: NOW,
-        }).toString('utf8');
+        const csv = buildSpreadsheet(
+            buildPayload([stored()], { includeCredentials: false, ownerId: OWNER }),
+            {
+                format: 'csv',
+                includesCredentials: false,
+                now: NOW,
+            },
+        ).toString('utf8');
 
         expect(csv.split('\r\n')[0]).not.toContain('Password');
         expect(csv).not.toContain('hunter2');
@@ -517,7 +525,10 @@ describe('buildPayload', () => {
 
     it('references the jump host by name, and keeps it through a CSV round trip', () => {
         const jumped = { ...stored(), name: 'db-primary', jumpServer: { name: 'bastion' } };
-        const result = buildPayload([stored(), jumped], { includeCredentials: false });
+        const result = buildPayload([stored(), jumped], {
+            includeCredentials: false,
+            ownerId: OWNER,
+        });
 
         expect(result.servers[0].jumpServerName).toBeNull();
         expect(result.servers[1].jumpServerName).toBe('bastion');

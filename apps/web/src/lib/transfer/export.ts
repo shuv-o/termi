@@ -51,6 +51,8 @@ export interface StoredServer {
 export interface BuildPayloadOptions {
     /** When false, secrets are dropped and never decrypted. */
     includeCredentials: boolean;
+    /** The user exporting; every exported server belongs to them. */
+    ownerId: string;
 }
 
 /**
@@ -61,21 +63,24 @@ export interface BuildPayloadOptions {
  */
 export function buildPayload(
     servers: StoredServer[],
-    { includeCredentials }: BuildPayloadOptions,
+    { includeCredentials, ownerId }: BuildPayloadOptions,
 ): ExportPayload {
     const groups = new Map<string, ExportPayload['groups'][number]>();
 
     const exported: ExportedServer[] = servers.map((server) => {
-        const decrypted = decryptCredentials({
-            host: server.host,
-            username: server.username,
-            // Only feed the secret fields in when they are actually wanted —
-            // decryptCredentials skips whatever is undefined.
-            password: includeCredentials ? (server.password ?? undefined) : undefined,
-            privateKey: includeCredentials ? (server.privateKey ?? undefined) : undefined,
-            passphrase: includeCredentials ? (server.passphrase ?? undefined) : undefined,
-            notes: includeCredentials ? (server.notes ?? undefined) : undefined,
-        });
+        const decrypted = decryptCredentials(
+            {
+                host: server.host,
+                username: server.username,
+                // Only feed the secret fields in when they are actually wanted —
+                // decryptCredentials skips whatever is undefined.
+                password: includeCredentials ? (server.password ?? undefined) : undefined,
+                privateKey: includeCredentials ? (server.privateKey ?? undefined) : undefined,
+                passphrase: includeCredentials ? (server.passphrase ?? undefined) : undefined,
+                notes: includeCredentials ? (server.notes ?? undefined) : undefined,
+            },
+            ownerId,
+        );
 
         if (server.group && !groups.has(server.group.name)) {
             groups.set(server.group.name, {

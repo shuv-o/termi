@@ -5,6 +5,7 @@
  * using @simplewebauthn/server.
  */
 
+import { createHmac } from 'crypto';
 import {
     generateRegistrationOptions,
     verifyRegistrationResponse,
@@ -166,6 +167,10 @@ export async function verifyPasskeyRegistration(
  * If email is provided, scope allowCredentials to that user's passkeys.
  * Stores the challenge + optional userId in the session.
  */
+function decoySecret(): string {
+    return process.env.SESSION_SECRET || 'termi-passkey-decoy';
+}
+
 export async function generatePasskeyAuthenticationOptions(email?: string) {
     const { rpID } = getRpDetails();
 
@@ -184,6 +189,19 @@ export async function generatePasskeyAuthenticationOptions(email?: string) {
                 id: p.credentialID,
                 transports: p.transports as AuthenticatorTransportFuture[],
             }));
+        } else {
+            // No account, or one without passkeys: answer with a credential id
+            // that looks real (and is stable per email), so the response can't
+            // be used to find out which emails have an account. No authenticator
+            // holds it, so sign-in simply fails.
+            allowCredentials = [
+                {
+                    id: createHmac('sha256', decoySecret())
+                        .update(`passkey-decoy:${email.toLowerCase()}`)
+                        .digest('base64url'),
+                    transports: ['internal', 'hybrid'],
+                },
+            ];
         }
     }
 

@@ -394,6 +394,7 @@ enum AuditAction {
   KEYCHAIN_CREATED
   KEYCHAIN_UPDATED
   KEYCHAIN_DELETED
+  KEYCHAIN_REVEALED
 
   // Bulk transfer events — every export is a credential-exposure event and is
   // logged whether or not it succeeded.

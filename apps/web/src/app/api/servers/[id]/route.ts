@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { withKeychainCredentials } from '@/lib/services/keychain.service';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById, updateServer, deleteServer, JumpHostError } from '@/lib/services';
 import {
@@ -37,6 +38,8 @@ const updateServerSchema = z.object({
     colorDepth: z.union([z.literal(8), z.literal(16), z.literal(24), z.literal(32)]).optional(),
     rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
     jumpServerId: z.string().nullable().optional(),
+    /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
+    keychainId: z.string().optional(),
 });
 
 interface RouteParams {
@@ -123,7 +126,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     }
 
     try {
-        const server = await updateServer(id, user.id, validation.data);
+        const input = await withKeychainCredentials(validation.data, user.id);
+        if (!input) return errorResponse('Keychain entry not found', 404);
+
+        const server = await updateServer(id, user.id, input);
 
         if (!server) {
             return notFoundResponse('Server not found');

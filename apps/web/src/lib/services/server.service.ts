@@ -6,12 +6,7 @@
 
 import { prisma } from '@/lib/db';
 import { Protocol } from '@/app/generated/prisma/client';
-import {
-    encryptCredentials,
-    decryptCredentials,
-    EncryptionContext,
-    ServerCredentials,
-} from '@/lib/crypto';
+import { encryptCredentials, decryptCredentials, ServerCredentials } from '@/lib/crypto';
 
 // TYPES
 
@@ -84,7 +79,6 @@ export async function assertValidJumpHost(
 export async function loadJump(
     jumpServerId: string | null,
     ownerId: string,
-    encryptionContext?: EncryptionContext,
 ): Promise<JumpConfig | null> {
     if (!jumpServerId) return null;
     const jump = await prisma.server.findFirst({ where: { id: jumpServerId, userId: ownerId } });
@@ -98,7 +92,7 @@ export async function loadJump(
             passphrase: jump.passphrase || undefined,
             notes: undefined,
         },
-        encryptionContext,
+        ownerId,
     );
     return {
         serverId: jump.id,
@@ -176,10 +170,7 @@ export interface ServerListItem {
 
 // CREATE
 
-export async function createServer(
-    input: CreateServerInput,
-    encryptionContext?: EncryptionContext,
-) {
+export async function createServer(input: CreateServerInput) {
     const {
         userId,
         name,
@@ -217,7 +208,7 @@ export async function createServer(
         notes,
     };
 
-    const encrypted = encryptCredentials(credentials, encryptionContext);
+    const encrypted = encryptCredentials(credentials, userId);
 
     const server = await prisma.server.create({
         data: {
@@ -285,7 +276,7 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
         orderBy: [{ isFavorite: 'desc' }, { lastUsedAt: 'desc' }, { name: 'asc' }],
     });
     return rows.map(({ password, host, username, ...rest }) => {
-        const creds = decryptCredentials({ host, username });
+        const creds = decryptCredentials({ host, username }, userId);
         return { ...rest, hasPassword: !!password, host: creds.host, username: creds.username };
     });
 }
@@ -300,11 +291,7 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
  * Use `getServerForConnection()` for SSH/SFTP connection setup.
  * Use `getServers()` for list views (already strips credentials).
  */
-export async function getServerById(
-    serverId: string,
-    userId: string,
-    encryptionContext?: EncryptionContext,
-) {
+export async function getServerById(serverId: string, userId: string) {
     const server = await prisma.server.findFirst({
         where: { id: serverId, userId },
         include: {
@@ -332,7 +319,7 @@ export async function getServerById(
         notes: server.notes || undefined,
     };
 
-    const credentials = decryptCredentials(encrypted, encryptionContext);
+    const credentials = decryptCredentials(encrypted, server.userId);
 
     return {
         ...server,
@@ -342,14 +329,13 @@ export async function getServerById(
         privateKey: credentials.privateKey,
         passphrase: credentials.passphrase,
         notes: credentials.notes,
-        jump: await loadJump(server.jumpServerId, server.userId, encryptionContext),
+        jump: await loadJump(server.jumpServerId, server.userId),
     };
 }
 
 export async function getServerForConnection(
     serverId: string,
     userId: string,
-    encryptionContext?: EncryptionContext,
 ): Promise<
     | (ServerCredentials & {
           id: string;
@@ -404,7 +390,7 @@ export async function getServerForConnection(
         notes: undefined,
     };
 
-    const credentials = decryptCredentials(encrypted, encryptionContext);
+    const credentials = decryptCredentials(encrypted, server.userId);
 
     return {
         id: server.id,
@@ -418,18 +404,13 @@ export async function getServerForConnection(
         ...credentials,
         // The jump host always belongs to the server's owner — for a shared
         // server too, so a recipient never needs the bastion shared with them.
-        jump: await loadJump(server.jumpServerId, server.userId, encryptionContext),
+        jump: await loadJump(server.jumpServerId, server.userId),
     };
 }
 
 // UPDATE
 
-export async function updateServer(
-    serverId: string,
-    userId: string,
-    input: UpdateServerInput,
-    encryptionContext?: EncryptionContext,
-) {
+export async function updateServer(serverId: string, userId: string, input: UpdateServerInput) {
     // Verify ownership
     const existing = await prisma.server.findFirst({
         where: { id: serverId, userId },
@@ -488,7 +469,7 @@ export async function updateServer(
             notes: existing.notes || undefined,
         };
 
-        const current = decryptCredentials(currentEncrypted, encryptionContext);
+        const current = decryptCredentials(currentEncrypted, existing.userId);
 
         // Merge with new values
         const newCredentials: ServerCredentials = {
@@ -501,7 +482,7 @@ export async function updateServer(
         };
 
         // Re-encrypt
-        const encrypted = encryptCredentials(newCredentials, encryptionContext);
+        const encrypted = encryptCredentials(newCredentials, existing.userId);
 
         updateData.host = encrypted.host;
         updateData.username = encrypted.username;
@@ -628,7 +609,7 @@ export async function searchServers(
         orderBy: [{ isFavorite: 'desc' }, { lastUsedAt: 'desc' }, { name: 'asc' }],
     });
     return rows.map(({ password, host, username, ...rest }) => {
-        const creds = decryptCredentials({ host, username });
+        const creds = decryptCredentials({ host, username }, userId);
         return { ...rest, hasPassword: !!password, host: creds.host, username: creds.username };
     });
 }

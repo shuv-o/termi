@@ -6,7 +6,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import { EncryptionContext, encryptCredentialField, decryptCredentialField } from '@/lib/crypto';
+import { sealField, openField } from '@/lib/crypto';
 
 // TYPES
 
@@ -44,17 +44,16 @@ export type UpdateKeychainInput = Partial<CreateKeychainInput>;
 export async function createKeychainCredential(
     userId: string,
     input: CreateKeychainInput,
-    context?: EncryptionContext,
 ): Promise<KeychainEntry> {
-    const encUsername = encryptCredentialField(input.username, context);
+    const encUsername = sealField(input.username, 'KeychainCredential', 'username', userId);
     const encPassword = input.password
-        ? encryptCredentialField(input.password, context)
+        ? sealField(input.password, 'KeychainCredential', 'password', userId)
         : undefined;
     const encPrivateKey = input.privateKey
-        ? encryptCredentialField(input.privateKey, context)
+        ? sealField(input.privateKey, 'KeychainCredential', 'privateKey', userId)
         : undefined;
     const encPassphrase = input.passphrase
-        ? encryptCredentialField(input.passphrase, context)
+        ? sealField(input.passphrase, 'KeychainCredential', 'passphrase', userId)
         : undefined;
 
     const entry = await prisma.keychainCredential.create({
@@ -90,10 +89,7 @@ export async function createKeychainCredential(
 
 // READ
 
-export async function getKeychainCredentials(
-    userId: string,
-    context?: EncryptionContext,
-): Promise<KeychainEntry[]> {
+export async function getKeychainCredentials(userId: string): Promise<KeychainEntry[]> {
     const rows = await prisma.keychainCredential.findMany({
         where: { userId },
         orderBy: { label: 'asc' },
@@ -102,7 +98,7 @@ export async function getKeychainCredentials(
     return rows.map((row) => ({
         id: row.id,
         label: row.label,
-        username: decryptCredentialField(row.username, context),
+        username: openField(row.username, 'KeychainCredential', 'username', userId),
         hasPassword: !!row.password,
         hasPrivateKey: !!row.privateKey,
         createdAt: row.createdAt,
@@ -113,7 +109,6 @@ export async function getKeychainCredentials(
 export async function getKeychainCredentialById(
     id: string,
     userId: string,
-    context?: EncryptionContext,
 ): Promise<KeychainEntryFull | null> {
     const row = await prisma.keychainCredential.findFirst({ where: { id, userId } });
     if (!row) return null;
@@ -121,10 +116,16 @@ export async function getKeychainCredentialById(
     return {
         id: row.id,
         label: row.label,
-        username: decryptCredentialField(row.username, context),
-        password: row.password ? decryptCredentialField(row.password, context) : undefined,
-        privateKey: row.privateKey ? decryptCredentialField(row.privateKey, context) : undefined,
-        passphrase: row.passphrase ? decryptCredentialField(row.passphrase, context) : undefined,
+        username: openField(row.username, 'KeychainCredential', 'username', userId),
+        password: row.password
+            ? openField(row.password, 'KeychainCredential', 'password', userId)
+            : undefined,
+        privateKey: row.privateKey
+            ? openField(row.privateKey, 'KeychainCredential', 'privateKey', userId)
+            : undefined,
+        passphrase: row.passphrase
+            ? openField(row.passphrase, 'KeychainCredential', 'passphrase', userId)
+            : undefined,
     };
 }
 
@@ -134,7 +135,6 @@ export async function updateKeychainCredential(
     id: string,
     userId: string,
     input: UpdateKeychainInput,
-    context?: EncryptionContext,
 ): Promise<KeychainEntry | null> {
     const existing = await prisma.keychainCredential.findFirst({ where: { id, userId } });
     if (!existing) return null;
@@ -142,18 +142,18 @@ export async function updateKeychainCredential(
     const updateData: Record<string, unknown> = {};
     if (input.label !== undefined) updateData.label = input.label;
     if (input.username !== undefined)
-        updateData.username = encryptCredentialField(input.username, context);
+        updateData.username = sealField(input.username, 'KeychainCredential', 'username', userId);
     if (input.password !== undefined)
         updateData.password = input.password
-            ? encryptCredentialField(input.password, context)
+            ? sealField(input.password, 'KeychainCredential', 'password', userId)
             : null;
     if (input.privateKey !== undefined)
         updateData.privateKey = input.privateKey
-            ? encryptCredentialField(input.privateKey, context)
+            ? sealField(input.privateKey, 'KeychainCredential', 'privateKey', userId)
             : null;
     if (input.passphrase !== undefined)
         updateData.passphrase = input.passphrase
-            ? encryptCredentialField(input.passphrase, context)
+            ? sealField(input.passphrase, 'KeychainCredential', 'passphrase', userId)
             : null;
 
     const updated = await prisma.keychainCredential.update({
@@ -175,7 +175,7 @@ export async function updateKeychainCredential(
         username:
             input.username !== undefined
                 ? input.username
-                : decryptCredentialField(existing.username, context),
+                : openField(existing.username, 'KeychainCredential', 'username', userId),
         hasPassword: !!updated.password,
         hasPrivateKey: !!updated.privateKey,
         createdAt: updated.createdAt,
@@ -204,4 +204,32 @@ export async function deleteKeychainCredential(id: string, userId: string): Prom
     });
 
     return true;
+}
+
+/**
+ * Fill a request's credentials from one of the user's keychain entries,
+ * server-side, so the secrets never travel to the browser. Returns the input
+ * without `keychainId` (unchanged when none was given), or null if the entry
+ * doesn't exist or isn't the user's.
+ */
+export async function withKeychainCredentials<
+    T extends {
+        keychainId?: string;
+        username?: string;
+        password?: string;
+        privateKey?: string;
+        passphrase?: string;
+    },
+>(input: T, userId: string): Promise<Omit<T, 'keychainId'> | null> {
+    const { keychainId, ...rest } = input;
+    if (!keychainId) return rest;
+    const entry = await getKeychainCredentialById(keychainId, userId);
+    if (!entry) return null;
+    return {
+        ...rest,
+        username: rest.username || entry.username,
+        password: entry.password,
+        privateKey: entry.privateKey,
+        passphrase: entry.passphrase,
+    };
 }

@@ -6,13 +6,11 @@ import { prisma } from '@/lib/db';
 import {
     hashPassword,
     verifyPassword,
-    generateSalt,
-    deriveMasterKey,
-    hashDerivedKey,
-    encryptField,
+    passwordNeedsRehash,
+    sealField,
+    openField,
     generateSecureToken,
     hashToken,
-    secureCompare,
 } from '@/lib/crypto';
 import { createSession, getSession, validateSession } from './session';
 import { verifyTOTP, generateRecoveryCodes, normalizeRecoveryCode } from './totp';
@@ -36,6 +34,8 @@ export interface LoginInput {
 }
 
 export interface AuthResult {
+    /** Registration only: the email already has an account (never sent to the client). */
+    duplicate?: boolean;
     success: boolean;
     error?: string;
     requires2FA?: boolean;
@@ -81,24 +81,16 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     });
 
     if (existing) {
-        return { success: false, error: 'Email already registered' };
+        return { success: false, error: 'Email already registered', duplicate: true };
     }
 
     const passwordHash = await hashPassword(password);
-
-    // Always auto-derive masterKey from password (no explicit passphrase needed)
-    const salt = generateSalt();
-    const derived = deriveMasterKey(password, salt);
-    const masterKeyHash = hashDerivedKey(derived);
-    const masterKeySalt = salt.toString('base64');
 
     const user = await prisma.user.create({
         data: {
             email: email.toLowerCase(),
             name: name?.trim() || null,
             passwordHash,
-            masterKeyHash,
-            masterKeySalt,
         },
     });
 
@@ -124,8 +116,6 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
             id: true,
             email: true,
             passwordHash: true,
-            masterKeyHash: true,
-            masterKeySalt: true,
             isActive: true,
             lockoutUntil: true,
             failedLoginCount: true,
@@ -194,6 +184,15 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
         return { success: false, error: 'Invalid email or password' };
     }
 
+    // Upgrade hashes made with older, weaker scrypt parameters while the
+    // plaintext is at hand (it never is otherwise).
+    if (passwordNeedsRehash(user.passwordHash)) {
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { passwordHash: await hashPassword(password) },
+        });
+    }
+
     // Reset failed count on success
     if (user.failedLoginCount > 0 || user.lockoutUntil) {
         await prisma.user.update({
@@ -202,32 +201,11 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
         });
     }
 
-    // Derive master key for session encryption
-    let derivedMasterKey: string | undefined;
-    if (user.masterKeySalt) {
-        const salt = Buffer.from(user.masterKeySalt, 'base64');
-        const derived = deriveMasterKey(password, salt);
-        derivedMasterKey = derived.toString('hex');
-    } else {
-        // Migrate existing user: auto-generate masterKey from their password
-        const salt = generateSalt();
-        const derived = deriveMasterKey(password, salt);
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                masterKeyHash: hashDerivedKey(derived),
-                masterKeySalt: salt.toString('base64'),
-            },
-        });
-        derivedMasterKey = derived.toString('hex');
-    }
-
     // Check if 2FA is required
     if (user.twoFactorMethod !== 'NONE') {
         const session = await getSession();
         session.requires2FA = true;
         session.tempUserId = user.id;
-        session.tempMasterKey = derivedMasterKey; // carry through 2FA
         await session.save();
 
         if (user.twoFactorMethod === 'EMAIL') {
@@ -249,7 +227,6 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
     session.email = user.email;
     session.sessionToken = sessionToken;
     session.isLoggedIn = true;
-    session.masterKey = derivedMasterKey;
     await session.save();
 
     const passkeyCount = await prisma.passkey.count({ where: { userId: user.id } });
@@ -323,8 +300,7 @@ export async function verify2FA(
                 }
             }
         } else if (user.totpSecret && user.totpEnabled) {
-            const { decryptCredentialField } = await import('@/lib/crypto/credentials');
-            const totpSecret = decryptCredentialField(user.totpSecret);
+            const totpSecret = openField(user.totpSecret, 'User', 'totpSecret', user.id);
             isValid = verifyTOTP(totpSecret, code);
         }
     }
@@ -361,8 +337,6 @@ export async function verify2FA(
     session.isLoggedIn = true;
     session.requires2FA = undefined;
     session.tempUserId = undefined;
-    session.masterKey = session.tempMasterKey; // promote tempMasterKey → masterKey
-    session.tempMasterKey = undefined;
     await session.save();
 
     const passkeyCount = await prisma.passkey.count({ where: { userId: user.id } });
@@ -391,7 +365,7 @@ export async function enable2FA(
         return { success: false, error: 'Invalid verification code' };
     }
 
-    const encryptedSecret = encryptField(totpSecret);
+    const encryptedSecret = sealField(totpSecret, 'User', 'totpSecret', userId);
 
     // Generate & store recovery codes
     const plainCodes = generateRecoveryCodes();
@@ -506,7 +480,6 @@ export async function getCurrentUser() {
             totpEnabled: true,
             emailOtpEnabled: true,
             twoFactorMethod: true,
-            masterKeyHash: true,
             passkeyEnabled: true,
             isActive: true,
             isVerified: true,
@@ -528,7 +501,6 @@ export async function changePassword(
         where: { id: userId },
         select: {
             passwordHash: true,
-            masterKeySalt: true,
         },
     });
 
@@ -539,26 +511,14 @@ export async function changePassword(
     const passwordValid = await verifyPassword(user.passwordHash, currentPassword);
     if (!passwordValid) return { success: false, error: 'Current password is incorrect' };
 
-    // Derive new master key
-    const newSalt = generateSalt();
-    const newMasterKey = deriveMasterKey(newPassword, newSalt);
-    const newMasterKeyHash = hashDerivedKey(newMasterKey);
-    const newMasterKeySalt = newSalt.toString('base64');
     const newPasswordHash = await hashPassword(newPassword);
 
-    // Server credentials are encrypted with the system key only (no caller
-    // passes a master-key EncryptionContext), so there is nothing to
-    // re-encrypt. Decrypting them with a password-derived key — as this used
-    // to — always failed GCM authentication and rolled back the whole change,
-    // so users with servers could not change their password at all.
+    // Server credentials are encrypted with the server's own key, not one
+    // derived from the password, so nothing needs re-encrypting.
     await prisma.$transaction(async (tx) => {
         await tx.user.update({
             where: { id: userId },
-            data: {
-                passwordHash: newPasswordHash,
-                masterKeyHash: newMasterKeyHash,
-                masterKeySalt: newMasterKeySalt,
-            },
+            data: { passwordHash: newPasswordHash },
         });
 
         await tx.session.updateMany({
@@ -667,16 +627,13 @@ export async function resetPassword(
     const newPasswordHash = await hashPassword(newPassword);
 
     await prisma.$transaction(async (tx) => {
-        // Delete ALL server records — credentials are now irretrievable
-        await tx.server.deleteMany({ where: { userId: user.id } });
-
-        // Update password, wipe master key, clear reset token
+        // Servers are kept: their credentials are encrypted with the server's
+        // own key, not one derived from the password, so a reset loses nothing.
+        // Every existing session is revoked below.
         await tx.user.update({
             where: { id: user.id },
             data: {
                 passwordHash: newPasswordHash,
-                masterKeyHash: null,
-                masterKeySalt: null,
                 passwordResetToken: null,
                 passwordResetExpiresAt: null,
             },
@@ -692,83 +649,7 @@ export async function resetPassword(
             data: {
                 userId: user.id,
                 action: 'USER_PASSWORD_RESET',
-                details: { serversDeleted: true },
-            },
-        });
-    });
-
-    return { success: true };
-}
-
-// ENCRYPTION KEY MANAGEMENT (Google OAuth users)
-
-export async function setupEncryption(
-    userId: string,
-    passphrase: string,
-): Promise<{ success: boolean; masterKey?: string; error?: string }> {
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { masterKeyHash: true },
-    });
-
-    if (!user) return { success: false, error: 'User not found' };
-    if (user.masterKeyHash) return { success: false, error: 'Encryption already configured' };
-
-    const salt = generateSalt();
-    const derived = deriveMasterKey(passphrase, salt);
-
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            masterKeyHash: hashDerivedKey(derived),
-            masterKeySalt: salt.toString('base64'),
-        },
-    });
-
-    await prisma.auditLog.create({
-        data: { userId, action: 'USER_ENCRYPTION_SETUP' },
-    });
-
-    return { success: true, masterKey: derived.toString('hex') };
-}
-
-export async function unlockEncryption(
-    userId: string,
-    passphrase: string,
-): Promise<{ success: boolean; masterKey?: string; error?: string }> {
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { masterKeyHash: true, masterKeySalt: true },
-    });
-
-    if (!user || !user.masterKeySalt || !user.masterKeyHash) {
-        return { success: false, error: 'Encryption not configured' };
-    }
-
-    const salt = Buffer.from(user.masterKeySalt, 'base64');
-    const derived = deriveMasterKey(passphrase, salt);
-    const candidateHash = hashDerivedKey(derived);
-
-    if (!secureCompare(candidateHash, user.masterKeyHash!)) {
-        return { success: false, error: 'Incorrect passphrase' };
-    }
-
-    return { success: true, masterKey: derived.toString('hex') };
-}
-
-export async function resetEncryptionKey(userId: string): Promise<{ success: boolean }> {
-    // Delete all servers — credentials permanently inaccessible
-    await prisma.$transaction(async (tx) => {
-        await tx.server.deleteMany({ where: { userId } });
-        await tx.user.update({
-            where: { id: userId },
-            data: { masterKeyHash: null, masterKeySalt: null },
-        });
-        await tx.auditLog.create({
-            data: {
-                userId,
-                action: 'USER_ENCRYPTION_KEY_RESET',
-                details: { serversDeleted: true },
+                details: { serversDeleted: false },
             },
         });
     });

@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/toast';
 
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
+import PasskeyRevealModal from '@/components/auth/PasskeyRevealModal';
 import { emptyForm, type EntryForm, type KeychainEntry } from './_components/types';
 
 /** Applies `?new=1` and `?entry=` deep links (e.g. from the command palette) on mount. */
@@ -69,9 +70,22 @@ export default function KeychainPage() {
         navigator.clipboard.writeText(entry.username).then(() => markCopied(entry.id, 'user'));
     };
 
+    /** Entry whose secret needs a step-up prompt before it can be copied. */
+    const [revealFor, setRevealFor] = useState<KeychainEntry | null>(null);
+
     const copyPassword = async (entry: KeychainEntry) => {
         try {
-            const res = await fetch(`/api/keychain/${entry.id}`);
+            // Succeeds without a prompt if this session stepped up in the last
+            // 5 minutes; otherwise ask for a password/passkey first.
+            const res = await fetch(`/api/keychain/${entry.id}/reveal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+            });
+            if (res.status === 401) {
+                setRevealFor(entry);
+                return;
+            }
             const data = await res.json();
             if (data.success) {
                 const secret = entry.hasPrivateKey
@@ -81,6 +95,8 @@ export default function KeychainPage() {
                     await navigator.clipboard.writeText(secret);
                     markCopied(entry.id, 'pass');
                 }
+            } else {
+                toast('error', data.error || 'Could not copy the secret');
             }
         } catch {
             // ignore
@@ -102,6 +118,8 @@ export default function KeychainPage() {
         setEditId(id);
         setFormError('');
         try {
+            // Metadata only: secret fields start blank, and blank keeps the
+            // stored value, so editing a label never exposes the secret.
             const res = await fetch(`/api/keychain/${id}`);
             const data = await res.json();
             if (data.success) {
@@ -109,10 +127,10 @@ export default function KeychainPage() {
                 setForm({
                     label: e.label,
                     username: e.username,
-                    authMethod: e.privateKey ? 'key' : 'password',
-                    password: e.password ?? '',
-                    privateKey: e.privateKey ?? '',
-                    passphrase: e.passphrase ?? '',
+                    authMethod: e.hasPrivateKey ? 'key' : 'password',
+                    password: '',
+                    privateKey: '',
+                    passphrase: '',
                 });
                 setShowForm(true);
             }
@@ -252,6 +270,21 @@ export default function KeychainPage() {
                     </div>
                 )}
             </div>
+
+            {revealFor && (
+                <PasskeyRevealModal
+                    serverId={revealFor.id}
+                    serverName={revealFor.label}
+                    revealUrl={`/api/keychain/${revealFor.id}/reveal`}
+                    field={revealFor.hasPrivateKey ? 'privateKey' : 'password'}
+                    pickValue={(d) => {
+                        const e = d.entry as { password: string | null; privateKey: string | null };
+                        return revealFor.hasPrivateKey ? e.privateKey : e.password;
+                    }}
+                    autoCopy
+                    onClose={() => setRevealFor(null)}
+                />
+            )}
 
             <KeychainEntryModal
                 open={showForm}

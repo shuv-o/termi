@@ -97,13 +97,16 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
     let passphrase: string | undefined;
 
     try {
-        const creds = decryptCredentials({
-            host: cfg.server.host,
-            username: cfg.server.username,
-            password: cfg.server.password ?? undefined,
-            privateKey: cfg.server.privateKey ?? undefined,
-            passphrase: cfg.server.passphrase ?? undefined,
-        });
+        const creds = decryptCredentials(
+            {
+                host: cfg.server.host,
+                username: cfg.server.username,
+                password: cfg.server.password ?? undefined,
+                privateKey: cfg.server.privateKey ?? undefined,
+                passphrase: cfg.server.passphrase ?? undefined,
+            },
+            cfg.server.userId,
+        );
         host = creds.host;
         username = creds.username;
         password = creds.password;
@@ -238,7 +241,10 @@ export async function checkSingleServer(
     // host is stored AES-encrypted; checkReachability needs the real hostname.
     let host: string;
     try {
-        ({ host } = decryptCredentials({ host: server.host, username: server.username }));
+        ({ host } = decryptCredentials(
+            { host: server.host, username: server.username },
+            server.userId,
+        ));
     } catch (err) {
         console.error(`[Monitor] Failed to decrypt host for server ${serverId}:`, err);
         return { reachable: false };

@@ -87,9 +87,7 @@ export default function EditServerPage() {
                 ...(form.protocol === 'RDP' ? { rdpSecurity: form.rdpSecurity } : {}),
                 // Explicit null clears it, and switching to RDP/VNC/Telnet drops it.
                 jumpServerId:
-                    (form.protocol !== 'TELNET') && form.jumpServerId
-                        ? form.jumpServerId
-                        : null,
+                    form.protocol !== 'TELNET' && form.jumpServerId ? form.jumpServerId : null,
             };
             // Blank credential fields are omitted so the stored ones survive.
             if (form.authMethod === 'password' && form.password.trim()) {
@@ -99,6 +97,8 @@ export default function EditServerPage() {
                 if (form.privateKey.trim()) payload.privateKey = form.privateKey;
                 if (form.passphrase.trim()) payload.passphrase = form.passphrase;
             }
+            // The server fills the secrets from this entry itself.
+            if (state.keychainId) payload.keychainId = state.keychainId;
 
             const res = await fetch(`/api/servers/${id}`, {
                 method: 'PATCH',

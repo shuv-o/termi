@@ -5,7 +5,6 @@ export interface PanelUser {
     email: string;
     name: string | null;
     totpEnabled: boolean;
-    hasMasterKey: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
     createdAt: string;

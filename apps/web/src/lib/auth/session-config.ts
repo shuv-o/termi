@@ -17,15 +17,14 @@ export interface SessionData {
     isLoggedIn: boolean;
     requires2FA?: boolean;
     tempUserId?: string; // For 2FA flow
-    masterKey?: string; // Encrypted master key for session
+    /** When this session last passed a step-up re-auth (keychain reveals reuse it for 5 min). */
+    stepUpAt?: number;
     lastActivity?: number;
     passkeyChallenge?: string; // Base64URL challenge for WebAuthn registration/auth
     passkeyAuthUserId?: string; // userId resolved during passkey auth options (before assertion verified)
     // Temporary fields used during Google OAuth dance (cleared after callback)
     googleOAuthState?: string;
     googleCodeVerifier?: string;
-    // Temporary masterKey during 2FA pending state
-    tempMasterKey?: string;
 }
 
 // CONFIGURATION

@@ -104,39 +104,50 @@ export async function validateBody<T>(
 // REQUEST HELPERS
 
 /**
- * Get client IP address from request.
+ * Get the client's IP address, for rate limiting and audit logs.
  *
- * Priority order:
- * 1. cf-connecting-ip  — set by Cloudflare; cannot be spoofed by end-users.
- * 2. x-real-ip         — set by a single trusted reverse proxy (nginx/caddy).
- * 3. x-forwarded-for   — only trusted when TRUSTED_PROXY=true is set, because
- *                        the header is user-controllable in direct deployments.
+ * Forwarding headers are set by whoever sends the request, so a header is
+ * only trusted when the deployment says which proxy sets it (TRUSTED_PROXY):
  *
- * Without a reverse proxy, none of these headers are set and the connection
- * address would need to come from the runtime (not available in Next.js edge).
- * We fall back to 'unknown' which is safe — rate limits will bucket to a
- * single shared key, providing conservative protection rather than bypassing.
+ *   cloudflare       CF-Connecting-IP. Only sound if the origin accepts traffic
+ *                    from Cloudflare alone — otherwise anyone can send it directly.
+ *   x-real-ip        X-Real-IP, set by a single reverse proxy (nginx, Traefik…).
+ *   x-forwarded-for  The last X-Forwarded-For entry (the one our proxy added).
+ *   true             Same as x-forwarded-for (the setting's original meaning).
+ *
+ * Unset: no header is trusted and every client shares the 'unknown' bucket.
+ * Per-account limits (login lockout, 2FA/OTP attempts) still apply per user.
  */
+let warnedNoTrustedProxy = false;
+
 export function getClientIP(request: Request): string {
-    // Cloudflare — always authoritative when present
-    const cfIP = request.headers.get('cf-connecting-ip');
-    if (cfIP) return cfIP.trim();
+    const mode = (process.env.TRUSTED_PROXY ?? '').trim().toLowerCase();
+    const header = (name: string) => request.headers.get(name)?.trim() || null;
 
-    // Single-proxy real IP (nginx `proxy_set_header X-Real-IP $remote_addr`)
-    const realIP = request.headers.get('x-real-ip');
-    if (realIP) return realIP.trim();
-
-    // X-Forwarded-For — only trust if explicitly configured (behind a trusted proxy)
-    if (process.env.TRUSTED_PROXY === 'true') {
-        const forwardedFor = request.headers.get('x-forwarded-for');
-        if (forwardedFor) {
-            // Take the last untrusted IP (rightmost entry added by our proxy)
-            const ips = forwardedFor.split(',').map((s) => s.trim());
-            return ips[ips.length - 1] || 'unknown';
+    switch (mode) {
+        case 'cloudflare':
+            return header('cf-connecting-ip') ?? 'unknown';
+        case 'x-real-ip':
+            return header('x-real-ip') ?? 'unknown';
+        case 'x-forwarded-for':
+        case 'true': {
+            const ips = (header('x-forwarded-for') ?? '')
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean);
+            return ips[ips.length - 1] ?? 'unknown';
         }
+        default:
+            if (!warnedNoTrustedProxy && process.env.NODE_ENV === 'production') {
+                warnedNoTrustedProxy = true;
+                console.warn(
+                    '[security] TRUSTED_PROXY is not set, so no client-IP header is trusted and ' +
+                        'per-IP rate limits are shared by all clients. Behind a proxy, set ' +
+                        'TRUSTED_PROXY=cloudflare | x-real-ip | x-forwarded-for.',
+                );
+            }
+            return 'unknown';
     }
-
-    return 'unknown';
 }
 
 /**

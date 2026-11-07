@@ -50,10 +50,6 @@ export default function ForgotPasswordPage() {
                             If that email address has an account, we&apos;ve sent a password reset
                             link. Check your inbox.
                         </p>
-                        <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-xs text-warning">
-                            ⚠️ Resetting your password will permanently delete your stored server
-                            credentials.
-                        </div>
                         <Button asChild variant="ghost" className="w-full">
                             <Link href="/login">
                                 <ArrowLeft className="w-4 h-4" />
@@ -66,10 +62,6 @@ export default function ForgotPasswordPage() {
                         <p className="text-sm text-muted-foreground text-center">
                             Enter your email address and we&apos;ll send a reset link.
                         </p>
-                        <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 text-xs text-danger">
-                            ⚠️ Warning: Resetting your password will permanently delete all stored
-                            server credentials (passwords, private keys). This cannot be undone.
-                        </div>
                         <div className="space-y-1">
                             <Label htmlFor="email">Email address</Label>
                             <Input

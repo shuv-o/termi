@@ -40,42 +40,29 @@ To report a vulnerability, use one of:
 
 ### Credential Encryption (AES-256-GCM)
 
-All server credentials (`host`, `username`, `password`, `privateKey`, `passphrase`, `notes`) are encrypted with AES-256-GCM before being written to the database:
+All server credentials (`host`, `username`, `password`, `privateKey`, `passphrase`, `notes`), keychain entries, TOTP secrets, webhook URLs and session recordings are encrypted with AES-256-GCM before being written to the database:
 
 ```
-plaintext credential
+plaintext value
         │
         ▼
 AES-256-GCM encrypt (random 96-bit IV)
   key = SHA-256(ENCRYPTION_KEY env var)
+  AAD = which field of which record the value belongs to
         │
         ▼
-  ciphertext:IV stored in PostgreSQL
+  ciphertext stored in PostgreSQL
 ```
+
+The AAD binds each ciphertext to its own field and record, so a value copied into a different column or row fails to decrypt instead of being revealed through a less-protected field. Values written before this binding existed are still readable and are upgraded the next time they are saved.
 
 Decryption happens only in memory, during an active request, and the plaintext is never logged or persisted.
 
-### Optional Master Key
+**What this protects against, and what it does not.** A database dump on its own reveals no credentials. A database dump *together with* `ENCRYPTION_KEY` reveals all of them, so keep the key out of database backups and away from anyone with database access. (Earlier versions advertised an optional per-user "master key" layer; it never encrypted anything and was removed in 1.2.0.)
 
-Users can optionally enable a **master key** for an additional layer of protection:
+### Password Hashing (scrypt)
 
-```
-ENCRYPTION_KEY (server-side AES layer)
-        +
-user's master password
-        │
-        ▼
-PBKDF2 key derivation (600,000 iterations, SHA-256)
-        │
-        ▼
-AES-256-GCM re-encryption of each credential
-```
-
-With a master key enabled, credentials cannot be decrypted even if the database and `ENCRYPTION_KEY` are both compromised — the user's master password is required.
-
-### Password Hashing (Argon2id)
-
-User passwords are hashed with **Argon2id** using parameters tuned for server-side security (memory cost, time cost, and parallelism are configurable).
+User passwords are hashed with **scrypt** (N = 2^15, r = 8, p = 3 — the equal-cost, lower-memory variant of OWASP's N = 2^17 recommendation — 64-byte output, random salt), off the event loop. Hashes made with the previous, lower cost are upgraded automatically the next time the user signs in.
 
 ### Connection Token (JWE)
 
@@ -89,7 +76,7 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 
 | Threat                      | Mitigation                                            |
 | --------------------------- | ----------------------------------------------------- |
-| Database exfiltration       | AES-256-GCM encryption at rest; optional master key   |
+| Database exfiltration       | AES-256-GCM encryption at rest (key kept outside DB)  |
 | Credential theft in transit | TLS (configured via reverse proxy)                    |
 | SSRF attacks                | `validateHost()` blocks private/loopback ranges       |
 | Brute-force login           | Rate limiting on auth endpoints                       |

@@ -8,7 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { recordingCreateRateLimit } from '@/lib/rate-limit';
 import { prisma } from '@/lib/db';
-import { encryptField } from '@/lib/crypto/crypto';
+import { sealField } from '@/lib/crypto/credentials';
 import {
     validateBody,
     successResponse,
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
                 // Terminal output can contain anything shown on screen during the
                 // session — file contents, env vars, secrets — so it's encrypted
                 // at rest the same as credential fields.
-                content: encryptField(content),
+                content: sealField(content, 'Recording', 'content', user.id),
                 durationSec,
                 sizeBytes,
             },

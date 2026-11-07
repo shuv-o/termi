@@ -293,6 +293,7 @@ export async function getSharedServers(userId: string) {
                     host: true,
                     username: true,
                     port: true,
+                    userId: true,
                     group: { select: { id: true, name: true, color: true } },
                 },
             },
@@ -302,8 +303,8 @@ export async function getSharedServers(userId: string) {
     });
 
     return shares.map((share) => {
-        const { password, host, username, ...rest } = share.server;
-        const creds = decryptCredentials({ host, username });
+        const { password, host, username, userId: ownerId, ...rest } = share.server;
+        const creds = decryptCredentials({ host, username }, ownerId);
         return {
             ...rest,
             host: creds.host,

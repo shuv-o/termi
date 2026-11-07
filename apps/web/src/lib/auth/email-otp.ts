@@ -166,3 +166,20 @@ export async function verifyEmailOTP(userId: string, code: string): Promise<bool
     }
     return false;
 }
+
+/**
+ * Tell an existing account's owner that someone tried to register with their
+ * address. Registration answers a duplicate exactly like a new sign-up (so it
+ * can't be used to discover who has an account); this email is how the real
+ * owner finds out.
+ */
+export async function sendAccountExistsNotice(email: string): Promise<void> {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    await sendEmail(
+        email,
+        'Someone tried to create a Termi account with your email',
+        `<p>Someone just tried to create a new Termi account with this email address, but you already have one.</p>
+<p>If it was you, <a href="${appUrl}/login">sign in</a> instead, or <a href="${appUrl}/forgot-password">reset your password</a>.</p>
+<p>If it wasn't you, you can ignore this email — nothing has changed on your account.</p>`,
+    );
+}

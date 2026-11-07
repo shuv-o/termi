@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, Check, X, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -71,11 +71,10 @@ function ResetPasswordForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 text-xs text-danger">
-                <AlertTriangle className="w-4 h-4 inline mr-1" />
-                <strong>Security notice:</strong> Resetting your password will permanently delete
-                your stored server credentials. You&apos;ll need to re-add your servers after reset.
-            </div>
+            <p className="text-xs text-muted-foreground">
+                Your servers and saved credentials are kept. Every device signed in to your account
+                will be signed out.
+            </p>
 
             {success ? (
                 <div className="text-center space-y-2">
@@ -146,11 +145,7 @@ function ResetPasswordForm() {
                         className="w-full"
                         disabled={loading || !allMet || !passwordsMatch}
                     >
-                        {loading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            'Reset Password & Delete Server Credentials'
-                        )}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Reset password'}
                     </Button>
                 </>
             )}

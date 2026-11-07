@@ -98,9 +98,9 @@ export default async function HomePage() {
                             <span aria-hidden className="cursor-block" />
                         </h1>
                         <p className="mt-6 max-w-[52ch] text-base leading-relaxed text-muted-foreground sm:text-lg">
-                            Open SSH shells, move files over SCP, and drive Windows or Linux desktops
-                            over RDP and VNC — from a laptop or a phone. Credentials are encrypted
-                            with AES-256-GCM before they touch the database.
+                            Open SSH shells, move files over SCP, and drive Windows or Linux
+                            desktops over RDP and VNC — from a laptop or a phone. Credentials are
+                            encrypted with AES-256-GCM before they touch the database.
                         </p>
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                             <Button size="lg" asChild>
@@ -129,7 +129,9 @@ export default async function HomePage() {
             <section id="features" className="border-t border-border px-4 py-16 sm:px-6 lg:py-24">
                 <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_2fr]">
                     <div>
-                        <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">One place for every way in</h2>
+                        <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">
+                            One place for every way in
+                        </h2>
                         <p className="mt-3 max-w-[40ch] text-muted-foreground">
                             Linux, Windows and anything that speaks Telnet, from whichever device is
                             in your hand.
@@ -157,16 +159,20 @@ export default async function HomePage() {
                 className="border-t border-border bg-card px-4 py-16 sm:px-6 lg:py-24"
             >
                 <div className="mx-auto max-w-6xl">
-                    <h2 className="max-w-[24ch] text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">Your keys stay yours</h2>
+                    <h2 className="max-w-[24ch] text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">
+                        Your keys stay yours
+                    </h2>
                     <p className="mt-3 max-w-[60ch] text-muted-foreground">
                         Passwords, private keys and notes are encrypted before they are stored, and
-                        never leave the server in plaintext. An optional master key adds a second
-                        layer that only you can unlock.
+                        each one is bound to the record it belongs to. The encryption key never
+                        touches the database.
                     </p>
                     <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
                         {SECURITY.map((item) => (
                             <div key={item.title} className="bg-card p-5">
-                                <p className="data text-lg font-medium text-primary">{item.title}</p>
+                                <p className="data text-lg font-medium text-primary">
+                                    {item.title}
+                                </p>
                                 <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
                             </div>
                         ))}

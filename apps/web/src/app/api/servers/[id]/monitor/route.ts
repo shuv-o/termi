@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { prisma } from '@/lib/db';
-import { encryptField } from '@/lib/crypto/crypto';
+import { sealField } from '@/lib/crypto/credentials';
 import { validateHost } from '@/lib/security/ssrf';
 import {
     validateBody,
@@ -108,7 +108,9 @@ export async function POST(request: Request, { params }: RouteParams) {
         }
     }
 
-    const encryptedWebhookUrl = data.webhookUrl ? encryptField(data.webhookUrl) : undefined;
+    const encryptedWebhookUrl = data.webhookUrl
+        ? sealField(data.webhookUrl, 'ServerMonitorConfig', 'webhookUrl', user.id)
+        : undefined;
 
     try {
         // Read existing config to detect a toggle change

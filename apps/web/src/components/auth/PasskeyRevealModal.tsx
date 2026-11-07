@@ -22,7 +22,12 @@ export type RevealField = 'password' | 'privateKey' | 'passphrase';
 
 interface Props {
     serverId: string;
+    /** Shown under the title: the server's (or keychain entry's) name. */
     serverName: string;
+    /** Reveal endpoint; defaults to the server's. The keychain passes its own. */
+    revealUrl?: string;
+    /** Picks the secret out of a successful response's `data`. */
+    pickValue?: (data: Record<string, unknown>) => string | null;
     field: RevealField;
     onClose: () => void;
     /**
@@ -65,10 +70,15 @@ function getWebAuthnErrorMessage(err: unknown): string {
 export default function PasskeyRevealModal({
     serverId,
     serverName,
+    revealUrl,
+    pickValue,
     field,
     onClose,
     autoCopy = false,
 }: Props) {
+    const endpoint = revealUrl ?? `/api/servers/${serverId}/reveal`;
+    const extract = (data: Record<string, unknown>) =>
+        (pickValue ? pickValue(data) : (data.value as string | undefined)) ?? '';
     const [step, setStep] = useState<Step>('authenticating');
     const [errorMsg, setErrorMsg] = useState('');
     const [revealedValue, setRevealedValue] = useState('');
@@ -155,7 +165,7 @@ export default function PasskeyRevealModal({
         }
 
         try {
-            const revealRes = await fetch(`/api/servers/${serverId}/reveal`, {
+            const revealRes = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ field, passkeyResponse: assertion }),
@@ -166,7 +176,7 @@ export default function PasskeyRevealModal({
                 setStep('error');
                 return;
             }
-            setRevealedValue(revealData.data.value);
+            setRevealedValue(extract(revealData.data));
             setStep('revealed');
         } catch {
             setErrorMsg('Network error — could not reach the server');
@@ -179,7 +189,7 @@ export default function PasskeyRevealModal({
         setPasswordLoading(true);
         setErrorMsg('');
         try {
-            const res = await fetch(`/api/servers/${serverId}/reveal`, {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ field, authPassword: passwordInput }),
@@ -190,7 +200,7 @@ export default function PasskeyRevealModal({
                 setStep('error');
                 return;
             }
-            setRevealedValue(data.data.value);
+            setRevealedValue(extract(data.data));
             setStep('revealed');
         } catch {
             setErrorMsg('Network error — could not reach the server');

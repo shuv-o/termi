@@ -19,9 +19,7 @@ export function MobileSectionPicker({
                         onClick={() => onChange(s)}
                         className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                             active === s
-                                ? s === 'danger'
-                                    ? 'bg-danger/20 text-danger'
-                                    : 'bg-primary/20 text-primary'
+                                ? 'bg-primary/20 text-primary'
                                 : 'bg-secondary text-muted-foreground hover:text-foreground'
                         }`}
                     >

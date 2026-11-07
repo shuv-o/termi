@@ -95,9 +95,9 @@ export async function verifyReauth(userId: string, input: ReauthInput): Promise<
         }
 
         if (dbUser.twoFactorMethod === 'TOTP' && dbUser.totpSecret) {
-            const { decryptCredentialField } = await import('@/lib/crypto/credentials');
+            const { openField } = await import('@/lib/crypto/credentials');
             const { verifyTOTP } = await import('@/lib/auth/totp');
-            return verifyTOTP(decryptCredentialField(dbUser.totpSecret), authCode);
+            return verifyTOTP(openField(dbUser.totpSecret, 'User', 'totpSecret', userId), authCode);
         }
 
         return false;
