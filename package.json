@@ -1,6 +1,6 @@
 {
     "name": "termi",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
@@ -41,22 +41,23 @@
         "electron-updater": "^6.6.2",
         "electron-webauthn": "~1.2.0",
         "node-pty": "^1.1.0",
-        "sharp": "0.35.4"
+        "sharp": "0.35.5"
     },
     "overrides": {
-        "shell-quote": "^1.8.4",
+        "shell-quote": "^1.12.0",
         "form-data": "^4.0.6",
-        "undici": "^6.27.0",
+        "undici": "^6.29.1",
         "esbuild": "^0.28.1",
         "mysql2": "^3.24.4",
-        "fast-uri": "^3.1.6",
+        "fast-uri": "^3.1.9",
         "js-yaml": "^4.3.2",
-        "@xmldom/xmldom": "^0.8.15"
+        "@xmldom/xmldom": "^0.8.15",
+        "source-map-js": "^1.2.2"
     },
     "devDependencies": {
         "@electron/rebuild": "^4.0.0",
         "concurrently": "^9.2.1",
-        "electron": "^41.10.5",
+        "electron": "^42.11.18",
         "electron-builder": "^26.15.3",
         "esbuild": "^0.28.1",
         "eslint-config-prettier": "^10.1.8",

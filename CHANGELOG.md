@@ -6,11 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [Unreleased]
+## [1.1.2] — 2026-11-07
+
+A security release. Upgrading is recommended for every installation.
+
+### Security
+
+- **Critical: a tunneled web app could act as you.** The port-forward proxy (`/tunnel/…`) served the target's pages from Termi's own origin, so a script in any tunneled app — including one on a server someone shared with you — could call Termi's API with your session: mint connection tokens for all your servers and run commands on them, read your keychain, or register a service worker that persisted on the Termi origin. In the desktop app it could also open a local shell. Tunneled pages are now sandboxed to an opaque origin (no session cookie, API, storage, service workers or desktop bridge) and authenticated by a short-lived token in the URL that only grants that one host and port. Headers that would affect the whole origin (`Service-Worker-Allowed`, `Clear-Site-Data`, CSP, HSTS, CORS, …) are no longer passed through, and the target's cookies are confined to the tunnel path.
+- **High: the RDP/VNC handshake could be hijacked.** The gateway forwarded browser frames to guacd before sending its own handshake, so a user could send their own `connect` — reaching any host (bypassing the gateway's SSRF guard) with any guacd parameters, such as a drive mapped to the guacd container's filesystem. Browser frames are now dropped until the gateway's handshake is done, and handshake instructions are never accepted from the browser.
+- **High: code injection in the generated tunnel bridge script.** A server name or remote host containing a newline or `${…}` became code in the Node.js script you run locally — exploitable by whoever shared a server with you. Those values now only appear as string literals.
+- **High: account pre-hijacking through Google sign-in.** "Sign in with Google" linked to an existing account with the same email even if it was never verified, so someone who registered your email first kept a working password into the account you then used. Google is now only linked to verified accounts.
+- **High: email verification codes could be brute-forced.** `verify-signup` had no attempt limit and signed the account in, bypassing password and 2FA. Email codes are now burned after 5 wrong guesses, verification is rate-limited per account, and it no longer signs in an account that has 2FA.
+- **Desktop app: IPC accepted calls from any page, and server-side redirects were not filtered.** Local-terminal, tunnel and passkey IPC now only answer Termi's own top-level pages, and redirects to other sites open in the browser instead.
+- Google sign-in now asks for the second factor on accounts with 2FA (it used to skip it).
+- 2FA codes are rate-limited per account as well as per IP, so rotating addresses no longer buys more guesses.
+- The gateway connects to the exact address it checked, closing a DNS-rebinding bypass of its private-network guard.
+- Session reattach checks the server too, so a revoked share can't keep using a live session.
+- One user can no longer exceed the tunnel and local-terminal caps (a slot was released twice on errors), exhaust gateway memory with chunked SCP uploads, or request an unbounded RDP framebuffer.
+- Webhook alerts no longer follow redirects (blind SSRF to internal addresses).
+- Decrypted keychain reads are rate-limited.
+- Fixed an open redirect in the login page's `?next=` parameter (`//host`).
+- The example placeholder values for `SESSION_SECRET` and `GATEWAY_JWT_SECRET` are refused in production; a placeholder `ENCRYPTION_KEY` logs a warning.
+- Dependencies (all open Dependabot alerts with a fix): Next.js 16.4.5 (image-optimizer and `next/og` RCEs, SSRF, cache poisoning), Electron 42.11.18, nodemailer 10.3.1, sharp 0.35.5, zod 4.6.7, vitest 4.1.12, vite 8.3.6, plus fixed `shell-quote`, `undici`, `fast-uri` and `source-map-js`. The unused `electron` dependency was removed from the web app.
 
 ### Fixed
 
-- **Fresh installs were missing the database objects for several features.** Telnet servers, server sharing and invitations, session recordings, benchmark history, tunnel sessions, webhook alerts and nine audit actions were added to the Prisma schema without migrations, so any database built by `prisma migrate deploy` — every Docker install — lacked them, and those features failed. A new migration (`20261107000000_sync_schema_drift`) adds them. Every statement is idempotent, so databases that already have these objects (synced with `prisma db push`) apply it as a no-op.
+- **Changing your password failed for anyone with servers.** It tried to re-encrypt server credentials with a key they were never encrypted with, so the change rolled back (and other sessions stayed signed in).
+- - **Fresh installs were missing the database objects for several features.** Telnet servers, server sharing and invitations, session recordings, benchmark history, tunnel sessions, webhook alerts and nine audit actions were added to the Prisma schema without migrations, so any database built by `prisma migrate deploy` — every Docker install — lacked them, and those features failed. A new migration (`20261107000000_sync_schema_drift`) adds them. Every statement is idempotent, so databases that already have these objects (synced with `prisma db push`) apply it as a no-op.
+
+### Upgrade notes
+
+- **If your `SESSION_SECRET` or `GATEWAY_JWT_SECRET` is still the `change-me…` example value, the new version will not start in production.** Replace it with `openssl rand -base64 32` (this signs everyone out). If `ENCRYPTION_KEY` is the example value, it still works but logs a warning — your stored credentials are readable by anyone with a database dump; set a new key and re-enter them.
+- Tunneled web apps now run sandboxed: they work, but can no longer use their own cookies or `localStorage`, so apps that need a login of their own may not keep you signed in through the `/tunnel` proxy. Use the desktop app's local port or the bridge script for those.
+- The desktop app moves to Electron 42.
+- One new database migration (`sync_schema_drift`) applies automatically on start; on databases that already have those objects it changes nothing.
 
 ---
 
