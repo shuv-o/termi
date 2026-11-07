@@ -14,6 +14,14 @@ name: Docker Release
 # GHCR needs no secrets: it authenticates with the automatically-provided
 # GITHUB_TOKEN via the `packages: write` permission below.
 #
+# Supply chain: every image is pushed with a BuildKit SBOM and max-mode SLSA
+# provenance attestation, then signed keyless with cosign (Sigstore, GitHub
+# OIDC identity — no long-lived signing key) by digest in both registries.
+# Verify with e.g.:
+#   cosign verify ghcr.io/shuv-o/termi-web:<version> \
+#     --certificate-identity-regexp '^https://github.com/shuv-o/termi/\.github/workflows/docker-release\.yml@refs/tags/v' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com
+#
 # Note: apps/web/Dockerfile and apps/gateway/Dockerfile build from the repo
 # root with `npm ci` against package-lock.json, so a release installs exactly
 # the audited dependency versions - distinct from compose.Dockerfile, which
@@ -27,14 +35,18 @@ on:
     tags:
       - 'v*.*.*'
 
+# Default for anything not overriding it; the job below widens only what it needs.
 permissions:
   contents: read
-  packages: write
 
 jobs:
   docker:
     name: Build & push termi-${{ matrix.image }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push images + cosign signatures to ghcr.io
+      id-token: write # OIDC token for keyless cosign signing
     strategy:
       fail-fast: false
       matrix:
@@ -47,22 +59,27 @@ jobs:
             dockerfile: apps/gateway/Dockerfile
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -73,14 +90,32 @@ jobs:
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           platforms: linux/amd64,linux/arm64
           push: true
+          sbom: true
+          provenance: mode=max
           tags: |
             shuvoo/termi-${{ matrix.image }}:latest
             shuvoo/termi-${{ matrix.image }}:${{ steps.version.outputs.version }}
             ghcr.io/shuv-o/termi-${{ matrix.image }}:latest
             ghcr.io/shuv-o/termi-${{ matrix.image }}:${{ steps.version.outputs.version }}
+
+      # Sign by digest (never by tag, which is mutable). Both registries hold
+      # the same manifest list, so one digest covers all four tags.
+      - name: Sign images with cosign (keyless)
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE: termi-${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DIGEST" ]; then
+            echo "::error::build-push-action returned no digest; refusing to sign."
+            exit 1
+          fi
+          cosign sign --yes "shuvoo/${IMAGE}@${DIGEST}"
+          cosign sign --yes "ghcr.io/shuv-o/${IMAGE}@${DIGEST}"
