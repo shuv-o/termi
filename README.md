@@ -28,11 +28,34 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 ## 📸 Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshot-hero.png" alt="Termi landing page — self-hosted SSH, SCP, RDP and VNC access from your browser" width="100%">
+  <img src=".github/assets/screenshot-dashboard.png" alt="Termi server dashboard: fleet status strip, live CPU, memory and disk per server, groups, tags and jump-host servers" width="100%">
 </p>
+
+<table>
+  <tr>
+    <td width="50%"><img src=".github/assets/screenshot-terminal.png" alt="SSH terminal session running htop in the browser"></td>
+    <td width="50%"><img src=".github/assets/screenshot-palette.png" alt="Command palette: type a server name and press Enter to connect"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>SSH in the browser</b> — tabs, multiple shells, file transfer and scrollback search</td>
+    <td align="center"><b>Command palette</b> — <kbd>⌘K</kbd>, type a name, <kbd>Enter</kbd> to connect</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/screenshot-security.png" alt="Security scan of a fresh Ubuntu server: score 20 of 100 with password and root login findings"></td>
+    <td width="50%"><img src=".github/assets/screenshot-harden-dialog.png" alt="Secure server dialog: admin user, root login choice, password logins off, fail2ban, updates"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Security scan</b> — a score and plain-language findings for each server</td>
+    <td align="center"><b>Fix automatically</b> — hardening with an on-server rollback if anything fails</td>
+  </tr>
+</table>
+
 <p align="center">
-  <img src=".github/assets/screenshot-features.png" alt="Termi feature overview — SSH terminal, file manager, remote desktop, encrypted credential vault, 2FA, mobile support" width="100%">
+  <img src=".github/assets/screenshot-mobile-dashboard.png" alt="Termi dashboard on a phone" width="260">
+  &nbsp;&nbsp;
+  <img src=".github/assets/screenshot-mobile-details.png" alt="Server details with live monitoring on a phone" width="260">
 </p>
+<p align="center"><sub>Works on phones too — installable as a PWA, or as the iOS/Android and desktop apps. Screenshots use demo data.</sub></p>
 
 ---
 
@@ -42,7 +65,6 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - [Quick Start](#-quick-start)
 - [Desktop App Installation](#-desktop-app-installation)
 - [Development Setup](#️-development-setup)
-- [Project Structure](#️-project-structure)
 - [Configuration](#️-configuration)
 - [Architecture](#-architecture)
 - [Security](#-security)
@@ -185,10 +207,10 @@ tagged release (`v*.*.*`) publishes multi-arch (amd64 + arm64) images to both
 [Docker Hub](https://hub.docker.com/u/shuvoo) and
 [GitHub Container Registry](https://github.com/shuv-o/termi/pkgs/container/termi-web):
 
-| Image             | Docker Hub                    | GHCR                                  |
-| ----------------- | ------------------------------ | -------------------------------------- |
-| Web (`@termi/web`) | `shuvoo/termi-web`             | `ghcr.io/shuv-o/termi-web`              |
-| Gateway            | `shuvoo/termi-gateway`         | `ghcr.io/shuv-o/termi-gateway`          |
+| Image              | Docker Hub             | GHCR                           |
+| ------------------ | ---------------------- | ------------------------------ |
+| Web (`@termi/web`) | `shuvoo/termi-web`     | `ghcr.io/shuv-o/termi-web`     |
+| Gateway            | `shuvoo/termi-gateway` | `ghcr.io/shuv-o/termi-gateway` |
 
 Both are tagged `latest` and with the release version (e.g. `1.0.10`).
 
