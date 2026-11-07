@@ -39,12 +39,23 @@ describe('SCAN_SCRIPT', () => {
     });
 
     // A fake 'nft' that prints a captured ruleset, ahead of the real PATH.
+    // Also fakes 'sudo' (always refuses) and 'ufw' (inactive): CI runners have
+    // passwordless sudo, and `sudo -n nft` would use sudo's secure_path — the
+    // runner's real, empty nft instead of this one — and run every other check
+    // in the scan for real, slowly.
     function firewallFor(fixture: string): string {
         const dir = mkdtempSync(join(tmpdir(), 'termi-nft-'));
         const ruleset = readFileSync(join(__dirname, '__fixtures__', `nft-${fixture}.txt`), 'utf8');
         writeFileSync(join(dir, 'ruleset'), ruleset);
-        writeFileSync(join(dir, 'nft'), `#!/bin/sh\ncat '${join(dir, 'ruleset')}'\n`);
-        chmodSync(join(dir, 'nft'), 0o755);
+        const fakes: Record<string, string> = {
+            nft: `cat '${join(dir, 'ruleset')}'`,
+            sudo: 'exit 1',
+            ufw: 'echo "Status: inactive"',
+        };
+        for (const [name, body] of Object.entries(fakes)) {
+            writeFileSync(join(dir, name), `#!/bin/sh\n${body}\n`);
+            chmodSync(join(dir, name), 0o755);
+        }
         const script = join(dir, 'scan.sh');
         writeFileSync(script, SCAN_SCRIPT);
         const out = execFileSync('sh', [script], {
@@ -57,10 +68,10 @@ describe('SCAN_SCRIPT', () => {
     it('does not mistake Docker/libvirt forward-chain drops for a firewall', () => {
         expect(firewallFor('docker')).not.toBe('nftables');
         expect(firewallFor('debian-default')).not.toBe('nftables');
-    });
+    }, 30_000);
 
     it('recognises a real nftables firewall, including rules in a jumped-to chain', () => {
         expect(firewallFor('real-policy')).toBe('nftables');
         expect(firewallFor('real-jump')).toBe('nftables');
-    });
+    }, 30_000);
 });
