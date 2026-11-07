@@ -265,7 +265,7 @@ export async function verify2FA(
     }
 
     // Per account, not just per IP: rotating addresses must not buy more guesses.
-    if (!verify2FAAccountRateLimit(session.tempUserId).allowed) {
+    if (!(await verify2FAAccountRateLimit(session.tempUserId)).allowed) {
         return { success: false, error: 'Too many attempts. Please wait and try again.' };
     }
 

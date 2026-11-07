@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [1.2.0] — 2026-11-07
+## [Unreleased]
 
-Security hardening follow-ups to 1.1.2, and the removal of the unused "master key".
+Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the unused "master key".
 
 ### Security
 
@@ -19,6 +19,20 @@ Security hardening follow-ups to 1.1.2, and the removal of the unused "master ke
 - **Stronger password hashing, off the event loop.** scrypt now runs asynchronously at N=2^15, r=8, p=3 (OWASP's equal-cost alternative to N=2^17 that needs ~32 MiB instead of ~128 MiB per hash). Existing passwords are upgraded automatically at the next sign-in.
 - **No more account enumeration.** Registering an email that already has an account answers exactly like a new sign-up (the real owner gets an email about it); signup verification and code resends answer the same for unknown accounts; passkey sign-in options look the same whether or not an email has passkeys.
 - HSTS no longer forces `includeSubDomains; preload` on every self-hosted domain; set `HSTS_PRELOAD=true` to opt in.
+
+- **Encryption keys can be rotated.** Stored values record which key encrypted them; `ENCRYPTION_KEY_PREVIOUS` keeps retired keys readable, and `npm run db:reseal` re-encrypts everything under the current key (it also upgrades all pre-1.2 values at once). Keys can be read from files (`ENCRYPTION_KEY_FILE`) for Docker/Kubernetes secrets.
+- **Tunnels can live on their own domain.** With `TUNNEL_ORIGIN_TEMPLATE` set, every port-forward tunnel is served from its own origin (e.g. `https://<id>.termi-tunnels.net`), isolated from Termi and from other tunnels; tunneled apps then run unsandboxed and keep their own logins. A tunnel origin serves nothing but its tunnel. Without it, tunnels stay sandboxed on Termi's origin.
+- **Security emails.** You're emailed when your account signs in from a new device, when your password is changed or reset, when 2FA is turned on or off, when a passkey is added or removed, and when your servers are exported.
+- **"Passkey only".** An optional setting (Settings → Passkeys) turns off password sign-in, so a leaked or phished password is useless. It needs a passkey, and turns itself off if the last passkey is removed or the password is reset by email.
+- **Account activity.** Settings → Account activity lists your sign-ins and security events. Successful sign-ins are now recorded (only failures were before).
+- **Cloud metadata is always blocked.** 169.254.169.254 and other cloud metadata endpoints are refused even with `ALLOW_PRIVATE_NETWORKS=true`, in the web app and the gateway.
+- **Rate limits survive restarts and scale out** with `REDIS_URL` (optional; in-memory otherwise). Email-code guess counting uses the same store.
+- **Hardened containers.** The compose files now split networks (Postgres is internal and only the web app reaches it; the gateway can't), run containers read-only with all capabilities dropped, `no-new-privileges`, and PID/memory limits. The web image applies migrations on every start (no flag file), so it runs read-only.
+- **Desktop app fuses.** The packaged app can no longer be run as plain Node (`ELECTRON_RUN_AS_NODE`, `NODE_OPTIONS`, `--inspect`), only loads its integrity-checked `app.asar`, and encrypts its cookies at rest.
+- **Content Security Policy:** adds `frame-ancestors 'none'` and Trusted Types in report-only mode.
+- **Database:** `DB_SSLMODE` enables TLS to Postgres; database credentials with special characters now work. `SECURITY.md` documents a least-privilege database role.
+- **Supply chain:** GitHub Actions are pinned to commit SHAs; Dependabot covers npm, actions and Docker; CodeQL runs on every push; CI fails on unreviewed high/critical advisories in production dependencies; release images carry an SBOM and SLSA provenance and are signed with Sigstore (see `SECURITY.md` to verify).
+- **Security regression suite.** `npm run test:security` (and the "Security E2E" CI job) proves the tunnel isolation, guacd handshake filtering, keychain step-up, field binding, enumeration resistance and related protections against a real web app, gateway, database, SSH host, guacd and VNC server.
 
 ### Removed
 
@@ -33,6 +47,10 @@ Security hardening follow-ups to 1.1.2, and the removal of the unused "master ke
 - Behind Cloudflare, set `TRUSTED_PROXY=cloudflare` (and make sure the origin only accepts Cloudflare traffic); behind nginx/Traefik/Caddy, set `x-real-ip` or `x-forwarded-for`. Without it, per-IP rate limits are shared by all clients (per-account limits still apply), and the app logs a warning.
 - One new migration (`add_keychain_revealed_audit`) applies automatically on start.
 - If you build the Docker images yourself with `apps/web/Dockerfile` or `apps/gateway/Dockerfile`, the build context is now the repository root: `docker build -f apps/web/Dockerfile .`
+- Two more migrations apply automatically on start (`add_keychain_revealed_audit`, `add_password_login_disabled`). The published web image now runs `prisma migrate deploy` on every start.
+- To bind all existing secrets right away instead of on their next save, run `npm run db:reseal` once (`-- --dry-run` first to preview).
+- Optional new settings: `TUNNEL_ORIGIN_TEMPLATE`, `REDIS_URL`, `DB_SSLMODE`, `ENCRYPTION_KEY_FILE`, `ENCRYPTION_KEY_PREVIOUS` (see `.env.example`).
+- If you deploy with the bundled compose files, their networks changed (`edge`, `data`, `remote`): recreate the stack with `docker compose up -d`.
 
 ---
 

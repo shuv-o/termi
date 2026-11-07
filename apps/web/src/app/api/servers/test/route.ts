@@ -165,7 +165,7 @@ export async function POST(request: Request) {
     }
 
     // Rate limit: 20 test attempts per 5 minutes per user
-    const rl = connectionTestRateLimit(user.id);
+    const rl = await connectionTestRateLimit(user.id);
     if (!rl.allowed) {
         return Response.json(
             {

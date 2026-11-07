@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (!user) return unauthorizedResponse();
 
     // Rate limit: 30 token requests per 5 minutes per user
-    const rl = connectionTokenRateLimit(user.id);
+    const rl = await connectionTokenRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many connection requests. Please wait before trying again.', 429);
     }

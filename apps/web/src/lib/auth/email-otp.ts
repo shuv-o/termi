@@ -8,6 +8,7 @@
 import { randomInt, scryptSync, timingSafeEqual, randomBytes } from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
+import { countEvent, resetCounter } from '@/lib/rate-limit';
 
 // CONSTANTS
 
@@ -127,7 +128,7 @@ export async function sendEmailOTP(
  */
 /** Wrong guesses per user since their last success; at the limit, outstanding codes are burned. */
 const MAX_FAILED_OTP_ATTEMPTS = 5;
-const failedOtpAttempts = new Map<string, number>();
+const failureKey = (userId: string) => `otp-fail:${userId}`;
 
 export async function verifyEmailOTP(userId: string, code: string): Promise<boolean> {
     const otps = await prisma.emailOTP.findMany({
@@ -146,7 +147,7 @@ export async function verifyEmailOTP(userId: string, code: string): Promise<bool
                 where: { id: otp.id },
                 data: { usedAt: new Date() },
             });
-            failedOtpAttempts.delete(userId);
+            await resetCounter(failureKey(userId));
             return true;
         }
     }
@@ -154,15 +155,13 @@ export async function verifyEmailOTP(userId: string, code: string): Promise<bool
     // A 6-digit code must not be guessable by retrying: after a few misses,
     // every outstanding code for this user stops working and a new one has to
     // be requested (which is itself rate-limited).
-    const failures = (failedOtpAttempts.get(userId) ?? 0) + 1;
+    const failures = await countEvent(failureKey(userId), OTP_TTL_MS);
     if (failures >= MAX_FAILED_OTP_ATTEMPTS) {
-        failedOtpAttempts.delete(userId);
+        await resetCounter(failureKey(userId));
         await prisma.emailOTP.updateMany({
             where: { userId, usedAt: null },
             data: { usedAt: new Date() },
         });
-    } else {
-        failedOtpAttempts.set(userId, failures);
     }
     return false;
 }

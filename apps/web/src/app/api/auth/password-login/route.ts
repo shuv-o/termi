@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    if (!credentialRevealRateLimit(user.id).allowed) {
+    if (!(await credentialRevealRateLimit(user.id)).allowed) {
         return errorResponse('Too many attempts. Please wait a few minutes.', 429);
     }
 

@@ -52,7 +52,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const rl = serverHardenRateLimit(user.id);
+    const rl = await serverHardenRateLimit(user.id);
     if (!rl.allowed) return errorResponse('Too many attempts. Try again in an hour.', 429);
 
     const validation = await validateBody(request, optionsSchema);

@@ -17,7 +17,7 @@ const schema = z.object({
 export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
 
-    const rl = registerRateLimit(ipAddress);
+    const rl = await registerRateLimit(ipAddress);
     if (!rl.allowed) {
         return errorResponse('Too many requests. Please try again later.', 429);
     }

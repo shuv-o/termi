@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getIronSession } from 'iron-session';
 import { sessionOptions, isDesktopDevice, type SessionData } from '@/lib/auth/session-config';
 import { TUNNEL_SANDBOX } from '@/lib/security/tunnel-sandbox';
+import { tunnelIdFromHost } from '@/lib/security/tunnel-origin';
 
 // Slide the desktop session cookie at most once per hour. Each save re-issues
 // the cookie with a fresh 30-day maxAge, so any interaction within the window
@@ -53,6 +54,18 @@ export async function proxy(request: NextRequest) {
         });
     }
 
+    // Per-tunnel origins (TUNNEL_ORIGIN_TEMPLATE) serve tunneled apps and
+    // nothing else: no Termi pages or API, no Termi CSP or session handling.
+    if (tunnelIdFromHost(host)) {
+        if (!url.pathname.startsWith('/tunnel/')) {
+            return new NextResponse('Not found', { status: 404 });
+        }
+        const tunnelResponse = NextResponse.next();
+        tunnelResponse.headers.set('X-Content-Type-Options', 'nosniff');
+        tunnelResponse.headers.set('Referrer-Policy', 'no-referrer');
+        return tunnelResponse;
+    }
+
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
     const isDev = process.env.NODE_ENV !== 'production';
     const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
@@ -78,6 +91,9 @@ export async function proxy(request: NextRequest) {
         "img-src 'self' data: blob:",
         "font-src 'self'",
         "frame-src 'none'",
+        // Nobody may frame Termi (clickjacking); X-Frame-Options: DENY is the
+        // legacy equivalent, kept below for old browsers.
+        "frame-ancestors 'none'",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
@@ -97,6 +113,15 @@ export async function proxy(request: NextRequest) {
     // Apply CSP and all other security headers on the response
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('X-Frame-Options', 'DENY');
+    // Trusted Types, report-only: logs any DOM-XSS-prone sink (innerHTML etc.)
+    // to the console without blocking, so it can be enforced once clean.
+    // Not applied to tunneled pages, which aren't ours.
+    if (!url.pathname.startsWith('/tunnel/')) {
+        response.headers.set(
+            'Content-Security-Policy-Report-Only',
+            "require-trusted-types-for 'script'",
+        );
+    }
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set(

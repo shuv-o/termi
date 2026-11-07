@@ -355,6 +355,11 @@ npm run build:electron            # Package Electron app
 | `GUACD_PORT`                       | `4822`                | guacd port                                                 |
 | `GUACD_TUNNEL_HOST`                | —                     | Gateway address guacd dials for RDP/VNC behind a jump host |
 | `HSTS_PRELOAD`                     | `false`               | Send `includeSubDomains; preload` with HSTS (only for a domain you put on the preload list) |
+| `TUNNEL_ORIGIN_TEMPLATE`           | —                     | Serve each port-forward tunnel from its own origin, e.g. `https://{id}.termi-tunnels.net` (wildcard DNS + cert, on a different domain than Termi) |
+| `REDIS_URL`                        | —                     | Share rate limits across instances and restarts (falls back to memory) |
+| `DB_SSLMODE`                       | —                     | TLS to Postgres, e.g. `verify-full`                        |
+| `ENCRYPTION_KEY_FILE`              | —                     | Read `ENCRYPTION_KEY` from a file (Docker/Kubernetes secret) |
+| `ENCRYPTION_KEY_PREVIOUS`          | —                     | Retired keys (comma-separated) still accepted while rotating; see `npm run db:reseal` |
 | `ALLOW_PRIVATE_NETWORKS`           | `false`               | Allow connections to private/internal IPs                  |
 | `TRUSTED_PROXY`                    | —                     | Proxy that sets the client IP: `cloudflare`, `x-real-ip` or `x-forwarded-for` |
 | `ALLOWED_ORIGINS`                  | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                               |

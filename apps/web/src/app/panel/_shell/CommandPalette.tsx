@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     BookKey,
     FolderOpen,
+    History,
     Key,
     Keyboard,
     Laptop,
@@ -47,6 +48,7 @@ const SETTINGS_SECTIONS = [
     { id: 'passkeys', label: 'Passkeys', icon: Key },
     { id: 'notifications', label: 'Alerts', icon: BookKey },
     { id: 'sessions', label: 'Active sessions', icon: Monitor },
+    { id: 'activity', label: 'Account activity', icon: History },
 ];
 
 /**

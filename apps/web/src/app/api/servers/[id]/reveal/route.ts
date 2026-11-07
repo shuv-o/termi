@@ -40,7 +40,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { id: serverId } = await params;
 
     // Rate limit: max 3 reveals per 5 min per user
-    const rl = credentialRevealRateLimit(user.id);
+    const rl = await credentialRevealRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many reveal requests. Please wait before trying again.', 429);
     }

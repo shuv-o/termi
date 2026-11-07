@@ -1,0 +1,76 @@
+name: Security E2E
+
+# Security regression suite (apps/web/e2e/security): proves the tunnel
+# sandbox/origins, guacd handshake filtering, keychain step-up, encrypted-field
+# binding, enumeration resistance and related protections still hold against a
+# real web app, gateway, Postgres, SSH host, guacd and VNC server.
+
+on:
+    push:
+        branches: [main, canary]
+    pull_request:
+        branches: [main]
+
+permissions:
+    contents: read
+
+concurrency:
+    group: security-e2e-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    security-e2e:
+        name: Security E2E
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+
+        services:
+            postgres:
+                image: postgres:17-alpine
+                env:
+                    POSTGRES_USER: termi
+                    POSTGRES_PASSWORD: termi
+                    POSTGRES_DB: postgres
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U termi"
+                    --health-interval 5s
+                    --health-timeout 5s
+                    --health-retries 10
+
+        env:
+            SEC_E2E_DB_HOST: localhost
+            SEC_E2E_DB_PORT: '5432'
+            SEC_E2E_DB_USER: termi
+            SEC_E2E_DB_PASSWORD: termi
+            SEC_E2E_DB_NAME: termi_sec_e2e
+            # The desktop shell isn't under test here.
+            ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+        steps:
+            - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+              with:
+                  persist-credentials: false
+
+            - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+              with:
+                  node-version: '22'
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci --no-audit --no-fund
+
+            - name: Generate Prisma client
+              run: npm run db:generate
+
+            - name: Install Playwright browser
+              working-directory: apps/web
+              run: npx playwright install --with-deps chromium
+
+            - name: Pull guacd
+              run: docker pull guacamole/guacd:1.6.0
+
+            - name: Run security suite
+              working-directory: apps/web
+              run: npm run test:security

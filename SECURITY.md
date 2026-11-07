@@ -98,14 +98,50 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 
 Before exposing Termi to the internet, ensure:
 
-- [ ] All secrets (`SESSION_SECRET`, `ENCRYPTION_KEY`, `GATEWAY_JWT_SECRET`) are ≥32 random bytes
-- [ ] HTTPS is enforced via a reverse proxy (Traefik, Nginx, Caddy)
-- [ ] `ALLOW_PRIVATE_NETWORKS=false` unless you explicitly need it
+- [ ] All secrets (`SESSION_SECRET`, `ENCRYPTION_KEY`, `GATEWAY_JWT_SECRET`) are ≥32 random bytes and none is an example placeholder
+- [ ] `ENCRYPTION_KEY` is kept out of database backups (prefer `ENCRYPTION_KEY_FILE` pointing at a Docker/Kubernetes secret)
+- [ ] HTTPS is enforced via a reverse proxy (Traefik, Nginx, Caddy), and `TRUSTED_PROXY` names that proxy (`cloudflare`, `x-real-ip` or `x-forwarded-for`)
+- [ ] Behind Cloudflare, the origin only accepts Cloudflare's IP ranges (or use Cloudflare Tunnel) — otherwise `CF-Connecting-IP` can be forged
+- [ ] `ALLOW_PRIVATE_NETWORKS=false` unless you explicitly need it (cloud metadata addresses stay blocked either way)
 - [ ] `ALLOW_LOCAL_TERMINAL` is not set unless you need it and understand the implications
-- [ ] The database port is not exposed to the internet
+- [ ] The database port is not exposed; the bundled compose files keep Postgres on an internal network only the web app joins
+- [ ] The database is reached over TLS (`DB_SSLMODE=verify-full`) unless it is on the same host or a private network
+- [ ] The app connects as a least-privilege database role (see below)
 - [ ] Docker socket (if used) is not accessible from the containers
-- [ ] You have enabled 2FA on your Termi account
-- [ ] You are running a recent version
+- [ ] You have enabled 2FA or a passkey on your Termi account (consider "Passkey only" in Settings → Passkeys)
+- [ ] You are running a recent version, and you verify image signatures (below)
+
+### Least-privilege database role
+
+Run migrations as the database owner, and the app as a role that can only read and write rows:
+
+```sql
+CREATE ROLE termi_app LOGIN PASSWORD '<random>';
+GRANT CONNECT ON DATABASE termi TO termi_app;
+GRANT USAGE ON SCHEMA public TO termi_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO termi_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE <owner> IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO termi_app;
+```
+
+The published web image runs `prisma migrate deploy` on start, which needs the owner role; to split them, run migrations once with the owner's credentials and start the app with `termi_app`.
+
+### Rotating the encryption key
+
+1. Generate a new key: `openssl rand -base64 32`.
+2. Set it as `ENCRYPTION_KEY`, and move the old one to `ENCRYPTION_KEY_PREVIOUS`.
+3. Run `npm run db:reseal` (add `-- --dry-run` first to see what would change).
+4. When it reports nothing left to re-seal, remove `ENCRYPTION_KEY_PREVIOUS`.
+
+### Verifying published images
+
+Release images are signed with Sigstore (keyless, GitHub OIDC) and carry an SBOM and SLSA provenance:
+
+```sh
+cosign verify ghcr.io/shuv-o/termi-web:<version> \
+  --certificate-identity-regexp '^https://github.com/shuv-o/termi/\.github/workflows/docker-release\.yml@refs/tags/v' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
 
 ---
 

@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
     const deviceInfo = getDeviceInfo(request);
 
-    const rl = serverImportRateLimit(user.id);
+    const rl = await serverImportRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many import requests. Please wait before trying again.', 429);
     }

@@ -23,6 +23,7 @@ import { ProfilePanel } from './_panels/ProfilePanel';
 import { RecordingsPanel } from './_panels/RecordingsPanel';
 import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
+import { ActivityPanel } from './_panels/ActivityPanel';
 import { TunnelsPanel } from './_panels/TunnelsPanel';
 
 import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
@@ -152,11 +153,14 @@ export default function SettingsPage() {
                         />
                     )}
 
-                    {activeSection === 'passkeys' && <PasskeysPanel passkeys={passkeys} user={user} setUser={setUser} />}
+                    {activeSection === 'passkeys' && (
+                        <PasskeysPanel passkeys={passkeys} user={user} setUser={setUser} />
+                    )}
 
                     {activeSection === 'notifications' && <NotificationsPanel push={push} />}
 
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
+                    {activeSection === 'activity' && <ActivityPanel />}
 
                     {activeSection === 'recordings' && <RecordingsPanel />}
 

@@ -30,6 +30,23 @@ files:
     - apps/web/public/icons/icon-512x512.png
     - node_modules/node-pty/**/*
 
+# Electron fuses: flipped in the binary at package time, so a copy of the app
+# can't be repurposed as a general Node runtime that carries the user's
+# session cookies (ELECTRON_RUN_AS_NODE, NODE_OPTIONS, --inspect), and only the
+# integrity-checked app.asar can be loaded. Cookies are encrypted at rest with
+# the OS keychain. Nothing in apps/electron forks Electron as Node.
+electronFuses:
+    runAsNode: false
+    enableCookieEncryption: true
+    enableNodeOptionsEnvironmentVariable: false
+    enableNodeCliInspectArguments: false
+    enableEmbeddedAsarIntegrityValidation: true
+    onlyLoadAppFromAsar: true
+    loadBrowserProcessSpecificV8Snapshot: false
+    grantFileProtocolExtraPrivileges: false
+    # Flipping fuses invalidates the ad-hoc macOS signature; re-sign ad hoc.
+    resetAdHocDarwinSignature: true
+
 # Native addons cannot be loaded from inside an asar archive — unpack them.
 asarUnpack:
     - node_modules/node-pty/**/*

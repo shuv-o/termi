@@ -42,7 +42,7 @@ export async function PUT(request: Request) {
         return errorResponse('No active 2FA session', 400);
     }
 
-    const rl = emailOtpRateLimit(session.tempUserId);
+    const rl = await emailOtpRateLimit(session.tempUserId);
     if (!rl.allowed) {
         return errorResponse(
             'Too many OTP requests. Please wait before requesting another code.',

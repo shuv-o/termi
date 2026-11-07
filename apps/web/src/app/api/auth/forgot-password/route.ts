@@ -13,7 +13,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
     const ip = getClientIP(request);
-    const rl = forgotPasswordRateLimit(ip);
+    const rl = await forgotPasswordRateLimit(ip);
     if (!rl.allowed) {
         return successResponse({ message: 'If that email exists, a reset link has been sent.' });
     }

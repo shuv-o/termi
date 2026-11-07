@@ -135,17 +135,13 @@ COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
 #!/bin/sh
 set -e
 
-FLAG_FILE="/app/.migrations_done"
 cd /app/apps/web
 
-if [ ! -f "$FLAG_FILE" ]; then
-    echo "First run detected - Running migrations..."
-    prisma migrate deploy
-    echo "Migrations completed!"
-    touch "$FLAG_FILE"
-else
-    echo "Migrations already run, skipping..."
-fi
+# Idempotent and fast (the CLI is baked in), so it runs on every start. No
+# "already migrated" flag file: the container can then run with a read-only
+# filesystem, and an image upgrade always applies its new migrations.
+echo "Applying database migrations..."
+prisma migrate deploy
 exec node server.js
 EOF
 

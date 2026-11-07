@@ -4,6 +4,7 @@ import {
     Bell,
     CheckCircle,
     Fingerprint,
+    History,
     Monitor,
     ScreenShare,
     Shield,
@@ -43,6 +44,7 @@ function SidebarNav({
             icon: Monitor,
             badge: sessionCount || undefined,
         },
+        { id: 'activity', label: 'Account activity', icon: History },
         { id: 'recordings', label: 'Recordings', icon: ScreenShare },
         {
             id: 'tunnels',

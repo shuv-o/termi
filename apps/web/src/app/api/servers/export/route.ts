@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
     const deviceInfo = getDeviceInfo(request);
 
-    const rl = serverExportRateLimit(user.id);
+    const rl = await serverExportRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many export requests. Please wait before trying again.', 429);
     }

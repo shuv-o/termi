@@ -27,7 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (!user) return unauthorizedResponse();
 
     // Decrypts the entry server-side; bound how fast one session can do it.
-    if (!keychainReadRateLimit(user.id).allowed) {
+    if (!(await keychainReadRateLimit(user.id)).allowed) {
         return errorResponse('Too many requests. Please wait a few minutes.', 429);
     }
 

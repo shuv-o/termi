@@ -41,7 +41,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    if (!keychainReadRateLimit(user.id).allowed) {
+    if (!(await keychainReadRateLimit(user.id)).allowed) {
         return errorResponse('Too many requests. Please wait a few minutes.', 429);
     }
 

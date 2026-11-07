@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     const { userId, code } = validation.data;
 
-    if (!verifySignupRateLimit(userId).allowed) {
+    if (!(await verifySignupRateLimit(userId)).allowed) {
         return errorResponse('Too many attempts. Please request a new code later.', 429);
     }
 

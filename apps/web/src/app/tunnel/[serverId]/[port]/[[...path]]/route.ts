@@ -31,6 +31,7 @@ import { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { mintTunnelToken, readTunnelToken, TUNNEL_TOKEN_PREFIX } from '@/lib/auth/tunnel-token';
 import { TUNNEL_SANDBOX } from '@/lib/security/tunnel-sandbox';
+import { tunnelIdFromHost, tunnelOrigin, tunnelSubdomainId } from '@/lib/security/tunnel-origin';
 import { getServerForConnection } from '@/lib/services';
 import { sshPool, type SSHPoolConfig } from '@/lib/services/ssh-pool';
 
@@ -112,6 +113,17 @@ export function isBlockedResponseHeader(name: string): boolean {
 }
 
 /**
+ * On a per-tunnel origin the app's cookies may stay as they are — except a
+ * Domain attribute, which could widen them to every tunnel under the parent
+ * domain.
+ */
+export function stripCookieDomain(cookie: string): string {
+    const [pair, ...attrs] = cookie.split(';');
+    const kept = attrs.map((a) => a.trim()).filter((a) => a && !/^domain\s*=/i.test(a));
+    return [pair.trim(), ...kept].join('; ');
+}
+
+/**
  * Rebuild a target's Set-Cookie so it can only ever apply to this tunnel:
  * every Path is replaced (not just the first), Domain is dropped, and a
  * __Host-/__Secure- prefix — which would demand Path=/ or a host-wide scope —
@@ -161,6 +173,8 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
 
     const url = new URL(request.url);
     const segments = path ?? [];
+    // Set when this request arrived on a per-tunnel origin (TUNNEL_ORIGIN_TEMPLATE).
+    const hostTunnelId = tunnelIdFromHost(request.headers.get('host'));
     const forwardedQuery = new URLSearchParams(url.searchParams);
     forwardedQuery.delete('host');
     const qs = forwardedQuery.toString();
@@ -168,8 +182,10 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
     // Tokenized request (everything from inside the sandboxed page).
     const tokenSegment = segments[0]?.startsWith(TUNNEL_TOKEN_PREFIX) ? segments[0] : null;
     if (!tokenSegment) {
+        // A tunnel origin never has Termi's session cookie; only token URLs work there.
+        if (hostTunnelId) return new Response('Not found', { status: 404 });
         // First visit, from Termi itself: authenticate by session, then move to
-        // the tokenized URL that the sandboxed page will keep using.
+        // the tokenized URL that the tunneled page will keep using.
         const user = await getCurrentUser();
         if (!user) return new Response('Unauthorized', { status: 401 });
         if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -177,14 +193,18 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
         }
         const server = await getServerForConnection(serverId, user.id);
         if (!server) return new Response('Server not found', { status: 404 });
-        const token = mintTunnelToken({
+        const grantFor = {
             userId: user.id,
             serverId,
             port: remotePort,
             host: url.searchParams.get('host') || '127.0.0.1',
-        });
+        };
+        const token = mintTunnelToken(grantFor);
         const rest = segments.map(encodeURIComponent).join('/');
+        // With per-tunnel origins configured, the tunnel lives on its own origin.
+        const origin = tunnelOrigin(tunnelSubdomainId(grantFor)) ?? '';
         const location =
+            origin +
             `/tunnel/${encodeURIComponent(serverId)}/${remotePort}/${TUNNEL_TOKEN_PREFIX}${token}/` +
             rest +
             (qs ? `?${qs}` : '');
@@ -203,6 +223,11 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
         return new Response('This tunnel link has expired. Open it again from Termi.', {
             status: 401,
         });
+    }
+    // On a tunnel origin, a token only works on its own tunnel's origin, so
+    // one tunneled app can't load another's content into its origin.
+    if (hostTunnelId && hostTunnelId !== tunnelSubdomainId(grant)) {
+        return new Response('Not found', { status: 404 });
     }
 
     // The sandboxed page has an opaque origin, so even its own requests to this
@@ -321,7 +346,9 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                     for (const [key, value] of Object.entries(proxyRes.headers)) {
                         const lower = key.toLowerCase();
                         if (value === undefined || HOP_BY_HOP_HEADERS.has(lower)) continue;
-                        if (isBlockedResponseHeader(lower)) continue;
+                        // On its own origin the app may set its own CSP etc.; only
+                        // Termi's origin needs the target's headers filtered.
+                        if (!hostTunnelId && isBlockedResponseHeader(lower)) continue;
 
                         if (lower === 'set-cookie') {
                             // Multiple Set-Cookie headers must stay separate lines, not
@@ -330,7 +357,9 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                             // real pages or collides with a different tunnel.
                             const cookies = Array.isArray(value) ? value : [value];
                             for (const cookie of cookies) {
-                                const scoped = scopeCookiePath(cookie, basePath);
+                                const scoped = hostTunnelId
+                                    ? stripCookieDomain(cookie)
+                                    : scopeCookiePath(cookie, basePath);
                                 if (scoped) resHeaders.append('set-cookie', scoped);
                             }
                             continue;
@@ -347,7 +376,9 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
                     // entirely, serving one user's private tunneled content to
                     // anyone who requests the same /tunnel/<serverId>/<port> URL.
                     resHeaders.set('cache-control', 'private, no-store');
-                    resHeaders.set('content-security-policy', TUNNEL_SANDBOX);
+                    // Termi's own origin: sandbox the page. A tunnel origin is
+                    // already isolated, so the app runs unsandboxed there.
+                    if (!hostTunnelId) resHeaders.set('content-security-policy', TUNNEL_SANDBOX);
                     resHeaders.set('x-content-type-options', 'nosniff');
                     // The token is in the URL; never leak it to sites the page links to.
                     resHeaders.set('referrer-policy', 'no-referrer');

@@ -90,6 +90,11 @@ export async function createSession(
         },
     });
 
+    // Every sign-in path (password, 2FA, passkey, Google, signup) ends here.
+    await prisma.auditLog.create({
+        data: { userId, action: 'USER_LOGIN', ipAddress, userAgent: deviceInfo },
+    });
+
     // Update user's last login
     await prisma.user.update({
         where: { id: userId },

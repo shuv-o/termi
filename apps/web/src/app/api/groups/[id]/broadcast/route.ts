@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         return unauthorizedResponse();
     }
 
-    const rateLimitResult = broadcastCommandRateLimit(user.id);
+    const rateLimitResult = await broadcastCommandRateLimit(user.id);
     if (!rateLimitResult.allowed) {
         return errorResponse('Too many broadcasts. Please wait before running another.', 429);
     }

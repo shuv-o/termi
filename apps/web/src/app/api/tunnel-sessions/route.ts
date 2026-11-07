@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const rateLimitResult = tunnelCreateRateLimit(user.id);
+    const rateLimitResult = await tunnelCreateRateLimit(user.id);
     if (!rateLimitResult.allowed) {
         return errorResponse(
             'Too many tunnels opened recently. Please wait before trying again.',

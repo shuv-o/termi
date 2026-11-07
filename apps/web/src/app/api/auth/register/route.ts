@@ -33,7 +33,7 @@ function decoyUserId(): string {
 export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
 
-    const rl = registerRateLimit(ipAddress);
+    const rl = await registerRateLimit(ipAddress);
     if (!rl.allowed) {
         return errorResponse('Too many registration attempts. Please try again later.', 429);
     }

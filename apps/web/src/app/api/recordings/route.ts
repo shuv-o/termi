@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const rateLimitResult = recordingCreateRateLimit(user.id);
+    const rateLimitResult = await recordingCreateRateLimit(user.id);
     if (!rateLimitResult.allowed) {
         return errorResponse(
             'Too many recordings saved recently. Please wait before trying again.',

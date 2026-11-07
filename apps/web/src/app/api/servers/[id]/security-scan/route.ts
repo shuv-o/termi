@@ -21,7 +21,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const rl = securityScanRateLimit(user.id);
+    const rl = await securityScanRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many scans. Wait a few minutes and try again.', 429);
     }

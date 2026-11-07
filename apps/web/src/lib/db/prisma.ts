@@ -21,7 +21,12 @@ function getDatabaseUrl(): string {
     if (DB_HOST && DB_USER && DB_PASSWORD && DB_NAME) {
         const schema = DB_SCHEMA ?? 'public';
         const port = DB_PORT ?? '5432';
-        return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${port}/${DB_NAME}?schema=${schema}`;
+        // DB_SSLMODE (e.g. require, verify-full) turns on TLS to the database —
+        // use it whenever Postgres isn't on the same host or a private network.
+        const ssl = process.env.DB_SSLMODE
+            ? `&sslmode=${encodeURIComponent(process.env.DB_SSLMODE)}`
+            : '';
+        return `postgresql://${encodeURIComponent(DB_USER)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}:${port}/${DB_NAME}?schema=${schema}${ssl}`;
     }
     if (DATABASE_URL) return DATABASE_URL;
     // During `next build` no DB connection is needed — return a placeholder so the

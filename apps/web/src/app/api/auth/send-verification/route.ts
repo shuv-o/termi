@@ -16,7 +16,7 @@ export async function POST() {
         return successResponse({ message: 'Email already verified' });
     }
 
-    const rl = sendVerificationRateLimit(user.id);
+    const rl = await sendVerificationRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many requests. Please try again later.', 429);
     }

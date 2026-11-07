@@ -22,14 +22,24 @@ services:
     volumes:
       - ./traefik:/etc/traefik:ro
     networks:
-      - termi-network
+      - edge
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 256
 
   guacd:
     image: guacamole/guacd:1.6.0
     container_name: termi-guacd
     restart: unless-stopped
     networks:
-      - termi-network
+      - remote
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 512
+    mem_limit: 1g
 
   postgres:
     image: postgres:17-alpine
@@ -42,7 +52,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - termi-network
+      - data
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 512
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-termi}"]
       interval: 10s
@@ -65,7 +77,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-termi}
     command: ["sh", "-c", "cd apps/web && npx prisma migrate deploy"]
     networks:
-      - termi-network
+      - data
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
 
   web:
     build:
@@ -114,7 +128,16 @@ services:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     networks:
-      - termi-network
+      - edge
+      - data
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 512
+    mem_limit: 1g
 
   gateway:
     build:
@@ -135,11 +158,28 @@ services:
       # GUACD_TUNNEL_HOST: gateway
       NODE_ENV: production
     networks:
-      - termi-network
+      - edge
+      - remote
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 1024
+    mem_limit: 1g
 
 volumes:
   postgres-data:
 
 networks:
-  termi-network:
+  # Public side: the reverse proxy, web app and gateway. Outbound internet is
+  # needed here (SSH targets, SMTP, webhooks).
+  edge:
+    driver: bridge
+  # Database: internal (no internet), and only the web app and migrations join
+  # it — the gateway, which dials user-supplied hosts, can't reach Postgres.
+  data:
+    driver: bridge
+    internal: true
+  # Remote desktops: guacd and the gateway only. guacd dials RDP/VNC targets.
+  remote:
     driver: bridge

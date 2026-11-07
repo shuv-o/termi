@@ -26,7 +26,7 @@ const verifySchema = z.object({
 export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
 
-    const rl = verify2FARateLimit(ipAddress);
+    const rl = await verify2FARateLimit(ipAddress);
     if (!rl.allowed) {
         return errorResponse('Too many verification attempts. Please try again later.', 429);
     }

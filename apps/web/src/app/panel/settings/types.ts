@@ -34,7 +34,14 @@ export interface AuthSession {
 
 /** Which settings panel is on screen. */
 export type SectionId =
-    'profile' | 'security' | 'passkeys' | 'notifications' | 'sessions' | 'recordings' | 'tunnels';
+    | 'profile'
+    | 'security'
+    | 'passkeys'
+    | 'notifications'
+    | 'sessions'
+    | 'activity'
+    | 'recordings'
+    | 'tunnels';
 
 export const SECTION_IDS: SectionId[] = [
     'profile',
@@ -42,6 +49,7 @@ export const SECTION_IDS: SectionId[] = [
     'passkeys',
     'notifications',
     'sessions',
+    'activity',
     'recordings',
     'tunnels',
 ];
@@ -53,6 +61,7 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     passkeys: 'Passkeys',
     notifications: 'Alerts',
     sessions: 'Sessions',
+    activity: 'Activity',
     recordings: 'Recordings',
     tunnels: 'Tunnels',
 };

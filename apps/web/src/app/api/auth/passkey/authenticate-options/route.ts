@@ -16,7 +16,7 @@ const optionsSchema = z.object({
 
 export async function POST(request: Request) {
     const ip = getClientIP(request);
-    const rl = passkeyAuthRateLimit(ip);
+    const rl = await passkeyAuthRateLimit(ip);
     if (!rl.allowed) {
         return errorResponse('Too many requests. Please try again later.', 429);
     }

@@ -15,7 +15,8 @@
         "db:seed": "tsx prisma/seed.ts",
         "db:studio": "prisma studio",
         "generate-icons": "node ../../scripts/generate-icons.js",
-        "db:reseal": "tsx --env-file-if-exists=.env --tsconfig tsconfig.json prisma/reseal.ts"
+        "db:reseal": "tsx --env-file-if-exists=.env --tsconfig tsconfig.json prisma/reseal.ts",
+        "test:security": "playwright test -c playwright.security.config.ts"
     },
     "dependencies": {
         "@prisma/adapter-pg": "^7.2.0",
@@ -46,6 +47,7 @@
         "cmdk": "^1.1.1",
         "dotenv": "^17.2.3",
         "guacamole-common-js": "^1.5.0",
+        "ioredis": "^5.11.1",
         "iron-session": "^8.0.4",
         "jose": "^6.1.3",
         "lucide-react": "^0.562.0",
