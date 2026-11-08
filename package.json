@@ -59,7 +59,7 @@
     },
     "devDependencies": {
         "@electron/rebuild": "^4.2.1",
-        "concurrently": "^9.2.1",
+        "concurrently": "^10.0.6",
         "electron": "^45.2.3",
         "electron-builder": "^26.18.0",
         "esbuild": "^0.28.1",
