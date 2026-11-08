@@ -19,6 +19,7 @@ import {
     SquareTerminal,
     UserCog,
     Lock,
+    Cable,
 } from 'lucide-react';
 import {
     CommandDialog,
@@ -229,6 +230,13 @@ export function CommandPalette() {
                         >
                             <Laptop />
                             Open local terminal
+                        </CommandItem>
+                        <CommandItem
+                            value="serial console usb cable com port switch router"
+                            onSelect={() => go('/panel/serial')}
+                        >
+                            <Cable />
+                            Serial console
                         </CommandItem>
                         <CommandItem
                             value="new snippet command create"

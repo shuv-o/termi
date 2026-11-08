@@ -116,6 +116,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 ### 💻 Local Terminal
 
+- **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
+
 - Access your **local machine's shell** directly from the app
 - **Electron**: spawns PowerShell (Windows) or your default shell (macOS/Linux)
 - **Browser/cloud**: spawns a shell on the gateway host (gated by `ALLOW_LOCAL_TERMINAL=true`)
