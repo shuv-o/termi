@@ -15,7 +15,7 @@ import { z } from 'zod';
 import {
     verifyAuthenticationResponse,
     type AuthenticationResponseJSON,
-    type AuthenticatorTransportFuture,
+    type AuthenticatorTransport,
 } from '@simplewebauthn/server';
 
 import { prisma } from '@/lib/db';
@@ -145,7 +145,7 @@ async function verifyPasskeyAssertion(
                 id: passkey.credentialID,
                 publicKey: new Uint8Array(passkey.credentialPublicKey),
                 counter: Number(passkey.counter),
-                transports: passkey.transports as AuthenticatorTransportFuture[],
+                transports: passkey.transports as AuthenticatorTransport[],
             },
             requireUserVerification: false,
         });

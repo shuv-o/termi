@@ -2,16 +2,8 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import {
-    Activity,
-    FolderOpen,
-    Github,
-    Linkedin,
-    Mail,
-    Monitor,
-    Smartphone,
-    Terminal,
-} from 'lucide-react';
+import { Activity, FolderOpen, Mail, Monitor, Smartphone, Terminal } from 'lucide-react';
+import { Github, Linkedin } from '@/components/icons/brand';
 import { Button } from '@/components/ui/button';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
 import StarOnGitHub from '@/components/landing/StarOnGitHub';
