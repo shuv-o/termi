@@ -48,6 +48,13 @@ export interface ConnectionTokenClaims {
         | { kind: 'local' }
         | { kind: 'dynamic' }
         | { kind: 'remote'; bindAddress: string; bindPort: number };
+    /** 'ssh' only: join someone's live session as a guest (no credentials). */
+    join?: {
+        sessionId: string;
+        ownerId: string;
+        email: string;
+        mode: 'view' | 'control';
+    } | null;
     /**
      * The server's pinned SSH host key (`SHA256:…`). The gateway refuses any
      * other key, and refuses SSH-family connections that carry none.

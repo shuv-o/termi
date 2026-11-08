@@ -411,6 +411,10 @@ enum AuditAction {
   TEAM_SERVER_ADDED
   TEAM_SERVER_REMOVED
 
+  // Shared live sessions
+  SESSION_SHARED
+  SESSION_JOINED
+
   // Passkey events
   PASSKEY_REGISTERED
   PASSKEY_REMOVED
@@ -892,4 +896,22 @@ model TeamInvitation {
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([teamId])
+}
+
+/// A link that lets someone ask to join a live terminal session (watch, or
+/// type too). The owner still approves each person in the terminal.
+model SessionShare {
+  id        String    @id @default(cuid())
+  /// SHA-256 of the code in the link.
+  codeHash  String    @unique
+  ownerId   String
+  /// The gateway session id (PersistentSession.sessionId) being shared.
+  sessionId String
+  serverId  String
+  mode      String // "view" | "control"
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([ownerId])
 }

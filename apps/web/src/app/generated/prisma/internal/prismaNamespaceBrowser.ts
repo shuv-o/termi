@@ -77,7 +77,8 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TeamServer: 'TeamServer',
-  TeamInvitation: 'TeamInvitation'
+  TeamInvitation: 'TeamInvitation',
+  SessionShare: 'SessionShare'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -530,6 +531,21 @@ export const TeamInvitationScalarFieldEnum = {
 } as const
 
 export type TeamInvitationScalarFieldEnum = (typeof TeamInvitationScalarFieldEnum)[keyof typeof TeamInvitationScalarFieldEnum]
+
+
+export const SessionShareScalarFieldEnum = {
+  id: 'id',
+  codeHash: 'codeHash',
+  ownerId: 'ownerId',
+  sessionId: 'sessionId',
+  serverId: 'serverId',
+  mode: 'mode',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SessionShareScalarFieldEnum = (typeof SessionShareScalarFieldEnum)[keyof typeof SessionShareScalarFieldEnum]
 
 
 export const SortOrder = {

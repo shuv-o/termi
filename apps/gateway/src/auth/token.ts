@@ -65,6 +65,17 @@ export interface TokenPayload {
         hostKey?: string | null;
         certificate?: string | null;
     } | null;
+    /**
+     * 'ssh' only: this token joins someone else's live session as a guest
+     * (see sessions/guests.ts) instead of opening a connection. No
+     * credentials are carried.
+     */
+    join?: {
+        sessionId: string;
+        ownerId: string;
+        email: string;
+        mode: 'view' | 'control';
+    } | null;
     exp: number;
 }
 
@@ -116,8 +127,16 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             throw new Error('Invalid token protocol');
         }
 
-        // Remote protocols require host and username; local does not
-        if (payload.protocol !== 'local' && (!payload.host || !payload.username)) {
+        // Remote protocols require host and username; local does not, and nor
+        // does a guest joining someone's live session (it dials nothing).
+        const join = payload.join as TokenPayload['join'];
+        const isGuest =
+            payload.protocol === 'ssh' &&
+            !!join &&
+            typeof join.sessionId === 'string' &&
+            typeof join.ownerId === 'string' &&
+            (join.mode === 'view' || join.mode === 'control');
+        if (payload.protocol !== 'local' && !isGuest && (!payload.host || !payload.username)) {
             throw new Error('Invalid token payload');
         }
 

@@ -18,6 +18,7 @@ import {
     Terminal,
     TerminalSquare,
     User,
+    UsersRound,
     Waypoints,
     Wrench,
     X,
@@ -129,6 +130,7 @@ export function TerminalPaneHeader({
     compact = false,
     onSplit,
     onUnsplit,
+    onShareSession,
 }: {
     session: Session;
     /** Host/username/port for the copy actions; `null` for local terminals. */
@@ -159,6 +161,8 @@ export function TerminalPaneHeader({
     onSplit?: (direction: 'right' | 'down') => void;
     /** Leave the split, keeping this pane. */
     onUnsplit?: () => void;
+    /** Invite someone into this live session (remote sessions only). */
+    onShareSession?: () => void;
 }) {
     const copy = useCopyToClipboard();
     const isRemote = session.type !== 'local';
@@ -229,6 +233,14 @@ export function TerminalPaneHeader({
                             isRecording ? 'fill-danger text-danger animate-pulse' : undefined
                         }
                     />
+                    {onShareSession && (
+                        <IconButton
+                            size="sm"
+                            label="Share session"
+                            icon={UsersRound}
+                            onClick={onShareSession}
+                        />
+                    )}
                     <IconButton
                         size="sm"
                         label="Port forwarding"

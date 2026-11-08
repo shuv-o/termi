@@ -9,6 +9,7 @@ import { LiveMetricsPanel } from '@/components/monitoring/live/LiveMetrics';
 import { TerminalPaneHeader } from './TerminalPaneHeader';
 import type { SessionServerMeta } from './ServerMeta';
 import { TunnelDialog } from './TunnelDialog';
+import { ShareSessionDialog } from './ShareSessionDialog';
 import { useShells } from './useShells';
 import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
 import type { PaneRect } from '../split';
@@ -132,6 +133,7 @@ export function TerminalPane({
     const [isMobile, setIsMobile] = useState(false);
     const [recordingShellId, setRecordingShellId] = useState<string | null>(null);
     const [showTunnelDialog, setShowTunnelDialog] = useState(false);
+    const [showShareDialog, setShowShareDialog] = useState(false);
     // Metrics polling is only worth paying for while the panel is on screen AND
     // this is the session you are looking at — a background tab holding an SSH
     // channel open every couple of seconds is pure waste.
@@ -283,6 +285,11 @@ export function TerminalPane({
             )}
             <TerminalPaneHeader
                 compact={inSplit}
+                onShareSession={
+                    session.type === 'remote' && session.status === 'connected'
+                        ? () => setShowShareDialog(true)
+                        : undefined
+                }
                 onSplit={onSplit}
                 onUnsplit={onUnsplit}
                 session={session}
@@ -329,6 +336,13 @@ export function TerminalPane({
                 onClose={() => removeSession(session.tabId)}
             />
 
+            {showShareDialog && (
+                <ShareSessionDialog
+                    sessionId={session.sessionId}
+                    serverName={session.serverName}
+                    onClose={() => setShowShareDialog(false)}
+                />
+            )}
             {session.type !== 'local' && (
                 <TunnelDialog
                     open={showTunnelDialog}

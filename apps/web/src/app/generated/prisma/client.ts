@@ -188,3 +188,9 @@ export type TeamServer = Prisma.TeamServerModel
  * 
  */
 export type TeamInvitation = Prisma.TeamInvitationModel
+/**
+ * Model SessionShare
+ * A link that lets someone ask to join a live terminal session (watch, or
+ * type too). The owner still approves each person in the terminal.
+ */
+export type SessionShare = Prisma.SessionShareModel

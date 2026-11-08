@@ -70,6 +70,14 @@ export default function SSHTerminal({
     const [agentPrompts, setAgentPrompts] = useState<
         { id: string; comment: string; fingerprint: string }[]
     >([]);
+    // Shared session: people asking to join, and people connected.
+    const [joinRequests, setJoinRequests] = useState<{ id: string; email: string; mode: string }[]>(
+        [],
+    );
+    const [guests, setGuests] = useState<{ id: string; email: string; mode: string }[]>([]);
+    const sendControl = (msg: Record<string, unknown>) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify(msg));
+    };
     const answerAgent = (id: string, allow: boolean, forSession = false) => {
         setAgentPrompts((list) => list.filter((p) => p.id !== id));
         if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -254,6 +262,27 @@ export default function SSHTerminal({
                                 },
                             ]);
                         }
+                        break;
+
+                    case 'join-request':
+                        if (typeof message.id === 'string') {
+                            setJoinRequests((list) => [
+                                ...list.filter((r) => r.id !== message.id),
+                                {
+                                    id: message.id,
+                                    email: String(message.email ?? 'someone'),
+                                    mode: message.mode === 'control' ? 'control' : 'view',
+                                },
+                            ]);
+                        }
+                        break;
+
+                    case 'join-request-closed':
+                        setJoinRequests((list) => list.filter((r) => r.id !== message.id));
+                        break;
+
+                    case 'participants':
+                        setGuests(Array.isArray(message.guests) ? message.guests : []);
                         break;
 
                     case 'agent-request-expired':
@@ -468,6 +497,81 @@ export default function SSHTerminal({
             />
             {search.bar}
             {suggestions.overlay}
+            {guests.length > 0 && (
+                <div
+                    data-testid="session-guests"
+                    className="absolute left-2 top-2 z-20 flex max-w-[60%] flex-wrap items-center gap-1 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] backdrop-blur"
+                >
+                    <span className="text-muted-foreground">In this session:</span>
+                    {guests.map((g) => (
+                        <span
+                            key={g.id}
+                            className="flex items-center gap-1 rounded bg-secondary px-1.5"
+                        >
+                            {g.email}
+                            <span className="text-muted-foreground">
+                                {g.mode === 'control' ? '(can type)' : '(watching)'}
+                            </span>
+                            <button
+                                type="button"
+                                aria-label={`Remove ${g.email}`}
+                                onClick={() => sendControl({ type: 'kick', id: g.id })}
+                                className="text-danger hover:underline"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
+                </div>
+            )}
+            {joinRequests[0] && (
+                <div
+                    role="alertdialog"
+                    aria-label="Join request"
+                    className="absolute left-1/2 top-3 z-30 w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-lg border border-primary/40 bg-card/95 p-3 shadow-lg backdrop-blur"
+                >
+                    <p className="text-sm font-medium">
+                        {joinRequests[0].email} wants to{' '}
+                        {joinRequests[0].mode === 'control' ? 'join and type in' : 'watch'} this
+                        session
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                        They&apos;ll see everything in this terminal
+                        {joinRequests[0].mode === 'control' ? ' and can type commands' : ''}. You
+                        can remove them at any time.
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                sendControl({
+                                    type: 'join-response',
+                                    id: joinRequests[0].id,
+                                    allow: true,
+                                });
+                                setJoinRequests((l) => l.slice(1));
+                            }}
+                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                        >
+                            Let in
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                sendControl({
+                                    type: 'join-response',
+                                    id: joinRequests[0].id,
+                                    allow: false,
+                                });
+                                setJoinRequests((l) => l.slice(1));
+                            }}
+                            className="rounded-md px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+                        >
+                            Deny
+                        </button>
+                    </div>
+                </div>
+            )}
             {agentPrompts[0] && (
                 <div
                     role="alertdialog"
