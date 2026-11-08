@@ -841,8 +841,8 @@ function PreviewPanel({
                         </select>
                     ) : (
                         <p className="text-xs text-muted-foreground">
-                            Add a login to your Keychain first to apply it here, or add credentials
-                            to each server after importing.
+                            Save a login in Keys &amp; passwords first to apply it here, or add
+                            credentials to each server after importing.
                         </p>
                     )}
                 </div>

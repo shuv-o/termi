@@ -185,7 +185,7 @@ export default function KeychainPage() {
             setShowForm(false);
             setEditId(null);
             await fetchEntries();
-            flash(editId ? 'Keychain entry updated' : 'Keychain entry created');
+            flash(editId ? 'Login updated' : 'Login saved');
         } catch {
             setFormError('An error occurred');
         } finally {
@@ -198,10 +198,10 @@ export default function KeychainPage() {
             const res = await fetch(`/api/keychain/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error();
             setEntries((prev) => prev.filter((e) => e.id !== id));
-            flash('Keychain entry deleted');
+            flash('Login deleted');
         } catch {
             // Was silently swallowed: the row stayed on screen with no reason.
-            toast('error', 'Could not delete that keychain entry');
+            toast('error', 'Could not delete that login');
         }
     };
 
@@ -213,16 +213,16 @@ export default function KeychainPage() {
 
             <div className={`${PAGE_CONTENT_WIDTH} space-y-4 sm:space-y-6`}>
                 <PageHeader
-                    title="Keychain"
+                    title="Keys & passwords"
                     description={
                         entries.length > 0
-                            ? `${entries.length} saved credential${entries.length === 1 ? '' : 's'} · reuse across servers`
-                            : 'Save credentials once, reuse them across servers'
+                            ? `${entries.length} saved login${entries.length === 1 ? '' : 's'}, ready to use on any server`
+                            : 'Save a login once and use it on any server'
                     }
                     actions={
                         <Button onClick={openCreate}>
                             <Plus className="w-4 h-4" />
-                            <span className="hidden sm:inline">New entry</span>
+                            <span className="hidden sm:inline">New login</span>
                             <span className="sm:hidden">New</span>
                         </Button>
                     }
@@ -248,12 +248,12 @@ export default function KeychainPage() {
                 ) : entries.length === 0 ? (
                     <EmptyStateCard
                         icon={BookKey}
-                        title="No keychain entries yet"
-                        description="Save reusable credentials once, then attach them to servers in seconds."
+                        title="No saved logins yet"
+                        description="Save a username with its password or SSH key once, then pick it for any server."
                         action={
                             <Button onClick={openCreate} variant="secondary">
                                 <Plus className="w-4 h-4" />
-                                Create your first entry
+                                Save your first login
                             </Button>
                         }
                     />

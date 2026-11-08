@@ -1,5 +1,6 @@
 'use client';
 
+import { useTerminalLook } from '@/lib/appearance/useTerminalLook';
 import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
@@ -18,31 +19,6 @@ interface LocalTerminalProps {
     onReady?: () => void;
     onExit?: (code: number) => void;
 }
-
-const THEME = {
-    background: '#0b0f14',
-    foreground: '#c9d1d9',
-    cursor: '#38b2f0',
-    cursorAccent: '#0b0f14',
-    selectionBackground: '#264f78',
-    selectionForeground: '#ffffff',
-    black: '#484f58',
-    red: '#ff7b72',
-    green: '#3fb950',
-    yellow: '#d29922',
-    blue: '#58a6ff',
-    magenta: '#bc8cff',
-    cyan: '#39c5cf',
-    white: '#b1bac4',
-    brightBlack: '#6e7681',
-    brightRed: '#ffa198',
-    brightGreen: '#56d364',
-    brightYellow: '#e3b341',
-    brightBlue: '#79c0ff',
-    brightMagenta: '#d2a8ff',
-    brightCyan: '#56d4dd',
-    brightWhite: '#f0f6fc',
-};
 
 type SetStatus = (s: 'starting' | 'ready' | 'exited' | 'error') => void;
 
@@ -216,6 +192,10 @@ export default function LocalTerminal({
         onSearchReady?.(search.openSearch);
     }, [onSearchReady, search.openSearch]);
     const containerRef = useRef<HTMLDivElement>(null);
+    const termRef = useRef<Terminal | null>(null);
+    const fitRef = useRef<FitAddon | null>(null);
+    // The user's terminal look (Settings → Appearance), applied live.
+    const { look, lookRef } = useTerminalLook(termRef, () => fitRef.current?.fit());
     const [status, setStatus] = useState<'starting' | 'ready' | 'exited' | 'error'>('starting');
 
     const onReadyRef = useRef(onReady);
@@ -235,16 +215,13 @@ export default function LocalTerminal({
         }
 
         const terminal = new Terminal({
-            cursorBlink: true,
-            cursorStyle: 'block',
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 14,
-            lineHeight: 1.2,
-            theme: THEME,
+            ...lookRef.current,
             allowProposedApi: true,
         });
+        termRef.current = terminal;
 
         const fit = new FitAddon();
+        fitRef.current = fit;
         terminal.loadAddon(fit);
         terminal.loadAddon(new WebLinksAddon());
         attachSearchRef.current(terminal);
@@ -289,6 +266,7 @@ export default function LocalTerminal({
             <div
                 ref={containerRef}
                 className="h-full terminal-container rounded-lg overflow-hidden"
+                style={{ background: look.theme.background }}
             />
             {search.bar}
         </div>

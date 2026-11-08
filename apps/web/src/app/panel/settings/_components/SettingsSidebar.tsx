@@ -6,6 +6,7 @@ import {
     Fingerprint,
     History,
     Monitor,
+    Palette,
     ScreenShare,
     Shield,
     User as UserIcon,
@@ -36,12 +37,13 @@ function SidebarNav({
 }) {
     const items: NavItem[] = [
         { id: 'profile', label: 'Profile', icon: UserIcon },
+        { id: 'appearance', label: 'Appearance', icon: Palette },
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'passkeys', label: 'Passkeys', icon: Fingerprint, badge: passkeyCount || undefined },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         {
             id: 'sessions',
-            label: 'Active sessions',
+            label: 'Signed-in devices',
             icon: Monitor,
             badge: sessionCount || undefined,
         },

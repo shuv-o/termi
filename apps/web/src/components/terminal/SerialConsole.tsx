@@ -1,5 +1,6 @@
 'use client';
 
+import { useTerminalLook } from '@/lib/appearance/useTerminalLook';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
@@ -58,6 +59,9 @@ export default function SerialConsole() {
     const [error, setError] = useState('');
     const box = useRef<HTMLDivElement>(null);
     const term = useRef<Terminal | null>(null);
+    const fitRef = useRef<FitAddon | null>(null);
+    // The user's terminal look (Settings → Appearance), applied live.
+    const { look, lookRef } = useTerminalLook(term, () => fitRef.current?.fit());
     const port = useRef<WebSerialPort | null>(null);
     const reader = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
     const writer = useRef<WritableStreamDefaultWriter<Uint8Array> | null>(null);
@@ -84,13 +88,11 @@ export default function SerialConsole() {
     useEffect(() => {
         if (!box.current || !supported) return;
         const t = new Terminal({
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 14,
-            cursorBlink: true,
+            ...lookRef.current,
             convertEol: false,
-            theme: { background: '#0d1117' },
         });
         const fit = new FitAddon();
+        fitRef.current = fit;
         t.loadAddon(fit);
         t.open(box.current);
         fit.fit();
@@ -111,7 +113,7 @@ export default function SerialConsole() {
             t.dispose();
             term.current = null;
         };
-    }, [supported]);
+    }, [supported, lookRef]);
 
     const disconnect = useCallback(async (note?: string) => {
         try {
@@ -355,7 +357,8 @@ export default function SerialConsole() {
             <div
                 ref={box}
                 data-testid="serial-terminal"
-                className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-[#0d1117] p-1"
+                className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border p-1"
+                style={{ background: look.theme.background }}
             />
         </div>
     );

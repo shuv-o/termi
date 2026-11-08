@@ -1,5 +1,6 @@
 'use client';
 
+import { useTerminalLook } from '@/lib/appearance/useTerminalLook';
 import { useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
@@ -23,6 +24,9 @@ export default function GuestTerminal({
     onStatus: (status: GuestStatus, detail?: string) => void;
 }) {
     const box = useRef<HTMLDivElement>(null);
+    const termRef = useRef<Terminal | null>(null);
+    const fitRef = useRef<FitAddon | null>(null);
+    const { look, lookRef } = useTerminalLook(termRef, () => fitRef.current?.fit());
     const statusRef = useRef(onStatus);
     statusRef.current = onStatus;
     const [canType, setCanType] = useState(false);
@@ -30,13 +34,13 @@ export default function GuestTerminal({
     useEffect(() => {
         if (!box.current) return;
         const term = new Terminal({
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 14,
+            ...lookRef.current,
             cursorBlink: false,
             disableStdin: true,
-            theme: { background: '#0d1117' },
         });
+        termRef.current = term;
         const fit = new FitAddon();
+        fitRef.current = fit;
         term.loadAddon(fit);
         term.open(box.current);
         fit.fit();
@@ -84,7 +88,7 @@ export default function GuestTerminal({
             ws.close();
             term.dispose();
         };
-    }, [gatewayUrl, serverId, token]);
+    }, [gatewayUrl, serverId, token, lookRef]);
 
     return (
         <div className="relative h-full">
@@ -92,6 +96,7 @@ export default function GuestTerminal({
                 ref={box}
                 data-testid="guest-terminal"
                 className="h-full overflow-hidden rounded-lg"
+                style={{ background: look.theme.background }}
             />
             {!canType && (
                 <span className="pointer-events-none absolute right-2 top-2 rounded bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">

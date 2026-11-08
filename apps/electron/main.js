@@ -227,12 +227,12 @@ function buildAppMenu() {
                     click: () => navigateTo('/panel/groups'),
                 },
                 {
-                    label: 'Sessions',
+                    label: 'Connections',
                     accelerator: 'CmdOrCtrl+3',
                     click: () => navigateTo('/panel/sessions'),
                 },
                 {
-                    label: 'Local Terminal',
+                    label: 'Local terminal',
                     accelerator: 'CmdOrCtrl+4',
                     click: () => navigateTo('/panel/local'),
                 },

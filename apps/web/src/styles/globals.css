@@ -69,6 +69,187 @@
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* ============================================================================
+   USER APPEARANCE (Settings → Appearance; lib/appearance/prefs.ts)
+   ============================================================================
+   <html> carries data-theme / data-accent / data-density / data-motion, set
+   on the server from the `termi-ui` cookie so the first frame is already
+   right. The selectors are plain attribute selectors, not :root-only, so any
+   element can re-scope the tokens — the theme swatches and the live preview
+   render each choice in its own colours.
+
+   Accents come in two shades: `--acc-d` for dark grounds (carries ink text)
+   and `--acc-l` for light grounds (carries white text). The values mirror
+   ACCENT_COLORS in lib/appearance/terminal-themes.ts (a test checks). */
+:root,
+[data-accent='blue'] {
+    --acc-d: #38b2f0;
+    --acc-l: #0a6aa1;
+}
+[data-accent='green'] {
+    --acc-d: #3ecf8e;
+    --acc-l: #137a4b;
+}
+[data-accent='violet'] {
+    --acc-d: #a78bfa;
+    --acc-l: #6d3fd6;
+}
+[data-accent='amber'] {
+    --acc-d: #f2b544;
+    --acc-l: #8f5b00;
+}
+[data-accent='pink'] {
+    --acc-d: #f472b6;
+    --acc-l: #b4246f;
+}
+[data-accent='graphite'] {
+    --acc-d: #c3ccd8;
+    --acc-l: #3d4a5a;
+}
+
+/* Night (the default) — the original "night console" ground. Repeated here
+   under [data-theme='night'] so a night swatch inside a light page works. */
+:root,
+[data-theme='night'] {
+    color-scheme: dark;
+    --background: #0e1319;
+    --foreground: #e4e9f0;
+    --card: #141a22;
+    --card-foreground: #e4e9f0;
+    --popover: #1b232e;
+    --popover-foreground: #e4e9f0;
+    --secondary: #1b232e;
+    --secondary-foreground: #e4e9f0;
+    --muted: #141a22;
+    --muted-foreground: #8794a6;
+    --accent: #212b38;
+    --accent-foreground: #e4e9f0;
+    --border: #263140;
+    --input: #2c3849;
+    --terminal-bg: #0b0f14;
+    --primary: var(--acc-d);
+    --primary-foreground: #06121c;
+    --ring: var(--acc-d);
+    --terminal-cursor: var(--acc-d);
+}
+
+/* Black — true black for OLED screens; surfaces step up from zero so cards
+   still read as raised without a single shadow. */
+[data-theme='black'] {
+    color-scheme: dark;
+    --background: #000000;
+    --foreground: #e4e9f0;
+    --card: #0a0d11;
+    --card-foreground: #e4e9f0;
+    --popover: #12171e;
+    --popover-foreground: #e4e9f0;
+    --secondary: #12171e;
+    --secondary-foreground: #e4e9f0;
+    --muted: #0a0d11;
+    --muted-foreground: #8794a6;
+    --accent: #1a2029;
+    --accent-foreground: #e4e9f0;
+    --border: #1d242e;
+    --input: #262f3b;
+    --terminal-bg: #000000;
+    --primary: var(--acc-d);
+    --primary-foreground: #06121c;
+    --ring: var(--acc-d);
+    --terminal-cursor: var(--acc-d);
+}
+
+/* Day — a cool, blue-grey paper (not cream): white cards on a faint ground,
+   the accent's deeper shade carrying white text, status hues darkened until
+   they pass contrast on white. Shared by `system` when the OS is light. */
+[data-theme='day'] {
+    color-scheme: light;
+    --background: #f4f6f9;
+    --foreground: #16202b;
+    --card: #ffffff;
+    --card-foreground: #16202b;
+    --popover: #ffffff;
+    --popover-foreground: #16202b;
+    --secondary: #e9edf2;
+    --secondary-foreground: #16202b;
+    --muted: #eef1f5;
+    --muted-foreground: #5a6878;
+    --accent: #e4e9ef;
+    --accent-foreground: #16202b;
+    --destructive: #c93636;
+    --border: #dae0e7;
+    --input: #c8d0da;
+    --success: #1a8f5a;
+    --warning: #9a6400;
+    --danger: #c43d37;
+    --info: #1f6fb5;
+    --proto-ssh: #12866a;
+    --proto-scp: #3866c9;
+    --proto-rdp: #7a4fd6;
+    --proto-vnc: #c2581b;
+    --proto-telnet: #13849a;
+    --local: #7a4fd6;
+    --shadow-float: 0 16px 40px -12px rgb(16 24 40 / 0.18), 0 0 0 1px rgb(16 24 40 / 0.06);
+    --terminal-bg: #fbfcfd;
+    --terminal-fg: #1f2933;
+    --primary: var(--acc-l);
+    --primary-foreground: #ffffff;
+    --ring: var(--acc-l);
+    --terminal-cursor: var(--acc-l);
+}
+@media (prefers-color-scheme: light) {
+    [data-theme='system'] {
+        color-scheme: light;
+        --background: #f4f6f9;
+        --foreground: #16202b;
+        --card: #ffffff;
+        --card-foreground: #16202b;
+        --popover: #ffffff;
+        --popover-foreground: #16202b;
+        --secondary: #e9edf2;
+        --secondary-foreground: #16202b;
+        --muted: #eef1f5;
+        --muted-foreground: #5a6878;
+        --accent: #e4e9ef;
+        --accent-foreground: #16202b;
+        --destructive: #c93636;
+        --border: #dae0e7;
+        --input: #c8d0da;
+        --success: #1a8f5a;
+        --warning: #9a6400;
+        --danger: #c43d37;
+        --info: #1f6fb5;
+        --proto-ssh: #12866a;
+        --proto-scp: #3866c9;
+        --proto-rdp: #7a4fd6;
+        --proto-vnc: #c2581b;
+        --proto-telnet: #13849a;
+        --local: #7a4fd6;
+        --shadow-float: 0 16px 40px -12px rgb(16 24 40 / 0.18), 0 0 0 1px rgb(16 24 40 / 0.06);
+        --terminal-bg: #fbfcfd;
+        --terminal-fg: #1f2933;
+        --primary: var(--acc-l);
+        --primary-foreground: #ffffff;
+        --ring: var(--acc-l);
+        --terminal-cursor: var(--acc-l);
+    }
+}
+
+/* Compact density: everything sized in rem (spacing, type, controls) scales
+   down together, so the hierarchy holds; terminals keep their own font size. */
+html[data-density='compact'] {
+    font-size: 15px;
+}
+
+/* "Reduce motion" in Termi, for people whose OS setting isn't on. */
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
 /* Map CSS variables to Tailwind v4 color utilities */
 @theme inline {
     --color-background: var(--background);

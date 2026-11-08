@@ -151,15 +151,19 @@ export default function VNCConnectionPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-dvh lg:h-screen">
-                <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
+            <div className="flex items-center justify-center h-dvh lg:h-[calc(100vh-var(--shell-top,0px))]">
+                <span
+                    role="status"
+                    aria-label="Loading"
+                    className="cursor-block cursor-waiting text-2xl"
+                />
             </div>
         );
     }
 
     if (error || !connectionToken) {
         return (
-            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-[calc(100vh-var(--shell-top,0px))] gap-4">
                 <p className="text-danger">{error || 'Connection failed'}</p>
                 <Button asChild>
                     <Link href="/panel">Back</Link>

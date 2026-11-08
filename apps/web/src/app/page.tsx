@@ -41,7 +41,12 @@ export default async function HomePage() {
     }
 
     return (
-        <div className="min-h-dvh bg-background">
+        // The marketing page keeps its own look, whatever theme the visitor chose in the app.
+        <div
+            data-theme="night"
+            data-accent="blue"
+            className="min-h-dvh bg-background text-foreground"
+        >
             <header
                 className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur-lg"
                 style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}

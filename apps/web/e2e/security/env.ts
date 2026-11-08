@@ -35,6 +35,8 @@ export const SECRETS = {
 export const USERS = {
     alice: { email: 'alice@sec-e2e.local', password: 'Alice-pass-123' },
     bob: { email: 'bob@sec-e2e.local', password: 'Bob-pass-1234' },
+    // A brand-new account: hasn't been through first-run setup yet.
+    carol: { email: 'carol@sec-e2e.local', password: 'Carol-pass-123' },
 };
 
 export const SSH_PASSWORD = 'sec-e2e-ssh-pw';

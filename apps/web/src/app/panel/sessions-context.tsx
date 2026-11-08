@@ -11,7 +11,8 @@ import {
     type ReactNode,
 } from 'react';
 
-import { prunePanes, type SplitState } from './_sessions/split';
+import { openBeside, prunePanes, type SplitState } from './_sessions/split';
+import { getAppearance } from '@/lib/appearance/store';
 
 // TYPES
 
@@ -148,6 +149,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     const uid = useId();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
+    // Read inside addSession, which must not change identity with every tab switch.
+    const activeTabRef = useRef<string | null>(null);
+    activeTabRef.current = activeTabId;
     const [sessionsRestored, setSessionsRestored] = useState(false);
     const [split, setSplitState] = useState<SplitState | null>(null);
     const [broadcast, setBroadcast] = useState(false);
@@ -229,6 +233,13 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                     showFiles: false,
                 },
             ]);
+            // "New connections: open beside it" — unless the caller is
+            // placing the pane itself (opts.tabId).
+            const focused = activeTabRef.current;
+            const prefs = getAppearance();
+            if (prefs.openIn === 'split' && focused && !opts?.tabId) {
+                setSplitState((prev) => openBeside(prev, focused, tabId, prefs.splitShape) ?? prev);
+            }
             setActiveTabId(tabId);
 
             if (!isElectronMode) {
@@ -303,6 +314,13 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                     showFiles: false,
                 },
             ]);
+            // "New connections: open beside it" — unless the caller is
+            // placing the pane itself (opts.tabId).
+            const focused = activeTabRef.current;
+            const prefs = getAppearance();
+            if (prefs.openIn === 'split' && focused && !opts?.tabId) {
+                setSplitState((prev) => openBeside(prev, focused, tabId, prefs.splitShape) ?? prev);
+            }
             setActiveTabId(tabId);
 
             // Persist to DB so other devices can see this session

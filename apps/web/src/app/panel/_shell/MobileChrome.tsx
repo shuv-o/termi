@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Laptop, LogOut, Mail, Search, Settings, Shield } from 'lucide-react';
+import { ChevronLeft, LayoutPanelLeft, LogOut, Mail, Search, Settings, Shield } from 'lucide-react';
 import TerminalLogo from '@/components/common/Logo';
 import {
     DropdownMenu,
@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
-import { activeNavName, isNavItemActive, navigation, type PanelUser } from './navigation';
+import { activeNavName, isNavItemActive, type NavItem, type PanelUser } from './navigation';
 
 /** Prompt to verify the account email; sits above the mobile header. */
 export function VerifyEmailBanner({
@@ -47,7 +47,7 @@ export function VerifyEmailBanner({
     );
 }
 
-function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void }) {
+export function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -74,6 +74,11 @@ function UserMenu({ user, onLogout }: { user: PanelUser; onLogout: () => void })
                 <DropdownMenuItem asChild>
                     <Link href="/panel/settings">
                         <Settings /> Settings
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/panel/settings?section=appearance#menu">
+                        <LayoutPanelLeft /> Arrange menu
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -153,18 +158,16 @@ export function MobileTopBar({
  * screens get the full viewport.
  */
 export function MobileBottomNav({
+    items,
     pathname,
     keyboardOpen,
-    isElectron,
-    localTerminalActive,
-    onOpenLocalTerminal,
 }: {
+    /** The user's phone-bar items, in menu order. */
+    items: NavItem[];
     pathname: string;
     keyboardOpen: boolean;
-    isElectron: boolean;
-    localTerminalActive: boolean;
-    onOpenLocalTerminal: () => void;
 }) {
+    if (items.length === 0) return null;
     const item = (active: boolean) =>
         `relative flex h-[52px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors active:bg-accent ${
             active ? 'text-foreground' : 'text-muted-foreground'
@@ -183,46 +186,35 @@ export function MobileBottomNav({
             }}
         >
             <div className="glass flex w-full max-w-md items-center gap-0.5 rounded-2xl p-1 shadow-xl">
-                {navigation
-                    .filter((nav) => nav.mobile !== false)
-                    .map((nav) => {
-                        const isActive = isNavItemActive(nav.href, pathname);
-                        return (
-                            <Link
-                                key={nav.name}
-                                href={nav.href}
-                                aria-current={isActive ? 'page' : undefined}
-                                className={item(isActive)}
-                            >
-                                <nav.icon
-                                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : ''}`}
-                                />
-                                <span
-                                    className={`text-[11px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}
-                                >
-                                    {nav.name}
-                                </span>
-                                {/* Cursor mark under the active tab. */}
-                                {isActive && (
-                                    <span
-                                        aria-hidden
-                                        className="absolute bottom-1 h-[3px] w-4 rounded-full bg-primary"
-                                    />
-                                )}
-                            </Link>
-                        );
-                    })}
-
-                {isElectron && (
-                    <button onClick={onOpenLocalTerminal} className={item(localTerminalActive)}>
-                        <Laptop className="h-5 w-5 shrink-0 text-local" />
-                        <span
-                            className={`text-[11px] leading-none ${localTerminalActive ? 'font-semibold' : 'font-medium'}`}
+                {items.map((nav) => {
+                    const isActive = isNavItemActive(nav.href, pathname);
+                    return (
+                        <Link
+                            key={nav.id}
+                            href={nav.href}
+                            aria-current={isActive ? 'page' : undefined}
+                            aria-label={nav.name}
+                            className={item(isActive)}
                         >
-                            Local
-                        </span>
-                    </button>
-                )}
+                            <nav.icon
+                                className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : nav.id === 'local' ? 'text-local' : ''}`}
+                            />
+                            <span
+                                aria-hidden
+                                className={`max-w-full truncate px-0.5 text-[11px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}
+                            >
+                                {nav.short}
+                            </span>
+                            {/* Cursor mark under the active tab. */}
+                            {isActive && (
+                                <span
+                                    aria-hidden
+                                    className="absolute bottom-1 h-[3px] w-4 rounded-full bg-primary"
+                                />
+                            )}
+                        </Link>
+                    );
+                })}
             </div>
         </nav>
     );

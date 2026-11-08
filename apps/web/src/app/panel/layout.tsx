@@ -9,6 +9,10 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { CommandPalette } from './_shell/CommandPalette';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
+import { TopNav } from './_shell/TopNav';
+import { FirstRunSetup } from '@/components/appearance/FirstRunSetup';
+import { mutateCache } from '@/lib/hooks/useCachedFetch';
+import type { PanelUser } from './_shell/navigation';
 import { MobileBottomNav, MobileTopBar, VerifyEmailBanner } from './_shell/MobileChrome';
 import { usePanelShell } from './_shell/usePanelShell';
 import { useRouteFade } from './_shell/useRouteFade';
@@ -34,7 +38,26 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         );
     }
 
-    const contentPl = collapsed ? 'lg:pl-14' : 'lg:pl-60';
+    // Room for the menu: a sidebar or rail on either side, or a bar on top
+    // (which also sets --shell-top for the full-height screens).
+    const { navStyle, navSide } = shell;
+    // Full class names only: Tailwind can't see names built at runtime.
+    const contentPad =
+        navStyle === 'topbar'
+            ? 'lg:pt-12 lg:[--shell-top:3rem]'
+            : navSide === 'right'
+              ? collapsed
+                  ? 'lg:pr-14'
+                  : 'lg:pr-60'
+              : collapsed
+                ? 'lg:pl-14'
+                : 'lg:pl-60';
+    // First sign-in: set up the look and layout (not while joining someone's session).
+    const showSetup = user.onboarded === false && !pathname.startsWith('/panel/join/');
+    const finishSetup = () =>
+        mutateCache<{ user: PanelUser }>('/api/auth/me', (prev) =>
+            prev ? { user: { ...prev.user, onboarded: true } } : prev!,
+        );
 
     // Email banner is the top-most element on mobile, so it (rather than the
     // sticky header) carries the safe-area inset when shown.
@@ -43,19 +66,31 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-background">
             <AppLock lockAfterMinutes={user.lockAfterMinutes ?? null} />
-            <DesktopSidebar
-                user={user}
-                pathname={pathname}
-                collapsed={collapsed}
-                onToggleCollapsed={shell.toggleCollapsed}
-                isElectron={shell.isElectron}
-                localTerminalActive={isLocalPage}
-                onOpenLocalTerminal={shell.openLocalTerminal}
-                onBack={shell.goBack}
-                onLogout={shell.logout}
-            />
+            {showSetup && <FirstRunSetup name={user.name} onDone={finishSetup} />}
+            {navStyle === 'topbar' ? (
+                <TopNav
+                    user={user}
+                    items={shell.desktopItems}
+                    pathname={pathname}
+                    isElectron={shell.isElectron}
+                    onBack={shell.goBack}
+                    onLogout={shell.logout}
+                />
+            ) : (
+                <DesktopSidebar
+                    user={user}
+                    items={shell.desktopItems}
+                    pathname={pathname}
+                    collapsed={collapsed}
+                    side={navSide}
+                    onToggleCollapsed={shell.toggleCollapsed}
+                    isElectron={shell.isElectron}
+                    onBack={shell.goBack}
+                    onLogout={shell.logout}
+                />
+            )}
 
-            <div className={`${contentPl} transition-[padding] duration-200 ease-in-out`}>
+            <div className={`${contentPad} transition-[padding] duration-200 ease-in-out`}>
                 {showBanner && (
                     <VerifyEmailBanner
                         resending={shell.verification.resending}
@@ -109,11 +144,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 reserving margin underneath it. */}
             {!isConnectPage && !isSessionsPage && !isLocalPage && (
                 <MobileBottomNav
+                    items={shell.phoneItems}
                     pathname={pathname}
                     keyboardOpen={shell.keyboardOpen}
-                    isElectron={shell.isElectron}
-                    localTerminalActive={isLocalPage}
-                    onOpenLocalTerminal={shell.openLocalTerminal}
                 />
             )}
 

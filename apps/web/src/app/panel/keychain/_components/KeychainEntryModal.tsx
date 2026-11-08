@@ -81,9 +81,7 @@ export function KeychainEntryModal({
         <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
             <DialogContent className="bg-card border-border max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>
-                        {editing ? 'Edit keychain entry' : 'New keychain entry'}
-                    </DialogTitle>
+                    <DialogTitle>{editing ? 'Edit login' : 'New login'}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={onSubmit} className="space-y-4">

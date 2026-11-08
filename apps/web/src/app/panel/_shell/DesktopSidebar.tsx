@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import {
     ChevronLeft,
-    Laptop,
+    LayoutPanelLeft,
     LogOut,
     PanelLeftClose,
     PanelLeftOpen,
+    PanelRightClose,
+    PanelRightOpen,
     Plus,
     Search,
     Shield,
@@ -14,18 +16,31 @@ import {
 import { Button } from '@/components/ui/button';
 import TerminalLogo from '@/components/common/Logo';
 import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
-import { isNavItemActive, navigation, type PanelUser } from './navigation';
+import { isNavItemActive, type NavItem, type PanelUser } from './navigation';
 
 function openCommandPalette() {
     window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT));
 }
 
 /** Hover label shown beside icons while the sidebar is collapsed. */
-function CollapseTooltip({ label, children }: { label: string; children: React.ReactNode }) {
+function CollapseTooltip({
+    label,
+    side = 'left',
+    children,
+}: {
+    label: string;
+    side?: 'left' | 'right';
+    children: React.ReactNode;
+}) {
+    // The label opens towards the page, away from the screen edge.
+    const place =
+        side === 'left' ? 'left-full ml-2 translate-x-1' : 'right-full mr-2 -translate-x-1';
     return (
         <span className="group relative flex justify-center">
             {children}
-            <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-[5px] border border-border bg-popover px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-lg transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100">
+            <span
+                className={`pointer-events-none absolute ${place} top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[5px] border border-border bg-popover px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-lg transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100`}
+            >
                 {label}
             </span>
         </span>
@@ -36,11 +51,11 @@ function CollapseTooltip({ label, children }: { label: string; children: React.R
  * The active nav entry is marked with the logo's block cursor, parked in the
  * left gutter — the same mark that ends every page title.
  */
-function ActiveMarker() {
+function ActiveMarker({ side = 'left' }: { side?: 'left' | 'right' }) {
     return (
         <span
             aria-hidden
-            className="absolute -left-2 top-1/2 h-4 w-[5px] -translate-y-1/2 rounded-[1.5px] bg-primary"
+            className={`absolute ${side === 'left' ? '-left-2' : '-right-2'} top-1/2 h-4 w-[5px] -translate-y-1/2 rounded-[1.5px] bg-primary`}
         />
     );
 }
@@ -52,30 +67,6 @@ function itemTone(active: boolean) {
     return active
         ? 'bg-accent text-foreground'
         : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground';
-}
-
-function LocalTerminalButton({
-    collapsed,
-    active,
-    onClick,
-}: {
-    collapsed: boolean;
-    active: boolean;
-    onClick: () => void;
-}) {
-    const button = (
-        <button
-            onClick={onClick}
-            aria-label={collapsed ? 'Local terminal' : undefined}
-            className={`${itemBase} ${itemTone(active)} ${collapsed ? 'justify-center' : 'gap-3 px-2.5'}`}
-        >
-            {active && <ActiveMarker />}
-            <Laptop className="h-[18px] w-[18px] shrink-0 text-local" />
-            {!collapsed && <span className="truncate">Local terminal</span>}
-        </button>
-    );
-
-    return collapsed ? <CollapseTooltip label="Local terminal">{button}</CollapseTooltip> : button;
 }
 
 /** Plain initial on the raised surface — no gradient avatar. */
@@ -91,22 +82,36 @@ function Avatar({ user, size = 'md' }: { user: PanelUser; size?: 'sm' | 'md' }) 
     );
 }
 
+/** Where the menu's own settings live. */
+export const ARRANGE_MENU_HREF = '/panel/settings?section=appearance#menu';
+
 function SidebarFooter({
     user,
     collapsed,
+    side,
     onLogout,
 }: {
     user: PanelUser;
     collapsed: boolean;
+    side: 'left' | 'right';
     onLogout: () => void;
 }) {
     if (collapsed) {
         return (
             <div className="flex shrink-0 flex-col items-center gap-2 border-t border-border p-2">
-                <CollapseTooltip label={user.name || user.email}>
+                <CollapseTooltip label="Arrange menu" side={side}>
+                    <Link
+                        href={ARRANGE_MENU_HREF}
+                        aria-label="Arrange menu"
+                        className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    >
+                        <LayoutPanelLeft className="h-4 w-4" />
+                    </Link>
+                </CollapseTooltip>
+                <CollapseTooltip label={user.name || user.email} side={side}>
                     <Avatar user={user} />
                 </CollapseTooltip>
-                <CollapseTooltip label="Sign out">
+                <CollapseTooltip label="Sign out" side={side}>
                     <button
                         onClick={onLogout}
                         aria-label="Sign out"
@@ -121,6 +126,13 @@ function SidebarFooter({
 
     return (
         <div className="shrink-0 border-t border-border p-3">
+            <Link
+                href={ARRANGE_MENU_HREF}
+                className="mb-3 flex h-8 items-center gap-2 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+                <LayoutPanelLeft className="h-3.5 w-3.5" />
+                Arrange menu
+            </Link>
             <div className="flex items-center gap-2.5">
                 <Avatar user={user} />
                 <div className="min-w-0 flex-1">
@@ -160,32 +172,52 @@ function SidebarFooter({
     );
 }
 
+/** Opens the command palette (⌘K). */
+export function openSearch() {
+    openCommandPalette();
+}
+
+/**
+ * The desktop menu as a sidebar (names and icons) or an icon rail, on the
+ * side the user chose. The items, their order and which are shown come from
+ * the user's menu settings.
+ */
 export function DesktopSidebar({
     user,
+    items,
     pathname,
     collapsed,
+    side,
     onToggleCollapsed,
     isElectron,
-    localTerminalActive,
-    onOpenLocalTerminal,
     onBack,
     onLogout,
 }: {
     user: PanelUser;
+    items: NavItem[];
     pathname: string;
     collapsed: boolean;
+    side: 'left' | 'right';
     onToggleCollapsed: () => void;
     isElectron: boolean;
-    localTerminalActive: boolean;
-    onOpenLocalTerminal: () => void;
     onBack: () => void;
     onLogout: () => void;
 }) {
     const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-60';
+    const edge = side === 'left' ? 'left-0 border-r' : 'right-0 border-l';
+    const CollapseIcon =
+        side === 'left'
+            ? collapsed
+                ? PanelLeftOpen
+                : PanelLeftClose
+            : collapsed
+              ? PanelRightOpen
+              : PanelRightClose;
 
     return (
         <aside
-            className={`fixed bottom-0 left-0 top-0 z-50 hidden flex-col border-r border-border bg-card lg:flex ${sidebarW} transition-[width] duration-200 ease-in-out`}
+            aria-label="Menu"
+            className={`fixed bottom-0 top-0 z-50 hidden flex-col border-border bg-card lg:flex ${edge} ${sidebarW} transition-[width] duration-200 ease-in-out`}
         >
             <div
                 className={`flex h-14 shrink-0 items-center px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}
@@ -209,15 +241,11 @@ export function DesktopSidebar({
                     )}
                     <button
                         onClick={onToggleCollapsed}
-                        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        title={collapsed ? 'Show names' : 'Icons only'}
+                        aria-label={collapsed ? 'Show names' : 'Icons only'}
                         className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
-                        {collapsed ? (
-                            <PanelLeftOpen className="h-4 w-4" />
-                        ) : (
-                            <PanelLeftClose className="h-4 w-4" />
-                        )}
+                        <CollapseIcon className="h-4 w-4" />
                     </button>
                 </div>
             </div>
@@ -225,7 +253,7 @@ export function DesktopSidebar({
             <div className={`flex flex-col gap-2 ${collapsed ? 'px-2' : 'px-3'}`}>
                 {collapsed ? (
                     <>
-                        <CollapseTooltip label="Search  ⌘K">
+                        <CollapseTooltip label="Search  ⌘K" side={side}>
                             <button
                                 onClick={openCommandPalette}
                                 aria-label="Search"
@@ -234,7 +262,7 @@ export function DesktopSidebar({
                                 <Search className="h-4 w-4" />
                             </button>
                         </CollapseTooltip>
-                        <CollapseTooltip label="Add server">
+                        <CollapseTooltip label="Add server" side={side}>
                             <Button asChild size="icon" className="h-9 w-full">
                                 <Link href="/panel/servers/new" aria-label="Add server">
                                     <Plus />
@@ -268,46 +296,36 @@ export function DesktopSidebar({
                 aria-label="Main"
                 className={`flex flex-1 flex-col gap-0.5 overflow-y-auto pt-4 ${collapsed ? 'px-2' : 'px-3'}`}
             >
-                {navigation.map((item) => {
+                {items.map((item) => {
                     const isActive = isNavItemActive(item.href, pathname);
                     const link = (
                         <Link
-                            key={item.name}
+                            key={item.id}
                             href={item.href}
                             prefetch
                             aria-current={isActive ? 'page' : undefined}
                             aria-label={collapsed ? item.name : undefined}
                             className={`${itemBase} ${itemTone(isActive)} ${collapsed ? 'justify-center' : 'gap-3 px-2.5'}`}
                         >
-                            {isActive && <ActiveMarker />}
+                            {isActive && <ActiveMarker side={side} />}
                             <item.icon
-                                className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-primary' : ''}`}
+                                className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-primary' : item.id === 'local' ? 'text-local' : ''}`}
                             />
                             {!collapsed && <span className="truncate">{item.name}</span>}
                         </Link>
                     );
 
                     return collapsed ? (
-                        <CollapseTooltip key={item.name} label={item.name}>
+                        <CollapseTooltip key={item.id} label={item.name} side={side}>
                             {link}
                         </CollapseTooltip>
                     ) : (
                         link
                     );
                 })}
-
-                {isElectron && (
-                    <div className="mt-3 border-t border-border pt-3">
-                        <LocalTerminalButton
-                            collapsed={collapsed}
-                            active={localTerminalActive}
-                            onClick={onOpenLocalTerminal}
-                        />
-                    </div>
-                )}
             </nav>
 
-            <SidebarFooter user={user} collapsed={collapsed} onLogout={onLogout} />
+            <SidebarFooter user={user} collapsed={collapsed} side={side} onLogout={onLogout} />
         </aside>
     );
 }

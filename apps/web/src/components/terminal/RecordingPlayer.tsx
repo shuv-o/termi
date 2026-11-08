@@ -8,6 +8,7 @@
  * actual rendering.
  */
 
+import { useTerminalLook } from '@/lib/appearance/useTerminalLook';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
@@ -41,6 +42,7 @@ function parseCast(content: string): CastEvent[] {
 export default function RecordingPlayer({ content }: { content: string }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const terminalRef = useRef<Terminal | null>(null);
+    const { look, lookRef } = useTerminalLook(terminalRef);
     const eventsRef = useRef<CastEvent[]>([]);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cursorRef = useRef(0); // next event index to play
@@ -54,12 +56,9 @@ export default function RecordingPlayer({ content }: { content: string }) {
     useEffect(() => {
         if (!containerRef.current) return;
         const terminal = new Terminal({
+            ...lookRef.current,
             disableStdin: true,
             cursorBlink: false,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 13,
-            lineHeight: 1.2,
-            theme: { background: '#0b0f14', foreground: '#c9d1d9' },
         });
         const fit = new FitAddon();
         terminal.loadAddon(fit);
@@ -78,7 +77,7 @@ export default function RecordingPlayer({ content }: { content: string }) {
             if (timerRef.current) clearTimeout(timerRef.current);
             terminal.dispose();
         };
-    }, [content]);
+    }, [content, lookRef]);
 
     const scheduleNext = useCallback(() => {
         const events = eventsRef.current;
@@ -126,7 +125,11 @@ export default function RecordingPlayer({ content }: { content: string }) {
 
     return (
         <div className="space-y-2">
-            <div ref={containerRef} className="h-80 rounded-lg overflow-hidden" />
+            <div
+                ref={containerRef}
+                className="h-80 rounded-lg overflow-hidden"
+                style={{ background: look.theme.background }}
+            />
             <div className="flex items-center gap-2">
                 {finished ? (
                     <Button size="sm" variant="secondary" onClick={restart} className="gap-1.5">

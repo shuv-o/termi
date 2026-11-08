@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google';
 import '../styles/globals.css';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 import { getSiteUrl } from '@/lib/site';
+import {
+    APPEARANCE_COOKIE,
+    decodePaintCookie,
+    paintAttributes,
+    THEME_COLOR,
+} from '@/lib/appearance/prefs';
 
 // Self-hosted at build time by next/font, so the CSP's `font-src 'self'` holds.
 const plex = IBM_Plex_Sans({
@@ -107,20 +113,34 @@ export const metadata: Metadata = {
     },
 };
 
-export const viewport: Viewport = {
-    themeColor: '#0e1319',
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-};
+/** The user's theme (from the `termi-ui` cookie) also colours the browser chrome. */
+export async function generateViewport(): Promise<Viewport> {
+    const { theme } = decodePaintCookie((await cookies()).get(APPEARANCE_COOKIE)?.value);
+    return {
+        themeColor:
+            theme === 'system'
+                ? [
+                      { media: '(prefers-color-scheme: light)', color: THEME_COLOR.day },
+                      { media: '(prefers-color-scheme: dark)', color: THEME_COLOR.night },
+                  ]
+                : THEME_COLOR[theme],
+        width: 'device-width',
+        initialScale: 1,
+        maximumScale: 1,
+        userScalable: false,
+        viewportFit: 'cover',
+    };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     const nonce = (await headers()).get('x-nonce') ?? '';
+    // Painted on the server, so the first frame is already in the user's theme.
+    const paint = paintAttributes(
+        decodePaintCookie((await cookies()).get(APPEARANCE_COOKIE)?.value),
+    );
 
     return (
-        <html lang="en" className={`dark ${plex.variable} ${jetbrains.variable}`}>
+        <html lang="en" className={`${plex.variable} ${jetbrains.variable}`} {...paint}>
             <head>
                 {/* Propagate the per-request nonce so Next.js can apply it to
                     any inline scripts it injects during hydration */}

@@ -4,6 +4,7 @@
  */
 
 import { getCurrentUser, getLockedSessionUser } from '@/lib/auth';
+import { sanitizeAppearance } from '@/lib/appearance/prefs';
 import { successResponse, unauthorizedResponse } from '@/lib/api';
 
 export async function GET() {
@@ -44,6 +45,9 @@ export async function GET() {
                 createdAt: user.createdAt,
                 isGoogleUser: !user.passwordHash,
                 lockAfterMinutes: user.lockAfterMinutes ?? null,
+                // null until the user saves a choice: the browser keeps its own until then.
+                appearance: user.appearance ? sanitizeAppearance(user.appearance) : null,
+                onboarded: !!user.onboardedAt,
             },
         });
     } catch (error) {

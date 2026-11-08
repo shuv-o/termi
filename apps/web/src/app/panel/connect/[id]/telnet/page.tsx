@@ -132,7 +132,11 @@ export default function TelnetConnectionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-dvh lg:h-screen">
-                <span role="status" aria-label="Loading" className="cursor-block cursor-waiting text-2xl" />
+                <span
+                    role="status"
+                    aria-label="Loading"
+                    className="cursor-block cursor-waiting text-2xl"
+                />
             </div>
         );
     }

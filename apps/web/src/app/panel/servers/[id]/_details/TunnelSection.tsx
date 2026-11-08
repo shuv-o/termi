@@ -94,7 +94,7 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
                         : 'Connected — point your tool at this address:'}
                 </p>
                 <div className="flex items-center gap-2">
-                    <code className="flex-1 text-xs font-mono bg-black/40 text-foreground/90 rounded-md px-3 py-2">
+                    <code className="flex-1 text-xs font-mono bg-secondary text-foreground/90 rounded-md px-3 py-2">
                         {socks ? `socks5://${address}` : address}
                     </code>
                     <CopyTextButton
@@ -151,7 +151,7 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
                       : `Run this on your own computer so the server can reach ${result.localTarget}`}{' '}
                 (requires Node.js 22+):
             </p>
-            <pre className="text-[11px] font-mono bg-black/40 text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
+            <pre className="text-[11px] font-mono bg-secondary text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
                 {result.bridgeScript}
             </pre>
             <div className="flex gap-2">
@@ -235,7 +235,7 @@ export function TunnelSessionRowCard({
 
             {row.kind === 'ELECTRON_LOCAL' && row.mode !== 'REMOTE' && row.localPort && (
                 <div className="flex items-center gap-2">
-                    <code className="flex-1 text-xs font-mono bg-black/40 text-foreground/90 rounded-md px-3 py-2">
+                    <code className="flex-1 text-xs font-mono bg-secondary text-foreground/90 rounded-md px-3 py-2">
                         {row.mode === 'DYNAMIC' ? 'socks5://' : ''}127.0.0.1:{row.localPort}
                     </code>
                     <CopyTextButton
@@ -277,7 +277,7 @@ export function TunnelSessionRowCard({
                 <div className="space-y-2">
                     {script ? (
                         <>
-                            <pre className="text-[11px] font-mono bg-black/40 text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
+                            <pre className="text-[11px] font-mono bg-secondary text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
                                 {script}
                             </pre>
                             <div className="flex gap-2">
