@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db';
 import { Protocol } from '@/app/generated/prisma/client';
 import { encryptCredentials, decryptCredentials, ServerCredentials } from '@/lib/crypto';
 import { pinOf, type HostKeyPin } from '@/lib/security/host-key';
+import { teamServerOwner } from './team.service';
 
 // TYPES
 
@@ -399,6 +400,14 @@ export async function getServerForConnection(
             server = await prisma.server.findFirst({
                 where: { id: serverId, userId: share.ownerId },
             });
+        }
+    }
+
+    // …or through a team whose vault holds it.
+    if (!server) {
+        const ownerId = await teamServerOwner(serverId, userId);
+        if (ownerId) {
+            server = await prisma.server.findFirst({ where: { id: serverId, userId: ownerId } });
         }
     }
 

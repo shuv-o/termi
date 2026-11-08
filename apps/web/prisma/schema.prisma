@@ -75,6 +75,7 @@ model User {
   recordings          Recording[]
   tunnelSessions      TunnelSession[]
   workspaces          Workspace[]
+  teamMemberships     TeamMember[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -214,6 +215,7 @@ model Server {
   jumpServer     Server?              @relation("JumpHost", fields: [jumpServerId], references: [id], onDelete: NoAction)
   jumpTargets    Server[]             @relation("JumpHost")
   hardeningRuns  ServerHardeningRun[]
+  teams          TeamServer[]
 
   @@index([userId])
   @@index([groupId])
@@ -398,6 +400,16 @@ enum AuditAction {
   GROUP_DELETED
   GROUP_BROADCAST_RUN
   SERVERS_COMMAND_RUN
+
+  // Teams
+  TEAM_CREATED
+  TEAM_DELETED
+  TEAM_MEMBER_INVITED
+  TEAM_MEMBER_JOINED
+  TEAM_MEMBER_REMOVED
+  TEAM_ROLE_CHANGED
+  TEAM_SERVER_ADDED
+  TEAM_SERVER_REMOVED
 
   // Passkey events
   PASSKEY_REGISTERED
@@ -813,4 +825,70 @@ model Workspace {
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+// TEAMS
+
+enum TeamRole {
+  OWNER // everything, including deleting the team and changing roles
+  ADMIN // invite and remove members, remove any server from the team
+  MEMBER // connect to the team's servers, add servers they own
+}
+
+/// A group of users sharing a vault of servers. Each server stays owned (and
+/// its credentials sealed) by the user who added it; members can connect.
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     TeamMember[]
+  servers     TeamServer[]
+  invitations TeamInvitation[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model TeamServer {
+  id        String   @id @default(cuid())
+  teamId    String
+  serverId  String
+  addedById String
+  createdAt DateTime @default(now())
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, serverId])
+  @@index([serverId])
+}
+
+model TeamInvitation {
+  id          String   @id @default(cuid())
+  teamId      String
+  email       String
+  role        TeamRole @default(MEMBER)
+  /// SHA-256 of the token in the emailed link.
+  tokenHash   String   @unique
+  invitedById String
+  status      String   @default("PENDING") // PENDING | ACCEPTED | REVOKED
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
 }

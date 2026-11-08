@@ -167,3 +167,24 @@ export type ServerHardeningRun = Prisma.ServerHardeningRunModel
  * recurring setup (web + db + logs side by side) opens in one click.
  */
 export type Workspace = Prisma.WorkspaceModel
+/**
+ * Model Team
+ * A group of users sharing a vault of servers. Each server stays owned (and
+ * its credentials sealed) by the user who added it; members can connect.
+ */
+export type Team = Prisma.TeamModel
+/**
+ * Model TeamMember
+ * 
+ */
+export type TeamMember = Prisma.TeamMemberModel
+/**
+ * Model TeamServer
+ * 
+ */
+export type TeamServer = Prisma.TeamServerModel
+/**
+ * Model TeamInvitation
+ * 
+ */
+export type TeamInvitation = Prisma.TeamInvitationModel

@@ -66,8 +66,12 @@ async function accessibleServers(userId: string, ids: string[]) {
             select: { server: { select: { id: true, name: true, protocol: true } } },
         }),
     ]);
+    const viaTeams = await prisma.teamServer.findMany({
+        where: { serverId: { in: ids }, team: { members: { some: { userId } } } },
+        select: { server: { select: { id: true, name: true, protocol: true } } },
+    });
     const map = new Map<string, string>();
-    for (const s of [...owned, ...shared.map((x) => x.server)]) {
+    for (const s of [...owned, ...shared.map((x) => x.server), ...viaTeams.map((x) => x.server)]) {
         // Terminal workspaces hold SSH sessions only.
         if (s.protocol === 'SSH') map.set(s.id, s.name);
     }

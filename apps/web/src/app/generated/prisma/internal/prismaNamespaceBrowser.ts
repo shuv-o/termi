@@ -73,7 +73,11 @@ export const ModelName = {
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare',
   ServerHardeningRun: 'ServerHardeningRun',
-  Workspace: 'Workspace'
+  Workspace: 'Workspace',
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  TeamServer: 'TeamServer',
+  TeamInvitation: 'TeamInvitation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -479,6 +483,53 @@ export const WorkspaceScalarFieldEnum = {
 } as const
 
 export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
+
+
+export const TeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
+
+
+export const TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const TeamServerScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  serverId: 'serverId',
+  addedById: 'addedById',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamServerScalarFieldEnum = (typeof TeamServerScalarFieldEnum)[keyof typeof TeamServerScalarFieldEnum]
+
+
+export const TeamInvitationScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  email: 'email',
+  role: 'role',
+  tokenHash: 'tokenHash',
+  invitedById: 'invitedById',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamInvitationScalarFieldEnum = (typeof TeamInvitationScalarFieldEnum)[keyof typeof TeamInvitationScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -251,3 +251,8 @@ export function verifySignupRateLimit(userId: string): Promise<RateLimitResult> 
 export function keychainReadRateLimit(userId: string): Promise<RateLimitResult> {
     return rateLimit(`keychain-read:${userId}`, 30, 5 * 60 * 1000);
 }
+
+/** Team invitations (they send email): 20 per hour per user. */
+export function teamInviteRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`team-invite:${userId}`, 20, 60 * 60 * 1000);
+}

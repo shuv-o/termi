@@ -13,6 +13,7 @@ import {
     Play,
     Plus,
     Server,
+    Users,
     Settings as SettingsIcon,
     Shield,
     SquareTerminal,
@@ -269,6 +270,13 @@ export function CommandPalette() {
                         >
                             <BookKey />
                             Keychain
+                        </CommandItem>
+                        <CommandItem
+                            value="teams team vault members"
+                            onSelect={() => go('/panel/teams')}
+                        >
+                            <Users />
+                            Teams
                         </CommandItem>
                         <CommandItem value="groups" onSelect={() => go('/panel/groups')}>
                             <FolderOpen />

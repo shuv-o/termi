@@ -379,6 +379,7 @@ export type UserWhereInput = {
   recordings?: Prisma.RecordingListRelationFilter
   tunnelSessions?: Prisma.TunnelSessionListRelationFilter
   workspaces?: Prisma.WorkspaceListRelationFilter
+  teamMemberships?: Prisma.TeamMemberListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -424,6 +425,7 @@ export type UserOrderByWithRelationInput = {
   recordings?: Prisma.RecordingOrderByRelationAggregateInput
   tunnelSessions?: Prisma.TunnelSessionOrderByRelationAggregateInput
   workspaces?: Prisma.WorkspaceOrderByRelationAggregateInput
+  teamMemberships?: Prisma.TeamMemberOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -472,6 +474,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   recordings?: Prisma.RecordingListRelationFilter
   tunnelSessions?: Prisma.TunnelSessionListRelationFilter
   workspaces?: Prisma.WorkspaceListRelationFilter
+  teamMemberships?: Prisma.TeamMemberListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -577,6 +580,7 @@ export type UserCreateInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -622,6 +626,7 @@ export type UserUncheckedCreateInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -667,6 +672,7 @@ export type UserUpdateInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -712,6 +718,7 @@ export type UserUncheckedUpdateInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1188,6 +1195,20 @@ export type UserUpdateOneRequiredWithoutWorkspacesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWorkspacesInput, Prisma.UserUpdateWithoutWorkspacesInput>, Prisma.UserUncheckedUpdateWithoutWorkspacesInput>
 }
 
+export type UserCreateNestedOneWithoutTeamMembershipsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTeamMembershipsInput, Prisma.UserUncheckedCreateWithoutTeamMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTeamMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTeamMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTeamMembershipsInput, Prisma.UserUncheckedCreateWithoutTeamMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTeamMembershipsInput
+  upsert?: Prisma.UserUpsertWithoutTeamMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTeamMembershipsInput, Prisma.UserUpdateWithoutTeamMembershipsInput>, Prisma.UserUncheckedUpdateWithoutTeamMembershipsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1230,6 +1251,7 @@ export type UserCreateWithoutSessionsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1274,6 +1296,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1334,6 +1357,7 @@ export type UserUpdateWithoutSessionsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1378,6 +1402,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServerGroupsInput = {
@@ -1422,6 +1447,7 @@ export type UserCreateWithoutServerGroupsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServerGroupsInput = {
@@ -1466,6 +1492,7 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServerGroupsInput = {
@@ -1526,6 +1553,7 @@ export type UserUpdateWithoutServerGroupsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
@@ -1570,6 +1598,7 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServersInput = {
@@ -1614,6 +1643,7 @@ export type UserCreateWithoutServersInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServersInput = {
@@ -1658,6 +1688,7 @@ export type UserUncheckedCreateWithoutServersInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServersInput = {
@@ -1718,6 +1749,7 @@ export type UserUpdateWithoutServersInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServersInput = {
@@ -1762,6 +1794,7 @@ export type UserUncheckedUpdateWithoutServersInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPersistentSessionsInput = {
@@ -1806,6 +1839,7 @@ export type UserCreateWithoutPersistentSessionsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
@@ -1850,6 +1884,7 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPersistentSessionsInput = {
@@ -1910,6 +1945,7 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
@@ -1954,6 +1990,7 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -1998,6 +2035,7 @@ export type UserCreateWithoutAuditLogsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -2042,6 +2080,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -2102,6 +2141,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -2146,6 +2186,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOauthAccountsInput = {
@@ -2190,6 +2231,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -2234,6 +2276,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -2294,6 +2337,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -2338,6 +2382,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasskeysInput = {
@@ -2382,6 +2427,7 @@ export type UserCreateWithoutPasskeysInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasskeysInput = {
@@ -2426,6 +2472,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasskeysInput = {
@@ -2486,6 +2533,7 @@ export type UserUpdateWithoutPasskeysInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasskeysInput = {
@@ -2530,6 +2578,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -2574,6 +2623,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -2618,6 +2668,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -2678,6 +2729,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -2722,6 +2774,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMonitorConfigsInput = {
@@ -2766,6 +2819,7 @@ export type UserCreateWithoutMonitorConfigsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
@@ -2810,6 +2864,7 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMonitorConfigsInput = {
@@ -2870,6 +2925,7 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
@@ -2914,6 +2970,7 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordingsInput = {
@@ -2958,6 +3015,7 @@ export type UserCreateWithoutRecordingsInput = {
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordingsInput = {
@@ -3002,6 +3060,7 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordingsInput = {
@@ -3062,6 +3121,7 @@ export type UserUpdateWithoutRecordingsInput = {
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordingsInput = {
@@ -3106,6 +3166,7 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTunnelSessionsInput = {
@@ -3150,6 +3211,7 @@ export type UserCreateWithoutTunnelSessionsInput = {
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTunnelSessionsInput = {
@@ -3194,6 +3256,7 @@ export type UserUncheckedCreateWithoutTunnelSessionsInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTunnelSessionsInput = {
@@ -3254,6 +3317,7 @@ export type UserUpdateWithoutTunnelSessionsInput = {
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
@@ -3298,6 +3362,7 @@ export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecoveryCodesInput = {
@@ -3342,6 +3407,7 @@ export type UserCreateWithoutRecoveryCodesInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
@@ -3386,6 +3452,7 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecoveryCodesInput = {
@@ -3446,6 +3513,7 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
@@ -3490,6 +3558,7 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailOTPsInput = {
@@ -3534,6 +3603,7 @@ export type UserCreateWithoutEmailOTPsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
@@ -3578,6 +3648,7 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailOTPsInput = {
@@ -3638,6 +3709,7 @@ export type UserUpdateWithoutEmailOTPsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
@@ -3682,6 +3754,7 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommandSnippetsInput = {
@@ -3726,6 +3799,7 @@ export type UserCreateWithoutCommandSnippetsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommandSnippetsInput = {
@@ -3770,6 +3844,7 @@ export type UserUncheckedCreateWithoutCommandSnippetsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommandSnippetsInput = {
@@ -3830,6 +3905,7 @@ export type UserUpdateWithoutCommandSnippetsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
@@ -3874,6 +3950,7 @@ export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutKeychainCredentialsInput = {
@@ -3918,6 +3995,7 @@ export type UserCreateWithoutKeychainCredentialsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
@@ -3962,6 +4040,7 @@ export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutKeychainCredentialsInput = {
@@ -4022,6 +4101,7 @@ export type UserUpdateWithoutKeychainCredentialsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
@@ -4066,6 +4146,7 @@ export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -4110,6 +4191,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -4154,6 +4236,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -4214,6 +4297,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -4258,6 +4342,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedSharesInput = {
@@ -4302,6 +4387,7 @@ export type UserCreateWithoutOwnedSharesInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedSharesInput = {
@@ -4346,6 +4432,7 @@ export type UserUncheckedCreateWithoutOwnedSharesInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedSharesInput = {
@@ -4395,6 +4482,7 @@ export type UserCreateWithoutReceivedSharesInput = {
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedSharesInput = {
@@ -4439,6 +4527,7 @@ export type UserUncheckedCreateWithoutReceivedSharesInput = {
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedSharesInput = {
@@ -4499,6 +4588,7 @@ export type UserUpdateWithoutOwnedSharesInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedSharesInput = {
@@ -4543,6 +4633,7 @@ export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedSharesInput = {
@@ -4598,6 +4689,7 @@ export type UserUpdateWithoutReceivedSharesInput = {
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedSharesInput = {
@@ -4642,6 +4734,7 @@ export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspacesInput = {
@@ -4686,6 +4779,7 @@ export type UserCreateWithoutWorkspacesInput = {
   commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesInput = {
@@ -4730,6 +4824,7 @@ export type UserUncheckedCreateWithoutWorkspacesInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesInput = {
@@ -4790,6 +4885,7 @@ export type UserUpdateWithoutWorkspacesInput = {
   commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesInput = {
@@ -4834,6 +4930,203 @@ export type UserUncheckedUpdateWithoutWorkspacesInput = {
   commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTeamMembershipsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTeamMembershipsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTeamMembershipsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTeamMembershipsInput, Prisma.UserUncheckedCreateWithoutTeamMembershipsInput>
+}
+
+export type UserUpsertWithoutTeamMembershipsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTeamMembershipsInput, Prisma.UserUncheckedUpdateWithoutTeamMembershipsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTeamMembershipsInput, Prisma.UserUncheckedCreateWithoutTeamMembershipsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTeamMembershipsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTeamMembershipsInput, Prisma.UserUncheckedUpdateWithoutTeamMembershipsInput>
+}
+
+export type UserUpdateWithoutTeamMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -4861,6 +5154,7 @@ export type UserCountOutputType = {
   recordings: number
   tunnelSessions: number
   workspaces: number
+  teamMemberships: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4883,6 +5177,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   recordings?: boolean | UserCountOutputTypeCountRecordingsArgs
   tunnelSessions?: boolean | UserCountOutputTypeCountTunnelSessionsArgs
   workspaces?: boolean | UserCountOutputTypeCountWorkspacesArgs
+  teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
 }
 
 /**
@@ -5028,6 +5323,13 @@ export type UserCountOutputTypeCountWorkspacesArgs<ExtArgs extends runtime.Types
   where?: Prisma.WorkspaceWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTeamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TeamMemberWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -5072,6 +5374,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
   tunnelSessions?: boolean | Prisma.User$tunnelSessionsArgs<ExtArgs>
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
+  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -5174,6 +5477,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
   tunnelSessions?: boolean | Prisma.User$tunnelSessionsArgs<ExtArgs>
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
+  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -5201,6 +5505,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     recordings: Prisma.$RecordingPayload<ExtArgs>[]
     tunnelSessions: Prisma.$TunnelSessionPayload<ExtArgs>[]
     workspaces: Prisma.$WorkspacePayload<ExtArgs>[]
+    teamMemberships: Prisma.$TeamMemberPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5642,6 +5947,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   recordings<T extends Prisma.User$recordingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recordingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tunnelSessions<T extends Prisma.User$tunnelSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tunnelSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TunnelSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workspaces<T extends Prisma.User$workspacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  teamMemberships<T extends Prisma.User$teamMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6540,6 +6846,30 @@ export type User$workspacesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.WorkspaceScalarFieldEnum | Prisma.WorkspaceScalarFieldEnum[]
+}
+
+/**
+ * User.teamMemberships
+ */
+export type User$teamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TeamMember
+   */
+  select?: Prisma.TeamMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TeamMember
+   */
+  omit?: Prisma.TeamMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamMemberInclude<ExtArgs> | null
+  where?: Prisma.TeamMemberWhereInput
+  orderBy?: Prisma.TeamMemberOrderByWithRelationInput | Prisma.TeamMemberOrderByWithRelationInput[]
+  cursor?: Prisma.TeamMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TeamMemberScalarFieldEnum | Prisma.TeamMemberScalarFieldEnum[]
 }
 
 /**

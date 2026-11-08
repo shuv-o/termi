@@ -128,6 +128,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 ### 🤝 Server Sharing
 
+- **Teams** — a shared vault of servers with owner / admin / member roles and email invitations; members connect, owners keep the credentials
+
 - Share server access with other users via invitation links
 - Per-server share management and revocation
 
