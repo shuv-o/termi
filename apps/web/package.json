@@ -84,7 +84,7 @@
         "tailwindcss": "^4.1.18",
         "tsx": "^4.23.15",
         "typescript": "^5.9.3",
-        "vitest": "^4.1.12"
+        "vitest": "^5.1.0"
     },
     "overrides": {
         "argon2": "npm:@node-rs/argon2@^1.7.0"
