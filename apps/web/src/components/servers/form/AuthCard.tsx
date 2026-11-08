@@ -1,8 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookKey, CheckCircle2, Eye, EyeOff, Key, KeyRound, Lock, Save } from 'lucide-react';
+import {
+    BookKey,
+    CheckCircle2,
+    Eye,
+    EyeOff,
+    Key,
+    KeyRound,
+    KeySquare,
+    Lock,
+    Save,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,6 +26,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { PrivateKeyField } from './PrivateKeyField';
 import { isSshLike, type AuthMethod, type StoredCredentials } from './types';
 import type { ServerFormState } from './useServerForm';
@@ -90,6 +101,23 @@ export function AuthCard({
 
     const isEdit = mode === 'edit';
     const keychainCheckboxId = `${mode}-save-keychain`;
+    // Security keys sign in interactive SSH terminals only.
+    const skAllowed = form.protocol === 'SSH';
+    const { data: skData } = useCachedFetch<{ keys: { id: string; label: string }[] }>(
+        skAllowed ? '/api/ssh-security-keys' : null,
+    );
+    // Switching away from SSH leaves no security-key option: fall back to a password.
+    useEffect(() => {
+        if (!skAllowed && form.authMethod === 'securityKey') update({ authMethod: 'password' });
+    }, [skAllowed, form.authMethod, update]);
+    const methods: AuthMethod[] = skAllowed
+        ? ['password', 'key', 'securityKey']
+        : ['password', 'key'];
+    const METHOD_LABEL: Record<AuthMethod, string> = {
+        password: 'Password',
+        key: 'SSH key',
+        securityKey: 'Security key',
+    };
 
     return (
         <Card className="border-border hover:border-border/80 transition-all duration-200">
@@ -178,7 +206,7 @@ export function AuthCard({
                     <>
                         {isSshLike(form.protocol) && (
                             <div className="flex w-fit gap-1 rounded-lg border border-border/50 bg-background/60 p-1">
-                                {(['password', 'key'] as AuthMethod[]).map((method) => (
+                                {methods.map((method) => (
                                     <button
                                         key={method}
                                         type="button"
@@ -191,10 +219,12 @@ export function AuthCard({
                                     >
                                         {method === 'password' ? (
                                             <Lock className="w-3 h-3" />
-                                        ) : (
+                                        ) : method === 'key' ? (
                                             <Key className="w-3 h-3" />
+                                        ) : (
+                                            <KeySquare className="w-3 h-3" />
                                         )}
-                                        {method === 'password' ? 'Password' : 'SSH key'}
+                                        {METHOD_LABEL[method]}
                                     </button>
                                 ))}
                             </div>
@@ -289,32 +319,83 @@ export function AuthCard({
                             </div>
                         )}
 
-                        <div className="space-y-2 border-t border-border/60 pt-2">
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id={keychainCheckboxId}
-                                    checked={saveToKeychain}
-                                    onCheckedChange={(v) => setSaveToKeychain(v === true)}
-                                    className="h-4 w-4"
-                                />
-                                <label
-                                    htmlFor={keychainCheckboxId}
-                                    className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
-                                >
-                                    <Save className="w-3 h-3" />
-                                    Save these credentials to Keychain
-                                </label>
+                        {form.authMethod === 'securityKey' && skAllowed && (
+                            <div className="space-y-1.5">
+                                {(skData?.keys ?? []).length === 0 ? (
+                                    <p className="py-2 text-xs text-muted-foreground">
+                                        No security keys yet.{' '}
+                                        <Link
+                                            href="/panel/keychain"
+                                            className="text-primary underline"
+                                        >
+                                            Add one on the Keychain page
+                                        </Link>
+                                        .
+                                    </p>
+                                ) : (
+                                    <>
+                                        <Label className="text-xs">Security key</Label>
+                                        <Select
+                                            value={form.securityKeyId || 'none'}
+                                            onValueChange={(v) =>
+                                                update({ securityKeyId: v === 'none' ? '' : v })
+                                            }
+                                        >
+                                            <SelectTrigger
+                                                className="h-9 text-sm"
+                                                aria-label="Security key"
+                                            >
+                                                <SelectValue placeholder="Choose a security key…" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-card border-border">
+                                                <SelectItem value="none">
+                                                    — Choose a key —
+                                                </SelectItem>
+                                                {skData!.keys.map((k) => (
+                                                    <SelectItem key={k.id} value={k.id}>
+                                                        {k.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <p className="text-[11px] text-muted-foreground">
+                                            You&apos;ll be asked to touch the key each time a
+                                            terminal connects. The server must list the key in
+                                            authorized_keys and allow it in sshd_config.
+                                        </p>
+                                    </>
+                                )}
                             </div>
-                            {saveToKeychain && (
-                                <Input
-                                    type="text"
-                                    value={keychainLabel}
-                                    onChange={(e) => setKeychainLabel(e.target.value)}
+                        )}
 
-                                    placeholder="Label (e.g. root@production)"
-                                />
-                            )}
-                        </div>
+                        {form.authMethod !== 'securityKey' && (
+                            <div className="space-y-2 border-t border-border/60 pt-2">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id={keychainCheckboxId}
+                                        checked={saveToKeychain}
+                                        onCheckedChange={(v) => setSaveToKeychain(v === true)}
+                                        className="h-4 w-4"
+                                    />
+                                    <label
+                                        htmlFor={keychainCheckboxId}
+                                        className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
+                                    >
+                                        <Save className="w-3 h-3" />
+                                        Save these credentials to Keychain
+                                    </label>
+                                </div>
+                                {saveToKeychain && (
+                                    <Input
+                                        type="text"
+                                        value={keychainLabel}
+                                        onChange={(e) => setKeychainLabel(e.target.value)}
+
+                                        placeholder="Label (e.g. root@production)"
+                                    />
+                                )}
+                            </div>
+                        )}
                     </>
                 )}
             </CardContent>

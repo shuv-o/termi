@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/toast';
 
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
+import { SecurityKeysSection } from '@/components/ssh/SecurityKeysSection';
 import PasskeyRevealModal from '@/components/auth/PasskeyRevealModal';
 import { emptyForm, type EntryForm, type KeychainEntry } from './_components/types';
 
@@ -271,6 +272,8 @@ export default function KeychainPage() {
                         ))}
                     </div>
                 )}
+
+                <SecurityKeysSection />
             </div>
 
             {revealFor && (

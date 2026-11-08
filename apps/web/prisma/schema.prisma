@@ -78,6 +78,7 @@ model User {
   tunnelSessions      TunnelSession[]
   workspaces          Workspace[]
   teamMemberships     TeamMember[]
+  sshSecurityKeys     SshSecurityKey[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -168,6 +169,12 @@ model Server {
   // open, without the keys ever leaving Termi. "off" | "on" | "confirm".
   agentForwarding  String   @default("off")
   agentKeychainIds String[] @default([])
+
+  // Sign in with a FIDO2 security key (terminal sessions only: someone has
+  // to touch the key). The server's sshd must accept
+  // webauthn-sk-ecdsa-sha2-nistp256@openssh.com.
+  securityKeyId String?
+  securityKey   SshSecurityKey? @relation(fields: [securityKeyId], references: [id], onDelete: SetNull)
 
   // Jump host (bastion): connect to this server *through* another of the
   // owner's SSH servers. One hop only. The target host is then dialed by the
@@ -418,6 +425,10 @@ enum AuditAction {
   // Shared live sessions
   SESSION_SHARED
   SESSION_JOINED
+
+  // FIDO2 security keys for SSH
+  SSH_SECURITY_KEY_ADDED
+  SSH_SECURITY_KEY_REMOVED
 
   // Passkey events
   PASSKEY_REGISTERED
@@ -918,4 +929,23 @@ model SessionShare {
   createdAt DateTime  @default(now())
 
   @@index([ownerId])
+}
+
+/// A FIDO2 security key (YubiKey, …) used as an SSH key: the private key never
+/// leaves the device. Enrolled through WebAuthn; `publicKey` is the OpenSSH
+/// `sk-ecdsa-sha2-nistp256@openssh.com` key blob whose application is `rpId`.
+model SshSecurityKey {
+  id           String    @id @default(cuid())
+  userId       String
+  label        String
+  credentialId String    @unique // base64url
+  publicKey    String // OpenSSH key blob, base64
+  rpId         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  servers Server[]
+
+  @@index([userId])
 }

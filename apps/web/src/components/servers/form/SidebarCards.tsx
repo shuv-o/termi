@@ -73,7 +73,7 @@ export function AdvancedCard({
                             type="text"
                             value={form.description}
                             onChange={(e) => update({ description: e.target.value })}
-                           
+
                             placeholder="Production web server"
                         />
                     </div>
@@ -217,7 +217,13 @@ export function PreviewCard({
                                         {form.username}
                                     </span>
                                     <span className="text-muted-foreground/40 text-[11px]">
-                                        ({form.authMethod === 'key' ? 'key' : 'password'})
+                                        (
+                                        {form.authMethod === 'key'
+                                            ? 'key'
+                                            : form.authMethod === 'securityKey'
+                                              ? 'security key'
+                                              : 'password'}
+                                        )
                                     </span>
                                 </div>
                             )}

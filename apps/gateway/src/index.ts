@@ -647,6 +647,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                         case 'kick':
                             kickGuest(session, message.id);
                             break;
+                        case 'sk-response':
+                            session.handler.answerSecurityKey(message);
+                            break;
                         case 'agent-response':
                             session.handler.answerAgentRequest(
                                 message.id,

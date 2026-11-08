@@ -116,6 +116,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 ### 💻 Local Terminal
 
+- **FIDO2 security keys** — YubiKey and other FIDO2 keys as SSH keys: the private key stays on the device, each login is a touch
 - **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
 
 - Access your **local machine's shell** directly from the app

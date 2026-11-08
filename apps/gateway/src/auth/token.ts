@@ -65,6 +65,8 @@ export interface TokenPayload {
         hostKey?: string | null;
         certificate?: string | null;
     } | null;
+    /** 'ssh' only: sign in with this FIDO2 security key (signatures come from the browser). */
+    securityKey?: { credentialId: string; publicKey: string; rpId: string } | null;
     /**
      * 'ssh' only: this token joins someone else's live session as a guest
      * (see sessions/guests.ts) instead of opening a connection. No

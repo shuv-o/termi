@@ -48,7 +48,8 @@ export const protoColors: Record<ProtocolValue, { pill: string; ring: string; ba
     ) as Record<ProtocolValue, { pill: string; ring: string; badge: string }>;
 
 export type RdpSecurity = 'any' | 'rdp' | 'nla' | 'tls';
-export type AuthMethod = 'password' | 'key';
+/** `securityKey`: a FIDO2 key enrolled on the Keychain page (SSH terminals only). */
+export type AuthMethod = 'password' | 'key' | 'securityKey';
 export type TestStatus = 'idle' | 'testing' | 'success' | 'failed';
 
 /** Every field the add/edit server form edits. */
@@ -75,6 +76,8 @@ export interface ServerFormValues {
     certificate: string;
     agentForwarding: AgentForwarding;
     agentKeychainIds: string[];
+    /** Enrolled FIDO2 security key id, used when authMethod is 'securityKey'. */
+    securityKeyId: string;
 }
 
 export type AgentForwarding = 'off' | 'on' | 'confirm';
@@ -98,6 +101,7 @@ export const EMPTY_SERVER_FORM: ServerFormValues = {
     rdpSecurity: 'any',
     jumpServerId: '',
     certificate: '',
+    securityKeyId: '',
     agentForwarding: 'off',
     agentKeychainIds: [],
 };

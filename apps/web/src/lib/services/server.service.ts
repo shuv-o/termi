@@ -18,6 +18,12 @@ import { teamServerOwner } from './team.service';
  */
 export type AgentForwardingMode = 'off' | 'on' | 'confirm';
 
+/** A server can only sign in with one of its owner's own security keys. */
+async function assertSecurityKey(userId: string, id: string): Promise<void> {
+    const key = await prisma.sshSecurityKey.findFirst({ where: { id, userId }, select: { id: true } });
+    if (!key) throw new JumpHostError('Choose one of your own security keys');
+}
+
 /** Agent keys must be the user's own keychain entries that hold a private key. */
 async function assertAgentKeys(userId: string, ids: string[]): Promise<void> {
     if (ids.length === 0) return;
@@ -147,6 +153,7 @@ export interface CreateServerInput {
     certificate?: string | null;
     agentForwarding?: AgentForwardingMode;
     agentKeychainIds?: string[];
+    securityKeyId?: string | null;
 }
 
 export interface UpdateServerInput {
@@ -171,6 +178,7 @@ export interface UpdateServerInput {
     certificate?: string | null;
     agentForwarding?: AgentForwardingMode;
     agentKeychainIds?: string[];
+    securityKeyId?: string | null;
 }
 
 export interface ServerListItem {
@@ -226,6 +234,7 @@ export async function createServer(input: CreateServerInput) {
     if (settings.agentKeychainIds?.length) {
         await assertAgentKeys(userId, settings.agentKeychainIds);
     }
+    if (settings.securityKeyId) await assertSecurityKey(userId, settings.securityKeyId);
 
     // Encrypt sensitive credentials
     const credentials: ServerCredentials = {
@@ -382,6 +391,7 @@ export async function getServerForConnection(
           ownerId: string;
           agentForwarding: string;
           agentKeychainIds: string[];
+          securityKey: { credentialId: string; publicKey: string; rpId: string } | null;
           jump: JumpConfig | null;
       })
     | null
@@ -451,6 +461,12 @@ export async function getServerForConnection(
         ownerId: server.userId,
         agentForwarding: server.agentForwarding,
         agentKeychainIds: server.agentKeychainIds,
+        securityKey: server.securityKeyId
+            ? await prisma.sshSecurityKey.findUnique({
+                  where: { id: server.securityKeyId },
+                  select: { credentialId: true, publicKey: true, rpId: true },
+              })
+            : null,
         // The jump host always belongs to the server's owner — for a shared
         // server too, so a recipient never needs the bastion shared with them.
         jump: await loadJump(server.jumpServerId, server.userId),
@@ -506,6 +522,10 @@ export async function updateServer(serverId: string, userId: string, input: Upda
     if (input.jumpServerId !== undefined) updateData.jumpServerId = input.jumpServerId;
     if (input.certificate !== undefined) updateData.certificate = input.certificate || null;
     if (input.agentForwarding !== undefined) updateData.agentForwarding = input.agentForwarding;
+    if (input.securityKeyId !== undefined) {
+        if (input.securityKeyId) await assertSecurityKey(userId, input.securityKeyId);
+        updateData.securityKeyId = input.securityKeyId || null;
+    }
     if (input.agentKeychainIds !== undefined) {
         await assertAgentKeys(userId, input.agentKeychainIds);
         updateData.agentKeychainIds = input.agentKeychainIds;

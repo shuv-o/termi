@@ -74,6 +74,8 @@ export default function SSHTerminal({
     const [joinRequests, setJoinRequests] = useState<{ id: string; email: string; mode: string }[]>(
         [],
     );
+    // Signing in with a FIDO2 security key: waiting for the user's touch.
+    const [skPending, setSkPending] = useState(false);
     const [guests, setGuests] = useState<{ id: string; email: string; mode: string }[]>([]);
     const sendControl = (msg: Record<string, unknown>) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify(msg));
@@ -261,6 +263,22 @@ export default function SSHTerminal({
                                     fingerprint: String(message.fingerprint ?? ''),
                                 },
                             ]);
+                        }
+                        break;
+
+                    case 'sk-sign':
+                        if (typeof message.id === 'string') {
+                            setSkPending(true);
+                            void signWithSecurityKey(message).then((assertion) => {
+                                setSkPending(false);
+                                ws.send(
+                                    JSON.stringify({
+                                        type: 'sk-response',
+                                        id: message.id,
+                                        assertion,
+                                    }),
+                                );
+                            });
                         }
                         break;
 
@@ -521,6 +539,14 @@ export default function SSHTerminal({
             />
             {search.bar}
             {suggestions.overlay}
+            {skPending && (
+                <div
+                    role="status"
+                    className="absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-lg border border-primary/40 bg-card/95 px-4 py-3 text-sm shadow-lg backdrop-blur"
+                >
+                    Touch your security key to sign in…
+                </div>
+            )}
             {guests.length > 0 && (
                 <div
                     data-testid="session-guests"
@@ -638,4 +664,46 @@ export default function SSHTerminal({
             )}
         </div>
     );
+}
+
+const fromB64url = (s: string) => {
+    const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+    return Uint8Array.from(b, (c) => c.charCodeAt(0));
+};
+const toB64url = (buf: ArrayBuffer) =>
+    btoa(String.fromCharCode(...new Uint8Array(buf)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+/**
+ * Sign the gateway's SSH challenge with a FIDO2 security key (WebAuthn). The
+ * challenge *is* the SSH data, which is what lets OpenSSH verify it.
+ */
+async function signWithSecurityKey(req: {
+    challenge?: unknown;
+    credentialId?: unknown;
+    rpId?: unknown;
+}): Promise<{ authenticatorData: string; clientDataJSON: string; signature: string } | null> {
+    if (typeof req.challenge !== 'string' || typeof req.credentialId !== 'string') return null;
+    try {
+        const cred = (await navigator.credentials.get({
+            publicKey: {
+                challenge: fromB64url(req.challenge),
+                allowCredentials: [{ type: 'public-key', id: fromB64url(req.credentialId) }],
+                rpId: typeof req.rpId === 'string' ? req.rpId : undefined,
+                userVerification: 'discouraged',
+                timeout: 60_000,
+            },
+        })) as PublicKeyCredential | null;
+        const r = cred?.response as AuthenticatorAssertionResponse | undefined;
+        if (!r) return null;
+        return {
+            authenticatorData: toB64url(r.authenticatorData),
+            clientDataJSON: toB64url(r.clientDataJSON),
+            signature: toB64url(r.signature),
+        };
+    } catch {
+        return null;
+    }
 }

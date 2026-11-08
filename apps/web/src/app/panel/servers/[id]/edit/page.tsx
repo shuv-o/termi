@@ -47,7 +47,12 @@ export default function EditServerPage() {
                     host: s.host ?? '',
                     port: s.port ?? 22,
                     username: s.username ?? '',
-                    authMethod: s.hasPrivateKey ? 'key' : 'password',
+                    authMethod: s.securityKeyId
+                        ? 'securityKey'
+                        : s.hasPrivateKey
+                          ? 'key'
+                          : 'password',
+                    securityKeyId: s.securityKeyId ?? '',
                     // Secrets are never sent back to the browser; blank means "keep".
                     notes: s.notes ?? '',
                     tags: s.tags ?? [],
@@ -108,6 +113,11 @@ export default function EditServerPage() {
             }
             // The server fills the secrets from this entry itself.
             if (state.keychainId) payload.keychainId = state.keychainId;
+            // Explicit null switches a server back to its password or key.
+            payload.securityKeyId =
+                form.protocol === 'SSH' && form.authMethod === 'securityKey' && form.securityKeyId
+                    ? form.securityKeyId
+                    : null;
 
             const res = await fetch(`/api/servers/${id}`, {
                 method: 'PATCH',

@@ -48,6 +48,11 @@ export interface ConnectionTokenClaims {
         | { kind: 'local' }
         | { kind: 'dynamic' }
         | { kind: 'remote'; bindAddress: string; bindPort: number };
+    /**
+     * 'ssh' only, owner only: sign in with this FIDO2 security key — the
+     * gateway asks the browser for each signature. Public data only.
+     */
+    securityKey?: { credentialId: string; publicKey: string; rpId: string } | null;
     /** 'ssh' only: join someone's live session as a guest (no credentials). */
     join?: {
         sessionId: string;

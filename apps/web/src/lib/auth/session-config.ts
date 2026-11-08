@@ -21,6 +21,7 @@ export interface SessionData {
     stepUpAt?: number;
     lastActivity?: number;
     passkeyChallenge?: string; // Base64URL challenge for WebAuthn registration/auth
+    sshKeyChallenge?: string; // Base64URL challenge while enrolling an SSH security key
     passkeyAuthUserId?: string; // userId resolved during passkey auth options (before assertion verified)
     // Temporary fields used during Google OAuth dance (cleared after callback)
     googleOAuthState?: string;

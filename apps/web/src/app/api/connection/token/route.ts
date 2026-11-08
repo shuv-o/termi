@@ -96,6 +96,23 @@ export async function POST(request: Request) {
             return errorResponse('Invalid server host configuration', 400);
         }
 
+        // A security key needs someone to touch it, in a terminal, and it is
+        // the owner's own key.
+        if (server.securityKey) {
+            if (protocol !== 'ssh') {
+                return errorResponse(
+                    'This server signs in with a security key: open a terminal to connect',
+                    400,
+                );
+            }
+            if (server.ownerId !== user.id) {
+                return errorResponse(
+                    "This server signs in with its owner's security key, so only they can connect",
+                    403,
+                );
+            }
+        }
+
         // The gateway can't write to the database, so it only ever verifies
         // host keys against pins recorded here first.
         const pinned = await pinHostKeys(server, protocol);
@@ -117,6 +134,7 @@ export async function POST(request: Request) {
             rdpSecurity: server.rdpSecurity ?? 'any',
             hostKey: server.hostKey.fingerprint,
             certificate: server.certificate,
+            securityKey: server.securityKey,
             agent: protocol === 'ssh' ? await agentClaim(server, user.id) : null,
             jump: jumpClaim(server.jump),
             ...forward,

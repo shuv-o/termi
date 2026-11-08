@@ -31,6 +31,7 @@ const createServerSchema = z.object({
     rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
     jumpServerId: z.string().nullable().optional(),
     certificate: certificateField,
+    securityKeyId: z.string().max(64).nullable().optional(),
     ...agentFields,
     /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
     keychainId: z.string().optional(),

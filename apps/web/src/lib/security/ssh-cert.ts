@@ -33,6 +33,11 @@ interface CertInfo {
     sigName: string;
     /** Key type, for ssh2's signature encoding. */
     baseType: string;
+    /**
+     * Keys whose signature is produced elsewhere (a FIDO2 security key, via
+     * the browser): resolves to the complete signature blob for `data`.
+     */
+    signBlob?: (data: Buffer) => Promise<Buffer>;
 }
 
 const SUPPORTED: Record<
@@ -119,6 +124,44 @@ export function certifiedKey(
         baseType: info.baseType,
     };
     return wrapped;
+}
+
+/**
+ * A login key whose signatures come from elsewhere (a FIDO2 security key via
+ * the browser): `blob` is its public key, `algorithm` the login algorithm,
+ * and `signBlob` returns the complete signature blob for the data to sign.
+ */
+export function remotelySignedKey(
+    blob: Buffer,
+    algorithm: string,
+    signBlob: (data: Buffer) => Promise<Buffer>,
+): ParsedKey {
+    installAuthOverride();
+    // ssh2 only accepts its own key objects; borrow one's shape.
+    const base = placeholderKey();
+    const wrapped = Object.create(base) as ParsedKey & { [CERT]: CertInfo };
+    Object.defineProperty(wrapped, 'type', { value: algorithm });
+    wrapped.getPublicSSH = () => blob;
+    wrapped.sign = (() => new Error('signed remotely')) as unknown as ParsedKey['sign'];
+    wrapped[CERT] = {
+        blob,
+        outerAlgo: algorithm,
+        sigName: algorithm,
+        baseType: algorithm,
+        signBlob,
+    };
+    return wrapped;
+}
+
+let placeholder: ParsedKey | null = null;
+function placeholderKey(): ParsedKey {
+    if (!placeholder) {
+        const pair = utils.generateKeyPairSync('ed25519');
+        const parsed = utils.parseKey(pair.private);
+        if (parsed instanceof Error) throw parsed;
+        placeholder = Array.isArray(parsed) ? parsed[0] : parsed;
+    }
+    return placeholder as ParsedKey;
 }
 
 // ── ssh2 override ───────────────────────────────────────────────────────────
@@ -217,31 +260,11 @@ function authPKCertificate(
         return;
     }
 
-    cbSign(packet, (raw) => {
-        const signature = convertSignature(raw, cert.baseType);
-        if (signature === false) throw new Error('Error while converting handshake signature');
-        const sigName = cert.sigName;
-        const sigNameLen = Buffer.byteLength(sigName);
-        const sigLen = signature.length;
+    const send = (sigBlob: Buffer) => {
+        const sigLen = sigBlob.length;
         p = proto._packetRW.write.allocStart;
         packet = proto._packetRW.write.alloc(
-            1 +
-                4 +
-                userLen +
-                4 +
-                14 +
-                4 +
-                9 +
-                1 +
-                4 +
-                algoLen +
-                4 +
-                pubKeyLen +
-                4 +
-                4 +
-                sigNameLen +
-                4 +
-                sigLen,
+            1 + 4 + userLen + 4 + 14 + 4 + 9 + 1 + 4 + algoLen + 4 + pubKeyLen + 4 + sigLen,
         );
         packet[p] = MESSAGE.USERAUTH_REQUEST;
         writeUInt32BE(packet, userLen, ++p);
@@ -255,13 +278,32 @@ function authPKCertificate(
         packet.write(keyAlgo, (p += 4), algoLen, 'utf8');
         writeUInt32BE(packet, pubKeyLen, (p += algoLen));
         packet.set(pubKey, (p += 4));
-        writeUInt32BE(packet, 4 + sigNameLen + 4 + sigLen, (p += pubKeyLen));
-        writeUInt32BE(packet, sigNameLen, (p += 4));
-        packet.write(sigName, (p += 4), sigNameLen, 'utf8');
-        writeUInt32BE(packet, sigLen, (p += sigNameLen));
-        packet.set(signature, (p += 4));
+        writeUInt32BE(packet, sigLen, (p += pubKeyLen));
+        packet.set(sigBlob, (p += 4));
         proto._authsQueue.push('publickey');
-        proto._debug?.('Outbound: Sending USERAUTH_REQUEST (publickey certificate)');
+        proto._debug?.('Outbound: Sending USERAUTH_REQUEST (publickey)');
         sendPacket(proto, proto._packetRW.write.finalize(packet));
+    };
+
+    if (cert.signBlob) {
+        // Signed elsewhere (e.g. a security key in the browser). A refusal or
+        // timeout sends an empty signature, which the server rejects, so the
+        // login fails cleanly instead of hanging.
+        const data = packet;
+        cert.signBlob(data).then(send, () => send(Buffer.alloc(0)));
+        return;
+    }
+
+    cbSign(packet, (raw) => {
+        const signature = convertSignature(raw, cert.baseType);
+        if (signature === false) throw new Error('Error while converting handshake signature');
+        send(Buffer.concat([sshString(cert.sigName), sshString(signature)]));
     });
+}
+
+function sshString(b: Buffer | string): Buffer {
+    const buf = typeof b === 'string' ? Buffer.from(b) : b;
+    const len = Buffer.alloc(4);
+    len.writeUInt32BE(buf.length);
+    return Buffer.concat([len, buf]);
 }

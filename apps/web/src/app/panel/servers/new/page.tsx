@@ -55,6 +55,11 @@ export default function NewServerPage() {
                         : {}),
                     // The server fills the secrets from this entry itself.
                     ...(state.keychainId ? { keychainId: state.keychainId } : {}),
+                    ...(form.protocol === 'SSH' &&
+                    form.authMethod === 'securityKey' &&
+                    form.securityKeyId
+                        ? { securityKeyId: form.securityKeyId }
+                        : {}),
                 }),
             });
             const data = await res.json();

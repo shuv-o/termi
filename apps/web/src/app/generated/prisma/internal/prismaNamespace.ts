@@ -424,7 +424,8 @@ export const ModelName = {
   TeamMember: 'TeamMember',
   TeamServer: 'TeamServer',
   TeamInvitation: 'TeamInvitation',
-  SessionShare: 'SessionShare'
+  SessionShare: 'SessionShare',
+  SshSecurityKey: 'SshSecurityKey'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare" | "sshSecurityKey"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2516,6 +2517,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SshSecurityKey: {
+      payload: Prisma.$SshSecurityKeyPayload<ExtArgs>
+      fields: Prisma.SshSecurityKeyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SshSecurityKeyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SshSecurityKeyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        findFirst: {
+          args: Prisma.SshSecurityKeyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SshSecurityKeyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        findMany: {
+          args: Prisma.SshSecurityKeyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>[]
+        }
+        create: {
+          args: Prisma.SshSecurityKeyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        createMany: {
+          args: Prisma.SshSecurityKeyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SshSecurityKeyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>[]
+        }
+        delete: {
+          args: Prisma.SshSecurityKeyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        update: {
+          args: Prisma.SshSecurityKeyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        deleteMany: {
+          args: Prisma.SshSecurityKeyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SshSecurityKeyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SshSecurityKeyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>[]
+        }
+        upsert: {
+          args: Prisma.SshSecurityKeyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SshSecurityKeyPayload>
+        }
+        aggregate: {
+          args: Prisma.SshSecurityKeyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSshSecurityKey>
+        }
+        groupBy: {
+          args: Prisma.SshSecurityKeyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SshSecurityKeyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SshSecurityKeyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SshSecurityKeyCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2637,6 +2712,7 @@ export const ServerScalarFieldEnum = {
   certificate: 'certificate',
   agentForwarding: 'agentForwarding',
   agentKeychainIds: 'agentKeychainIds',
+  securityKeyId: 'securityKeyId',
   jumpServerId: 'jumpServerId',
   hostKeyFingerprint: 'hostKeyFingerprint',
   hostKeyType: 'hostKeyType',
@@ -3006,6 +3082,20 @@ export const SessionShareScalarFieldEnum = {
 } as const
 
 export type SessionShareScalarFieldEnum = (typeof SessionShareScalarFieldEnum)[keyof typeof SessionShareScalarFieldEnum]
+
+
+export const SshSecurityKeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  rpId: 'rpId',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type SshSecurityKeyScalarFieldEnum = (typeof SshSecurityKeyScalarFieldEnum)[keyof typeof SshSecurityKeyScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3485,6 +3575,7 @@ export type GlobalOmitConfig = {
   teamServer?: Prisma.TeamServerOmit
   teamInvitation?: Prisma.TeamInvitationOmit
   sessionShare?: Prisma.SessionShareOmit
+  sshSecurityKey?: Prisma.SshSecurityKeyOmit
 }
 
 /* Types for Logging */

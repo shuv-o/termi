@@ -87,13 +87,14 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
 
     const isSSHProto = isSshLike(form.protocol);
     const hasAuth =
-        !!keychainId || form.authMethod === 'password'
-            ? !!form.password.trim()
-            : !!form.privateKey.trim();
+        !!keychainId ||
+        (form.authMethod === 'password' ? !!form.password.trim() : !!form.privateKey.trim());
     const canTest = !!(
         form.host.trim() &&
         form.port > 0 &&
         form.username.trim() &&
+        // A security key needs someone to touch it: there's nobody at a test.
+        form.authMethod !== 'securityKey' &&
         (!isSSHProto || hasAuth)
     );
 

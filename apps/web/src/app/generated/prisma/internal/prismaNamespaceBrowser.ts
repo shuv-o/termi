@@ -78,7 +78,8 @@ export const ModelName = {
   TeamMember: 'TeamMember',
   TeamServer: 'TeamServer',
   TeamInvitation: 'TeamInvitation',
-  SessionShare: 'SessionShare'
+  SessionShare: 'SessionShare',
+  SshSecurityKey: 'SshSecurityKey'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -179,6 +180,7 @@ export const ServerScalarFieldEnum = {
   certificate: 'certificate',
   agentForwarding: 'agentForwarding',
   agentKeychainIds: 'agentKeychainIds',
+  securityKeyId: 'securityKeyId',
   jumpServerId: 'jumpServerId',
   hostKeyFingerprint: 'hostKeyFingerprint',
   hostKeyType: 'hostKeyType',
@@ -548,6 +550,20 @@ export const SessionShareScalarFieldEnum = {
 } as const
 
 export type SessionShareScalarFieldEnum = (typeof SessionShareScalarFieldEnum)[keyof typeof SessionShareScalarFieldEnum]
+
+
+export const SshSecurityKeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  rpId: 'rpId',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type SshSecurityKeyScalarFieldEnum = (typeof SshSecurityKeyScalarFieldEnum)[keyof typeof SshSecurityKeyScalarFieldEnum]
 
 
 export const SortOrder = {

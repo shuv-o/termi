@@ -194,3 +194,10 @@ export type TeamInvitation = Prisma.TeamInvitationModel
  * type too). The owner still approves each person in the terminal.
  */
 export type SessionShare = Prisma.SessionShareModel
+/**
+ * Model SshSecurityKey
+ * A FIDO2 security key (YubiKey, …) used as an SSH key: the private key never
+ * leaves the device. Enrolled through WebAuthn; `publicKey` is the OpenSSH
+ * `sk-ecdsa-sha2-nistp256@openssh.com` key blob whose application is `rpId`.
+ */
+export type SshSecurityKey = Prisma.SshSecurityKeyModel
