@@ -33,7 +33,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { serverImportRateLimit } from '@/lib/rate-limit';
+import { serverImportPreviewRateLimit, serverImportRateLimit } from '@/lib/rate-limit';
 import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
 import { createServer, createServerGroup, JumpHostError } from '@/lib/services';
 import { Protocol } from '@/app/generated/prisma/client';
@@ -44,7 +44,11 @@ import {
     PassphraseRequiredError,
     WrongPassphraseError,
     MAX_IMPORT_SERVERS,
+    parseForeign,
+    hasCredentials,
+    type ExportPayload,
 } from '@/lib/transfer';
+import { getKeychainCredentialById } from '@/lib/services/keychain.service';
 
 /** 8 MB of text. A 1000-server export with private keys is well under 5 MB. */
 const MAX_CONTENT_LENGTH = 8 * 1024 * 1024;
@@ -54,11 +58,22 @@ const SSRF_CONCURRENCY = 8;
 
 const importSchema = z.object({
     content: z.string().min(1).max(MAX_CONTENT_LENGTH),
-    fileType: z.enum(['json', 'csv']),
+    fileType: z.enum(['json', 'csv', 'ssh-config', 'putty', 'mobaxterm']),
     passphrase: z.string().max(256).optional(),
     /** What to do when a server of the same name already exists. */
     onDuplicate: z.enum(['skip', 'rename']).default('skip'),
+    /** Parse only and describe what would be imported; nothing is written. */
+    dryRun: z.boolean().default(false),
+    /**
+     * A keychain login for servers the file has no credentials for (other
+     * tools' files never carry passwords). Its username is used only where
+     * the file had none.
+     */
+    keychainId: z.string().max(64).optional(),
 });
+
+/** At most this many rows are listed in a preview. */
+const PREVIEW_ROWS = 200;
 
 interface ImportFailure {
     name: string;
@@ -100,22 +115,31 @@ export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
     const deviceInfo = getDeviceInfo(request);
 
-    const rl = await serverImportRateLimit(user.id);
+    const validation = await validateBody(request, importSchema);
+    if ('error' in validation) return validation.error;
+
+    const { content, fileType, passphrase, onDuplicate, dryRun, keychainId } = validation.data;
+
+    const rl = dryRun
+        ? await serverImportPreviewRateLimit(user.id)
+        : await serverImportRateLimit(user.id);
     if (!rl.allowed) {
         return errorResponse('Too many import requests. Please wait before trying again.', 429);
     }
 
-    const validation = await validateBody(request, importSchema);
-    if ('error' in validation) return validation.error;
-
-    const { content, fileType, passphrase, onDuplicate } = validation.data;
-
     //   Parse and validate the file before touching the database
 
-    let payload;
+    let payload: ExportPayload;
+    let notes: string[] = [];
+    let defaultedUsername = new Set<string>();
     try {
         if (fileType === 'csv') {
             payload = parseCsvExport(content);
+        } else if (fileType !== 'json') {
+            const foreign = parseForeign(fileType, content);
+            payload = foreign.payload;
+            notes = foreign.notes;
+            defaultedUsername = new Set(foreign.defaultedUsername);
         } else {
             let parsed: unknown;
             try {
@@ -144,6 +168,27 @@ export async function POST(request: Request) {
     if (payload.servers.length > MAX_IMPORT_SERVERS) {
         return errorResponse(`An import is limited to ${MAX_IMPORT_SERVERS} servers.`, 400);
     }
+
+    if (dryRun) {
+        return successResponse({
+            total: payload.servers.length,
+            withCredentials: payload.servers.filter(hasCredentials).length,
+            groups: payload.groups.map((g) => g.name),
+            notes,
+            servers: payload.servers.slice(0, PREVIEW_ROWS).map((s) => ({
+                name: s.name,
+                host: s.host,
+                port: s.port,
+                protocol: s.protocol,
+                username: defaultedUsername.has(s.name) ? null : s.username,
+                group: s.groupName ?? null,
+                jump: s.jumpServerName ?? null,
+            })),
+        });
+    }
+
+    const keychain = keychainId ? await getKeychainCredentialById(keychainId, user.id) : null;
+    if (keychainId && !keychain) return errorResponse('Keychain entry not found', 404);
 
     try {
         //   Pre-flight checks that apply to the whole file
@@ -235,11 +280,7 @@ export async function POST(request: Request) {
                     host: server.host,
                     port: server.port,
                     protocol: server.protocol as Protocol,
-                    username: server.username,
-
-                    password: server.password ?? undefined,
-                    privateKey: server.privateKey ?? undefined,
-                    passphrase: server.passphrase ?? undefined,
+                    ...withLogin(server, keychain, defaultedUsername.has(server.name)),
                     notes: server.notes ?? undefined,
 
                     tags: server.tags,
@@ -276,6 +317,7 @@ export async function POST(request: Request) {
                 details: {
                     success: true,
                     fileType,
+                    keychain: Boolean(keychain),
                     encrypted: fileType === 'json' && Boolean(passphrase),
                     total: payload.servers.length,
                     imported,
@@ -290,6 +332,7 @@ export async function POST(request: Request) {
             skipped,
             failed,
             total: payload.servers.length,
+            notes,
         });
     } catch (error) {
         console.error('Server import error:', error);
@@ -316,4 +359,26 @@ function resolveName(
     }
 
     return null;
+}
+
+/** The server's own login, or the keychain's where the file had none. */
+function withLogin(
+    server: ExportPayload['servers'][number],
+    keychain: Awaited<ReturnType<typeof getKeychainCredentialById>>,
+    usernameDefaulted: boolean,
+) {
+    if (!keychain || hasCredentials(server)) {
+        return {
+            username: server.username,
+            password: server.password ?? undefined,
+            privateKey: server.privateKey ?? undefined,
+            passphrase: server.passphrase ?? undefined,
+        };
+    }
+    return {
+        username: usernameDefaulted && keychain.username ? keychain.username : server.username,
+        password: keychain.password ?? undefined,
+        privateKey: keychain.privateKey ?? undefined,
+        passphrase: keychain.passphrase ?? undefined,
+    };
 }

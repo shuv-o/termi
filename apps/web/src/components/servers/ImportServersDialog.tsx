@@ -34,6 +34,48 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SAMPLE_CSV, SAMPLE_JSON, SAMPLE_COLUMNS, SAMPLE_ROWS } from '@/lib/transfer/samples';
+import { detectFormat } from '@/lib/transfer/detect';
+
+type FileType = 'json' | 'csv' | 'ssh-config' | 'putty' | 'mobaxterm';
+
+const FORMAT_LABEL: Record<FileType, string> = {
+    json: 'Termi export',
+    csv: 'CSV',
+    'ssh-config': 'OpenSSH config',
+    putty: 'PuTTY sessions',
+    mobaxterm: 'MobaXterm sessions',
+};
+
+interface Preview {
+    total: number;
+    withCredentials: number;
+    groups: string[];
+    notes: string[];
+    servers: {
+        name: string;
+        host: string;
+        port: number;
+        protocol: string;
+        username: string | null;
+        group: string | null;
+        jump: string | null;
+    }[];
+}
+
+/**
+ * Decode a file the way the tool that wrote it did: `reg export` writes
+ * UTF-16 with a BOM, MobaXterm writes Windows-1252, everything else UTF-8.
+ */
+async function decodeFile(file: File): Promise<string> {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder('utf-16le').decode(bytes);
+    if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder('utf-16be').decode(bytes);
+    try {
+        return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+        return new TextDecoder('windows-1252').decode(bytes);
+    }
+}
 
 interface Props {
     onClose: () => void;
@@ -45,6 +87,7 @@ interface ImportResult {
     skipped: number;
     failed: { name: string; reason: string }[];
     total: number;
+    notes?: string[];
 }
 
 /** Matches MAX_CONTENT_LENGTH on the server, checked early for a clear message. */
@@ -54,7 +97,11 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [content, setContent] = useState('');
-    const [fileType, setFileType] = useState<'json' | 'csv'>('json');
+    const [fileType, setFileType] = useState<FileType>('json');
+    const [preview, setPreview] = useState<Preview | null>(null);
+    const [previewing, setPreviewing] = useState(false);
+    const [keychain, setKeychain] = useState<{ id: string; label: string; username: string }[]>([]);
+    const [keychainId, setKeychainId] = useState('');
     const [fileName, setFileName] = useState('');
     const [isEncrypted, setIsEncrypted] = useState(false);
     const [passphrase, setPassphrase] = useState('');
@@ -130,8 +177,18 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
             return;
         }
 
-        const text = await file.text();
-        const type = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
+        const text = await decodeFile(file);
+        const type = detectFormat(file.name, text);
+        setPreview(null);
+        setKeychainId('');
+        if (!type) {
+            setContent('');
+            setFileName(file.name);
+            setError(
+                "Termi can't read this file. Choose a Termi export, an OpenSSH config, a PuTTY .reg export, a MobaXterm sessions file or a CSV.",
+            );
+            return;
+        }
 
         setContent(text);
         setFileName(file.name);
@@ -140,14 +197,51 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
         // Peek at a JSON file to decide whether to prompt for a passphrase. A
         // parse failure here is not fatal — the server gives the real verdict.
         if (type === 'json') {
+            let encrypted = false;
             try {
-                const parsed = JSON.parse(text);
-                setIsEncrypted(parsed?.encrypted === true);
+                encrypted = JSON.parse(text)?.encrypted === true;
             } catch {
-                setIsEncrypted(false);
+                /* the preview reports a broken file */
             }
+            setIsEncrypted(encrypted);
+            if (encrypted) return; // previewed once the passphrase is known
         } else {
             setIsEncrypted(false);
+        }
+        void loadPreview(text, type);
+    }
+
+    async function loadPreview(text: string, type: FileType, pass?: string) {
+        setPreviewing(true);
+        setError('');
+        try {
+            const res = await fetch('/api/servers/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: text,
+                    fileType: type,
+                    passphrase: pass,
+                    dryRun: true,
+                }),
+            });
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data?.success) {
+                setError(data?.error || `Could not read the file (${res.status}).`);
+                return;
+            }
+            const p = data.data as Preview;
+            setPreview(p);
+            if (p.withCredentials < p.total && keychain.length === 0) {
+                const kc = await fetch('/api/keychain')
+                    .then((r) => r.json())
+                    .catch(() => null);
+                if (kc?.success) setKeychain(kc.data.entries ?? []);
+            }
+        } catch {
+            setError('Could not read the file.');
+        } finally {
+            setPreviewing(false);
         }
     }
 
@@ -165,6 +259,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                     fileType,
                     passphrase: isEncrypted ? passphrase : undefined,
                     onDuplicate,
+                    keychainId: keychainId || undefined,
                 }),
             });
 
@@ -211,6 +306,17 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                             <Stat value={result.failed.length} label="Failed" tone="bad" />
                         </div>
 
+                        {result.notes && result.notes.length > 0 && (
+                            <ul className="space-y-1 text-xs text-muted-foreground">
+                                {result.notes.map((n, i) => (
+                                    <li key={i} className="flex gap-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning" />
+                                        {n}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+
                         {result.failed.length > 0 && (
                             <div className="space-y-1.5 max-h-48 overflow-y-auto">
                                 <p className="text-xs text-muted-foreground">
@@ -256,7 +362,6 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".json,.csv,application/json,text/csv"
                         className="hidden"
                         onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -270,24 +375,24 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                     >
                         {fileName ? (
                             <>
-                                {fileType === 'csv' ? (
-                                    <FileText className="w-8 h-8 text-primary" />
-                                ) : (
+                                {fileType === 'json' ? (
                                     <FileJson className="w-8 h-8 text-primary" />
+                                ) : (
+                                    <FileText className="w-8 h-8 text-primary" />
                                 )}
                                 <span className="text-sm font-medium">{fileName}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    Click to choose a different file
+                                    {content ? `${FORMAT_LABEL[fileType]} · ` : ''}Click to choose a
+                                    different file
                                 </span>
                             </>
                         ) : (
                             <>
                                 <Upload className="w-8 h-8 text-muted-foreground" />
-                                <span className="text-sm font-medium">
-                                    Choose a Termi export file
-                                </span>
+                                <span className="text-sm font-medium">Choose a file</span>
                                 <span className="text-xs text-muted-foreground">
-                                    JSON or CSV, up to 8 MB
+                                    Termi export, ~/.ssh/config, PuTTY, MobaXterm or CSV — up to 8
+                                    MB
                                 </span>
                             </>
                         )}
@@ -304,13 +409,39 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                             ) : (
                                 <ChevronRight className="w-4 h-4 shrink-0" />
                             )}
-                            <span>What should the file look like?</span>
+                            <span>Where do I get this file?</span>
                         </button>
 
                         {showFormat && (
                             <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
+                                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                                    <li>
+                                        <span className="text-foreground">OpenSSH:</span> choose{' '}
+                                        <code>~/.ssh/config</code> (press ⌘⇧. in the macOS file
+                                        picker to show hidden folders).
+                                    </li>
+                                    <li>
+                                        <span className="text-foreground">PuTTY / KiTTY:</span> on
+                                        Windows run{' '}
+                                        <code>
+                                            reg export HKCU\Software\SimonTatham\PuTTY\Sessions
+                                            putty.reg
+                                        </code>{' '}
+                                        and choose <code>putty.reg</code>.
+                                    </li>
+                                    <li>
+                                        <span className="text-foreground">MobaXterm:</span>{' '}
+                                        right-click a session folder → Export, or choose{' '}
+                                        <code>MobaXterm.ini</code>.
+                                    </li>
+                                    <li>
+                                        <span className="text-foreground">Termius and others:</span>{' '}
+                                        export a CSV — columns like Label, Hostname, Port, Username
+                                        and Group are recognised.
+                                    </li>
+                                </ul>
                                 <p className="text-xs text-muted-foreground">
-                                    Import a file you exported from Termi, or build your own.
+                                    Or build your own file.
                                     <span className="text-foreground">
                                         {' '}
                                         Only <code>Name</code> and <code>Host</code> are required
@@ -417,6 +548,32 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                         </div>
                     )}
 
+                    {isEncrypted && passphrase && !preview && (
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => loadPreview(content, fileType, passphrase)}
+                            disabled={previewing}
+                        >
+                            Unlock and preview
+                        </Button>
+                    )}
+
+                    {previewing && (
+                        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Reading the file…
+                        </p>
+                    )}
+
+                    {preview && (
+                        <PreviewPanel
+                            preview={preview}
+                            keychain={keychain}
+                            keychainId={keychainId}
+                            setKeychainId={setKeychainId}
+                        />
+                    )}
+
                     {content && (
                         <div className="space-y-1.5">
                             <Label>If a server of the same name already exists</Label>
@@ -460,7 +617,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                             ) : (
                                 <Upload className="w-4 h-4" />
                             )}
-                            Import
+                            {preview ? `Import ${preview.total}` : 'Import'}
                         </Button>
                     </div>
                 </div>
@@ -579,5 +736,117 @@ function DupOption({
             <div className="text-sm font-medium">{title}</div>
             <div className="text-xs text-muted-foreground">{hint}</div>
         </button>
+    );
+}
+
+/** What the file contains, before anything is written. */
+function PreviewPanel({
+    preview,
+    keychain,
+    keychainId,
+    setKeychainId,
+}: {
+    preview: Preview;
+    keychain: { id: string; label: string; username: string }[];
+    keychainId: string;
+    setKeychainId: (id: string) => void;
+}) {
+    const missing = preview.total - preview.withCredentials;
+    return (
+        <div className="space-y-3 rounded-lg border border-border p-3">
+            <p className="text-sm">
+                <span className="font-medium">
+                    {preview.total} server{preview.total === 1 ? '' : 's'}
+                </span>
+                {preview.groups.length > 0 && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        in {preview.groups.length} group{preview.groups.length === 1 ? '' : 's'}
+                    </span>
+                )}
+            </p>
+
+            <div className="max-h-48 overflow-auto rounded-sm border border-border">
+                <table className="w-full border-collapse text-[11px]">
+                    <thead className="sticky top-0 bg-secondary">
+                        <tr>
+                            {['Name', 'Address', 'User', 'Group', 'Via'].map((h) => (
+                                <th
+                                    key={h}
+                                    className="whitespace-nowrap px-2 py-1.5 text-left font-semibold"
+                                >
+                                    {h}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {preview.servers.map((s, i) => (
+                            <tr key={i} className="even:bg-secondary/30">
+                                <td className="whitespace-nowrap px-2 py-1">{s.name}</td>
+                                <td className="whitespace-nowrap px-2 py-1 text-muted-foreground">
+                                    {s.protocol === 'SSH' ? '' : `${s.protocol} `}
+                                    {s.host}:{s.port}
+                                </td>
+                                <td className="whitespace-nowrap px-2 py-1 text-muted-foreground">
+                                    {s.username ?? '—'}
+                                </td>
+                                <td className="whitespace-nowrap px-2 py-1 text-muted-foreground">
+                                    {s.group ?? ''}
+                                </td>
+                                <td className="whitespace-nowrap px-2 py-1 text-muted-foreground">
+                                    {s.jump ?? ''}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            {preview.servers.length < preview.total && (
+                <p className="text-[11px] text-muted-foreground">
+                    Showing the first {preview.servers.length}.
+                </p>
+            )}
+
+            {preview.notes.length > 0 && (
+                <ul className="space-y-1 text-xs text-muted-foreground">
+                    {preview.notes.map((n, i) => (
+                        <li key={i} className="flex gap-2">
+                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
+                            {n}
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {missing > 0 && (
+                <div className="space-y-1.5">
+                    <Label htmlFor="import-keychain">
+                        Login for the {missing} server{missing === 1 ? '' : 's'} without one
+                    </Label>
+                    {keychain.length > 0 ? (
+                        <select
+                            id="import-keychain"
+                            value={keychainId}
+                            onChange={(e) => setKeychainId(e.target.value)}
+                            className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
+                        >
+                            <option value="">None — I&apos;ll add credentials later</option>
+                            {keychain.map((k) => (
+                                <option key={k.id} value={k.id}>
+                                    {k.label}
+                                    {k.username ? ` (${k.username})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <p className="text-xs text-muted-foreground">
+                            Add a login to your Keychain first to apply it here, or add credentials
+                            to each server after importing.
+                        </p>
+                    )}
+                </div>
+            )}
+        </div>
     );
 }

@@ -35,6 +35,10 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 - **Supply chain:** GitHub Actions are pinned to commit SHAs; Dependabot covers npm, actions and Docker; CodeQL runs on every push; CI fails on unreviewed high/critical advisories in production dependencies; release images carry an SBOM and SLSA provenance and are signed with Sigstore (see `SECURITY.md` to verify).
 - **Security regression suite.** `npm run test:security` (and the "Security E2E" CI job) proves the tunnel isolation, guacd handshake filtering, keychain step-up, field binding, enumeration resistance and related protections against a real web app, gateway, database, SSH host, guacd and VNC server.
 
+### Added
+
+- **Import from other SSH clients.** The import dialog now reads an OpenSSH `~/.ssh/config` (with `Host` patterns, first-match defaults and `ProxyJump` turned into jump hosts), PuTTY / KiTTY sessions exported with `reg export`, and MobaXterm session files (SSH, SFTP, RDP and VNC, with folders as groups and SSH gateways as jump hosts). CSV import also recognises other tools' column names (Label, Hostname, Address, User, Groups, …), so a Termius or spreadsheet export works too. The dialog previews exactly what will be imported, explains what can't be (key files on your computer, ProxyCommand, multi-hop jumps, unsupported session types), and can apply a keychain login to every server the file has no credentials for.
+
 ### Removed
 
 - **The optional "master key".** It was presented as a second encryption layer but never encrypted anything, while Google sign-in users had to create and unlock a passphrase on every login. The setup and unlock steps, the Settings → Encryption section and Danger zone (whose only action deleted all servers) are gone; old links redirect to the panel. Sign-in no longer derives a key from the password (600,000 PBKDF2 iterations per login).

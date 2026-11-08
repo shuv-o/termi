@@ -169,6 +169,11 @@ export function serverImportRateLimit(userId: string): Promise<RateLimitResult> 
     return rateLimit(`server-import:${userId}`, 10, 60 * 60 * 1000);
 }
 
+/** Import previews only parse the file: 60 per hour per user. */
+export function serverImportPreviewRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`server-import-preview:${userId}`, 60, 60 * 60 * 1000);
+}
+
 /** 10 passkey authentication attempts per 5 minutes per IP */
 export function passkeyAuthRateLimit(ip: string): Promise<RateLimitResult> {
     return rateLimit(`passkey-auth:${ip}`, 10, 5 * 60 * 1000);

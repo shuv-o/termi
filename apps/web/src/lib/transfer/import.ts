@@ -140,6 +140,29 @@ const CSV_HEADERS: Record<string, string> = {
     'private key': 'privateKey',
     'key passphrase': 'passphrase',
     notes: 'notes',
+    // Other tools' spellings (Termius, Royal TS, spreadsheets people keep):
+    label: 'name',
+    alias: 'name',
+    title: 'name',
+    'display name': 'name',
+    hostname: 'host',
+    'hostname/ip': 'host',
+    'host/ip': 'host',
+    address: 'host',
+    'ip address': 'host',
+    ip: 'host',
+    server: 'host',
+    user: 'username',
+    login: 'username',
+    'user name': 'username',
+    groups: 'groupName',
+    folder: 'groupName',
+    'jump server': 'jumpServerName',
+    jumphost: 'jumpServerName',
+    comment: 'notes',
+    comments: 'notes',
+    passphrase: 'passphrase',
+    'ssh key': 'privateKey',
 };
 
 /**
@@ -169,8 +192,10 @@ export function parseCsvExport(text: string): ExportPayload {
 
     const headers = rows[0].map((h) => CSV_HEADERS[h.trim().toLowerCase()] ?? null);
 
-    if (!headers.includes('name') || !headers.includes('host')) {
-        throw new InvalidFileError('The file needs at least "Name" and "Host" columns.');
+    if (!headers.includes('host')) {
+        throw new InvalidFileError(
+            'The file needs a "Host" column (or "Hostname", "Address", "IP").',
+        );
     }
 
     const servers = rows.slice(1).map((row) => {
@@ -195,7 +220,7 @@ export function parseCsvExport(text: string): ExportPayload {
                     record.isFavorite = /^(true|yes|1)$/i.test(value);
                     break;
                 case 'protocol':
-                    record.protocol = value.toUpperCase();
+                    record.protocol = value.toUpperCase() === 'SFTP' ? 'SCP' : value.toUpperCase();
                     break;
                 default:
                     record[field] = value;
@@ -204,6 +229,7 @@ export function parseCsvExport(text: string): ExportPayload {
 
         // A CSV written by hand will omit these; fall back to sane defaults so
         // the row validates instead of rejecting the whole file.
+        record.name ??= record.host;
         record.port ??= defaultPort(String(record.protocol ?? ''));
         record.protocol ??= 'SSH';
         record.username ??= 'root';
