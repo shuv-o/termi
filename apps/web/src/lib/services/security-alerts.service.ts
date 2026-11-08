@@ -17,7 +17,9 @@ export type SecurityEvent =
     | '2fa_disabled'
     | 'passkey_added'
     | 'passkey_removed'
-    | 'servers_exported';
+    | 'servers_exported'
+    | 'host_key_mismatch'
+    | 'host_key_trusted';
 
 const MESSAGES: Record<SecurityEvent, { subject: string; body: string }> = {
     new_device: {
@@ -51,6 +53,14 @@ const MESSAGES: Record<SecurityEvent, { subject: string; body: string }> = {
     servers_exported: {
         subject: 'Your Termi servers were exported',
         body: 'Your server list was just exported from your account.',
+    },
+    host_key_mismatch: {
+        subject: 'A server presented a different SSH host key',
+        body: 'Termi refused to connect to one of your servers because its SSH host key changed. Someone may be intercepting the connection. If the server was reinstalled, review and trust the new key in its settings.',
+    },
+    host_key_trusted: {
+        subject: 'A new SSH host key was trusted',
+        body: 'A new SSH host key was just trusted for one of your servers. Termi will now send that server its stored login.',
     },
 };
 

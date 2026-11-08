@@ -15,6 +15,7 @@
 
 import { Client, ConnectConfig } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from './ssh-jump';
+import type { HostKeyPin } from '@/lib/security/host-key';
 
 // TYPES
 
@@ -102,6 +103,7 @@ interface SSHConfig {
     privateKey?: string;
     passphrase?: string;
     jump?: SSHJumpConfig | null;
+    hostKey: HostKeyPin;
 }
 
 // PYTHON SCRIPTS (base64-encoded to avoid all shell quoting issues)
@@ -710,7 +712,7 @@ export async function runBenchmark(
 
         onProgress({ phase: 'connecting', message: 'Connecting via SSH…' });
         try {
-            connectSSH(client, buildConnectConfig(config), config.jump);
+            connectSSH(client, buildConnectConfig(config), config.jump, config.hostKey);
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             onProgress({ phase: 'error', message: msg });

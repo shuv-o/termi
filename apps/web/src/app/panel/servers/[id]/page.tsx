@@ -10,6 +10,7 @@ import { HealthHistorySection } from './_details/HealthHistorySection';
 import { LiveMonitoringSection } from './_details/LiveMonitoringSection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
 import { SecurityScanSection } from './_details/SecurityScanSection';
+import { HostKeySection } from './_details/HostKeySection';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
 import { TunnelSection } from './_details/TunnelSection';
 import { useBenchmark } from './_details/useBenchmark';
@@ -68,6 +69,8 @@ export default function ServerDetailsPage() {
             {/* Right after live metrics: "is this box exposed?" is the other
                 question you open a server page to answer. */}
             {isSSH && <SecurityScanSection serverId={id} serverName={server.name} />}
+
+            {isSSH && <HostKeySection serverId={id} />}
 
             <HealthHistorySection
                 records={monitoring.healthRecords}

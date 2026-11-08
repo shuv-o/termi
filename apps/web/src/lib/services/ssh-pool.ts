@@ -28,6 +28,7 @@
 
 import { Client, ConnectConfig, SFTPWrapper } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from './ssh-jump';
+import type { HostKeyPin } from '@/lib/security/host-key';
 
 //  ─ Tuning constants                             ─
 
@@ -53,6 +54,8 @@ export interface SSHPoolConfig {
     passphrase?: string;
     /** Reach this server through a bastion (see ssh-jump.ts). */
     jump?: SSHJumpConfig | null;
+    /** The server's pinned SSH host key (see lib/security/host-key.ts). */
+    hostKey: HostKeyPin;
 }
 
 //  ─ Internal types                              ─
@@ -60,6 +63,8 @@ export interface SSHPoolConfig {
 interface PoolEntry {
     client: Client;
     ready: boolean;
+    /** The host key this connection was verified against. */
+    hostKey: string | null;
     /** Number of active callers using this connection right now. */
     refCount: number;
     /** Pending idle-destroy timer (active when refCount === 0). */
@@ -97,6 +102,11 @@ export class SSHConnectionPool {
     async acquire(cfg: SSHPoolConfig): Promise<{ client: Client; key: string }> {
         const key = SSHConnectionPool.makeKey(cfg);
 
+        // A connection verified against a different pin (the owner trusted a
+        // new key, or the host changed) is never reused.
+        const stale = this.entries.get(key);
+        if (stale && stale.hostKey !== cfg.hostKey.fingerprint) this.destroy(key);
+
         // Fast-path: reuse existing ready connection
         const existing = this.entries.get(key);
         if (existing?.ready) {
@@ -111,7 +121,7 @@ export class SSHConnectionPool {
         if (inFlight) {
             await inFlight.catch(() => null); // ignore – we'll check entry below
             const e = this.entries.get(key);
-            if (e?.ready) {
+            if (e?.ready && e.hostKey === cfg.hostKey.fingerprint) {
                 e.refCount++;
                 e.lastUsed = Date.now();
                 this.cancelIdle(e);
@@ -226,6 +236,8 @@ export class SSHConnectionPool {
                 this.entries.set(key, {
                     client,
                     ready: true,
+                    // Set by the verifier: the pin, or the key just pinned.
+                    hostKey: cfg.hostKey.fingerprint,
                     refCount: 0,
                     idleTimer: null,
                     lastUsed: Date.now(),
@@ -279,7 +291,7 @@ export class SSHConnectionPool {
             }
 
             try {
-                connectSSH(client, cc, cfg.jump);
+                connectSSH(client, cc, cfg.jump, cfg.hostKey);
             } catch (err) {
                 this.entries.delete(key);
                 reject(err);

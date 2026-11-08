@@ -152,7 +152,9 @@ function sshAuthTest(
             cc.tryKeyboard = true;
         }
 
-        connectSSH(client, cc, config.jump);
+        // Not saved yet, so nothing to verify against (first contact is trusted
+        // either way); the key is pinned on the first real connection.
+        connectSSH(client, cc, config.jump, null);
     });
 }
 

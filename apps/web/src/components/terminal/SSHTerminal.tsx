@@ -215,6 +215,11 @@ export default function SSHTerminal({
                         isRecordingRef.current = false;
                         onRecordingChangeRef.current?.(false);
                         saveRecording(message.cast, message.durationSec, message.sizeBytes);
+                        if (message.code === 'HOST_KEY_MISMATCH') {
+                            terminalInstance.current?.write(
+                                '\x1b[33mOpen this server\'s details page and use "Host key" to review the new key.\x1b[0m\r\n',
+                            );
+                        }
                         onErrorRef.current?.(message.message);
                         break;
 

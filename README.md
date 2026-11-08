@@ -87,6 +87,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
 - **Google OAuth** — "Sign in with Google" support
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
+- **SSH host key verification** — each server's key is pinned on first connection (like `known_hosts`); a changed key is refused everywhere, reported, and can be reviewed and re-trusted from the server's page
 - **One-click server hardening** — scan a server's SSH and firewall setup, get a security score, and fix it automatically: key-only login, a dedicated admin user, root-login choice, fail2ban, unattended updates, firewall and SSH port move. Every change is armed with an on-server rollback and verified on a fresh login before Termi stores the new credentials
 
 ### 🖥️ Multi-Protocol Remote Access

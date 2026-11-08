@@ -23,7 +23,13 @@ vi.mock('ssh2', () => ({ Client: FakeClient }));
 import { connectSSH } from './ssh-jump';
 import type { Client } from 'ssh2';
 
-const jump = { host: 'bastion.example.com', port: 2222, username: 'jump', password: 'pw' };
+const jump = {
+    host: 'bastion.example.com',
+    port: 2222,
+    username: 'jump',
+    password: 'pw',
+    hostKey: { serverId: 'b1', fingerprint: 'SHA256:bastion' },
+};
 const target = { host: '10.0.2.4', port: 22, username: 'deploy', readyTimeout: 5000 };
 
 beforeEach(() => {
@@ -33,14 +39,14 @@ beforeEach(() => {
 describe('connectSSH', () => {
     it('connects directly when there is no jump host', () => {
         const client = new FakeClient();
-        connectSSH(client as unknown as Client, target, null);
+        connectSSH(client as unknown as Client, target, null, null);
         expect(client.connect).toHaveBeenCalledWith(target);
         expect(FakeClient.instances).toHaveLength(1);
     });
 
     it('dials the bastion, forwards to the target, and handshakes over that channel', () => {
         const client = new FakeClient();
-        connectSSH(client as unknown as Client, target, jump);
+        connectSSH(client as unknown as Client, target, jump, null);
 
         const bastion = FakeClient.instances[1];
         expect(client.connect).not.toHaveBeenCalled();
@@ -71,7 +77,7 @@ describe('connectSSH', () => {
         const client = new FakeClient();
         const onError = vi.fn();
         client.on('error', onError);
-        connectSSH(client as unknown as Client, target, jump);
+        connectSSH(client as unknown as Client, target, jump, null);
         const bastion = FakeClient.instances[1];
 
         bastion.emit('ready');
@@ -87,7 +93,7 @@ describe('connectSSH', () => {
         const client = new FakeClient();
         const onError = vi.fn();
         client.on('error', onError);
-        connectSSH(client as unknown as Client, target, jump);
+        connectSSH(client as unknown as Client, target, jump, null);
         const bastion = FakeClient.instances[1];
 
         bastion.emit('error', new Error('All configured authentication methods failed'));

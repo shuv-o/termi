@@ -9,6 +9,7 @@
 import { Client, ClientChannel } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
 import { connectSSH } from './jump.js';
+import { HOST_KEY_MISMATCH } from '../auth/host-key.js';
 
 export interface SSHOutputSink {
     /** Called with a raw chunk of SSH output bytes. */
@@ -82,15 +83,8 @@ export class SSHHandler {
                     'diffie-hellman-group14-sha1',
                     'diffie-hellman-group1-sha1',
                 ],
-                serverHostKey: [
-                    'ecdsa-sha2-nistp256',
-                    'ecdsa-sha2-nistp384',
-                    'ecdsa-sha2-nistp521',
-                    'rsa-sha2-512',
-                    'rsa-sha2-256',
-                    'ssh-rsa',
-                    'ssh-dss',
-                ],
+                // serverHostKey is set by applyHostKeyCheck (one list on web and gateway,
+                // so both negotiate the same key type and see the same fingerprint).
                 cipher: [
                     'aes128-gcm@openssh.com',
                     'aes256-gcm@openssh.com',
@@ -142,7 +136,10 @@ export class SSHHandler {
         });
 
         this.ssh.on('error', (err) => {
-            this.sink.onMessage('error', { message: 'SSH error: ' + err.message });
+            this.sink.onMessage('error', {
+                message: 'SSH error: ' + err.message,
+                ...((err as { code?: unknown }).code === HOST_KEY_MISMATCH && { code: HOST_KEY_MISMATCH }),
+            });
             this.close();
         });
 
@@ -151,7 +148,7 @@ export class SSHHandler {
         });
 
         try {
-            connectSSH(this.ssh, config, token.jump);
+            connectSSH(this.ssh, config, token.jump, token.hostKey);
         } catch (error) {
             this.sink.onMessage('error', {
                 message: 'Connection failed: ' + (error as Error).message,

@@ -44,6 +44,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
                 privateKey: server.privateKey ?? undefined,
                 passphrase: server.passphrase ?? undefined,
                 jump: server.jump,
+                hostKey: server.hostKey,
             },
             { authMethod: server.privateKey ? 'key' : 'password' },
         );

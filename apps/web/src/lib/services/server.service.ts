@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/db';
 import { Protocol } from '@/app/generated/prisma/client';
 import { encryptCredentials, decryptCredentials, ServerCredentials } from '@/lib/crypto';
+import { pinOf, type HostKeyPin } from '@/lib/security/host-key';
 
 // TYPES
 
@@ -16,6 +17,8 @@ import { encryptCredentials, decryptCredentials, ServerCredentials } from '@/lib
  */
 export interface JumpConfig {
     serverId: string;
+    /** The bastion's pinned SSH host key. */
+    hostKey: HostKeyPin;
     host: string;
     port: number;
     username: string;
@@ -96,6 +99,7 @@ export async function loadJump(
     );
     return {
         serverId: jump.id,
+        hostKey: pinOf(jump),
         host: creds.host,
         port: jump.port,
         username: creds.username,
@@ -329,6 +333,7 @@ export async function getServerById(serverId: string, userId: string) {
         privateKey: credentials.privateKey,
         passphrase: credentials.passphrase,
         notes: credentials.notes,
+        hostKey: pinOf(server),
         jump: await loadJump(server.jumpServerId, server.userId),
     };
 }
@@ -346,6 +351,7 @@ export async function getServerForConnection(
           displayHeight: number | null;
           colorDepth: number | null;
           rdpSecurity: string | null;
+          hostKey: HostKeyPin;
           jump: JumpConfig | null;
       })
     | null
@@ -402,6 +408,7 @@ export async function getServerForConnection(
         colorDepth: server.colorDepth,
         rdpSecurity: server.rdpSecurity ?? null,
         ...credentials,
+        hostKey: pinOf(server),
         // The jump host always belongs to the server's owner — for a shared
         // server too, so a recipient never needs the bastion shared with them.
         jump: await loadJump(server.jumpServerId, server.userId),
@@ -439,7 +446,14 @@ export async function updateServer(serverId: string, userId: string, input: Upda
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.groupId !== undefined) updateData.groupId = input.groupId;
-    if (input.port !== undefined) updateData.port = input.port;
+    if (input.port !== undefined) {
+        updateData.port = input.port;
+        if (input.port !== existing.port) {
+            updateData.hostKeyFingerprint = null;
+            updateData.hostKeyType = null;
+            updateData.hostKeyTrustedAt = null;
+        }
+    }
     if (input.protocol !== undefined) updateData.protocol = input.protocol;
     if (input.tags !== undefined) updateData.tags = input.tags;
     if (input.displayWidth !== undefined) updateData.displayWidth = input.displayWidth;
@@ -483,6 +497,13 @@ export async function updateServer(serverId: string, userId: string, input: Upda
 
         // Re-encrypt
         const encrypted = encryptCredentials(newCredentials, existing.userId);
+
+        // A different host is a different machine: pin its key afresh.
+        if (newCredentials.host !== current.host) {
+            updateData.hostKeyFingerprint = null;
+            updateData.hostKeyType = null;
+            updateData.hostKeyTrustedAt = null;
+        }
 
         updateData.host = encrypted.host;
         updateData.username = encrypted.username;

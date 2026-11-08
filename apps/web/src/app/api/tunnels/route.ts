@@ -12,6 +12,7 @@
 import { z } from 'zod';
 import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
 import { jumpClaim } from '@/lib/auth/connectionToken';
+import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { getServerForConnection } from '@/lib/services';
 import { probeTunnelTarget } from '@/lib/services/tunnel.service';
 import { tunnelCreateRateLimit } from '@/lib/rate-limit';
@@ -143,6 +144,15 @@ export async function POST(request: Request) {
     }
 
     try {
+        try {
+            await ensureHostKeysPinned(server, true);
+        } catch (err) {
+            return errorResponse(
+                `Could not read the server's SSH host key: ${(err as Error).message}`,
+                502,
+            );
+        }
+
         const probe = await probeTunnelTarget(user.id, serverId, remoteHost, remotePort);
         if ('error' in probe) {
             return errorResponse(probe.error, 400);
@@ -158,6 +168,7 @@ export async function POST(request: Request) {
             password: server.password ?? null,
             privateKey: server.privateKey ?? null,
             passphrase: server.passphrase ?? null,
+            hostKey: server.hostKey.fingerprint,
             jump: jumpClaim(server.jump),
             remoteHost,
             remotePort,

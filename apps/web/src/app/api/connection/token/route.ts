@@ -18,6 +18,7 @@ import {
 } from '@/lib/api';
 import { validateHost } from '@/lib/security/ssrf';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
+import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 
 const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
@@ -92,6 +93,11 @@ export async function POST(request: Request) {
             return errorResponse('Invalid server host configuration', 400);
         }
 
+        // The gateway can't write to the database, so it only ever verifies
+        // host keys against pins recorded here first.
+        const pinned = await pinHostKeys(server, protocol);
+        if (pinned) return pinned;
+
         const token = await mintConnectionToken({
             userId: user.id,
             serverId: server.id,
@@ -106,6 +112,7 @@ export async function POST(request: Request) {
             displayHeight: server.displayHeight ?? 1080,
             colorDepth: server.colorDepth ?? 24,
             rdpSecurity: server.rdpSecurity ?? 'any',
+            hostKey: server.hostKey.fingerprint,
             jump: jumpClaim(server.jump),
             ...(protocol === 'tunnel' && {
                 remoteHost: tokenData.remoteHost,
@@ -121,5 +128,23 @@ export async function POST(request: Request) {
         }
         console.error('Token generation error:', error);
         return errorResponse('Failed to generate connection token', 500);
+    }
+}
+
+const SSH_FAMILY = new Set(['ssh', 'scp', 'tunnel']);
+
+/** Pin any SSH hop not pinned yet; returns an error response on failure. */
+async function pinHostKeys(
+    server: Parameters<typeof ensureHostKeysPinned>[0],
+    protocol: string,
+): Promise<Response | null> {
+    try {
+        await ensureHostKeysPinned(server, SSH_FAMILY.has(protocol));
+        return null;
+    } catch (err) {
+        return errorResponse(
+            `Could not read the server's SSH host key: ${(err as Error).message}`,
+            502,
+        );
     }
 }

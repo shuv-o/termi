@@ -8,6 +8,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { pinOf } from '@/lib/security/host-key';
 import { checkReachabilityVia, getSSHMetrics } from './metrics.service';
 import { loadJump } from './server.service';
 import { sendServerDownAlert, sendServerUpAlert } from './alert.service';
@@ -40,6 +41,7 @@ export async function runMonitoringPass(): Promise<void> {
                     passphrase: true,
                     userId: true,
                     jumpServerId: true,
+                    hostKeyFingerprint: true,
                 },
             },
         },
@@ -77,6 +79,7 @@ interface MonitorConfig {
         passphrase: string | null;
         userId: string;
         jumpServerId: string | null;
+        hostKeyFingerprint: string | null;
     };
 }
 
@@ -146,6 +149,7 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
                     privateKey,
                     passphrase,
                     jump,
+                    hostKey: pinOf({ id: cfg.serverId, hostKeyFingerprint: cfg.server.hostKeyFingerprint }),
                 },
                 10000,
             );

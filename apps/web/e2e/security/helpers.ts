@@ -44,6 +44,11 @@ export async function signedIn(user: keyof typeof USERS): Promise<APIRequestCont
     return ctx;
 }
 
+/** Drop a cached session (e.g. after a password change signed it out). */
+export function forgetSession(user: keyof typeof USERS) {
+    sessions.delete(user);
+}
+
 /** Give a browser page the signed-in session of a seeded user. */
 export async function signInPage(page: Page, user: keyof typeof USERS) {
     const ctx = await signedIn(user);

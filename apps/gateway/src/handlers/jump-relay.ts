@@ -68,7 +68,7 @@ export async function openJumpRelay(
         }
         bastion.once('ready', () => resolve());
         bastion.once('error', (err) => reject(new Error(`jump host ${jump.host}: ${err.message}`)));
-        bastion.connect(bastionConfig(jump));
+        bastion.connect(bastionConfig(bastion, jump));
     });
 
     // 2. The relay listener guacd connects to.

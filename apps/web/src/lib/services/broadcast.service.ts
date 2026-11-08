@@ -7,6 +7,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { pinOf } from '@/lib/security/host-key';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 import { sshPool, type SSHPoolConfig } from './ssh-pool';
 import { loadJump } from './server.service';
@@ -133,6 +134,7 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
             privateKey: creds.privateKey,
             passphrase: creds.passphrase,
             jump,
+            hostKey: pinOf(server),
         });
 
         loadJump(server.jumpServerId, server.userId)

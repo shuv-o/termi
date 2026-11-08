@@ -111,7 +111,13 @@ describe('jumpClaim', () => {
 
     it('carries the bastion credentials, with absent secrets as null', () => {
         expect(
-            jumpClaim({ host: 'bastion', port: 22, username: 'jump', privateKey: 'KEY' }),
+            jumpClaim({
+                host: 'bastion',
+                port: 22,
+                username: 'jump',
+                privateKey: 'KEY',
+                hostKey: { fingerprint: 'SHA256:abc' },
+            }),
         ).toEqual({
             host: 'bastion',
             port: 22,
@@ -119,6 +125,7 @@ describe('jumpClaim', () => {
             password: null,
             privateKey: 'KEY',
             passphrase: null,
+            hostKey: 'SHA256:abc',
         });
     });
 
@@ -130,9 +137,22 @@ describe('jumpClaim', () => {
             host: '10.0.2.4',
             port: 22,
             username: 'deploy',
-            jump: jumpClaim({ host: 'bastion', port: 2222, username: 'jump', password: 'pw' }),
+            hostKey: 'SHA256:target',
+            jump: jumpClaim({
+                host: 'bastion',
+                port: 2222,
+                username: 'jump',
+                password: 'pw',
+                hostKey: { fingerprint: 'SHA256:bastion' },
+            }),
         });
         const { payload } = await jose.jwtDecrypt(token, getJWEKey());
-        expect(payload.jump).toMatchObject({ host: 'bastion', port: 2222, password: 'pw' });
+        expect(payload.hostKey).toBe('SHA256:target');
+        expect(payload.jump).toMatchObject({
+            host: 'bastion',
+            port: 2222,
+            password: 'pw',
+            hostKey: 'SHA256:bastion',
+        });
     });
 });

@@ -58,6 +58,9 @@ export type ServerMinAggregateOutputType = {
   privateKey: string | null
   passphrase: string | null
   jumpServerId: string | null
+  hostKeyFingerprint: string | null
+  hostKeyType: string | null
+  hostKeyTrustedAt: Date | null
   notes: string | null
   displayWidth: number | null
   displayHeight: number | null
@@ -86,6 +89,9 @@ export type ServerMaxAggregateOutputType = {
   privateKey: string | null
   passphrase: string | null
   jumpServerId: string | null
+  hostKeyFingerprint: string | null
+  hostKeyType: string | null
+  hostKeyTrustedAt: Date | null
   notes: string | null
   displayWidth: number | null
   displayHeight: number | null
@@ -115,6 +121,9 @@ export type ServerCountAggregateOutputType = {
   privateKey: number
   passphrase: number
   jumpServerId: number
+  hostKeyFingerprint: number
+  hostKeyType: number
+  hostKeyTrustedAt: number
   notes: number
   sshOptions: number
   displayWidth: number
@@ -162,6 +171,9 @@ export type ServerMinAggregateInputType = {
   privateKey?: true
   passphrase?: true
   jumpServerId?: true
+  hostKeyFingerprint?: true
+  hostKeyType?: true
+  hostKeyTrustedAt?: true
   notes?: true
   displayWidth?: true
   displayHeight?: true
@@ -190,6 +202,9 @@ export type ServerMaxAggregateInputType = {
   privateKey?: true
   passphrase?: true
   jumpServerId?: true
+  hostKeyFingerprint?: true
+  hostKeyType?: true
+  hostKeyTrustedAt?: true
   notes?: true
   displayWidth?: true
   displayHeight?: true
@@ -219,6 +234,9 @@ export type ServerCountAggregateInputType = {
   privateKey?: true
   passphrase?: true
   jumpServerId?: true
+  hostKeyFingerprint?: true
+  hostKeyType?: true
+  hostKeyTrustedAt?: true
   notes?: true
   sshOptions?: true
   displayWidth?: true
@@ -336,6 +354,9 @@ export type ServerGroupByOutputType = {
   privateKey: string | null
   passphrase: string | null
   jumpServerId: string | null
+  hostKeyFingerprint: string | null
+  hostKeyType: string | null
+  hostKeyTrustedAt: Date | null
   notes: string | null
   sshOptions: runtime.JsonValue | null
   displayWidth: number | null
@@ -389,6 +410,9 @@ export type ServerWhereInput = {
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyTrustedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Server"> | string | null
   sshOptions?: Prisma.JsonNullableFilter<"Server">
   displayWidth?: Prisma.IntNullableFilter<"Server"> | number | null
@@ -432,6 +456,9 @@ export type ServerOrderByWithRelationInput = {
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
   jumpServerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyTrustedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   sshOptions?: Prisma.SortOrderInput | Prisma.SortOrder
   displayWidth?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -478,6 +505,9 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyTrustedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Server"> | string | null
   sshOptions?: Prisma.JsonNullableFilter<"Server">
   displayWidth?: Prisma.IntNullableFilter<"Server"> | number | null
@@ -521,6 +551,9 @@ export type ServerOrderByWithAggregationInput = {
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
   jumpServerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  hostKeyTrustedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   sshOptions?: Prisma.SortOrderInput | Prisma.SortOrder
   displayWidth?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -559,6 +592,9 @@ export type ServerScalarWhereWithAggregatesInput = {
   privateKey?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   jumpServerId?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  hostKeyFingerprint?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  hostKeyType?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  hostKeyTrustedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Server"> | Date | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   sshOptions?: Prisma.JsonNullableWithAggregatesFilter<"Server">
   displayWidth?: Prisma.IntNullableWithAggregatesFilter<"Server"> | number | null
@@ -586,6 +622,9 @@ export type ServerCreateInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -629,6 +668,9 @@ export type ServerUncheckedCreateInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -666,6 +708,9 @@ export type ServerUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -709,6 +754,9 @@ export type ServerUncheckedUpdateInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -749,6 +797,9 @@ export type ServerCreateManyInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -776,6 +827,9 @@ export type ServerUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -806,6 +860,9 @@ export type ServerUncheckedUpdateManyInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -859,6 +916,9 @@ export type ServerCountOrderByAggregateInput = {
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
+  hostKeyFingerprint?: Prisma.SortOrder
+  hostKeyType?: Prisma.SortOrder
+  hostKeyTrustedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   sshOptions?: Prisma.SortOrder
   displayWidth?: Prisma.SortOrder
@@ -896,6 +956,9 @@ export type ServerMaxOrderByAggregateInput = {
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
+  hostKeyFingerprint?: Prisma.SortOrder
+  hostKeyType?: Prisma.SortOrder
+  hostKeyTrustedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   displayWidth?: Prisma.SortOrder
   displayHeight?: Prisma.SortOrder
@@ -924,6 +987,9 @@ export type ServerMinOrderByAggregateInput = {
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
+  hostKeyFingerprint?: Prisma.SortOrder
+  hostKeyType?: Prisma.SortOrder
+  hostKeyTrustedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   displayWidth?: Prisma.SortOrder
   displayHeight?: Prisma.SortOrder
@@ -1256,6 +1322,9 @@ export type ServerCreateWithoutUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1297,6 +1366,9 @@ export type ServerUncheckedCreateWithoutUserInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1366,6 +1438,9 @@ export type ServerScalarWhereInput = {
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
+  hostKeyTrustedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Server"> | string | null
   sshOptions?: Prisma.JsonNullableFilter<"Server">
   displayWidth?: Prisma.IntNullableFilter<"Server"> | number | null
@@ -1393,6 +1468,9 @@ export type ServerCreateWithoutGroupInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1434,6 +1512,9 @@ export type ServerUncheckedCreateWithoutGroupInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1497,6 +1578,9 @@ export type ServerCreateWithoutJumpTargetsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1539,6 +1623,9 @@ export type ServerUncheckedCreateWithoutJumpTargetsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1580,6 +1667,9 @@ export type ServerCreateWithoutJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1621,6 +1711,9 @@ export type ServerUncheckedCreateWithoutJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1679,6 +1772,9 @@ export type ServerUpdateWithoutJumpTargetsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1721,6 +1817,9 @@ export type ServerUncheckedUpdateWithoutJumpTargetsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1773,6 +1872,9 @@ export type ServerCreateWithoutConnectionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1815,6 +1917,9 @@ export type ServerUncheckedCreateWithoutConnectionsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1867,6 +1972,9 @@ export type ServerUpdateWithoutConnectionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1909,6 +2017,9 @@ export type ServerUncheckedUpdateWithoutConnectionsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1945,6 +2056,9 @@ export type ServerCreateWithoutMonitorConfigInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -1987,6 +2101,9 @@ export type ServerUncheckedCreateWithoutMonitorConfigInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2039,6 +2156,9 @@ export type ServerUpdateWithoutMonitorConfigInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2081,6 +2201,9 @@ export type ServerUncheckedUpdateWithoutMonitorConfigInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2117,6 +2240,9 @@ export type ServerCreateWithoutHealthRecordsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2159,6 +2285,9 @@ export type ServerUncheckedCreateWithoutHealthRecordsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2211,6 +2340,9 @@ export type ServerUpdateWithoutHealthRecordsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2253,6 +2385,9 @@ export type ServerUncheckedUpdateWithoutHealthRecordsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2289,6 +2424,9 @@ export type ServerCreateWithoutBenchmarkRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2331,6 +2469,9 @@ export type ServerUncheckedCreateWithoutBenchmarkRunsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2383,6 +2524,9 @@ export type ServerUpdateWithoutBenchmarkRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2425,6 +2569,9 @@ export type ServerUncheckedUpdateWithoutBenchmarkRunsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2461,6 +2608,9 @@ export type ServerCreateWithoutRecordingsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2503,6 +2653,9 @@ export type ServerUncheckedCreateWithoutRecordingsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2555,6 +2708,9 @@ export type ServerUpdateWithoutRecordingsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2597,6 +2753,9 @@ export type ServerUncheckedUpdateWithoutRecordingsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2633,6 +2792,9 @@ export type ServerCreateWithoutTunnelSessionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2675,6 +2837,9 @@ export type ServerUncheckedCreateWithoutTunnelSessionsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2727,6 +2892,9 @@ export type ServerUpdateWithoutTunnelSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2769,6 +2937,9 @@ export type ServerUncheckedUpdateWithoutTunnelSessionsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2805,6 +2976,9 @@ export type ServerCreateWithoutInvitationsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2847,6 +3021,9 @@ export type ServerUncheckedCreateWithoutInvitationsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -2899,6 +3076,9 @@ export type ServerUpdateWithoutInvitationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2941,6 +3121,9 @@ export type ServerUncheckedUpdateWithoutInvitationsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2977,6 +3160,9 @@ export type ServerCreateWithoutSharesInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3019,6 +3205,9 @@ export type ServerUncheckedCreateWithoutSharesInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3071,6 +3260,9 @@ export type ServerUpdateWithoutSharesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3113,6 +3305,9 @@ export type ServerUncheckedUpdateWithoutSharesInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3149,6 +3344,9 @@ export type ServerCreateWithoutHardeningRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3191,6 +3389,9 @@ export type ServerUncheckedCreateWithoutHardeningRunsInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3243,6 +3444,9 @@ export type ServerUpdateWithoutHardeningRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3285,6 +3489,9 @@ export type ServerUncheckedUpdateWithoutHardeningRunsInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3323,6 +3530,9 @@ export type ServerCreateManyUserInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3350,6 +3560,9 @@ export type ServerUpdateWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3391,6 +3604,9 @@ export type ServerUncheckedUpdateWithoutUserInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3430,6 +3646,9 @@ export type ServerUncheckedUpdateManyWithoutUserInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3459,6 +3678,9 @@ export type ServerCreateManyGroupInput = {
   privateKey?: string | null
   passphrase?: string | null
   jumpServerId?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3486,6 +3708,9 @@ export type ServerUpdateWithoutGroupInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3527,6 +3752,9 @@ export type ServerUncheckedUpdateWithoutGroupInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3566,6 +3794,9 @@ export type ServerUncheckedUpdateManyWithoutGroupInput = {
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3595,6 +3826,9 @@ export type ServerCreateManyJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  hostKeyFingerprint?: string | null
+  hostKeyType?: string | null
+  hostKeyTrustedAt?: Date | string | null
   notes?: string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: number | null
@@ -3622,6 +3856,9 @@ export type ServerUpdateWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3663,6 +3900,9 @@ export type ServerUncheckedUpdateWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3702,6 +3942,9 @@ export type ServerUncheckedUpdateManyWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sshOptions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   displayWidth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3835,6 +4078,9 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   privateKey?: boolean
   passphrase?: boolean
   jumpServerId?: boolean
+  hostKeyFingerprint?: boolean
+  hostKeyType?: boolean
+  hostKeyTrustedAt?: boolean
   notes?: boolean
   sshOptions?: boolean
   displayWidth?: boolean
@@ -3879,6 +4125,9 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   privateKey?: boolean
   passphrase?: boolean
   jumpServerId?: boolean
+  hostKeyFingerprint?: boolean
+  hostKeyType?: boolean
+  hostKeyTrustedAt?: boolean
   notes?: boolean
   sshOptions?: boolean
   displayWidth?: boolean
@@ -3912,6 +4161,9 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   privateKey?: boolean
   passphrase?: boolean
   jumpServerId?: boolean
+  hostKeyFingerprint?: boolean
+  hostKeyType?: boolean
+  hostKeyTrustedAt?: boolean
   notes?: boolean
   sshOptions?: boolean
   displayWidth?: boolean
@@ -3945,6 +4197,9 @@ export type ServerSelectScalar = {
   privateKey?: boolean
   passphrase?: boolean
   jumpServerId?: boolean
+  hostKeyFingerprint?: boolean
+  hostKeyType?: boolean
+  hostKeyTrustedAt?: boolean
   notes?: boolean
   sshOptions?: boolean
   displayWidth?: boolean
@@ -3958,7 +4213,7 @@ export type ServerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "jumpServerId" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "jumpServerId" | "hostKeyFingerprint" | "hostKeyType" | "hostKeyTrustedAt" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   group?: boolean | Prisma.Server$groupArgs<ExtArgs>
@@ -4020,6 +4275,9 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     privateKey: string | null
     passphrase: string | null
     jumpServerId: string | null
+    hostKeyFingerprint: string | null
+    hostKeyType: string | null
+    hostKeyTrustedAt: Date | null
     notes: string | null
     sshOptions: runtime.JsonValue | null
     displayWidth: number | null
@@ -4483,6 +4741,9 @@ export interface ServerFieldRefs {
   readonly privateKey: Prisma.FieldRef<"Server", 'String'>
   readonly passphrase: Prisma.FieldRef<"Server", 'String'>
   readonly jumpServerId: Prisma.FieldRef<"Server", 'String'>
+  readonly hostKeyFingerprint: Prisma.FieldRef<"Server", 'String'>
+  readonly hostKeyType: Prisma.FieldRef<"Server", 'String'>
+  readonly hostKeyTrustedAt: Prisma.FieldRef<"Server", 'DateTime'>
   readonly notes: Prisma.FieldRef<"Server", 'String'>
   readonly sshOptions: Prisma.FieldRef<"Server", 'Json'>
   readonly displayWidth: Prisma.FieldRef<"Server", 'Int'>

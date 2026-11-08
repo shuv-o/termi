@@ -8,6 +8,13 @@
  */
 
 import { Client, type ConnectConfig } from 'ssh2';
+import {
+    applyHostKeyCheck,
+    HOST_KEY_ALGORITHMS,
+    HOST_KEY_MISMATCH,
+    type HostKeyPin,
+} from '@/lib/security/host-key';
+import { pinFirstHostKey, recordHostKeyMismatch } from './host-key.service';
 
 export interface SSHJumpConfig {
     host: string;
@@ -16,6 +23,14 @@ export interface SSHJumpConfig {
     password?: string;
     privateKey?: string;
     passphrase?: string;
+    /** The bastion's own pinned host key. */
+    hostKey: HostKeyPin;
+}
+
+function checkHostKey(client: Client, cc: ConnectConfig, pin: HostKeyPin, label: string) {
+    applyHostKeyCheck(client, cc, pin, label, pinFirstHostKey, (err) =>
+        recordHostKeyMismatch(pin.serverId, err),
+    );
 }
 
 function bastionConfig(jump: SSHJumpConfig, readyTimeout?: number): ConnectConfig {
@@ -41,8 +56,21 @@ function bastionConfig(jump: SSHJumpConfig, readyTimeout?: number): ConnectConfi
  * `client.connect(cc)`, but through `jump` when one is given. Failures on the
  * bastion surface as an `error` event on `client`, so callers keep a single
  * error path. The bastion connection is closed when `client` closes.
+ *
+ * `hostKey` is the target's pin: its host key is verified (or pinned on first
+ * contact). Pass `null` only when `cc` brings its own `hostVerifier` (the
+ * probe) or for a server that isn't saved yet (the connection test). The
+ * bastion is always verified against its own pin.
  */
-export function connectSSH(client: Client, cc: ConnectConfig, jump?: SSHJumpConfig | null): void {
+export function connectSSH(
+    client: Client,
+    cc: ConnectConfig,
+    jump: SSHJumpConfig | null | undefined,
+    hostKey: HostKeyPin | null,
+): void {
+    if (hostKey) checkHostKey(client, cc, hostKey, cc.host ?? 'the server');
+    else cc.algorithms = { ...cc.algorithms, serverHostKey: HOST_KEY_ALGORITHMS };
+
     if (!jump) {
         client.connect(cc);
         return;
@@ -51,10 +79,10 @@ export function connectSSH(client: Client, cc: ConnectConfig, jump?: SSHJumpConf
     const target = `${cc.host}:${cc.port ?? 22}`;
     const bastion = new Client();
     let handedOff = false;
-    const fail = (message: string) => {
+    const fail = (message: string, code?: unknown) => {
         if (handedOff) return;
         handedOff = true;
-        client.emit('error', new Error(message));
+        client.emit('error', Object.assign(new Error(message), code ? { code } : {}));
         bastion.end();
     };
 
@@ -74,7 +102,12 @@ export function connectSSH(client: Client, cc: ConnectConfig, jump?: SSHJumpConf
             client.connect({ ...rest, sock: stream });
         });
     });
-    bastion.on('error', (err) => fail(`Jump host ${jump.host}: ${err.message}`));
+    bastion.on('error', (err: Error & { code?: unknown }) =>
+        fail(
+            `Jump host ${jump.host}: ${err.message}`,
+            err.code === HOST_KEY_MISMATCH ? HOST_KEY_MISMATCH : undefined,
+        ),
+    );
     bastion.on('close', () => {
         // Bastion gone before the target came up — say so rather than hang.
         if (!handedOff) fail(`Jump host ${jump.host} closed the connection`);
@@ -82,7 +115,9 @@ export function connectSSH(client: Client, cc: ConnectConfig, jump?: SSHJumpConf
     client.once('close', () => bastion.end());
 
     try {
-        bastion.connect(bastionConfig(jump, cc.readyTimeout));
+        const bcc = bastionConfig(jump, cc.readyTimeout);
+        checkHostKey(bastion, bcc, jump.hostKey, `jump host ${jump.host}`);
+        bastion.connect(bcc);
     } catch (err) {
         fail(`Jump host ${jump.host}: ${(err as Error).message}`);
     }

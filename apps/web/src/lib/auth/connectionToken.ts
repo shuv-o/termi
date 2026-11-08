@@ -44,6 +44,11 @@ export interface ConnectionTokenClaims {
     remoteHost?: string;
     remotePort?: number;
     /**
+     * The server's pinned SSH host key (`SHA256:…`). The gateway refuses any
+     * other key, and refuses SSH-family connections that carry none.
+     */
+    hostKey?: string | null;
+    /**
      * Optional bastion. When present the gateway connects here first and
      * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
      */
@@ -54,6 +59,8 @@ export interface ConnectionTokenClaims {
         password?: string | null;
         privateKey?: string | null;
         passphrase?: string | null;
+        /** The bastion's pinned SSH host key. */
+        hostKey: string | null;
     } | null;
 }
 
@@ -67,6 +74,7 @@ export function jumpClaim(
               password?: string;
               privateKey?: string;
               passphrase?: string;
+              hostKey: { fingerprint: string | null };
           }
         | null
         | undefined,
@@ -79,6 +87,7 @@ export function jumpClaim(
         password: jump.password ?? null,
         privateKey: jump.privateKey ?? null,
         passphrase: jump.passphrase ?? null,
+        hostKey: jump.hostKey.fingerprint,
     };
 }
 

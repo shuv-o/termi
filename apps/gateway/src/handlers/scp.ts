@@ -83,7 +83,7 @@ export class SCPHandler {
         });
 
         try {
-            connectSSH(this.ssh, config, token.jump);
+            connectSSH(this.ssh, config, token.jump, token.hostKey);
         } catch (error) {
             this.sendError('Connection failed: ' + (error as Error).message);
             this.close();

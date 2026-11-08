@@ -1,6 +1,6 @@
 import { expect, test, request as pwRequest } from '@playwright/test';
 import { BASE, USERS } from './env';
-import { json, signedIn, sql, state } from './helpers';
+import { forgetSession, json, signedIn, sql, state } from './helpers';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -237,4 +237,14 @@ test('changing the password works for a user who has servers', async () => {
     expect(
         Number(sql(`select count(*) from "Server" where "userId"='${state().bobId}'`)),
     ).toBeGreaterThan(0);
+
+    // Put the password back for later tests; the change signed out the old session.
+    expect(
+        (
+            await anon.post('/api/auth/password', {
+                data: { currentPassword: next, newPassword: USERS.bob.password },
+            })
+        ).status(),
+    ).toBe(200);
+    forgetSession('bob');
 });

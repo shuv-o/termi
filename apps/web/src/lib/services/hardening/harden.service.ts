@@ -18,6 +18,7 @@
 import { randomBytes } from 'crypto';
 import { Client, utils, type ConnectConfig } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from '../ssh-jump';
+import type { HostKeyPin } from '@/lib/security/host-key';
 import { SCAN_SCRIPT } from './scan-script';
 import { parseScanOutput, evaluateScan, parseListen } from './evaluate';
 import {
@@ -42,6 +43,7 @@ export interface HardenTarget {
     privateKey?: string;
     passphrase?: string;
     jump?: SSHJumpConfig | null;
+    hostKey: HostKeyPin;
 }
 
 export interface HardenOptions {
@@ -124,7 +126,7 @@ function connect(t: HardenTarget, timeoutMs = 15_000): Promise<Client> {
         }
         client.once('ready', () => resolve(client));
         client.once('error', reject);
-        connectSSH(client, cc, t.jump);
+        connectSSH(client, cc, t.jump, t.hostKey);
     });
 }
 

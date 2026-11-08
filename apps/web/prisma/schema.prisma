@@ -159,6 +159,13 @@ model Server {
   // jump server, not by Termi, so it may be a private address.
   jumpServerId String?
 
+  // Pinned SSH host key (like known_hosts): OpenSSH-style "SHA256:..." of the
+  // key the server presented on first contact. Every SSH connection — web
+  // and gateway — refuses a different key. Cleared when host or port change.
+  hostKeyFingerprint String?
+  hostKeyType        String?
+  hostKeyTrustedAt   DateTime?
+
   // Additional settings
   notes      String? // Encrypted notes
   sshOptions Json? // Additional SSH options
@@ -420,6 +427,10 @@ enum AuditAction {
   // Security hardening events
   SERVER_HARDENED
   SERVER_HARDENING_FAILED
+
+  // SSH host key pinning
+  SERVER_HOST_KEY_TRUSTED
+  SERVER_HOST_KEY_MISMATCH
 }
 
 // PUSH NOTIFICATIONS

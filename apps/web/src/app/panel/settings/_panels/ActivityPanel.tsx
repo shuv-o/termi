@@ -39,6 +39,8 @@ const LABELS: Record<string, string> = {
     SERVERS_EXPORTED: 'Servers exported',
     SERVER_HARDENED: 'Server secured',
     SERVER_HARDENING_FAILED: 'Server hardening failed',
+    SERVER_HOST_KEY_TRUSTED: 'New server host key trusted',
+    SERVER_HOST_KEY_MISMATCH: 'Server host key changed — connection refused',
 };
 
 const ALERT_ACTIONS = new Set([
@@ -47,6 +49,7 @@ const ALERT_ACTIONS = new Set([
     'USER_RECOVERY_CODE_USED',
     'SERVERS_EXPORTED',
     'SERVER_HARDENING_FAILED',
+    'SERVER_HOST_KEY_MISMATCH',
 ]);
 
 const humanise = (action: string) =>
