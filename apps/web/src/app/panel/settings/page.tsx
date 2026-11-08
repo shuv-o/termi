@@ -25,6 +25,7 @@ import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
 import { ActivityPanel } from './_panels/ActivityPanel';
 import { TunnelsPanel } from './_panels/TunnelsPanel';
+import { TerminalPanel } from './_panels/TerminalPanel';
 
 import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
 import type { TunnelSessionRow } from '../servers/[id]/_details/useTunnels';
@@ -165,6 +166,7 @@ export default function SettingsPage() {
                     {activeSection === 'recordings' && <RecordingsPanel />}
 
                     {activeSection === 'tunnels' && <TunnelsPanel />}
+                    {activeSection === 'terminal' && <TerminalPanel />}
                 </div>
             </div>
         </div>

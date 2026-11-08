@@ -44,6 +44,39 @@ interface BroadcastServer {
     certificate: string | null;
 }
 
+const RUNNABLE_SELECT = {
+    id: true,
+    name: true,
+    host: true,
+    port: true,
+    username: true,
+    password: true,
+    privateKey: true,
+    passphrase: true,
+    userId: true,
+    jumpServerId: true,
+    hostKeyFingerprint: true,
+    certificate: true,
+} as const;
+
+/** Most servers one run may target. */
+export const MAX_RUN_SERVERS = 50;
+
+/**
+ * The SSH servers among `ids` this user owns, in the order given. Unknown,
+ * foreign and non-SSH ids are left out.
+ */
+export async function getRunnableServers(
+    ids: string[],
+    userId: string,
+): Promise<BroadcastServer[]> {
+    const rows = await prisma.server.findMany({
+        where: { id: { in: ids.slice(0, MAX_RUN_SERVERS) }, userId, protocol: 'SSH' },
+        select: RUNNABLE_SELECT,
+    });
+    return ids.map((id) => rows.find((r) => r.id === id)).filter((r): r is BroadcastServer => !!r);
+}
+
 /**
  * The SSH servers in a group this user owns. Returns `null` if the group
  * doesn't exist or isn't theirs. Non-SSH servers (RDP/VNC/Telnet/SCP) are

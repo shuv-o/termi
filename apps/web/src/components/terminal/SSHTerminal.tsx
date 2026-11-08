@@ -5,6 +5,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { useTerminalSearch } from './TerminalSearch';
+import { useCommandSuggestions } from './CommandSuggestions';
 
 import '@xterm/xterm/css/xterm.css';
 
@@ -53,6 +54,10 @@ export default function SSHTerminal({
     const search = useTerminalSearch();
     const attachSearchRef = useRef(search.attach);
     attachSearchRef.current = search.attach;
+    const suggestions = useCommandSuggestions(serverId);
+    const suggestionsRef = useRef(suggestions);
+    suggestionsRef.current = suggestions;
+    const rootRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         onSearchReady?.(search.openSearch);
     }, [onSearchReady, search.openSearch]);
@@ -369,9 +374,17 @@ export default function SSHTerminal({
         fitAddon.current = fit;
         terminal.loadAddon(fit);
         terminal.loadAddon(new WebLinksAddon());
-        attachSearchRef.current(terminal);
+        attachSearchRef.current(terminal, (e) => suggestionsRef.current.onKey(e));
         terminal.open(terminalRef.current);
         fit.fit();
+        const detachSuggestions = rootRef.current
+            ? suggestionsRef.current.attach(terminal, rootRef.current, (text) => {
+                  if (wsRef.current?.readyState === WebSocket.OPEN) {
+                      wsRef.current.send(TEXT_ENCODER.encode(text));
+                      onInputRef.current?.(text);
+                  }
+              })
+            : () => {};
 
         // Prevent native mobile keyboard from opening when terminal is tapped
         if (disableNativeKeyboard) {
@@ -392,6 +405,7 @@ export default function SSHTerminal({
                 wsRef.current.send(TEXT_ENCODER.encode(data));
                 onInputRef.current?.(data);
             }
+            suggestionsRef.current.onUserData(data);
         });
 
         onKeyHandlerReadyRef.current?.((key) => terminal.input(key));
@@ -417,6 +431,7 @@ export default function SSHTerminal({
         connect().catch((err) => console.error('[SSHTerminal] initial connect error:', err));
 
         return () => {
+            detachSuggestions();
             window.removeEventListener('resize', handleResize);
             resizeObserver.disconnect();
             if (resizeTimer) clearTimeout(resizeTimer);
@@ -434,7 +449,7 @@ export default function SSHTerminal({
     }, [connect]);
 
     return (
-        <div className="relative h-full">
+        <div ref={rootRef} className="relative h-full">
             <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
                 <span
                     className={`w-2 h-2 rounded-full ${
@@ -452,6 +467,7 @@ export default function SSHTerminal({
                 className="h-full terminal-container rounded-lg overflow-hidden"
             />
             {search.bar}
+            {suggestions.overlay}
             {agentPrompts[0] && (
                 <div
                     role="alertdialog"

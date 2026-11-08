@@ -10,6 +10,7 @@ import {
     Shield,
     User as UserIcon,
     Waypoints,
+    SquareTerminal,
 } from 'lucide-react';
 import type { SectionId, User } from '../types';
 
@@ -52,6 +53,7 @@ function SidebarNav({
             icon: Waypoints,
             badge: tunnelCount || undefined,
         },
+        { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
     ];
 
     return (

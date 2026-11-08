@@ -106,7 +106,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard; press Enter on a server to connect straight away
 - **Split panes & workspaces** — up to four sessions side by side, stacked or in a grid, optional typing into all panes at once, and named workspaces that reopen a whole setup in one click
 - **Terminal search** — find text in the scrollback of SSH, Telnet, and local terminals (⌘F / Ctrl+Shift+F)
-- **Command snippets** — save frequently-used shell commands and run them into the active terminal with one click
+- **Command snippets** — save commands with `{{variables}}` (asked for each time, safely quoted with `|q`), type or run them in the active terminal, or run them on several servers at once with per-server output
+- **Command suggestions** — fish-style completions from your per-server history and snippets, kept in your browser; passwords and space-prefixed commands are never remembered
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
 - **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (Termius and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
