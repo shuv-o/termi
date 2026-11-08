@@ -41,8 +41,8 @@
         "sync:tunnel-runtime": "node scripts/sync-tunnel-runtime.mjs"
     },
     "dependencies": {
-        "electron-updater": "^6.6.2",
-        "electron-webauthn": "~1.2.0",
+        "electron-updater": "^6.8.11",
+        "electron-webauthn": "~1.4.0",
         "node-pty": "^1.1.0",
         "sharp": "0.35.5"
     },
@@ -58,13 +58,13 @@
         "source-map-js": "^1.2.2"
     },
     "devDependencies": {
-        "@electron/rebuild": "^4.0.0",
+        "@electron/rebuild": "^4.2.1",
         "concurrently": "^9.2.1",
         "electron": "^42.11.18",
-        "electron-builder": "^26.15.3",
+        "electron-builder": "^26.18.0",
         "esbuild": "^0.28.1",
         "eslint-config-prettier": "^10.1.8",
-        "prettier": "^3.8.3",
+        "prettier": "^3.9.10",
         "typescript": "^5.9.3"
     },
     "engines": {
