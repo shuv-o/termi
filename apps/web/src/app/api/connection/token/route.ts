@@ -19,6 +19,7 @@ import {
 import { validateHost } from '@/lib/security/ssrf';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
+import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 
 const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
@@ -32,8 +33,7 @@ const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
         protocol: z.literal('tunnel'),
         serverId: z.string(),
-        remoteHost: z.string().min(1).max(255),
-        remotePort: z.number().int().min(1).max(65535),
+        ...forwardFields,
     }),
 ]);
 
@@ -72,6 +72,8 @@ export async function POST(request: Request) {
         }
 
         const { serverId, protocol } = tokenData;
+        const forward = protocol === 'tunnel' ? forwardClaims(tokenData) : null;
+        if (forward && 'error' in forward) return errorResponse(forward.error, 400);
         const server = await getServerForConnection(serverId, user.id);
         if (!server) return notFoundResponse('Server not found');
 
@@ -114,10 +116,7 @@ export async function POST(request: Request) {
             rdpSecurity: server.rdpSecurity ?? 'any',
             hostKey: server.hostKey.fingerprint,
             jump: jumpClaim(server.jump),
-            ...(protocol === 'tunnel' && {
-                remoteHost: tokenData.remoteHost,
-                remotePort: tokenData.remotePort,
-            }),
+            ...forward,
         });
 
         return successResponse({ token, gatewayUrl: getGatewayUrl() });

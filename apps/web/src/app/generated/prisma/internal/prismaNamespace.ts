@@ -2369,8 +2369,10 @@ export const TunnelSessionScalarFieldEnum = {
   remoteHost: 'remoteHost',
   remotePort: 'remotePort',
   kind: 'kind',
+  mode: 'mode',
   localPort: 'localPort',
   electronId: 'electronId',
+  localHost: 'localHost',
   createdAt: 'createdAt',
   closedAt: 'closedAt'
 } as const
@@ -2729,6 +2731,20 @@ export type EnumTunnelKindFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'TunnelKind[]'
  */
 export type ListEnumTunnelKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TunnelKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TunnelMode'
+ */
+export type EnumTunnelModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TunnelMode'>
+    
+
+
+/**
+ * Reference to a field of type 'TunnelMode[]'
+ */
+export type ListEnumTunnelModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TunnelMode[]'>
     
 
 

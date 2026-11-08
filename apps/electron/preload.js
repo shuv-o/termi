@@ -62,7 +62,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
         },
     },
     tunnel: {
+        /** Forwarding modes this shell can run (absent: local only). */
+        modes: ['local', 'dynamic', 'remote'],
         open: (opts) => ipcRenderer.invoke('tunnel:open', opts),
         close: (id) => ipcRenderer.send('tunnel:close', id),
+        list: () => ipcRenderer.invoke('tunnel:list'),
+        /** Called with {id, reason} when an open tunnel drops. Returns an unsubscribe. */
+        onClosed: (cb) => {
+            const listener = (_e, info) => cb(info);
+            ipcRenderer.on('tunnel:closed', listener);
+            return () => ipcRenderer.removeListener('tunnel:closed', listener);
+        },
     },
 });

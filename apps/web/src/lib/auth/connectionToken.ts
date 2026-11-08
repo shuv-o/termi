@@ -43,6 +43,11 @@ export interface ConnectionTokenClaims {
     rdpSecurity?: string;
     remoteHost?: string;
     remotePort?: number;
+    /** 'tunnel' only: the kind of forwarding (gateway: handlers/tunnel-mux.ts). */
+    forward?:
+        | { kind: 'local' }
+        | { kind: 'dynamic' }
+        | { kind: 'remote'; bindAddress: string; bindPort: number };
     /**
      * The server's pinned SSH host key (`SHA256:…`). The gateway refuses any
      * other key, and refuses SSH-family connections that carry none.

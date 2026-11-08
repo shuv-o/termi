@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import {
     AlertTriangle,
+    ArrowDownLeft,
+    ArrowUpRight,
     Check,
     Copy,
     ExternalLink,
     Globe,
     Laptop,
     Loader2,
+    Network,
     Terminal,
     Waypoints,
     X,
@@ -17,7 +20,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { formatRelativeTime } from '@/lib/format';
-import type { TunnelResult, TunnelSessionRow } from './useTunnels';
+import { cn } from '@/lib/utils';
+import {
+    desktopSupports,
+    type ForwardMode,
+    type TunnelResult,
+    type TunnelSessionRow,
+    type useTunnels,
+} from './useTunnels';
+
+type Tunnels = ReturnType<typeof useTunnels>;
 
 function CopyTextButton({ text, label = 'Copy' }: { text: string; label?: string }) {
     const [copied, setCopied] = useState(false);
@@ -54,21 +66,50 @@ function downloadScript(content: string) {
 }
 
 function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: () => void }) {
-    if (result.electronLocalPort) {
-        const address = `127.0.0.1:${result.electronLocalPort}`;
+    if (result.electronBindPort) {
         return (
             <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 space-y-2">
                 <p className="text-xs text-muted-foreground">
-                    Connected — point your tool at this address:
+                    Connected — port{' '}
+                    <code className="font-mono text-foreground">{result.electronBindPort}</code> on
+                    the server now reaches{' '}
+                    <code className="font-mono text-foreground">{result.localTarget}</code> on this
+                    computer, while this tunnel stays open.
+                </p>
+                <Button variant="ghost" size="sm" onClick={onReset}>
+                    Close tunnel
+                </Button>
+            </div>
+        );
+    }
+
+    if (result.electronLocalPort) {
+        const address = `127.0.0.1:${result.electronLocalPort}`;
+        const socks = result.mode === 'dynamic';
+        return (
+            <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                    {socks
+                        ? 'Connected — set this as the SOCKS5 proxy in your browser or tool:'
+                        : 'Connected — point your tool at this address:'}
                 </p>
                 <div className="flex items-center gap-2">
                     <code className="flex-1 text-xs font-mono bg-black/40 text-foreground/90 rounded-md px-3 py-2">
-                        {address}
+                        {socks ? `socks5://${address}` : address}
                     </code>
-                    <CopyTextButton text={address} label="Copy address" />
+                    <CopyTextButton
+                        text={socks ? `socks5://${address}` : address}
+                        label="Copy address"
+                    />
                 </div>
+                {socks && (
+                    <p className="text-[11px] text-muted-foreground/70">
+                        e.g. <code className="font-mono">curl --socks5-hostname {address} …</code> —
+                        names are resolved by the server, so internal hostnames work.
+                    </p>
+                )}
                 <Button variant="ghost" size="sm" onClick={onReset}>
-                    Dismiss
+                    Close tunnel
                 </Button>
             </div>
         );
@@ -103,8 +144,12 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
         <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 space-y-2">
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 shrink-0" />
-                Not HTTP — run this once on your own machine to open a local port (requires Node.js
-                22+):
+                {result.mode === 'local'
+                    ? 'Not HTTP — run this on your own computer to open a local port'
+                    : result.mode === 'dynamic'
+                      ? 'Run this on your own computer to start a SOCKS5 proxy'
+                      : `Run this on your own computer so the server can reach ${result.localTarget}`}{' '}
+                (requires Node.js 22+):
             </p>
             <pre className="text-[11px] font-mono bg-black/40 text-foreground/90 rounded-md p-3 overflow-x-auto max-h-48 whitespace-pre">
                 {result.bridgeScript}
@@ -124,8 +169,8 @@ function TunnelResultCard({ result, onReset }: { result: TunnelResult; onReset: 
             </div>
             <p className="text-[11px] text-muted-foreground/70">
                 Save as <code className="font-mono">termi-tunnel.mjs</code> and run{' '}
-                <code className="font-mono">node termi-tunnel.mjs</code>. The token inside expires
-                in 5 minutes if unused — regenerate here if it fails.
+                <code className="font-mono">node termi-tunnel.mjs</code> within 5 minutes; once
+                connected it keeps running until you stop it.
             </p>
         </div>
     );
@@ -170,9 +215,7 @@ export function TunnelSessionRowCard({
             )}
             <div className="flex items-center gap-2 min-w-0">
                 <Icon className="w-3.5 h-3.5 text-info shrink-0" />
-                <span className="text-sm font-mono truncate">
-                    {row.remoteHost}:{row.remotePort}
-                </span>
+                <span className="text-sm font-mono truncate">{rowLabel(row)}</span>
                 <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
                     {KIND_LABEL[row.kind]}
                 </span>
@@ -181,12 +224,24 @@ export function TunnelSessionRowCard({
                 </span>
             </div>
 
-            {row.kind === 'ELECTRON_LOCAL' && row.localPort && (
+            {row.kind === 'ELECTRON_LOCAL' && row.mode === 'REMOTE' && (
+                <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" className="gap-1" onClick={onClose}>
+                        <X className="w-3.5 h-3.5" />
+                        Close
+                    </Button>
+                </div>
+            )}
+
+            {row.kind === 'ELECTRON_LOCAL' && row.mode !== 'REMOTE' && row.localPort && (
                 <div className="flex items-center gap-2">
                     <code className="flex-1 text-xs font-mono bg-black/40 text-foreground/90 rounded-md px-3 py-2">
-                        127.0.0.1:{row.localPort}
+                        {row.mode === 'DYNAMIC' ? 'socks5://' : ''}127.0.0.1:{row.localPort}
                     </code>
-                    <CopyTextButton text={`127.0.0.1:${row.localPort}`} label="Copy" />
+                    <CopyTextButton
+                        text={`${row.mode === 'DYNAMIC' ? 'socks5://' : ''}127.0.0.1:${row.localPort}`}
+                        label="Copy"
+                    />
                     <Button variant="ghost" size="sm" className="gap-1" onClick={onClose}>
                         <X className="w-3.5 h-3.5" />
                         Close
@@ -284,7 +339,7 @@ export function TunnelSessionRowCard({
                         </div>
                     )}
                     <p className="text-[11px] text-muted-foreground/70">
-                        The token inside a bridge script expires after 5 minutes — fetch a fresh one
+                        A script has to be started within 5 minutes of fetching it — get a fresh one
                         rather than reusing an old copy.
                     </p>
                 </div>
@@ -293,46 +348,251 @@ export function TunnelSessionRowCard({
     );
 }
 
-/**
- * Port forwarding for one SSH server. Each request probes the target and
- * hands back either a one-click browser link (HTTP targets) or a copyable
- * local-bridge script (everything else) — no listener opens on this host, so
- * it works behind a reverse proxy that only forwards 80/443. Tunnels that
- * were opened are listed below so they're still visible after navigating
- * away and back — see useTunnels.ts.
- */
-export function TunnelSection({
-    remoteHost,
-    setRemoteHost,
-    remotePort,
-    setRemotePort,
-    opening,
-    error,
-    onOpen,
-    result,
-    onReset,
-    activeSessions,
-    onCloseSession,
-    proxyUrlFor,
-    onRegenerateScript,
-}: {
-    remoteHost: string;
-    setRemoteHost: (v: string) => void;
-    remotePort: string;
-    setRemotePort: (v: string) => void;
-    opening: boolean;
-    error: string;
-    onOpen: () => void;
-    result: TunnelResult | null;
-    onReset: () => void;
-    activeSessions: TunnelSessionRow[];
-    onCloseSession: (row: TunnelSessionRow) => void;
-    proxyUrlFor: (row: TunnelSessionRow) => string;
-    onRegenerateScript: (row: TunnelSessionRow) => Promise<string | null>;
-}) {
-    const canOpen =
-        remoteHost.trim().length > 0 && Number(remotePort) >= 1 && Number(remotePort) <= 65535;
+/** How a saved row reads in a list. */
+function rowLabel(row: TunnelSessionRow): string {
+    if (row.mode === 'DYNAMIC') return 'SOCKS proxy';
+    if (row.mode === 'REMOTE') {
+        return `server :${row.remotePort} → ${row.localHost ?? '127.0.0.1'}:${row.localPort ?? '?'}`;
+    }
+    return `${row.remoteHost}:${row.remotePort}`;
+}
 
+const MODES: { mode: ForwardMode; label: string; icon: typeof Waypoints; hint: React.ReactNode }[] =
+    [
+        {
+            mode: 'local',
+            label: 'Local',
+            icon: ArrowDownLeft,
+            hint: (
+                <>
+                    Reach a port on this server&apos;s network from your computer — like{' '}
+                    <code className="font-mono">ssh -L</code>.
+                </>
+            ),
+        },
+        {
+            mode: 'dynamic',
+            label: 'SOCKS proxy',
+            icon: Network,
+            hint: (
+                <>
+                    A SOCKS5 proxy on your computer that sends each connection out from this server,
+                    to any host it can reach — like <code className="font-mono">ssh -D</code>.
+                </>
+            ),
+        },
+        {
+            mode: 'remote',
+            label: 'Remote',
+            icon: ArrowUpRight,
+            hint: (
+                <>
+                    Let this server reach a port on your computer, e.g. to show a local dev server
+                    or receive a webhook — like <code className="font-mono">ssh -R</code>.
+                </>
+            ),
+        },
+    ];
+
+const portInput = (v: string) => v.replace(/\D/g, '').slice(0, 5);
+const validPort = (v: string, allowZero = false) =>
+    v !== '' && Number(v) >= (allowZero ? 0 : 1) && Number(v) <= 65535;
+
+/**
+ * The forwarding form: a mode switch and that mode's fields, the result and
+ * any error. Shared by the server page and the in-terminal dialog.
+ */
+export function ForwardForm({ tunnels }: { tunnels: Tunnels }) {
+    const t = tunnels;
+    const canOpen =
+        t.mode === 'local'
+            ? t.remoteHost.trim().length > 0 && validPort(t.remotePort)
+            : t.mode === 'dynamic'
+              ? t.localPort === '' || validPort(t.localPort)
+              : validPort(t.localPort) && (t.bindPort === '' || validPort(t.bindPort, true));
+    const hint = MODES.find((m) => m.mode === t.mode)!.hint;
+    const runsHere = desktopSupports(t.mode);
+
+    return (
+        <div className="space-y-3">
+            <div
+                role="radiogroup"
+                aria-label="Forwarding type"
+                className="grid grid-cols-3 gap-1 rounded-lg bg-secondary/50 p-1"
+            >
+                {MODES.map(({ mode, label, icon: Icon }) => (
+                    <button
+                        key={mode}
+                        type="button"
+                        role="radio"
+                        aria-checked={t.mode === mode}
+                        disabled={t.opening}
+                        onClick={() => t.setMode(mode)}
+                        className={cn(
+                            'flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                            t.mode === mode
+                                ? 'bg-card text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground',
+                        )}
+                    >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                        {mode === 'dynamic' ? (
+                            <>
+                                <span className="sm:hidden">SOCKS</span>
+                                <span className="hidden sm:inline">{label}</span>
+                            </>
+                        ) : (
+                            label
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            <p className="text-xs text-muted-foreground">{hint}</p>
+
+            <form
+                className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    if (canOpen && !t.opening) void t.open();
+                }}
+            >
+                {t.mode === 'local' && (
+                    <>
+                        <Field label="Host, as the server sees it" className="sm:flex-1">
+                            <Input
+                                value={t.remoteHost}
+                                onChange={(e) => t.setRemoteHost(e.target.value)}
+                                placeholder="127.0.0.1"
+                                className="font-mono text-xs"
+                                disabled={t.opening}
+                            />
+                        </Field>
+                        <Field label="Port" className="sm:w-28">
+                            <Input
+                                value={t.remotePort}
+                                onChange={(e) => t.setRemotePort(portInput(e.target.value))}
+                                placeholder="5432"
+                                inputMode="numeric"
+                                className="font-mono text-xs"
+                                disabled={t.opening}
+                            />
+                        </Field>
+                    </>
+                )}
+
+                {t.mode === 'dynamic' && runsHere && (
+                    <Field label="Proxy port on this computer (optional)" className="sm:flex-1">
+                        <Input
+                            value={t.localPort}
+                            onChange={(e) => t.setLocalPort(portInput(e.target.value))}
+                            placeholder="1080"
+                            inputMode="numeric"
+                            className="font-mono text-xs"
+                            disabled={t.opening}
+                        />
+                    </Field>
+                )}
+
+                {t.mode === 'remote' && (
+                    <>
+                        <Field label="Server listens on" className="sm:w-40">
+                            <select
+                                value={t.bindAddress}
+                                onChange={(e) =>
+                                    t.setBindAddress(e.target.value as '127.0.0.1' | '0.0.0.0')
+                                }
+                                disabled={t.opening}
+                                className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs"
+                            >
+                                <option value="127.0.0.1">The server only</option>
+                                <option value="0.0.0.0">All interfaces</option>
+                            </select>
+                        </Field>
+                        <Field label="Server port" className="sm:w-28">
+                            <Input
+                                value={t.bindPort}
+                                onChange={(e) => t.setBindPort(portInput(e.target.value))}
+                                placeholder="9000"
+                                inputMode="numeric"
+                                className="font-mono text-xs"
+                                disabled={t.opening}
+                            />
+                        </Field>
+                        <Field label="Port on this computer" className="sm:w-36">
+                            <Input
+                                value={t.localPort}
+                                onChange={(e) => t.setLocalPort(portInput(e.target.value))}
+                                placeholder="3000"
+                                inputMode="numeric"
+                                className="font-mono text-xs"
+                                disabled={t.opening}
+                            />
+                        </Field>
+                    </>
+                )}
+
+                <Button type="submit" disabled={t.opening || !canOpen} className="shrink-0">
+                    {t.opening ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : t.mode === 'dynamic' ? (
+                        'Start proxy'
+                    ) : (
+                        'Create tunnel'
+                    )}
+                </Button>
+            </form>
+
+            {t.mode === 'remote' && t.bindAddress === '0.0.0.0' && (
+                <p className="text-[11px] text-muted-foreground/80">
+                    Other machines can then reach your computer through the server. sshd only allows
+                    this with <code className="font-mono">GatewayPorts yes</code>; otherwise it
+                    listens on the server only.
+                </p>
+            )}
+            {t.mode !== 'local' && !runsHere && (
+                <p className="text-[11px] text-muted-foreground/80">
+                    A browser can&apos;t open ports, so you&apos;ll get a small script to run with
+                    Node.js — or use the Termi desktop app to run it right here.
+                </p>
+            )}
+
+            {t.error && (
+                <div className="flex items-center gap-2 text-xs text-danger">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    {t.error}
+                </div>
+            )}
+
+            {t.result && <TunnelResultCard result={t.result} onReset={t.reset} />}
+        </div>
+    );
+}
+
+function Field({
+    label,
+    className,
+    children,
+}: {
+    label: string;
+    className?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <label className={cn('flex flex-col gap-1', className)}>
+            <span className="text-[11px] text-muted-foreground">{label}</span>
+            {children}
+        </label>
+    );
+}
+
+/**
+ * Port forwarding for one SSH server: local, SOCKS and remote. No listener
+ * opens on Termi's host, so it works behind a reverse proxy that only
+ * forwards 80/443. Tunnels opened earlier are listed below so they're still
+ * visible after navigating away and back — see useTunnels.ts.
+ */
+export function TunnelSection({ tunnels }: { tunnels: Tunnels }) {
     return (
         <div>
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2 mb-3">
@@ -341,57 +601,20 @@ export function TunnelSection({
             </h2>
 
             <Card className="p-4 space-y-3">
-                <p className="text-xs text-muted-foreground">
-                    Reach a port on this server&apos;s own network (or anything reachable from it)
-                    without opening a terminal — like <code className="font-mono">ssh -L</code>.
-                </p>
+                <ForwardForm tunnels={tunnels} />
 
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                        value={remoteHost}
-                        onChange={(e) => setRemoteHost(e.target.value)}
-                        placeholder="127.0.0.1"
-                        className="font-mono text-xs sm:flex-1"
-                        disabled={opening}
-                    />
-                    <Input
-                        value={remotePort}
-                        onChange={(e) => setRemotePort(e.target.value.replace(/\D/g, ''))}
-                        placeholder="5432"
-                        inputMode="numeric"
-                        className="font-mono text-xs sm:w-28"
-                        disabled={opening}
-                    />
-                    <Button onClick={onOpen} disabled={opening || !canOpen} className="shrink-0">
-                        {opening ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                            'Create tunnel'
-                        )}
-                    </Button>
-                </div>
-
-                {error && (
-                    <div className="flex items-center gap-2 text-xs text-danger">
-                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                        {error}
-                    </div>
-                )}
-
-                {result && <TunnelResultCard result={result} onReset={onReset} />}
-
-                {activeSessions.length > 0 && (
+                {tunnels.activeSessions.length > 0 && (
                     <div className="space-y-2 pt-1">
                         <p className="text-[11px] font-medium text-muted-foreground">
                             Active tunnels for this server
                         </p>
-                        {activeSessions.map((row) => (
+                        {tunnels.activeSessions.map((row) => (
                             <TunnelSessionRowCard
                                 key={row.id}
                                 row={row}
-                                proxyUrl={proxyUrlFor(row)}
-                                onClose={() => onCloseSession(row)}
-                                onRegenerateScript={() => onRegenerateScript(row)}
+                                proxyUrl={tunnels.proxyUrlFor(row)}
+                                onClose={() => tunnels.closeSession(row)}
+                                onRegenerateScript={() => tunnels.regenerateBridgeScript(row)}
                             />
                         ))}
                     </div>

@@ -50,8 +50,10 @@ export type TunnelSessionMinAggregateOutputType = {
   remoteHost: string | null
   remotePort: number | null
   kind: $Enums.TunnelKind | null
+  mode: $Enums.TunnelMode | null
   localPort: number | null
   electronId: string | null
+  localHost: string | null
   createdAt: Date | null
   closedAt: Date | null
 }
@@ -64,8 +66,10 @@ export type TunnelSessionMaxAggregateOutputType = {
   remoteHost: string | null
   remotePort: number | null
   kind: $Enums.TunnelKind | null
+  mode: $Enums.TunnelMode | null
   localPort: number | null
   electronId: string | null
+  localHost: string | null
   createdAt: Date | null
   closedAt: Date | null
 }
@@ -78,8 +82,10 @@ export type TunnelSessionCountAggregateOutputType = {
   remoteHost: number
   remotePort: number
   kind: number
+  mode: number
   localPort: number
   electronId: number
+  localHost: number
   createdAt: number
   closedAt: number
   _all: number
@@ -104,8 +110,10 @@ export type TunnelSessionMinAggregateInputType = {
   remoteHost?: true
   remotePort?: true
   kind?: true
+  mode?: true
   localPort?: true
   electronId?: true
+  localHost?: true
   createdAt?: true
   closedAt?: true
 }
@@ -118,8 +126,10 @@ export type TunnelSessionMaxAggregateInputType = {
   remoteHost?: true
   remotePort?: true
   kind?: true
+  mode?: true
   localPort?: true
   electronId?: true
+  localHost?: true
   createdAt?: true
   closedAt?: true
 }
@@ -132,8 +142,10 @@ export type TunnelSessionCountAggregateInputType = {
   remoteHost?: true
   remotePort?: true
   kind?: true
+  mode?: true
   localPort?: true
   electronId?: true
+  localHost?: true
   createdAt?: true
   closedAt?: true
   _all?: true
@@ -233,8 +245,10 @@ export type TunnelSessionGroupByOutputType = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode: $Enums.TunnelMode
   localPort: number | null
   electronId: string | null
+  localHost: string | null
   createdAt: Date
   closedAt: Date | null
   _count: TunnelSessionCountAggregateOutputType | null
@@ -270,8 +284,10 @@ export type TunnelSessionWhereInput = {
   remoteHost?: Prisma.StringFilter<"TunnelSession"> | string
   remotePort?: Prisma.IntFilter<"TunnelSession"> | number
   kind?: Prisma.EnumTunnelKindFilter<"TunnelSession"> | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFilter<"TunnelSession"> | $Enums.TunnelMode
   localPort?: Prisma.IntNullableFilter<"TunnelSession"> | number | null
   electronId?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
+  localHost?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TunnelSession"> | Date | string
   closedAt?: Prisma.DateTimeNullableFilter<"TunnelSession"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -286,8 +302,10 @@ export type TunnelSessionOrderByWithRelationInput = {
   remoteHost?: Prisma.SortOrder
   remotePort?: Prisma.SortOrder
   kind?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
   localPort?: Prisma.SortOrderInput | Prisma.SortOrder
   electronId?: Prisma.SortOrderInput | Prisma.SortOrder
+  localHost?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -305,8 +323,10 @@ export type TunnelSessionWhereUniqueInput = Prisma.AtLeast<{
   remoteHost?: Prisma.StringFilter<"TunnelSession"> | string
   remotePort?: Prisma.IntFilter<"TunnelSession"> | number
   kind?: Prisma.EnumTunnelKindFilter<"TunnelSession"> | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFilter<"TunnelSession"> | $Enums.TunnelMode
   localPort?: Prisma.IntNullableFilter<"TunnelSession"> | number | null
   electronId?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
+  localHost?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TunnelSession"> | Date | string
   closedAt?: Prisma.DateTimeNullableFilter<"TunnelSession"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -321,8 +341,10 @@ export type TunnelSessionOrderByWithAggregationInput = {
   remoteHost?: Prisma.SortOrder
   remotePort?: Prisma.SortOrder
   kind?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
   localPort?: Prisma.SortOrderInput | Prisma.SortOrder
   electronId?: Prisma.SortOrderInput | Prisma.SortOrder
+  localHost?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TunnelSessionCountOrderByAggregateInput
@@ -343,8 +365,10 @@ export type TunnelSessionScalarWhereWithAggregatesInput = {
   remoteHost?: Prisma.StringWithAggregatesFilter<"TunnelSession"> | string
   remotePort?: Prisma.IntWithAggregatesFilter<"TunnelSession"> | number
   kind?: Prisma.EnumTunnelKindWithAggregatesFilter<"TunnelSession"> | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeWithAggregatesFilter<"TunnelSession"> | $Enums.TunnelMode
   localPort?: Prisma.IntNullableWithAggregatesFilter<"TunnelSession"> | number | null
   electronId?: Prisma.StringNullableWithAggregatesFilter<"TunnelSession"> | string | null
+  localHost?: Prisma.StringNullableWithAggregatesFilter<"TunnelSession"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TunnelSession"> | Date | string
   closedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TunnelSession"> | Date | string | null
 }
@@ -355,8 +379,10 @@ export type TunnelSessionCreateInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutTunnelSessionsInput
@@ -371,8 +397,10 @@ export type TunnelSessionUncheckedCreateInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -383,8 +411,10 @@ export type TunnelSessionUpdateInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutTunnelSessionsNestedInput
@@ -399,8 +429,10 @@ export type TunnelSessionUncheckedUpdateInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -413,8 +445,10 @@ export type TunnelSessionCreateManyInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -425,8 +459,10 @@ export type TunnelSessionUpdateManyMutationInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -439,8 +475,10 @@ export type TunnelSessionUncheckedUpdateManyInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -463,8 +501,10 @@ export type TunnelSessionCountOrderByAggregateInput = {
   remoteHost?: Prisma.SortOrder
   remotePort?: Prisma.SortOrder
   kind?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
   localPort?: Prisma.SortOrder
   electronId?: Prisma.SortOrder
+  localHost?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
 }
@@ -482,8 +522,10 @@ export type TunnelSessionMaxOrderByAggregateInput = {
   remoteHost?: Prisma.SortOrder
   remotePort?: Prisma.SortOrder
   kind?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
   localPort?: Prisma.SortOrder
   electronId?: Prisma.SortOrder
+  localHost?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
 }
@@ -496,8 +538,10 @@ export type TunnelSessionMinOrderByAggregateInput = {
   remoteHost?: Prisma.SortOrder
   remotePort?: Prisma.SortOrder
   kind?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
   localPort?: Prisma.SortOrder
   electronId?: Prisma.SortOrder
+  localHost?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
 }
@@ -595,14 +639,20 @@ export type EnumTunnelKindFieldUpdateOperationsInput = {
   set?: $Enums.TunnelKind
 }
 
+export type EnumTunnelModeFieldUpdateOperationsInput = {
+  set?: $Enums.TunnelMode
+}
+
 export type TunnelSessionCreateWithoutUserInput = {
   id?: string
   serverName: string
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
   server?: Prisma.ServerCreateNestedOneWithoutTunnelSessionsInput
@@ -615,8 +665,10 @@ export type TunnelSessionUncheckedCreateWithoutUserInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -658,8 +710,10 @@ export type TunnelSessionScalarWhereInput = {
   remoteHost?: Prisma.StringFilter<"TunnelSession"> | string
   remotePort?: Prisma.IntFilter<"TunnelSession"> | number
   kind?: Prisma.EnumTunnelKindFilter<"TunnelSession"> | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFilter<"TunnelSession"> | $Enums.TunnelMode
   localPort?: Prisma.IntNullableFilter<"TunnelSession"> | number | null
   electronId?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
+  localHost?: Prisma.StringNullableFilter<"TunnelSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TunnelSession"> | Date | string
   closedAt?: Prisma.DateTimeNullableFilter<"TunnelSession"> | Date | string | null
 }
@@ -670,8 +724,10 @@ export type TunnelSessionCreateWithoutServerInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutTunnelSessionsInput
@@ -684,8 +740,10 @@ export type TunnelSessionUncheckedCreateWithoutServerInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -723,8 +781,10 @@ export type TunnelSessionCreateManyUserInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -735,8 +795,10 @@ export type TunnelSessionUpdateWithoutUserInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   server?: Prisma.ServerUpdateOneWithoutTunnelSessionsNestedInput
@@ -749,8 +811,10 @@ export type TunnelSessionUncheckedUpdateWithoutUserInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -762,8 +826,10 @@ export type TunnelSessionUncheckedUpdateManyWithoutUserInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -775,8 +841,10 @@ export type TunnelSessionCreateManyServerInput = {
   remoteHost: string
   remotePort: number
   kind: $Enums.TunnelKind
+  mode?: $Enums.TunnelMode
   localPort?: number | null
   electronId?: string | null
+  localHost?: string | null
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -787,8 +855,10 @@ export type TunnelSessionUpdateWithoutServerInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutTunnelSessionsNestedInput
@@ -801,8 +871,10 @@ export type TunnelSessionUncheckedUpdateWithoutServerInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -814,8 +886,10 @@ export type TunnelSessionUncheckedUpdateManyWithoutServerInput = {
   remoteHost?: Prisma.StringFieldUpdateOperationsInput | string
   remotePort?: Prisma.IntFieldUpdateOperationsInput | number
   kind?: Prisma.EnumTunnelKindFieldUpdateOperationsInput | $Enums.TunnelKind
+  mode?: Prisma.EnumTunnelModeFieldUpdateOperationsInput | $Enums.TunnelMode
   localPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   electronId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -830,8 +904,10 @@ export type TunnelSessionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   remoteHost?: boolean
   remotePort?: boolean
   kind?: boolean
+  mode?: boolean
   localPort?: boolean
   electronId?: boolean
+  localHost?: boolean
   createdAt?: boolean
   closedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -846,8 +922,10 @@ export type TunnelSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   remoteHost?: boolean
   remotePort?: boolean
   kind?: boolean
+  mode?: boolean
   localPort?: boolean
   electronId?: boolean
+  localHost?: boolean
   createdAt?: boolean
   closedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -862,8 +940,10 @@ export type TunnelSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   remoteHost?: boolean
   remotePort?: boolean
   kind?: boolean
+  mode?: boolean
   localPort?: boolean
   electronId?: boolean
+  localHost?: boolean
   createdAt?: boolean
   closedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -878,13 +958,15 @@ export type TunnelSessionSelectScalar = {
   remoteHost?: boolean
   remotePort?: boolean
   kind?: boolean
+  mode?: boolean
   localPort?: boolean
   electronId?: boolean
+  localHost?: boolean
   createdAt?: boolean
   closedAt?: boolean
 }
 
-export type TunnelSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "serverId" | "serverName" | "remoteHost" | "remotePort" | "kind" | "localPort" | "electronId" | "createdAt" | "closedAt", ExtArgs["result"]["tunnelSession"]>
+export type TunnelSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "serverId" | "serverName" | "remoteHost" | "remotePort" | "kind" | "mode" | "localPort" | "electronId" | "localHost" | "createdAt" | "closedAt", ExtArgs["result"]["tunnelSession"]>
 export type TunnelSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   server?: boolean | Prisma.TunnelSession$serverArgs<ExtArgs>
@@ -912,8 +994,10 @@ export type $TunnelSessionPayload<ExtArgs extends runtime.Types.Extensions.Inter
     remoteHost: string
     remotePort: number
     kind: $Enums.TunnelKind
+    mode: $Enums.TunnelMode
     localPort: number | null
     electronId: string | null
+    localHost: string | null
     createdAt: Date
     closedAt: Date | null
   }, ExtArgs["result"]["tunnelSession"]>
@@ -1348,8 +1432,10 @@ export interface TunnelSessionFieldRefs {
   readonly remoteHost: Prisma.FieldRef<"TunnelSession", 'String'>
   readonly remotePort: Prisma.FieldRef<"TunnelSession", 'Int'>
   readonly kind: Prisma.FieldRef<"TunnelSession", 'TunnelKind'>
+  readonly mode: Prisma.FieldRef<"TunnelSession", 'TunnelMode'>
   readonly localPort: Prisma.FieldRef<"TunnelSession", 'Int'>
   readonly electronId: Prisma.FieldRef<"TunnelSession", 'String'>
+  readonly localHost: Prisma.FieldRef<"TunnelSession", 'String'>
   readonly createdAt: Prisma.FieldRef<"TunnelSession", 'DateTime'>
   readonly closedAt: Prisma.FieldRef<"TunnelSession", 'DateTime'>
 }

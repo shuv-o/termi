@@ -102,23 +102,7 @@ export default function ServerDetailsPage() {
             )}
 
             {/* Port forwarding needs a shell channel, so it's SSH-only too. */}
-            {isSSH && (
-                <TunnelSection
-                    remoteHost={tunnels.remoteHost}
-                    setRemoteHost={tunnels.setRemoteHost}
-                    remotePort={tunnels.remotePort}
-                    setRemotePort={tunnels.setRemotePort}
-                    opening={tunnels.opening}
-                    error={tunnels.error}
-                    onOpen={tunnels.open}
-                    result={tunnels.result}
-                    onReset={tunnels.reset}
-                    activeSessions={tunnels.activeSessions}
-                    onCloseSession={tunnels.closeSession}
-                    proxyUrlFor={tunnels.proxyUrlFor}
-                    onRegenerateScript={tunnels.regenerateBridgeScript}
-                />
-            )}
+            {isSSH && <TunnelSection tunnels={tunnels} />}
         </div>
     );
 }

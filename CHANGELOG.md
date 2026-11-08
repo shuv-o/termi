@@ -37,6 +37,8 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 
 ### Added
 
+- **SOCKS proxy and remote port forwarding.** Port forwarding now has three modes: Local (`ssh -L`), SOCKS proxy (`ssh -D`: a SOCKS5 proxy on your computer that sends each connection out from the server, resolving names there) and Remote (`ssh -R`: the server listens on a port and reaches a service on your computer — a dev server, a webhook receiver). They run inside the desktop app, or anywhere via a small Node.js bridge script; several can run side by side.
+- **Tunnels no longer stop accepting connections after 5 minutes, and are much faster.** A tunnel is now one WebSocket and one SSH connection carrying every TCP connection (with per-connection flow control and proper half-close), instead of a new SSH handshake per connection with a 5-minute token that ran out. The sign-in token only has to be valid when the tunnel starts. Older desktop apps and bridge scripts keep working for local forwarding.
 - **Import from other SSH clients.** The import dialog now reads an OpenSSH `~/.ssh/config` (with `Host` patterns, first-match defaults and `ProxyJump` turned into jump hosts), PuTTY / KiTTY sessions exported with `reg export`, and MobaXterm session files (SSH, SFTP, RDP and VNC, with folders as groups and SSH gateways as jump hosts). CSV import also recognises other tools' column names (Label, Hostname, Address, User, Groups, …), so a Termius or spreadsheet export works too. The dialog previews exactly what will be imported, explains what can't be (key files on your computer, ProxyCommand, multi-hop jumps, unsupported session types), and can apply a keychain login to every server the file has no credentials for.
 
 ### Removed

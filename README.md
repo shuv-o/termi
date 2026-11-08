@@ -98,7 +98,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **VNC** — Virtual Network Computing via Apache Guacamole, same mobile touch support
 - **Telnet** — direct terminal access for legacy/unencrypted devices
 - **Jump hosts** — reach servers behind a bastion, like `ssh -J`, for SSH, SFTP, tunnels, and RDP/VNC
-- **Port forwarding** — forward any port reachable from a server, like `ssh -L`, with no terminal needed. Auto-detects HTTP targets for a one-click browser link; anything else gets a copyable local-bridge script (or, in the desktop app, a real local port)
+- **Port forwarding** — local (`ssh -L`), SOCKS proxy (`ssh -D`) and remote (`ssh -R`), with no terminal needed. Local HTTP targets get a one-click browser link; everything runs in the desktop app or via a small Node.js bridge script, over one multiplexed connection per tunnel
 
 ### ⚡ Productivity
 

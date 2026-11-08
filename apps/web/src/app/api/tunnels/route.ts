@@ -16,6 +16,8 @@ import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { getServerForConnection } from '@/lib/services';
 import { probeTunnelTarget } from '@/lib/services/tunnel.service';
 import { tunnelCreateRateLimit } from '@/lib/rate-limit';
+import { buildBridgeScript } from '@/lib/tunnel/bridge';
+import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 import { prisma } from '@/lib/db';
 import { getSiteUrl } from '@/lib/site';
 import {
@@ -28,96 +30,21 @@ import {
 
 const createTunnelSchema = z.object({
     serverId: z.string().min(1),
-    remoteHost: z.string().min(1).max(255),
-    remotePort: z.number().int().min(1).max(65535),
+    ...forwardFields,
+    /**
+     * local / dynamic: the port to listen on, on the user's computer.
+     * remote: the port of the service on the user's computer to expose.
+     */
+    localPort: z.number().int().min(1).max(65535).optional(),
+    /** remote: the host of that service, from the user's computer. */
+    localHost: z
+        .string()
+        .max(255)
+        .regex(/^[A-Za-z0-9._:-]+$/)
+        .default('127.0.0.1'),
 });
 
-/** Self-contained Node.js bridge: forwards a local TCP port to the tunnel's
- *  target over the gateway WebSocket. No dependencies beyond Node's built-in
- *  global WebSocket (Node 22+). */
-export function buildBridgeScript(opts: {
-    gatewayUrl: string;
-    serverId: string;
-    token: string;
-    remoteHost: string;
-    remotePort: number;
-    serverName: string;
-    localPort: number;
-}): string {
-    const wsUrl = `${opts.gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(opts.serverId)}`;
-    // Ports below 1024 need root to bind locally on Unix — default to an
-    // OS-assigned ephemeral port instead of blindly mirroring the remote one.
-    const defaultLocalPort =
-        Number.isInteger(opts.localPort) && opts.localPort >= 1024 && opts.localPort <= 65535
-            ? opts.localPort
-            : 0;
-    const remotePort = Number.isInteger(opts.remotePort) ? opts.remotePort : 0;
-    // Server names and hosts come from users (including whoever shared the
-    // server), and this script is run on the user's own machine. They only ever
-    // enter it as JSON string literals; comments get a single-line printable copy.
-    const commentSafe = (v: string) => v.replace(/[^\x20-\x7e]/g, '?').slice(0, 120);
-    const target = `${opts.remoteHost}:${remotePort}`;
-    return `#!/usr/bin/env node
-// Termi tunnel bridge — forwards a local port to ${commentSafe(target)}
-// on "${commentSafe(opts.serverName)}" via Termi. Requires Node 22+ (built-in WebSocket).
-// This token expires in 5 minutes if unused — regenerate from Termi if this fails.
-//
-// Run: node termi-tunnel.mjs
-
-import net from 'node:net';
-
-const WS_URL = ${JSON.stringify(wsUrl)};
-const TOKEN = ${JSON.stringify(opts.token)};
-const TARGET = ${JSON.stringify(target)};
-const SERVER_NAME = ${JSON.stringify(opts.serverName)};
-// 0 = let the OS pick a free port (printed once the server starts). Set a
-// specific port here if you want one — ports below 1024 need root on Unix.
-const LOCAL_PORT = ${defaultLocalPort};
-
-const server = net.createServer((socket) => {
-    socket.pause();
-    const ws = new WebSocket(WS_URL);
-    ws.binaryType = 'arraybuffer';
-
-    ws.addEventListener('open', () => {
-        ws.send(JSON.stringify({ type: 'auth', token: TOKEN }));
-    });
-    ws.addEventListener('message', (event) => {
-        if (typeof event.data !== 'string') {
-            socket.write(Buffer.from(event.data));
-            return;
-        }
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'tunnel-ready') {
-            socket.resume();
-        } else if (msg.type === 'error') {
-            console.error('[termi-tunnel] ' + msg.message);
-            socket.destroy();
-        } else if (msg.type === 'closed' || msg.type === 'disconnected') {
-            socket.destroy();
-        }
-    });
-    ws.addEventListener('close', () => socket.destroy());
-    ws.addEventListener('error', () => socket.destroy());
-
-    socket.on('data', (chunk) => {
-        if (ws.readyState === WebSocket.OPEN) ws.send(chunk);
-    });
-    socket.on('close', () => {
-        try { ws.close(); } catch {}
-    });
-    socket.on('error', () => {
-        try { ws.close(); } catch {}
-    });
-});
-
-server.listen(LOCAL_PORT, '127.0.0.1', () => {
-    const boundPort = server.address().port;
-    console.log('[termi-tunnel] Listening on 127.0.0.1:' + boundPort + ' -> ' + TARGET + ' via ' + SERVER_NAME);
-    console.log('[termi-tunnel] Point your tool at 127.0.0.1:' + boundPort);
-});
-`;
-}
+export { buildBridgeScript };
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
@@ -135,7 +62,13 @@ export async function POST(request: Request) {
     if ('error' in validation) {
         return validation.error;
     }
-    const { serverId, remoteHost, remotePort } = validation.data;
+    const { serverId, localPort, localHost, ...forwardReq } = validation.data;
+    const claims = forwardClaims(forwardReq);
+    if ('error' in claims) return errorResponse(claims.error, 400);
+    if (forwardReq.mode === 'remote' && !localPort) {
+        return errorResponse('Choose the port on your computer the server should reach', 400);
+    }
+    const { remoteHost, remotePort } = claims;
 
     const server = await getServerForConnection(serverId, user.id);
     if (!server) return notFoundResponse('Server not found');
@@ -153,9 +86,12 @@ export async function POST(request: Request) {
             );
         }
 
-        const probe = await probeTunnelTarget(user.id, serverId, remoteHost, remotePort);
-        if ('error' in probe) {
-            return errorResponse(probe.error, 400);
+        // Only a fixed target can be probed (and offered as a browser link).
+        let isHttp = false;
+        if (forwardReq.mode === 'local') {
+            const probe = await probeTunnelTarget(user.id, serverId, remoteHost!, remotePort!);
+            if ('error' in probe) return errorResponse(probe.error, 400);
+            isHttp = probe.isHttp;
         }
 
         const token = await mintConnectionToken({
@@ -170,8 +106,7 @@ export async function POST(request: Request) {
             passphrase: server.passphrase ?? null,
             hostKey: server.hostKey.fingerprint,
             jump: jumpClaim(server.jump),
-            remoteHost,
-            remotePort,
+            ...claims,
         });
 
         await prisma.auditLog.create({
@@ -179,13 +114,20 @@ export async function POST(request: Request) {
                 userId: user.id,
                 action: 'TUNNEL_OPENED',
                 resource: `server:${serverId}`,
-                details: { remoteHost, remotePort, isHttp: probe.isHttp },
+                details: {
+                    mode: forwardReq.mode,
+                    ...(forwardReq.mode === 'local' && { remoteHost, remotePort, isHttp }),
+                    ...(forwardReq.mode === 'remote' && {
+                        bindAddress: forwardReq.bindAddress,
+                        bindPort: forwardReq.bindPort,
+                    }),
+                },
             },
         });
 
-        if (probe.isHttp) {
+        if (isHttp) {
             const hostParam =
-                remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(remoteHost)}` : '';
+                remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(remoteHost!)}` : '';
             const proxyUrl = `${getSiteUrl()}/tunnel/${serverId}/${remotePort}${hostParam}`;
             return successResponse({ isHttp: true, proxyUrl }, 201);
         }
@@ -193,11 +135,16 @@ export async function POST(request: Request) {
         const bridgeScript = buildBridgeScript({
             gatewayUrl: getGatewayUrl(),
             serverId,
+            serverName: server.name,
             token,
+            mode: forwardReq.mode,
             remoteHost,
             remotePort,
-            serverName: server.name,
-            localPort: remotePort,
+            localPort: forwardReq.mode === 'remote' ? undefined : (localPort ?? remotePort),
+            bindAddress: forwardReq.bindAddress,
+            bindPort: forwardReq.bindPort,
+            localTarget:
+                forwardReq.mode === 'remote' ? { host: localHost, port: localPort! } : undefined,
         });
 
         return successResponse({ isHttp: false, bridgeScript }, 201);

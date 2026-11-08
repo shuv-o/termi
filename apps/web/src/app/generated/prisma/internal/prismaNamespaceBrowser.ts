@@ -355,8 +355,10 @@ export const TunnelSessionScalarFieldEnum = {
   remoteHost: 'remoteHost',
   remotePort: 'remotePort',
   kind: 'kind',
+  mode: 'mode',
   localPort: 'localPort',
   electronId: 'electronId',
+  localHost: 'localHost',
   createdAt: 'createdAt',
   closedAt: 'closedAt'
 } as const

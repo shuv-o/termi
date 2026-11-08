@@ -37,7 +37,8 @@
         "mobile:add:android": "npm run add:android --workspace=apps/mobile",
         "mobile:open:ios": "npm run open:ios --workspace=apps/mobile",
         "mobile:open:android": "npm run open:android --workspace=apps/mobile",
-        "db:reseal": "npm run db:reseal --workspace=apps/web --"
+        "db:reseal": "npm run db:reseal --workspace=apps/web --",
+        "sync:tunnel-runtime": "node scripts/sync-tunnel-runtime.mjs"
     },
     "dependencies": {
         "electron-updater": "^6.6.2",

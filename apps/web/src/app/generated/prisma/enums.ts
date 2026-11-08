@@ -109,6 +109,15 @@ export const AuditAction = {
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 
 
+export const TunnelMode = {
+  LOCAL: 'LOCAL',
+  DYNAMIC: 'DYNAMIC',
+  REMOTE: 'REMOTE'
+} as const
+
+export type TunnelMode = (typeof TunnelMode)[keyof typeof TunnelMode]
+
+
 export const TunnelKind = {
   HTTP_PROXY: 'HTTP_PROXY',
   BRIDGE_SCRIPT: 'BRIDGE_SCRIPT',

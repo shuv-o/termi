@@ -14,6 +14,7 @@ const hostile = {
     serverName:
         "${import('child_process').then(c=>c.execSync('touch /tmp/pwned'))}\nprocess.exit(9)",
     localPort: 3000,
+    mode: 'local' as const,
 };
 
 describe('buildBridgeScript', () => {
@@ -25,6 +26,9 @@ describe('buildBridgeScript', () => {
         }
         // The values appear only as JSON string literals.
         expect(script).toContain(`const SERVER_NAME = ${JSON.stringify(hostile.serverName)};`);
+        expect(script).toContain(
+            `const TARGET = ${JSON.stringify(`${hostile.remoteHost}:${hostile.remotePort}`)};`,
+        );
     });
 
     it('produces a script that parses, with no injected statements', () => {
@@ -32,13 +36,14 @@ describe('buildBridgeScript', () => {
         const file = join(dir, 'bridge.mjs');
         writeFileSync(file, buildBridgeScript(hostile));
         // --check parses without running; an injected statement would still parse,
-        // so also assert the only top-level process.exit calls are absent.
+        // so also assert none of the payload's exit calls made it into code.
         expect(() => execFileSync(process.execPath, ['--check', file])).not.toThrow();
         const code = buildBridgeScript(hostile)
             .split('\n')
             .filter((l) => !l.trim().startsWith('//'))
             .join('\n')
             .replace(/"(?:[^"\\]|\\.)*"/g, '""'); // drop string literal contents
-        expect(code).not.toMatch(/process\.exit\(/);
+        expect(code).not.toMatch(/process\.exit\([789]\)/);
+        expect(code).not.toContain('child_process');
     });
 });

@@ -606,75 +606,61 @@ ipcMain.on('local-terminal:kill', (event, id) => {
 // connection per local TCP connection, mirroring the standalone bridge
 // script's own logic exactly.
 
-const tunnelServers = new Map(); // id -> net.Server
+const { runTunnel } = require('./tunnel-mux');
+const tunnels = new Map(); // id -> { close() }
 
-ipcMain.handle('tunnel:open', (event, { gatewayUrl, serverId, token, localPort }) => {
+// One multiplexed tunnel per open: a single gateway WebSocket and SSH
+// connection carry every TCP connection, for local (-L), SOCKS (-D) and
+// remote (-R) forwarding alike. The token only has to be valid when the
+// tunnel opens; it then stays up until closed. See tunnel-mux.js.
+ipcMain.handle('tunnel:open', (event, opts) => {
     assertTrustedSender(event);
-    const net = require('net');
     const { randomUUID } = require('crypto');
-    const wsUrl = `${gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(serverId)}`;
+    const mode = ['local', 'dynamic', 'remote'].includes(opts.mode) ? opts.mode : 'local';
+    const target =
+        mode === 'remote'
+            ? { host: String(opts.target?.host || '127.0.0.1'), port: Number(opts.target?.port) }
+            : undefined;
+    if (mode === 'remote' && !(target.port >= 1 && target.port <= 65535)) {
+        return { success: false, error: 'Choose the local port to expose' };
+    }
+    const id = randomUUID();
+    const sender = event.sender;
 
     return new Promise((resolve) => {
-        const server = net.createServer((socket) => {
-            socket.pause();
-            const ws = new WebSocket(wsUrl);
-            ws.binaryType = 'arraybuffer';
-
-            ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
-            ws.onmessage = (ev) => {
-                if (typeof ev.data !== 'string') {
-                    socket.write(Buffer.from(ev.data));
-                    return;
-                }
-                let msg;
-                try {
-                    msg = JSON.parse(ev.data);
-                } catch {
-                    return;
-                }
-                if (msg.type === 'tunnel-ready') {
-                    socket.resume();
-                } else if (
-                    msg.type === 'error' ||
-                    msg.type === 'closed' ||
-                    msg.type === 'disconnected'
-                ) {
-                    socket.destroy();
-                }
-            };
-            ws.onclose = () => socket.destroy();
-            ws.onerror = () => socket.destroy();
-
-            socket.on('data', (chunk) => {
-                if (ws.readyState === WebSocket.OPEN) ws.send(chunk);
-            });
-            const cleanup = () => {
-                try {
-                    ws.close();
-                } catch (_) {}
-            };
-            socket.on('close', cleanup);
-            socket.on('error', cleanup);
-        });
-
-        server.once('error', (err) => {
-            resolve({ success: false, error: err.message });
-        });
-
-        server.listen(localPort || 0, '127.0.0.1', () => {
-            const id = randomUUID();
-            tunnelServers.set(id, server);
-            resolve({ success: true, id, localPort: server.address().port });
+        let ready = false;
+        const tunnel = runTunnel({
+            wsUrl: `${opts.gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(opts.serverId)}&mux=1`,
+            token: opts.token,
+            mode,
+            listenHost: '127.0.0.1',
+            listenPort: Number(opts.localPort) || 0,
+            target,
+            onReady(info) {
+                ready = true;
+                tunnels.set(id, tunnel);
+                resolve({ success: true, id, ...info });
+            },
+            onClose(reason) {
+                tunnels.delete(id);
+                if (!ready) resolve({ success: false, error: reason });
+                else if (!sender.isDestroyed()) sender.send('tunnel:closed', { id, reason });
+            },
         });
     });
 });
 
+ipcMain.handle('tunnel:list', (event) => {
+    assertTrustedSender(event);
+    return [...tunnels.keys()];
+});
+
 ipcMain.on('tunnel:close', (event, id) => {
     if (!isTrustedSender(event)) return;
-    const server = tunnelServers.get(id);
-    if (server) {
-        server.close();
-        tunnelServers.delete(id);
+    const tunnel = tunnels.get(id);
+    if (tunnel) {
+        tunnel.close();
+        tunnels.delete(id);
     }
 });
 

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { SettingsSection } from '../_components/SettingsSection';
 import { TunnelSessionRowCard } from '../../servers/[id]/_details/TunnelSection';
-import type { TunnelSessionRow } from '../../servers/[id]/_details/useTunnels';
+import { rowRequest, type TunnelSessionRow } from '../../servers/[id]/_details/useTunnels';
 
 function buildProxyUrl(row: TunnelSessionRow): string | null {
     if (!row.serverId) return null;
@@ -43,11 +43,7 @@ export function TunnelsPanel() {
             const res = await fetch('/api/tunnels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    serverId: row.serverId,
-                    remoteHost: row.remoteHost,
-                    remotePort: row.remotePort,
-                }),
+                body: JSON.stringify({ serverId: row.serverId, ...rowRequest(row) }),
             });
             const json = await res.json();
             return json.success ? (json.data.bridgeScript ?? null) : null;

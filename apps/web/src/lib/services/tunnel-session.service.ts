@@ -10,7 +10,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import type { TunnelKind } from '@/app/generated/prisma/client';
+import type { TunnelKind, TunnelMode } from '@/app/generated/prisma/client';
 
 export interface CreateTunnelSessionInput {
     serverId: string | null;
@@ -18,7 +18,9 @@ export interface CreateTunnelSessionInput {
     remoteHost: string;
     remotePort: number;
     kind: TunnelKind;
+    mode?: TunnelMode;
     localPort?: number | null;
+    localHost?: string | null;
     electronId?: string | null;
 }
 
@@ -31,7 +33,9 @@ export async function createTunnelSession(userId: string, input: CreateTunnelSes
             remoteHost: input.remoteHost,
             remotePort: input.remotePort,
             kind: input.kind,
+            mode: input.mode,
             localPort: input.localPort,
+            localHost: input.localHost,
             electronId: input.electronId,
         },
     });

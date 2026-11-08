@@ -17,9 +17,11 @@ const createSchema = z.object({
     serverId: z.string().min(1).nullable(),
     serverName: z.string().min(1).max(200),
     remoteHost: z.string().min(1).max(255),
-    remotePort: z.number().int().min(1).max(65535),
+    remotePort: z.number().int().min(0).max(65535),
     kind: z.enum(['HTTP_PROXY', 'BRIDGE_SCRIPT', 'ELECTRON_LOCAL']),
+    mode: z.enum(['LOCAL', 'DYNAMIC', 'REMOTE']).default('LOCAL'),
     localPort: z.number().int().min(0).max(65535).nullable().optional(),
+    localHost: z.string().min(1).max(255).nullable().optional(),
     electronId: z.string().min(1).nullable().optional(),
 });
 

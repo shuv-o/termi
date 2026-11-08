@@ -21,6 +21,7 @@ import { GuacamoleHandler } from './handlers/guacamole.js';
 import { LocalHandler } from './handlers/local.js';
 import { TelnetHandler } from './handlers/telnet.js';
 import { TunnelHandler } from './handlers/tunnel.js';
+import { TunnelMuxHandler } from './handlers/tunnel-mux.js';
 import { validateToken, TokenPayload } from './auth/token.js';
 import { RingBuffer } from './sessions/RingBuffer.js';
 import { AsciicastRecorder } from './sessions/AsciicastRecorder.js';
@@ -165,7 +166,13 @@ interface NonSshMeta {
     userId: string;
     protocol: 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     serverId: string;
-    handler?: SCPHandler | GuacamoleHandler | LocalHandler | TelnetHandler | TunnelHandler;
+    handler?:
+        | SCPHandler
+        | GuacamoleHandler
+        | LocalHandler
+        | TelnetHandler
+        | TunnelHandler
+        | TunnelMuxHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
@@ -721,38 +728,66 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 return;
             }
 
-            const sink: SSHOutputSink = {
-                onData(data: Buffer) {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(data, { binary: true });
+            const legacyTunnel = () => {
+                const sink: SSHOutputSink = {
+                    onData(data: Buffer) {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(data, { binary: true });
+                        }
+                    },
+                    onMessage(type: string, extra?: Record<string, unknown>) {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ type, ...extra }));
+                        }
+                    },
+                };
+
+                const tunnelHandler = new TunnelHandler(tokenPayload, sink);
+                meta.handler = tunnelHandler;
+
+                ws.on('message', (data: Buffer, isBinary: boolean) => {
+                    if (isBinary) {
+                        resetTimeout();
+                        tunnelHandler.write(data);
+                        return;
                     }
-                },
-                onMessage(type: string, extra?: Record<string, unknown>) {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ type, ...extra }));
+                    try {
+                        const msg = JSON.parse(data.toString());
+                        if (msg.type === 'close-session') {
+                            tunnelHandler.close();
+                            ws.close(1000, 'Session closed');
+                        }
+                    } catch {
+                        /* ignore malformed control messages */
                     }
-                },
+                });
             };
 
-            const tunnelHandler = new TunnelHandler(tokenPayload, sink);
-            meta.handler = tunnelHandler;
-
-            ws.on('message', (data: Buffer, isBinary: boolean) => {
-                if (isBinary) {
+            if (url.searchParams.get('mux') === '1') {
+                // Multiplexed: one WS + one SSH connection for many streams,
+                // and the only path for dynamic (SOCKS) and remote forwarding.
+                const mux = new TunnelMuxHandler(tokenPayload, ws);
+                meta.handler = mux;
+                ws.on('message', (data: Buffer, isBinary: boolean) => {
                     resetTimeout();
-                    tunnelHandler.write(data);
-                    return;
-                }
-                try {
-                    const msg = JSON.parse(data.toString());
-                    if (msg.type === 'close-session') {
-                        tunnelHandler.close();
-                        ws.close(1000, 'Session closed');
-                    }
-                } catch {
-                    /* ignore malformed control messages */
-                }
-            });
+                    mux.handleMessage(data, isBinary);
+                });
+            } else if (tokenPayload.forward && tokenPayload.forward.kind !== 'local') {
+                // An older desktop app or bridge script: it can only do -L.
+                if (timeoutId) clearTimeout(timeoutId);
+                nonSshConnections.delete(ws);
+                tunnelSlotLimiter.release(tokenPayload.userId);
+                ws.send(
+                    JSON.stringify({
+                        type: 'error',
+                        message: 'This tunnel needs a newer Termi app or bridge script',
+                    }),
+                );
+                ws.close(4000, 'Bad Request');
+                return;
+            } else {
+                legacyTunnel();
+            }
         } else {
             // Override stored display dimensions with the browser's actual viewport
             const payloadWithDims =

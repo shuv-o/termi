@@ -65,19 +65,30 @@ interface ElectronUpdaterAPI {
 type AppCommand = 'shell:new' | 'shell:close' | 'shell:next' | 'shell:prev' | 'palette:open';
 
 /**
- * Local port-forward bridge — the desktop shell can bind a real local TCP
- * port (a browser tab can't), bridging it to the gateway's tunnel WebSocket.
+ * Port forwarding from the desktop shell, which can bind real local ports (a
+ * browser tab can't). Shells without `modes` only support local forwarding.
  */
+type ForwardMode = 'local' | 'dynamic' | 'remote';
+
 interface ElectronTunnelAPI {
+    modes?: ForwardMode[];
     open: (opts: {
         gatewayUrl: string;
         serverId: string;
         token: string;
+        mode?: ForwardMode;
+        /** local / dynamic: the port to listen on here (0 = any). */
         localPort?: number;
+        /** remote: the service on this computer the server reaches. */
+        target?: { host: string; port: number };
     }) => Promise<
-        { success: true; id: string; localPort: number } | { success: false; error: string }
+        | { success: true; id: string; localPort?: number; bindPort?: number }
+        | { success: false; error: string }
     >;
     close: (id: string) => void;
+    /** Ids of the tunnels running now. */
+    list?: () => Promise<string[]>;
+    onClosed?: (cb: (info: { id: string; reason: string }) => void) => () => void;
 }
 
 interface ElectronAPI {

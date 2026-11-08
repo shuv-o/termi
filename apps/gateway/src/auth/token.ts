@@ -30,6 +30,14 @@ export interface TokenPayload {
     // could already reach with a normal interactive session on this server.
     remoteHost?: string;
     remotePort?: number;
+    /**
+     * 'tunnel' only: which kind of forwarding (see handlers/tunnel-mux.ts).
+     * Absent on tokens from older web versions, which mean 'local'.
+     */
+    forward?:
+        | { kind: 'local' }
+        | { kind: 'dynamic' }
+        | { kind: 'remote'; bindAddress: string; bindPort: number };
     /** The server's pinned SSH host key (`SHA256:…`); SSH is refused without it. */
     hostKey?: string | null;
     /**

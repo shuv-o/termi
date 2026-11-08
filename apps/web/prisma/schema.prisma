@@ -573,6 +573,12 @@ model Recording {
 }
 
 /// How a tunnel's data path actually flows — see apps/web/src/app/api/tunnels/route.ts.
+enum TunnelMode {
+  LOCAL // ssh -L: remoteHost:remotePort is the target, seen from the server
+  DYNAMIC // ssh -D: a SOCKS proxy; remoteHost is "*" and remotePort 0
+  REMOTE // ssh -R: the server listens on remoteHost:remotePort and reaches localHost:localPort
+}
+
 enum TunnelKind {
   HTTP_PROXY // one-click browser link at /tunnel/[serverId]/[port]
   BRIDGE_SCRIPT // copyable local Node.js script (web, non-HTTP target)
@@ -599,11 +605,14 @@ model TunnelSession {
   remoteHost String
   remotePort Int
   kind       TunnelKind
+  mode       TunnelMode @default(LOCAL)
 
   // Only set for kind = ELECTRON_LOCAL: the port actually bound on the
   // user's machine, and the id used to ask the desktop shell to close it.
   localPort  Int?
   electronId String?
+  // REMOTE only: the host of the service on the user's machine.
+  localHost  String?
 
   createdAt DateTime  @default(now())
   closedAt  DateTime?

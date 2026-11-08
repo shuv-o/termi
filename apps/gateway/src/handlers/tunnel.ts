@@ -52,46 +52,7 @@ export class TunnelHandler {
     }
 
     private setupSSH(token: TokenPayload): void {
-        const config: Parameters<Client['connect']>[0] = {
-            host: token.host,
-            port: token.port,
-            username: token.username,
-            readyTimeout: 10000,
-            keepaliveInterval: 15000,
-            keepaliveCountMax: 6,
-            algorithms: {
-                kex: [
-                    'ecdh-sha2-nistp256',
-                    'ecdh-sha2-nistp384',
-                    'ecdh-sha2-nistp521',
-                    'diffie-hellman-group-exchange-sha256',
-                    'diffie-hellman-group14-sha256',
-                    'diffie-hellman-group14-sha1',
-                    'diffie-hellman-group1-sha1',
-                ],
-                // serverHostKey is set by applyHostKeyCheck (one list on web and gateway,
-                // so both negotiate the same key type and see the same fingerprint).
-                cipher: [
-                    'aes128-gcm@openssh.com',
-                    'aes256-gcm@openssh.com',
-                    'aes256-ctr',
-                    'aes192-ctr',
-                    'aes128-ctr',
-                    'aes256-cbc',
-                    'aes192-cbc',
-                    'aes128-cbc',
-                    '3des-cbc',
-                ],
-                hmac: ['hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'],
-            },
-        };
-
-        if (token.privateKey) {
-            config.privateKey = token.privateKey;
-            if (token.passphrase) config.passphrase = token.passphrase;
-        } else if (token.password) {
-            config.password = token.password;
-        }
+        const config = tunnelConnectConfig(token);
 
         this.ssh.on('ready', () => {
             const remoteHost = token.remoteHost;
@@ -127,7 +88,9 @@ export class TunnelHandler {
         this.ssh.on('error', (err) => {
             this.sink.onMessage('error', {
                 message: 'SSH error: ' + err.message,
-                ...((err as { code?: unknown }).code === HOST_KEY_MISMATCH && { code: HOST_KEY_MISMATCH }),
+                ...((err as { code?: unknown }).code === HOST_KEY_MISMATCH && {
+                    code: HOST_KEY_MISMATCH,
+                }),
             });
             this.close();
         });
@@ -145,4 +108,50 @@ export class TunnelHandler {
             this.close();
         }
     }
+}
+
+/** SSH connection settings shared by the tunnel handlers. */
+export function tunnelConnectConfig(token: TokenPayload): Parameters<Client['connect']>[0] {
+    const config: Parameters<Client['connect']>[0] = {
+        host: token.host,
+        port: token.port,
+        username: token.username,
+        readyTimeout: 10000,
+        keepaliveInterval: 15000,
+        keepaliveCountMax: 6,
+        algorithms: {
+            kex: [
+                'ecdh-sha2-nistp256',
+                'ecdh-sha2-nistp384',
+                'ecdh-sha2-nistp521',
+                'diffie-hellman-group-exchange-sha256',
+                'diffie-hellman-group14-sha256',
+                'diffie-hellman-group14-sha1',
+                'diffie-hellman-group1-sha1',
+            ],
+            // serverHostKey is set by applyHostKeyCheck (one list on web and gateway,
+            // so both negotiate the same key type and see the same fingerprint).
+            cipher: [
+                'aes128-gcm@openssh.com',
+                'aes256-gcm@openssh.com',
+                'aes256-ctr',
+                'aes192-ctr',
+                'aes128-ctr',
+                'aes256-cbc',
+                'aes192-cbc',
+                'aes128-cbc',
+                '3des-cbc',
+            ],
+            hmac: ['hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'],
+        },
+    };
+
+    if (token.privateKey) {
+        config.privateKey = token.privateKey;
+        if (token.passphrase) config.passphrase = token.passphrase;
+    } else if (token.password) {
+        config.password = token.password;
+    }
+
+    return config;
 }
