@@ -1,7 +1,7 @@
 # Built from the REPOSITORY ROOT (docker build -f apps/web/Dockerfile .) so the
 # root package-lock.json pins every dependency, transitive ones included:
 # `npm ci` installs exactly what the lockfile says or fails.
-FROM node:24.22.1-slim AS deps
+FROM node:26.12.1-slim AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY apps/mobile/package.json ./apps/mobile/
 RUN npm ci --workspace=apps/web --no-audit --no-fund
 
 # Stage 2: Builder
-FROM node:24.22.1-slim AS builder
+FROM node:26.12.1-slim AS builder
 WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y openssl
@@ -82,7 +82,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:24.22.1-alpine AS runner
+FROM node:26.12.1-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
