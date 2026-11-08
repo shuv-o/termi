@@ -11,6 +11,30 @@
 import { Client, type ConnectConfig } from 'ssh2';
 import type { TokenPayload } from '../auth/token.js';
 import { applyHostKeyCheck, HOST_KEY_MISMATCH } from '../auth/host-key.js';
+import { certifiedKey } from '../auth/ssh-cert.js';
+
+/**
+ * Log in with an OpenSSH user certificate: replaces the plain key with a
+ * certified one (throws CertificateError when it doesn't match the key).
+ */
+export function applyCertificate(cc: ConnectConfig, certificate: string | null | undefined): void {
+    if (!certificate || !cc.privateKey) return;
+    const key = certifiedKey(
+        String(cc.privateKey),
+        cc.passphrase === undefined ? undefined : String(cc.passphrase),
+        certificate,
+    );
+    const username = cc.username ?? '';
+    let offered = false;
+    // One certificate login attempt, then give up (false), like ssh2's own lists.
+    cc.authHandler = ((_methodsLeft: unknown, _partial: unknown, next: (m: unknown) => void) => {
+        if (offered) return false;
+        offered = true;
+        next({ type: 'publickey', username, key });
+    }) as unknown as ConnectConfig['authHandler'];
+    delete cc.privateKey;
+    delete cc.passphrase;
+}
 
 export type Jump = NonNullable<TokenPayload['jump']>;
 
@@ -28,6 +52,7 @@ export function bastionConfig(client: Client, jump: Jump, readyTimeout?: number)
     if (jump.privateKey) {
         cc.privateKey = jump.privateKey;
         if (jump.passphrase) cc.passphrase = jump.passphrase;
+        applyCertificate(cc, jump.certificate);
     } else if (jump.password) {
         cc.password = jump.password;
         cc.tryKeyboard = true;
@@ -46,8 +71,10 @@ export function connectSSH(
     config: ConnectConfig,
     jump: TokenPayload['jump'],
     hostKey: string | null | undefined,
+    certificate?: string | null,
 ): void {
     applyHostKeyCheck(client, config, hostKey, config.host ?? 'the server');
+    applyCertificate(config, certificate);
 
     if (!jump) {
         client.connect(config);

@@ -1,6 +1,7 @@
 'use client';
 
-import { Waypoints } from 'lucide-react';
+import { KeyRound, Waypoints } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { Input } from '@/components/ui/input';
@@ -92,7 +93,7 @@ export function IdentityCard({
                         type="text"
                         value={form.name}
                         onChange={(e) => update({ name: e.target.value })}
-                       
+
                         placeholder="Production Web"
                         required
                     />
@@ -162,7 +163,7 @@ export function IdentityCard({
                         type="text"
                         value={form.username}
                         onChange={(e) => update({ username: e.target.value })}
-                       
+
                         placeholder="root"
                         required
                     />
@@ -281,7 +282,13 @@ export function JumpHostCard({
     onConnectionFieldChange: () => void;
 }) {
     const { data } = useCachedFetch<{
-        servers: { id: string; name: string; protocol: string; host: string; jumpServerId: string | null }[];
+        servers: {
+            id: string;
+            name: string;
+            protocol: string;
+            host: string;
+            jumpServerId: string | null;
+        }[];
     }>('/api/servers');
     const candidates = (data?.servers ?? []).filter(
         (s) => s.protocol === 'SSH' && s.id !== selfId && !s.jumpServerId,
@@ -331,8 +338,8 @@ export function JumpHostCard({
                 )}
                 {selected ? (
                     <p className="data text-xs text-muted-foreground">
-                        Like <span className="text-foreground/85">ssh -J {selected.host}</span>.
-                        The host above is dialed from {selected.name}, so a private address such as
+                        Like <span className="text-foreground/85">ssh -J {selected.host}</span>. The
+                        host above is dialed from {selected.name}, so a private address such as
                         10.0.0.5 is fine.
                     </p>
                 ) : (
@@ -341,6 +348,108 @@ export function JumpHostCard({
                             Add the bastion as an SSH server first, then pick it here.
                         </p>
                     )
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+const AGENT_MODES: { value: ServerFormValues['agentForwarding']; label: string }[] = [
+    { value: 'off', label: 'Off' },
+    { value: 'confirm', label: 'Ask each time' },
+    { value: 'on', label: 'On' },
+];
+
+/**
+ * SSH agent forwarding (`ssh -A`): lets the server use your keys — to pull
+ * from git or hop to another host — while a terminal is open, without the
+ * keys ever being copied to it. Only applies when you (the owner) connect.
+ */
+export function AgentForwardingCard({
+    form,
+    update,
+    keychain,
+}: {
+    form: ServerFormValues;
+    update: (patch: Partial<ServerFormValues>) => void;
+    keychain: { id: string; label: string; username: string; hasPrivateKey: boolean }[];
+}) {
+    const keys = keychain.filter((k) => k.hasPrivateKey);
+    const on = form.agentForwarding !== 'off';
+    const toggleKey = (id: string, checked: boolean) =>
+        update({
+            agentKeychainIds: checked
+                ? [...form.agentKeychainIds, id].slice(0, 10)
+                : form.agentKeychainIds.filter((k) => k !== id),
+        });
+
+    return (
+        <Card className={CARD_CLASS}>
+            <CardContent className="space-y-3 p-4">
+                <div className="flex items-start gap-3">
+                    <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                        <p className="text-sm font-medium">Forward my keys</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                            Let this server use your SSH keys while a terminal is open — to pull
+                            from git or reach another host — like{' '}
+                            <code className="data">ssh -A</code>. The keys stay in Termi; the server
+                            only gets signatures.
+                        </p>
+                    </div>
+                </div>
+                <div
+                    role="radiogroup"
+                    aria-label="Agent forwarding"
+                    className="grid grid-cols-3 gap-1 rounded-lg bg-secondary/50 p-1"
+                >
+                    {AGENT_MODES.map((m) => (
+                        <button
+                            key={m.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={form.agentForwarding === m.value}
+                            onClick={() => update({ agentForwarding: m.value })}
+                            className={`rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                                form.agentForwarding === m.value
+                                    ? 'bg-card text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            {m.label}
+                        </button>
+                    ))}
+                </div>
+                {on && (
+                    <>
+                        <div className="space-y-1.5">
+                            <p className="text-xs text-muted-foreground">
+                                Forwarded: this server&apos;s own login key (if it uses one)
+                                {keys.length > 0 ? ', plus:' : '.'}
+                            </p>
+                            {keys.map((k) => (
+                                <label
+                                    key={k.id}
+                                    className="flex cursor-pointer items-center gap-2 text-xs"
+                                >
+                                    <Checkbox
+                                        checked={form.agentKeychainIds.includes(k.id)}
+                                        onCheckedChange={(v) => toggleKey(k.id, v === true)}
+                                        className="h-4 w-4"
+                                    />
+                                    <span>{k.label}</span>
+                                    <span className="text-muted-foreground">{k.username}</span>
+                                </label>
+                            ))}
+                        </div>
+                        <p className="text-xs text-warning">
+                            {form.agentForwarding === 'confirm'
+                                ? 'You approve each use in the terminal. '
+                                : ''}
+                            Anyone with root on this server can use these keys while your session is
+                            open. Only forward to servers you trust.
+                        </p>
+                    </>
                 )}
             </CardContent>
         </Card>

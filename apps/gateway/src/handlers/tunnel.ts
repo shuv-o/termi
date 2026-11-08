@@ -100,7 +100,7 @@ export class TunnelHandler {
         });
 
         try {
-            connectSSH(this.ssh, config, token.jump, token.hostKey);
+            connectSSH(this.ssh, config, token.jump, token.hostKey, token.certificate);
         } catch (error) {
             this.sink.onMessage('error', {
                 message: 'Connection failed: ' + (error as Error).message,

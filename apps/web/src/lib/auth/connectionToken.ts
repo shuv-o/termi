@@ -53,6 +53,13 @@ export interface ConnectionTokenClaims {
      * other key, and refuses SSH-family connections that carry none.
      */
     hostKey?: string | null;
+    /** OpenSSH user certificate for privateKey. */
+    certificate?: string | null;
+    /** 'ssh' only, owner only: forward an agent holding these keys. */
+    agent?: {
+        mode: 'on' | 'confirm';
+        keys: { comment: string; privateKey: string; passphrase?: string | null }[];
+    } | null;
     /**
      * Optional bastion. When present the gateway connects here first and
      * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
@@ -66,6 +73,7 @@ export interface ConnectionTokenClaims {
         passphrase?: string | null;
         /** The bastion's pinned SSH host key. */
         hostKey: string | null;
+        certificate?: string | null;
     } | null;
 }
 
@@ -80,6 +88,7 @@ export function jumpClaim(
               privateKey?: string;
               passphrase?: string;
               hostKey: { fingerprint: string | null };
+              certificate?: string | null;
           }
         | null
         | undefined,
@@ -93,6 +102,7 @@ export function jumpClaim(
         privateKey: jump.privateKey ?? null,
         passphrase: jump.passphrase ?? null,
         hostKey: jump.hostKey.fingerprint,
+        certificate: jump.certificate ?? null,
     };
 }
 

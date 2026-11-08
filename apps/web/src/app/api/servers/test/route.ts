@@ -9,6 +9,7 @@
 import net from 'net';
 import { Client, type ConnectConfig } from 'ssh2';
 import { z } from 'zod';
+import { certificateField } from '@/lib/security/certificate-field';
 import { withKeychainCredentials } from '@/lib/services/keychain.service';
 import { getCurrentUser } from '@/lib/auth';
 import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
@@ -25,6 +26,7 @@ const schema = z.object({
     password: z.string().optional(),
     privateKey: z.string().optional(),
     passphrase: z.string().optional(),
+    certificate: certificateField,
     /** Test through this saved SSH server instead of dialing the host directly. */
     jumpServerId: z.string().nullable().optional(),
     /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
@@ -80,6 +82,7 @@ function sshAuthTest(
         password?: string;
         privateKey?: string;
         passphrase?: string;
+        certificate?: string | null;
         jump?: SSHJumpConfig | null;
     },
     timeoutMs = 12000,
@@ -154,7 +157,11 @@ function sshAuthTest(
 
         // Not saved yet, so nothing to verify against (first contact is trusted
         // either way); the key is pinned on the first real connection.
-        connectSSH(client, cc, config.jump, null);
+        try {
+            connectSSH(client, cc, config.jump, null, config.certificate);
+        } catch (err) {
+            done({ ok: false, error: (err as Error).message });
+        }
     });
 }
 
@@ -262,6 +269,7 @@ export async function POST(request: Request) {
             password,
             privateKey,
             passphrase,
+            certificate: resolved.certificate,
             jump,
         });
         return Response.json({

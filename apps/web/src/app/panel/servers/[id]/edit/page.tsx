@@ -55,6 +55,9 @@ export default function EditServerPage() {
                     displayHeight: s.displayHeight ?? 1080,
                     rdpSecurity: (s.rdpSecurity ?? 'any') as RdpSecurity,
                     jumpServerId: s.jumpServerId ?? '',
+                    certificate: s.certificate ?? '',
+                    agentForwarding: s.agentForwarding ?? 'off',
+                    agentKeychainIds: s.agentKeychainIds ?? [],
                 });
             })
             .catch(() => router.push('/panel'))
@@ -96,6 +99,12 @@ export default function EditServerPage() {
             if (form.authMethod === 'key') {
                 if (form.privateKey.trim()) payload.privateKey = form.privateKey;
                 if (form.passphrase.trim()) payload.passphrase = form.passphrase;
+            }
+            // Certificates are public: always sent, so clearing the field removes it.
+            payload.certificate = form.authMethod === 'key' ? form.certificate : null;
+            if (form.protocol === 'SSH') {
+                payload.agentForwarding = form.agentForwarding;
+                payload.agentKeychainIds = form.agentKeychainIds;
             }
             // The server fills the secrets from this entry itself.
             if (state.keychainId) payload.keychainId = state.keychainId;

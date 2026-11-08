@@ -16,6 +16,8 @@ export interface KeychainEntry {
     username: string;
     hasPassword: boolean;
     hasPrivateKey: boolean;
+    /** The entry's OpenSSH certificate (public). */
+    certificate: string | null;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -27,6 +29,7 @@ export interface KeychainEntryFull {
     password?: string;
     privateKey?: string;
     passphrase?: string;
+    certificate?: string | null;
 }
 
 export interface CreateKeychainInput {
@@ -35,6 +38,7 @@ export interface CreateKeychainInput {
     password?: string;
     privateKey?: string;
     passphrase?: string;
+    certificate?: string | null;
 }
 
 export type UpdateKeychainInput = Partial<CreateKeychainInput>;
@@ -64,6 +68,7 @@ export async function createKeychainCredential(
             password: encPassword,
             privateKey: encPrivateKey,
             passphrase: encPassphrase,
+            certificate: input.certificate || null,
         },
     });
 
@@ -82,6 +87,7 @@ export async function createKeychainCredential(
         username: input.username,
         hasPassword: !!input.password,
         hasPrivateKey: !!input.privateKey,
+        certificate: entry.certificate,
         createdAt: entry.createdAt,
         updatedAt: entry.updatedAt,
     };
@@ -101,6 +107,7 @@ export async function getKeychainCredentials(userId: string): Promise<KeychainEn
         username: openField(row.username, 'KeychainCredential', 'username', userId),
         hasPassword: !!row.password,
         hasPrivateKey: !!row.privateKey,
+        certificate: row.certificate,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
     }));
@@ -126,6 +133,7 @@ export async function getKeychainCredentialById(
         passphrase: row.passphrase
             ? openField(row.passphrase, 'KeychainCredential', 'passphrase', userId)
             : undefined,
+        certificate: row.certificate,
     };
 }
 
@@ -156,6 +164,8 @@ export async function updateKeychainCredential(
             ? sealField(input.passphrase, 'KeychainCredential', 'passphrase', userId)
             : null;
 
+    if (input.certificate !== undefined) updateData.certificate = input.certificate || null;
+
     const updated = await prisma.keychainCredential.update({
         where: { id },
         data: updateData,
@@ -178,6 +188,7 @@ export async function updateKeychainCredential(
                 : openField(existing.username, 'KeychainCredential', 'username', userId),
         hasPassword: !!updated.password,
         hasPrivateKey: !!updated.privateKey,
+        certificate: updated.certificate,
         createdAt: updated.createdAt,
         updatedAt: updated.updatedAt,
     };
@@ -219,6 +230,7 @@ export async function withKeychainCredentials<
         password?: string;
         privateKey?: string;
         passphrase?: string;
+        certificate?: string | null;
     },
 >(input: T, userId: string): Promise<Omit<T, 'keychainId'> | null> {
     const { keychainId, ...rest } = input;
@@ -231,5 +243,8 @@ export async function withKeychainCredentials<
         password: entry.password,
         privateKey: entry.privateKey,
         passphrase: entry.passphrase,
+        // The entry's certificate belongs to its key; a key without one drops
+        // any certificate the form had.
+        certificate: entry.privateKey ? (entry.certificate ?? null) : rest.certificate,
     };
 }

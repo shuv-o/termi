@@ -154,6 +154,15 @@ model Server {
   password   String? // Encrypted (optional - for password auth)
   privateKey String? // Encrypted (optional - for SSH key auth)
   passphrase String? // Encrypted (optional - key passphrase)
+  // OpenSSH user certificate for privateKey (`ssh-ed25519-cert-v01@openssh.com
+  // AAAA…`). Public, like a public key, so stored as is.
+  certificate String?
+
+  // SSH agent forwarding: lets this server use the owner's keys (its own
+  // login key plus the chosen keychain keys) while a terminal session is
+  // open, without the keys ever leaving Termi. "off" | "on" | "confirm".
+  agentForwarding  String   @default("off")
+  agentKeychainIds String[] @default([])
 
   // Jump host (bastion): connect to this server *through* another of the
   // owner's SSH servers. One hop only. The target host is then dialed by the
@@ -701,6 +710,8 @@ model KeychainCredential {
   password   String? // Encrypted (optional – password auth)
   privateKey String? // Encrypted (optional – SSH key auth)
   passphrase String? // Encrypted (optional – key passphrase)
+  // OpenSSH user certificate for privateKey (public, stored as is).
+  certificate String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

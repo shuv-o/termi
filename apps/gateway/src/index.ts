@@ -609,6 +609,13 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                             }
                             break;
                         }
+                        case 'agent-response':
+                            session.handler.answerAgentRequest(
+                                message.id,
+                                message.allow,
+                                message.forSession,
+                            );
+                            break;
                         case 'close-session':
                             persistentSessions.delete(resolvedSessionId);
                             ws.close(1000, 'Session closed');

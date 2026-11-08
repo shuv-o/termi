@@ -40,6 +40,16 @@ export interface TokenPayload {
         | { kind: 'remote'; bindAddress: string; bindPort: number };
     /** The server's pinned SSH host key (`SHA256:…`); SSH is refused without it. */
     hostKey?: string | null;
+    /** OpenSSH user certificate for `privateKey`. */
+    certificate?: string | null;
+    /**
+     * 'ssh' only: forward an agent holding these keys (see handlers/agent.ts).
+     * Only ever set when the server's owner connects.
+     */
+    agent?: {
+        mode: 'on' | 'confirm';
+        keys: { comment: string; privateKey: string; passphrase?: string | null }[];
+    } | null;
     /**
      * Optional bastion. When present the gateway connects here first and
      * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
@@ -53,6 +63,7 @@ export interface TokenPayload {
         passphrase?: string | null;
         /** The bastion's pinned SSH host key. */
         hostKey?: string | null;
+        certificate?: string | null;
     } | null;
     exp: number;
 }

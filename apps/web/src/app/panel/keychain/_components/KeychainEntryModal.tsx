@@ -183,6 +183,21 @@ export function KeychainEntryModal({
                                     placeholder="••••••••"
                                 />
                             </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="keychain-certificate">
+                                    Certificate{' '}
+                                    <span className="text-muted-foreground/60">(optional)</span>
+                                </Label>
+                                <Textarea
+                                    id="keychain-certificate"
+                                    value={form.certificate}
+                                    onChange={(e) => onChange({ certificate: e.target.value })}
+                                    placeholder="ssh-ed25519-cert-v01@openssh.com AAAA…"
+                                    rows={2}
+                                    spellCheck={false}
+                                    className="font-mono text-xs"
+                                />
+                            </div>
                         </>
                     )}
 

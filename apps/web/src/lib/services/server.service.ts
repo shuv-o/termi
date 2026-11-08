@@ -15,8 +15,22 @@ import { pinOf, type HostKeyPin } from '@/lib/security/host-key';
  * Decrypted credentials for the bastion a server is reached through. Only ever
  * built server-side and handed to the SSH pool or sealed inside a gateway JWE.
  */
+export type AgentForwardingMode = 'off' | 'on' | 'confirm';
+
+/** Agent keys must be the user's own keychain entries that hold a private key. */
+async function assertAgentKeys(userId: string, ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const count = await prisma.keychainCredential.count({
+        where: { id: { in: ids }, userId, privateKey: { not: null } },
+    });
+    if (count !== new Set(ids).size) {
+        throw new JumpHostError('Choose keychain entries of your own that contain a private key');
+    }
+}
+
 export interface JumpConfig {
     serverId: string;
+    certificate?: string | null;
     /** The bastion's pinned SSH host key. */
     hostKey: HostKeyPin;
     host: string;
@@ -100,6 +114,7 @@ export async function loadJump(
     return {
         serverId: jump.id,
         hostKey: pinOf(jump),
+        certificate: jump.certificate,
         host: creds.host,
         port: jump.port,
         username: creds.username,
@@ -128,6 +143,9 @@ export interface CreateServerInput {
     colorDepth?: number;
     rdpSecurity?: string;
     jumpServerId?: string | null;
+    certificate?: string | null;
+    agentForwarding?: AgentForwardingMode;
+    agentKeychainIds?: string[];
 }
 
 export interface UpdateServerInput {
@@ -149,6 +167,9 @@ export interface UpdateServerInput {
     rdpSecurity?: string;
     isFavorite?: boolean;
     jumpServerId?: string | null;
+    certificate?: string | null;
+    agentForwarding?: AgentForwardingMode;
+    agentKeychainIds?: string[];
 }
 
 export interface ServerListItem {
@@ -200,6 +221,9 @@ export async function createServer(input: CreateServerInput) {
 
     if (settings.jumpServerId) {
         await assertValidJumpHost(userId, settings.jumpServerId, protocol);
+    }
+    if (settings.agentKeychainIds?.length) {
+        await assertAgentKeys(userId, settings.agentKeychainIds);
     }
 
     // Encrypt sensitive credentials
@@ -352,6 +376,11 @@ export async function getServerForConnection(
           colorDepth: number | null;
           rdpSecurity: string | null;
           hostKey: HostKeyPin;
+          certificate: string | null;
+          /** The owner's id: agent forwarding only applies when the owner connects. */
+          ownerId: string;
+          agentForwarding: string;
+          agentKeychainIds: string[];
           jump: JumpConfig | null;
       })
     | null
@@ -409,6 +438,10 @@ export async function getServerForConnection(
         rdpSecurity: server.rdpSecurity ?? null,
         ...credentials,
         hostKey: pinOf(server),
+        certificate: server.certificate,
+        ownerId: server.userId,
+        agentForwarding: server.agentForwarding,
+        agentKeychainIds: server.agentKeychainIds,
         // The jump host always belongs to the server's owner — for a shared
         // server too, so a recipient never needs the bastion shared with them.
         jump: await loadJump(server.jumpServerId, server.userId),
@@ -462,6 +495,12 @@ export async function updateServer(serverId: string, userId: string, input: Upda
     if (input.rdpSecurity !== undefined) updateData.rdpSecurity = input.rdpSecurity;
     if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
     if (input.jumpServerId !== undefined) updateData.jumpServerId = input.jumpServerId;
+    if (input.certificate !== undefined) updateData.certificate = input.certificate || null;
+    if (input.agentForwarding !== undefined) updateData.agentForwarding = input.agentForwarding;
+    if (input.agentKeychainIds !== undefined) {
+        await assertAgentKeys(userId, input.agentKeychainIds);
+        updateData.agentKeychainIds = input.agentKeychainIds;
+    }
 
     // Encrypted fields - need to re-encrypt if changed
     const needsEncryption =

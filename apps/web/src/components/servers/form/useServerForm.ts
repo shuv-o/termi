@@ -113,6 +113,10 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
                     password: form.authMethod === 'password' ? form.password : undefined,
                     privateKey: form.authMethod === 'key' ? form.privateKey : undefined,
                     passphrase: form.authMethod === 'key' ? form.passphrase : undefined,
+                    certificate:
+                        form.authMethod === 'key' && form.certificate.trim()
+                            ? form.certificate
+                            : undefined,
                     jumpServerId:
                         form.protocol !== 'TELNET' && form.jumpServerId
                             ? form.jumpServerId

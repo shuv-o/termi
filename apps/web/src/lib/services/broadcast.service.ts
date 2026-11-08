@@ -40,6 +40,8 @@ interface BroadcastServer {
     passphrase: string | null;
     userId: string;
     jumpServerId: string | null;
+    hostKeyFingerprint: string | null;
+    certificate: string | null;
 }
 
 /**
@@ -67,6 +69,8 @@ export async function getBroadcastableServers(
                     passphrase: true,
                     userId: true,
                     jumpServerId: true,
+                    hostKeyFingerprint: true,
+                    certificate: true,
                 },
             },
         },
@@ -135,6 +139,7 @@ function execOne(server: BroadcastServer, command: string): Promise<BroadcastRes
             passphrase: creds.passphrase,
             jump,
             hostKey: pinOf(server),
+            certificate: server.certificate,
         });
 
         loadJump(server.jumpServerId, server.userId)

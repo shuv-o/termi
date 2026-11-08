@@ -9,6 +9,7 @@ import {
     DisplaySettingsCard,
     IdentityCard,
     JumpHostCard,
+    AgentForwardingCard,
     ProtocolSelector,
 } from './ConnectionCards';
 import { AdvancedCard, PreviewCard, TestConnectionCard } from './SidebarCards';
@@ -99,6 +100,13 @@ export function ServerForm({
                                 update={update}
                                 selfId={serverId}
                                 onConnectionFieldChange={resetTest}
+                            />
+                        )}
+                        {form.protocol === 'SSH' && (
+                            <AgentForwardingCard
+                                form={form}
+                                update={update}
+                                keychain={state.keychainEntries}
                             />
                         )}
                         <DisplaySettingsCard form={form} update={update} />

@@ -9,6 +9,10 @@
 import { Client, ClientChannel } from 'ssh2';
 import { TokenPayload } from '../auth/token.js';
 import { connectSSH } from './jump.js';
+import { ForwardedAgent } from './agent.js';
+
+/** How long a key-use prompt waits for the user before denying. */
+const AGENT_PROMPT_TIMEOUT_MS = 60_000;
 import { HOST_KEY_MISMATCH } from '../auth/host-key.js';
 
 export interface SSHOutputSink {
@@ -24,6 +28,9 @@ export class SSHHandler {
     private connected = false;
     private closing = false;
     private sink: SSHOutputSink;
+    /** Key-use prompts waiting for an answer, by id. */
+    private agentPrompts = new Map<string, (allow: boolean) => void>();
+    private agentAllowedForSession = false;
 
     constructor(token: TokenPayload, sink: SSHOutputSink) {
         this.sink = sink;
@@ -45,6 +52,37 @@ export class SSHHandler {
         }
     }
 
+    /**
+     * Ask the browser whether the server may use a forwarded key. Denied when
+     * nobody answers in time (including while no browser is attached).
+     */
+    private askToUseKey(req: { comment: string; fingerprint: string }): Promise<boolean> {
+        if (this.agentAllowedForSession) return Promise.resolve(true);
+        const id = Math.random().toString(36).slice(2, 12);
+        return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+                this.agentPrompts.delete(id);
+                this.sink.onMessage('agent-request-expired', { id });
+                resolve(false);
+            }, AGENT_PROMPT_TIMEOUT_MS);
+            this.agentPrompts.set(id, (allow) => {
+                clearTimeout(timer);
+                this.agentPrompts.delete(id);
+                resolve(allow);
+            });
+            this.sink.onMessage('agent-request', { id, ...req });
+        });
+    }
+
+    /** The user's answer to a key-use prompt. */
+    answerAgentRequest(id: unknown, allow: unknown, forSession: unknown): void {
+        if (typeof id !== 'string') return;
+        const resolve = this.agentPrompts.get(id);
+        if (!resolve) return;
+        if (allow === true && forSession === true) this.agentAllowedForSession = true;
+        resolve(allow === true);
+    }
+
     public close(): void {
         if (this.closing) return;
         this.closing = true;
@@ -56,6 +94,8 @@ export class SSHHandler {
             this.ssh.end();
         }
         this.connected = false;
+        for (const resolve of this.agentPrompts.values()) resolve(false);
+        this.agentPrompts.clear();
     }
 
     public isConnected(): boolean {
@@ -107,8 +147,23 @@ export class SSHHandler {
             config.password = token.password;
         }
 
+        const agent =
+            token.agent && token.agent.keys.length
+                ? new ForwardedAgent(
+                      token.agent.keys,
+                      token.agent.mode === 'confirm' ? (req) => this.askToUseKey(req) : undefined,
+                  )
+                : null;
+        if (agent?.size) {
+            config.agent = agent;
+            config.agentForward = true;
+            // ssh2 would otherwise also try logging in with the agent's keys.
+            config.authHandler = config.privateKey ? ['publickey'] : ['password'];
+        }
+
         this.ssh.on('ready', () => {
             this.connected = true;
+            // With config.agentForward set, ssh2 requests forwarding for the shell.
             this.ssh.shell({ term: 'xterm-256color', cols: 80, rows: 24 }, (err, stream) => {
                 if (err) {
                     this.sink.onMessage('error', {
@@ -138,7 +193,9 @@ export class SSHHandler {
         this.ssh.on('error', (err) => {
             this.sink.onMessage('error', {
                 message: 'SSH error: ' + err.message,
-                ...((err as { code?: unknown }).code === HOST_KEY_MISMATCH && { code: HOST_KEY_MISMATCH }),
+                ...((err as { code?: unknown }).code === HOST_KEY_MISMATCH && {
+                    code: HOST_KEY_MISMATCH,
+                }),
             });
             this.close();
         });
@@ -148,7 +205,7 @@ export class SSHHandler {
         });
 
         try {
-            connectSSH(this.ssh, config, token.jump, token.hostKey);
+            connectSSH(this.ssh, config, token.jump, token.hostKey, token.certificate);
         } catch (error) {
             this.sink.onMessage('error', {
                 message: 'Connection failed: ' + (error as Error).message,

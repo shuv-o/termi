@@ -42,6 +42,7 @@ export async function runMonitoringPass(): Promise<void> {
                     userId: true,
                     jumpServerId: true,
                     hostKeyFingerprint: true,
+                    certificate: true,
                 },
             },
         },
@@ -80,6 +81,7 @@ interface MonitorConfig {
         userId: string;
         jumpServerId: string | null;
         hostKeyFingerprint: string | null;
+        certificate: string | null;
     };
 }
 
@@ -150,6 +152,7 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
                     passphrase,
                     jump,
                     hostKey: pinOf({ id: cfg.serverId, hostKeyFingerprint: cfg.server.hostKeyFingerprint }),
+                    certificate: cfg.server.certificate,
                 },
                 10000,
             );

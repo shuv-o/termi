@@ -15,6 +15,30 @@ import {
     type HostKeyPin,
 } from '@/lib/security/host-key';
 import { pinFirstHostKey, recordHostKeyMismatch } from './host-key.service';
+import { certifiedKey } from '@/lib/security/ssh-cert';
+
+/**
+ * Log in with an OpenSSH user certificate: replaces the plain key with a
+ * certified one (throws CertificateError when it doesn't match the key).
+ */
+export function applyCertificate(cc: ConnectConfig, certificate: string | null | undefined): void {
+    if (!certificate || !cc.privateKey) return;
+    const key = certifiedKey(
+        String(cc.privateKey),
+        cc.passphrase === undefined ? undefined : String(cc.passphrase),
+        certificate,
+    );
+    const username = cc.username ?? '';
+    let offered = false;
+    // One certificate login attempt, then give up (false), like ssh2's own lists.
+    cc.authHandler = ((_methodsLeft: unknown, _partial: unknown, next: (m: unknown) => void) => {
+        if (offered) return false;
+        offered = true;
+        next({ type: 'publickey', username, key });
+    }) as unknown as ConnectConfig['authHandler'];
+    delete cc.privateKey;
+    delete cc.passphrase;
+}
 
 export interface SSHJumpConfig {
     host: string;
@@ -23,6 +47,7 @@ export interface SSHJumpConfig {
     password?: string;
     privateKey?: string;
     passphrase?: string;
+    certificate?: string | null;
     /** The bastion's own pinned host key. */
     hostKey: HostKeyPin;
 }
@@ -45,6 +70,7 @@ function bastionConfig(jump: SSHJumpConfig, readyTimeout?: number): ConnectConfi
     if (jump.privateKey?.trim()) {
         cc.privateKey = jump.privateKey;
         if (jump.passphrase?.trim()) cc.passphrase = jump.passphrase;
+        applyCertificate(cc, jump.certificate);
     } else if (jump.password?.trim()) {
         cc.password = jump.password;
         cc.tryKeyboard = true;
@@ -67,7 +93,9 @@ export function connectSSH(
     cc: ConnectConfig,
     jump: SSHJumpConfig | null | undefined,
     hostKey: HostKeyPin | null,
+    certificate?: string | null,
 ): void {
+    applyCertificate(cc, certificate);
     if (hostKey) checkHostKey(client, cc, hostKey, cc.host ?? 'the server');
     else cc.algorithms = { ...cc.algorithms, serverHostKey: HOST_KEY_ALGORITHMS };
 

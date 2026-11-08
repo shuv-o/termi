@@ -44,6 +44,7 @@ export interface HardenTarget {
     passphrase?: string;
     jump?: SSHJumpConfig | null;
     hostKey: HostKeyPin;
+    certificate?: string | null;
 }
 
 export interface HardenOptions {
@@ -126,7 +127,7 @@ function connect(t: HardenTarget, timeoutMs = 15_000): Promise<Client> {
         }
         client.once('ready', () => resolve(client));
         client.once('error', reject);
-        connectSSH(client, cc, t.jump, t.hostKey);
+        connectSSH(client, cc, t.jump, t.hostKey, t.certificate);
     });
 }
 

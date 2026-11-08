@@ -44,6 +44,15 @@ export default function NewServerPage() {
                     ...(form.protocol !== 'TELNET' && form.jumpServerId
                         ? { jumpServerId: form.jumpServerId }
                         : {}),
+                    ...(form.authMethod === 'key' && form.certificate.trim()
+                        ? { certificate: form.certificate }
+                        : {}),
+                    ...(form.protocol === 'SSH'
+                        ? {
+                              agentForwarding: form.agentForwarding,
+                              agentKeychainIds: form.agentKeychainIds,
+                          }
+                        : {}),
                     // The server fills the secrets from this entry itself.
                     ...(state.keychainId ? { keychainId: state.keychainId } : {}),
                 }),

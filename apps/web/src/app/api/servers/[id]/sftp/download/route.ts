@@ -37,6 +37,7 @@ export async function GET(request: Request, { params }: RouteParams) {
                 passphrase: server.passphrase ?? undefined,
                 jump: server.jump,
                 hostKey: server.hostKey,
+                certificate: server.certificate,
             },
             filePath,
         );

@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { agentFields, certificateField } from '@/lib/security/certificate-field';
 import { withKeychainCredentials } from '@/lib/services/keychain.service';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById, updateServer, deleteServer, JumpHostError } from '@/lib/services';
@@ -38,6 +39,8 @@ const updateServerSchema = z.object({
     colorDepth: z.union([z.literal(8), z.literal(16), z.literal(24), z.literal(32)]).optional(),
     rdpSecurity: z.enum(['any', 'rdp', 'nla', 'tls']).optional(),
     jumpServerId: z.string().nullable().optional(),
+    certificate: certificateField,
+    ...agentFields,
     /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
     keychainId: z.string().optional(),
 });

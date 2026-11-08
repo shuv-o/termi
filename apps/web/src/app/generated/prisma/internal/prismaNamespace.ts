@@ -2257,6 +2257,9 @@ export const ServerScalarFieldEnum = {
   password: 'password',
   privateKey: 'privateKey',
   passphrase: 'passphrase',
+  certificate: 'certificate',
+  agentForwarding: 'agentForwarding',
+  agentKeychainIds: 'agentKeychainIds',
   jumpServerId: 'jumpServerId',
   hostKeyFingerprint: 'hostKeyFingerprint',
   hostKeyType: 'hostKeyType',
@@ -2502,6 +2505,7 @@ export const KeychainCredentialScalarFieldEnum = {
   password: 'password',
   privateKey: 'privateKey',
   passphrase: 'passphrase',
+  certificate: 'certificate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

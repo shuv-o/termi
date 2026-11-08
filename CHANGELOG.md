@@ -37,6 +37,8 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 
 ### Added
 
+- **SSH agent forwarding without handing out keys.** Per server (SSH only): Off / Ask each time / On. While a terminal is open, the server can use your keys — its own login key plus keychain keys you pick — to pull from git or hop to another host, like `ssh -A`. The keys stay in Termi: the gateway answers the agent requests itself, and in "Ask each time" mode every use shows an Allow once / Allow for this session / Deny prompt in the terminal (denied after 60 seconds or when no browser is attached). Only the server's owner gets forwarding; people it's shared with never do.
+- **OpenSSH user certificates.** Servers and keychain entries take an optional certificate (`…-cert.pub`) next to the private key, used for every connection — terminals, files, tunnels, monitoring, hardening — and checked by "Test connection". ed25519, ECDSA and RSA (signed with SHA-512) certificates are supported.
 - **Split panes.** Show up to four sessions at once — side by side, stacked or in a grid — with draggable dividers (arrow keys work too). "Split right/down" in a session's header opens another shell to the same server beside it; picking a tab while split puts it in the focused pane. The split is remembered across reloads. Phones keep showing one session at a time.
 - **Type in all panes.** Optional broadcast typing sends what you type to every visible pane (like tmux's synchronize-panes), with a clear banner while it's on.
 - **Saved workspaces.** Save the open sessions and their layout under a name and reopen them together in one click (Layout menu). Servers you can no longer open are skipped and reported.

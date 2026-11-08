@@ -71,7 +71,13 @@ export interface ServerFormValues {
     rdpSecurity: RdpSecurity;
     /** Jump host server id; '' for a direct connection. SSH/SCP only. */
     jumpServerId: string;
+    /** OpenSSH user certificate for the private key ('' for none). */
+    certificate: string;
+    agentForwarding: AgentForwarding;
+    agentKeychainIds: string[];
 }
+
+export type AgentForwarding = 'off' | 'on' | 'confirm';
 
 export const EMPTY_SERVER_FORM: ServerFormValues = {
     name: '',
@@ -91,6 +97,9 @@ export const EMPTY_SERVER_FORM: ServerFormValues = {
     displayHeight: 1080,
     rdpSecurity: 'any',
     jumpServerId: '',
+    certificate: '',
+    agentForwarding: 'off',
+    agentKeychainIds: [],
 };
 
 /**

@@ -51,6 +51,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
                     passphrase: server.passphrase ?? undefined,
                     jump: server.jump,
                     hostKey: server.hostKey,
+                    certificate: server.certificate,
                 },
                 send,
             );

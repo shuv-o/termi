@@ -61,6 +61,16 @@ export default function SSHTerminal({
     const fitAddon = useRef<FitAddon | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const statusRef = useRef<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
+    // The server asking to use a forwarded key ("ask each time" agent forwarding).
+    const [agentPrompts, setAgentPrompts] = useState<
+        { id: string; comment: string; fingerprint: string }[]
+    >([]);
+    const answerAgent = (id: string, allow: boolean, forSession = false) => {
+        setAgentPrompts((list) => list.filter((p) => p.id !== id));
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({ type: 'agent-response', id, allow, forSession }));
+        }
+    };
     const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>(
         'connecting',
     );
@@ -226,6 +236,23 @@ export default function SSHTerminal({
                             );
                         }
                         onErrorRef.current?.(message.message);
+                        break;
+
+                    case 'agent-request':
+                        if (typeof message.id === 'string') {
+                            setAgentPrompts((list) => [
+                                ...list.filter((p) => p.id !== message.id),
+                                {
+                                    id: message.id,
+                                    comment: String(message.comment ?? 'a key'),
+                                    fingerprint: String(message.fingerprint ?? ''),
+                                },
+                            ]);
+                        }
+                        break;
+
+                    case 'agent-request-expired':
+                        setAgentPrompts((list) => list.filter((p) => p.id !== message.id));
                         break;
 
                     case 'record-started':
@@ -425,6 +452,46 @@ export default function SSHTerminal({
                 className="h-full terminal-container rounded-lg overflow-hidden"
             />
             {search.bar}
+            {agentPrompts[0] && (
+                <div
+                    role="alertdialog"
+                    aria-label="Allow key use"
+                    className="absolute left-1/2 top-3 z-20 w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-lg border border-warning/40 bg-card/95 p-3 shadow-lg backdrop-blur"
+                >
+                    <p className="text-sm font-medium">The server wants to use your key</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        <span className="text-foreground">{agentPrompts[0].comment}</span>{' '}
+                        <span className="break-all font-mono">{agentPrompts[0].fingerprint}</span>
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                        Only allow it if you just ran something that needs it (git, ssh to another
+                        host).
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, true)}
+                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                        >
+                            Allow once
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, true, true)}
+                            className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium"
+                        >
+                            Allow for this session
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, false)}
+                            className="rounded-md px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+                        >
+                            Deny
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

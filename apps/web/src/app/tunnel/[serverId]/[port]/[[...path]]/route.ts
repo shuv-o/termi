@@ -272,6 +272,7 @@ async function handleProxy(request: NextRequest, { params }: RouteParams): Promi
         passphrase: server.passphrase,
         jump: server.jump,
         hostKey: server.hostKey,
+        certificate: server.certificate,
     };
 
     let client;

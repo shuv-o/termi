@@ -19,6 +19,8 @@ const { FakeClient } = vi.hoisted(() => {
 });
 
 vi.mock('ssh2', () => ({ Client: FakeClient }));
+// Reaches into the real ssh2's protocol internals; not needed for routing.
+vi.mock('@/lib/security/ssh-cert', () => ({ certifiedKey: vi.fn() }));
 
 import { connectSSH } from './ssh-jump';
 import type { Client } from 'ssh2';

@@ -57,6 +57,8 @@ export type ServerMinAggregateOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
+  agentForwarding: string | null
   jumpServerId: string | null
   hostKeyFingerprint: string | null
   hostKeyType: string | null
@@ -88,6 +90,8 @@ export type ServerMaxAggregateOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
+  agentForwarding: string | null
   jumpServerId: string | null
   hostKeyFingerprint: string | null
   hostKeyType: string | null
@@ -120,6 +124,9 @@ export type ServerCountAggregateOutputType = {
   password: number
   privateKey: number
   passphrase: number
+  certificate: number
+  agentForwarding: number
+  agentKeychainIds: number
   jumpServerId: number
   hostKeyFingerprint: number
   hostKeyType: number
@@ -170,6 +177,8 @@ export type ServerMinAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
+  agentForwarding?: true
   jumpServerId?: true
   hostKeyFingerprint?: true
   hostKeyType?: true
@@ -201,6 +210,8 @@ export type ServerMaxAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
+  agentForwarding?: true
   jumpServerId?: true
   hostKeyFingerprint?: true
   hostKeyType?: true
@@ -233,6 +244,9 @@ export type ServerCountAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
+  agentForwarding?: true
+  agentKeychainIds?: true
   jumpServerId?: true
   hostKeyFingerprint?: true
   hostKeyType?: true
@@ -353,6 +367,9 @@ export type ServerGroupByOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
+  agentForwarding: string
+  agentKeychainIds: string[]
   jumpServerId: string | null
   hostKeyFingerprint: string | null
   hostKeyType: string | null
@@ -409,6 +426,9 @@ export type ServerWhereInput = {
   password?: Prisma.StringNullableFilter<"Server"> | string | null
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
+  certificate?: Prisma.StringNullableFilter<"Server"> | string | null
+  agentForwarding?: Prisma.StringFilter<"Server"> | string
+  agentKeychainIds?: Prisma.StringNullableListFilter<"Server">
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -455,6 +475,9 @@ export type ServerOrderByWithRelationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentForwarding?: Prisma.SortOrder
+  agentKeychainIds?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrderInput | Prisma.SortOrder
   hostKeyFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   hostKeyType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -504,6 +527,9 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringNullableFilter<"Server"> | string | null
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
+  certificate?: Prisma.StringNullableFilter<"Server"> | string | null
+  agentForwarding?: Prisma.StringFilter<"Server"> | string
+  agentKeychainIds?: Prisma.StringNullableListFilter<"Server">
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -550,6 +576,9 @@ export type ServerOrderByWithAggregationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentForwarding?: Prisma.SortOrder
+  agentKeychainIds?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrderInput | Prisma.SortOrder
   hostKeyFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   hostKeyType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -591,6 +620,9 @@ export type ServerScalarWhereWithAggregatesInput = {
   password?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   privateKey?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  certificate?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  agentForwarding?: Prisma.StringWithAggregatesFilter<"Server"> | string
+  agentKeychainIds?: Prisma.StringNullableListFilter<"Server">
   jumpServerId?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   hostKeyFingerprint?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
   hostKeyType?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
@@ -622,6 +654,9 @@ export type ServerCreateInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -667,6 +702,9 @@ export type ServerUncheckedCreateInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -708,6 +746,9 @@ export type ServerUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -753,6 +794,9 @@ export type ServerUncheckedUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -796,6 +840,9 @@ export type ServerCreateManyInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -827,6 +874,9 @@ export type ServerUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -859,6 +909,9 @@ export type ServerUncheckedUpdateManyInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -915,6 +968,9 @@ export type ServerCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
+  agentForwarding?: Prisma.SortOrder
+  agentKeychainIds?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
   hostKeyFingerprint?: Prisma.SortOrder
   hostKeyType?: Prisma.SortOrder
@@ -955,6 +1011,8 @@ export type ServerMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
+  agentForwarding?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
   hostKeyFingerprint?: Prisma.SortOrder
   hostKeyType?: Prisma.SortOrder
@@ -986,6 +1044,8 @@ export type ServerMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
+  agentForwarding?: Prisma.SortOrder
   jumpServerId?: Prisma.SortOrder
   hostKeyFingerprint?: Prisma.SortOrder
   hostKeyType?: Prisma.SortOrder
@@ -1103,6 +1163,10 @@ export type ServerCreatetagsInput = {
   set: string[]
 }
 
+export type ServerCreateagentKeychainIdsInput = {
+  set: string[]
+}
+
 export type ServerCreateNestedOneWithoutJumpTargetsInput = {
   create?: Prisma.XOR<Prisma.ServerCreateWithoutJumpTargetsInput, Prisma.ServerUncheckedCreateWithoutJumpTargetsInput>
   connectOrCreate?: Prisma.ServerCreateOrConnectWithoutJumpTargetsInput
@@ -1130,6 +1194,11 @@ export type ServerUpdatetagsInput = {
 
 export type EnumProtocolFieldUpdateOperationsInput = {
   set?: $Enums.Protocol
+}
+
+export type ServerUpdateagentKeychainIdsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -1322,6 +1391,9 @@ export type ServerCreateWithoutUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1365,6 +1437,9 @@ export type ServerUncheckedCreateWithoutUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -1437,6 +1512,9 @@ export type ServerScalarWhereInput = {
   password?: Prisma.StringNullableFilter<"Server"> | string | null
   privateKey?: Prisma.StringNullableFilter<"Server"> | string | null
   passphrase?: Prisma.StringNullableFilter<"Server"> | string | null
+  certificate?: Prisma.StringNullableFilter<"Server"> | string | null
+  agentForwarding?: Prisma.StringFilter<"Server"> | string
+  agentKeychainIds?: Prisma.StringNullableListFilter<"Server">
   jumpServerId?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyFingerprint?: Prisma.StringNullableFilter<"Server"> | string | null
   hostKeyType?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -1468,6 +1546,9 @@ export type ServerCreateWithoutGroupInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1511,6 +1592,9 @@ export type ServerUncheckedCreateWithoutGroupInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -1578,6 +1662,9 @@ export type ServerCreateWithoutJumpTargetsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1622,6 +1709,9 @@ export type ServerUncheckedCreateWithoutJumpTargetsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -1667,6 +1757,9 @@ export type ServerCreateWithoutJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1711,6 +1804,9 @@ export type ServerUncheckedCreateWithoutJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1772,6 +1868,9 @@ export type ServerUpdateWithoutJumpTargetsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1816,6 +1915,9 @@ export type ServerUncheckedUpdateWithoutJumpTargetsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1872,6 +1974,9 @@ export type ServerCreateWithoutConnectionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -1916,6 +2021,9 @@ export type ServerUncheckedCreateWithoutConnectionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -1972,6 +2080,9 @@ export type ServerUpdateWithoutConnectionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2016,6 +2127,9 @@ export type ServerUncheckedUpdateWithoutConnectionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2056,6 +2170,9 @@ export type ServerCreateWithoutMonitorConfigInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -2100,6 +2217,9 @@ export type ServerUncheckedCreateWithoutMonitorConfigInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -2156,6 +2276,9 @@ export type ServerUpdateWithoutMonitorConfigInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2200,6 +2323,9 @@ export type ServerUncheckedUpdateWithoutMonitorConfigInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2240,6 +2366,9 @@ export type ServerCreateWithoutHealthRecordsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -2284,6 +2413,9 @@ export type ServerUncheckedCreateWithoutHealthRecordsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -2340,6 +2472,9 @@ export type ServerUpdateWithoutHealthRecordsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2384,6 +2519,9 @@ export type ServerUncheckedUpdateWithoutHealthRecordsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2424,6 +2562,9 @@ export type ServerCreateWithoutBenchmarkRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -2468,6 +2609,9 @@ export type ServerUncheckedCreateWithoutBenchmarkRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -2524,6 +2668,9 @@ export type ServerUpdateWithoutBenchmarkRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2568,6 +2715,9 @@ export type ServerUncheckedUpdateWithoutBenchmarkRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2608,6 +2758,9 @@ export type ServerCreateWithoutRecordingsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -2652,6 +2805,9 @@ export type ServerUncheckedCreateWithoutRecordingsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -2708,6 +2864,9 @@ export type ServerUpdateWithoutRecordingsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2752,6 +2911,9 @@ export type ServerUncheckedUpdateWithoutRecordingsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2792,6 +2954,9 @@ export type ServerCreateWithoutTunnelSessionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -2836,6 +3001,9 @@ export type ServerUncheckedCreateWithoutTunnelSessionsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -2892,6 +3060,9 @@ export type ServerUpdateWithoutTunnelSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2936,6 +3107,9 @@ export type ServerUncheckedUpdateWithoutTunnelSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2976,6 +3150,9 @@ export type ServerCreateWithoutInvitationsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -3020,6 +3197,9 @@ export type ServerUncheckedCreateWithoutInvitationsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -3076,6 +3256,9 @@ export type ServerUpdateWithoutInvitationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3120,6 +3303,9 @@ export type ServerUncheckedUpdateWithoutInvitationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3160,6 +3346,9 @@ export type ServerCreateWithoutSharesInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -3204,6 +3393,9 @@ export type ServerUncheckedCreateWithoutSharesInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -3260,6 +3452,9 @@ export type ServerUpdateWithoutSharesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3304,6 +3499,9 @@ export type ServerUncheckedUpdateWithoutSharesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3344,6 +3542,9 @@ export type ServerCreateWithoutHardeningRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -3388,6 +3589,9 @@ export type ServerUncheckedCreateWithoutHardeningRunsInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -3444,6 +3648,9 @@ export type ServerUpdateWithoutHardeningRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3488,6 +3695,9 @@ export type ServerUncheckedUpdateWithoutHardeningRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3529,6 +3739,9 @@ export type ServerCreateManyUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -3560,6 +3773,9 @@ export type ServerUpdateWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3603,6 +3819,9 @@ export type ServerUncheckedUpdateWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3645,6 +3864,9 @@ export type ServerUncheckedUpdateManyWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3677,6 +3899,9 @@ export type ServerCreateManyGroupInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   jumpServerId?: string | null
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
@@ -3708,6 +3933,9 @@ export type ServerUpdateWithoutGroupInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3751,6 +3979,9 @@ export type ServerUncheckedUpdateWithoutGroupInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3793,6 +4024,9 @@ export type ServerUncheckedUpdateManyWithoutGroupInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   jumpServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3826,6 +4060,9 @@ export type ServerCreateManyJumpServerInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
+  agentForwarding?: string
+  agentKeychainIds?: Prisma.ServerCreateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: string | null
   hostKeyType?: string | null
   hostKeyTrustedAt?: Date | string | null
@@ -3856,6 +4093,9 @@ export type ServerUpdateWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3900,6 +4140,9 @@ export type ServerUncheckedUpdateWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3942,6 +4185,9 @@ export type ServerUncheckedUpdateManyWithoutJumpServerInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentForwarding?: Prisma.StringFieldUpdateOperationsInput | string
+  agentKeychainIds?: Prisma.ServerUpdateagentKeychainIdsInput | string[]
   hostKeyFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hostKeyTrustedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4077,6 +4323,9 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
+  agentForwarding?: boolean
+  agentKeychainIds?: boolean
   jumpServerId?: boolean
   hostKeyFingerprint?: boolean
   hostKeyType?: boolean
@@ -4124,6 +4373,9 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
+  agentForwarding?: boolean
+  agentKeychainIds?: boolean
   jumpServerId?: boolean
   hostKeyFingerprint?: boolean
   hostKeyType?: boolean
@@ -4160,6 +4412,9 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
+  agentForwarding?: boolean
+  agentKeychainIds?: boolean
   jumpServerId?: boolean
   hostKeyFingerprint?: boolean
   hostKeyType?: boolean
@@ -4196,6 +4451,9 @@ export type ServerSelectScalar = {
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
+  agentForwarding?: boolean
+  agentKeychainIds?: boolean
   jumpServerId?: boolean
   hostKeyFingerprint?: boolean
   hostKeyType?: boolean
@@ -4213,7 +4471,7 @@ export type ServerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "jumpServerId" | "hostKeyFingerprint" | "hostKeyType" | "hostKeyTrustedAt" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "certificate" | "agentForwarding" | "agentKeychainIds" | "jumpServerId" | "hostKeyFingerprint" | "hostKeyType" | "hostKeyTrustedAt" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   group?: boolean | Prisma.Server$groupArgs<ExtArgs>
@@ -4274,6 +4532,9 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     password: string | null
     privateKey: string | null
     passphrase: string | null
+    certificate: string | null
+    agentForwarding: string
+    agentKeychainIds: string[]
     jumpServerId: string | null
     hostKeyFingerprint: string | null
     hostKeyType: string | null
@@ -4740,6 +5001,9 @@ export interface ServerFieldRefs {
   readonly password: Prisma.FieldRef<"Server", 'String'>
   readonly privateKey: Prisma.FieldRef<"Server", 'String'>
   readonly passphrase: Prisma.FieldRef<"Server", 'String'>
+  readonly certificate: Prisma.FieldRef<"Server", 'String'>
+  readonly agentForwarding: Prisma.FieldRef<"Server", 'String'>
+  readonly agentKeychainIds: Prisma.FieldRef<"Server", 'String[]'>
   readonly jumpServerId: Prisma.FieldRef<"Server", 'String'>
   readonly hostKeyFingerprint: Prisma.FieldRef<"Server", 'String'>
   readonly hostKeyType: Prisma.FieldRef<"Server", 'String'>

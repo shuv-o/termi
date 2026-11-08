@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -268,6 +269,23 @@ export function AuthCard({
                                         autoComplete={isEdit ? 'new-password' : undefined}
                                     />
                                 </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="server-certificate" className="text-xs">
+                                        Certificate{' '}
+                                        <span className="text-muted-foreground/50">
+                                            (optional — the key&apos;s -cert.pub, signed by your CA)
+                                        </span>
+                                    </Label>
+                                    <Textarea
+                                        id="server-certificate"
+                                        value={form.certificate}
+                                        onChange={(e) => update({ certificate: e.target.value })}
+                                        placeholder="ssh-ed25519-cert-v01@openssh.com AAAA…"
+                                        rows={2}
+                                        spellCheck={false}
+                                        className="data text-xs"
+                                    />
+                                </div>
                             </div>
                         )}
 
@@ -292,7 +310,7 @@ export function AuthCard({
                                     type="text"
                                     value={keychainLabel}
                                     onChange={(e) => setKeychainLabel(e.target.value)}
-                                   
+
                                     placeholder="Label (e.g. root@production)"
                                 />
                             )}

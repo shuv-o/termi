@@ -126,6 +126,7 @@ describe('jumpClaim', () => {
             privateKey: 'KEY',
             passphrase: null,
             hostKey: 'SHA256:abc',
+            certificate: null,
         });
     });
 

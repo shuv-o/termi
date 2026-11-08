@@ -32,6 +32,7 @@ export type KeychainCredentialMinAggregateOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +45,7 @@ export type KeychainCredentialMaxAggregateOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +58,7 @@ export type KeychainCredentialCountAggregateOutputType = {
   password: number
   privateKey: number
   passphrase: number
+  certificate: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -70,6 +73,7 @@ export type KeychainCredentialMinAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +86,7 @@ export type KeychainCredentialMaxAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -94,6 +99,7 @@ export type KeychainCredentialCountAggregateInputType = {
   password?: true
   privateKey?: true
   passphrase?: true
+  certificate?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -179,6 +185,7 @@ export type KeychainCredentialGroupByOutputType = {
   password: string | null
   privateKey: string | null
   passphrase: string | null
+  certificate: string | null
   createdAt: Date
   updatedAt: Date
   _count: KeychainCredentialCountAggregateOutputType | null
@@ -212,6 +219,7 @@ export type KeychainCredentialWhereInput = {
   password?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   privateKey?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   passphrase?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
+  certificate?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -225,6 +233,7 @@ export type KeychainCredentialOrderByWithRelationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -241,6 +250,7 @@ export type KeychainCredentialWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   privateKey?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   passphrase?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
+  certificate?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -254,6 +264,7 @@ export type KeychainCredentialOrderByWithAggregationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   privateKey?: Prisma.SortOrderInput | Prisma.SortOrder
   passphrase?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.KeychainCredentialCountOrderByAggregateInput
@@ -272,6 +283,7 @@ export type KeychainCredentialScalarWhereWithAggregatesInput = {
   password?: Prisma.StringNullableWithAggregatesFilter<"KeychainCredential"> | string | null
   privateKey?: Prisma.StringNullableWithAggregatesFilter<"KeychainCredential"> | string | null
   passphrase?: Prisma.StringNullableWithAggregatesFilter<"KeychainCredential"> | string | null
+  certificate?: Prisma.StringNullableWithAggregatesFilter<"KeychainCredential"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"KeychainCredential"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"KeychainCredential"> | Date | string
 }
@@ -283,6 +295,7 @@ export type KeychainCredentialCreateInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutKeychainCredentialsInput
@@ -296,6 +309,7 @@ export type KeychainCredentialUncheckedCreateInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -307,6 +321,7 @@ export type KeychainCredentialUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutKeychainCredentialsNestedInput
@@ -320,6 +335,7 @@ export type KeychainCredentialUncheckedUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -332,6 +348,7 @@ export type KeychainCredentialCreateManyInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +360,7 @@ export type KeychainCredentialUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +373,7 @@ export type KeychainCredentialUncheckedUpdateManyInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -377,6 +396,7 @@ export type KeychainCredentialCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -389,6 +409,7 @@ export type KeychainCredentialMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -401,6 +422,7 @@ export type KeychainCredentialMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   privateKey?: Prisma.SortOrder
   passphrase?: Prisma.SortOrder
+  certificate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -454,6 +476,7 @@ export type KeychainCredentialCreateWithoutUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -465,6 +488,7 @@ export type KeychainCredentialUncheckedCreateWithoutUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -506,6 +530,7 @@ export type KeychainCredentialScalarWhereInput = {
   password?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   privateKey?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   passphrase?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
+  certificate?: Prisma.StringNullableFilter<"KeychainCredential"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KeychainCredential"> | Date | string
 }
@@ -517,6 +542,7 @@ export type KeychainCredentialCreateManyUserInput = {
   password?: string | null
   privateKey?: string | null
   passphrase?: string | null
+  certificate?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -528,6 +554,7 @@ export type KeychainCredentialUpdateWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -539,6 +566,7 @@ export type KeychainCredentialUncheckedUpdateWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -550,6 +578,7 @@ export type KeychainCredentialUncheckedUpdateManyWithoutUserInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passphrase?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certificate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -564,6 +593,7 @@ export type KeychainCredentialSelect<ExtArgs extends runtime.Types.Extensions.In
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -577,6 +607,7 @@ export type KeychainCredentialSelectCreateManyAndReturn<ExtArgs extends runtime.
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -590,6 +621,7 @@ export type KeychainCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime.
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -603,11 +635,12 @@ export type KeychainCredentialSelectScalar = {
   password?: boolean
   privateKey?: boolean
   passphrase?: boolean
+  certificate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type KeychainCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "label" | "username" | "password" | "privateKey" | "passphrase" | "createdAt" | "updatedAt", ExtArgs["result"]["keychainCredential"]>
+export type KeychainCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "label" | "username" | "password" | "privateKey" | "passphrase" | "certificate" | "createdAt" | "updatedAt", ExtArgs["result"]["keychainCredential"]>
 export type KeychainCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -631,6 +664,7 @@ export type $KeychainCredentialPayload<ExtArgs extends runtime.Types.Extensions.
     password: string | null
     privateKey: string | null
     passphrase: string | null
+    certificate: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["keychainCredential"]>
@@ -1064,6 +1098,7 @@ export interface KeychainCredentialFieldRefs {
   readonly password: Prisma.FieldRef<"KeychainCredential", 'String'>
   readonly privateKey: Prisma.FieldRef<"KeychainCredential", 'String'>
   readonly passphrase: Prisma.FieldRef<"KeychainCredential", 'String'>
+  readonly certificate: Prisma.FieldRef<"KeychainCredential", 'String'>
   readonly createdAt: Prisma.FieldRef<"KeychainCredential", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"KeychainCredential", 'DateTime'>
 }
