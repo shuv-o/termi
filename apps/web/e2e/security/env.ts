@@ -65,5 +65,7 @@ export function appEnv(): Record<string, string> {
         OIDC_CLIENT_SECRET: 'termi-e2e-secret',
         OIDC_NAME: 'Acme SSO',
         OIDC_ENFORCE_DOMAINS: 'corp.test',
+        // The suite signs in and connects far more than a person would.
+        E2E_RATE_LIMIT_MULTIPLIER: '10',
     };
 }

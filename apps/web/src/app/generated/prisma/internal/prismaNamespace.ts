@@ -2578,7 +2578,8 @@ export const UserScalarFieldEnum = {
   updatedAt: 'updatedAt',
   lastLoginAt: 'lastLoginAt',
   passkeyEnabled: 'passkeyEnabled',
-  passwordLoginDisabled: 'passwordLoginDisabled'
+  passwordLoginDisabled: 'passwordLoginDisabled',
+  lockAfterMinutes: 'lockAfterMinutes'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -2593,6 +2594,7 @@ export const SessionScalarFieldEnum = {
   createdAt: 'createdAt',
   expiresAt: 'expiresAt',
   lastActiveAt: 'lastActiveAt',
+  lockedAt: 'lockedAt',
   isRevoked: 'isRevoked',
   revokedAt: 'revokedAt',
   revokedReason: 'revokedReason'

@@ -395,6 +395,19 @@ export default function GuacamoleDisplay({
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverId, connectionToken, protocol, preferredWidth, preferredHeight]);
+    // App lock: drop the remote desktop connection; reconnect after unlocking.
+    useEffect(() => {
+        const onLock = () => {
+            try {
+                guacClientRef.current?.disconnect();
+            } catch {
+                /* already closed */
+            }
+        };
+        window.addEventListener('termi-lock', onLock);
+        return () => window.removeEventListener('termi-lock', onLock);
+    }, []);
+
     const isConnecting = clientState === 1 || clientState === 2;
     const isConnected = clientState === 3;
     const label = CLIENT_STATE_LABELS[clientState] ?? String(clientState);
@@ -509,7 +522,11 @@ export default function GuacamoleDisplay({
             {isConnecting && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-20 pointer-events-none">
                     <div className="text-center">
-                        <span role="status" aria-label="Connecting" className="cursor-block cursor-waiting mb-4 text-2xl" />
+                        <span
+                            role="status"
+                            aria-label="Connecting"
+                            className="cursor-block cursor-waiting mb-4 text-2xl"
+                        />
                         <p className="text-foreground">Connecting to {protocol.toUpperCase()}...</p>
                     </div>
                 </div>

@@ -361,6 +361,30 @@ export default function SSHTerminal({
         onReconnectReadyRef.current?.(reconnect);
     }, [reconnect]);
 
+    // App lock: close the connection (the gateway keeps the session running)
+    // and stay closed — reconnecting needs a fresh token, which a locked
+    // session can't get. Unlocking reattaches.
+    useEffect(() => {
+        const onLock = () => {
+            if (retryTimerRef.current) {
+                clearTimeout(retryTimerRef.current);
+                retryTimerRef.current = null;
+            }
+            if (wsRef.current) {
+                intentionalCloseRef.current = true;
+                wsRef.current.close();
+                terminalInstance.current?.writeln('\r\n\x1b[33mTermi is locked.\x1b[0m');
+            }
+        };
+        const onUnlock = () => reconnect();
+        window.addEventListener('termi-lock', onLock);
+        window.addEventListener('termi-unlock', onUnlock);
+        return () => {
+            window.removeEventListener('termi-lock', onLock);
+            window.removeEventListener('termi-unlock', onUnlock);
+        };
+    }, [reconnect]);
+
     useEffect(() => {
         if (!terminalRef.current) return;
 

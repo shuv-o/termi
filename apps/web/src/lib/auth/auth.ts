@@ -487,7 +487,8 @@ export async function getCurrentUser() {
     }
 
     const valid = await validateSession(session.sessionToken);
-    if (!valid) return null;
+    // A locked session is signed out for everything but unlocking.
+    if (!valid || valid.lockedAt) return null;
 
     const user = await prisma.user.findUnique({
         where: { id: session.userId },
@@ -504,11 +505,29 @@ export async function getCurrentUser() {
             isVerified: true,
             createdAt: true,
             passwordHash: true,
+            lockAfterMinutes: true,
         },
     });
 
     if (!user || !user.isActive) return null;
     return user;
+}
+
+/**
+ * The signed-in user of a *locked* session (for the lock screen and the
+ * unlock route), or null when the session isn't locked or isn't valid.
+ */
+export async function getLockedSessionUser() {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId || !session.sessionToken) return null;
+    const valid = await validateSession(session.sessionToken);
+    if (!valid?.lockedAt || valid.userId !== session.userId) return null;
+    const user = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { id: true, email: true, passwordHash: true, passkeyEnabled: true, isActive: true },
+    });
+    if (!user?.isActive) return null;
+    return { ...user, sessionToken: session.sessionToken, sessionRowId: valid.sessionId };
 }
 
 export async function changePassword(

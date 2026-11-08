@@ -54,6 +54,8 @@ model User {
   passkeyEnabled Boolean @default(false)
   /// "Passkey only": refuse password sign-in (needs a passkey; cleared when the last one is removed or on password reset)
   passwordLoginDisabled Boolean @default(false)
+  /// Lock the app after this many idle minutes (null = never).
+  lockAfterMinutes      Int?
 
   // Relations
   sessions            Session[]
@@ -96,6 +98,8 @@ model Session {
   createdAt    DateTime @default(now())
   expiresAt    DateTime
   lastActiveAt DateTime @default(now())
+  /// Set while the app is locked (idle lock): every API but unlock refuses it.
+  lockedAt     DateTime?
 
   // Session can be revoked by user
   isRevoked     Boolean   @default(false)

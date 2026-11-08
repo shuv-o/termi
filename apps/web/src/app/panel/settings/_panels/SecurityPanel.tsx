@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
     AlertCircle,
     AlertTriangle,
@@ -13,7 +15,10 @@ import {
     ShieldOff,
     Smartphone,
     Zap,
+    Lock,
 } from 'lucide-react';
+import { LOCK_NOW_EVENT } from '../../_shell/AppLock';
+import { revalidate } from '@/lib/hooks/useCachedFetch';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -140,7 +145,7 @@ function DisableConfirm({ twoFactor }: { twoFactor: TwoFactor }) {
                     type="password"
                     value={twoFactor.disablePassword}
                     onChange={(e) => twoFactor.setDisablePassword(e.target.value)}
-                   
+
                     placeholder="Your current password"
                     autoFocus
                 />
@@ -341,6 +346,66 @@ export function SecurityPanel({
             </Card>
 
             {!user?.isGoogleUser && <ChangePasswordCard password={password} />}
+
+            <AppLockCard initial={user?.lockAfterMinutes ?? null} />
         </div>
+    );
+}
+
+const LOCK_CHOICES: [number | null, string][] = [
+    [null, 'Never'],
+    [5, 'After 5 minutes'],
+    [15, 'After 15 minutes'],
+    [30, 'After 30 minutes'],
+    [60, 'After 1 hour'],
+];
+
+/** Lock Termi after a while without activity; unlocking needs a password or passkey. */
+function AppLockCard({ initial }: { initial: number | null }) {
+    const [value, setValue] = useState<number | null>(initial);
+    const [saved, setSaved] = useState(false);
+    return (
+        <SettingsSection
+            title="Lock when idle"
+            description="Lock Termi after a while without activity, on this and every other device. Open terminals disconnect while locked and reconnect when you unlock with your password or a passkey."
+            icon={Lock}
+            iconBg="bg-primary/10 text-primary"
+        >
+            <div className="flex flex-wrap items-center gap-3">
+                <select
+                    aria-label="Lock when idle"
+                    value={value ?? ''}
+                    onChange={async (e) => {
+                        const next = e.target.value ? Number(e.target.value) : null;
+                        setValue(next);
+                        setSaved(false);
+                        const res = await fetch('/api/account/lock', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ lockAfterMinutes: next }),
+                        });
+                        if (res.ok) {
+                            setSaved(true);
+                            revalidate('/api/auth/me', '/api/auth/me');
+                        }
+                    }}
+                    className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+                >
+                    {LOCK_CHOICES.map(([v, label]) => (
+                        <option key={label} value={v ?? ''}>
+                            {label}
+                        </option>
+                    ))}
+                </select>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => window.dispatchEvent(new Event(LOCK_NOW_EVENT))}
+                >
+                    Lock now
+                </Button>
+                {saved && <span className="text-xs text-success">Saved</span>}
+            </div>
+        </SettingsSection>
     );
 }

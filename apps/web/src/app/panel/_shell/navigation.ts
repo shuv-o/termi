@@ -8,6 +8,8 @@ export interface PanelUser {
     isVerified: boolean;
     isGoogleUser: boolean;
     createdAt: string;
+    /** Lock after this many idle minutes; null = never. */
+    lockAfterMinutes?: number | null;
 }
 
 export const navigation = [

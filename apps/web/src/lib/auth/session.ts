@@ -117,7 +117,9 @@ export async function createSession(
 /**
  * Validate a session token
  */
-export async function validateSession(token: string): Promise<{ userId: string } | null> {
+export async function validateSession(
+    token: string,
+): Promise<{ userId: string; sessionId: string; lockedAt: Date | null } | null> {
     const tokenHash = hashToken(token);
 
     const session = await prisma.session.findUnique({
@@ -128,6 +130,7 @@ export async function validateSession(token: string): Promise<{ userId: string }
             expiresAt: true,
             isRevoked: true,
             deviceInfo: true,
+            lockedAt: true,
         },
     });
 
@@ -166,7 +169,15 @@ export async function validateSession(token: string): Promise<{ userId: string }
         },
     });
 
-    return { userId: session.userId };
+    return { userId: session.userId, sessionId: session.id, lockedAt: session.lockedAt };
+}
+
+/** Lock or unlock the session behind `token` (app lock after inactivity). */
+export async function setSessionLocked(token: string, locked: boolean): Promise<void> {
+    await prisma.session.update({
+        where: { tokenHash: hashToken(token) },
+        data: { lockedAt: locked ? new Date() : null },
+    });
 }
 
 /**

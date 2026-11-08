@@ -11,6 +11,7 @@ export interface User {
     passwordLoginDisabled: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
+    lockAfterMinutes?: number | null;
 }
 
 export interface Passkey {

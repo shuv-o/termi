@@ -18,6 +18,7 @@ import {
     Shield,
     SquareTerminal,
     UserCog,
+    Lock,
 } from 'lucide-react';
 import {
     CommandDialog,
@@ -37,6 +38,7 @@ import type { Snippet } from '@/components/terminal/TerminalToolbar';
 import { NewSnippetDialog } from './NewSnippetDialog';
 import { useSnippetRunner } from '@/components/terminal/SnippetRunner';
 import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
+import { LOCK_NOW_EVENT } from './AppLock';
 import { useSessionsContext } from '../sessions-context';
 import type { ServerItem } from '../_dashboard/types';
 import type { Group } from '../groups/_components/types';
@@ -277,6 +279,16 @@ export function CommandPalette() {
                         >
                             <Users />
                             Teams
+                        </CommandItem>
+                        <CommandItem
+                            value="lock termi now screen"
+                            onSelect={() => {
+                                setOpen(false);
+                                window.dispatchEvent(new Event(LOCK_NOW_EVENT));
+                            }}
+                        >
+                            <Lock />
+                            Lock Termi now
                         </CommandItem>
                         <CommandItem value="groups" onSelect={() => go('/panel/groups')}>
                             <FolderOpen />
