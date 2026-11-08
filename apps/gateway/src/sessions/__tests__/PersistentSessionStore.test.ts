@@ -18,6 +18,8 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         detachedAt: null,
         isClosing: false,
         recording: null,
+        guests: new Map(),
+        joinRequests: new Map(),
         ...overrides,
     };
 }

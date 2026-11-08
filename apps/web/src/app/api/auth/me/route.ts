@@ -3,7 +3,7 @@
  * Get current authenticated user
  */
 
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, getLockedSessionUser } from '@/lib/auth';
 import { successResponse, unauthorizedResponse } from '@/lib/api';
 
 export async function GET() {
@@ -11,6 +11,22 @@ export async function GET() {
         const user = await getCurrentUser();
 
         if (!user) {
+            // A locked session gets the lock screen, not the login page.
+            const locked = await getLockedSessionUser();
+            if (locked) {
+                return Response.json(
+                    {
+                        success: false,
+                        error: 'locked',
+                        data: {
+                            email: locked.email,
+                            hasPassword: !!locked.passwordHash,
+                            passkeyEnabled: locked.passkeyEnabled,
+                        },
+                    },
+                    { status: 423 },
+                );
+            }
             return unauthorizedResponse('Not authenticated');
         }
 
@@ -27,6 +43,7 @@ export async function GET() {
                 isVerified: user.isVerified,
                 createdAt: user.createdAt,
                 isGoogleUser: !user.passwordHash,
+                lockAfterMinutes: user.lockAfterMinutes ?? null,
             },
         });
     } catch (error) {

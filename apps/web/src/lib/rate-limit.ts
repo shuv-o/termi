@@ -117,11 +117,21 @@ export async function countEvent(key: string, windowMs: number): Promise<number>
  * @param limit    - Maximum number of requests in the window
  * @param windowMs - Window duration in milliseconds
  */
+/**
+ * Test-only: the security e2e suite runs far more sign-ins and connections
+ * than one person would, so it scales the limits up. Ignored in production.
+ */
+const LIMIT_MULTIPLIER =
+    process.env.NODE_ENV !== 'production' && Number(process.env.E2E_RATE_LIMIT_MULTIPLIER) > 1
+        ? Number(process.env.E2E_RATE_LIMIT_MULTIPLIER)
+        : 1;
+
 export async function rateLimit(
     key: string,
-    limit: number,
+    baseLimit: number,
     windowMs: number,
 ): Promise<RateLimitResult> {
+    const limit = baseLimit * LIMIT_MULTIPLIER;
     const { count, resetAt } = await increment(key, windowMs);
     return { allowed: count <= limit, remaining: Math.max(0, limit - count), resetAt };
 }
@@ -250,4 +260,9 @@ export function verifySignupRateLimit(userId: string): Promise<RateLimitResult> 
  */
 export function keychainReadRateLimit(userId: string): Promise<RateLimitResult> {
     return rateLimit(`keychain-read:${userId}`, 30, 5 * 60 * 1000);
+}
+
+/** Team invitations (they send email): 20 per hour per user. */
+export function teamInviteRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`team-invite:${userId}`, 20, 60 * 60 * 1000);
 }

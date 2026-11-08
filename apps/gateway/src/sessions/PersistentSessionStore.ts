@@ -3,6 +3,8 @@ import type { SSHHandler } from '../handlers/ssh.js';
 import type { AsciicastRecorder } from './AsciicastRecorder.js';
 import type { RingBuffer } from './RingBuffer.js';
 
+import { closeGuests, type Guest } from './guests.js';
+
 export interface PersistentSession {
     sessionId: string;
     userId: string;
@@ -23,6 +25,10 @@ export interface PersistentSession {
     /** Set while a recording is active. Lives on the session (not the WS) so it
      *  survives tab reattachment, same as the ring buffer. */
     recording: AsciicastRecorder | null;
+    /** People watching (or helping in) this session — see guests.ts. */
+    guests: Map<string, Guest>;
+    /** Join requests waiting for the owner's answer, by id. */
+    joinRequests: Map<string, (allow: boolean) => void>;
 }
 
 /**
@@ -92,6 +98,7 @@ export class PersistentSessionStore {
         const session = this.sessions.get(sessionId);
         if (session) {
             session.isClosing = true;
+            closeGuests(session, 'The shared session has ended');
             session.handler.close();
             this.sessions.delete(sessionId);
         }

@@ -72,7 +72,14 @@ export const ModelName = {
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare',
-  ServerHardeningRun: 'ServerHardeningRun'
+  ServerHardeningRun: 'ServerHardeningRun',
+  Workspace: 'Workspace',
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  TeamServer: 'TeamServer',
+  TeamInvitation: 'TeamInvitation',
+  SessionShare: 'SessionShare',
+  SshSecurityKey: 'SshSecurityKey'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -114,7 +121,8 @@ export const UserScalarFieldEnum = {
   updatedAt: 'updatedAt',
   lastLoginAt: 'lastLoginAt',
   passkeyEnabled: 'passkeyEnabled',
-  passwordLoginDisabled: 'passwordLoginDisabled'
+  passwordLoginDisabled: 'passwordLoginDisabled',
+  lockAfterMinutes: 'lockAfterMinutes'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -129,6 +137,7 @@ export const SessionScalarFieldEnum = {
   createdAt: 'createdAt',
   expiresAt: 'expiresAt',
   lastActiveAt: 'lastActiveAt',
+  lockedAt: 'lockedAt',
   isRevoked: 'isRevoked',
   revokedAt: 'revokedAt',
   revokedReason: 'revokedReason'
@@ -168,6 +177,10 @@ export const ServerScalarFieldEnum = {
   password: 'password',
   privateKey: 'privateKey',
   passphrase: 'passphrase',
+  certificate: 'certificate',
+  agentForwarding: 'agentForwarding',
+  agentKeychainIds: 'agentKeychainIds',
+  securityKeyId: 'securityKeyId',
   jumpServerId: 'jumpServerId',
   hostKeyFingerprint: 'hostKeyFingerprint',
   hostKeyType: 'hostKeyType',
@@ -413,6 +426,7 @@ export const KeychainCredentialScalarFieldEnum = {
   password: 'password',
   privateKey: 'privateKey',
   passphrase: 'passphrase',
+  certificate: 'certificate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -461,6 +475,95 @@ export const ServerHardeningRunScalarFieldEnum = {
 } as const
 
 export type ServerHardeningRunScalarFieldEnum = (typeof ServerHardeningRunScalarFieldEnum)[keyof typeof ServerHardeningRunScalarFieldEnum]
+
+
+export const WorkspaceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  tabs: 'tabs',
+  split: 'split',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
+
+
+export const TeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
+
+
+export const TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const TeamServerScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  serverId: 'serverId',
+  addedById: 'addedById',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamServerScalarFieldEnum = (typeof TeamServerScalarFieldEnum)[keyof typeof TeamServerScalarFieldEnum]
+
+
+export const TeamInvitationScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  email: 'email',
+  role: 'role',
+  tokenHash: 'tokenHash',
+  invitedById: 'invitedById',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamInvitationScalarFieldEnum = (typeof TeamInvitationScalarFieldEnum)[keyof typeof TeamInvitationScalarFieldEnum]
+
+
+export const SessionShareScalarFieldEnum = {
+  id: 'id',
+  codeHash: 'codeHash',
+  ownerId: 'ownerId',
+  sessionId: 'sessionId',
+  serverId: 'serverId',
+  mode: 'mode',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SessionShareScalarFieldEnum = (typeof SessionShareScalarFieldEnum)[keyof typeof SessionShareScalarFieldEnum]
+
+
+export const SshSecurityKeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  rpId: 'rpId',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type SshSecurityKeyScalarFieldEnum = (typeof SshSecurityKeyScalarFieldEnum)[keyof typeof SshSecurityKeyScalarFieldEnum]
 
 
 export const SortOrder = {

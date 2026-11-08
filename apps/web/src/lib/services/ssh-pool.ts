@@ -56,6 +56,8 @@ export interface SSHPoolConfig {
     jump?: SSHJumpConfig | null;
     /** The server's pinned SSH host key (see lib/security/host-key.ts). */
     hostKey: HostKeyPin;
+    /** OpenSSH user certificate for privateKey. */
+    certificate?: string | null;
 }
 
 //  ─ Internal types                              ─
@@ -291,7 +293,7 @@ export class SSHConnectionPool {
             }
 
             try {
-                connectSSH(client, cc, cfg.jump, cfg.hostKey);
+                connectSSH(client, cc, cfg.jump, cfg.hostKey, cfg.certificate);
             } catch (err) {
                 this.entries.delete(key);
                 reject(err);

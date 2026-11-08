@@ -14,6 +14,8 @@ export interface EntryForm {
     password: string;
     privateKey: string;
     passphrase: string;
+    /** OpenSSH certificate for the key ('' for none). */
+    certificate: string;
 }
 
 export const emptyForm = (): EntryForm => ({
@@ -23,4 +25,5 @@ export const emptyForm = (): EntryForm => ({
     password: '',
     privateKey: '',
     passphrase: '',
+    certificate: '',
 });

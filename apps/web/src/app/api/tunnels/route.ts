@@ -105,6 +105,7 @@ export async function POST(request: Request) {
             privateKey: server.privateKey ?? null,
             passphrase: server.passphrase ?? null,
             hostKey: server.hostKey.fingerprint,
+            certificate: server.certificate,
             jump: jumpClaim(server.jump),
             ...claims,
         });

@@ -104,6 +104,7 @@ interface SSHConfig {
     passphrase?: string;
     jump?: SSHJumpConfig | null;
     hostKey: HostKeyPin;
+    certificate?: string | null;
 }
 
 // PYTHON SCRIPTS (base64-encoded to avoid all shell quoting issues)
@@ -712,7 +713,7 @@ export async function runBenchmark(
 
         onProgress({ phase: 'connecting', message: 'Connecting via SSH…' });
         try {
-            connectSSH(client, buildConnectConfig(config), config.jump, config.hostKey);
+            connectSSH(client, buildConnectConfig(config), config.jump, config.hostKey, config.certificate);
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             onProgress({ phase: 'error', message: msg });

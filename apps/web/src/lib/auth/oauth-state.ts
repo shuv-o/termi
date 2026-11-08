@@ -17,6 +17,8 @@ const TTL_SECONDS = 600; // 10 minutes
 interface OAuthState {
     state: string;
     codeVerifier: string;
+    /** OpenID Connect: the nonce the ID token must carry. */
+    nonce?: string;
 }
 
 function getSecret(): string {
@@ -30,8 +32,9 @@ export async function setOAuthStateCookie(
     responseCookies: ResponseCookies,
     state: string,
     codeVerifier: string,
+    nonce?: string,
 ): Promise<void> {
-    const sealed = await sealData({ state, codeVerifier } satisfies OAuthState, {
+    const sealed = await sealData({ state, codeVerifier, nonce } satisfies OAuthState, {
         password: getSecret(),
         ttl: TTL_SECONDS,
     });

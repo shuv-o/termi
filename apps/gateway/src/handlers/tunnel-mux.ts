@@ -173,7 +173,8 @@ export class TunnelMuxHandler {
             targetHost = host;
             targetPort = port;
         } else {
-            if (!this.token.remoteHost || !this.token.remotePort) return fail('Tunnel target missing');
+            if (!this.token.remoteHost || !this.token.remotePort)
+                return fail('Tunnel target missing');
             targetHost = this.token.remoteHost;
             targetPort = this.token.remotePort;
         }
@@ -184,7 +185,9 @@ export class TunnelMuxHandler {
                 return;
             }
             if (err || !channel) {
-                return fail(`Could not reach ${targetHost}:${targetPort}: ${err?.message ?? 'unknown error'}`);
+                return fail(
+                    `Could not reach ${targetHost}:${targetPort}: ${err?.message ?? 'unknown error'}`,
+                );
             }
             this.attach(id, channel);
             this.send({ type: 'opened', id });
@@ -301,7 +304,13 @@ export class TunnelMuxHandler {
         });
 
         try {
-            connectSSH(this.ssh, tunnelConnectConfig(this.token), this.token.jump, this.token.hostKey);
+            connectSSH(
+                this.ssh,
+                tunnelConnectConfig(this.token),
+                this.token.jump,
+                this.token.hostKey,
+                this.token.certificate,
+            );
         } catch (err) {
             this.send({ type: 'error', message: 'Connection failed: ' + (err as Error).message });
             this.close();

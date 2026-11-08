@@ -90,9 +90,13 @@ function setupElectronTerminal(
         api.resize(tabId, terminal.cols, terminal.rows);
     };
     window.addEventListener('resize', handleResize);
+    // Panes resize without the window doing so (split dividers).
+    const resizeObserver = new ResizeObserver(() => handleResize());
+    if (terminal.element?.parentElement) resizeObserver.observe(terminal.element.parentElement);
 
     return () => {
         window.removeEventListener('resize', handleResize);
+        resizeObserver.disconnect();
         unsubData();
         unsubExit();
         api.kill(tabId);
@@ -181,9 +185,13 @@ function setupWebSocketTerminal(
         }
     };
     window.addEventListener('resize', handleResize);
+    // Panes resize without the window doing so (split dividers).
+    const resizeObserver = new ResizeObserver(() => handleResize());
+    if (terminal.element?.parentElement) resizeObserver.observe(terminal.element.parentElement);
 
     return () => {
         window.removeEventListener('resize', handleResize);
+        resizeObserver.disconnect();
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ type: 'close-session' }));
             ws.close(1000);

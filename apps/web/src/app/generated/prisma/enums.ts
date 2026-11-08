@@ -79,6 +79,19 @@ export const AuditAction = {
   GROUP_UPDATED: 'GROUP_UPDATED',
   GROUP_DELETED: 'GROUP_DELETED',
   GROUP_BROADCAST_RUN: 'GROUP_BROADCAST_RUN',
+  SERVERS_COMMAND_RUN: 'SERVERS_COMMAND_RUN',
+  TEAM_CREATED: 'TEAM_CREATED',
+  TEAM_DELETED: 'TEAM_DELETED',
+  TEAM_MEMBER_INVITED: 'TEAM_MEMBER_INVITED',
+  TEAM_MEMBER_JOINED: 'TEAM_MEMBER_JOINED',
+  TEAM_MEMBER_REMOVED: 'TEAM_MEMBER_REMOVED',
+  TEAM_ROLE_CHANGED: 'TEAM_ROLE_CHANGED',
+  TEAM_SERVER_ADDED: 'TEAM_SERVER_ADDED',
+  TEAM_SERVER_REMOVED: 'TEAM_SERVER_REMOVED',
+  SESSION_SHARED: 'SESSION_SHARED',
+  SESSION_JOINED: 'SESSION_JOINED',
+  SSH_SECURITY_KEY_ADDED: 'SSH_SECURITY_KEY_ADDED',
+  SSH_SECURITY_KEY_REMOVED: 'SSH_SECURITY_KEY_REMOVED',
   PASSKEY_REGISTERED: 'PASSKEY_REGISTERED',
   PASSKEY_REMOVED: 'PASSKEY_REMOVED',
   PASSKEY_USED: 'PASSKEY_USED',
@@ -128,7 +141,8 @@ export type TunnelKind = (typeof TunnelKind)[keyof typeof TunnelKind]
 
 
 export const OAuthProvider = {
-  GOOGLE: 'GOOGLE'
+  GOOGLE: 'GOOGLE',
+  OIDC: 'OIDC'
 } as const
 
 export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider]
@@ -142,3 +156,12 @@ export const InvitationStatus = {
 } as const
 
 export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus]
+
+
+export const TeamRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
+} as const
+
+export type TeamRole = (typeof TeamRole)[keyof typeof TeamRole]

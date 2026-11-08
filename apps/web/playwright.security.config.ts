@@ -7,7 +7,7 @@
  *   npm run test:security
  */
 import { defineConfig, devices } from '@playwright/test';
-import { appEnv, BASE, GATEWAY_PORT, WEB_PORT } from './e2e/security/env';
+import { appEnv, BASE, GATEWAY_PORT, OIDC_IDP, OIDC_IDP_PORT, WEB_PORT } from './e2e/security/env';
 
 export default defineConfig({
     testDir: './e2e/security',
@@ -21,6 +21,13 @@ export default defineConfig({
     globalTeardown: './e2e/security/global-teardown.ts',
     use: { baseURL: BASE, ...devices['Desktop Chrome'] },
     webServer: [
+        {
+            command: 'node e2e/security/fixtures/oidc-idp.mjs',
+            url: `${OIDC_IDP}/.well-known/openid-configuration`,
+            env: { OIDC_IDP_PORT: String(OIDC_IDP_PORT) },
+            reuseExistingServer: false,
+            timeout: 30_000,
+        },
         {
             command: `npx next dev --port ${WEB_PORT}`,
             url: `${BASE}/login`,

@@ -87,6 +87,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
 - **Google OAuth** — "Sign in with Google" support
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
+- **App lock** — lock after inactivity or on demand, enforced by the server; unlock with a password or passkey
+- **SSH certificates & agent forwarding** — log in with OpenSSH user certificates; forward your keys to a server (optionally approving each use) without the keys ever leaving Termi
 - **SSH host key verification** — each server's key is pinned on first connection (like `known_hosts`); a changed key is refused everywhere, reported, and can be reviewed and re-trusted from the server's page
 - **One-click server hardening** — scan a server's SSH and firewall setup, get a security score, and fix it automatically: key-only login, a dedicated admin user, root-login choice, fail2ban, unattended updates, firewall and SSH port move. Every change is armed with an on-server rollback and verified on a fresh login before Termi stores the new credentials
 
@@ -103,14 +105,19 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 ### ⚡ Productivity
 
 - **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard; press Enter on a server to connect straight away
+- **Split panes & workspaces** — up to four sessions side by side, stacked or in a grid, optional typing into all panes at once, and named workspaces that reopen a whole setup in one click
 - **Terminal search** — find text in the scrollback of SSH, Telnet, and local terminals (⌘F / Ctrl+Shift+F)
-- **Command snippets** — save frequently-used shell commands and run them into the active terminal with one click
+- **Command snippets** — save commands with `{{variables}}` (asked for each time, safely quoted with `|q`), type or run them in the active terminal, or run them on several servers at once with per-server output
+- **Command suggestions** — fish-style completions from your per-server history and snippets, kept in your browser; passwords and space-prefixed commands are never remembered
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
 - **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (Termius and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
 - **Session recording & playback** — record any SSH session and replay it later from Settings → Recordings, encrypted at rest
 
 ### 💻 Local Terminal
+
+- **FIDO2 security keys** — YubiKey and other FIDO2 keys as SSH keys: the private key stays on the device, each login is a touch
+- **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
 
 - Access your **local machine's shell** directly from the app
 - **Electron**: spawns PowerShell (Windows) or your default shell (macOS/Linux)
@@ -124,6 +131,9 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - Built-in **benchmark tool** with persisted history and a trend chart over time
 
 ### 🤝 Server Sharing
+
+- **Teams** — a shared vault of servers with owner / admin / member roles and email invitations; members connect, owners keep the credentials
+- **Shared live sessions** — invite someone to watch or work in your terminal; you approve each person and can remove them any time
 
 - Share server access with other users via invitation links
 - Per-server share management and revocation
@@ -370,6 +380,12 @@ npm run build:electron            # Package Electron app
 | `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`                   | Concurrent sessions per user; `0` = unlimited              |
 | `GOOGLE_CLIENT_ID`                 | —                     | Google OAuth client ID                                     |
 | `GOOGLE_CLIENT_SECRET`             | —                     | Google OAuth client secret                                 |
+| `OIDC_ISSUER`                      | —                     | Single sign-on: your OpenID Connect provider's issuer URL (Okta, Entra ID, Google Workspace, Keycloak…). Redirect URI: `<app>/api/auth/sso/callback` |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | —                | Single sign-on client credentials                          |
+| `OIDC_NAME`                        | `SSO`                 | Label for the "Sign in with …" button                     |
+| `OIDC_ALLOWED_DOMAINS`             | —                     | Only these email domains may sign in with SSO (comma-separated) |
+| `OIDC_ENFORCE_DOMAINS`             | —                     | These email domains must use SSO: password, Google and passkey sign-in and registration are refused |
+| `OIDC_TRUST_EMAIL`                 | `false`               | Accept emails without `email_verified` (for providers such as Entra ID that vouch for all emails) |
 | `SMTP_HOST`                        | —                     | SMTP host for email (verification, alerts, invites)        |
 | `SMTP_USER`                        | —                     | SMTP username                                              |
 | `SMTP_PASS`                        | —                     | SMTP password                                              |

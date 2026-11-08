@@ -35,7 +35,10 @@ export function WorkspaceTopBar({
     onModeChange,
     isFullscreen,
     onToggleFullscreen,
+    extra,
 }: {
+    /** Extra controls beside the terminal/transfer switch (the layout menu). */
+    extra?: React.ReactNode;
     layoutMode: LayoutMode;
     onToggleLayout: () => void;
     sidebarOpen: boolean;
@@ -99,6 +102,8 @@ export function WorkspaceTopBar({
             </div>
 
             <div className="flex-1" />
+
+            {extra}
 
             <div className="flex items-center gap-0.5 bg-secondary rounded-lg p-0.5">
                 {(

@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { getSession, createSession } from '@/lib/auth/session';
 import { exchangeGoogleCode, findOrCreateGoogleUser } from '@/lib/auth/google-oauth';
+import { ssoRequiredFor } from '@/lib/auth/oidc';
 import { consumeOAuthStateCookie, oauthStateCookieDeletion } from '@/lib/auth/oauth-state';
 import { sendEmailOTP } from '@/lib/auth/email-otp';
 import { prisma } from '@/lib/db';
@@ -40,6 +41,9 @@ export async function GET(request: Request) {
 
     try {
         const googleUser = await exchangeGoogleCode(code, oauthState.codeVerifier);
+        if (ssoRequiredFor(googleUser.email)) {
+            return deleteOAuthCookie(NextResponse.redirect(`${appUrl}/login?error=sso_required`));
+        }
         const { userId, email } = await findOrCreateGoogleUser(googleUser);
 
         const deviceInfo = request.headers.get('user-agent') || 'Unknown';

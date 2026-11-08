@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { certificateField } from '@/lib/security/certificate-field';
 import { getCurrentUser } from '@/lib/auth';
 import { getKeychainCredentials, createKeychainCredential } from '@/lib/services';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
@@ -14,6 +15,7 @@ const createSchema = z.object({
     password: z.string().optional(),
     privateKey: z.string().optional(),
     passphrase: z.string().optional(),
+    certificate: certificateField,
 });
 
 export async function GET() {

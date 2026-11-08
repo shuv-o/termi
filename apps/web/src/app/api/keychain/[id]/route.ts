@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { certificateField } from '@/lib/security/certificate-field';
 import { keychainReadRateLimit } from '@/lib/rate-limit';
 import { getCurrentUser } from '@/lib/auth';
 import {
@@ -20,6 +21,7 @@ const updateSchema = z.object({
     password: z.string().optional().nullable(),
     privateKey: z.string().optional().nullable(),
     passphrase: z.string().optional().nullable(),
+    certificate: certificateField,
 });
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -46,6 +48,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 hasPassword: !!entry.password,
                 hasPrivateKey: !!entry.privateKey,
                 hasPassphrase: !!entry.passphrase,
+                // Public, so it can be shown and edited like the label.
+                certificate: entry.certificate ?? null,
             },
         });
     } catch (error) {

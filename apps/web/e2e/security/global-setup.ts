@@ -38,7 +38,7 @@ export default async function globalSetup() {
 
     // Fresh database, built from migrations (as a new install would be).
     const pgEnv = { PGHOST: DB.host, PGPORT: DB.port, PGUSER: DB.user, PGPASSWORD: DB.password };
-    run('dropdb', ['--if-exists', DB.name], pgEnv);
+    run('dropdb', ['--if-exists', '--force', DB.name], pgEnv);
     run('createdb', [DB.name], pgEnv);
     run('npx', ['prisma', 'migrate', 'deploy'], appEnv());
 

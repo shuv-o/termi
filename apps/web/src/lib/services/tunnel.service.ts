@@ -39,6 +39,7 @@ export async function probeTunnelTarget(
         passphrase: server.passphrase,
         jump: server.jump,
         hostKey: server.hostKey,
+        certificate: server.certificate,
     };
 
     let client;

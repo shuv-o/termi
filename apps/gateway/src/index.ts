@@ -30,6 +30,7 @@ import {
     PersistentSessionStore,
     type PersistentSession,
 } from './sessions/PersistentSessionStore.js';
+import { announceGuests, answerJoin, fanOut, kickGuest, requestJoin } from './sessions/guests.js';
 
 dotenv.config({ path: '../../.env' });
 dotenv.config();
@@ -198,6 +199,7 @@ function createSink(session: PersistentSession): SSHOutputSink {
             if (session.attachedWs?.readyState === WebSocket.OPEN) {
                 session.attachedWs.send(data, { binary: true });
             }
+            fanOut(session, data);
         },
         onMessage(type: string, extra?: Record<string, unknown>) {
             if (session.isClosing) return;
@@ -363,7 +365,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         //   there is one. The target behind a bastion is dialed by the bastion
         //   (like `ssh -J`), so a private address there is expected.
         const dialedHost = tokenPayload.jump ? tokenPayload.jump.host : tokenPayload.host;
-        if (protocol !== 'local') {
+        // A guest joining a live session dials nothing (sessions/guests.ts).
+        const isGuest = protocol === 'ssh' && !!tokenPayload.join;
+        if (protocol !== 'local' && !isGuest) {
             const address =
                 process.env.ALLOW_PRIVATE_NETWORKS === 'true'
                     ? await resolveAllowingPrivate(dialedHost)
@@ -436,6 +440,30 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
         //   SSH: persistent sessions
 
+        if (protocol === 'ssh' && tokenPayload.join) {
+            //   Guest joining someone else's live session (sessions/guests.ts)
+            const join = tokenPayload.join;
+            const target = persistentSessions.get(join.sessionId);
+            if (
+                !target ||
+                target.isClosing ||
+                target.userId !== join.ownerId ||
+                target.serverId !== serverId
+            ) {
+                ws.send(
+                    JSON.stringify({ type: 'error', message: 'This shared session has ended' }),
+                );
+                ws.close(1000, 'Session not found');
+                return;
+            }
+            requestJoin(target, ws, {
+                userId: tokenPayload.userId,
+                email: join.email,
+                mode: join.mode,
+            });
+            return;
+        }
+
         if (protocol === 'ssh') {
             // If client doesn't send a sessionId (e.g. stale cached JS), generate one.
             // The session will still work but won't be reattachable by this browser.
@@ -470,6 +498,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
                 existing.attachedWs = ws;
                 existing.detachedAt = null; // reattached — stop the detached-grace clock
+                // The owner's new tab learns who's watching.
+                if (existing.guests.size) setTimeout(() => announceGuests(existing), 0);
 
                 // Replay buffered output as a raw binary frame (non-destructive
                 // snapshot). The client writes any binary frame straight to the
@@ -508,6 +538,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     detachedAt: null,
                     isClosing: false,
                     recording: null,
+                    guests: new Map(),
+                    joinRequests: new Map(),
                 };
 
                 const sink = createSink(session);
@@ -609,6 +641,22 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                             }
                             break;
                         }
+                        case 'join-response':
+                            answerJoin(session, message.id, message.allow);
+                            break;
+                        case 'kick':
+                            kickGuest(session, message.id);
+                            break;
+                        case 'sk-response':
+                            session.handler.answerSecurityKey(message);
+                            break;
+                        case 'agent-response':
+                            session.handler.answerAgentRequest(
+                                message.id,
+                                message.allow,
+                                message.forSession,
+                            );
+                            break;
                         case 'close-session':
                             persistentSessions.delete(resolvedSessionId);
                             ws.close(1000, 'Session closed');

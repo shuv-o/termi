@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/toast';
 
 import { KeychainEntryCard } from './_components/KeychainEntryCard';
 import { KeychainEntryModal } from './_components/KeychainEntryModal';
+import { SecurityKeysSection } from '@/components/ssh/SecurityKeysSection';
 import PasskeyRevealModal from '@/components/auth/PasskeyRevealModal';
 import { emptyForm, type EntryForm, type KeychainEntry } from './_components/types';
 
@@ -131,6 +132,7 @@ export default function KeychainPage() {
                     password: '',
                     privateKey: '',
                     passphrase: '',
+                    certificate: e.certificate ?? '',
                 });
                 setShowForm(true);
             }
@@ -167,6 +169,7 @@ export default function KeychainPage() {
                 password: form.authMethod === 'password' ? form.password || undefined : undefined,
                 privateKey: form.authMethod === 'key' ? form.privateKey || undefined : undefined,
                 passphrase: form.authMethod === 'key' ? form.passphrase || undefined : undefined,
+                certificate: form.authMethod === 'key' ? form.certificate.trim() || null : null,
             };
 
             const res = await fetch(editId ? `/api/keychain/${editId}` : '/api/keychain', {
@@ -269,6 +272,8 @@ export default function KeychainPage() {
                         ))}
                     </div>
                 )}
+
+                <SecurityKeysSection />
             </div>
 
             {revealFor && (

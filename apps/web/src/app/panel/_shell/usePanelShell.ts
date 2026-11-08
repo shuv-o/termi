@@ -139,7 +139,8 @@ export function usePanelShell() {
 
     // A failed /api/auth/me (expired session, network) means we're not signed in.
     useEffect(() => {
-        if (meError) router.push('/login');
+        // A locked session shows the lock screen (AppLock) instead.
+        if (meError && meError.message !== 'locked') router.push('/login');
     }, [meError, router]);
 
     useEffect(() => {

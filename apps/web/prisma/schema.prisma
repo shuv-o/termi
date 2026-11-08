@@ -54,6 +54,8 @@ model User {
   passkeyEnabled Boolean @default(false)
   /// "Passkey only": refuse password sign-in (needs a passkey; cleared when the last one is removed or on password reset)
   passwordLoginDisabled Boolean @default(false)
+  /// Lock the app after this many idle minutes (null = never).
+  lockAfterMinutes      Int?
 
   // Relations
   sessions            Session[]
@@ -74,6 +76,9 @@ model User {
   commandSnippets     CommandSnippet[]
   recordings          Recording[]
   tunnelSessions      TunnelSession[]
+  workspaces          Workspace[]
+  teamMemberships     TeamMember[]
+  sshSecurityKeys     SshSecurityKey[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -94,6 +99,8 @@ model Session {
   createdAt    DateTime @default(now())
   expiresAt    DateTime
   lastActiveAt DateTime @default(now())
+  /// Set while the app is locked (idle lock): every API but unlock refuses it.
+  lockedAt     DateTime?
 
   // Session can be revoked by user
   isRevoked     Boolean   @default(false)
@@ -153,6 +160,21 @@ model Server {
   password   String? // Encrypted (optional - for password auth)
   privateKey String? // Encrypted (optional - for SSH key auth)
   passphrase String? // Encrypted (optional - key passphrase)
+  // OpenSSH user certificate for privateKey (`ssh-ed25519-cert-v01@openssh.com
+  // AAAA…`). Public, like a public key, so stored as is.
+  certificate String?
+
+  // SSH agent forwarding: lets this server use the owner's keys (its own
+  // login key plus the chosen keychain keys) while a terminal session is
+  // open, without the keys ever leaving Termi. "off" | "on" | "confirm".
+  agentForwarding  String   @default("off")
+  agentKeychainIds String[] @default([])
+
+  // Sign in with a FIDO2 security key (terminal sessions only: someone has
+  // to touch the key). The server's sshd must accept
+  // webauthn-sk-ecdsa-sha2-nistp256@openssh.com.
+  securityKeyId String?
+  securityKey   SshSecurityKey? @relation(fields: [securityKeyId], references: [id], onDelete: SetNull)
 
   // Jump host (bastion): connect to this server *through* another of the
   // owner's SSH servers. One hop only. The target host is then dialed by the
@@ -204,6 +226,7 @@ model Server {
   jumpServer     Server?              @relation("JumpHost", fields: [jumpServerId], references: [id], onDelete: NoAction)
   jumpTargets    Server[]             @relation("JumpHost")
   hardeningRuns  ServerHardeningRun[]
+  teams          TeamServer[]
 
   @@index([userId])
   @@index([groupId])
@@ -387,6 +410,25 @@ enum AuditAction {
   GROUP_UPDATED
   GROUP_DELETED
   GROUP_BROADCAST_RUN
+  SERVERS_COMMAND_RUN
+
+  // Teams
+  TEAM_CREATED
+  TEAM_DELETED
+  TEAM_MEMBER_INVITED
+  TEAM_MEMBER_JOINED
+  TEAM_MEMBER_REMOVED
+  TEAM_ROLE_CHANGED
+  TEAM_SERVER_ADDED
+  TEAM_SERVER_REMOVED
+
+  // Shared live sessions
+  SESSION_SHARED
+  SESSION_JOINED
+
+  // FIDO2 security keys for SSH
+  SSH_SECURITY_KEY_ADDED
+  SSH_SECURITY_KEY_REMOVED
 
   // Passkey events
   PASSKEY_REGISTERED
@@ -657,6 +699,7 @@ model EmailOTP {
 
 enum OAuthProvider {
   GOOGLE
+  OIDC // single sign-on (OIDC_ISSUER); providerAccountId is "<issuer>|<sub>"
 }
 
 // KEYCHAIN – reusable credential sets
@@ -700,6 +743,8 @@ model KeychainCredential {
   password   String? // Encrypted (optional – password auth)
   privateKey String? // Encrypted (optional – SSH key auth)
   passphrase String? // Encrypted (optional – key passphrase)
+  // OpenSSH user certificate for privateKey (public, stored as is).
+  certificate String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -777,4 +822,130 @@ model ServerHardeningRun {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, createdAt])
+}
+
+// SAVED WORKSPACES
+
+/// A named set of terminal sessions and how they are split on screen, so a
+/// recurring setup (web + db + logs side by side) opens in one click.
+model Workspace {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+
+  /// [{ serverId: string | null (null = local terminal) }], in tab order.
+  tabs  Json
+  /// { layout: 'columns' | 'rows' | 'grid', panes: number[] (indexes into tabs), x, y }
+  split Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+// TEAMS
+
+enum TeamRole {
+  OWNER // everything, including deleting the team and changing roles
+  ADMIN // invite and remove members, remove any server from the team
+  MEMBER // connect to the team's servers, add servers they own
+}
+
+/// A group of users sharing a vault of servers. Each server stays owned (and
+/// its credentials sealed) by the user who added it; members can connect.
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     TeamMember[]
+  servers     TeamServer[]
+  invitations TeamInvitation[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model TeamServer {
+  id        String   @id @default(cuid())
+  teamId    String
+  serverId  String
+  addedById String
+  createdAt DateTime @default(now())
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, serverId])
+  @@index([serverId])
+}
+
+model TeamInvitation {
+  id          String   @id @default(cuid())
+  teamId      String
+  email       String
+  role        TeamRole @default(MEMBER)
+  /// SHA-256 of the token in the emailed link.
+  tokenHash   String   @unique
+  invitedById String
+  status      String   @default("PENDING") // PENDING | ACCEPTED | REVOKED
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+}
+
+/// A link that lets someone ask to join a live terminal session (watch, or
+/// type too). The owner still approves each person in the terminal.
+model SessionShare {
+  id        String    @id @default(cuid())
+  /// SHA-256 of the code in the link.
+  codeHash  String    @unique
+  ownerId   String
+  /// The gateway session id (PersistentSession.sessionId) being shared.
+  sessionId String
+  serverId  String
+  mode      String // "view" | "control"
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([ownerId])
+}
+
+/// A FIDO2 security key (YubiKey, …) used as an SSH key: the private key never
+/// leaves the device. Enrolled through WebAuthn; `publicKey` is the OpenSSH
+/// `sk-ecdsa-sha2-nistp256@openssh.com` key blob whose application is `rpId`.
+model SshSecurityKey {
+  id           String    @id @default(cuid())
+  userId       String
+  label        String
+  credentialId String    @unique // base64url
+  publicKey    String // OpenSSH key blob, base64
+  rpId         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  servers Server[]
+
+  @@index([userId])
 }

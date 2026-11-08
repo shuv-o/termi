@@ -47,7 +47,12 @@ export default function EditServerPage() {
                     host: s.host ?? '',
                     port: s.port ?? 22,
                     username: s.username ?? '',
-                    authMethod: s.hasPrivateKey ? 'key' : 'password',
+                    authMethod: s.securityKeyId
+                        ? 'securityKey'
+                        : s.hasPrivateKey
+                          ? 'key'
+                          : 'password',
+                    securityKeyId: s.securityKeyId ?? '',
                     // Secrets are never sent back to the browser; blank means "keep".
                     notes: s.notes ?? '',
                     tags: s.tags ?? [],
@@ -55,6 +60,9 @@ export default function EditServerPage() {
                     displayHeight: s.displayHeight ?? 1080,
                     rdpSecurity: (s.rdpSecurity ?? 'any') as RdpSecurity,
                     jumpServerId: s.jumpServerId ?? '',
+                    certificate: s.certificate ?? '',
+                    agentForwarding: s.agentForwarding ?? 'off',
+                    agentKeychainIds: s.agentKeychainIds ?? [],
                 });
             })
             .catch(() => router.push('/panel'))
@@ -97,8 +105,19 @@ export default function EditServerPage() {
                 if (form.privateKey.trim()) payload.privateKey = form.privateKey;
                 if (form.passphrase.trim()) payload.passphrase = form.passphrase;
             }
+            // Certificates are public: always sent, so clearing the field removes it.
+            payload.certificate = form.authMethod === 'key' ? form.certificate : null;
+            if (form.protocol === 'SSH') {
+                payload.agentForwarding = form.agentForwarding;
+                payload.agentKeychainIds = form.agentKeychainIds;
+            }
             // The server fills the secrets from this entry itself.
             if (state.keychainId) payload.keychainId = state.keychainId;
+            // Explicit null switches a server back to its password or key.
+            payload.securityKeyId =
+                form.protocol === 'SSH' && form.authMethod === 'securityKey' && form.securityKeyId
+                    ? form.securityKeyId
+                    : null;
 
             const res = await fetch(`/api/servers/${id}`, {
                 method: 'PATCH',

@@ -3,6 +3,7 @@
  */
 
 import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
+import { SSO_REQUIRED_MESSAGE, ssoRequiredFor } from './oidc';
 import { prisma } from '@/lib/db';
 import {
     hashPassword,
@@ -76,6 +77,7 @@ function verifyRecoveryCodeHash(code: string, stored: string): boolean {
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     const { email, password, name } = input;
+    if (ssoRequiredFor(email)) return { success: false, error: SSO_REQUIRED_MESSAGE };
 
     const existing = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
@@ -110,6 +112,8 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
     const { email, password, deviceInfo, ipAddress } = input;
+    // Domain policy, not account state: the same answer for every address there.
+    if (ssoRequiredFor(email)) return { success: false, error: SSO_REQUIRED_MESSAGE };
 
     const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
@@ -483,7 +487,8 @@ export async function getCurrentUser() {
     }
 
     const valid = await validateSession(session.sessionToken);
-    if (!valid) return null;
+    // A locked session is signed out for everything but unlocking.
+    if (!valid || valid.lockedAt) return null;
 
     const user = await prisma.user.findUnique({
         where: { id: session.userId },
@@ -500,11 +505,29 @@ export async function getCurrentUser() {
             isVerified: true,
             createdAt: true,
             passwordHash: true,
+            lockAfterMinutes: true,
         },
     });
 
     if (!user || !user.isActive) return null;
     return user;
+}
+
+/**
+ * The signed-in user of a *locked* session (for the lock screen and the
+ * unlock route), or null when the session isn't locked or isn't valid.
+ */
+export async function getLockedSessionUser() {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId || !session.sessionToken) return null;
+    const valid = await validateSession(session.sessionToken);
+    if (!valid?.lockedAt || valid.userId !== session.userId) return null;
+    const user = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { id: true, email: true, passwordHash: true, passkeyEnabled: true, isActive: true },
+    });
+    if (!user?.isActive) return null;
+    return { ...user, sessionToken: session.sessionToken, sessionRowId: valid.sessionId };
 }
 
 export async function changePassword(

@@ -183,33 +183,35 @@ export function MobileBottomNav({
             }}
         >
             <div className="glass flex w-full max-w-md items-center gap-0.5 rounded-2xl p-1 shadow-xl">
-                {navigation.map((nav) => {
-                    const isActive = isNavItemActive(nav.href, pathname);
-                    return (
-                        <Link
-                            key={nav.name}
-                            href={nav.href}
-                            aria-current={isActive ? 'page' : undefined}
-                            className={item(isActive)}
-                        >
-                            <nav.icon
-                                className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : ''}`}
-                            />
-                            <span
-                                className={`text-[11px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}
+                {navigation
+                    .filter((nav) => nav.mobile !== false)
+                    .map((nav) => {
+                        const isActive = isNavItemActive(nav.href, pathname);
+                        return (
+                            <Link
+                                key={nav.name}
+                                href={nav.href}
+                                aria-current={isActive ? 'page' : undefined}
+                                className={item(isActive)}
                             >
-                                {nav.name}
-                            </span>
-                            {/* Cursor mark under the active tab. */}
-                            {isActive && (
-                                <span
-                                    aria-hidden
-                                    className="absolute bottom-1 h-[3px] w-4 rounded-full bg-primary"
+                                <nav.icon
+                                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : ''}`}
                                 />
-                            )}
-                        </Link>
-                    );
-                })}
+                                <span
+                                    className={`text-[11px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}
+                                >
+                                    {nav.name}
+                                </span>
+                                {/* Cursor mark under the active tab. */}
+                                {isActive && (
+                                    <span
+                                        aria-hidden
+                                        className="absolute bottom-1 h-[3px] w-4 rounded-full bg-primary"
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
 
                 {isElectron && (
                     <button onClick={onOpenLocalTerminal} className={item(localTerminalActive)}>

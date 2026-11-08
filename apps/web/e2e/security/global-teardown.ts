@@ -8,7 +8,7 @@ export default async function globalTeardown() {
     rmSync(STATE_FILE, { force: true });
     if (!process.env.SEC_E2E_KEEP_DB) {
         try {
-            execFileSync('dropdb', ['--if-exists', DB.name], {
+            execFileSync('dropdb', ['--if-exists', '--force', DB.name], {
                 env: {
                     ...process.env,
                     PGHOST: DB.host,

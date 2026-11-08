@@ -5,6 +5,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { useTerminalSearch } from './TerminalSearch';
+import { useCommandSuggestions } from './CommandSuggestions';
 
 import '@xterm/xterm/css/xterm.css';
 
@@ -29,6 +30,8 @@ interface SSHTerminalProps {
     onSessionNotFound?: () => void;
     onReconnectReady?: (fn: () => void) => void;
     onRecordingChange?: (recording: boolean) => void;
+    /** Everything the user types, after it was sent (for broadcast typing). */
+    onInput?: (data: string) => void;
 }
 
 export default function SSHTerminal({
@@ -45,11 +48,16 @@ export default function SSHTerminal({
     onSessionNotFound,
     onReconnectReady,
     onRecordingChange,
+    onInput,
     onSearchReady,
 }: SSHTerminalProps) {
     const search = useTerminalSearch();
     const attachSearchRef = useRef(search.attach);
     attachSearchRef.current = search.attach;
+    const suggestions = useCommandSuggestions(serverId);
+    const suggestionsRef = useRef(suggestions);
+    suggestionsRef.current = suggestions;
+    const rootRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         onSearchReady?.(search.openSearch);
     }, [onSearchReady, search.openSearch]);
@@ -58,6 +66,26 @@ export default function SSHTerminal({
     const fitAddon = useRef<FitAddon | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const statusRef = useRef<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
+    // The server asking to use a forwarded key ("ask each time" agent forwarding).
+    const [agentPrompts, setAgentPrompts] = useState<
+        { id: string; comment: string; fingerprint: string }[]
+    >([]);
+    // Shared session: people asking to join, and people connected.
+    const [joinRequests, setJoinRequests] = useState<{ id: string; email: string; mode: string }[]>(
+        [],
+    );
+    // Signing in with a FIDO2 security key: waiting for the user's touch.
+    const [skPending, setSkPending] = useState(false);
+    const [guests, setGuests] = useState<{ id: string; email: string; mode: string }[]>([]);
+    const sendControl = (msg: Record<string, unknown>) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify(msg));
+    };
+    const answerAgent = (id: string, allow: boolean, forSession = false) => {
+        setAgentPrompts((list) => list.filter((p) => p.id !== id));
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({ type: 'agent-response', id, allow, forSession }));
+        }
+    };
     const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>(
         'connecting',
     );
@@ -76,6 +104,8 @@ export default function SSHTerminal({
     onReconnectReadyRef.current = onReconnectReady;
     const onRecordingChangeRef = useRef(onRecordingChange);
     onRecordingChangeRef.current = onRecordingChange;
+    const onInputRef = useRef(onInput);
+    onInputRef.current = onInput;
 
     const connectionTokenRef = useRef(connectionToken);
     connectionTokenRef.current = connectionToken;
@@ -223,6 +253,60 @@ export default function SSHTerminal({
                         onErrorRef.current?.(message.message);
                         break;
 
+                    case 'agent-request':
+                        if (typeof message.id === 'string') {
+                            setAgentPrompts((list) => [
+                                ...list.filter((p) => p.id !== message.id),
+                                {
+                                    id: message.id,
+                                    comment: String(message.comment ?? 'a key'),
+                                    fingerprint: String(message.fingerprint ?? ''),
+                                },
+                            ]);
+                        }
+                        break;
+
+                    case 'sk-sign':
+                        if (typeof message.id === 'string') {
+                            setSkPending(true);
+                            void signWithSecurityKey(message).then((assertion) => {
+                                setSkPending(false);
+                                ws.send(
+                                    JSON.stringify({
+                                        type: 'sk-response',
+                                        id: message.id,
+                                        assertion,
+                                    }),
+                                );
+                            });
+                        }
+                        break;
+
+                    case 'join-request':
+                        if (typeof message.id === 'string') {
+                            setJoinRequests((list) => [
+                                ...list.filter((r) => r.id !== message.id),
+                                {
+                                    id: message.id,
+                                    email: String(message.email ?? 'someone'),
+                                    mode: message.mode === 'control' ? 'control' : 'view',
+                                },
+                            ]);
+                        }
+                        break;
+
+                    case 'join-request-closed':
+                        setJoinRequests((list) => list.filter((r) => r.id !== message.id));
+                        break;
+
+                    case 'participants':
+                        setGuests(Array.isArray(message.guests) ? message.guests : []);
+                        break;
+
+                    case 'agent-request-expired':
+                        setAgentPrompts((list) => list.filter((p) => p.id !== message.id));
+                        break;
+
                     case 'record-started':
                         isRecordingRef.current = true;
                         onRecordingChangeRef.current?.(true);
@@ -295,6 +379,30 @@ export default function SSHTerminal({
         onReconnectReadyRef.current?.(reconnect);
     }, [reconnect]);
 
+    // App lock: close the connection (the gateway keeps the session running)
+    // and stay closed — reconnecting needs a fresh token, which a locked
+    // session can't get. Unlocking reattaches.
+    useEffect(() => {
+        const onLock = () => {
+            if (retryTimerRef.current) {
+                clearTimeout(retryTimerRef.current);
+                retryTimerRef.current = null;
+            }
+            if (wsRef.current) {
+                intentionalCloseRef.current = true;
+                wsRef.current.close();
+                terminalInstance.current?.writeln('\r\n\x1b[33mTermi is locked.\x1b[0m');
+            }
+        };
+        const onUnlock = () => reconnect();
+        window.addEventListener('termi-lock', onLock);
+        window.addEventListener('termi-unlock', onUnlock);
+        return () => {
+            window.removeEventListener('termi-lock', onLock);
+            window.removeEventListener('termi-unlock', onUnlock);
+        };
+    }, [reconnect]);
+
     useEffect(() => {
         if (!terminalRef.current) return;
 
@@ -337,9 +445,17 @@ export default function SSHTerminal({
         fitAddon.current = fit;
         terminal.loadAddon(fit);
         terminal.loadAddon(new WebLinksAddon());
-        attachSearchRef.current(terminal);
+        attachSearchRef.current(terminal, (e) => suggestionsRef.current.onKey(e));
         terminal.open(terminalRef.current);
         fit.fit();
+        const detachSuggestions = rootRef.current
+            ? suggestionsRef.current.attach(terminal, rootRef.current, (text) => {
+                  if (wsRef.current?.readyState === WebSocket.OPEN) {
+                      wsRef.current.send(TEXT_ENCODER.encode(text));
+                      onInputRef.current?.(text);
+                  }
+              })
+            : () => {};
 
         // Prevent native mobile keyboard from opening when terminal is tapped
         if (disableNativeKeyboard) {
@@ -358,7 +474,9 @@ export default function SSHTerminal({
                 // Send keystrokes as a raw binary frame; the gateway treats any
                 // binary frame as terminal input. Control stays JSON (resize/pong).
                 wsRef.current.send(TEXT_ENCODER.encode(data));
+                onInputRef.current?.(data);
             }
+            suggestionsRef.current.onUserData(data);
         });
 
         onKeyHandlerReadyRef.current?.((key) => terminal.input(key));
@@ -375,13 +493,18 @@ export default function SSHTerminal({
             }, 100);
         };
         window.addEventListener('resize', handleResize);
+        // Panes resize without the window doing so (split dividers, side panels).
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(terminalRef.current);
 
         terminal.write('Connecting to server...\r\n');
         retryCountRef.current = 0;
         connect().catch((err) => console.error('[SSHTerminal] initial connect error:', err));
 
         return () => {
+            detachSuggestions();
             window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             if (resizeTimer) clearTimeout(resizeTimer);
             if (retryTimerRef.current) {
                 clearTimeout(retryTimerRef.current);
@@ -397,7 +520,7 @@ export default function SSHTerminal({
     }, [connect]);
 
     return (
-        <div className="relative h-full">
+        <div ref={rootRef} className="relative h-full">
             <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
                 <span
                     className={`w-2 h-2 rounded-full ${
@@ -415,6 +538,172 @@ export default function SSHTerminal({
                 className="h-full terminal-container rounded-lg overflow-hidden"
             />
             {search.bar}
+            {suggestions.overlay}
+            {skPending && (
+                <div
+                    role="status"
+                    className="absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-lg border border-primary/40 bg-card/95 px-4 py-3 text-sm shadow-lg backdrop-blur"
+                >
+                    Touch your security key to sign in…
+                </div>
+            )}
+            {guests.length > 0 && (
+                <div
+                    data-testid="session-guests"
+                    className="absolute left-2 top-2 z-20 flex max-w-[60%] flex-wrap items-center gap-1 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] backdrop-blur"
+                >
+                    <span className="text-muted-foreground">In this session:</span>
+                    {guests.map((g) => (
+                        <span
+                            key={g.id}
+                            className="flex items-center gap-1 rounded bg-secondary px-1.5"
+                        >
+                            {g.email}
+                            <span className="text-muted-foreground">
+                                {g.mode === 'control' ? '(can type)' : '(watching)'}
+                            </span>
+                            <button
+                                type="button"
+                                aria-label={`Remove ${g.email}`}
+                                onClick={() => sendControl({ type: 'kick', id: g.id })}
+                                className="text-danger hover:underline"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
+                </div>
+            )}
+            {joinRequests[0] && (
+                <div
+                    role="alertdialog"
+                    aria-label="Join request"
+                    className="absolute left-1/2 top-3 z-30 w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-lg border border-primary/40 bg-card/95 p-3 shadow-lg backdrop-blur"
+                >
+                    <p className="text-sm font-medium">
+                        {joinRequests[0].email} wants to{' '}
+                        {joinRequests[0].mode === 'control' ? 'join and type in' : 'watch'} this
+                        session
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                        They&apos;ll see everything in this terminal
+                        {joinRequests[0].mode === 'control' ? ' and can type commands' : ''}. You
+                        can remove them at any time.
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                sendControl({
+                                    type: 'join-response',
+                                    id: joinRequests[0].id,
+                                    allow: true,
+                                });
+                                setJoinRequests((l) => l.slice(1));
+                            }}
+                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                        >
+                            Let in
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                sendControl({
+                                    type: 'join-response',
+                                    id: joinRequests[0].id,
+                                    allow: false,
+                                });
+                                setJoinRequests((l) => l.slice(1));
+                            }}
+                            className="rounded-md px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+                        >
+                            Deny
+                        </button>
+                    </div>
+                </div>
+            )}
+            {agentPrompts[0] && (
+                <div
+                    role="alertdialog"
+                    aria-label="Allow key use"
+                    className="absolute left-1/2 top-3 z-20 w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-lg border border-warning/40 bg-card/95 p-3 shadow-lg backdrop-blur"
+                >
+                    <p className="text-sm font-medium">The server wants to use your key</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        <span className="text-foreground">{agentPrompts[0].comment}</span>{' '}
+                        <span className="break-all font-mono">{agentPrompts[0].fingerprint}</span>
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                        Only allow it if you just ran something that needs it (git, ssh to another
+                        host).
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, true)}
+                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                        >
+                            Allow once
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, true, true)}
+                            className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium"
+                        >
+                            Allow for this session
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => answerAgent(agentPrompts[0].id, false)}
+                            className="rounded-md px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+                        >
+                            Deny
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
+}
+
+const fromB64url = (s: string) => {
+    const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+    return Uint8Array.from(b, (c) => c.charCodeAt(0));
+};
+const toB64url = (buf: ArrayBuffer) =>
+    btoa(String.fromCharCode(...new Uint8Array(buf)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+/**
+ * Sign the gateway's SSH challenge with a FIDO2 security key (WebAuthn). The
+ * challenge *is* the SSH data, which is what lets OpenSSH verify it.
+ */
+async function signWithSecurityKey(req: {
+    challenge?: unknown;
+    credentialId?: unknown;
+    rpId?: unknown;
+}): Promise<{ authenticatorData: string; clientDataJSON: string; signature: string } | null> {
+    if (typeof req.challenge !== 'string' || typeof req.credentialId !== 'string') return null;
+    try {
+        const cred = (await navigator.credentials.get({
+            publicKey: {
+                challenge: fromB64url(req.challenge),
+                allowCredentials: [{ type: 'public-key', id: fromB64url(req.credentialId) }],
+                rpId: typeof req.rpId === 'string' ? req.rpId : undefined,
+                userVerification: 'discouraged',
+                timeout: 60_000,
+            },
+        })) as PublicKeyCredential | null;
+        const r = cred?.response as AuthenticatorAssertionResponse | undefined;
+        if (!r) return null;
+        return {
+            authenticatorData: toB64url(r.authenticatorData),
+            clientDataJSON: toB64url(r.clientDataJSON),
+            signature: toB64url(r.signature),
+        };
+    } catch {
+        return null;
+    }
 }

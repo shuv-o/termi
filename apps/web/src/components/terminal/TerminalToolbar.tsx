@@ -33,6 +33,8 @@ import {
     Play,
     Keyboard as KeyboardIcon,
 } from 'lucide-react';
+import { useSnippetRunner } from './SnippetRunner';
+import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -132,6 +134,8 @@ interface Props {
 
 export default function TerminalToolbar({ onKey, onClose }: Props) {
     const [snippets, setSnippets] = useState<Snippet[]>([]);
+    const runner = useSnippetRunner();
+    const [runOn, setRunOn] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [managing, setManaging] = useState(false);
 
@@ -173,6 +177,7 @@ export default function TerminalToolbar({ onKey, onClose }: Props) {
 
     return (
         <div className="shrink-0 border-t border-border bg-card/60">
+            {runner.dialog}
             <div className="flex items-center gap-1.5 px-2 py-1.5 overflow-x-auto no-scrollbar">
                 <Wrench className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
 
@@ -201,7 +206,9 @@ export default function TerminalToolbar({ onKey, onClose }: Props) {
                                 ? `Run: ${snippet.command}`
                                 : `Type (does not run): ${snippet.command}`
                         }
-                        onClick={() => send(snippet.command, snippet.runImmediately)}
+                        onClick={() =>
+                            runner.run(snippet, (command) => send(command, snippet.runImmediately))
+                        }
                     />
                 ))}
 
@@ -232,7 +239,16 @@ export default function TerminalToolbar({ onKey, onClose }: Props) {
                     snippets={snippets}
                     onChange={loadSnippets}
                     onClose={() => setManaging(false)}
+                    onRunOnServers={(snippet) =>
+                        runner.run(snippet, (command) => {
+                            setManaging(false);
+                            setRunOn(command);
+                        })
+                    }
                 />
+            )}
+            {runOn !== null && (
+                <RunOnServersDialog initialCommand={runOn} onClose={() => setRunOn(null)} />
             )}
         </div>
     );
@@ -273,10 +289,12 @@ function SnippetManager({
     snippets,
     onChange,
     onClose,
+    onRunOnServers,
 }: {
     snippets: Snippet[];
     onChange: () => void;
     onClose: () => void;
+    onRunOnServers: (snippet: Snippet) => void;
 }) {
     const [label, setLabel] = useState('');
     const [command, setCommand] = useState('');
@@ -360,6 +378,14 @@ function SnippetManager({
                                         {snippet.runImmediately ? 'Runs' : 'Types'}
                                     </span>
                                     <button
+                                        onClick={() => onRunOnServers(snippet)}
+                                        title="Run on several servers"
+                                        aria-label={`Run ${snippet.label} on several servers`}
+                                        className="shrink-0 p-1 rounded-sm text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                    >
+                                        <Play className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
                                         onClick={() => remove(snippet.id)}
                                         title="Delete snippet"
                                         className="shrink-0 p-1 rounded-sm text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
@@ -389,12 +415,18 @@ function SnippetManager({
                                     id="snippet-command"
                                     value={command}
                                     onChange={(e) => setCommand(e.target.value)}
-                                    placeholder="journalctl -u nginx -n 100"
+                                    placeholder="journalctl -u nginx -n {{lines:100}}"
                                     maxLength={2000}
                                     className="font-mono text-xs"
                                 />
                             </div>
                         </div>
+                        <p className="text-xs text-muted-foreground">
+                            Add <code className="font-mono">{'{{name}}'}</code> or{' '}
+                            <code className="font-mono">{'{{name:default}}'}</code> to be asked for
+                            a value each time; <code className="font-mono">{'{{name|q}}'}</code>{' '}
+                            inserts it safely quoted.
+                        </p>
 
                         <label className="flex items-start gap-2 text-sm cursor-pointer">
                             <input

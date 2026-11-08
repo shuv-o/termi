@@ -11,6 +11,7 @@ export interface User {
     passwordLoginDisabled: boolean;
     isVerified: boolean;
     isGoogleUser: boolean;
+    lockAfterMinutes?: number | null;
 }
 
 export interface Passkey {
@@ -41,7 +42,8 @@ export type SectionId =
     | 'sessions'
     | 'activity'
     | 'recordings'
-    | 'tunnels';
+    | 'tunnels'
+    | 'terminal';
 
 export const SECTION_IDS: SectionId[] = [
     'profile',
@@ -52,6 +54,7 @@ export const SECTION_IDS: SectionId[] = [
     'activity',
     'recordings',
     'tunnels',
+    'terminal',
 ];
 
 /** Short labels used by the mobile section picker. */
@@ -64,6 +67,7 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     activity: 'Activity',
     recordings: 'Recordings',
     tunnels: 'Tunnels',
+    terminal: 'Terminal',
 };
 
 /**

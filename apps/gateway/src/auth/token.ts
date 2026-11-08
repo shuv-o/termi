@@ -40,6 +40,16 @@ export interface TokenPayload {
         | { kind: 'remote'; bindAddress: string; bindPort: number };
     /** The server's pinned SSH host key (`SHA256:…`); SSH is refused without it. */
     hostKey?: string | null;
+    /** OpenSSH user certificate for `privateKey`. */
+    certificate?: string | null;
+    /**
+     * 'ssh' only: forward an agent holding these keys (see handlers/agent.ts).
+     * Only ever set when the server's owner connects.
+     */
+    agent?: {
+        mode: 'on' | 'confirm';
+        keys: { comment: string; privateKey: string; passphrase?: string | null }[];
+    } | null;
     /**
      * Optional bastion. When present the gateway connects here first and
      * reaches `host:port` over a `forwardOut` channel, like `ssh -J`.
@@ -53,6 +63,20 @@ export interface TokenPayload {
         passphrase?: string | null;
         /** The bastion's pinned SSH host key. */
         hostKey?: string | null;
+        certificate?: string | null;
+    } | null;
+    /** 'ssh' only: sign in with this FIDO2 security key (signatures come from the browser). */
+    securityKey?: { credentialId: string; publicKey: string; rpId: string } | null;
+    /**
+     * 'ssh' only: this token joins someone else's live session as a guest
+     * (see sessions/guests.ts) instead of opening a connection. No
+     * credentials are carried.
+     */
+    join?: {
+        sessionId: string;
+        ownerId: string;
+        email: string;
+        mode: 'view' | 'control';
     } | null;
     exp: number;
 }
@@ -105,8 +129,16 @@ export async function validateToken(token: string): Promise<TokenPayload> {
             throw new Error('Invalid token protocol');
         }
 
-        // Remote protocols require host and username; local does not
-        if (payload.protocol !== 'local' && (!payload.host || !payload.username)) {
+        // Remote protocols require host and username; local does not, and nor
+        // does a guest joining someone's live session (it dials nothing).
+        const join = payload.join as TokenPayload['join'];
+        const isGuest =
+            payload.protocol === 'ssh' &&
+            !!join &&
+            typeof join.sessionId === 'string' &&
+            typeof join.ownerId === 'string' &&
+            (join.mode === 'view' || join.mode === 'control');
+        if (payload.protocol !== 'local' && !isGuest && (!payload.host || !payload.username)) {
             throw new Error('Invalid token payload');
         }
 

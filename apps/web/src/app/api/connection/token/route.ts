@@ -20,6 +20,7 @@ import { validateHost } from '@/lib/security/ssrf';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
+import { getKeychainCredentialById } from '@/lib/services/keychain.service';
 
 const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
@@ -95,6 +96,23 @@ export async function POST(request: Request) {
             return errorResponse('Invalid server host configuration', 400);
         }
 
+        // A security key needs someone to touch it, in a terminal, and it is
+        // the owner's own key.
+        if (server.securityKey) {
+            if (protocol !== 'ssh') {
+                return errorResponse(
+                    'This server signs in with a security key: open a terminal to connect',
+                    400,
+                );
+            }
+            if (server.ownerId !== user.id) {
+                return errorResponse(
+                    "This server signs in with its owner's security key, so only they can connect",
+                    403,
+                );
+            }
+        }
+
         // The gateway can't write to the database, so it only ever verifies
         // host keys against pins recorded here first.
         const pinned = await pinHostKeys(server, protocol);
@@ -115,6 +133,9 @@ export async function POST(request: Request) {
             colorDepth: server.colorDepth ?? 24,
             rdpSecurity: server.rdpSecurity ?? 'any',
             hostKey: server.hostKey.fingerprint,
+            certificate: server.certificate,
+            securityKey: server.securityKey,
+            agent: protocol === 'ssh' ? await agentClaim(server, user.id) : null,
             jump: jumpClaim(server.jump),
             ...forward,
         });
@@ -146,4 +167,50 @@ async function pinHostKeys(
             502,
         );
     }
+}
+
+const MAX_AGENT_KEYS = 10;
+
+/**
+ * The keys to forward for an interactive session, or null. Only the server's
+ * owner gets forwarding: the keys are the owner's own (the server's login key
+ * and chosen keychain entries), so a user it is shared with must never be
+ * able to use them through the remote host.
+ */
+async function agentClaim(
+    server: {
+        name: string;
+        ownerId: string;
+        agentForwarding: string;
+        agentKeychainIds: string[];
+        privateKey?: string;
+        passphrase?: string;
+    },
+    userId: string,
+) {
+    if (server.ownerId !== userId) return null;
+    if (server.agentForwarding !== 'on' && server.agentForwarding !== 'confirm') return null;
+    const keys: { comment: string; privateKey: string; passphrase: string | null }[] = [];
+    if (server.privateKey?.trim()) {
+        keys.push({
+            comment: `${server.name} login key`,
+            privateKey: server.privateKey,
+            passphrase: server.passphrase ?? null,
+        });
+    }
+    for (const id of server.agentKeychainIds.slice(0, MAX_AGENT_KEYS)) {
+        const entry = await getKeychainCredentialById(id, userId);
+        if (entry?.privateKey) {
+            keys.push({
+                comment: entry.label,
+                privateKey: entry.privateKey,
+                passphrase: entry.passphrase ?? null,
+            });
+        }
+    }
+    if (keys.length === 0) return null;
+    return {
+        mode: server.agentForwarding as 'on' | 'confirm',
+        keys: keys.slice(0, MAX_AGENT_KEYS),
+    };
 }

@@ -87,13 +87,14 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
 
     const isSSHProto = isSshLike(form.protocol);
     const hasAuth =
-        !!keychainId || form.authMethod === 'password'
-            ? !!form.password.trim()
-            : !!form.privateKey.trim();
+        !!keychainId ||
+        (form.authMethod === 'password' ? !!form.password.trim() : !!form.privateKey.trim());
     const canTest = !!(
         form.host.trim() &&
         form.port > 0 &&
         form.username.trim() &&
+        // A security key needs someone to touch it: there's nobody at a test.
+        form.authMethod !== 'securityKey' &&
         (!isSSHProto || hasAuth)
     );
 
@@ -113,6 +114,10 @@ export function useServerForm(initialValues?: Partial<ServerFormValues>) {
                     password: form.authMethod === 'password' ? form.password : undefined,
                     privateKey: form.authMethod === 'key' ? form.privateKey : undefined,
                     passphrase: form.authMethod === 'key' ? form.passphrase : undefined,
+                    certificate:
+                        form.authMethod === 'key' && form.certificate.trim()
+                            ? form.certificate
+                            : undefined,
                     jumpServerId:
                         form.protocol !== 'TELNET' && form.jumpServerId
                             ? form.jumpServerId

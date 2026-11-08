@@ -1,6 +1,7 @@
 'use client';
 
 import { SessionsProvider } from './sessions-context';
+import { AppLock } from './_shell/AppLock';
 import SessionsWorkspace from './sessions-workspace';
 import StarNudge from '@/components/common/StarNudge';
 import { ToastProvider } from '@/components/ui/toast';
@@ -27,6 +28,8 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 aria-label="Loading"
             >
                 <span className="cursor-block cursor-waiting" />
+                {/* A locked session has no user until it's unlocked. */}
+                <AppLock lockAfterMinutes={null} />
             </div>
         );
     }
@@ -39,6 +42,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="min-h-screen bg-background">
+            <AppLock lockAfterMinutes={user.lockAfterMinutes ?? null} />
             <DesktopSidebar
                 user={user}
                 pathname={pathname}

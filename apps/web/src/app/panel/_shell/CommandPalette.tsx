@@ -13,10 +13,13 @@ import {
     Play,
     Plus,
     Server,
+    Users,
     Settings as SettingsIcon,
     Shield,
     SquareTerminal,
     UserCog,
+    Lock,
+    Cable,
 } from 'lucide-react';
 import {
     CommandDialog,
@@ -34,6 +37,9 @@ import { protocolIcons } from '@/lib/protocol-style';
 import { connectHref } from '@/lib/connect-route';
 import type { Snippet } from '@/components/terminal/TerminalToolbar';
 import { NewSnippetDialog } from './NewSnippetDialog';
+import { useSnippetRunner } from '@/components/terminal/SnippetRunner';
+import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
+import { LOCK_NOW_EVENT } from './AppLock';
 import { useSessionsContext } from '../sessions-context';
 import type { ServerItem } from '../_dashboard/types';
 import type { Group } from '../groups/_components/types';
@@ -64,6 +70,7 @@ export function CommandPalette() {
     const { activeTabId, sendToSession, sessions } = useSessionsContext();
     const [open, setOpen] = useState(false);
     const [showNewSnippet, setShowNewSnippet] = useState(false);
+    const [showRunOn, setShowRunOn] = useState(false);
     // cmdk's onSelect carries no event, so the modifier is tracked here:
     // Enter connects, Shift+Enter (or Shift+click) opens the server's page.
     const shiftHeld = useRef(false);
@@ -137,19 +144,23 @@ export function CommandPalette() {
 
     // Types it into the active session's active shell if one exists; otherwise
     // falls back to the clipboard so the action never silently does nothing.
+    const snippetRunner = useSnippetRunner();
     const runSnippet = useCallback(
         (snippet: Snippet) => {
             setOpen(false);
-            const text = snippet.runImmediately ? `${snippet.command}\r` : snippet.command;
-            if (!sendToSession(activeTabId, text)) {
-                navigator.clipboard.writeText(snippet.command).catch(() => {});
-            }
+            snippetRunner.run(snippet, (command) => {
+                const text = snippet.runImmediately ? `${command}\r` : command;
+                if (!sendToSession(activeTabId, text)) {
+                    navigator.clipboard.writeText(command).catch(() => {});
+                }
+            });
         },
-        [activeTabId, sendToSession],
+        [activeTabId, sendToSession, snippetRunner],
     );
 
     return (
         <>
+            {snippetRunner.dialog}
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <DialogTitle className="sr-only">Command palette</DialogTitle>
                 <CommandInput placeholder="Connect to a server, or search anything…" />
@@ -221,6 +232,13 @@ export function CommandPalette() {
                             Open local terminal
                         </CommandItem>
                         <CommandItem
+                            value="serial console usb cable com port switch router"
+                            onSelect={() => go('/panel/serial')}
+                        >
+                            <Cable />
+                            Serial console
+                        </CommandItem>
+                        <CommandItem
                             value="new snippet command create"
                             onSelect={() => {
                                 setOpen(false);
@@ -229,6 +247,16 @@ export function CommandPalette() {
                         >
                             <SquareTerminal />
                             New snippet
+                        </CommandItem>
+                        <CommandItem
+                            value="run command on several servers broadcast multiple"
+                            onSelect={() => {
+                                setOpen(false);
+                                setShowRunOn(true);
+                            }}
+                        >
+                            <Play />
+                            Run a command on several servers
                         </CommandItem>
                     </CommandGroup>
 
@@ -252,6 +280,23 @@ export function CommandPalette() {
                         >
                             <BookKey />
                             Keychain
+                        </CommandItem>
+                        <CommandItem
+                            value="teams team vault members"
+                            onSelect={() => go('/panel/teams')}
+                        >
+                            <Users />
+                            Teams
+                        </CommandItem>
+                        <CommandItem
+                            value="lock termi now screen"
+                            onSelect={() => {
+                                setOpen(false);
+                                window.dispatchEvent(new Event(LOCK_NOW_EVENT));
+                            }}
+                        >
+                            <Lock />
+                            Lock Termi now
                         </CommandItem>
                         <CommandItem value="groups" onSelect={() => go('/panel/groups')}>
                             <FolderOpen />
@@ -356,6 +401,7 @@ export function CommandPalette() {
                     </span>
                 </div>
             </CommandDialog>
+            {showRunOn && <RunOnServersDialog onClose={() => setShowRunOn(false)} />}
             <NewSnippetDialog
                 open={showNewSnippet}
                 onClose={() => setShowNewSnippet(false)}

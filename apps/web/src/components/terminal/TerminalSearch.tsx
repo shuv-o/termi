@@ -34,7 +34,11 @@ export function useTerminalSearch() {
     const termRef = useRef<Terminal | null>(null);
     const [open, setOpen] = useState(false);
 
-    const attach = useCallback((terminal: Terminal) => {
+    /**
+     * `next` handles every other key (xterm allows only one custom key
+     * handler per terminal); return false from it to keep a key from the shell.
+     */
+    const attach = useCallback((terminal: Terminal, next?: (e: KeyboardEvent) => boolean) => {
         const addon = new SearchAddon();
         terminal.loadAddon(addon);
         addonRef.current = addon;
@@ -45,7 +49,7 @@ export function useTerminalSearch() {
                 setOpen(true);
                 return false;
             }
-            return true;
+            return next ? next(e) : true;
         });
     }, []);
 

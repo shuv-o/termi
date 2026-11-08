@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain, session, Menu } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, session, Menu, dialog } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -398,6 +398,7 @@ function createWindow(appUrl) {
         },
         ...(iconPath ? { icon: iconPath } : {}),
     });
+    setupSerialPorts(win);
 
     if (isMaximized) win.maximize();
 
@@ -503,6 +504,47 @@ function isTrustedSender(event) {
     } catch {
         return false;
     }
+}
+
+/** True for a Termi page (app origin, not a /tunnel/ page) at `url`. */
+function isAppUrl(url) {
+    try {
+        const u = new URL(url);
+        return u.origin === new URL(REMOTE_URL).origin && !u.pathname.startsWith('/tunnel/');
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Web Serial (Settings → Serial console): Electron has no built-in device
+ * chooser, so offer one here — and only to Termi's own pages, never to a
+ * tunneled app or anything else that ends up in the window.
+ */
+function setupSerialPorts(win) {
+    const ses = win.webContents.session;
+    ses.on('select-serial-port', (event, portList, webContents, callback) => {
+        event.preventDefault();
+        if (!isAppUrl(webContents.getURL()) || portList.length === 0) return callback('');
+        if (portList.length === 1) return callback(portList[0].portId);
+        const labels = portList.map((p) => p.displayName || p.portName || p.portId);
+        dialog
+            .showMessageBox(win, {
+                type: 'question',
+                message: 'Choose a serial device',
+                buttons: [...labels, 'Cancel'],
+                cancelId: labels.length,
+            })
+            .then(({ response }) =>
+                callback(response < portList.length ? portList[response].portId : ''),
+            )
+            .catch(() => callback(''));
+    });
+    // Serial access only for Termi's own pages; every other check keeps
+    // Electron's default (allowed).
+    ses.setPermissionCheckHandler((_wc, permission, origin) =>
+        permission === 'serial' ? isAppUrl(origin) : true,
+    );
 }
 
 function assertTrustedSender(event) {

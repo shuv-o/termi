@@ -137,3 +137,43 @@ export type ServerShare = Prisma.ServerShareModel
  * One "secure this server" run (lib/services/hardening/harden.service.ts).
  */
 export type ServerHardeningRun = Prisma.ServerHardeningRunModel
+/**
+ * Model Workspace
+ * A named set of terminal sessions and how they are split on screen, so a
+ * recurring setup (web + db + logs side by side) opens in one click.
+ */
+export type Workspace = Prisma.WorkspaceModel
+/**
+ * Model Team
+ * A group of users sharing a vault of servers. Each server stays owned (and
+ * its credentials sealed) by the user who added it; members can connect.
+ */
+export type Team = Prisma.TeamModel
+/**
+ * Model TeamMember
+ * 
+ */
+export type TeamMember = Prisma.TeamMemberModel
+/**
+ * Model TeamServer
+ * 
+ */
+export type TeamServer = Prisma.TeamServerModel
+/**
+ * Model TeamInvitation
+ * 
+ */
+export type TeamInvitation = Prisma.TeamInvitationModel
+/**
+ * Model SessionShare
+ * A link that lets someone ask to join a live terminal session (watch, or
+ * type too). The owner still approves each person in the terminal.
+ */
+export type SessionShare = Prisma.SessionShareModel
+/**
+ * Model SshSecurityKey
+ * A FIDO2 security key (YubiKey, …) used as an SSH key: the private key never
+ * leaves the device. Enrolled through WebAuthn; `publicKey` is the OpenSSH
+ * `sk-ecdsa-sha2-nistp256@openssh.com` key blob whose application is `rpId`.
+ */
+export type SshSecurityKey = Prisma.SshSecurityKeyModel

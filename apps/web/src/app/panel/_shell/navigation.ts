@@ -1,4 +1,4 @@
-import { BookKey, FolderOpen, Monitor, Server, Settings } from 'lucide-react';
+import { BookKey, FolderOpen, Monitor, Server, Settings, Users } from 'lucide-react';
 
 export interface PanelUser {
     id: string;
@@ -8,6 +8,8 @@ export interface PanelUser {
     isVerified: boolean;
     isGoogleUser: boolean;
     createdAt: string;
+    /** Lock after this many idle minutes; null = never. */
+    lockAfterMinutes?: number | null;
 }
 
 export const navigation = [
@@ -15,6 +17,8 @@ export const navigation = [
     { name: 'Sessions', href: '/panel/sessions', icon: Monitor },
     { name: 'Keychain', href: '/panel/keychain', icon: BookKey },
     { name: 'Groups', href: '/panel/groups', icon: FolderOpen },
+    // Not in the phone tab bar (no room); reachable from the command palette.
+    { name: 'Teams', href: '/panel/teams', icon: Users, mobile: false },
     { name: 'Settings', href: '/panel/settings', icon: Settings },
 ];
 

@@ -39,6 +39,7 @@ function toSFTPConfig(
         passphrase: server.passphrase ?? undefined,
         jump: server.jump,
         hostKey: server.hostKey,
+        certificate: server.certificate,
     };
 }
 
