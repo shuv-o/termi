@@ -1,7 +1,7 @@
 # Termi Gateway compose.Dockerfile
 
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 
 # node-pty requires native build tools
@@ -21,7 +21,7 @@ COPY apps/gateway ./apps/gateway
 RUN npm run build --workspace=apps/gateway
 
 # Stage 2: Production
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
