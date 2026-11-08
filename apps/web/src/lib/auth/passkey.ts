@@ -17,7 +17,7 @@ import {
 import type {
     RegistrationResponseJSON,
     AuthenticationResponseJSON,
-    AuthenticatorTransportFuture,
+    AuthenticatorTransport,
 } from '@simplewebauthn/server';
 import { prisma } from '@/lib/db';
 import { createSession, getSession } from './session';
@@ -72,7 +72,7 @@ export async function generatePasskeyRegistrationOptions(userId: string) {
         timeout: 30000,
         excludeCredentials: user.passkeys.map((p) => ({
             id: p.credentialID,
-            transports: p.transports as AuthenticatorTransportFuture[],
+            transports: p.transports as AuthenticatorTransport[],
         })),
         authenticatorSelection: {
             residentKey: 'preferred',
@@ -178,7 +178,7 @@ export async function generatePasskeyAuthenticationOptions(email?: string) {
     const { rpID } = getRpDetails();
 
     let userId: string | undefined;
-    let allowCredentials: { id: string; transports: AuthenticatorTransportFuture[] }[] = [];
+    let allowCredentials: { id: string; transports: AuthenticatorTransport[] }[] = [];
 
     if (email) {
         const user = await prisma.user.findUnique({
@@ -190,7 +190,7 @@ export async function generatePasskeyAuthenticationOptions(email?: string) {
             userId = user.id;
             allowCredentials = user.passkeys.map((p) => ({
                 id: p.credentialID,
-                transports: p.transports as AuthenticatorTransportFuture[],
+                transports: p.transports as AuthenticatorTransport[],
             }));
         } else {
             // No account, or one without passkeys: answer with a credential id
@@ -284,7 +284,7 @@ export async function verifyPasskeyAuthentication(
                 id: passkey.credentialID,
                 publicKey: new Uint8Array(passkey.credentialPublicKey),
                 counter: Number(passkey.counter),
-                transports: passkey.transports as AuthenticatorTransportFuture[],
+                transports: passkey.transports as AuthenticatorTransport[],
             },
             requireUserVerification: false,
         });

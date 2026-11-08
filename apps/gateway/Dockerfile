@@ -5,7 +5,7 @@
 # `npm ci` installs exactly what the lockfile says or fails.
 
 # Stage 1: Build
-FROM node:20-bookworm-slim AS builder
+FROM node:25-bookworm-slim AS builder
 WORKDIR /app
 
 # node-pty requires native build tools
@@ -29,7 +29,7 @@ COPY apps/gateway ./apps/gateway
 RUN npm run build --workspace=apps/gateway
 
 # Stage 2: Production
-FROM node:20-bookworm-slim AS runner
+FROM node:25-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

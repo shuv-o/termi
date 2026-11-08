@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Star, GitFork, Github } from 'lucide-react';
+import { Star, GitFork } from 'lucide-react';
+import { Github } from '@/components/icons/brand';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -67,14 +68,15 @@ export default async function StarOnGitHub() {
         <section className="border-t border-border px-4 py-16 sm:px-6">
             <div className="mx-auto max-w-6xl">
                 <Card className="relative overflow-hidden p-6 sm:p-8">
-
                     <div className="relative flex flex-col items-start gap-6 md:flex-row md:items-center">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-warning/25 bg-warning/10">
                             <Star className="h-6 w-6 text-warning" />
                         </div>
 
                         <div className="flex-1">
-                            <h2 className="mb-2 text-xl font-semibold tracking-[-0.01em] sm:text-2xl">Enjoying Termi? Star it on GitHub</h2>
+                            <h2 className="mb-2 text-xl font-semibold tracking-[-0.01em] sm:text-2xl">
+                                Enjoying Termi? Star it on GitHub
+                            </h2>
                             <p className="text-muted-foreground max-w-xl">
                                 Termi is free, open source and MIT licensed. A star costs you
                                 nothing, helps other developers find the project, and keeps it
