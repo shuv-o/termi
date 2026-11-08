@@ -29,6 +29,8 @@ interface SSHTerminalProps {
     onSessionNotFound?: () => void;
     onReconnectReady?: (fn: () => void) => void;
     onRecordingChange?: (recording: boolean) => void;
+    /** Everything the user types, after it was sent (for broadcast typing). */
+    onInput?: (data: string) => void;
 }
 
 export default function SSHTerminal({
@@ -45,6 +47,7 @@ export default function SSHTerminal({
     onSessionNotFound,
     onReconnectReady,
     onRecordingChange,
+    onInput,
     onSearchReady,
 }: SSHTerminalProps) {
     const search = useTerminalSearch();
@@ -76,6 +79,8 @@ export default function SSHTerminal({
     onReconnectReadyRef.current = onReconnectReady;
     const onRecordingChangeRef = useRef(onRecordingChange);
     onRecordingChangeRef.current = onRecordingChange;
+    const onInputRef = useRef(onInput);
+    onInputRef.current = onInput;
 
     const connectionTokenRef = useRef(connectionToken);
     connectionTokenRef.current = connectionToken;
@@ -358,6 +363,7 @@ export default function SSHTerminal({
                 // Send keystrokes as a raw binary frame; the gateway treats any
                 // binary frame as terminal input. Control stays JSON (resize/pong).
                 wsRef.current.send(TEXT_ENCODER.encode(data));
+                onInputRef.current?.(data);
             }
         });
 
@@ -375,6 +381,9 @@ export default function SSHTerminal({
             }, 100);
         };
         window.addEventListener('resize', handleResize);
+        // Panes resize without the window doing so (split dividers, side panels).
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(terminalRef.current);
 
         terminal.write('Connecting to server...\r\n');
         retryCountRef.current = 0;
@@ -382,6 +391,7 @@ export default function SSHTerminal({
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             if (resizeTimer) clearTimeout(resizeTimer);
             if (retryTimerRef.current) {
                 clearTimeout(retryTimerRef.current);

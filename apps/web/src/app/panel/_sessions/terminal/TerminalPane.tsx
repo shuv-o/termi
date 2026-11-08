@@ -11,6 +11,9 @@ import type { SessionServerMeta } from './ServerMeta';
 import { TunnelDialog } from './TunnelDialog';
 import { useShells } from './useShells';
 import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
+import type { PaneRect } from '../split';
+
+const TEXT_ENCODER = new TextEncoder();
 
 const SSHTerminal = dynamic(() => import('@/components/terminal/SSHTerminal'), { ssr: false });
 const LocalTerminal = dynamic(() => import('@/components/terminal/LocalTerminal'), { ssr: false });
@@ -94,8 +97,15 @@ export function TerminalPane({
     toggleFiles,
     removeSession,
     onCopyPassword,
+    rect = null,
+    isFocused = isActive,
+    inSplit = false,
+    onFocus,
+    onSplit,
+    onUnsplit,
 }: {
     session: Session;
+    /** On screen (the only session shown, or one of the split panes). */
     isActive: boolean;
     mode: 'terminal' | 'transfer';
     /** Host/username/port/hasPassword from the cached server list; `null` for local terminals. */
@@ -108,6 +118,14 @@ export function TerminalPane({
     toggleFiles: (tabId: string) => void;
     removeSession: (tabId: string) => void;
     onCopyPassword: () => void;
+    /** Where this pane sits in a split (fractions of the workspace); null = all of it. */
+    rect?: PaneRect | null;
+    /** Receives keyboard shortcuts and menu commands (the focused split pane). */
+    isFocused?: boolean;
+    inSplit?: boolean;
+    onFocus?: () => void;
+    onSplit?: (direction: 'right' | 'down') => void;
+    onUnsplit?: () => void;
 }) {
     const [showKeyboard, setShowKeyboard] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
@@ -119,7 +137,7 @@ export function TerminalPane({
     // channel open every couple of seconds is pure waste.
     const [showMetrics, setShowMetrics] = useState(false);
 
-    const { registerSendHandler } = useSessionsContext();
+    const { registerSendHandler, registerRawSender, relayInput } = useSessionsContext();
     // Per-shell "open find bar" functions, handed up by each terminal.
     const searchOpeners = useRef(new Map<string, () => void>());
 
@@ -146,6 +164,18 @@ export function TerminalPane({
         return () => registerSendHandler(session.tabId, null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session.tabId, session.type, activeShellId, registerSendHandler]);
+
+    // Broadcast typing: other panes write straight to this shell's connection,
+    // bypassing xterm, so their input isn't relayed back out again.
+    useEffect(() => {
+        if (session.type === 'local') return;
+        registerRawSender(session.tabId, (data) => {
+            const ws = wsRefs.current.get(activeShellId);
+            if (ws?.readyState === WebSocket.OPEN) ws.send(TEXT_ENCODER.encode(data));
+        });
+        return () => registerRawSender(session.tabId, null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session.tabId, session.type, activeShellId, registerRawSender]);
 
     useEffect(() => {
         const check = () => {
@@ -185,7 +215,7 @@ export function TerminalPane({
     useEffect(() => {
         const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
         if (!api?.onCommand) return;
-        if (!isActive || session.type === 'local') return;
+        if (!isFocused || session.type === 'local') return;
 
         return api.onCommand((command) => {
             switch (command) {
@@ -210,7 +240,7 @@ export function TerminalPane({
             }
         });
     }, [
-        isActive,
+        isFocused,
         session.type,
         shells,
         activeShellId,
@@ -231,13 +261,30 @@ export function TerminalPane({
 
     return (
         <div
-            className="absolute inset-0 flex flex-col"
+            className={`absolute flex flex-col ${inSplit ? 'border border-border/60' : ''}`}
             style={{
+                left: `${(rect?.left ?? 0) * 100}%`,
+                top: `${(rect?.top ?? 0) * 100}%`,
+                width: `${(rect?.width ?? 1) * 100}%`,
+                height: `${(rect?.height ?? 1) * 100}%`,
                 visibility: visible ? 'visible' : 'hidden',
                 pointerEvents: visible ? 'auto' : 'none',
             }}
+            onPointerDownCapture={onFocus}
+            onFocusCapture={onFocus}
+            data-pane={session.tabId}
+            data-focused={inSplit && isFocused ? 'true' : undefined}
         >
+            {inSplit && isFocused && visible && (
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-30 ring-2 ring-inset ring-primary/50"
+                />
+            )}
             <TerminalPaneHeader
+                compact={inSplit}
+                onSplit={onSplit}
+                onUnsplit={onUnsplit}
                 session={session}
                 serverMeta={serverMeta}
                 shells={shells}
@@ -247,7 +294,9 @@ export function TerminalPane({
                 onAddShell={addShell}
                 onReconnectShell={() => reconnectShell(activeShellId, activeShellIndex === 0)}
                 onFind={() =>
-                    searchOpeners.current.get(session.type === 'local' ? 'local' : activeShellId)?.()
+                    searchOpeners.current.get(
+                        session.type === 'local' ? 'local' : activeShellId,
+                    )?.()
                 }
                 onCopyPassword={onCopyPassword}
                 onToggleFiles={() => {
@@ -369,6 +418,10 @@ export function TerminalPane({
                                                 }}
                                                 onSessionNotFound={() =>
                                                     renewShell(shell.id, isFirst)
+                                                }
+                                                onInput={(data) =>
+                                                    shell.id === activeShellId &&
+                                                    relayInput(session.tabId, data)
                                                 }
                                                 onRecordingChange={(recording) =>
                                                     setRecordingShellId((prev) =>

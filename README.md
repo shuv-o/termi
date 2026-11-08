@@ -103,6 +103,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 ### ⚡ Productivity
 
 - **Global command palette** (⌘K / Ctrl+K) — jump to any server, group, keychain entry, or settings section without leaving the keyboard; press Enter on a server to connect straight away
+- **Split panes & workspaces** — up to four sessions side by side, stacked or in a grid, optional typing into all panes at once, and named workspaces that reopen a whole setup in one click
 - **Terminal search** — find text in the scrollback of SSH, Telnet, and local terminals (⌘F / Ctrl+Shift+F)
 - **Command snippets** — save frequently-used shell commands and run them into the active terminal with one click
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view

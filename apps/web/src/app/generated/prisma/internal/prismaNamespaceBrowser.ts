@@ -72,7 +72,8 @@ export const ModelName = {
   KeychainCredential: 'KeychainCredential',
   ServerInvitation: 'ServerInvitation',
   ServerShare: 'ServerShare',
-  ServerHardeningRun: 'ServerHardeningRun'
+  ServerHardeningRun: 'ServerHardeningRun',
+  Workspace: 'Workspace'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -461,6 +462,19 @@ export const ServerHardeningRunScalarFieldEnum = {
 } as const
 
 export type ServerHardeningRunScalarFieldEnum = (typeof ServerHardeningRunScalarFieldEnum)[keyof typeof ServerHardeningRunScalarFieldEnum]
+
+
+export const WorkspaceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  tabs: 'tabs',
+  split: 'split',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -161,3 +161,9 @@ export type ServerShare = Prisma.ServerShareModel
  * One "secure this server" run (lib/services/hardening/harden.service.ts).
  */
 export type ServerHardeningRun = Prisma.ServerHardeningRunModel
+/**
+ * Model Workspace
+ * A named set of terminal sessions and how they are split on screen, so a
+ * recurring setup (web + db + logs side by side) opens in one click.
+ */
+export type Workspace = Prisma.WorkspaceModel

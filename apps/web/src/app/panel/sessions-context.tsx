@@ -11,6 +11,8 @@ import {
     type ReactNode,
 } from 'react';
 
+import { prunePanes, type SplitState } from './_sessions/split';
+
 // TYPES
 
 export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'detached';
@@ -33,8 +35,16 @@ interface SessionsContextValue {
     activeTabId: string | null;
     setActiveTabId: (tabId: string) => void;
     sessionsRestored: boolean;
-    addSession: (serverId: string, serverName?: string) => Promise<void>;
-    addLocalSession: () => void;
+    /**
+     * Opens a session; resolves to its tab id. `opts.tabId` picks the id up
+     * front, so a split can place the pane before the connection is ready.
+     */
+    addSession: (
+        serverId: string,
+        serverName?: string,
+        opts?: AddSessionOptions,
+    ) => Promise<string>;
+    addLocalSession: (opts?: AddSessionOptions) => string;
     removeSession: (tabId: string) => void;
     reconnectSession: (tabId: string, serverId: string) => Promise<void>;
     renewSession: (tabId: string, serverId: string) => Promise<void>;
@@ -51,7 +61,29 @@ interface SessionsContextValue {
     registerSendHandler: (tabId: string, handler: ((key: string) => void) | null) => void;
     /** Returns false (no-op) if that tab has no registered handler — e.g. it isn't a connected remote session. */
     sendToSession: (tabId: string | null, text: string) => boolean;
+    /** Panes shown side by side, or null for one session at a time. */
+    split: SplitState | null;
+    setSplit: (split: SplitState | null) => void;
+    /** Typing in one visible pane goes to every visible pane. */
+    broadcast: boolean;
+    setBroadcast: (on: boolean) => void;
+    /**
+     * A pane's "write these bytes to my shell's connection" — unlike the send
+     * handler it bypasses xterm, so relayed input isn't relayed again.
+     */
+    registerRawSender: (tabId: string, sender: ((data: string) => void) | null) => void;
+    /** Called with what the user typed in `fromTabId`. */
+    relayInput: (fromTabId: string, data: string) => void;
 }
+
+const SPLIT_STORAGE_KEY = 'sessions-split';
+
+export interface AddSessionOptions {
+    tabId?: string;
+}
+
+/** A fresh tab id, for callers that place a tab before opening it. */
+export const newTabId = () => `tab-${crypto.randomUUID()}`;
 
 // CONTEXT
 
@@ -105,14 +137,21 @@ async function dbRenewSession(oldSessionId: string, newSessionId: string) {
 
 // PROVIDER
 
-type SessionsProvider_AddSession = (serverId: string, serverName?: string) => Promise<void>;
-type SessionsProvider_AddLocalSession = () => void;
+type SessionsProvider_AddSession = (
+    serverId: string,
+    serverName?: string,
+    opts?: AddSessionOptions,
+) => Promise<string>;
+type SessionsProvider_AddLocalSession = (opts?: AddSessionOptions) => string;
 
 export function SessionsProvider({ children }: { children: ReactNode }) {
     const uid = useId();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
     const [sessionsRestored, setSessionsRestored] = useState(false);
+    const [split, setSplitState] = useState<SplitState | null>(null);
+    const [broadcast, setBroadcast] = useState(false);
+    const rawSenders = useRef(new Map<string, (data: string) => void>());
 
     // Map of tabId → active WebSocket, used to send close-session before removing
     const wsRefs = useRef(new Map<string, WebSocket>());
@@ -169,71 +208,75 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     //   Session management
 
-    const addLocalSession: SessionsProvider_AddLocalSession = useCallback(() => {
-        const tabId = `${uid}-local-${Date.now()}`;
-        const isElectronMode =
-            typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
-        const serverName = isElectronMode ? 'Local terminal' : 'Gateway Shell';
+    const addLocalSession: SessionsProvider_AddLocalSession = useCallback(
+        (opts) => {
+            const tabId = opts?.tabId ?? `${uid}-local-${Date.now()}`;
+            const isElectronMode =
+                typeof window !== 'undefined' && Boolean(window.electronAPI?.isElectron);
+            const serverName = isElectronMode ? 'Local terminal' : 'Gateway Shell';
 
-        setSessions((prev) => [
-            ...prev,
-            {
-                tabId,
-                sessionId: crypto.randomUUID(),
-                type: 'local',
-                serverId: 'local',
-                serverName,
-                token: null,
-                gatewayUrl: null,
-                status: 'connecting',
-                showFiles: false,
-            },
-        ]);
-        setActiveTabId(tabId);
+            setSessions((prev) => [
+                ...prev,
+                {
+                    tabId,
+                    sessionId: crypto.randomUUID(),
+                    type: 'local',
+                    serverId: 'local',
+                    serverName,
+                    token: null,
+                    gatewayUrl: null,
+                    status: 'connecting',
+                    showFiles: false,
+                },
+            ]);
+            setActiveTabId(tabId);
 
-        if (!isElectronMode) {
-            // Fetch a gateway token for the WebSocket-based cloud path
-            fetch('/api/connection/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ protocol: 'local' }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setSessions((prev) =>
-                        prev.map((s) => {
-                            if (s.tabId !== tabId) return s;
-                            if (data.success) {
+            if (!isElectronMode) {
+                // Fetch a gateway token for the WebSocket-based cloud path
+                fetch('/api/connection/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ protocol: 'local' }),
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        setSessions((prev) =>
+                            prev.map((s) => {
+                                if (s.tabId !== tabId) return s;
+                                if (data.success) {
+                                    return {
+                                        ...s,
+                                        token: data.data.token,
+                                        gatewayUrl: data.data.gatewayUrl,
+                                    };
+                                }
                                 return {
                                     ...s,
-                                    token: data.data.token,
-                                    gatewayUrl: data.data.gatewayUrl,
+                                    status: 'error',
+                                    errorMessage:
+                                        data.error || 'Local terminal not available on this server',
                                 };
-                            }
-                            return {
-                                ...s,
-                                status: 'error',
-                                errorMessage:
-                                    data.error || 'Local terminal not available on this server',
-                            };
-                        }),
-                    );
-                })
-                .catch(() => {
-                    setSessions((prev) =>
-                        prev.map((s) =>
-                            s.tabId === tabId
-                                ? { ...s, status: 'error', errorMessage: 'Failed to connect' }
-                                : s,
-                        ),
-                    );
-                });
-        }
-    }, [uid]);
+                            }),
+                        );
+                    })
+                    .catch(() => {
+                        setSessions((prev) =>
+                            prev.map((s) =>
+                                s.tabId === tabId
+                                    ? { ...s, status: 'error', errorMessage: 'Failed to connect' }
+                                    : s,
+                            ),
+                        );
+                    });
+            }
+            return tabId;
+        },
+        [uid],
+    );
 
     const addSession: SessionsProvider_AddSession = useCallback(
-        async (serverId: string, serverName?: string) => {
-            const tabId = `${uid}-${Date.now()}`;
+        async (serverId: string, serverName?: string, opts?: AddSessionOptions) => {
+            const tabId = opts?.tabId ?? `${uid}-${Date.now()}`;
             const sessionId = crypto.randomUUID();
             let name = serverName ?? '';
             if (!name) {
@@ -274,6 +317,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                         : { ...s, status: 'error' };
                 }),
             );
+            return tabId;
         },
         [uid],
     );
@@ -375,6 +419,60 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         return true;
     }, []);
 
+    //   Split panes and broadcast typing
+
+    const setSplit = useCallback((next: SplitState | null) => setSplitState(next), []);
+
+    // Remember the split by session id (stable across reloads); it is
+    // restored once the sessions themselves are.
+    useEffect(() => {
+        if (!sessionsRestored) return;
+        try {
+            if (!split) {
+                localStorage.removeItem(SPLIT_STORAGE_KEY);
+                return;
+            }
+            const panes = split.panes
+                .map((t) => sessions.find((s) => s.tabId === t))
+                .filter((s) => s?.type === 'remote')
+                .map((s) => s!.sessionId);
+            localStorage.setItem(SPLIT_STORAGE_KEY, JSON.stringify({ ...split, panes }));
+        } catch {
+            /* storage unavailable: the split just isn't remembered */
+        }
+    }, [split, sessions, sessionsRestored]);
+
+    // Closed tabs leave the split; a split down to one pane ends.
+    useEffect(() => {
+        setSplitState((curr) =>
+            prunePanes(
+                curr,
+                sessions.map((s) => s.tabId),
+            ),
+        );
+    }, [sessions]);
+
+    const registerRawSender = useCallback(
+        (tabId: string, sender: ((data: string) => void) | null) => {
+            if (sender) rawSenders.current.set(tabId, sender);
+            else rawSenders.current.delete(tabId);
+        },
+        [],
+    );
+
+    const splitRef = useRef<SplitState | null>(null);
+    splitRef.current = split;
+    const broadcastRef = useRef(false);
+    broadcastRef.current = broadcast;
+
+    const relayInput = useCallback((fromTabId: string, data: string) => {
+        const current = splitRef.current;
+        if (!broadcastRef.current || !current || !current.panes.includes(fromTabId)) return;
+        for (const tabId of current.panes) {
+            if (tabId !== fromTabId) rawSenders.current.get(tabId)?.(data);
+        }
+    }, []);
+
     //   Refs so restore effect can call stable functions without re-running
 
     const reconnectSessionRef = useRef<typeof reconnectSession | null>(null);
@@ -384,6 +482,26 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     // Sessions start as 'detached' then immediately begin reconnecting.
 
     useEffect(() => {
+        function restoreSplit(restored: Session[]) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SPLIT_STORAGE_KEY) ?? 'null');
+                if (!saved || !Array.isArray(saved.panes)) return;
+                const panes = (saved.panes as string[])
+                    .map((id) => restored.find((s) => s.sessionId === id)?.tabId)
+                    .filter((t): t is string => Boolean(t));
+                const next = prunePanes(
+                    { layout: saved.layout, panes, x: Number(saved.x), y: Number(saved.y) },
+                    restored.map((s) => s.tabId),
+                );
+                if (next && ['columns', 'rows', 'grid'].includes(next.layout)) {
+                    setSplitState(next);
+                    setActiveTabId(next.panes[0]);
+                }
+            } catch {
+                /* a broken saved split is simply ignored */
+            }
+        }
+
         async function restoreSessions() {
             try {
                 const res = await fetch('/api/sessions');
@@ -408,6 +526,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 if (restoredSessions.length > 0) {
                     setSessions(restoredSessions);
                     setActiveTabId(restoredSessions[restoredSessions.length - 1].tabId);
+                    restoreSplit(restoredSessions);
                     restoredSessions.forEach((s) =>
                         reconnectSessionRef.current?.(s.tabId, s.serverId),
                     );
@@ -440,6 +559,12 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 setSessionWs,
                 registerSendHandler,
                 sendToSession,
+                split,
+                setSplit,
+                broadcast,
+                setBroadcast,
+                registerRawSender,
+                relayInput,
             }}
         >
             {children}

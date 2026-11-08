@@ -3,14 +3,17 @@
 import {
     Activity,
     Circle,
+    Columns2,
     Copy,
     ExternalLink,
     FolderOpen,
     Keyboard,
     KeyRound,
     Laptop,
+    Maximize2,
     Plus,
     RotateCcw,
+    Rows2,
     Search,
     Terminal,
     TerminalSquare,
@@ -123,6 +126,9 @@ export function TerminalPaneHeader({
     onToggleRecording,
     onOpenTunnel,
     onClose,
+    compact = false,
+    onSplit,
+    onUnsplit,
 }: {
     session: Session;
     /** Host/username/port for the copy actions; `null` for local terminals. */
@@ -147,6 +153,12 @@ export function TerminalPaneHeader({
     onToggleRecording: () => void;
     onOpenTunnel: () => void;
     onClose: () => void;
+    /** A narrow pane in a split: actions go on their own scrolling row. */
+    compact?: boolean;
+    /** Open another pane beside this one; absent where splitting isn't offered. */
+    onSplit?: (direction: 'right' | 'down') => void;
+    /** Leave the split, keeping this pane. */
+    onUnsplit?: () => void;
 }) {
     const copy = useCopyToClipboard();
     const isRemote = session.type !== 'local';
@@ -272,6 +284,32 @@ export function TerminalPaneHeader({
                 </>
             )}
 
+            {(onSplit || onUnsplit) && <IconButtonDivider />}
+            {onSplit && (
+                <>
+                    <IconButton
+                        size="sm"
+                        label="Split right"
+                        icon={Columns2}
+                        onClick={() => onSplit('right')}
+                    />
+                    <IconButton
+                        size="sm"
+                        label="Split down"
+                        icon={Rows2}
+                        onClick={() => onSplit('down')}
+                    />
+                </>
+            )}
+            {onUnsplit && (
+                <IconButton
+                    size="sm"
+                    label="Show only this pane"
+                    icon={Maximize2}
+                    onClick={onUnsplit}
+                />
+            )}
+
             <IconButton
                 size="sm"
                 label="Close session"
@@ -326,11 +364,18 @@ export function TerminalPaneHeader({
                     <div className="flex-1" />
                 )}
 
-                <div className="hidden shrink-0 items-center gap-0.5 md:flex">{actions}</div>
+                {!compact && (
+                    <div className="hidden shrink-0 items-center gap-0.5 md:flex">{actions}</div>
+                )}
             </div>
 
-            {/* Narrow screens: the same bar, one row down, scrolling sideways. */}
-            <div className="no-scrollbar flex items-center gap-0.5 overflow-x-auto px-3 pb-1.5 md:hidden">
+            {/* Narrow screens (or a narrow pane): the same bar, one row down,
+                scrolling sideways. */}
+            <div
+                className={`no-scrollbar flex items-center gap-0.5 overflow-x-auto px-3 pb-1.5 ${
+                    compact ? '' : 'md:hidden'
+                }`}
+            >
                 {actions}
             </div>
         </div>

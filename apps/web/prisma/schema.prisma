@@ -74,6 +74,7 @@ model User {
   commandSnippets     CommandSnippet[]
   recordings          Recording[]
   tunnelSessions      TunnelSession[]
+  workspaces          Workspace[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -777,4 +778,27 @@ model ServerHardeningRun {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, createdAt])
+}
+
+// SAVED WORKSPACES
+
+/// A named set of terminal sessions and how they are split on screen, so a
+/// recurring setup (web + db + logs side by side) opens in one click.
+model Workspace {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+
+  /// [{ serverId: string | null (null = local terminal) }], in tab order.
+  tabs  Json
+  /// { layout: 'columns' | 'rows' | 'grid', panes: number[] (indexes into tabs), x, y }
+  split Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
 }
