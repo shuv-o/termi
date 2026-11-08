@@ -680,6 +680,7 @@ model EmailOTP {
 
 enum OAuthProvider {
   GOOGLE
+  OIDC // single sign-on (OIDC_ISSUER); providerAccountId is "<issuer>|<sub>"
 }
 
 // KEYCHAIN – reusable credential sets

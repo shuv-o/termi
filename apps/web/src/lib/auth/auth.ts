@@ -3,6 +3,7 @@
  */
 
 import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
+import { SSO_REQUIRED_MESSAGE, ssoRequiredFor } from './oidc';
 import { prisma } from '@/lib/db';
 import {
     hashPassword,
@@ -76,6 +77,7 @@ function verifyRecoveryCodeHash(code: string, stored: string): boolean {
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     const { email, password, name } = input;
+    if (ssoRequiredFor(email)) return { success: false, error: SSO_REQUIRED_MESSAGE };
 
     const existing = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
@@ -110,6 +112,8 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
     const { email, password, deviceInfo, ipAddress } = input;
+    // Domain policy, not account state: the same answer for every address there.
+    if (ssoRequiredFor(email)) return { success: false, error: SSO_REQUIRED_MESSAGE };
 
     const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },

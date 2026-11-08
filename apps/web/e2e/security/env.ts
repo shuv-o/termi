@@ -9,6 +9,8 @@ export const GATEWAY_PORT = 23081;
 export const SSH_PORT = 23022;
 export const GUACD_PORT = 23822;
 export const BASE = `http://localhost:${WEB_PORT}`;
+export const OIDC_IDP_PORT = 23099;
+export const OIDC_IDP = `http://localhost:${OIDC_IDP_PORT}`;
 export const TUNNEL_TEMPLATE = `http://{id}.localhost:${WEB_PORT}`;
 
 export const DOCKER_NET = 'termi-sec-e2e';
@@ -57,5 +59,11 @@ export function appEnv(): Record<string, string> {
         TUNNEL_ORIGIN_TEMPLATE: TUNNEL_TEMPLATE,
         SMTP_HOST: '',
         NODE_ENV: 'development',
+        // Single sign-on against the suite's own provider (fixtures/oidc-idp.mjs).
+        OIDC_ISSUER: OIDC_IDP,
+        OIDC_CLIENT_ID: 'termi-e2e',
+        OIDC_CLIENT_SECRET: 'termi-e2e-secret',
+        OIDC_NAME: 'Acme SSO',
+        OIDC_ENFORCE_DOMAINS: 'corp.test',
     };
 }

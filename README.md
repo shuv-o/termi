@@ -375,6 +375,12 @@ npm run build:electron            # Package Electron app
 | `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`                   | Concurrent sessions per user; `0` = unlimited              |
 | `GOOGLE_CLIENT_ID`                 | —                     | Google OAuth client ID                                     |
 | `GOOGLE_CLIENT_SECRET`             | —                     | Google OAuth client secret                                 |
+| `OIDC_ISSUER`                      | —                     | Single sign-on: your OpenID Connect provider's issuer URL (Okta, Entra ID, Google Workspace, Keycloak…). Redirect URI: `<app>/api/auth/sso/callback` |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | —                | Single sign-on client credentials                          |
+| `OIDC_NAME`                        | `SSO`                 | Label for the "Sign in with …" button                     |
+| `OIDC_ALLOWED_DOMAINS`             | —                     | Only these email domains may sign in with SSO (comma-separated) |
+| `OIDC_ENFORCE_DOMAINS`             | —                     | These email domains must use SSO: password, Google and passkey sign-in and registration are refused |
+| `OIDC_TRUST_EMAIL`                 | `false`               | Accept emails without `email_verified` (for providers such as Entra ID that vouch for all emails) |
 | `SMTP_HOST`                        | —                     | SMTP host for email (verification, alerts, invites)        |
 | `SMTP_USER`                        | —                     | SMTP username                                              |
 | `SMTP_PASS`                        | —                     | SMTP password                                              |

@@ -137,7 +137,8 @@ export type TunnelKind = (typeof TunnelKind)[keyof typeof TunnelKind]
 
 
 export const OAuthProvider = {
-  GOOGLE: 'GOOGLE'
+  GOOGLE: 'GOOGLE',
+  OIDC: 'OIDC'
 } as const
 
 export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider]

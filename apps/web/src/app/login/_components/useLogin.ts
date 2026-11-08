@@ -115,6 +115,22 @@ export function useLogin() {
             setError(
                 'An account with this email exists but its email was never verified. Sign in with its password, or reset the password, then use Google.',
             );
+        const SSO_ERRORS: Record<string, string> = {
+            sso_required: 'Your organization requires signing in with single sign-on.',
+            sso_cancelled: 'Single sign-on was cancelled.',
+            sso_state: 'Single sign-on expired or was interrupted. Please try again.',
+            sso_email_unverified:
+                'Your identity provider did not confirm your email address, so Termi cannot sign you in.',
+            sso_no_email: 'Your identity provider did not share an email address.',
+            sso_domain_not_allowed:
+                'Your email domain is not allowed to sign in with single sign-on.',
+            sso_account_unverified:
+                'An account with this email exists but its email was never verified. Sign in with its password first.',
+        };
+        if (err?.startsWith('sso_')) {
+            if (err === 'sso_cancelled') setInfo(SSO_ERRORS[err]);
+            else setError(SSO_ERRORS[err] ?? 'Single sign-on failed. Please try again.');
+        }
         // Google sign-in on an account with 2FA: show the code step.
         const twofa = searchParams.get('twofa');
         if (twofa === 'TOTP' || twofa === 'EMAIL') {

@@ -6,6 +6,7 @@
  */
 
 import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
+import { SSO_REQUIRED_MESSAGE, ssoRequiredFor } from './oidc';
 import { createHmac } from 'crypto';
 import {
     generateRegistrationOptions,
@@ -257,6 +258,9 @@ export async function verifyPasskeyAuthentication(
 
     if (!passkey.user.isActive) {
         return { success: false, error: 'Account is disabled' };
+    }
+    if (ssoRequiredFor(passkey.user.email)) {
+        return { success: false, error: SSO_REQUIRED_MESSAGE };
     }
 
     if (passkey.user.lockoutUntil && passkey.user.lockoutUntil > new Date()) {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Fingerprint, Loader2 } from 'lucide-react';
+import { Building2, Eye, EyeOff, Fingerprint, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,28 @@ function Divider({ label }: { label: string }) {
     );
 }
 
-/** Email + password sign-in, with Google and passkey alternatives. */
+/** "Sign in with <provider>", shown only when single sign-on is set up. */
+function SsoButton() {
+    const [name, setName] = useState<string | null>(null);
+    useEffect(() => {
+        fetch('/api/auth/sso')
+            .then((r) => r.json())
+            .then((b) => b?.data?.enabled && setName(b.data.name))
+            .catch(() => {});
+    }, []);
+    if (!name) return null;
+    return (
+        <a
+            href="/api/auth/sso/authorize"
+            className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium mb-3"
+        >
+            <Building2 className="w-5 h-5" />
+            Sign in with {name}
+        </a>
+    );
+}
+
+/** Email + password sign-in, with SSO, Google and passkey alternatives. */
 export function LoginForm({ state }: { state: LoginState }) {
     const [showPassword, setShowPassword] = useState(false);
     const { formData, setFormData, loading, error } = state;
@@ -33,6 +54,8 @@ export function LoginForm({ state }: { state: LoginState }) {
             <p className="text-muted-foreground text-sm mb-6">
                 Sign in to your account to continue
             </p>
+
+            <SsoButton />
 
             <a
                 href="/api/auth/google/authorize"
@@ -53,7 +76,7 @@ export function LoginForm({ state }: { state: LoginState }) {
                         name="username"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                       
+
                         placeholder="you@example.com"
                         required
                         autoComplete="username email"
