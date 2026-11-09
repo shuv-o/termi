@@ -21,6 +21,7 @@
         "test:security": "playwright test -c playwright.security.config.ts"
     },
     "dependencies": {
+        "@anthropic-ai/sdk": "^1.6.0",
         "@prisma/adapter-pg": "^7.10.1",
         "@prisma/client": "^7.10.1",
         "@radix-ui/react-alert-dialog": "^1.2.1",

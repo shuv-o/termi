@@ -5,7 +5,7 @@ import LegalShell, { Section, type TocItem } from '@/components/legal/LegalShell
 export const metadata: Metadata = {
     title: 'Security policy',
     description:
-        "Termi's security model and how to responsibly report a vulnerability. Built with AES-256-GCM encryption, Argon2id hashing, TOTP 2FA, and short-lived JWE tokens.",
+        'How Termi protects your servers and credentials — AES-256-GCM encryption bound to each field and owner, scrypt password hashing, host key pinning, passkeys and 2FA — and how to report a vulnerability privately.',
     alternates: { canonical: '/security' },
     openGraph: {
         title: 'Security Policy | Termi',
@@ -151,7 +151,8 @@ export default function SecurityPage() {
                 <ul>
                     <li>
                         <strong>Password hashing</strong> — account passwords are hashed with{' '}
-                        <strong>Argon2id</strong> using secure parameters.
+                        <strong>scrypt</strong> (N = 2^15, r = 8, p = 3), and older hashes are
+                        upgraded at the next sign-in.
                     </li>
                     <li>
                         <strong>Two-factor authentication</strong> — TOTP-based 2FA is supported
@@ -205,8 +206,8 @@ export default function SecurityPage() {
 
             <Section id="operator" title="Operator responsibilities">
                 <p>
-                    Because Termi is self-hosted, a secure deployment is a shared responsibility.
-                    As an operator you should:
+                    Because Termi is self-hosted, a secure deployment is a shared responsibility. As
+                    an operator you should:
                 </p>
                 <ul>
                     <li>

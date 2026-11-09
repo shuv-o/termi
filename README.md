@@ -2,7 +2,7 @@
 
 # 🖥️ Termi
 
-**Self-hosted server management — SSH, SCP, RDP, VNC & local terminal from your browser or desktop**
+**Self-hosted server access — SSH, SFTP, RDP, VNC, Telnet and serial from your browser, phone or desktop**
 
 _Termi runs in production at **[termi.run](https://termi.run)** — try it there, or follow [Quick Start](#-quick-start) to self-host your own instance._
 
@@ -10,7 +10,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/shuv-o/termi/actions/workflows/ci.yml/badge.svg)](https://github.com/shuv-o/termi/actions/workflows/ci.yml)
 [![Release](https://github.com/shuv-o/termi/actions/workflows/release.yml/badge.svg)](https://github.com/shuv-o/termi/actions/workflows/release.yml)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=next.js)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
@@ -28,20 +28,20 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 ## 📸 Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshot-dashboard.png" alt="Termi server dashboard: fleet status strip, live CPU, memory and disk per server, groups, tags and jump-host servers" width="100%">
+  <img src=".github/assets/screenshot-dashboard.png" alt="Termi server dashboard: fleet summary, a server that needs attention, and live CPU, memory and disk for each server, with groups and tags" width="100%">
 </p>
 
 <table>
   <tr>
-    <td width="50%"><img src=".github/assets/screenshot-terminal.png" alt="SSH terminal session running htop in the browser"></td>
+    <td width="50%"><img src=".github/assets/screenshot-terminal.png" alt="Two SSH terminals side by side from a saved workspace: top on web-01, disk and processes on web-02"></td>
     <td width="50%"><img src=".github/assets/screenshot-palette.png" alt="Command palette: type a server name and press Enter to connect"></td>
   </tr>
   <tr>
-    <td align="center"><b>SSH in the browser</b> — tabs, multiple shells, file transfer and scrollback search</td>
+    <td align="center"><b>Split panes and workspaces</b> — several terminals side by side, reopened in one click</td>
     <td align="center"><b>Command palette</b> — <kbd>⌘K</kbd>, type a name, <kbd>Enter</kbd> to connect</td>
   </tr>
   <tr>
-    <td width="50%"><img src=".github/assets/screenshot-security.png" alt="Security scan of a fresh Ubuntu server: score 20 of 100 with password and root login findings"></td>
+    <td width="50%"><img src=".github/assets/screenshot-security.png" alt="Security scan of a fresh server: score 24 of 100 with password login, root login, fail2ban and firewall findings"></td>
     <td width="50%"><img src=".github/assets/screenshot-harden-dialog.png" alt="Secure server dialog: admin user, root login choice, password logins off, fail2ban, updates"></td>
   </tr>
   <tr>
@@ -55,7 +55,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
   &nbsp;&nbsp;
   <img src=".github/assets/screenshot-mobile-details.png" alt="Server details with live monitoring on a phone" width="260">
 </p>
-<p align="center"><sub>Works on phones too — installable as a PWA, or as the iOS/Android and desktop apps. Screenshots use demo data.</sub></p>
+<p align="center"><sub>Works on phones too: install it from the browser, or use the desktop app on macOS, Windows and Linux. Screenshots use demo data.</sub></p>
 
 ---
 
@@ -360,6 +360,8 @@ npm run build:electron            # Package Electron app
 | `GUACD_HOST`                       | `localhost`           | guacd host for RDP/VNC                                     |
 | `GUACD_PORT`                       | `4822`                | guacd port                                                 |
 | `GUACD_TUNNEL_HOST`                | —                     | Gateway address guacd dials for RDP/VNC behind a jump host |
+| `SEARCH_INDEXING`                  | `on`                  | `off` keeps this instance out of search results (robots.txt, meta tags, X-Robots-Tag); the signed-in app is never indexed |
+| `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` | — | Ownership tokens for Google Search Console / Bing Webmaster Tools |
 | `HSTS_PRELOAD`                     | `false`               | Send `includeSubDomains; preload` with HSTS (only for a domain you put on the preload list) |
 | `TUNNEL_ORIGIN_TEMPLATE`           | —                     | Serve each port-forward tunnel from its own origin, e.g. `https://{id}.termi-tunnels.net` (wildcard DNS + cert, on a different domain than Termi) |
 | `REDIS_URL`                        | —                     | Share rate limits across instances and restarts (falls back to memory) |
@@ -425,12 +427,12 @@ npm run build:electron            # Package Electron app
 
 **Connection flow:**
 
-1. Browser calls `POST /api/connection/token` → server decrypts stored credentials and issues a short-lived **JWE token
-   ** (A256GCM, 5-minute TTL).
-2. Browser opens a WebSocket to the gateway with the JWE token as a query parameter and a protocol of `ssh`, `scp`, `rdp`, `vnc`, `telnet`, `local`, or `tunnel`.
-3. Gateway validates the token and routes to the matching handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler` (RDP/VNC), `TelnetHandler`, `LocalHandler`, or `TunnelHandler`.
+1. The browser calls `POST /api/connection/token`. The web app checks the sign-in and access to the server, decrypts the stored credentials and seals them into a **JWE token** (A256GCM, 5-minute lifetime) that names the sign-in it was issued to. The browser carries the token but cannot read it.
+2. The browser opens a WebSocket to the gateway and sends the token in its first message, with a protocol of `ssh`, `scp`, `rdp`, `vnc`, `telnet`, `local` or `tunnel`.
+3. The gateway validates the token, checks the server's SSH host key against the pinned one, and routes to the matching handler: `SSHHandler`, `SCPHandler`, `GuacamoleHandler` (RDP/VNC), `TelnetHandler`, `LocalHandler` or `TunnelMuxHandler`.
 4. For RDP/VNC, `GuacamoleHandler` connects to guacd and forwards the Guacamole protocol frames to the browser.
-5. For port forwarding, `TunnelHandler` opens an SSH `forwardOut` channel and relays raw bytes over the same WebSocket — either straight to a bound local port (Electron), or through `/tunnel/<serverId>/<port>`, a same-origin HTTP reverse proxy that works behind a reverse proxy exposing only 80/443.
+5. For port forwarding, `TunnelMuxHandler` carries local, SOCKS and remote forwards over one SSH connection. Web apps on the far side open through `/tunnel/<serverId>/<port>`, an isolated reverse proxy that works behind a proxy exposing only 80/443.
+6. Every 30 seconds the gateway asks the web app (`POST /api/internal/access-check`) whether each open connection is still allowed, and closes those whose sign-in was revoked or whose access was removed. The gateway never touches the database.
 
 ---
 
@@ -440,11 +442,13 @@ See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability repor
 
 **Highlights:**
 
-- Credentials encrypted with AES-256-GCM before database storage
-- SSRF protection on all user-supplied host inputs
-- Rate limiting on authentication endpoints
-- CSP and security headers on every response
-- Session tokens revocable per-device
+- Credentials encrypted with AES-256-GCM, each value bound to its field and owner; key rotation without data loss
+- SSH host keys pinned on first connection and checked on every one after
+- Removing access (sign-out, password change, share or team removal) closes open connections within seconds
+- Passkeys, two-factor, single sign-on (OIDC) and a server-enforced app lock
+- SSRF protection on every user-supplied host; cloud metadata always blocked
+- Rate limits and account lockout on sign-in; CSP with nonces and security headers on every response
+- Hardened, read-only containers; signed release images with SBOM and provenance
 
 ---
 

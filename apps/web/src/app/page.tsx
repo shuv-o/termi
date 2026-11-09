@@ -1,27 +1,28 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, Laptop, Mail, Smartphone } from 'lucide-react';
+import { Globe, Laptop, Mail, Plus, Smartphone } from 'lucide-react';
 import { Github, Linkedin } from '@/components/icons/brand';
 import { Button } from '@/components/ui/button';
 import DownloadDesktopButton from '@/components/landing/DownloadButton';
+import FeatureExplorer from '@/components/landing/FeatureExplorer';
+import { FEATURE_COUNT, FEATURE_GROUPS } from '@/components/landing/features';
+import HowItWorks from '@/components/landing/HowItWorks';
 import HeroWorkspace from '@/components/landing/HeroWorkspace';
 import StarOnGitHub from '@/components/landing/StarOnGitHub';
 import { getSession } from '@/lib/auth/session';
+import { AUTHOR, REPO_URL, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from '@/lib/seo';
+import { getSiteUrl } from '@/lib/site';
 import TerminalLogo from '@/components/common/Logo';
 
 export const metadata: Metadata = {
-    title: 'Termi - Secure Server Management',
-    description:
-        'Termi is an open-source, self-hosted platform for SSH, SFTP, RDP, VNC, Telnet and serial access from your browser, phone or desktop, with encrypted credentials, host key pinning, teams and single sign-on.',
-    alternates: {
-        canonical: '/',
-    },
+    title: { absolute: SITE_TITLE },
+    description: SITE_DESCRIPTION,
+    alternates: { canonical: '/' },
     openGraph: {
-        title: 'Termi - Secure Server Management',
-        description:
-            'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with AES-256-GCM encryption and TOTP 2FA.',
+        title: SITE_TITLE,
+        description: SITE_DESCRIPTION,
         url: '/',
         type: 'website',
     },
@@ -41,6 +42,8 @@ export default async function HomePage() {
         redirect(lastPath && LAST_PATH_PATTERN.test(lastPath) ? lastPath : '/panel');
     }
 
+    const nonce = (await headers()).get('x-nonce') ?? '';
+
     return (
         // The marketing page keeps its own look, whatever theme the visitor chose in the app.
         <div
@@ -48,6 +51,12 @@ export default async function HomePage() {
             data-accent="blue"
             className="min-h-dvh bg-background text-foreground"
         >
+            <script
+                type="application/ld+json"
+                nonce={nonce}
+                // JSON-LD for search engines: the app, its FAQ and the site.
+                dangerouslySetInnerHTML={{ __html: structuredData() }}
+            />
             <header
                 className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur-lg"
                 style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
@@ -59,11 +68,11 @@ export default async function HomePage() {
                     </Link>
                     <nav aria-label="Page" className="hidden items-center gap-6 text-sm md:flex">
                         {[
-                            ['Security', '#security'],
-                            ['Teams', '#teams'],
                             ['Features', '#features'],
+                            ['Security', '#security'],
+                            ['How it works', '#how-it-works'],
                             ['Self-host', '#self-host'],
-                            ['GitHub', 'https://github.com/shuv-o/termi'],
+                            ['Questions', '#questions'],
                         ].map(([label, href]) => (
                             <Link
                                 key={href}
@@ -131,7 +140,7 @@ export default async function HomePage() {
             {/* The most important part: what happens to a password, in order. */}
             <section
                 id="security"
-                className="border-t border-border bg-card px-4 py-20 sm:px-6 lg:py-28"
+                className="scroll-mt-14 border-t border-border bg-card px-4 py-20 sm:px-6 lg:py-28"
             >
                 <div className="mx-auto max-w-6xl">
                     <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-14">
@@ -169,8 +178,28 @@ export default async function HomePage() {
                 </div>
             </section>
 
+            <section
+                id="how-it-works"
+                className="scroll-mt-14 border-t border-border px-4 py-20 sm:px-6 lg:py-28"
+            >
+                <div className="mx-auto max-w-6xl">
+                    <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
+                        How a connection is made
+                    </h2>
+                    <p className="mt-4 max-w-[56ch] text-muted-foreground">
+                        Three steps, every time you open a terminal, a file browser or a desktop.
+                    </p>
+                    <div className="mt-12">
+                        <HowItWorks />
+                    </div>
+                </div>
+            </section>
+
             {/* Second highlight: working with other people. */}
-            <section id="teams" className="border-t border-border px-4 py-20 sm:px-6 lg:py-28">
+            <section
+                id="teams"
+                className="scroll-mt-14 border-t border-border px-4 py-20 sm:px-6 lg:py-28"
+            >
                 <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
                     <div>
                         <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
@@ -203,37 +232,20 @@ export default async function HomePage() {
             </section>
 
             {/* Every capability, grouped, so nothing has to be hunted for. */}
-            <section id="features" className="border-t border-border px-4 py-20 sm:px-6 lg:py-28">
+            <section
+                id="features"
+                className="scroll-mt-14 border-t border-border px-4 py-20 sm:px-6 lg:py-28"
+            >
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
                         Everything in Termi
                     </h2>
-                    <p className="mt-4 max-w-[56ch] text-muted-foreground">
-                        Free and open source. Every feature is included, whether you use this site
-                        or run Termi on your own server.
+                    <p className="mt-4 max-w-[60ch] text-muted-foreground">
+                        {FEATURE_COUNT} features, all free and open source, whether you use this
+                        site or run Termi on your own server.
                     </p>
-                    <div className="mt-14 grid gap-x-12 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
-                        {CAPABILITIES.map((group) => (
-                            <section key={group.id} aria-labelledby={`cap-${group.id}`}>
-                                <h3
-                                    id={`cap-${group.id}`}
-                                    className="flex items-center gap-2.5 border-b border-border pb-3 text-base font-semibold"
-                                >
-                                    <span className={`h-3.5 w-1 rounded-full ${group.bar}`} />
-                                    {group.name}
-                                </h3>
-                                <dl className="mt-4 space-y-3.5">
-                                    {group.items.map(([name, body]) => (
-                                        <div key={name}>
-                                            <dt className="text-[15px] font-medium">{name}</dt>
-                                            <dd className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
-                                                {body}
-                                            </dd>
-                                        </div>
-                                    ))}
-                                </dl>
-                            </section>
-                        ))}
+                    <div className="mt-12">
+                        <FeatureExplorer />
                     </div>
                 </div>
             </section>
@@ -262,7 +274,10 @@ export default async function HomePage() {
 
             <StarOnGitHub />
 
-            <section id="self-host" className="border-t border-border px-4 py-20 sm:px-6 lg:py-28">
+            <section
+                id="self-host"
+                className="scroll-mt-14 border-t border-border px-4 py-20 sm:px-6 lg:py-28"
+            >
                 <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
                     <div>
                         <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
@@ -302,6 +317,31 @@ export default async function HomePage() {
                             </li>
                         ))}
                     </ol>
+                </div>
+            </section>
+
+            <section
+                id="questions"
+                className="scroll-mt-14 border-t border-border px-4 py-20 sm:px-6 lg:py-28"
+            >
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+                    <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
+                        Questions
+                    </h2>
+                    <div className="divide-y divide-border border-y border-border">
+                        {QUESTIONS.map(([q, a]) => (
+                            <details key={q} className="group py-1">
+                                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded-md py-4 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                                    {q}
+                                    <Plus
+                                        aria-hidden
+                                        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-45"
+                                    />
+                                </summary>
+                                <p className="max-w-[64ch] pb-5 text-muted-foreground">{a}</p>
+                            </details>
+                        ))}
+                    </div>
                 </div>
             </section>
 
@@ -452,140 +492,6 @@ function JoinPrompt() {
     );
 }
 
-const CAPABILITIES: {
-    id: string;
-    name: string;
-    bar: string;
-    items: [string, string][];
-}[] = [
-    {
-        id: 'connect',
-        name: 'Connect',
-        bar: 'bg-proto-ssh',
-        items: [
-            [
-                'SSH terminal',
-                'Full xterm with colour, Unicode and search. Keeps running after you close the tab.',
-            ],
-            [
-                'Files over SFTP',
-                'Browse, upload, download, rename and delete, beside the terminal.',
-            ],
-            [
-                'Remote desktop',
-                'Windows over RDP and Linux over VNC, with clipboard sync and touch controls.',
-            ],
-            [
-                'Telnet and serial',
-                'Older network gear over Telnet, or a USB console cable straight from the browser.',
-            ],
-            ['Jump hosts', 'Reach servers behind a bastion, like ssh -J, for every protocol.'],
-            [
-                'Port forwarding',
-                'Local, SOCKS and remote forwards, with a one-click link for web apps.',
-            ],
-        ],
-    },
-    {
-        id: 'work',
-        name: 'Work faster',
-        bar: 'bg-proto-scp',
-        items: [
-            [
-                'Split panes and workspaces',
-                'Up to four sessions at once, saved as named layouts you reopen in a click.',
-            ],
-            ['Type in all panes', 'Send the same keystrokes to every visible terminal.'],
-            ['Snippets', 'Saved commands with variables you fill in each time, safely quoted.'],
-            [
-                'Command suggestions',
-                'Completions from your own history on that server, kept in your browser.',
-            ],
-            [
-                'Run on many servers',
-                'One command across a group or a selection, with each server’s output.',
-            ],
-            ['Command palette', 'Jump to any server, page or setting with ⌘K.'],
-        ],
-    },
-    {
-        id: 'security',
-        name: 'Server security',
-        bar: 'bg-primary',
-        items: [
-            [
-                'Known hosts',
-                'Every server’s pinned host key in one list, checked on each connection.',
-            ],
-            [
-                'Certificates and agent forwarding',
-                'OpenSSH certificates, and key forwarding you can approve use by use.',
-            ],
-            [
-                'Security keys for SSH',
-                'A YubiKey or other FIDO2 key as an SSH key: one touch per login.',
-            ],
-            [
-                'One-click hardening',
-                'Scan a server, get a score, and fix SSH and the firewall with automatic rollback.',
-            ],
-            ['Recordings', 'Record a terminal and replay it later, encrypted at rest.'],
-            ['History', 'Every connection you opened and every sign-in, visible only to you.'],
-        ],
-    },
-    {
-        id: 'people',
-        name: 'Teams and sharing',
-        bar: 'bg-proto-vnc',
-        items: [
-            [
-                'Team vaults',
-                'Shared servers with owner, admin and member roles, and email invitations.',
-            ],
-            [
-                'Share a server',
-                'Give one person connect access by email, and take it back any time.',
-            ],
-            [
-                'Shared terminals',
-                'Invite someone to watch or type in your session, after you let them in.',
-            ],
-            ['Signed-in devices', 'See every device on your account and sign any of them out.'],
-        ],
-    },
-    {
-        id: 'monitor',
-        name: 'Monitoring',
-        bar: 'bg-proto-telnet',
-        items: [
-            ['Live metrics', 'CPU, memory and disk for every SSH server, beside the terminal.'],
-            [
-                'Alerts',
-                'Email, push notifications or a webhook to Slack or Discord when a server goes down.',
-            ],
-            ['Health history', 'Charts of each server over time.'],
-            ['Benchmarks', 'Score a server’s CPU, disk and network, and track it over time.'],
-        ],
-    },
-    {
-        id: 'yours',
-        name: 'Make it yours',
-        bar: 'bg-proto-rdp',
-        items: [
-            [
-                'Themes and layout',
-                'Night, Black or Day, accent colours, and the menu as a sidebar, rail or top bar.',
-            ],
-            ['Terminal look', 'Colour schemes, fonts, size and cursor, synced to every device.'],
-            [
-                'Import your servers',
-                'From ~/.ssh/config, PuTTY, MobaXterm or a CSV, with a preview first.',
-            ],
-            ['Export', 'Your servers as a passphrase-encrypted file or a spreadsheet.'],
-        ],
-    },
-];
-
 const DEVICES = [
     {
         name: 'Browser',
@@ -610,3 +516,94 @@ const SETUP = [
     { what: 'Set your secrets', cmd: 'cp .env.example .env' },
     { what: 'Start everything', cmd: 'docker compose up -d' },
 ];
+
+const QUESTIONS: [string, string][] = [
+    [
+        'Is Termi free?',
+        'Yes. Termi is open source under the MIT licence, and every feature is included, on this site or on your own server.',
+    ],
+    [
+        'Where are my passwords and keys stored?',
+        'In the database of the Termi you use, encrypted with AES-256-GCM. The encryption key is kept apart from the database, and each value is locked to its field and its owner, so a copy of the database alone reveals nothing.',
+    ],
+    [
+        'Do my servers need anything installed?',
+        'No. Termi connects with standard SSH, RDP, VNC and Telnet, and reads monitoring figures over SSH. Only SSH logins with a FIDO2 security key need one extra line in sshd_config.',
+    ],
+    [
+        'What do I need to run my own?',
+        'A machine with Docker and Docker Compose. The Compose file includes the database, the remote-desktop service and a reverse proxy, and the setup guide walks through the few settings to fill in.',
+    ],
+    [
+        'Can I bring my servers from another SSH client?',
+        'Yes. Import an OpenSSH config file, PuTTY or KiTTY sessions, MobaXterm sessions or a CSV, and preview exactly what will be added before anything is saved.',
+    ],
+    [
+        'Can my team share servers without sharing passwords?',
+        'Yes. Servers in a team vault can be opened by every member, but their credentials stay sealed to whoever added them. Removing someone ends their access and closes their open connections.',
+    ],
+    [
+        'Does it work on a phone?',
+        'Yes. Install it from the browser on iOS or Android. Terminals get a key row for Ctrl, Alt, Esc, Tab and arrows, and remote desktops turn touches into mouse clicks.',
+    ],
+    [
+        'What happens if I lose my phone with my authenticator app?',
+        'Sign in with one of the recovery codes you saved when turning on two-factor, or with a passkey, then set up two-factor again.',
+    ],
+];
+
+/** Schema.org data: what Termi is, its questions and answers, and the site. */
+function structuredData(): string {
+    const site = getSiteUrl();
+    const author = { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url, sameAs: AUTHOR.sameAs };
+    const graph = [
+        {
+            '@type': 'WebSite',
+            '@id': `${site}/#website`,
+            url: site,
+            name: SITE_NAME,
+            description: SITE_DESCRIPTION,
+            inLanguage: 'en',
+            publisher: author,
+        },
+        {
+            '@type': 'SoftwareApplication',
+            '@id': `${site}/#software`,
+            name: SITE_NAME,
+            alternateName: SITE_TITLE,
+            description: SITE_DESCRIPTION,
+            url: site,
+            applicationCategory: 'DeveloperApplication',
+            applicationSubCategory: 'Remote access',
+            operatingSystem: 'Web browser, macOS, Windows, Linux, iOS, Android',
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+            isAccessibleForFree: true,
+            license: 'https://opensource.org/licenses/MIT',
+            codeRepository: REPO_URL,
+            downloadUrl: `${REPO_URL}/releases/latest`,
+            installUrl: `${REPO_URL}#-quick-start`,
+            softwareHelp: { '@type': 'CreativeWork', url: `${REPO_URL}/wiki` },
+            screenshot: [
+                `${site}/screenshots/dashboard.png`,
+                `${site}/screenshots/split-panes.png`,
+                `${site}/screenshots/mobile-dashboard.png`,
+            ],
+            featureList: FEATURE_GROUPS.flatMap((g) => g.features.map((f) => f.name)),
+            author,
+        },
+        {
+            '@type': 'FAQPage',
+            '@id': `${site}/#questions`,
+            mainEntity: QUESTIONS.map(([q, a]) => ({
+                '@type': 'Question',
+                name: q,
+                acceptedAnswer: { '@type': 'Answer', text: a },
+            })),
+        },
+    ];
+    // `<` escaped so a string can never close the script element.
+    return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(
+        /</g,
+        '\\u003c',
+    );
+}

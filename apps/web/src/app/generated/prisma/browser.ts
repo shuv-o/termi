@@ -177,3 +177,24 @@ export type SessionShare = Prisma.SessionShareModel
  * `sk-ecdsa-sha2-nistp256@openssh.com` key blob whose application is `rpId`.
  */
 export type SshSecurityKey = Prisma.SshSecurityKeyModel
+/**
+ * Model AiSettings
+ * A user's own AI provider. Without it (or with useOwn off) the deployment's
+ * AI_* settings apply.
+ */
+export type AiSettings = Prisma.AiSettingsModel
+/**
+ * Model AiConversation
+ * 
+ */
+export type AiConversation = Prisma.AiConversationModel
+/**
+ * Model AiMessage
+ * Stored after redaction, so history never holds a secret.
+ */
+export type AiMessage = Prisma.AiMessageModel
+/**
+ * Model AiMemory
+ * Lasting facts the assistant keeps about the user's setup and preferences.
+ */
+export type AiMemory = Prisma.AiMemoryModel

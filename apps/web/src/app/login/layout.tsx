@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Login',
+    title: 'Sign in',
     description:
-        'Sign in to your Termi account to manage your servers securely via SSH, SCP, RDP, and VNC.',
+        'Sign in to Termi to open your servers over SSH, SFTP, RDP, VNC and Telnet from your browser.',
+    alternates: { canonical: '/login' },
     robots: {
         index: false,
         follow: false,

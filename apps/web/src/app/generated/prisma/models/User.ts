@@ -405,6 +405,9 @@ export type UserWhereInput = {
   workspaces?: Prisma.WorkspaceListRelationFilter
   teamMemberships?: Prisma.TeamMemberListRelationFilter
   sshSecurityKeys?: Prisma.SshSecurityKeyListRelationFilter
+  aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
+  aiConversations?: Prisma.AiConversationListRelationFilter
+  aiMemories?: Prisma.AiMemoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -455,6 +458,9 @@ export type UserOrderByWithRelationInput = {
   workspaces?: Prisma.WorkspaceOrderByRelationAggregateInput
   teamMemberships?: Prisma.TeamMemberOrderByRelationAggregateInput
   sshSecurityKeys?: Prisma.SshSecurityKeyOrderByRelationAggregateInput
+  aiSettings?: Prisma.AiSettingsOrderByWithRelationInput
+  aiConversations?: Prisma.AiConversationOrderByRelationAggregateInput
+  aiMemories?: Prisma.AiMemoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -508,6 +514,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   workspaces?: Prisma.WorkspaceListRelationFilter
   teamMemberships?: Prisma.TeamMemberListRelationFilter
   sshSecurityKeys?: Prisma.SshSecurityKeyListRelationFilter
+  aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
+  aiConversations?: Prisma.AiConversationListRelationFilter
+  aiMemories?: Prisma.AiMemoryListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -624,6 +633,9 @@ export type UserCreateInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -674,6 +686,9 @@ export type UserUncheckedCreateInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -724,6 +739,9 @@ export type UserUpdateInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -774,6 +792,9 @@ export type UserUncheckedUpdateInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1304,6 +1325,48 @@ export type UserUpdateOneRequiredWithoutSshSecurityKeysNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSshSecurityKeysInput, Prisma.UserUpdateWithoutSshSecurityKeysInput>, Prisma.UserUncheckedUpdateWithoutSshSecurityKeysInput>
 }
 
+export type UserCreateNestedOneWithoutAiSettingsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiSettingsInput, Prisma.UserUncheckedCreateWithoutAiSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAiSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiSettingsInput, Prisma.UserUncheckedCreateWithoutAiSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiSettingsInput
+  upsert?: Prisma.UserUpsertWithoutAiSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiSettingsInput, Prisma.UserUpdateWithoutAiSettingsInput>, Prisma.UserUncheckedUpdateWithoutAiSettingsInput>
+}
+
+export type UserCreateNestedOneWithoutAiConversationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAiConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiConversationsInput
+  upsert?: Prisma.UserUpsertWithoutAiConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiConversationsInput, Prisma.UserUpdateWithoutAiConversationsInput>, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+}
+
+export type UserCreateNestedOneWithoutAiMemoriesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiMemoriesInput, Prisma.UserUncheckedCreateWithoutAiMemoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiMemoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAiMemoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiMemoriesInput, Prisma.UserUncheckedCreateWithoutAiMemoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiMemoriesInput
+  upsert?: Prisma.UserUpsertWithoutAiMemoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiMemoriesInput, Prisma.UserUpdateWithoutAiMemoriesInput>, Prisma.UserUncheckedUpdateWithoutAiMemoriesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1351,6 +1414,9 @@ export type UserCreateWithoutSessionsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1400,6 +1466,9 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1465,6 +1534,9 @@ export type UserUpdateWithoutSessionsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1514,6 +1586,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServerGroupsInput = {
@@ -1563,6 +1638,9 @@ export type UserCreateWithoutServerGroupsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServerGroupsInput = {
@@ -1612,6 +1690,9 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServerGroupsInput = {
@@ -1677,6 +1758,9 @@ export type UserUpdateWithoutServerGroupsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
@@ -1726,6 +1810,9 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServersInput = {
@@ -1775,6 +1862,9 @@ export type UserCreateWithoutServersInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServersInput = {
@@ -1824,6 +1914,9 @@ export type UserUncheckedCreateWithoutServersInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServersInput = {
@@ -1889,6 +1982,9 @@ export type UserUpdateWithoutServersInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServersInput = {
@@ -1938,6 +2034,9 @@ export type UserUncheckedUpdateWithoutServersInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPersistentSessionsInput = {
@@ -1987,6 +2086,9 @@ export type UserCreateWithoutPersistentSessionsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
@@ -2036,6 +2138,9 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPersistentSessionsInput = {
@@ -2101,6 +2206,9 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
@@ -2150,6 +2258,9 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -2199,6 +2310,9 @@ export type UserCreateWithoutAuditLogsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -2248,6 +2362,9 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -2313,6 +2430,9 @@ export type UserUpdateWithoutAuditLogsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -2362,6 +2482,9 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOauthAccountsInput = {
@@ -2411,6 +2534,9 @@ export type UserCreateWithoutOauthAccountsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -2460,6 +2586,9 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -2525,6 +2654,9 @@ export type UserUpdateWithoutOauthAccountsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -2574,6 +2706,9 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasskeysInput = {
@@ -2623,6 +2758,9 @@ export type UserCreateWithoutPasskeysInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasskeysInput = {
@@ -2672,6 +2810,9 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasskeysInput = {
@@ -2737,6 +2878,9 @@ export type UserUpdateWithoutPasskeysInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasskeysInput = {
@@ -2786,6 +2930,9 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -2835,6 +2982,9 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -2884,6 +3034,9 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -2949,6 +3102,9 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -2998,6 +3154,9 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMonitorConfigsInput = {
@@ -3047,6 +3206,9 @@ export type UserCreateWithoutMonitorConfigsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
@@ -3096,6 +3258,9 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMonitorConfigsInput = {
@@ -3161,6 +3326,9 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
@@ -3210,6 +3378,9 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordingsInput = {
@@ -3259,6 +3430,9 @@ export type UserCreateWithoutRecordingsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordingsInput = {
@@ -3308,6 +3482,9 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordingsInput = {
@@ -3373,6 +3550,9 @@ export type UserUpdateWithoutRecordingsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordingsInput = {
@@ -3422,6 +3602,9 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTunnelSessionsInput = {
@@ -3471,6 +3654,9 @@ export type UserCreateWithoutTunnelSessionsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTunnelSessionsInput = {
@@ -3520,6 +3706,9 @@ export type UserUncheckedCreateWithoutTunnelSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTunnelSessionsInput = {
@@ -3585,6 +3774,9 @@ export type UserUpdateWithoutTunnelSessionsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
@@ -3634,6 +3826,9 @@ export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecoveryCodesInput = {
@@ -3683,6 +3878,9 @@ export type UserCreateWithoutRecoveryCodesInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
@@ -3732,6 +3930,9 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecoveryCodesInput = {
@@ -3797,6 +3998,9 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
@@ -3846,6 +4050,9 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailOTPsInput = {
@@ -3895,6 +4102,9 @@ export type UserCreateWithoutEmailOTPsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
@@ -3944,6 +4154,9 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailOTPsInput = {
@@ -4009,6 +4222,9 @@ export type UserUpdateWithoutEmailOTPsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
@@ -4058,6 +4274,9 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommandSnippetsInput = {
@@ -4107,6 +4326,9 @@ export type UserCreateWithoutCommandSnippetsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommandSnippetsInput = {
@@ -4156,6 +4378,9 @@ export type UserUncheckedCreateWithoutCommandSnippetsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommandSnippetsInput = {
@@ -4221,6 +4446,9 @@ export type UserUpdateWithoutCommandSnippetsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
@@ -4270,6 +4498,9 @@ export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutKeychainCredentialsInput = {
@@ -4319,6 +4550,9 @@ export type UserCreateWithoutKeychainCredentialsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
@@ -4368,6 +4602,9 @@ export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutKeychainCredentialsInput = {
@@ -4433,6 +4670,9 @@ export type UserUpdateWithoutKeychainCredentialsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
@@ -4482,6 +4722,9 @@ export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -4531,6 +4774,9 @@ export type UserCreateWithoutSentInvitationsInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -4580,6 +4826,9 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -4645,6 +4894,9 @@ export type UserUpdateWithoutSentInvitationsInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -4694,6 +4946,9 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedSharesInput = {
@@ -4743,6 +4998,9 @@ export type UserCreateWithoutOwnedSharesInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedSharesInput = {
@@ -4792,6 +5050,9 @@ export type UserUncheckedCreateWithoutOwnedSharesInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedSharesInput = {
@@ -4846,6 +5107,9 @@ export type UserCreateWithoutReceivedSharesInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedSharesInput = {
@@ -4895,6 +5159,9 @@ export type UserUncheckedCreateWithoutReceivedSharesInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedSharesInput = {
@@ -4960,6 +5227,9 @@ export type UserUpdateWithoutOwnedSharesInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedSharesInput = {
@@ -5009,6 +5279,9 @@ export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedSharesInput = {
@@ -5069,6 +5342,9 @@ export type UserUpdateWithoutReceivedSharesInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedSharesInput = {
@@ -5118,6 +5394,9 @@ export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspacesInput = {
@@ -5167,6 +5446,9 @@ export type UserCreateWithoutWorkspacesInput = {
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesInput = {
@@ -5216,6 +5498,9 @@ export type UserUncheckedCreateWithoutWorkspacesInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesInput = {
@@ -5281,6 +5566,9 @@ export type UserUpdateWithoutWorkspacesInput = {
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesInput = {
@@ -5330,6 +5618,9 @@ export type UserUncheckedUpdateWithoutWorkspacesInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeamMembershipsInput = {
@@ -5379,6 +5670,9 @@ export type UserCreateWithoutTeamMembershipsInput = {
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -5428,6 +5722,9 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -5493,6 +5790,9 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -5542,6 +5842,9 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSshSecurityKeysInput = {
@@ -5591,6 +5894,9 @@ export type UserCreateWithoutSshSecurityKeysInput = {
   tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSshSecurityKeysInput = {
@@ -5640,6 +5946,9 @@ export type UserUncheckedCreateWithoutSshSecurityKeysInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSshSecurityKeysInput = {
@@ -5705,6 +6014,9 @@ export type UserUpdateWithoutSshSecurityKeysInput = {
   tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSshSecurityKeysInput = {
@@ -5754,6 +6066,681 @@ export type UserUncheckedUpdateWithoutSshSecurityKeysInput = {
   tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAiSettingsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAiSettingsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAiSettingsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiSettingsInput, Prisma.UserUncheckedCreateWithoutAiSettingsInput>
+}
+
+export type UserUpsertWithoutAiSettingsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAiSettingsInput, Prisma.UserUncheckedUpdateWithoutAiSettingsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiSettingsInput, Prisma.UserUncheckedCreateWithoutAiSettingsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAiSettingsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAiSettingsInput, Prisma.UserUncheckedUpdateWithoutAiSettingsInput>
+}
+
+export type UserUpdateWithoutAiSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAiSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAiConversationsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAiConversationsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAiConversationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+}
+
+export type UserUpsertWithoutAiConversationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAiConversationsInput, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAiConversationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAiConversationsInput, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+}
+
+export type UserUpdateWithoutAiConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAiConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAiMemoriesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAiMemoriesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAiMemoriesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiMemoriesInput, Prisma.UserUncheckedCreateWithoutAiMemoriesInput>
+}
+
+export type UserUpsertWithoutAiMemoriesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAiMemoriesInput, Prisma.UserUncheckedUpdateWithoutAiMemoriesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiMemoriesInput, Prisma.UserUncheckedCreateWithoutAiMemoriesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAiMemoriesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAiMemoriesInput, Prisma.UserUncheckedUpdateWithoutAiMemoriesInput>
+}
+
+export type UserUpdateWithoutAiMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAiMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -5783,6 +6770,8 @@ export type UserCountOutputType = {
   workspaces: number
   teamMemberships: number
   sshSecurityKeys: number
+  aiConversations: number
+  aiMemories: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5807,6 +6796,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   workspaces?: boolean | UserCountOutputTypeCountWorkspacesArgs
   teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
   sshSecurityKeys?: boolean | UserCountOutputTypeCountSshSecurityKeysArgs
+  aiConversations?: boolean | UserCountOutputTypeCountAiConversationsArgs
+  aiMemories?: boolean | UserCountOutputTypeCountAiMemoriesArgs
 }
 
 /**
@@ -5966,6 +6957,20 @@ export type UserCountOutputTypeCountSshSecurityKeysArgs<ExtArgs extends runtime.
   where?: Prisma.SshSecurityKeyWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAiConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiConversationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAiMemoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiMemoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -6015,6 +7020,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
   teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   sshSecurityKeys?: boolean | Prisma.User$sshSecurityKeysArgs<ExtArgs>
+  aiSettings?: boolean | Prisma.User$aiSettingsArgs<ExtArgs>
+  aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
+  aiMemories?: boolean | Prisma.User$aiMemoriesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -6128,6 +7136,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
   teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   sshSecurityKeys?: boolean | Prisma.User$sshSecurityKeysArgs<ExtArgs>
+  aiSettings?: boolean | Prisma.User$aiSettingsArgs<ExtArgs>
+  aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
+  aiMemories?: boolean | Prisma.User$aiMemoriesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -6157,6 +7168,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     workspaces: Prisma.$WorkspacePayload<ExtArgs>[]
     teamMemberships: Prisma.$TeamMemberPayload<ExtArgs>[]
     sshSecurityKeys: Prisma.$SshSecurityKeyPayload<ExtArgs>[]
+    aiSettings: Prisma.$AiSettingsPayload<ExtArgs> | null
+    aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
+    aiMemories: Prisma.$AiMemoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6612,6 +7626,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   workspaces<T extends Prisma.User$workspacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teamMemberships<T extends Prisma.User$teamMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sshSecurityKeys<T extends Prisma.User$sshSecurityKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sshSecurityKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SshSecurityKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiSettings<T extends Prisma.User$aiSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiSettingsArgs<ExtArgs>>): Prisma.Prisma__AiSettingsClient<runtime.Types.Result.GetResult<Prisma.$AiSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  aiConversations<T extends Prisma.User$aiConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiMemories<T extends Prisma.User$aiMemoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiMemoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiMemoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7561,6 +8578,73 @@ export type User$sshSecurityKeysArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.SshSecurityKeyScalarFieldEnum | Prisma.SshSecurityKeyScalarFieldEnum[]
+}
+
+/**
+ * User.aiSettings
+ */
+export type User$aiSettingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiSettings
+   */
+  select?: Prisma.AiSettingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiSettings
+   */
+  omit?: Prisma.AiSettingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiSettingsInclude<ExtArgs> | null
+  where?: Prisma.AiSettingsWhereInput
+}
+
+/**
+ * User.aiConversations
+ */
+export type User$aiConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiConversation
+   */
+  select?: Prisma.AiConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiConversation
+   */
+  omit?: Prisma.AiConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiConversationInclude<ExtArgs> | null
+  where?: Prisma.AiConversationWhereInput
+  orderBy?: Prisma.AiConversationOrderByWithRelationInput | Prisma.AiConversationOrderByWithRelationInput[]
+  cursor?: Prisma.AiConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiConversationScalarFieldEnum | Prisma.AiConversationScalarFieldEnum[]
+}
+
+/**
+ * User.aiMemories
+ */
+export type User$aiMemoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiMemory
+   */
+  select?: Prisma.AiMemorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiMemory
+   */
+  omit?: Prisma.AiMemoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiMemoryInclude<ExtArgs> | null
+  where?: Prisma.AiMemoryWhereInput
+  orderBy?: Prisma.AiMemoryOrderByWithRelationInput | Prisma.AiMemoryOrderByWithRelationInput[]
+  cursor?: Prisma.AiMemoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiMemoryScalarFieldEnum | Prisma.AiMemoryScalarFieldEnum[]
 }
 
 /**

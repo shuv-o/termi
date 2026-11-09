@@ -66,7 +66,9 @@ User passwords are hashed with **scrypt** (N = 2^15, r = 8, p = 3 — the equal-
 
 ### Connection Token (JWE)
 
-When a terminal session is opened, the web app issues a short-lived **JWE token** (A256GCM, 5-minute TTL) containing the decrypted credentials. This token is sent to the browser and used to authenticate the WebSocket connection to the gateway. The gateway validates the token and discards it immediately — credentials live in memory only for the duration of the connection.
+When a connection is opened, the web app issues a short-lived **JWE token** (A256GCM, 5-minute TTL) containing the decrypted credentials and the id of the sign-in that asked for it. The browser forwards it to the gateway in the WebSocket's first message but cannot decrypt it. The gateway validates the token and discards it — credentials live in memory only for the duration of the connection.
+
+Because a token is only checked when a connection opens, the gateway asks the web app every `GATEWAY_ACCESS_CHECK_SEC` (default 30 s) whether each open connection may stay, over an internal endpoint authenticated with a gateway-only service token. Connections whose sign-in was revoked or expired, or whose user lost access to the server, are closed.
 
 ---
 
@@ -77,6 +79,10 @@ When a terminal session is opened, the web app issues a short-lived **JWE token*
 | Threat                      | Mitigation                                            |
 | --------------------------- | ----------------------------------------------------- |
 | Database exfiltration       | AES-256-GCM encryption at rest (key kept outside DB)  |
+| Database tampering          | Each ciphertext bound (AAD) to its field and owner    |
+| Man-in-the-middle to servers | SSH host keys pinned on first use, checked every time |
+| Revoked or stolen sign-in   | Open connections closed when access ends (≤30 s)      |
+| Secrets in images           | No secret build arguments; settings read at runtime   |
 | Credential theft in transit | TLS (configured via reverse proxy)                    |
 | SSRF attacks                | `validateHost()` blocks private/loopback ranges       |
 | Brute-force login           | Rate limiting on auth endpoints                       |
@@ -109,6 +115,8 @@ Before exposing Termi to the internet, ensure:
 - [ ] The app connects as a least-privilege database role (see below)
 - [ ] Docker socket (if used) is not accessible from the containers
 - [ ] You have enabled 2FA or a passkey on your Termi account (consider "Passkey only" in Settings → Passkeys)
+- [ ] Secrets are given to containers at runtime (environment or secret files), never as Docker build arguments
+- [ ] The gateway can reach the web app (`WEB_INTERNAL_URL`), so removed access closes open connections
 - [ ] You are running a recent version, and you verify image signatures (below)
 
 ### Least-privilege database role

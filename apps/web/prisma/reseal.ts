@@ -29,7 +29,11 @@ interface Target {
         | 'user'
         | 'recording'
         | 'serverMonitorConfig'
-        | 'serverHardeningRun';
+        | 'serverHardeningRun'
+        | 'aiSettings'
+        | 'aiConversation'
+        | 'aiMessage'
+        | 'aiMemory';
     fields: string[];
     /** Column holding the owning user's id. */
     owner: 'userId' | 'id';
@@ -62,6 +66,10 @@ const TARGETS: Target[] = [
         owner: 'userId',
         fields: ['pendingSecret'],
     },
+    { model: 'AiSettings', table: 'aiSettings', owner: 'userId', fields: ['apiKey'] },
+    { model: 'AiConversation', table: 'aiConversation', owner: 'userId', fields: ['title'] },
+    { model: 'AiMessage', table: 'aiMessage', owner: 'userId', fields: ['content'] },
+    { model: 'AiMemory', table: 'aiMemory', owner: 'userId', fields: ['content'] },
 ];
 
 type Row = Record<string, string | null>;

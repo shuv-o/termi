@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Added
+
+- **A new landing page.** A hero you can try (terminal, files, remote desktop and split panes), the path a password takes through Termi, how a connection is made, team access, and a searchable explorer with every feature in detail, plus answers to common questions.
+- **Easier to find.** Every public page has its own title, description, canonical link and link-preview image; the home page describes Termi to search engines (app details, all features, screenshots, and its questions as an FAQ); the web manifest has screenshots for richer install prompts; and `/llms.txt` summarises Termi for AI assistants. Search Console and Bing verification tokens can be set with `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION`.
+- **`SEARCH_INDEXING=off`** keeps a private instance out of search results entirely. Either way, the signed-in app, invitation links, tunnels and the API are never indexed.
+
+### Changed
+
+- **Six desktop installers per release.** macOS (Intel and Apple Silicon), Linux (x64 and arm64) and one Windows installer for both x64 and arm64 — all built in CI, including Apple Silicon. Releases no longer carry macOS zips, `latest-mac.yml` or `.blockmap` files; the macOS app checks GitHub for a newer version directly, and Windows and Linux updates download the full installer.
+- README screenshots show the current app.
+
+### Fixed
+
+- Live network rates under 1 KB/s showed long unrounded numbers (`649.616368286445 B/s`).
+- Every page declared the home page as its canonical URL, the sitemap listed pages marked "noindex", and the security page said passwords use Argon2id (they use scrypt).
+
 ---
 
 ## [1.2.0] — 2026-11-09

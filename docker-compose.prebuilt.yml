@@ -110,6 +110,11 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT:-22081}
       GUACD_HOST: guacd
       GUACD_PORT: 4822
+      # Search engines: SEARCH_INDEXING=off keeps a private instance out of search
+      # results; the verification tokens prove ownership in Google / Bing consoles.
+      SEARCH_INDEXING: ${SEARCH_INDEXING:-}
+      GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
+      BING_SITE_VERIFICATION: ${BING_SITE_VERIFICATION:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}

@@ -4,6 +4,7 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions, isDesktopDevice, type SessionData } from '@/lib/auth/session-config';
 import { TUNNEL_SANDBOX } from '@/lib/security/tunnel-sandbox';
 import { tunnelIdFromHost } from '@/lib/security/tunnel-origin';
+import { isPrivatePath, searchIndexingAllowed } from '@/lib/seo';
 
 // Slide the desktop session cookie at most once per hour. Each save re-issues
 // the cookie with a fresh 30-day maxAge, so any interaction within the window
@@ -63,6 +64,7 @@ export async function proxy(request: NextRequest) {
         const tunnelResponse = NextResponse.next();
         tunnelResponse.headers.set('X-Content-Type-Options', 'nosniff');
         tunnelResponse.headers.set('Referrer-Policy', 'no-referrer');
+        tunnelResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
         return tunnelResponse;
     }
 
@@ -124,6 +126,11 @@ export async function proxy(request: NextRequest) {
     }
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // The signed-in app, one-time links and tunnels never belong in search
+    // results; with SEARCH_INDEXING=off, nothing does.
+    if (!searchIndexingAllowed() || isPrivatePath(url.pathname)) {
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
     response.headers.set(
         'Permissions-Policy',
         'camera=(), microphone=(), geolocation=(), payment=(), usb=()',

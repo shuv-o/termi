@@ -1,0 +1,22 @@
+# Termi
+
+> Termi is an open-source (MIT), self-hosted remote access platform. It opens SSH terminals, SFTP file browsers, RDP and VNC remote desktops, Telnet sessions and serial consoles from a web browser, a phone or a desktop app (macOS, Windows, Linux), with server credentials encrypted on the operator's own server.
+
+Termi runs as a Next.js web app plus a WebSocket gateway, deployed with Docker Compose (web app, gateway, PostgreSQL, Apache Guacamole's guacd for RDP/VNC, and a reverse proxy). Every feature is free.
+
+## What it does
+
+- Connect: SSH terminal that keeps running after the tab closes, SFTP file manager, RDP and VNC in the browser, Telnet, serial console over Web Serial, local terminal in the desktop app, jump hosts (ssh -J), port forwarding (local, SOCKS and remote).
+- Work faster: split panes and saved workspaces, typing into all panes, snippets with variables, command suggestions from history, running a command on many servers, a ⌘K command palette, session recording and replay, import from OpenSSH config, PuTTY, MobaXterm and CSV.
+- Server security: SSH host keys pinned on first connection, FIDO2 security keys (YubiKey) as SSH keys, OpenSSH certificates, agent forwarding that can ask before each use, one-click server hardening with automatic rollback.
+- Your data: credentials encrypted with AES-256-GCM and bound to their field and owner, key rotation, secrets never sent to the browser to connect, and open connections closed when access is removed.
+- Sign-in: passkeys, TOTP or email two-factor, Google sign-in, single sign-on with any OpenID Connect provider, app lock, signed-in device management, security emails.
+- Teams: team vaults with owner, admin and member roles; sharing a server; shared live terminals where the owner lets each guest in.
+- Monitoring: live CPU, memory and disk over SSH, alerts by email, push or webhook (Slack, Discord), health history, benchmarks.
+
+## Links
+
+- [Source code](https://github.com/shuv-o/termi): README with setup guide
+- [Releases](https://github.com/shuv-o/termi/releases/latest): desktop installers and changelog
+- [Security policy](https://github.com/shuv-o/termi/blob/main/SECURITY.md): encryption design and vulnerability reporting
+- [Hosted instance](https://termi.run): try it without installing

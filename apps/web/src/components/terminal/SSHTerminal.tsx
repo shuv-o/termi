@@ -33,6 +33,8 @@ interface SSHTerminalProps {
     onRecordingChange?: (recording: boolean) => void;
     /** Everything the user types, after it was sent (for broadcast typing). */
     onInput?: (data: string) => void;
+    /** Hands the parent a function that reads the recent output (Ask AI). */
+    onScreenReaderReady?: (read: () => string) => void;
 }
 
 export default function SSHTerminal({
@@ -51,6 +53,7 @@ export default function SSHTerminal({
     onRecordingChange,
     onInput,
     onSearchReady,
+    onScreenReaderReady,
 }: SSHTerminalProps) {
     const search = useTerminalSearch();
     const attachSearchRef = useRef(search.attach);
@@ -64,6 +67,9 @@ export default function SSHTerminal({
     }, [onSearchReady, search.openSearch]);
     const terminalRef = useRef<HTMLDivElement>(null);
     const terminalInstance = useRef<Terminal | null>(null);
+    useEffect(() => {
+        onScreenReaderReady?.(() => readRecentOutput(terminalInstance.current));
+    }, [onScreenReaderReady]);
     const fitAddon = useRef<FitAddon | null>(null);
     // The user's terminal look (Settings → Appearance), applied live.
     const { look, lookRef } = useTerminalLook(terminalInstance, () => fitAddon.current?.fit());
@@ -687,4 +693,22 @@ async function signWithSecurityKey(req: {
     } catch {
         return null;
     }
+}
+
+const SCREEN_LINES = 200;
+
+/** The last lines of the terminal, as plain text (wrapped lines rejoined). */
+function readRecentOutput(terminal: Terminal | null): string {
+    if (!terminal) return '';
+    const buffer = terminal.buffer.active;
+    const lines: string[] = [];
+    for (let i = Math.max(0, buffer.length - SCREEN_LINES * 2); i < buffer.length; i++) {
+        const line = buffer.getLine(i);
+        if (!line) continue;
+        const text = line.translateToString(true);
+        if (line.isWrapped && lines.length) lines[lines.length - 1] += text;
+        else lines.push(text);
+    }
+    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+    return lines.slice(-SCREEN_LINES).join('\n');
 }

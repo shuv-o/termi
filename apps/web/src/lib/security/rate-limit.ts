@@ -260,3 +260,13 @@ export function keychainReadRateLimit(userId: string): Promise<RateLimitResult> 
 export function teamInviteRateLimit(userId: string): Promise<RateLimitResult> {
     return rateLimit(`team-invite:${userId}`, 20, 60 * 60 * 1000);
 }
+
+/** 40 assistant messages per 10 minutes per user — each is a paid request to a provider. */
+export function aiChatRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`ai-chat:${userId}`, 40, 10 * 60 * 1000);
+}
+
+/** 20 model-list lookups per 10 minutes per user (Settings → AI assistant). */
+export function aiModelsRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`ai-models:${userId}`, 20, 10 * 60 * 1000);
+}

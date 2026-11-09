@@ -1,20 +1,27 @@
 import type { MetadataRoute } from 'next';
 
+import { PRIVATE_PATH_PREFIXES, searchIndexingAllowed } from '@/lib/seo';
 import { getSiteUrl } from '@/lib/site';
 
+// Read SEARCH_INDEXING and NEXT_PUBLIC_APP_URL per request: a prebuilt image is
+// configured when it starts, not when it is built.
+export const dynamic = 'force-dynamic';
+
 export default function robots(): MetadataRoute.Robots {
+    if (!searchIndexingAllowed()) {
+        return { rules: [{ userAgent: '*', disallow: '/' }] };
+    }
     return {
         rules: [
             {
                 userAgent: '*',
-                allow: ['/', '/login', '/register'],
-                disallow: ['/panel/', '/api/'],
+                allow: ['/', '/privacy', '/security'],
+                // Prefix matches: '/panel' covers every page under it.
+                disallow: PRIVATE_PATH_PREFIXES,
             },
         ],
-        // Was hardcoded to a github.com URL that serves no such file — crawlers
-        // following robots.txt's sitemap pointer got a 404 instead of the real
-        // sitemap. Must match the sitemap route's own base URL (getSiteUrl()),
-        // not a fixed domain, since every self-hosted instance differs.
+        // This instance's own sitemap: every self-hosted deployment has its own domain.
         sitemap: `${getSiteUrl()}/sitemap.xml`,
+        host: getSiteUrl(),
     };
 }

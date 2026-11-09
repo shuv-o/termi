@@ -116,6 +116,7 @@ termi/
 │   ├── components/
 │   │   ├── ui/                 # Design-system primitives (button, dialog, list-motion…)
 │   │   ├── common/             # Small shared widgets (CopyButton, Logo)
+│   │   ├── landing/            # The public landing page; features.ts lists every feature
 │   │   └── <feature>/          # UI used by more than one page: terminal, tunnels,
 │   │                           # snippets, servers, appearance, scp, monitoring…
 │   └── lib/                    # No React pages; mostly framework-free
@@ -129,9 +130,10 @@ termi/
 │       └── navigation.ts       # The menu: every page, its name and icon
 ├── apps/gateway/src/
 │   ├── handlers/               # SSH, SCP, Guacamole, Telnet, local PTY, tunnels
-│   ├── sessions/               # Persistent sessions, recording, limits
+│   ├── sessions/               # Persistent sessions, guests, recording, limits, access checks
 │   └── auth/                   # JWE token validation, host keys
-└── apps/electron/              # Electron main process & preload
+├── apps/electron/              # Desktop app: main process, preload, tunnels, auto-update
+└── apps/mobile/                # Capacitor shell around the hosted web app
 ```
 
 Where new code goes:
@@ -140,6 +142,7 @@ Where new code goes:
 - **Used by two or more pages?** `components/<feature>/` for UI, `lib/<domain>/` for logic and types. A page never imports from another page's folder, and `components/` and `lib/` never import from `app/`.
 - **Types** live with the code that owns the data (`lib/servers/types.ts`, `lib/snippets/types.ts`), not in a component.
 - **Imports:** relative (`./x`) inside one folder, `@/…` across folders.
+- **A new user-facing feature** also gets an entry in `components/landing/features.ts`, so the landing page lists it.
 - **Tests** sit next to the file they test (`split.ts` → `split.test.ts`); end-to-end tests are in `apps/web/e2e/`.
 - **Heavy UI** (xterm, Guacamole, rarely shown dialogs) is loaded with `next/dynamic`, so it isn't in every page's bundle.
 
@@ -248,6 +251,10 @@ Termi uses SemVer tags and GitHub Releases.
 - Do not delete the `latest*.yml` assets. Windows and Linux read them to detect and download updates — removing them silently disables auto-update.
 - GitHub always attaches "Source code (zip/tar.gz)". These are generated from the tag and cannot be removed.
 - macOS builds are ad-hoc signed but not notarized, so they cannot self-update: the app checks GitHub's API for a newer release and opens the download page. An Apple Developer ID would allow notarization and real macOS auto-update.
+
+### Usage statistics
+
+`.github/workflows/usage-stats.yml` runs daily and records public download counts (Docker Hub pulls, installer downloads, desktop update checks, stars, GitHub traffic) on the `stats` branch: see its `README.md` there. Termi itself sends nothing. GitHub views and clones need a `STATS_TOKEN` secret: a fine-grained token with "Administration: read-only" on this repository. Run it by hand from Actions → Usage Stats → Run workflow.
 
 ---
 

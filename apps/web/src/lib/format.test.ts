@@ -10,6 +10,10 @@ describe('formatBytes', () => {
         expect(formatBytes(1_649_267_441_664)).toBe('1.5 TB');
     });
 
+    it('rounds fractional byte counts, like live transfer rates', () => {
+        expect(formatBytes(649.616368286445)).toBe('650 B');
+    });
+
     it('renders zero as "0 B" by default', () => {
         expect(formatBytes(0)).toBe('0 B');
     });

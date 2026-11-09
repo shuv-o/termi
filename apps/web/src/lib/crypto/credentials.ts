@@ -25,7 +25,11 @@ export type SealedModel =
     | 'User'
     | 'Recording'
     | 'ServerMonitorConfig'
-    | 'ServerHardeningRun';
+    | 'ServerHardeningRun'
+    | 'AiSettings'
+    | 'AiConversation'
+    | 'AiMessage'
+    | 'AiMemory';
 
 export function fieldAad(model: SealedModel, field: string, ownerId: string): string {
     if (!ownerId) throw new Error(`Missing owner for ${model}.${field}`);

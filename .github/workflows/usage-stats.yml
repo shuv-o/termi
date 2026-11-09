@@ -1,0 +1,61 @@
+name: Usage Stats
+
+# Records how widely Termi is used, from public download counts only (Docker
+# Hub pulls, release downloads, desktop update checks, stars, GitHub traffic).
+# Termi itself sends nothing anywhere.
+#
+# Results go to the `stats` branch, so main's history stays clean:
+#   history.json, traffic.json and a README.md summary.
+# GitHub keeps traffic for only 14 days; running daily keeps all of it.
+#
+# Traffic (views and clones) needs push access, which the workflow token does
+# not grant. Add a fine-grained token with "Administration: read-only" on this
+# repository as the STATS_TOKEN secret to collect it; everything else works
+# without it.
+
+on:
+  schedule:
+    - cron: '17 3 * * *' # daily, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: usage-stats
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Collect usage stats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Open the stats branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin stats >/dev/null; then
+            git fetch --depth=1 origin stats:stats
+            git worktree add stats-data stats
+          else
+            git worktree add --orphan -b stats stats-data
+          fi
+
+      - name: Collect
+        run: node scripts/collect-stats.mjs
+        env:
+          STATS_DIR: stats-data
+          GITHUB_TOKEN: ${{ secrets.STATS_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Save
+        working-directory: stats-data
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No change."
+          else
+            git commit -q -m "stats: $(date -u +%F)"
+            git push origin stats
+          fi

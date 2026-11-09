@@ -51,9 +51,9 @@ model User {
   lastLoginAt DateTime?
 
   // Passkeys
-  passkeyEnabled Boolean @default(false)
+  passkeyEnabled        Boolean   @default(false)
   /// "Passkey only": refuse password sign-in (needs a passkey; cleared when the last one is removed or on password reset)
-  passwordLoginDisabled Boolean @default(false)
+  passwordLoginDisabled Boolean   @default(false)
   /// Lock the app after this many idle minutes (null = never).
   lockAfterMinutes      Int?
   /// Look and layout choices (lib/appearance/prefs.ts); null = defaults.
@@ -83,6 +83,9 @@ model User {
   workspaces          Workspace[]
   teamMemberships     TeamMember[]
   sshSecurityKeys     SshSecurityKey[]
+  aiSettings          AiSettings?
+  aiConversations     AiConversation[]
+  aiMemories          AiMemory[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -100,9 +103,9 @@ model Session {
   ipAddress  String
 
   // Session validity
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
   expiresAt    DateTime
-  lastActiveAt DateTime @default(now())
+  lastActiveAt DateTime  @default(now())
   /// Set while the app is locked (idle lock): every API but unlock refuses it.
   lockedAt     DateTime?
 
@@ -160,10 +163,10 @@ model Server {
   protocol Protocol
 
   // Credentials (encrypted)
-  username   String // Encrypted
-  password   String? // Encrypted (optional - for password auth)
-  privateKey String? // Encrypted (optional - for SSH key auth)
-  passphrase String? // Encrypted (optional - key passphrase)
+  username    String // Encrypted
+  password    String? // Encrypted (optional - for password auth)
+  privateKey  String? // Encrypted (optional - for SSH key auth)
+  passphrase  String? // Encrypted (optional - key passphrase)
   // OpenSSH user certificate for privateKey (`ssh-ed25519-cert-v01@openssh.com
   // AAAA…`). Public, like a public key, so stored as is.
   certificate String?
@@ -465,6 +468,7 @@ enum AuditAction {
 
   // A terminal, file browser or desktop was opened (History page)
   CONNECTION_OPENED
+  AI_SETTINGS_UPDATED
 
   // Port-forward tunnel events
   TUNNEL_OPENED
@@ -747,10 +751,10 @@ model KeychainCredential {
   label String
 
   // Credentials (all encrypted with AES-256-GCM)
-  username   String // Encrypted
-  password   String? // Encrypted (optional – password auth)
-  privateKey String? // Encrypted (optional – SSH key auth)
-  passphrase String? // Encrypted (optional – key passphrase)
+  username    String // Encrypted
+  password    String? // Encrypted (optional – password auth)
+  privateKey  String? // Encrypted (optional – SSH key auth)
+  passphrase  String? // Encrypted (optional – key passphrase)
   // OpenSSH user certificate for privateKey (public, stored as is).
   certificate String?
 
@@ -810,15 +814,15 @@ model ServerShare {
 
 /// One "secure this server" run (lib/services/hardening/harden.service.ts).
 model ServerHardeningRun {
-  id       String @id @default(cuid())
-  serverId String
-  userId   String
+  id            String    @id @default(cuid())
+  serverId      String
+  userId        String
   /// running | succeeded | failed | rollback-pending
-  status   String
+  status        String
   /// The options the user picked (no secrets).
-  options  Json
+  options       Json
   /// Step-by-step outcome, as streamed to the browser.
-  steps    Json   @default("[]")
+  steps         Json      @default("[]")
   /// Encrypted JSON of the new credentials, written BEFORE they are put to use
   /// on the server and cleared once committed to the Server row — so a crash
   /// mid-run never leaves a password set that Termi has no record of.
@@ -956,4 +960,64 @@ model SshSecurityKey {
   servers Server[]
 
   @@index([userId])
+}
+
+// ── AI assistant (lib/ai, lib/services/ai.service.ts) ─────────────────────────
+
+/// A user's own AI provider. Without it (or with useOwn off) the deployment's
+/// AI_* settings apply.
+model AiSettings {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  /// "anthropic" | "openai" (OpenAI or any OpenAI-compatible endpoint)
+  provider      String   @default("anthropic")
+  model         String?
+  /// Custom endpoint (vLLM, Ollama, a proxy). Checked like any host Termi dials.
+  baseUrl       String?
+  apiKey        String? // Encrypted
+  useOwn        Boolean  @default(false)
+  memoryEnabled Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String // Encrypted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+/// Stored after redaction, so history never holds a secret.
+model AiMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  /// "user" | "assistant"
+  role           String
+  content        String // Encrypted
+  createdAt      DateTime @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+/// Lasting facts the assistant keeps about the user's setup and preferences.
+model AiMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String // Encrypted
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

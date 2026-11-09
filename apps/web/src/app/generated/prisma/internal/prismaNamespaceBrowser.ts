@@ -79,7 +79,11 @@ export const ModelName = {
   TeamServer: 'TeamServer',
   TeamInvitation: 'TeamInvitation',
   SessionShare: 'SessionShare',
-  SshSecurityKey: 'SshSecurityKey'
+  SshSecurityKey: 'SshSecurityKey',
+  AiSettings: 'AiSettings',
+  AiConversation: 'AiConversation',
+  AiMessage: 'AiMessage',
+  AiMemory: 'AiMemory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -566,6 +570,54 @@ export const SshSecurityKeyScalarFieldEnum = {
 } as const
 
 export type SshSecurityKeyScalarFieldEnum = (typeof SshSecurityKeyScalarFieldEnum)[keyof typeof SshSecurityKeyScalarFieldEnum]
+
+
+export const AiSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  model: 'model',
+  baseUrl: 'baseUrl',
+  apiKey: 'apiKey',
+  useOwn: 'useOwn',
+  memoryEnabled: 'memoryEnabled',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiSettingsScalarFieldEnum = (typeof AiSettingsScalarFieldEnum)[keyof typeof AiSettingsScalarFieldEnum]
+
+
+export const AiConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiConversationScalarFieldEnum = (typeof AiConversationScalarFieldEnum)[keyof typeof AiConversationScalarFieldEnum]
+
+
+export const AiMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  userId: 'userId',
+  role: 'role',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type AiMessageScalarFieldEnum = (typeof AiMessageScalarFieldEnum)[keyof typeof AiMessageScalarFieldEnum]
+
+
+export const AiMemoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type AiMemoryScalarFieldEnum = (typeof AiMemoryScalarFieldEnum)[keyof typeof AiMemoryScalarFieldEnum]
 
 
 export const SortOrder = {

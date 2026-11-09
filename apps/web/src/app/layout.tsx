@@ -6,6 +6,14 @@ import InstallPrompt from '@/components/pwa/InstallPrompt';
 import CapacitorBridge from '@/components/pwa/CapacitorBridge';
 import { getSiteUrl } from '@/lib/site';
 import {
+    AUTHOR,
+    SITE_DESCRIPTION,
+    SITE_KEYWORDS,
+    SITE_NAME,
+    SITE_TITLE,
+    searchIndexingAllowed,
+} from '@/lib/seo';
+import {
     APPEARANCE_COOKIE,
     decodePaintCookie,
     paintAttributes,
@@ -26,44 +34,22 @@ const jetbrains = JetBrains_Mono({
     display: 'swap',
 });
 
+const indexable = searchIndexingAllowed();
+
 export const metadata: Metadata = {
-    // Resolves relative OG/twitter image URLs and the canonical link tag. This
-    // must be the site people actually land on when they click a shared link,
-    // and — since Termi is self-hosted — that's a different domain for every
-    // deployment (NEXT_PUBLIC_APP_URL), not always this project's own site.
+    // Absolute URLs (canonical, Open Graph) resolve against the deployment's
+    // own domain: every self-hosted instance has its own.
     metadataBase: new URL(getSiteUrl()),
+    applicationName: SITE_NAME,
     title: {
-        default: 'Termi - Secure Server Management',
+        default: SITE_TITLE,
         template: '%s | Termi',
     },
-    description:
-        'Termi is an open-source, self-hosted server management platform. Manage Linux and Windows servers via SSH, SCP, RDP, and VNC directly from your browser — with AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-    keywords: [
-        'server management',
-        'SSH client',
-        'SCP file transfer',
-        'RDP remote desktop',
-        'VNC viewer',
-        'self-hosted',
-        'open source',
-        'web terminal',
-        'xterm.js',
-        'secure server access',
-        'AES-256 encryption',
-        'TOTP 2FA',
-        'PWA',
-        'Next.js',
-        'developer tools',
-        'Shuvo',
-    ],
-    authors: [
-        {
-            name: 'Shuvo',
-            url: 'https://github.com/shuv-o',
-        },
-    ],
-    creator: 'Shuvo',
-    publisher: 'Shuvo',
+    description: SITE_DESCRIPTION,
+    keywords: SITE_KEYWORDS,
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
+    creator: AUTHOR.name,
+    publisher: AUTHOR.name,
     manifest: '/manifest.json',
     icons: {
         icon: [
@@ -75,42 +61,43 @@ export const metadata: Metadata = {
     },
     appleWebApp: {
         capable: true,
-        title: 'Termi',
+        title: SITE_NAME,
         statusBarStyle: 'black-translucent',
     },
+    formatDetection: { telephone: false, email: false, address: false },
     openGraph: {
-        title: 'Termi - Secure Server Management',
-        description:
-            'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser. Built with Next.js, AES-256-GCM encryption, and TOTP 2FA.',
+        title: SITE_TITLE,
+        description: SITE_DESCRIPTION,
         type: 'website',
-        url: getSiteUrl(),
-        siteName: 'Termi',
+        siteName: SITE_NAME,
         locale: 'en_US',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Termi - Secure Server Management',
-        description:
-            'Open-source self-hosted platform to manage servers via SSH, SCP, RDP, and VNC from your browser.',
-        creator: '@shuv-o',
+        title: SITE_TITLE,
+        description: SITE_DESCRIPTION,
     },
-    robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-            index: true,
-            follow: true,
-            'max-snippet': -1,
-            'max-image-preview': 'large',
-            'max-video-preview': -1,
-        },
+    robots: indexable
+        ? {
+              index: true,
+              follow: true,
+              googleBot: {
+                  index: true,
+                  follow: true,
+                  'max-snippet': -1,
+                  'max-image-preview': 'large',
+                  'max-video-preview': -1,
+              },
+          }
+        : { index: false, follow: false },
+    // Search Console / Bing Webmaster Tools ownership, when configured.
+    verification: {
+        google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+        other: process.env.BING_SITE_VERIFICATION
+            ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION }
+            : undefined,
     },
     category: 'technology',
-    // Without an explicit canonical, search engines have to guess which URL is
-    // authoritative when the same page is reachable under multiple hosts/paths.
-    alternates: {
-        canonical: '/',
-    },
 };
 
 /** The user's theme (from the `termi-ui` cookie) also colours the browser chrome. */
@@ -153,62 +140,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {children}
                 <InstallPrompt />
                 <CapacitorBridge />
-                <script
-                    type="application/ld+json"
-                    nonce={nonce}
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            '@context': 'https://schema.org',
-                            '@graph': [
-                                {
-                                    '@type': 'SoftwareApplication',
-                                    name: 'Termi',
-                                    applicationCategory: 'DeveloperApplication',
-                                    operatingSystem: 'Any',
-                                    description:
-                                        'Open-source self-hosted server management platform with SSH, SCP, RDP, and VNC support. Features AES-256-GCM encryption, TOTP 2FA, and a mobile-ready PWA.',
-                                    url: 'https://github.com/shuv-o/termi',
-                                    author: {
-                                        '@type': 'Person',
-                                        name: 'Shuvo',
-                                        email: 'shuvo.punam@gmail.com',
-                                        url: 'https://github.com/shuv-o',
-                                        sameAs: [
-                                            'https://github.com/shuv-o',
-                                            'https://www.linkedin.com/in/shuv-o/',
-                                        ],
-                                    },
-                                    license: 'https://opensource.org/licenses/MIT',
-                                    offers: {
-                                        '@type': 'Offer',
-                                        price: '0',
-                                        priceCurrency: 'USD',
-                                    },
-                                    featureList: [
-                                        'SSH Terminal',
-                                        'SCP File Manager',
-                                        'RDP Remote Desktop',
-                                        'VNC Viewer',
-                                        'AES-256-GCM Encryption',
-                                        'TOTP Two-Factor Authentication',
-                                        'Progressive Web App',
-                                        'Mobile Optimized',
-                                    ],
-                                },
-                                {
-                                    '@type': 'Person',
-                                    name: 'Shuvo',
-                                    email: 'shuvo.punam@gmail.com',
-                                    url: 'https://github.com/shuv-o',
-                                    sameAs: [
-                                        'https://github.com/shuv-o',
-                                        'https://www.linkedin.com/in/shuv-o/',
-                                    ],
-                                },
-                            ],
-                        }),
-                    }}
-                />
                 <script
                     nonce={nonce}
                     dangerouslySetInnerHTML={{
