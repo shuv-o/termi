@@ -20,7 +20,10 @@ export type AgentForwardingMode = 'off' | 'on' | 'confirm';
 
 /** A server can only sign in with one of its owner's own security keys. */
 async function assertSecurityKey(userId: string, id: string): Promise<void> {
-    const key = await prisma.sshSecurityKey.findFirst({ where: { id, userId }, select: { id: true } });
+    const key = await prisma.sshSecurityKey.findFirst({
+        where: { id, userId },
+        select: { id: true },
+    });
     if (!key) throw new JumpHostError('Choose one of your own security keys');
 }
 
@@ -195,6 +198,10 @@ export interface ServerListItem {
     port: number;
     /** The server this one is reached through, if any. */
     jumpServerId: string | null;
+    /** The pinned SSH host key (public), for the Known hosts page. */
+    hostKeyFingerprint: string | null;
+    hostKeyType: string | null;
+    hostKeyTrustedAt: Date | null;
     group: {
         id: string;
         name: string;
@@ -303,6 +310,9 @@ export async function getServers(userId: string): Promise<ServerListItem[]> {
             username: true,
             port: true,
             jumpServerId: true,
+            hostKeyFingerprint: true,
+            hostKeyType: true,
+            hostKeyTrustedAt: true,
             group: {
                 select: {
                     id: true,
@@ -687,6 +697,9 @@ export async function searchServers(
             username: true,
             port: true,
             jumpServerId: true,
+            hostKeyFingerprint: true,
+            hostKeyType: true,
+            hostKeyTrustedAt: true,
             group: {
                 select: {
                     id: true,

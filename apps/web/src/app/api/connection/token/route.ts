@@ -15,12 +15,15 @@ import {
     errorResponse,
     unauthorizedResponse,
     notFoundResponse,
+    getClientIP,
+    getDeviceInfo,
 } from '@/lib/api';
 import { validateHost } from '@/lib/security/ssrf';
 import { connectionTokenRateLimit } from '@/lib/rate-limit';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 import { getKeychainCredentialById } from '@/lib/services/keychain.service';
+import { recordConnection } from '@/lib/services/connection-history.service';
 
 const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
@@ -139,6 +142,18 @@ export async function POST(request: Request) {
             jump: jumpClaim(server.jump),
             ...forward,
         });
+
+        // Tunnels have their own TUNNEL_OPENED entry.
+        if (protocol !== 'tunnel') {
+            await recordConnection({
+                userId: user.id,
+                serverId: server.id,
+                serverName: server.name,
+                protocol,
+                ipAddress: getClientIP(request),
+                userAgent: getDeviceInfo(request),
+            }).catch((err) => console.error('Connection history error:', err));
+        }
 
         return successResponse({ token, gatewayUrl: getGatewayUrl() });
     } catch (error) {

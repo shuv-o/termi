@@ -38,3 +38,17 @@ export function fillSnippet(command: string, values: Record<string, string>): st
         return q ? shellQuote(value) : value;
     });
 }
+
+/** A command split into plain text and `{{variable}}` placeholders, for display. */
+export function commandParts(command: string): { text: string; variable?: string }[] {
+    const parts: { text: string; variable?: string }[] = [];
+    let last = 0;
+    for (const m of command.matchAll(PATTERN)) {
+        const at = m.index ?? 0;
+        if (at > last) parts.push({ text: command.slice(last, at) });
+        parts.push({ text: m[0], variable: m[1] });
+        last = at + m[0].length;
+    }
+    if (last < command.length) parts.push({ text: command.slice(last) });
+    return parts;
+}

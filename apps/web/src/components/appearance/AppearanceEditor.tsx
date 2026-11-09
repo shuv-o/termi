@@ -369,7 +369,7 @@ export function AppearanceEditor() {
                     </div>
                 </fieldset>
                 <Choices
-                    legend="Density"
+                    legend="Spacing"
                     value={a.density}
                     columns={2}
                     onChange={(density) => set({ density })}
@@ -416,7 +416,7 @@ export function AppearanceEditor() {
 
             <Section title="Layout">
                 <Choices
-                    legend="Menu"
+                    legend="Menu style"
                     value={a.nav}
                     onChange={(nav) => set({ nav })}
                     options={[
@@ -465,7 +465,7 @@ export function AppearanceEditor() {
                     ]}
                 />
                 <Choices
-                    legend="Menu side"
+                    legend="Menu position"
                     value={a.navSide}
                     columns={2}
                     disabled={a.nav === 'topbar'}
@@ -499,7 +499,7 @@ export function AppearanceEditor() {
                 />
                 <MenuArranger />
                 <Choices
-                    legend="Open sessions as"
+                    legend="Show open connections as"
                     value={a.sessionList}
                     columns={2}
                     onChange={(sessionList) => set({ sessionList })}
@@ -521,7 +521,7 @@ export function AppearanceEditor() {
                         },
                         {
                             value: 'side',
-                            label: 'A list',
+                            label: 'A side list',
                             hint: 'Down the side, with search',
                             visual: (
                                 <Sketch
@@ -537,15 +537,15 @@ export function AppearanceEditor() {
                     ]}
                 />
                 <Choices
-                    legend="New connections"
-                    description="When a terminal is already open."
+                    legend="When you open another server"
+                    description="While something is already open."
                     value={a.openIn}
                     columns={2}
                     onChange={(openIn) => set({ openIn })}
                     options={[
                         {
                             value: 'tab',
-                            label: 'Open in a new tab',
+                            label: 'In a new tab',
                             visual: (
                                 <Sketch
                                     boxes={[
@@ -558,7 +558,7 @@ export function AppearanceEditor() {
                         },
                         {
                             value: 'split',
-                            label: 'Open beside it',
+                            label: 'Beside the current one',
                             visual: (
                                 <Sketch
                                     boxes={[
@@ -572,7 +572,7 @@ export function AppearanceEditor() {
                 />
                 <Choices
                     legend="Split screen"
-                    description="How terminals share the screen when you split it."
+                    description="How servers share the screen when one opens beside another."
                     value={a.splitShape}
                     onChange={(splitShape) => set({ splitShape })}
                     options={[
@@ -616,7 +616,7 @@ export function AppearanceEditor() {
                     ]}
                 />
                 <Choices
-                    legend="Servers page"
+                    legend="Show servers as"
                     value={a.serverView}
                     columns={2}
                     onChange={(serverView) => set({ serverView })}
@@ -654,7 +654,7 @@ export function AppearanceEditor() {
                 />
                 <Choices
                     legend="Start on"
-                    description="What you see after signing in."
+                    description="The page Termi opens after you sign in."
                     value={a.startPage}
                     columns={2}
                     onChange={(startPage) => set({ startPage })}
@@ -667,7 +667,7 @@ export function AppearanceEditor() {
 
             <Section title="Terminal">
                 <Choices
-                    legend="Colours"
+                    legend="Colour scheme"
                     value={a.terminal.scheme}
                     columns={4}
                     onChange={(scheme) => set({ terminal: { scheme } })}

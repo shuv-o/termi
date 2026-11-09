@@ -35,16 +35,7 @@ export interface AuthSession {
 
 /** Which settings panel is on screen. */
 export type SectionId =
-    | 'profile'
-    | 'appearance'
-    | 'security'
-    | 'passkeys'
-    | 'notifications'
-    | 'sessions'
-    | 'activity'
-    | 'recordings'
-    | 'tunnels'
-    | 'terminal';
+    'profile' | 'appearance' | 'security' | 'passkeys' | 'notifications' | 'sessions' | 'terminal';
 
 export const SECTION_IDS: SectionId[] = [
     'profile',
@@ -53,11 +44,15 @@ export const SECTION_IDS: SectionId[] = [
     'passkeys',
     'notifications',
     'sessions',
-    'activity',
-    'recordings',
-    'tunnels',
     'terminal',
 ];
+
+/** Sections that became pages of their own; old links still land there. */
+export const MOVED_SECTIONS: Record<string, string> = {
+    tunnels: '/panel/forwarding',
+    activity: '/panel/history?tab=activity',
+    recordings: '/panel/history?tab=recordings',
+};
 
 /** Short labels used by the mobile section picker. */
 export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
@@ -65,11 +60,8 @@ export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     appearance: 'Appearance',
     security: 'Security',
     passkeys: 'Passkeys',
-    notifications: 'Alerts',
+    notifications: 'Notifications',
     sessions: 'Devices',
-    activity: 'Activity',
-    recordings: 'Recordings',
-    tunnels: 'Tunnels',
     terminal: 'Terminal',
 };
 

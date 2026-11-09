@@ -14,6 +14,7 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSessionsContext } from '../sessions-context';
+import { OPEN_WORKSPACE_EVENT } from '../_sessions/events';
 
 function AutoConnect() {
     const router = useRouter();
@@ -45,10 +46,33 @@ function AutoConnect() {
     return null;
 }
 
+/** `?workspace=<id>` (from the Workspaces page) opens that saved workspace. */
+function OpenWorkspace() {
+    const router = useRouter();
+    const id = useSearchParams().get('workspace');
+
+    useEffect(() => {
+        if (!id) return;
+        router.replace('/panel/sessions');
+        fetch('/api/workspaces')
+            .then((r) => r.json())
+            .then((d) => {
+                const w = d.success
+                    ? d.data.workspaces.find((x: { id: string }) => x.id === id)
+                    : null;
+                if (w) window.dispatchEvent(new CustomEvent(OPEN_WORKSPACE_EVENT, { detail: w }));
+            })
+            .catch(() => {});
+    }, [id, router]);
+
+    return null;
+}
+
 export default function SessionsPage() {
     return (
         <Suspense fallback={null}>
             <AutoConnect />
+            <OpenWorkspace />
         </Suspense>
     );
 }

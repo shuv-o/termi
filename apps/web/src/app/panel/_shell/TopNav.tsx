@@ -1,9 +1,11 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TerminalLogo from '@/components/common/Logo';
+import { useActiveRect } from '@/lib/hooks/useActiveRect';
 import { openSearch } from './DesktopSidebar';
 import { UserMenu } from './MobileChrome';
 import { isNavItemActive, type NavItem, type PanelUser } from './navigation';
@@ -31,6 +33,14 @@ export function TopNav({
     onBack: () => void;
     onLogout: () => void;
 }) {
+    const navRef = useRef<HTMLElement>(null);
+    // Names need room: with a long menu they show only on the widest screens,
+    // and narrower ones keep the icons (named in the tooltip).
+    const roomy = items.length <= 7;
+    const labelShown = roomy ? 'hidden xl:inline' : 'hidden 2xl:inline';
+    const labelHidden = roomy ? 'sr-only xl:hidden' : 'sr-only 2xl:hidden';
+    // One underline for the bar: it slides to the page you open.
+    const rect = useActiveRect(navRef, '[aria-current="page"]', `${pathname}|${items.length}`);
     return (
         <header className="fixed inset-x-0 top-0 z-50 hidden h-12 items-center gap-1 border-b border-border bg-card px-3 lg:flex">
             {isElectron && (
@@ -49,9 +59,17 @@ export function TopNav({
             </Link>
 
             <nav
+                ref={navRef}
                 aria-label="Main"
-                className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto"
+                className="relative flex h-full min-w-0 flex-1 items-center gap-0.5 overflow-x-auto"
             >
+                {rect && (
+                    <span
+                        aria-hidden
+                        className={`pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary ${rect.moved ? 'termi-glide' : ''}`}
+                        style={{ left: rect.left + 6, width: rect.width - 12 }}
+                    />
+                )}
                 {items.map((item) => {
                     const active = isNavItemActive(item.href, pathname);
                     return (
@@ -70,8 +88,8 @@ export function TopNav({
                             <item.icon
                                 className={`h-4 w-4 shrink-0 ${active ? 'text-primary' : item.id === 'local' ? 'text-local' : ''}`}
                             />
-                            <span className="hidden xl:inline">{item.name}</span>
-                            <span className="sr-only xl:hidden">{item.name}</span>
+                            <span className={labelShown}>{item.name}</span>
+                            <span className={labelHidden}>{item.name}</span>
                         </Link>
                     );
                 })}

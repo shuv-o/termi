@@ -4,13 +4,10 @@ import {
     Bell,
     CheckCircle,
     Fingerprint,
-    History,
     Monitor,
     Palette,
-    ScreenShare,
     Shield,
     User as UserIcon,
-    Waypoints,
     SquareTerminal,
 } from 'lucide-react';
 import type { SectionId, User } from '../types';
@@ -27,13 +24,11 @@ function SidebarNav({
     onChange,
     passkeyCount,
     sessionCount,
-    tunnelCount,
 }: {
     active: SectionId;
     onChange: (s: SectionId) => void;
     passkeyCount: number;
     sessionCount: number;
-    tunnelCount: number;
 }) {
     const items: NavItem[] = [
         { id: 'profile', label: 'Profile', icon: UserIcon },
@@ -46,14 +41,6 @@ function SidebarNav({
             label: 'Signed-in devices',
             icon: Monitor,
             badge: sessionCount || undefined,
-        },
-        { id: 'activity', label: 'Account activity', icon: History },
-        { id: 'recordings', label: 'Recordings', icon: ScreenShare },
-        {
-            id: 'tunnels',
-            label: 'Active tunnels',
-            icon: Waypoints,
-            badge: tunnelCount || undefined,
         },
         { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
     ];
@@ -100,14 +87,12 @@ export function SettingsSidebar({
     onChange,
     passkeyCount,
     sessionCount,
-    tunnelCount,
 }: {
     user: User;
     active: SectionId;
     onChange: (s: SectionId) => void;
     passkeyCount: number;
     sessionCount: number;
-    tunnelCount: number;
 }) {
     return (
         <div className="sticky top-24 space-y-4">
@@ -144,7 +129,6 @@ export function SettingsSidebar({
                     onChange={onChange}
                     passkeyCount={passkeyCount}
                     sessionCount={sessionCount}
-                    tunnelCount={tunnelCount}
                 />
             </div>
         </div>

@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Loader2, Play, ScreenShare, Trash2 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { MotionRow, useListMotion } from '@/components/ui/list-motion';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { formatBytes, formatRelativeTime } from '@/lib/format';
-import { SettingsSection } from '../_components/SettingsSection';
 
 const RecordingPlayer = dynamic(() => import('@/components/terminal/RecordingPlayer'), {
     ssr: false,
@@ -75,7 +75,7 @@ function RecordingRow({
     );
 }
 
-export function RecordingsPanel() {
+export function RecordingsList() {
     const { data, mutate } = useCachedFetch<{ recordings: RecordingSummary[] }>('/api/recordings');
     const recordings = data?.recordings ?? [];
 
@@ -83,6 +83,7 @@ export function RecordingsPanel() {
     const [playingContent, setPlayingContent] = useState<string | null>(null);
     const [loadingPlay, setLoadingPlay] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const motion = useListMotion();
 
     const play = async (id: string) => {
         setPlayingId(id);
@@ -100,41 +101,39 @@ export function RecordingsPanel() {
         setDeletingId(id);
         try {
             await fetch(`/api/recordings/${id}`, { method: 'DELETE' });
-            mutate((prev) => ({
-                recordings: (prev?.recordings ?? []).filter((r) => r.id !== id),
-            }));
+            motion.remove(id, () =>
+                mutate((prev) => ({
+                    recordings: (prev?.recordings ?? []).filter((r) => r.id !== id),
+                })),
+            );
         } finally {
             setDeletingId(null);
         }
     };
 
     return (
-        <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
-            <SettingsSection
-                title="Recordings"
-                description="Asciinema-style captures of terminal sessions you recorded, for audit or handoff."
-                icon={ScreenShare}
-                iconBg="bg-proto-telnet/15 text-proto-telnet"
-            >
-                {recordings.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
-                        No recordings yet — use the record button in a terminal session&apos;s
-                        toolbar to capture one.
-                    </p>
-                ) : (
-                    <div className="space-y-2">
-                        {recordings.map((r) => (
+        <>
+            {recordings.length === 0 ? (
+                <EmptyState
+                    compact
+                    icon={ScreenShare}
+                    title="No recordings yet"
+                    description="Press record in a terminal's toolbar to keep a replayable copy of what happened, for an audit or a handover."
+                />
+            ) : (
+                <ul aria-label="Recordings">
+                    {recordings.map((r) => (
+                        <MotionRow key={r.id} motion={motion} id={r.id}>
                             <RecordingRow
-                                key={r.id}
                                 recording={r}
                                 onPlay={() => play(r.id)}
                                 onDelete={() => remove(r.id)}
                                 deleting={deletingId === r.id}
                             />
-                        ))}
-                    </div>
-                )}
-            </SettingsSection>
+                        </MotionRow>
+                    ))}
+                </ul>
+            )}
 
             <Dialog open={playingId !== null} onOpenChange={(v) => !v && setPlayingId(null)}>
                 <DialogContent className="sm:max-w-2xl">
@@ -152,6 +151,6 @@ export function RecordingsPanel() {
                     )}
                 </DialogContent>
             </Dialog>
-        </Card>
+        </>
     );
 }

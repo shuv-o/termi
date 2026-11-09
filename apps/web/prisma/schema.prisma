@@ -304,6 +304,7 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([userId, action, createdAt])
   @@index([action])
   @@index([createdAt])
 }
@@ -461,6 +462,9 @@ enum AuditAction {
   SNIPPET_CREATED
   SNIPPET_UPDATED
   SNIPPET_DELETED
+
+  // A terminal, file browser or desktop was opened (History page)
+  CONNECTION_OPENED
 
   // Port-forward tunnel events
   TUNNEL_OPENED

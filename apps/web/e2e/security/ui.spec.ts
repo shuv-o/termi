@@ -5,12 +5,13 @@ import { signInPage } from './helpers';
 test.describe('security settings UI', () => {
     test('account activity lists recent sign-ins and security events', async ({ page }) => {
         await signInPage(page, 'alice');
+        // Account activity moved from Settings to History; the old link still lands there.
         await page.goto(`${BASE}/panel/settings?section=activity`);
-        await page
-            .getByRole('button', { name: /Account activity/ })
-            .first()
-            .click();
-        await expect(page.getByText('Account activity').first()).toBeVisible();
+        await expect(page).toHaveURL(/\/panel\/history\?tab=activity/);
+        await expect(page.getByRole('tab', { name: 'Account activity' })).toHaveAttribute(
+            'aria-selected',
+            'true',
+        );
         await expect(page.getByText('Keychain secret revealed').first()).toBeVisible();
         await expect(page.getByText(/Signed in|Failed sign-in attempt/).first()).toBeVisible();
     });

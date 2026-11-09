@@ -31,7 +31,17 @@ interface PresentedKey {
  * owner compares the new key and, if the change is expected, trusts it.
  * Owner-only: the section hides itself for anyone else.
  */
-export function HostKeySection({ serverId }: { serverId: string }) {
+export function HostKeySection({
+    serverId,
+    embedded = false,
+    onTrusted,
+}: {
+    serverId: string;
+    /** Called after a new key is trusted, so a list can show it. */
+    onTrusted?: () => void;
+    /** Inside another list (Known hosts): no heading, and it checks straight away. */
+    embedded?: boolean;
+}) {
     const url = `/api/servers/${serverId}/host-key`;
     const [hidden, setHidden] = useState(false);
     const [pinned, setPinned] = useState<PinnedKey | null>(null);
@@ -100,6 +110,7 @@ export function HostKeySection({ serverId }: { serverId: string }) {
                 return;
             }
             setPinned(data.data.pinned);
+            onTrusted?.();
             setConfirming(false);
             setPassword('');
         } catch {
@@ -132,10 +143,117 @@ export function HostKeySection({ serverId }: { serverId: string }) {
         }
     };
 
+    // Opened from the Known hosts list: the person asked to check, so check.
+    useEffect(() => {
+        if (embedded && loaded) void check();
+        // Once, when the pinned key has loaded.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [embedded, loaded]);
+
     if (hidden || !loaded) return null;
 
     const changed = !!presented && !!pinned && presented.fingerprint !== pinned.fingerprint;
     const unpinned = !!presented && !pinned;
+
+    const verdict = (
+        <>
+            {presented && !changed && !unpinned && (
+                <p className="mt-3 flex items-center gap-2 text-[13px] text-success">
+                    <CheckCircle2 className="h-4 w-4" /> The server presents this key.
+                </p>
+            )}
+
+            {(changed || unpinned) && presented && (
+                <div
+                    className={
+                        changed
+                            ? 'mt-4 rounded-lg border border-danger/25 bg-danger/5 p-3'
+                            : 'mt-4 rounded-lg border border-border p-3'
+                    }
+                >
+                    {changed && (
+                        <p className="flex items-start gap-2 text-sm font-medium text-danger">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                            The server presents a different key
+                        </p>
+                    )}
+                    <p className="mt-1 text-[13px] text-muted-foreground">
+                        {changed
+                            ? 'Expected after reinstalling the server or regenerating its keys. Otherwise someone may be intercepting the connection: compare the key below with the output of '
+                            : 'The server presents this key. To be sure it is the real server, compare it with the output of '}
+                        <code className="font-mono">
+                            ssh-keygen -lf /etc/ssh/ssh_host_*_key.pub
+                        </code>{' '}
+                        run on the server itself.
+                    </p>
+                    <p className="mt-2 break-all font-mono text-[13px]">
+                        {presented.fingerprint}{' '}
+                        <span className="text-muted-foreground">({presented.keyType})</span>
+                    </p>
+
+                    {!confirming ? (
+                        <Button
+                            size="sm"
+                            variant={changed ? 'destructive' : 'default'}
+                            className="mt-3"
+                            onClick={() => trust()}
+                            disabled={trusting}
+                        >
+                            {trusting && <Loader2 className="animate-spin" />}
+                            Trust this key
+                        </Button>
+                    ) : (
+                        <form
+                            className="mt-3 space-y-2"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                void trust({ authPassword: password });
+                            }}
+                        >
+                            <Input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Confirm with your password"
+                                autoComplete="current-password"
+                                autoFocus
+                            />
+                            <div className="flex flex-wrap gap-2">
+                                <Button type="submit" size="sm" disabled={!password || trusting}>
+                                    {trusting && <Loader2 className="animate-spin" />}
+                                    Trust this key
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={trustWithPasskey}
+                                    disabled={trusting}
+                                >
+                                    <KeyRound /> Use a passkey
+                                </Button>
+                            </div>
+                        </form>
+                    )}
+                </div>
+            )}
+
+            {error && <p className="mt-3 text-[13px] text-danger">{error}</p>}
+        </>
+    );
+
+    if (embedded) {
+        return (
+            <div>
+                {checking && !presented && (
+                    <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Asking the server for its key…
+                    </p>
+                )}
+                {verdict}
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -167,92 +285,7 @@ export function HostKeySection({ serverId }: { serverId: string }) {
                     </p>
                 )}
 
-                {presented && !changed && !unpinned && (
-                    <p className="mt-3 flex items-center gap-2 text-[13px] text-success">
-                        <CheckCircle2 className="h-4 w-4" /> The server presents this key.
-                    </p>
-                )}
-
-                {(changed || unpinned) && presented && (
-                    <div
-                        className={
-                            changed
-                                ? 'mt-4 rounded-lg border border-danger/25 bg-danger/5 p-3'
-                                : 'mt-4 rounded-lg border border-border p-3'
-                        }
-                    >
-                        {changed && (
-                            <p className="flex items-start gap-2 text-sm font-medium text-danger">
-                                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                                The server presents a different key
-                            </p>
-                        )}
-                        <p className="mt-1 text-[13px] text-muted-foreground">
-                            {changed
-                                ? 'Expected after reinstalling the server or regenerating its keys. Otherwise someone may be intercepting the connection: compare the key below with the output of '
-                                : 'The server presents this key. To be sure it is the real server, compare it with the output of '}
-                            <code className="font-mono">
-                                ssh-keygen -lf /etc/ssh/ssh_host_*_key.pub
-                            </code>{' '}
-                            run on the server itself.
-                        </p>
-                        <p className="mt-2 break-all font-mono text-[13px]">
-                            {presented.fingerprint}{' '}
-                            <span className="text-muted-foreground">({presented.keyType})</span>
-                        </p>
-
-                        {!confirming ? (
-                            <Button
-                                size="sm"
-                                variant={changed ? 'destructive' : 'default'}
-                                className="mt-3"
-                                onClick={() => trust()}
-                                disabled={trusting}
-                            >
-                                {trusting && <Loader2 className="animate-spin" />}
-                                Trust this key
-                            </Button>
-                        ) : (
-                            <form
-                                className="mt-3 space-y-2"
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    void trust({ authPassword: password });
-                                }}
-                            >
-                                <Input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Confirm with your password"
-                                    autoComplete="current-password"
-                                    autoFocus
-                                />
-                                <div className="flex flex-wrap gap-2">
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        disabled={!password || trusting}
-                                    >
-                                        {trusting && <Loader2 className="animate-spin" />}
-                                        Trust this key
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={trustWithPasskey}
-                                        disabled={trusting}
-                                    >
-                                        <KeyRound /> Use a passkey
-                                    </Button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                )}
-
-                {error && <p className="mt-3 text-[13px] text-danger">{error}</p>}
+                {verdict}
             </Card>
         </div>
     );

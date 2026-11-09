@@ -538,7 +538,7 @@ export function ForwardForm({ tunnels }: { tunnels: Tunnels }) {
                     ) : t.mode === 'dynamic' ? (
                         'Start proxy'
                     ) : (
-                        'Create tunnel'
+                        'Open forward'
                     )}
                 </Button>
             </form>
@@ -606,7 +606,7 @@ export function TunnelSection({ tunnels }: { tunnels: Tunnels }) {
                 {tunnels.activeSessions.length > 0 && (
                     <div className="space-y-2 pt-1">
                         <p className="text-[11px] font-medium text-muted-foreground">
-                            Active tunnels for this server
+                            Open forwards on this server
                         </p>
                         {tunnels.activeSessions.map((row) => (
                             <TunnelSessionRowCard

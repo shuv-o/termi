@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
 import {
     ChevronLeft,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TerminalLogo from '@/components/common/Logo';
+import { useActiveRect } from '@/lib/hooks/useActiveRect';
 import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
 import { isNavItemActive, type NavItem, type PanelUser } from './navigation';
 
@@ -49,13 +51,29 @@ function CollapseTooltip({
 
 /**
  * The active nav entry is marked with the logo's block cursor, parked in the
- * left gutter — the same mark that ends every page title.
+ * gutter beside it — the same mark that ends every page title. There is one
+ * marker for the whole menu: it glides from the page you left to the one you
+ * opened.
  */
-function ActiveMarker({ side = 'left' }: { side?: 'left' | 'right' }) {
+function ActiveMarker({
+    nav,
+    pathname,
+    side,
+}: {
+    nav: React.RefObject<HTMLElement | null>;
+    pathname: string;
+    side: 'left' | 'right';
+}) {
+    const rect = useActiveRect(nav, '[aria-current="page"]', pathname);
+    if (!rect) return null;
     return (
         <span
             aria-hidden
-            className={`absolute ${side === 'left' ? '-left-2' : '-right-2'} top-1/2 h-4 w-[5px] -translate-y-1/2 rounded-[1.5px] bg-primary`}
+            className={`pointer-events-none absolute h-4 w-[5px] rounded-[1.5px] bg-primary ${rect.moved ? 'termi-glide' : ''}`}
+            style={{
+                top: rect.top + rect.height / 2 - 8,
+                left: side === 'left' ? rect.left - 8 : rect.left + rect.width + 3,
+            }}
         />
     );
 }
@@ -203,6 +221,7 @@ export function DesktopSidebar({
     onBack: () => void;
     onLogout: () => void;
 }) {
+    const navRef = useRef<HTMLElement>(null);
     const sidebarW = collapsed ? 'lg:w-14' : 'lg:w-60';
     const edge = side === 'left' ? 'left-0 border-r' : 'right-0 border-l';
     const CollapseIcon =
@@ -293,9 +312,15 @@ export function DesktopSidebar({
             </div>
 
             <nav
+                ref={navRef}
                 aria-label="Main"
-                className={`flex flex-1 flex-col gap-0.5 overflow-y-auto pt-4 ${collapsed ? 'px-2' : 'px-3'}`}
+                className={`relative flex flex-1 flex-col gap-0.5 overflow-y-auto pt-4 ${collapsed ? 'px-2' : 'px-3'}`}
             >
+                <ActiveMarker
+                    nav={navRef}
+                    pathname={`${pathname}|${collapsed}|${items.length}`}
+                    side={side}
+                />
                 {items.map((item) => {
                     const isActive = isNavItemActive(item.href, pathname);
                     const link = (
@@ -307,7 +332,6 @@ export function DesktopSidebar({
                             aria-label={collapsed ? item.name : undefined}
                             className={`${itemBase} ${itemTone(isActive)} ${collapsed ? 'justify-center' : 'gap-3 px-2.5'}`}
                         >
-                            {isActive && <ActiveMarker side={side} />}
                             <item.icon
                                 className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-primary' : item.id === 'local' ? 'text-local' : ''}`}
                             />
