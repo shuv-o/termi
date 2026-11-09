@@ -435,7 +435,7 @@ export default function ImportServersDialog({ onClose, onImported }: Props) {
                                         <code>MobaXterm.ini</code>.
                                     </li>
                                     <li>
-                                        <span className="text-foreground">Termius and others:</span>{' '}
+                                        <span className="text-foreground">Other clients:</span>{' '}
                                         export a CSV — columns like Label, Hostname, Port, Username
                                         and Group are recognised.
                                     </li>

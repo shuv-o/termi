@@ -114,7 +114,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Command suggestions** — fish-style completions from your per-server history and snippets, kept in your browser; passwords and space-prefixed commands are never remembered
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
-- **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (Termius and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
+- **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (other clients and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
 - **Session recording & playback** — record any SSH session and replay it later from History → Recordings, encrypted at rest
 - **Connection history** — every terminal, file browser and desktop you opened, with time, device and IP, visible only to you
 - **Your layout, your look** — Night, Black, Day or system themes, accent colours, compact density; the menu as a sidebar, icon rail or top bar on either side, in your own order, with your own phone bar; terminal colour schemes and fonts, synced to your account

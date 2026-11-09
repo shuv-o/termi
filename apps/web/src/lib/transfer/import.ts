@@ -138,7 +138,7 @@ const CSV_HEADERS: Record<string, string> = {
     'private key': 'privateKey',
     'key passphrase': 'passphrase',
     notes: 'notes',
-    // Other tools' spellings (Termius, Royal TS, spreadsheets people keep):
+    // Other tools' spellings (other SSH clients, spreadsheets people keep):
     label: 'name',
     alias: 'name',
     title: 'name',
