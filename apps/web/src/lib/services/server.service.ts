@@ -10,8 +10,6 @@ import { encryptCredentials, decryptCredentials, ServerCredentials } from '@/lib
 import { pinOf, type HostKeyPin } from '@/lib/security/host-key';
 import { teamServerOwner } from './team.service';
 
-// TYPES
-
 /**
  * Decrypted credentials for the bastion a server is reached through. Only ever
  * built server-side and handed to the SSH pool or sealed inside a gateway JWE.
@@ -209,8 +207,6 @@ export interface ServerListItem {
     } | null;
 }
 
-// CREATE
-
 export async function createServer(input: CreateServerInput) {
     const {
         userId,
@@ -243,7 +239,6 @@ export async function createServer(input: CreateServerInput) {
     }
     if (settings.securityKeyId) await assertSecurityKey(userId, settings.securityKeyId);
 
-    // Encrypt sensitive credentials
     const credentials: ServerCredentials = {
         host,
         username,
@@ -279,7 +274,6 @@ export async function createServer(input: CreateServerInput) {
         },
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -291,8 +285,6 @@ export async function createServer(input: CreateServerInput) {
 
     return server;
 }
-
-// READ
 
 export async function getServers(userId: string): Promise<ServerListItem[]> {
     const rows = await prisma.server.findMany({
@@ -357,7 +349,6 @@ export async function getServerById(serverId: string, userId: string) {
         return null;
     }
 
-    // Decrypt credentials
     const encrypted = {
         host: server.host,
         username: server.username,
@@ -435,7 +426,6 @@ export async function getServerForConnection(
         return null;
     }
 
-    // Update last used
     await prisma.server.update({
         where: { id: serverId },
         data: {
@@ -444,7 +434,6 @@ export async function getServerForConnection(
         },
     });
 
-    // Decrypt credentials
     const encrypted = {
         host: server.host,
         username: server.username,
@@ -483,8 +472,6 @@ export async function getServerForConnection(
     };
 }
 
-// UPDATE
-
 export async function updateServer(serverId: string, userId: string, input: UpdateServerInput) {
     // Verify ownership
     const existing = await prisma.server.findFirst({
@@ -507,7 +494,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
         await assertValidJumpHost(userId, finalJump, input.protocol ?? existing.protocol, serverId);
     }
 
-    // Build update data
     const updateData: Record<string, unknown> = {};
 
     // Non-encrypted fields
@@ -551,7 +537,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
         input.notes;
 
     if (needsEncryption) {
-        // Get current decrypted values
         const currentEncrypted = {
             host: existing.host,
             username: existing.username,
@@ -563,7 +548,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
 
         const current = decryptCredentials(currentEncrypted, existing.userId);
 
-        // Merge with new values
         const newCredentials: ServerCredentials = {
             host: input.host ?? current.host,
             username: input.username ?? current.username,
@@ -573,7 +557,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
             notes: input.notes ?? current.notes,
         };
 
-        // Re-encrypt
         const encrypted = encryptCredentials(newCredentials, existing.userId);
 
         // A different host is a different machine: pin its key afresh.
@@ -601,7 +584,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
         },
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -612,8 +594,6 @@ export async function updateServer(serverId: string, userId: string, input: Upda
 
     return updated;
 }
-
-// DELETE
 
 export async function deleteServer(serverId: string, userId: string) {
     // Verify ownership
@@ -644,7 +624,6 @@ export async function deleteServer(serverId: string, userId: string) {
         where: { id: serverId },
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -656,8 +635,6 @@ export async function deleteServer(serverId: string, userId: string) {
 
     return true;
 }
-
-// SEARCH
 
 export async function searchServers(
     userId: string,
@@ -715,8 +692,6 @@ export async function searchServers(
         return { ...rest, hasPassword: !!password, host: creds.host, username: creds.username };
     });
 }
-
-// TOGGLE FAVORITE
 
 export async function toggleFavorite(serverId: string, userId: string) {
     const server = await prisma.server.findFirst({

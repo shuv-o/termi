@@ -13,7 +13,7 @@
  * --info`, so a future re-theme is a four-line change.
  *
  * Deliberately NOT covered: the per-protocol accent palette in
- * `protocol-style.ts`. Those colours are categorical (SSH vs RDP vs VNC), not
+ * `protocol.ts`. Those colours are categorical (SSH vs RDP vs VNC), not
  * a judgement about health, and keeping the two scales separate is what makes
  * a green "SSH" chip next to a green "online" pill read as intentional.
  */
@@ -57,11 +57,8 @@ export const toneBanner: Record<Tone, string> = {
 };
 
 /**
- * Canonical load thresholds. These used to disagree: a dashboard card turned
- * amber at 70%, the "High CPU" fleet stat only counted servers at 80%, and the
- * alert banner only listed them at 90% — so the fleet could read "High CPU: 0"
- * while a card right below it was amber. One pair of numbers now drives all
- * three: amber is "high", red is "critical".
+ * Canonical load thresholds for every card, fleet stat and alert banner, so
+ * they always agree: amber is "high", red is "critical".
  */
 export const USAGE_WARN_PCT = 80;
 export const USAGE_CRIT_PCT = 90;

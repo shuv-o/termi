@@ -193,7 +193,7 @@ export default function VirtualKeyboard({ onKey }: VirtualKeyboardProps) {
         { label: '📋', cls: 'vk-key-action', action: handlePaste },
     ];
 
-    //   Alpha rows                              ─
+    // Alpha rows
     const alphaRow1 = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
     const alphaRow2 = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
     const alphaRow3 = ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.'];

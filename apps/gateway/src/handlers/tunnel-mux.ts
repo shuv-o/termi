@@ -82,8 +82,6 @@ export class TunnelMuxHandler {
         this.setupSSH();
     }
 
-    // ── WebSocket → SSH ─────────────────────────────────────────────────────
-
     handleMessage(data: Buffer, isBinary: boolean): void {
         if (isBinary) {
             if (data.length < 4) return;
@@ -194,8 +192,6 @@ export class TunnelMuxHandler {
         });
     }
 
-    // ── SSH → WebSocket ─────────────────────────────────────────────────────
-
     private attach(id: number, channel: ClientChannel): Stream {
         const s: Stream = {
             channel,
@@ -249,8 +245,6 @@ export class TunnelMuxHandler {
             }
         }, 25);
     }
-
-    // ── SSH connection ──────────────────────────────────────────────────────
 
     private setupSSH(): void {
         this.ssh.on('ready', () => {

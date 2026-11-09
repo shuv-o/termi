@@ -33,8 +33,6 @@ function createTransporter() {
     });
 }
 
-// INVITE
-
 export async function sendShareInvitation(
     serverId: string,
     inviterId: string,
@@ -143,8 +141,6 @@ export async function sendShareInvitation(
     return { success: true };
 }
 
-// LOOKUP
-
 export async function getInvitationByToken(token: string) {
     const tokenHash = hashToken(token);
     return prisma.serverInvitation.findFirst({
@@ -190,8 +186,6 @@ export async function getServerShares(serverId: string, ownerId: string) {
 
     return { shares, pending };
 }
-
-// ACCEPT
 
 export async function acceptInvitation(
     token: string,
@@ -246,8 +240,6 @@ export async function acceptInvitation(
 
     return { success: true, serverId: invitation.serverId };
 }
-
-// REVOKE
 
 export async function revokeShare(
     shareId: string,

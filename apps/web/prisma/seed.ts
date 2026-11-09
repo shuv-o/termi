@@ -21,7 +21,6 @@ const prisma = new PrismaClient({
 async function main() {
     console.log('🌱 Seeding database...');
 
-    // Create demo user
     const passwordHash = await hashPassword('Demo@123');
 
     const user = await prisma.user.upsert({
@@ -37,7 +36,6 @@ async function main() {
 
     console.log(`✓ Created user: ${user.email}`);
 
-    // Create server groups
     const groups = await Promise.all([
         prisma.serverGroup.upsert({
             where: { userId_name: { userId: user.id, name: 'Production' } },
@@ -76,10 +74,8 @@ async function main() {
 
     console.log(`✓ Created ${groups.length} server groups`);
 
-    // Helper to encrypt credentials
     const encryptField = (value: string) => serializeEncrypted(encrypt(value));
 
-    // Create demo servers
     const servers = [
         {
             name: 'Web Server 1',

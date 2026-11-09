@@ -30,8 +30,6 @@ export interface SheetColumn {
     width?: number;
 }
 
-// FORMULA INJECTION
-
 /**
  * Characters that make Excel, LibreOffice and Google Sheets treat a cell as a
  * formula rather than text. A cell starting with one of these can invoke DDE or
@@ -54,8 +52,6 @@ export function sanitizeCell(value: string): string {
     if (value.length === 0) return value;
     return FORMULA_TRIGGERS.includes(value[0]) ? `'${value}` : value;
 }
-
-// CSV
 
 /**
  * Build an RFC 4180 CSV.
@@ -82,8 +78,6 @@ export function buildCsv(columns: SheetColumn[], rows: CellValue[][]): Buffer {
 
     return Buffer.concat([Buffer.from('﻿', 'utf8'), Buffer.from(lines.join('\r\n'), 'utf8')]);
 }
-
-// XML
 
 /** Excel's hard limit on the length of a single cell's text. */
 const MAX_CELL_CHARS = 32767;
@@ -164,8 +158,6 @@ function sheetXml(columns: SheetColumn[], rows: CellValue[][]): string {
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr><dimension ref="A1"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${headerRow}${bodyRows}</sheetData></worksheet>`;
 }
-
-// ZIP
 
 /** CRC-32 (IEEE 802.3), the checksum every ZIP entry carries. */
 const CRC_TABLE = (() => {
@@ -271,8 +263,6 @@ function buildZip(entries: ZipEntry[], date: Date): Buffer {
 
     return Buffer.concat([...locals, centralDirectory, end]);
 }
-
-// WORKBOOK
 
 const CONTENT_TYPES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
 

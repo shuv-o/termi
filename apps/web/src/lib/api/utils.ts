@@ -5,16 +5,12 @@
 import { NextResponse } from 'next/server';
 import { ZodError, ZodSchema } from 'zod';
 
-// TYPES
-
 export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
     errors?: Record<string, string[]>;
 }
-
-// RESPONSE HELPERS
 
 // Every JSON API response goes through these helpers, and many carry
 // per-session/per-user data (e.g. /api/auth/me). Without an explicit
@@ -72,8 +68,6 @@ export function serverErrorResponse(message: string = 'Internal server error') {
     );
 }
 
-// VALIDATION
-
 /**
  * Validate request body against a Zod schema
  */
@@ -100,8 +94,6 @@ export async function validateBody<T>(
         return { error: errorResponse('Invalid JSON body') };
     }
 }
-
-// REQUEST HELPERS
 
 /**
  * Get the client's IP address, for rate limiting and audit logs.

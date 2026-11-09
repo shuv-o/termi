@@ -55,8 +55,6 @@ function payload(overrides: Partial<ExportPayload['servers'][number]> = {}): Exp
     };
 }
 
-// ZIP / XLSX
-
 /** Minimal ZIP reader — walks local file headers and inflates each entry. */
 function readZip(buf: Buffer): Map<string, string> {
     const files = new Map<string, string>();
@@ -208,8 +206,6 @@ describe('columnLetter', () => {
     });
 });
 
-// ENCRYPTION
-
 describe('export envelope', () => {
     it('round-trips a payload through a passphrase', () => {
         const original = payload();
@@ -255,8 +251,6 @@ describe('export envelope', () => {
         expect(a.payload.data).not.toBe(b.payload.data);
     });
 });
-
-// FILE PARSING
 
 describe('parseExportFile', () => {
     it('reads back a plaintext export', () => {
@@ -313,8 +307,6 @@ describe('parseExportFile', () => {
         expect(() => parseExportFile(file)).toThrow(InvalidFileError);
     });
 });
-
-// CSV PARSING
 
 describe('parseCsv', () => {
     it('keeps newlines inside a quoted field intact', () => {
@@ -437,8 +429,6 @@ describe('parseCsvExport', () => {
         );
     });
 });
-
-// PAYLOAD CONSTRUCTION
 
 const OWNER = 'user-1';
 

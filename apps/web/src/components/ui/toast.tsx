@@ -46,14 +46,8 @@ const DEFAULT_DURATION: Record<ToastType, number> = {
 };
 
 /**
- * App-wide transient feedback.
- *
- * Feedback used to arrive three different ways: settings had a floating toast
- * stack, groups pushed an inline banner in from the top of the page, keychain
- * rendered a green strip that only ever reported success, and the dashboard
- * said nothing at all when a delete failed. Same event, four different
- * affordances — and one of them silent. This is the single channel; mount the
- * provider once and call `useToast()` anywhere below it.
+ * App-wide transient feedback: the single channel for success and error
+ * messages. Mount the provider once and call `useToast()` anywhere below it.
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
     const [toasts, setToasts] = React.useState<Toast[]>([]);

@@ -28,11 +28,9 @@ export interface IconButtonProps extends Omit<ButtonProps, 'children' | 'size'> 
  * An icon-only button that always carries a real tooltip and an accessible
  * name.
  *
- * Icon buttons were previously labelled with the native `title` attribute,
- * which waits about a second, renders in the OS's own style rather than the
- * app's, and is skipped by some screen readers. Routing them through one
- * component means a toolbar icon can never ship unlabelled: `label` is required
- * and feeds both the tooltip and `aria-label`.
+ * Use this instead of the native `title` attribute, which is slow, unstyled and
+ * skipped by some screen readers. `label` is required and feeds both the
+ * tooltip and `aria-label`, so a toolbar icon can never ship unlabelled.
  */
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     (
@@ -57,7 +55,10 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
             variant: variant ?? (active ? ('default' as const) : ('ghost' as const)),
             size: 'icon' as const,
             'aria-label': label,
-            className: cn(size === 'sm' ? 'h-8 w-8 sm:h-7 sm:w-7' : 'h-9 w-9 sm:h-8 sm:w-8', className),
+            className: cn(
+                size === 'sm' ? 'h-8 w-8 sm:h-7 sm:w-7' : 'h-9 w-9 sm:h-8 sm:w-8',
+                className,
+            ),
         };
 
         return (

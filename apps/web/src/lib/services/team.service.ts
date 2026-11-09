@@ -71,8 +71,6 @@ async function requireRole(teamId: string, userId: string, min: TeamRole): Promi
     return role;
 }
 
-// ── Teams ──────────────────────────────────────────────────────────────────
-
 export async function createTeam(userId: string, name: string) {
     const count = await prisma.teamMember.count({ where: { userId } });
     if (count >= MAX_TEAMS_PER_USER) {
@@ -168,8 +166,6 @@ export async function deleteTeam(teamId: string, userId: string) {
     await prisma.team.delete({ where: { id: teamId } });
     await audit(userId, 'TEAM_DELETED', teamId);
 }
-
-// ── Members ────────────────────────────────────────────────────────────────
 
 export async function inviteToTeam(
     teamId: string,
@@ -314,8 +310,6 @@ export async function changeRole(teamId: string, userId: string, memberId: strin
     await audit(userId, 'TEAM_ROLE_CHANGED', teamId, { memberId, role });
 }
 
-// ── Vault ──────────────────────────────────────────────────────────────────
-
 export async function addServerToTeam(teamId: string, userId: string, serverId: string) {
     await roleIn(teamId, userId);
     const server = await prisma.server.findFirst({
@@ -344,8 +338,6 @@ export async function removeServerFromTeam(teamId: string, userId: string, serve
     await prisma.teamServer.delete({ where: { id: link.id } });
     await audit(userId, 'TEAM_SERVER_REMOVED', teamId, { serverId });
 }
-
-// ── Access ─────────────────────────────────────────────────────────────────
 
 /**
  * The owner of `serverId` when `userId` may connect to it through a team, or

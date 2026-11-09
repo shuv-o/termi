@@ -25,7 +25,6 @@ export default function MetricSparkline({
     const H = height;
     const PADDING = 4;
 
-    // Filter to valid numbers
     const values = data.map((d) => (d != null && isFinite(d) ? d : null));
     const defined = values.filter((v): v is number => v !== null);
 

@@ -150,7 +150,6 @@ export default function DashboardPage() {
         [filteredServers, sort, metrics],
     );
 
-    // Protocol counts for filter buttons
     const protocolCounts = useMemo(() => {
         const base = servers.filter((s) => {
             if (filter === 'favorites' && !s.isFavorite) return false;

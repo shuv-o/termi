@@ -14,8 +14,6 @@ import { loadJump } from './server.service';
 import { sendServerDownAlert, sendServerUpAlert } from './alert.service';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 
-// HEALTH CHECK RUNNER
-
 /**
  * Run one health check pass for ALL servers that have monitoring enabled.
  * Called by the cron scheduler every minute.
@@ -151,7 +149,10 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
                     privateKey,
                     passphrase,
                     jump,
-                    hostKey: pinOf({ id: cfg.serverId, hostKeyFingerprint: cfg.server.hostKeyFingerprint }),
+                    hostKey: pinOf({
+                        id: cfg.serverId,
+                        hostKeyFingerprint: cfg.server.hostKeyFingerprint,
+                    }),
                     certificate: cfg.server.certificate,
                 },
                 10000,
@@ -217,7 +218,6 @@ async function checkServer(cfg: MonitorConfig, now: Date): Promise<void> {
         }
     }
 
-    // Update the monitor config state
     await prisma.serverMonitorConfig.update({
         where: { id: cfg.id },
         data: {

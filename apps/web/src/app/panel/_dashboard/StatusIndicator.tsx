@@ -15,7 +15,7 @@ const TONE: Record<ServerStatus, Tone> = {
  * cards/rows and the server detail header, so "online"/"offline" always
  * looks like the same status system no matter which page renders it.
  *
- * Colours come from the shared tone scale (`lib/status-style`), which is what
+ * Colours come from the shared tone scale (`lib/style/status.ts`), which is what
  * keeps this pill, the session status dot and the toaster speaking the same
  * green/amber/red.
  */

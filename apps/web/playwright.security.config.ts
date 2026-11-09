@@ -1,7 +1,6 @@
 /**
- * Security regression suite: proves the protections added in 1.1.2/1.2.0 still
- * hold, against a real web app, gateway, database, SSH host, guacd and VNC
- * server. Needs Docker and a reachable Postgres (local trust auth, or the
+ * Security regression suite: proves Termi's protections hold against a real
+ * web app, gateway, database, SSH host, guacd and VNC server. Needs Docker and a reachable Postgres (local trust auth, or the
  * SEC_E2E_DB_* variables).
  *
  *   npm run test:security

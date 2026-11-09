@@ -8,8 +8,6 @@
 import webpush from 'web-push';
 import { prisma } from '@/lib/db';
 
-// VAPID SETUP
-
 let vapidInitialized = false;
 
 function ensureVapidKeys() {
@@ -36,8 +34,6 @@ function ensureVapidKeys() {
 export function getVapidPublicKey(): string | null {
     return process.env.VAPID_PUBLIC_KEY || null;
 }
-
-// SUBSCRIPTION MANAGEMENT
 
 export interface PushSubscriptionData {
     endpoint: string;
@@ -82,8 +78,6 @@ export async function getUserSubscriptions(userId: string) {
         orderBy: { createdAt: 'desc' },
     });
 }
-
-// SENDING NOTIFICATIONS
 
 export interface PushPayload {
     title: string;

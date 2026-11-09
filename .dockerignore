@@ -2,6 +2,17 @@ node_modules
 **/node_modules
 **/.next
 **/dist
-**/.env
-**/.env.local
 .git
+
+# Secrets never go into a build: every setting is given to the container when
+# it starts. This keeps any local env file (.env, .env.production, .env.*.local…)
+# and private key out of the build context, the build cache and the image.
+**/.env*
+!**/.env.example
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/id_rsa*
+**/id_ecdsa*
+**/id_ed25519*

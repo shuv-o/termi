@@ -22,7 +22,6 @@ const loginSchema = z.object({
 export async function POST(request: Request) {
     const ipAddress = getClientIP(request);
 
-    // Rate limiting
     const rl = await loginRateLimit(ipAddress);
     if (!rl.allowed) {
         return errorResponse('Too many login attempts. Please try again later.', 429);

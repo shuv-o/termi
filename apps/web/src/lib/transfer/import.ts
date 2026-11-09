@@ -63,8 +63,6 @@ export function parseExportFile(raw: unknown, passphrase?: string): ExportPayloa
     return openPayload(file.data.payload, file.data.kdf, passphrase);
 }
 
-// CSV
-
 /**
  * Split CSV text into rows of fields (RFC 4180).
  *
@@ -276,8 +274,6 @@ function withDerivedGroups(payload: ExportPayload): ExportPayload {
         groups: [...names].map((name) => ({ name, description: null, color: null, icon: null })),
     };
 }
-
-// SUMMARY
 
 export interface ImportSummary {
     total: number;

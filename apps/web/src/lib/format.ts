@@ -1,9 +1,6 @@
 /**
- * Shared display formatters.
- *
- * These were previously copy-pasted into the dashboard, server details, groups,
- * sessions workspace and file manager. Keep new formatting helpers here so the
- * whole UI renders sizes and timestamps the same way.
+ * Shared display formatters. Keep new formatting helpers here so the whole UI
+ * renders sizes and timestamps the same way.
  */
 
 /**

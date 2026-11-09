@@ -9,14 +9,11 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { randomBytes } from 'crypto';
 
-// CONSTANTS
-
 const TOTP_ISSUER = 'Termi';
 const TOTP_ALGORITHM = 'SHA1';
 const TOTP_DIGITS = 6;
 const TOTP_PERIOD = 30;
 
-// Recovery codes count
 const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_CODE_LENGTH = 8;
 
@@ -36,8 +33,6 @@ if (256 % RECOVERY_ALPHABET.length !== 0) {
     );
 }
 
-// TOTP FUNCTIONS
-
 /**
  * Generate a new TOTP secret for a user
  *
@@ -49,10 +44,8 @@ export async function generateTOTPSecret(email: string): Promise<{
     uri: string;
     qrCode: string;
 }> {
-    // Generate random secret
     const secret = new OTPAuth.Secret({ size: 20 });
 
-    // Create TOTP object
     const totp = new OTPAuth.TOTP({
         issuer: TOTP_ISSUER,
         label: email,

@@ -21,8 +21,6 @@ import {
 } from 'crypto';
 import { readFileSync } from 'fs';
 
-// CONSTANTS
-
 // AES-256-GCM parameters
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // 96 bits for GCM
@@ -44,8 +42,6 @@ const SCRYPT_OPTIONS = {
 const PBKDF2_ITERATIONS = 600000; // OWASP 2023 recommendation
 const PBKDF2_DIGEST = 'sha256';
 const SALT_LENGTH = 32;
-
-// ENCRYPTION KEY MANAGEMENT
 
 /**
  * The system encryption keys.
@@ -109,7 +105,10 @@ export function getKeyring(): { current: KeyEntry; all: Map<string, KeyEntry> } 
 
     const current = keyEntry(currentSecret);
     const all = new Map<string, KeyEntry>([[current.kid, current]]);
-    for (const secret of previous.split(',').map((s) => s.trim()).filter(Boolean)) {
+    for (const secret of previous
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)) {
         const entry = keyEntry(secret);
         if (!all.has(entry.kid)) all.set(entry.kid, entry);
     }
@@ -152,8 +151,6 @@ export function hashDerivedKey(derivedKey: Buffer): string {
     return createHash('sha256').update(derivedKey).digest('hex');
 }
 
-// AES-256-GCM ENCRYPTION
-
 export interface EncryptedData {
     iv: string; // Base64 encoded IV
     data: string; // Base64 encoded ciphertext
@@ -174,14 +171,11 @@ export function encrypt(plaintext: string, key?: Buffer, aad?: string): Encrypte
     // Generate random IV for each encryption (NEVER reuse IVs with GCM)
     const iv = randomBytes(IV_LENGTH);
 
-    // Create cipher
     const cipher = createCipheriv(ALGORITHM, encryptionKey, iv);
     if (aad !== undefined) cipher.setAAD(Buffer.from(aad, 'utf8'));
 
-    // Encrypt
     const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
 
-    // Get authentication tag
     const tag = cipher.getAuthTag();
 
     return {
@@ -203,22 +197,18 @@ export function encrypt(plaintext: string, key?: Buffer, aad?: string): Encrypte
 export function decrypt(encryptedData: EncryptedData, key?: Buffer, aad?: string): string {
     const decryptionKey = key || getSystemKey();
 
-    // Decode from base64
     const iv = Buffer.from(encryptedData.iv, 'base64');
     const encrypted = Buffer.from(encryptedData.data, 'base64');
     const tag = Buffer.from(encryptedData.tag, 'base64');
 
-    // Validate IV length
     if (iv.length !== IV_LENGTH) {
         throw new Error('Invalid IV length');
     }
 
-    // Validate tag length
     if (tag.length !== TAG_LENGTH) {
         throw new Error('Invalid authentication tag length');
     }
 
-    // Create decipher
     const decipher = createDecipheriv(ALGORITHM, decryptionKey, iv);
     decipher.setAuthTag(tag);
     if (aad !== undefined) decipher.setAAD(Buffer.from(aad, 'utf8'));
@@ -324,8 +314,6 @@ function scryptAsync(
         scrypt(password, salt, keylen, options, (err, key) => (err ? reject(err) : resolve(key))),
     );
 }
-
-// UTILITY FUNCTIONS
 
 /**
  * Generate a secure random token (for session tokens, CSRF, etc.)

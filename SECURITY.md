@@ -58,7 +58,7 @@ The AAD binds each ciphertext to its own field and record, so a value copied int
 
 Decryption happens only in memory, during an active request, and the plaintext is never logged or persisted.
 
-**What this protects against, and what it does not.** A database dump on its own reveals no credentials. A database dump *together with* `ENCRYPTION_KEY` reveals all of them, so keep the key out of database backups and away from anyone with database access. (Earlier versions advertised an optional per-user "master key" layer; it never encrypted anything and was removed in 1.2.0.)
+**What this protects against, and what it does not.** A database dump on its own reveals no credentials. A database dump *together with* `ENCRYPTION_KEY` reveals all of them, so keep the key out of database backups and away from anyone with database access.
 
 ### Password Hashing (scrypt)
 

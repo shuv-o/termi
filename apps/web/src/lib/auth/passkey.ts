@@ -22,8 +22,6 @@ import type {
 import { prisma } from '@/lib/db';
 import { createSession, getSession } from './session';
 
-// HELPERS
-
 function getRpDetails() {
     // In development the Next.js server runs on localhost:22080. Using a remote
     // domain as rpID causes the browser to reject the WebAuthn request entirely
@@ -43,8 +41,6 @@ function getRpDetails() {
         origins: [url.origin],
     };
 }
-
-// REGISTRATION
 
 /**
  * Generate WebAuthn registration options for an authenticated user.
@@ -80,7 +76,6 @@ export async function generatePasskeyRegistrationOptions(userId: string) {
         },
     });
 
-    // Persist challenge to session
     const session = await getSession();
     session.passkeyChallenge = options.challenge;
     await session.save();
@@ -156,14 +151,11 @@ export async function verifyPasskeyRegistration(
     ]);
     notifySecurityEvent(userId, 'passkey_added');
 
-    // Clear challenge
     session.passkeyChallenge = undefined;
     await session.save();
 
     return { success: true };
 }
-
-// AUTHENTICATION
 
 /**
  * Generate WebAuthn authentication options.
@@ -317,7 +309,6 @@ export async function verifyPasskeyAuthentication(
         }),
     ]);
 
-    // Create full session
     const sessionToken = await createSession(
         passkey.userId,
         passkey.user.email,
@@ -340,8 +331,6 @@ export async function verifyPasskeyAuthentication(
         sessionToken,
     };
 }
-
-// MANAGEMENT
 
 /** List all passkeys for the authenticated user */
 export async function listPasskeys(userId: string) {

@@ -14,8 +14,6 @@ import {
 import { openBeside, prunePanes, type SplitState } from './split';
 import { getAppearance } from '@/lib/appearance/store';
 
-// TYPES
-
 export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'detached';
 
 export interface Session {
@@ -86,8 +84,6 @@ export interface AddSessionOptions {
 /** A fresh tab id, for callers that place a tab before opening it. */
 export const newTabId = () => `tab-${crypto.randomUUID()}`;
 
-// CONTEXT
-
 const SessionsContext = createContext<SessionsContextValue | null>(null);
 
 export function useSessionsContext() {
@@ -95,8 +91,6 @@ export function useSessionsContext() {
     if (!ctx) throw new Error('useSessionsContext must be inside SessionsProvider');
     return ctx;
 }
-
-// DB HELPERS
 
 async function dbRegisterSession(sessionId: string, serverId: string, serverName: string) {
     try {
@@ -136,8 +130,6 @@ async function dbRenewSession(oldSessionId: string, newSessionId: string) {
     }
 }
 
-// PROVIDER
-
 type SessionsProvider_AddSession = (
     serverId: string,
     serverName?: string,
@@ -168,8 +160,6 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         sessionsRef.current = sessions;
     }, [sessions]);
 
-    //   Helpers
-
     const updateSessionStatus = useCallback((tabId: string, status: SessionStatus) => {
         setSessions((prev) => prev.map((s) => (s.tabId === tabId ? { ...s, status } : s)));
     }, []);
@@ -190,8 +180,6 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    //   Fetch token helper
-
     async function fetchToken(
         serverId: string,
     ): Promise<{ token: string; gatewayUrl: string | null } | null> {
@@ -209,8 +197,6 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             return null;
         }
     }
-
-    //   Session management
 
     const addLocalSession: SessionsProvider_AddLocalSession = useCallback(
         (opts) => {
@@ -373,7 +359,6 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                     : s,
             ),
         );
-        // Update DB with new sessionId
         if (oldSessionId) await dbRenewSession(oldSessionId, newSessionId);
 
         const result = await fetchToken(serverId);
@@ -436,8 +421,6 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         handler(text);
         return true;
     }, []);
-
-    //   Split panes and broadcast typing
 
     const setSplit = useCallback((next: SplitState | null) => setSplitState(next), []);
 

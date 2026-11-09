@@ -86,6 +86,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **TOTP-based 2FA** — works with Google Authenticator, Authy, and any TOTP app
 - **Passkey / WebAuthn** — passwordless login with hardware keys and biometrics
 - **Google OAuth** — "Sign in with Google" support
+- **Single sign-on (OIDC)** — Okta, Entra ID, Google Workspace, Keycloak or any OpenID Connect provider, optionally required for chosen email domains
+- **FIDO2 security keys** — YubiKey and other FIDO2 keys as SSH keys: the private key stays on the device, each login is a touch
 - Zero-trust architecture — credentials are decrypted only in memory, never stored in plaintext
 - **App lock** — lock after inactivity or on demand, enforced by the server; unlock with a password or passkey
 - **SSH certificates & agent forwarding** — log in with OpenSSH user certificates; forward your keys to a server (optionally approving each use) without the keys ever leaving Termi
@@ -99,6 +101,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **RDP** — Windows Remote Desktop via [Apache Guacamole](https://guacamole.apache.org/), with touch-to-mouse translation and an on-screen keyboard on mobile
 - **VNC** — Virtual Network Computing via Apache Guacamole, same mobile touch support
 - **Telnet** — direct terminal access for legacy/unencrypted devices
+- **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
 - **Jump hosts** — reach servers behind a bastion, like `ssh -J`, for SSH, SFTP, tunnels, and RDP/VNC
 - **Port forwarding** — local (`ssh -L`), SOCKS proxy (`ssh -D`) and remote (`ssh -R`), with no terminal needed. Local HTTP targets get a one-click browser link; everything runs in the desktop app or via a small Node.js bridge script, over one multiplexed connection per tunnel
 
@@ -113,12 +116,10 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
 - **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (Termius and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
 - **Session recording & playback** — record any SSH session and replay it later from History → Recordings, encrypted at rest
+- **Connection history** — every terminal, file browser and desktop you opened, with time, device and IP, visible only to you
+- **Your layout, your look** — Night, Black, Day or system themes, accent colours, compact density; the menu as a sidebar, icon rail or top bar on either side, in your own order, with your own phone bar; terminal colour schemes and fonts, synced to your account
 
 ### 💻 Local Terminal
-
-- **Your layout, your look** — Night, Black, Day or system themes, accent colours, compact density; the menu as a sidebar, icon rail or top bar on either side, in your own order, with your own phone bar; terminal colour schemes and fonts, synced to your account
-- **FIDO2 security keys** — YubiKey and other FIDO2 keys as SSH keys: the private key stays on the device, each login is a touch
-- **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
 
 - Access your **local machine's shell** directly from the app
 - **Electron**: spawns PowerShell (Windows) or your default shell (macOS/Linux)
@@ -135,9 +136,8 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 - **Teams** — a shared vault of servers with owner / admin / member roles and email invitations; members connect, owners keep the credentials
 - **Shared live sessions** — invite someone to watch or work in your terminal; you approve each person and can remove them any time
-
-- Share server access with other users via invitation links
-- Per-server share management and revocation
+- **Server sharing** — share one server with another user by email invitation, and revoke it any time
+- Removing access (a share, a team member, a signed-in device) also closes the connections it allowed
 
 ### 📱 PWA & Mobile
 
@@ -196,21 +196,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:22080
 ```
 
 ```bash
-# 3. Start the stack
+# 3. Start the stack (migrations and guacd for RDP/VNC are included)
 docker compose up -d
 
-# 4. Run database migrations
-docker compose exec web npx prisma migrate deploy
-
-# 5. Open Termi
+# 4. Open Termi
 open http://localhost:22080
 ```
-
-> **RDP / VNC**: also start guacd — on Apple Silicon, add `--platform linux/arm64`:
->
-> ```bash
-> docker run -d -p 4822:4822 --name termi-guacd guacamole/guacd: 1.6.0
-> ```
 
 ### Deploy with Prebuilt Images
 
@@ -331,8 +322,10 @@ npm run db:migrate       # Create + apply a migration
 npm run db:studio        # Prisma Studio database browser
 npm run db:seed          # Seed with sample data
 
+npm run check            # Lint + typecheck + unit tests
 npm run test             # Unit tests (Vitest)
 npm run test:e2e         # End-to-end tests (Playwright)
+npm run test:security    # Security regression suite (needs Docker)
 npm run lint             # ESLint across all workspaces
 npm run build            # Production build
 

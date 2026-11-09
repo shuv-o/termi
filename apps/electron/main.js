@@ -99,7 +99,7 @@ function getWindowIconPath() {
     return candidates.find((candidate) => fs.existsSync(candidate)) || undefined;
 }
 
-//   Windows                                                ─
+// Windows
 
 /** Tell the renderer (SPA) to navigate without a full page reload. */
 function navigateTo(routePath) {
@@ -296,7 +296,7 @@ function buildAppMenu() {
     return Menu.buildFromTemplate(template);
 }
 
-//   Static asset caching                                   ─
+// Static asset caching
 
 let cachingConfigured = false;
 
@@ -562,7 +562,7 @@ function assertTrustedSender(event) {
     if (!isTrustedSender(event)) throw new Error('Untrusted IPC sender');
 }
 
-//   Local terminal IPC                                     ─
+// Local terminal IPC
 
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
     assertTrustedSender(event);
@@ -850,7 +850,7 @@ ipcMain.handle('passkey:get', async (event, optionsJSON) => {
     }
 });
 
-//   App lifecycle                                          ─
+// App lifecycle
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {

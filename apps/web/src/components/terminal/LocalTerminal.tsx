@@ -22,7 +22,7 @@ interface LocalTerminalProps {
 
 type SetStatus = (s: 'starting' | 'ready' | 'exited' | 'error') => void;
 
-//   Electron IPC path                             ─
+// Electron IPC path
 
 function setupElectronTerminal(
     tabId: string,
@@ -174,8 +174,6 @@ function setupWebSocketTerminal(
         }
     };
 }
-
-//   Component                                 ─
 
 export default function LocalTerminal({
     tabId,

@@ -7,7 +7,6 @@ const nextConfig = {
     reactStrictMode: false,
     poweredByHeader: false,
 
-    // Standalone output for Docker
     output: 'standalone',
 
     // Allow the Next.js dev server to accept HMR WebSocket connections from
@@ -40,8 +39,7 @@ const nextConfig = {
     //   /panel/*             — the authenticated dashboard (servers, keychain, settings, sessions)
     //   /invitations/*       — single-use server-share invitation tokens
     //   /reset-password      — single-use password-reset token flow
-    // The master-key passphrase steps were removed in 1.2.0 (they encrypted
-    // nothing); send old links and bookmarks to the panel.
+    // Old master-key passphrase pages: send links and bookmarks to the panel.
     async redirects() {
         return [
             { source: '/setup-encryption', destination: '/panel', permanent: false },

@@ -71,8 +71,6 @@ export function ssoRequiredFor(email: string): boolean {
 
 export const SSO_REQUIRED_MESSAGE = 'Your organization requires signing in with single sign-on.';
 
-// ── Discovery ──────────────────────────────────────────────────────────────
-
 interface Discovery {
     issuer: string;
     authorization_endpoint: string;
@@ -119,8 +117,6 @@ const callbackUrl = () =>
     `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080'}/api/auth/sso/callback`;
 
 const b64url = (b: Buffer) => b.toString('base64url');
-
-// ── Flow ───────────────────────────────────────────────────────────────────
 
 export async function createAuthorizationUrl(cfg: OidcConfig) {
     const { doc } = await discover(cfg);

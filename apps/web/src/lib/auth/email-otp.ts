@@ -10,11 +10,7 @@ import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
 import { countEvent, resetCounter } from '@/lib/security/rate-limit';
 
-// CONSTANTS
-
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-
-// HELPERS
 
 /** Generate a random 6-digit OTP */
 function generateOTP(): string {
@@ -40,8 +36,6 @@ function verifyOTPHash(code: string, stored: string): boolean {
         return false;
     }
 }
-
-// MAILER
 
 function createTransporter() {
     // Support both SMTP and services like Gmail/Mailgun via env vars.
@@ -82,8 +76,6 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
     }
 }
 
-// PUBLIC API
-
 /**
  * Send an email OTP to the user and store the hash in DB.
  * Clears any existing unused OTPs for the user first.
@@ -93,7 +85,6 @@ export async function sendEmailOTP(
     email: string,
     ipAddress: string,
 ): Promise<void> {
-    // Invalidate previous OTPs
     await prisma.emailOTP.deleteMany({
         where: { userId, usedAt: null },
     });

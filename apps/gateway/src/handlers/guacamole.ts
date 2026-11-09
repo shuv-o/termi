@@ -241,7 +241,6 @@ export class GuacamoleHandler {
                 if (data.match(/^\d+\./)) {
                     this.forwardClientInstructions(data);
                 } else {
-                    // Try to parse as JSON
                     const parsed = JSON.parse(data);
 
                     if (parsed.type === 'ping') {
@@ -302,7 +301,6 @@ export class GuacamoleHandler {
             return;
         }
 
-        // Send select instruction
         const guacProtocol = protocol === 'rdp' ? 'rdp' : 'vnc';
         this.guacdSocket.write(encodeInstruction('select', guacProtocol));
 
@@ -361,7 +359,6 @@ export class GuacamoleHandler {
         // Build connection args based on what guacd expects
         const connectionArgs: string[] = [];
 
-        // Map of available parameter values
         const paramMap: Record<string, string> = {
             // Basic connection
             hostname: targetHost,

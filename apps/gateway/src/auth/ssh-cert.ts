@@ -164,8 +164,6 @@ function placeholderKey(): ParsedKey {
     return placeholder as ParsedKey;
 }
 
-// ── ssh2 override ───────────────────────────────────────────────────────────
-
 let installed = false;
 
 function installAuthOverride(): void {

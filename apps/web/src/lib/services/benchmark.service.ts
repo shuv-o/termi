@@ -17,8 +17,6 @@ import { Client, ConnectConfig } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from './ssh-jump';
 import type { HostKeyPin } from '@/lib/security/host-key';
 
-// TYPES
-
 export interface BenchmarkHardwareInfo {
     cpuModel: string;
     cpuCores: number;
@@ -177,8 +175,6 @@ t.join(2)
 print(f'{65536 * 512 / 1024 / 1024 / elapsed:.0f}')
 `;
 
-// PARSERS
-
 /** Parse dd output: "... copied, 1.23 s, 773 MB/s" → MB/s */
 function parseDdMBps(output: string): number | null {
     const m = output.match(/copied,\s*[\d.]+\s*s,\s*([\d.]+)\s*(GB|MB|kB|B)\/s/);
@@ -268,8 +264,6 @@ function parseHardwareInfo(output: string): BenchmarkHardwareInfo {
     };
 }
 
-// SCORING
-
 /**
  * Compute normalised 0–1000 scores for each subsystem and an overall score.
  *
@@ -294,7 +288,6 @@ function computeScores(
     const multiPts = cpu ? Math.min(1000, Math.round((multiPerThread * 1000) / 800)) : 0;
     const cpuScore = cpu ? Math.round(singlePts * 0.6 + multiPts * 0.4) : 0;
 
-    // RAM
     const ramAvg = ram ? (ram.writeMBps + ram.readMBps) / 2 : 0;
     const ramScore = Math.min(1000, Math.round((ramAvg * 1000) / 30000));
 
@@ -316,8 +309,6 @@ function computeScores(
     const overall = Math.round((cpuScore + ramScore + diskScore + netScore) / 4);
     return { cpu: cpuScore, ram: ramScore, disk: diskScore, network: netScore, overall };
 }
-
-// SSH HELPERS
 
 function buildConnectConfig(config: SSHConfig): ConnectConfig {
     const c: ConnectConfig = {
@@ -359,8 +350,6 @@ function execSSH(client: Client, cmd: string, timeoutMs: number): Promise<string
         });
     });
 }
-
-// MAIN BENCHMARK RUNNER
 
 const EMPTY_HARDWARE: BenchmarkHardwareInfo = {
     cpuModel: 'Unknown',
@@ -692,7 +681,6 @@ export async function runBenchmark(
                     results: { network: partial.network, scores: partial.scores },
                 });
 
-                //   Done
                 onProgress({
                     phase: 'done',
                     message: `Benchmark complete — Overall Score: ${partial.scores?.overall ?? '—'}`,
@@ -713,7 +701,13 @@ export async function runBenchmark(
 
         onProgress({ phase: 'connecting', message: 'Connecting via SSH…' });
         try {
-            connectSSH(client, buildConnectConfig(config), config.jump, config.hostKey, config.certificate);
+            connectSSH(
+                client,
+                buildConnectConfig(config),
+                config.jump,
+                config.hostKey,
+                config.certificate,
+            );
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             onProgress({ phase: 'error', message: msg });

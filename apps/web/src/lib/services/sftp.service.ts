@@ -9,8 +9,6 @@
 import { SFTPWrapper } from 'ssh2';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
 
-// TYPES
-
 export type SFTPConfig = SSHPoolConfig;
 
 export interface RemoteEntry {
@@ -22,8 +20,6 @@ export interface RemoteEntry {
     permissions: string;
     mode: number;
 }
-
-// POOLED SFTP HELPER
 
 /**
  * Acquire a pooled SSH connection, get (or reuse) the cached SFTP channel,
@@ -43,8 +39,6 @@ async function withPooledSFTP<T>(
         sshPool.release(key);
     }
 }
-
-// HELPERS
 
 function entryType(mode: number): RemoteEntry['type'] {
     const t = mode & 0o170000;
@@ -82,8 +76,6 @@ function joinPath(...parts: string[]): string {
     );
 }
 
-// LIST DIRECTORY
-
 export async function listDirectory(config: SFTPConfig, dirPath: string): Promise<RemoteEntry[]> {
     return withPooledSFTP(
         config,
@@ -115,8 +107,6 @@ export async function listDirectory(config: SFTPConfig, dirPath: string): Promis
             }),
     );
 }
-
-// MAKE DIRECTORY
 
 export async function makeDirectory(config: SFTPConfig, dirPath: string): Promise<void> {
     return withPooledSFTP(
@@ -171,8 +161,6 @@ export async function deleteEntry(
         }
     });
 }
-
-// RENAME / MOVE
 
 export async function renameEntry(
     config: SFTPConfig,
@@ -295,8 +283,6 @@ export async function transferFiles(
 
     return { ok, failed };
 }
-
-// UPLOAD
 
 export async function uploadBuffer(
     config: SFTPConfig,

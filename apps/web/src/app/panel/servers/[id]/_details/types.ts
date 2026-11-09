@@ -175,9 +175,7 @@ export function phaseIndex(phase: BenchmarkPhase | null): number {
 /**
  * Scores are 0–1000, graded against a high-end server reference.
  *
- * Three bands, matching the app-wide tone scale. There used to be four, but
- * two of them were `yellow-400` and `amber-400` — indistinguishable side by
- * side, so the extra band communicated nothing.
+ * Three bands, matching the app-wide tone scale.
  */
 const GOOD_SCORE = 800;
 const FAIR_SCORE = 500;

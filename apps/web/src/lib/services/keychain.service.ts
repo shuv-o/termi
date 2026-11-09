@@ -8,8 +8,6 @@
 import { prisma } from '@/lib/db';
 import { sealField, openField } from '@/lib/crypto';
 
-// TYPES
-
 export interface KeychainEntry {
     id: string;
     label: string;
@@ -42,8 +40,6 @@ export interface CreateKeychainInput {
 }
 
 export type UpdateKeychainInput = Partial<CreateKeychainInput>;
-
-// CREATE
 
 export async function createKeychainCredential(
     userId: string,
@@ -93,8 +89,6 @@ export async function createKeychainCredential(
     };
 }
 
-// READ
-
 export async function getKeychainCredentials(userId: string): Promise<KeychainEntry[]> {
     const rows = await prisma.keychainCredential.findMany({
         where: { userId },
@@ -136,8 +130,6 @@ export async function getKeychainCredentialById(
         certificate: row.certificate,
     };
 }
-
-// UPDATE
 
 export async function updateKeychainCredential(
     id: string,
@@ -193,8 +185,6 @@ export async function updateKeychainCredential(
         updatedAt: updated.updatedAt,
     };
 }
-
-// DELETE
 
 export async function deleteKeychainCredential(id: string, userId: string): Promise<boolean> {
     const existing = await prisma.keychainCredential.findFirst({

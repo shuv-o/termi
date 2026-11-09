@@ -30,14 +30,10 @@ import { Client, ConnectConfig, SFTPWrapper } from 'ssh2';
 import { connectSSH, type SSHJumpConfig } from './ssh-jump';
 import type { HostKeyPin } from '@/lib/security/host-key';
 
-//  ─ Tuning constants                             ─
-
 const IDLE_TTL_MS = 5 * 60_000; // destroy connection after 5 min idle
 const CONNECT_TIMEOUT = 15_000; // maximum time to establish SSH connection
 const KEEPALIVE_MS = 20_000; // send SSH keepalive every 20 s
 const KEEPALIVE_MAX = 3; // give up after 3 missed keepalives (~60 s)
-
-//  ─ Public config type                            ─
 
 export interface SSHPoolConfig {
     /**
@@ -60,8 +56,6 @@ export interface SSHPoolConfig {
     certificate?: string | null;
 }
 
-//  ─ Internal types                              ─
-
 interface PoolEntry {
     client: Client;
     ready: boolean;
@@ -81,14 +75,10 @@ interface PoolEntry {
     sftpPending: Promise<SFTPWrapper> | null;
 }
 
-//  ─ Pool implementation
-
 export class SSHConnectionPool {
     private entries = new Map<string, PoolEntry>();
     /** Coalesces parallel first-connect attempts for the same key. */
     private connecting = new Map<string, Promise<Client>>();
-
-    //   Key
 
     static makeKey(cfg: SSHPoolConfig): string {
         const base = cfg.id ?? `${cfg.username}@${cfg.host}:${cfg.port}`;
@@ -98,8 +88,6 @@ export class SSHConnectionPool {
             ? `${base}~via~${cfg.jump.username}@${cfg.jump.host}:${cfg.jump.port}`
             : base;
     }
-
-    //   acquire
 
     async acquire(cfg: SSHPoolConfig): Promise<{ client: Client; key: string }> {
         const key = SSHConnectionPool.makeKey(cfg);
@@ -149,8 +137,6 @@ export class SSHConnectionPool {
             this.connecting.delete(key);
         }
     }
-
-    //   release
 
     release(key: string): void {
         const e = this.entries.get(key);
@@ -223,12 +209,9 @@ export class SSHConnectionPool {
         }
     }
 
-    //   stats
     get size(): number {
         return this.entries.size;
     }
-
-    //   internal helpers                          ─
 
     private openConnection(key: string, cfg: SSHPoolConfig): Promise<Client> {
         return new Promise<Client>((resolve, reject) => {
@@ -326,8 +309,6 @@ export class SSHConnectionPool {
         }
     }
 }
-
-//  ─ Singleton
 
 declare global {
     var __sshPool: SSHConnectionPool | undefined;

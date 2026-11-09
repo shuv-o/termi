@@ -1,17 +1,11 @@
 /**
- * Tunnel Target Probing
+ * Tunnel target probing. Tunnel traffic itself goes over a WebSocket through
+ * the gateway (apps/gateway/src/handlers/tunnel-mux.ts), so it works behind a
+ * reverse proxy that only forwards 80/443.
  *
- * Port-forward tunnels no longer open a raw TCP listener on this host — that
- * only works when the deployment exposes arbitrary ports, which isn't true
- * behind a reverse proxy (Traefik/nginx) that forwards just 80/443. Instead,
- * the actual data path is a WebSocket through the gateway (see
- * apps/gateway/src/handlers/tunnel.ts), reachable at the same domain/port as
- * everything else.
- *
- * This module's only remaining job: given a candidate target, make a quick
- * real HTTP request through the SSH forwardOut channel to see whether it's
- * worth offering the one-click "open in browser" HTTP proxy, or whether the
- * user needs the local-bridge command instead (databases, raw SSH, etc.).
+ * Given a candidate target, this makes a quick real HTTP request through the
+ * SSH forwardOut channel to decide whether to offer the one-click "open in
+ * browser" proxy, or the local bridge instead (databases, raw SSH, etc.).
  */
 
 import { sshPool, type SSHPoolConfig } from './ssh-pool';

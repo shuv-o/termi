@@ -31,9 +31,7 @@ function AutoConnect() {
     useEffect(() => {
         if (!addId) return;
 
-        // Focus the existing tab rather than opening a second shell on the same
-        // box — clicking Connect twice used to be a no-op that left you looking
-        // at whatever tab happened to be active.
+        // Focus the existing tab rather than opening a second shell on the same box.
         const existing = sessionsRef.current.find((s) => s.serverId === addId);
         if (existing) setActiveTabId(existing.tabId);
         else void addSession(addId);

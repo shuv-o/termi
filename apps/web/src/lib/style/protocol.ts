@@ -4,12 +4,11 @@
  * Servers render in several places (dashboard cards/rows, the dashboard filter
  * chips, groups, server detail, shared-with-me, the add/edit form) — this is
  * the single source of truth so the same protocol never gets a different
- * colour or icon depending on which page happens to render it. Three copies of
- * this table used to exist, and they had already drifted apart on opacity.
+ * colour or icon depending on which page happens to render it.
  *
  * These colours are deliberately *categorical*, not status: they distinguish
  * SSH from RDP, they do not say anything is healthy. State colours live in
- * `status-style.ts` and come from the `--success/--warning/--danger/--info`
+ * `status.ts` and come from the `--success/--warning/--danger/--info`
  * tokens. Keeping the two scales separate is what makes a green SSH chip next
  * to a green "online" pill read as intentional rather than accidental.
  *

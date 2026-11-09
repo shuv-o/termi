@@ -75,8 +75,6 @@ async function sendAlertEmail(to: string, subject: string, html: string): Promis
     }
 }
 
-// ALERT LOGIC
-
 export async function sendServerDownAlert(serverId: string): Promise<void> {
     const config = await prisma.serverMonitorConfig.findUnique({
         where: { serverId },

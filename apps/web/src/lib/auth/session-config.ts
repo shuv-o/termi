@@ -8,8 +8,6 @@
 
 import { SessionOptions } from 'iron-session';
 
-// TYPES
-
 export interface SessionData {
     userId?: string;
     email?: string;
@@ -27,8 +25,6 @@ export interface SessionData {
     googleOAuthState?: string;
     googleCodeVerifier?: string;
 }
-
-// CONFIGURATION
 
 export const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days (web browser / PWA)
 export const DESKTOP_SESSION_TTL = 60 * 60 * 24 * 30; // 30 days (Electron desktop, rolling)

@@ -62,7 +62,6 @@ export default function TelnetConnectionPage() {
         router.push('/panel');
     }, [router]);
 
-    // Responsive
     useEffect(() => {
         const check = () => {
             const mobile = window.innerWidth < 768;
@@ -88,7 +87,6 @@ export default function TelnetConnectionPage() {
         if (visualH > 0) window.dispatchEvent(new Event('resize'));
     }, [visualH]);
 
-    // Initial load
     useEffect(() => {
         let cancelled = false;
 

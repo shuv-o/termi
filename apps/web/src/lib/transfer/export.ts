@@ -144,8 +144,6 @@ export function buildExportFile(
     return { ...base, encrypted: false, payload };
 }
 
-// SPREADSHEET
-
 /**
  * Columns for the tabular exports.
  *

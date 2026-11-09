@@ -9,8 +9,6 @@ import * as net from 'net';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
 import type { SSHJumpConfig } from './ssh-jump';
 
-// TYPES
-
 export interface ServerMetrics {
     reachable: boolean;
     latencyMs?: number;
@@ -33,8 +31,6 @@ export interface ServerMetrics {
     };
     error?: string;
 }
-
-// TCP REACHABILITY
 
 export function checkReachability(
     host: string,
@@ -101,8 +97,6 @@ export async function checkReachabilityVia(
         if (key) sshPool.release(key);
     }
 }
-
-// SSH METRICS
 
 // Dynamic metrics — change every poll. Always collected.
 // Output: 5 lines

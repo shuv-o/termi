@@ -14,13 +14,7 @@
  * the bound format, so data upgrades as it is saved.
  */
 
-import {
-    encrypt,
-    decrypt,
-    serializeEncrypted,
-    deserializeEncrypted,
-    getKeyring,
-} from './crypto';
+import { encrypt, decrypt, serializeEncrypted, deserializeEncrypted, getKeyring } from './crypto';
 
 const BOUND_PREFIX = 'v2:';
 
@@ -102,8 +96,6 @@ export function needsReseal(stored: string): boolean {
 export function isLegacySealed(stored: string): boolean {
     return !stored.startsWith(BOUND_PREFIX);
 }
-
-// TYPES
 
 export interface ServerCredentials {
     host: string;

@@ -31,7 +31,7 @@ try {
     );
 }
 
-//   Per-user session cap                           ─
+// Per-user session cap
 
 const MAX_LOCAL_PTYS_PER_USER = 3;
 const userPtyCounts = new Map<string, number>();
@@ -48,8 +48,6 @@ function decrementUser(userId: string): void {
     if (n <= 1) userPtyCounts.delete(userId);
     else userPtyCounts.set(userId, n - 1);
 }
-
-//   Handler class
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 

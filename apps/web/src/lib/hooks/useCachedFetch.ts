@@ -1,15 +1,9 @@
 'use client';
 
 /**
- * Client-side data cache with stale-while-revalidate — the piece that makes the
- * panel feel like a native app instead of a website.
+ * Client-side data cache with stale-while-revalidate, so returning to a page
+ * shows its data at once instead of a spinner.
  *
- * The problem it solves: every panel page used to fetch on mount with its own
- * `useState(loading=true)`, so navigating away and back re-ran the request and
- * re-flashed a spinner over data the user had just seen. There was no shared
- * cache, so the same endpoints were fetched three times over by different pages.
- *
- * How it behaves:
  *   - Data is cached at module scope, keyed by URL, so it survives navigation
  *     (a component unmounting does not throw the data away).
  *   - `isLoading` is true ONLY when nothing is cached yet. A return visit renders

@@ -55,8 +55,6 @@ export default function LocalTerminalPage() {
     const searchOpeners = useRef(new Map<string, () => void>());
     const findLabel = useFindShortcutLabel();
 
-    //   Helpers
-
     const fetchLocalToken = useCallback(async (): Promise<{
         token: string;
         gatewayUrl: string | null;

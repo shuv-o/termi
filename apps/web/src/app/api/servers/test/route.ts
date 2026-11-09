@@ -72,7 +72,7 @@ function tcpCheck(
     });
 }
 
-//   SSH authentication test                          ─
+// SSH authentication test
 
 function sshAuthTest(
     config: {
@@ -164,8 +164,6 @@ function sshAuthTest(
         }
     });
 }
-
-//   Route handler                               ─
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();

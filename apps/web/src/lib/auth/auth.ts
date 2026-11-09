@@ -20,8 +20,6 @@ import { sendEmailOTP, verifyEmailOTP } from './email-otp';
 import { verify2FAAccountRateLimit } from '@/lib/security/rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 
-// TYPES
-
 export interface RegisterInput {
     email: string;
     password: string;
@@ -48,8 +46,6 @@ export interface AuthResult {
     suggestPasskeySetup?: boolean; // True when user has no passkeys yet
 }
 
-// HELPERS
-
 const MAX_FAILED_ATTEMPTS = 10;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -72,8 +68,6 @@ function verifyRecoveryCodeHash(code: string, stored: string): boolean {
         return false;
     }
 }
-
-// REGISTRATION
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
     const { email, password, name } = input;
@@ -107,8 +101,6 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 
     return { success: true, userId: user.id, email: user.email };
 }
-
-// LOGIN
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
     const { email, password, deviceInfo, ipAddress } = input;
@@ -162,7 +154,6 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
         };
     }
 
-    // Lockout check
     if (user.lockoutUntil && user.lockoutUntil > new Date()) {
         const remaining = Math.ceil((user.lockoutUntil.getTime() - Date.now()) / 60000);
         return {
@@ -208,7 +199,6 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
         });
     }
 
-    // Reset failed count on success
     if (user.failedLoginCount > 0 || user.lockoutUntil) {
         await prisma.user.update({
             where: { id: user.id },
@@ -216,7 +206,6 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
         });
     }
 
-    // Check if 2FA is required
     if (user.twoFactorMethod !== 'NONE') {
         const session = await getSession();
         session.requires2FA = true;
@@ -382,7 +371,6 @@ export async function enable2FA(
 
     const encryptedSecret = sealField(totpSecret, 'User', 'totpSecret', userId);
 
-    // Generate & store recovery codes
     const plainCodes = generateRecoveryCodes();
     const codeHashes = plainCodes.map(hashRecoveryCode);
 
@@ -430,8 +418,6 @@ export async function enableEmailOTP(
     return { success: true };
 }
 
-// 2FA DISABLE
-
 export async function disable2FA(
     userId: string,
     password: string,
@@ -476,8 +462,6 @@ export async function disable2FA(
 
     return { success: true };
 }
-
-// AUTH UTILITIES
 
 export async function getCurrentUser() {
     const session = await getSession();
@@ -587,8 +571,6 @@ export async function changePassword(
     return { success: true };
 }
 
-// PASSWORD RESET
-
 async function sendPasswordResetEmail(email: string, token: string): Promise<void> {
     const nodemailer = await import('nodemailer');
     const transporter = process.env.SMTP_HOST
@@ -694,7 +676,6 @@ export async function resetPassword(
             },
         });
 
-        // Revoke all sessions
         await tx.session.updateMany({
             where: { userId: user.id, isRevoked: false },
             data: { isRevoked: true, revokedAt: new Date(), revokedReason: 'Password reset' },

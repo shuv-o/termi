@@ -80,7 +80,6 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (!server) return notFoundResponse('Server not found');
 
-    // Decrypt credentials
     let plainValue: string | null = null;
     try {
         const decrypted = decryptCredentials(

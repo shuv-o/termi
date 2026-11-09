@@ -5,8 +5,6 @@
 import { prisma } from '@/lib/db';
 import { decryptCredentials } from '@/lib/crypto';
 
-// TYPES
-
 export interface CreateGroupInput {
     userId: string;
     name: string;
@@ -23,12 +21,9 @@ export interface UpdateGroupInput {
     sortOrder?: number;
 }
 
-// CREATE
-
 export async function createServerGroup(input: CreateGroupInput) {
     const { userId, name, description, color, icon } = input;
 
-    // Check for duplicate name
     const existing = await prisma.serverGroup.findFirst({
         where: { userId, name },
     });
@@ -37,7 +32,6 @@ export async function createServerGroup(input: CreateGroupInput) {
         throw new Error('A group with this name already exists');
     }
 
-    // Get max sort order
     const maxOrder = await prisma.serverGroup.aggregate({
         where: { userId },
         _max: { sortOrder: true },
@@ -54,7 +48,6 @@ export async function createServerGroup(input: CreateGroupInput) {
         },
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -66,8 +59,6 @@ export async function createServerGroup(input: CreateGroupInput) {
 
     return group;
 }
-
-// READ
 
 export async function getServerGroups(userId: string) {
     return prisma.serverGroup.findMany({
@@ -114,8 +105,6 @@ export async function getServerGroupById(groupId: string, userId: string) {
     };
 }
 
-// UPDATE
-
 export async function updateServerGroup(groupId: string, userId: string, input: UpdateGroupInput) {
     // Verify ownership
     const existing = await prisma.serverGroup.findFirst({
@@ -142,7 +131,6 @@ export async function updateServerGroup(groupId: string, userId: string, input: 
         data: input,
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -153,8 +141,6 @@ export async function updateServerGroup(groupId: string, userId: string, input: 
 
     return updated;
 }
-
-// DELETE
 
 export async function deleteServerGroup(groupId: string, userId: string) {
     // Verify ownership
@@ -172,7 +158,6 @@ export async function deleteServerGroup(groupId: string, userId: string) {
         where: { id: groupId },
     });
 
-    // Audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -184,8 +169,6 @@ export async function deleteServerGroup(groupId: string, userId: string) {
 
     return true;
 }
-
-// REORDER
 
 export async function reorderGroups(userId: string, groupIds: string[]) {
     // Update sort order for each group

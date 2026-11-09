@@ -5,17 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 /**
- * SSH no longer has a page of its own.
- *
- * It used to: a full-screen terminal at this route, with its own tab strip,
- * file manager, metrics panel and toolbar — a near-duplicate of the sessions
- * workspace that happened to be the only place some of those features existed.
- * Worse, a shell opened here was invisible to the sessions list and did not
- * survive navigating away, so "my terminals" meant two different sets of
- * terminals depending on how you had opened them.
- *
- * Every SSH connection now opens as a session. This route stays as a redirect
- * because it is baked into QR connect codes, shared links and browser history.
+ * Every SSH connection opens as a session in the sessions workspace. This
+ * route only redirects there, because it is baked into QR connect codes,
+ * shared links and browser history.
  */
 export default function SSHConnectRedirect() {
     const router = useRouter();

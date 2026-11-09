@@ -16,8 +16,6 @@ export interface RateLimitResult {
     resetAt: number; // epoch ms
 }
 
-// MEMORY STORE
-
 interface RateLimitEntry {
     count: number;
     resetAt: number; // epoch ms
@@ -48,8 +46,6 @@ function memoryIncrement(key: string, windowMs: number): { count: number; resetA
     entry.count++;
     return { count: entry.count, resetAt: entry.resetAt };
 }
-
-// REDIS STORE
 
 let redis: Redis | null | undefined;
 let warnedRedisDown = false;
@@ -135,8 +131,6 @@ export async function rateLimit(
     const { count, resetAt } = await increment(key, windowMs);
     return { allowed: count <= limit, remaining: Math.max(0, limit - count), resetAt };
 }
-
-// PRE-CONFIGURED LIMITERS
 
 /** 10 login attempts per 15 minutes per IP */
 export function loginRateLimit(ip: string): Promise<RateLimitResult> {

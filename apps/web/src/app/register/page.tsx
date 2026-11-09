@@ -33,8 +33,6 @@ function GoogleIcon({ className }: { className?: string }) {
     );
 }
 
-// ── OTP verification step ────────────────────────────────────────────────────
-
 function VerifyStep({
     email,
     userId,
@@ -193,8 +191,6 @@ function VerifyStep({
         </div>
     );
 }
-
-// ── Registration form ────────────────────────────────────────────────────────
 
 function RegisterContent() {
     const router = useRouter();

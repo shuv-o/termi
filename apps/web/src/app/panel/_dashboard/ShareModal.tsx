@@ -47,7 +47,6 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
             }
             setSuccess(`Invitation sent to ${email.trim()}`);
             setEmail('');
-            // Refresh share list
             const sharesRes = await fetch(`/api/servers/${server.id}/shares`);
             const sharesData = await sharesRes.json();
             if (sharesData.success) setData(sharesData.data);
@@ -142,9 +141,7 @@ export function ShareModal({ server, onClose }: { server: ServerItem; onClose: (
                     </div>
                 ) : hasAnyShares ? (
                     <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground">
-                            Shared with
-                        </p>
+                        <p className="text-xs font-medium text-muted-foreground">Shared with</p>
 
                         {data?.shares.map((share) => (
                             <div

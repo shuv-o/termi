@@ -201,7 +201,6 @@ export class SCPHandler {
     private downloadFile(path: string): void {
         if (!this.sftp) return;
 
-        // Get file stats first
         this.sftp.stat(path, (err, stats) => {
             if (err) {
                 this.sendError('File not found: ' + err.message);
@@ -381,7 +380,6 @@ export class SCPHandler {
     private deleteFile(path: string): void {
         if (!this.sftp) return;
 
-        // Check if directory or file
         this.sftp.stat(path, (err, stats) => {
             if (err) {
                 this.sendError('File not found: ' + err.message);

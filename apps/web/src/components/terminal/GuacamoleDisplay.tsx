@@ -132,10 +132,8 @@ export default function GuacamoleDisplay({
                 `&serverId=${encodeURIComponent(serverId)}` +
                 `&width=${width}&height=${height}`;
             const tunnel = createGatewayTunnel(Guacamole, wsUrl, connectionToken);
-            // Client
             guacClient = new Guacamole.Client(tunnel);
             guacClientRef.current = guacClient;
-            // Display
             const display = guacClient.getDisplay();
             displayEl = display.getElement() as HTMLElement;
             displayEl.style.position = 'absolute';
@@ -164,7 +162,6 @@ export default function GuacamoleDisplay({
             resizeObserver = new ResizeObserver(fitDisplay);
             resizeObserver.observe(container);
             display.onresize = fitDisplay;
-            // Client state changes
             guacClient.onstatechange = (state: number) => {
                 setClientState(state);
                 if (state === 3 /* CONNECTED */) {
@@ -361,7 +358,6 @@ export default function GuacamoleDisplay({
                 mobileKeyboard.onkeydown = forwardKeyDown;
                 mobileKeyboard.onkeyup = forwardKeyUp;
             }
-            // Connect
             guacClient.connect(connectData);
         });
         return () => {

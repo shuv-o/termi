@@ -8,8 +8,6 @@
 import * as jose from 'jose';
 import { createHash } from 'crypto';
 
-// TYPES
-
 export interface TokenPayload {
     userId: string;
     serverId: string;
@@ -89,10 +87,8 @@ export interface TokenPayload {
     exp: number;
 }
 
-// KEY DERIVATION
-
 // Key derivation MUST stay byte-for-byte identical to the web app's
-// getJWEKey (apps/web/.../api/connection/token/route.ts), otherwise tokens
+// getJWEKey (apps/web/src/lib/auth/connectionToken.ts), otherwise tokens
 // encrypted by the web app will fail to decrypt here. In particular, an unset
 // or placeholder secret in development must derive from the SAME fallback
 // string on both sides.
@@ -111,8 +107,6 @@ function getJWEKey(): Uint8Array {
     }
     return new Uint8Array(createHash('sha256').update(secret).digest());
 }
-
-// TOKEN VALIDATION
 
 /**
  * Validate and decrypt a JWE connection token.
@@ -163,8 +157,6 @@ export async function validateToken(token: string): Promise<TokenPayload> {
         throw new Error('Invalid token');
     }
 }
-
-// SERVICE TOKENS
 
 /**
  * A short-lived token proving a request comes from this gateway, for the

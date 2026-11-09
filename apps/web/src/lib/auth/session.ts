@@ -24,12 +24,9 @@ import {
 export { SESSION_TTL, DESKTOP_SESSION_TTL, DESKTOP_UA_MARKER, isDesktopDevice, sessionOptions };
 export type { SessionData };
 
-// Default session state
 const defaultSession: SessionData = {
     isLoggedIn: false,
 };
-
-// SESSION FUNCTIONS
 
 /**
  * Get the current session from cookies
@@ -38,7 +35,6 @@ export async function getSession(): Promise<IronSession<SessionData>> {
     const cookieStore = await cookies();
     const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
 
-    // Initialize with defaults if empty
     if (!session.isLoggedIn) {
         session.isLoggedIn = defaultSession.isLoggedIn;
     }
@@ -55,7 +51,6 @@ export async function createSession(
     deviceInfo: string,
     ipAddress: string,
 ): Promise<string> {
-    // Generate session token
     const token = generateSecureToken(32);
     const tokenHash = hashToken(token);
 
@@ -79,7 +74,6 @@ export async function createSession(
         notifySecurityEvent(userId, 'new_device', { ipAddress, deviceInfo });
     }
 
-    // Store session in database
     await prisma.session.create({
         data: {
             userId,
@@ -95,13 +89,11 @@ export async function createSession(
         data: { userId, action: 'USER_LOGIN', ipAddress, userAgent: deviceInfo },
     });
 
-    // Update user's last login
     await prisma.user.update({
         where: { id: userId },
         data: { lastLoginAt: new Date() },
     });
 
-    // Create audit log
     await prisma.auditLog.create({
         data: {
             userId,
@@ -138,12 +130,10 @@ export async function validateSession(
         return null;
     }
 
-    // Check if revoked
     if (session.isRevoked) {
         return null;
     }
 
-    // Check if expired
     if (session.expiresAt < new Date()) {
         // Mark as expired in audit log
         await prisma.auditLog.create({
@@ -269,7 +259,6 @@ export async function destroySession(): Promise<void> {
     if (session.sessionToken) {
         const tokenHash = hashToken(session.sessionToken);
 
-        // Revoke database session
         await prisma.session.updateMany({
             where: { tokenHash },
             data: {
@@ -279,7 +268,6 @@ export async function destroySession(): Promise<void> {
             },
         });
 
-        // Audit log
         if (session.userId) {
             await prisma.auditLog.create({
                 data: {
@@ -290,7 +278,6 @@ export async function destroySession(): Promise<void> {
         }
     }
 
-    // Clear session data
     session.userId = undefined;
     session.email = undefined;
     session.sessionToken = undefined;

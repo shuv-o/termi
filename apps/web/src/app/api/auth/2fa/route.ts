@@ -28,7 +28,6 @@ export async function GET() {
     }
 }
 
-// POST - Enable TOTP 2FA
 const enableSchema = z.object({
     secret: z.string(),
     code: z.string().length(6),
@@ -61,7 +60,6 @@ export async function POST(request: Request) {
     }
 }
 
-// DELETE - Disable 2FA
 const disableSchema = z.object({
     password: z.string(),
 });

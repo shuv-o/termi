@@ -57,8 +57,6 @@ export interface ScanContext {
 
 export class ScanOutputError extends Error {}
 
-// ── Parsing ──────────────────────────────────────────────────────────────────
-
 export interface RawScan {
     values: Map<string, string>;
     listen: string[];
@@ -108,8 +106,6 @@ export function parseListen(entries: string[]): ListeningPort[] {
     }
     return ports.sort((a, b) => a.port - b.port);
 }
-
-// ── Rules ────────────────────────────────────────────────────────────────────
 
 /** Services that should almost never face the internet directly. */
 export const RISKY_PORTS: Record<number, string> = {
@@ -182,7 +178,6 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
                 ? 'rhel'
                 : 'other';
 
-    // ── Login ────────────────────────────────────────────────────────────────
     const passwordAuth = sshd(raw, 'passwordauthentication') === 'yes';
     const kbdAuth =
         sshd(raw, 'kbdinteractiveauthentication') === 'yes' && sshd(raw, 'usepam') !== 'no';
@@ -286,7 +281,6 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
         });
     }
 
-    // ── SSH settings ─────────────────────────────────────────────────────────
     const maxTries = Number(sshd(raw, 'maxauthtries')) || 6;
     add({
         id: 'max-auth-tries',
@@ -325,7 +319,6 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
         fix: 'Set X11Forwarding to no.',
     });
 
-    // ── Network ──────────────────────────────────────────────────────────────
     const fw = v('firewall');
     add({
         id: 'firewall',
@@ -385,7 +378,6 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
         fix: 'Optionally move SSH to another port. Opt-in, because it can lock you out if a cloud firewall is not updated too.',
     });
 
-    // ── Updates ──────────────────────────────────────────────────────────────
     const au = v('autoupdates');
     add({
         id: 'auto-updates',
@@ -434,7 +426,6 @@ export function evaluateScan(raw: RawScan, ctx: ScanContext): SecurityReport {
         });
     }
 
-    // ── Accounts ─────────────────────────────────────────────────────────────
     const uid0 = v('uid0_extra').split(/\s+/).filter(Boolean);
     add({
         id: 'uid0-accounts',

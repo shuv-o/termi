@@ -9,8 +9,6 @@ import { PrismaClient } from '@/app/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
-// STARTUP VALIDATION
-
 /**
  * Build a PostgreSQL connection URL from split env vars.
  * Falls back to DATABASE_URL for backwards compatibility.

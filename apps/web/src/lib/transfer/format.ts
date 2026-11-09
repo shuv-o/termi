@@ -26,8 +26,6 @@ export const MAX_IMPORT_SERVERS = 1000;
 /** Minimum length for an export passphrase. */
 export const MIN_PASSPHRASE_LENGTH = 12;
 
-// PAYLOAD
-
 const groupSchema = z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(500).nullish(),
@@ -78,8 +76,6 @@ export const exportPayloadSchema = z.object({
 export type ExportPayload = z.infer<typeof exportPayloadSchema>;
 export type ExportedServer = z.infer<typeof serverSchema>;
 export type ExportedGroup = z.infer<typeof groupSchema>;
-
-// ENVELOPE
 
 /** AES-256-GCM ciphertext, matching the shape used elsewhere in `lib/crypto`. */
 const encryptedDataSchema = z.object({

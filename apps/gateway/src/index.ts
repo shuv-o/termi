@@ -44,8 +44,6 @@ import { startAccessChecks, webAccessAsker, type LiveConnection } from './sessio
 dotenv.config({ path: '../../.env' });
 dotenv.config();
 
-// CONFIGURATION
-
 const PORT = parseInt(process.env.GATEWAY_PORT || '22081', 10);
 const HOST = process.env.GATEWAY_HOST || '0.0.0.0';
 
@@ -58,8 +56,6 @@ const ALLOWED_ORIGINS: Set<string> = new Set(
 
 // Idle timeout for non-persistent (RDP/VNC/SCP) connections
 const CONNECTION_TIMEOUT = 300000; // 5 minutes
-
-// SSRF GUARD
 
 function ip4ToInt(ip: string): number {
     return ip.split('.').reduce((acc, octet) => (acc << 8) | parseInt(octet, 10), 0) >>> 0;
@@ -166,8 +162,6 @@ async function resolvePublicAddress(host: string): Promise<string | null> {
     }
 }
 
-// SESSION STORES
-
 /** Persistent SSH sessions (survive WS disconnect). */
 const persistentSessions = new PersistentSessionStore();
 
@@ -187,8 +181,6 @@ interface NonSshMeta {
         | TunnelMuxHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
-
-// ACCESS CHECK
 
 /** Every live connection and what it relies on — see sessions/access-check.ts. */
 function liveConnections(): LiveConnection[] {
@@ -253,8 +245,6 @@ const stopAccessChecks = startAccessChecks(
 const MAX_TUNNELS_PER_USER = 10;
 const tunnelSlotLimiter = new TunnelSlotLimiter(MAX_TUNNELS_PER_USER);
 
-// SSH SINK FACTORY
-
 /**
  * Creates the SSHOutputSink for a PersistentSession.
  * Data is always appended to the ring buffer.
@@ -299,8 +289,6 @@ function createSink(session: PersistentSession): SSHOutputSink {
     };
 }
 
-// HTTP SERVER
-
 const server = createServer((req, res) => {
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -317,8 +305,6 @@ const server = createServer((req, res) => {
     res.writeHead(404);
     res.end('Not Found');
 });
-
-// WEBSOCKET SERVER
 
 const wss = new WebSocketServer({ server, path: '/connect', maxPayload: 1024 * 1024 });
 
@@ -407,7 +393,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         // Guard: abort if the socket was closed while we awaited validateToken
         if (ws.readyState !== WebSocket.OPEN) return;
 
-        //   Token payload cross-checks                   ─
+        // Token payload cross-checks
         if (tokenPayload.serverId !== serverId) {
             ws.send(JSON.stringify({ type: 'error', message: 'Server access denied' }));
             ws.close(4003, 'Forbidden');
@@ -664,7 +650,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
             startHeartbeat();
 
-            //   WS message routing for SSH
             ws.on('message', (data: Buffer, isBinary: boolean) => {
                 const session = persistentSessions.get(resolvedSessionId);
                 if (!session) return;
@@ -952,8 +937,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     ws.once('message', onAuthMessage);
 });
 
-// START
-
 server.listen(PORT, HOST, () => {
     console.log(`[gateway] Listening on ${HOST}:${PORT}`);
 });
@@ -971,7 +954,6 @@ function shutdown(signal: string): void {
     console.log(`[gateway] Received ${signal} — shutting down gracefully`);
     stopAccessChecks();
     persistentSessions.destroy();
-    // Close all active WebSocket connections
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.close(1001, 'Server shutting down');

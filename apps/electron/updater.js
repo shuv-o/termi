@@ -18,7 +18,7 @@
 //     error and no dialog. So on macOS we do NOT auto-download or offer
 //     "Restart to install" (that button would appear to do nothing). Instead,
 //     when a newer version exists we point the user at the download page to
-//     install the new .dmg by hand. See apps/electron/PASSKEYS.md for the
+//     install the new .dmg by hand. See docs/PASSKEYS.md for the
 //     signing setup that would let us restore true self-update here.
 
 const { app, dialog, ipcMain, shell, BrowserWindow } = require('electron');

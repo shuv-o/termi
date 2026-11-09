@@ -35,7 +35,6 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
         if (!token) return;
 
         async function load() {
-            // Fetch invitation details
             const invRes = await fetch(`/api/invitations/${token}`);
             const invData = await invRes.json();
 
@@ -46,13 +45,11 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
             setInvitation(invData.data.invitation);
 
-            // Check current auth session
             const meRes = await fetch('/api/auth/me');
             const meData = await meRes.json();
 
             if (meData.success) {
                 setCurrentUserEmail(meData.data.user.email);
-                // Check email matches
                 const invEmail = invData.data.invitation.inviteeEmail.toLowerCase();
                 const loggedIn = meData.data.user.email.toLowerCase();
                 if (invEmail !== loggedIn) {

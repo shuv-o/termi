@@ -139,8 +139,6 @@ async function networkFirstWithOfflineFallback(request) {
     }
 }
 
-// PUSH NOTIFICATIONS
-
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 
@@ -166,8 +164,6 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil(self.registration.showNotification(payload.title || 'Termi Alert', options));
 });
-
-// NOTIFICATION CLICK
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
