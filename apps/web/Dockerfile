@@ -62,16 +62,17 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 
-# Bake the Prisma CLI into the image at build time. The standalone output
-# above only traces @prisma/client (what app code actually imports), not the
-# `prisma` CLI binary that `migrate deploy` needs — this used to be installed
-# from the registry inside the entrypoint on every fresh container's first
-# start, adding ~3 minutes to startup. Pinned to the exact @prisma/client
-# version already baked in above to avoid drift.
+# The standalone output only traces @prisma/client, not the `prisma` CLI that
+# `migrate deploy` needs. Bake it in, pinned to the bundled client's version,
+# in its own directory (an install inside /app would act on the standalone
+# package.json), linked where prisma.config.ts's `import 'prisma/config'`
+# resolves.
 RUN PRISMA_VERSION=$(node -p "require('@prisma/client/package.json').version") && \
-    npm install --no-save --no-audit --no-fund "prisma@$PRISMA_VERSION"
+    mkdir -p /opt/prisma-cli && cd /opt/prisma-cli && echo '{"private":true}' > package.json && \
+    npm install --no-audit --no-fund "prisma@$PRISMA_VERSION" && \
+    ln -s /opt/prisma-cli/node_modules/prisma /app/node_modules/prisma && \
+    ln -s /opt/prisma-cli/node_modules/.bin/prisma /usr/local/bin/prisma
 
-# Set permissions
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs
@@ -81,26 +82,17 @@ EXPOSE 22080
 ENV PORT=22080
 ENV HOSTNAME="0.0.0.0"
 
-# entrypoint script
-# --chmod is required here (rather than a separate RUN chmod) because USER nextjs
-# is already active above: COPY always writes as root regardless of USER, so a
-# later `RUN chmod` as the unprivileged nextjs user fails with "Operation not
-# permitted" on the root-owned file.
+# --chmod because USER nextjs is already active: COPY writes as root, and a
+# later `RUN chmod` as nextjs is not permitted.
 COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
 #!/bin/sh
 set -e
-
-FLAG_FILE="/app/.migrations_done"
-
-if [ ! -f "$FLAG_FILE" ]; then
-    echo "First run detected - Running migrations..."
-    npx prisma migrate deploy
-    echo "Migrations completed!"
-    touch "$FLAG_FILE"
-else
-    echo "Migrations already run, skipping..."
-fi
-node server.js
+# Idempotent and fast, so it runs on every start: no "already migrated" flag
+# file, which lets the container run read-only and makes an upgraded image
+# always apply its new migrations.
+echo "Applying database migrations..."
+prisma migrate deploy
+exec node server.js
 EOF
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

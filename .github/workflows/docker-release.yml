@@ -22,10 +22,10 @@ name: Docker Release
 #     --certificate-identity-regexp '^https://github.com/shuv-o/termi/\.github/workflows/docker-release\.yml@refs/tags/v' \
 #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
 #
-# Note: apps/web/Dockerfile and apps/gateway/Dockerfile build from the repo
-# root with `npm ci` against package-lock.json, so a release installs exactly
-# the audited dependency versions - distinct from compose.Dockerfile, which
-# docker-compose uses for local builds.
+# Note: apps/web/Dockerfile and apps/gateway/Dockerfile build with their own
+# app folder as context (no lockfile there, so npm resolves versions at build
+# time) - distinct from compose.Dockerfile, which docker-compose uses for local
+# builds from the repo root.
 # NEXT_PUBLIC_* build args are intentionally left unset here so the published
 # images stay deployment-agnostic; self-hosters who need custom values should
 # build locally via docker-compose as documented in README.md.
@@ -52,10 +52,10 @@ jobs:
       matrix:
         include:
           - image: web
-            context: .
+            context: apps/web
             dockerfile: apps/web/Dockerfile
           - image: gateway
-            context: .
+            context: apps/gateway
             dockerfile: apps/gateway/Dockerfile
 
     steps:

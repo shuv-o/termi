@@ -1,4 +1,4 @@
-# Termi Gateway compose.Dockerfile
+# Termi Gateway image (build context: apps/gateway)
 
 # Stage 1: Build
 FROM node:25-bookworm-slim AS builder
@@ -24,7 +24,8 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-bookworm-slim AS runner
+# Same Node version as the builder: node-pty is a native module compiled there.
+FROM node:25-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

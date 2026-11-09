@@ -114,10 +114,10 @@ jobs:
       matrix:
         include:
           - image: web
-            context: .
+            context: apps/web
             dockerfile: apps/web/Dockerfile
           - image: gateway
-            context: .
+            context: apps/gateway
             dockerfile: apps/gateway/Dockerfile
 
     steps:

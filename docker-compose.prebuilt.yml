@@ -125,7 +125,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /app/apps/web/.next/cache
+      - /app/.next/cache
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     pids_limit: 512
