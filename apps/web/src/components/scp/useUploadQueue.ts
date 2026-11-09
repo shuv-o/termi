@@ -1,15 +1,15 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import type { FileTransport } from './transport';
 import type { UploadItem } from './types';
 
-/**
- * Multi-file SFTP upload queue plus the drag-and-drop handlers for the panel.
- *
- * Uses `XMLHttpRequest` rather than `fetch` because it's the only way to get
- * upload progress events for the per-file progress bars.
- */
-export function useUploadQueue(serverId: string, currentPath: string, onUploaded: () => void) {
+/** Multi-file SFTP upload queue plus the drag-and-drop handlers for the panel. */
+export function useUploadQueue(
+    transport: FileTransport | null,
+    currentPath: string,
+    onUploaded: () => void,
+) {
     const [uploads, setUploads] = useState<UploadItem[]>([]);
     const [expanded, setExpanded] = useState(true);
     const [dragging, setDragging] = useState(false);
@@ -32,49 +32,39 @@ export function useUploadQueue(serverId: string, currentPath: string, onUploaded
                     },
                 ]);
 
-                const xhr = new XMLHttpRequest();
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('path', currentPath);
-
-                xhr.upload.onprogress = (ev) => {
-                    if (ev.lengthComputable)
-                        setUploads((p) =>
-                            p.map((u) =>
-                                u.id === uid
-                                    ? { ...u, progress: Math.round((ev.loaded / ev.total) * 100) }
-                                    : u,
+                if (!transport) {
+                    setUploads((p) =>
+                        p.map((u) =>
+                            u.id === uid ? { ...u, status: 'error', error: 'Not connected' } : u,
+                        ),
+                    );
+                    return;
+                }
+                transport
+                    .upload(file, currentPath, (progress) =>
+                        setUploads((p) => p.map((u) => (u.id === uid ? { ...u, progress } : u))),
+                    )
+                    .then(
+                        () => {
+                            setUploads((p) =>
+                                p.map((u) =>
+                                    u.id === uid ? { ...u, status: 'done', progress: 100 } : u,
+                                ),
+                            );
+                            onUploaded();
+                        },
+                        (err: Error) =>
+                            setUploads((p) =>
+                                p.map((u) =>
+                                    u.id === uid
+                                        ? { ...u, status: 'error', error: err.message || 'Failed' }
+                                        : u,
+                                ),
                             ),
-                        );
-                };
-                xhr.onload = () => {
-                    const ok = xhr.status >= 200 && xhr.status < 300;
-                    setUploads((p) =>
-                        p.map((u) =>
-                            u.id === uid
-                                ? {
-                                      ...u,
-                                      status: ok ? 'done' : 'error',
-                                      progress: 100,
-                                      error: ok ? undefined : 'Failed',
-                                  }
-                                : u,
-                        ),
                     );
-                    if (ok) onUploaded();
-                };
-                xhr.onerror = () =>
-                    setUploads((p) =>
-                        p.map((u) =>
-                            u.id === uid ? { ...u, status: 'error', error: 'Network error' } : u,
-                        ),
-                    );
-
-                xhr.open('POST', `/api/servers/${serverId}/sftp/upload`);
-                xhr.send(fd);
             });
         },
-        [serverId, currentPath, onUploaded],
+        [transport, currentPath, onUploaded],
     );
 
     const dismiss = useCallback(

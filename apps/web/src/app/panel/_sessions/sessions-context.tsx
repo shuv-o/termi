@@ -13,6 +13,7 @@ import {
 
 import { openBeside, prunePanes, type SplitState } from './split';
 import { getAppearance } from '@/lib/appearance/store';
+import { requestConnection, type ConnectionGrant } from '@/lib/gateway/connect';
 
 export type SessionStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'detached';
 
@@ -27,6 +28,10 @@ export interface Session {
     status: SessionStatus;
     showFiles: boolean;
     errorMessage?: string | null;
+    /** Connected from this computer (desktop app) or through the Termi server. */
+    via?: 'gateway' | 'device';
+    /** A device connection that fails may move to the gateway. */
+    fallback?: boolean;
 }
 
 interface SessionsContextValue {
@@ -50,6 +55,8 @@ interface SessionsContextValue {
     toggleFiles: (tabId: string) => void;
     updateSessionStatus: (tabId: string, status: SessionStatus) => void;
     setSessionError: (tabId: string, error: string | null) => void;
+    /** This computer couldn't reach the server: reconnect through the Termi server. */
+    switchToGateway: (tabId: string) => Promise<void>;
     setSessionWs: (tabId: string, ws: WebSocket | null) => void;
     /**
      * Lets a session's terminal pane register "type this into my active
@@ -182,21 +189,25 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     async function fetchToken(
         serverId: string,
-    ): Promise<{ token: string; gatewayUrl: string | null } | null> {
+        route: 'auto' | 'gateway' = 'auto',
+    ): Promise<ConnectionGrant | null> {
         try {
-            const res = await fetch('/api/connection/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ serverId, protocol: 'ssh' }),
-            });
-            const data = await res.json();
-            return data.success
-                ? { token: data.data.token, gatewayUrl: data.data.gatewayUrl ?? null }
-                : null;
+            return await requestConnection({ serverId, protocol: 'ssh' }, route);
         } catch {
             return null;
         }
     }
+
+    /** Keep a session on the route it already uses when it reconnects. */
+    const routeOf = (tabId: string): 'auto' | 'gateway' =>
+        sessionsRef.current.find((s) => s.tabId === tabId)?.via === 'gateway' ? 'gateway' : 'auto';
+
+    const grantFields = (g: ConnectionGrant) => ({
+        token: g.token,
+        gatewayUrl: g.gatewayUrl,
+        via: g.via,
+        fallback: g.fallback,
+    });
 
     const addLocalSession: SessionsProvider_AddLocalSession = useCallback(
         (opts) => {
@@ -316,9 +327,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
             setSessions((prev) =>
                 prev.map((s) => {
                     if (s.tabId !== tabId) return s;
-                    return result
-                        ? { ...s, token: result.token, gatewayUrl: result.gatewayUrl }
-                        : { ...s, status: 'error' };
+                    return result ? { ...s, ...grantFields(result) } : { ...s, status: 'error' };
                 }),
             );
             return tabId;
@@ -331,17 +340,12 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         setSessions((prev) =>
             prev.map((s) => (s.tabId === tabId ? { ...s, token: null, status: 'connecting' } : s)),
         );
-        const result = await fetchToken(serverId);
+        const result = await fetchToken(serverId, routeOf(tabId));
         setSessions((prev) =>
             prev.map((s) => {
                 if (s.tabId !== tabId) return s;
                 return result
-                    ? {
-                          ...s,
-                          token: result.token,
-                          gatewayUrl: result.gatewayUrl,
-                          status: 'connecting',
-                      }
+                    ? { ...s, ...grantFields(result), status: 'connecting' }
                     : { ...s, status: 'error' };
             }),
         );
@@ -361,19 +365,29 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         );
         if (oldSessionId) await dbRenewSession(oldSessionId, newSessionId);
 
-        const result = await fetchToken(serverId);
+        const result = await fetchToken(serverId, routeOf(tabId));
         setSessions((prev) =>
             prev.map((s) => {
                 if (s.tabId !== tabId) return s;
                 return result
-                    ? {
-                          ...s,
-                          token: result.token,
-                          gatewayUrl: result.gatewayUrl,
-                          status: 'connecting',
-                      }
+                    ? { ...s, ...grantFields(result), status: 'connecting' }
                     : { ...s, status: 'error' };
             }),
+        );
+    }, []);
+
+    const switchToGateway = useCallback(async (tabId: string) => {
+        const session = sessionsRef.current.find((s) => s.tabId === tabId);
+        if (!session || session.via !== 'device' || !session.fallback) return;
+        const result = await fetchToken(session.serverId, 'gateway');
+        setSessions((prev) =>
+            prev.map((s) =>
+                s.tabId !== tabId
+                    ? s
+                    : result
+                      ? { ...s, ...grantFields(result), status: 'connecting', errorMessage: null }
+                      : { ...s, status: 'error' },
+            ),
         );
     }, []);
 
@@ -557,6 +571,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 toggleFiles,
                 updateSessionStatus,
                 setSessionError,
+                switchToGateway,
                 setSessionWs,
                 registerSendHandler,
                 sendToSession,

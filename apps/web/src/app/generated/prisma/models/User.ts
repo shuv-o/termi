@@ -408,6 +408,7 @@ export type UserWhereInput = {
   aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
   aiConversations?: Prisma.AiConversationListRelationFilter
   aiMemories?: Prisma.AiMemoryListRelationFilter
+  devices?: Prisma.DeviceListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -461,6 +462,7 @@ export type UserOrderByWithRelationInput = {
   aiSettings?: Prisma.AiSettingsOrderByWithRelationInput
   aiConversations?: Prisma.AiConversationOrderByRelationAggregateInput
   aiMemories?: Prisma.AiMemoryOrderByRelationAggregateInput
+  devices?: Prisma.DeviceOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -517,6 +519,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
   aiConversations?: Prisma.AiConversationListRelationFilter
   aiMemories?: Prisma.AiMemoryListRelationFilter
+  devices?: Prisma.DeviceListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -636,6 +639,7 @@ export type UserCreateInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -689,6 +693,7 @@ export type UserUncheckedCreateInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -742,6 +747,7 @@ export type UserUpdateInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -795,6 +801,7 @@ export type UserUncheckedUpdateInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1367,6 +1374,20 @@ export type UserUpdateOneRequiredWithoutAiMemoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiMemoriesInput, Prisma.UserUpdateWithoutAiMemoriesInput>, Prisma.UserUncheckedUpdateWithoutAiMemoriesInput>
 }
 
+export type UserCreateNestedOneWithoutDevicesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDevicesInput, Prisma.UserUncheckedCreateWithoutDevicesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDevicesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDevicesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDevicesInput, Prisma.UserUncheckedCreateWithoutDevicesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDevicesInput
+  upsert?: Prisma.UserUpsertWithoutDevicesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDevicesInput, Prisma.UserUpdateWithoutDevicesInput>, Prisma.UserUncheckedUpdateWithoutDevicesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1417,6 +1438,7 @@ export type UserCreateWithoutSessionsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1469,6 +1491,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1537,6 +1560,7 @@ export type UserUpdateWithoutSessionsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1589,6 +1613,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServerGroupsInput = {
@@ -1641,6 +1666,7 @@ export type UserCreateWithoutServerGroupsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServerGroupsInput = {
@@ -1693,6 +1719,7 @@ export type UserUncheckedCreateWithoutServerGroupsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServerGroupsInput = {
@@ -1761,6 +1788,7 @@ export type UserUpdateWithoutServerGroupsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServerGroupsInput = {
@@ -1813,6 +1841,7 @@ export type UserUncheckedUpdateWithoutServerGroupsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutServersInput = {
@@ -1865,6 +1894,7 @@ export type UserCreateWithoutServersInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutServersInput = {
@@ -1917,6 +1947,7 @@ export type UserUncheckedCreateWithoutServersInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutServersInput = {
@@ -1985,6 +2016,7 @@ export type UserUpdateWithoutServersInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutServersInput = {
@@ -2037,6 +2069,7 @@ export type UserUncheckedUpdateWithoutServersInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPersistentSessionsInput = {
@@ -2089,6 +2122,7 @@ export type UserCreateWithoutPersistentSessionsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPersistentSessionsInput = {
@@ -2141,6 +2175,7 @@ export type UserUncheckedCreateWithoutPersistentSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPersistentSessionsInput = {
@@ -2209,6 +2244,7 @@ export type UserUpdateWithoutPersistentSessionsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
@@ -2261,6 +2297,7 @@ export type UserUncheckedUpdateWithoutPersistentSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -2313,6 +2350,7 @@ export type UserCreateWithoutAuditLogsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -2365,6 +2403,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -2433,6 +2472,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -2485,6 +2525,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOauthAccountsInput = {
@@ -2537,6 +2578,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -2589,6 +2631,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -2657,6 +2700,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -2709,6 +2753,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasskeysInput = {
@@ -2761,6 +2806,7 @@ export type UserCreateWithoutPasskeysInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasskeysInput = {
@@ -2813,6 +2859,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasskeysInput = {
@@ -2881,6 +2928,7 @@ export type UserUpdateWithoutPasskeysInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasskeysInput = {
@@ -2933,6 +2981,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -2985,6 +3034,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -3037,6 +3087,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -3105,6 +3156,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -3157,6 +3209,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMonitorConfigsInput = {
@@ -3209,6 +3262,7 @@ export type UserCreateWithoutMonitorConfigsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMonitorConfigsInput = {
@@ -3261,6 +3315,7 @@ export type UserUncheckedCreateWithoutMonitorConfigsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMonitorConfigsInput = {
@@ -3329,6 +3384,7 @@ export type UserUpdateWithoutMonitorConfigsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
@@ -3381,6 +3437,7 @@ export type UserUncheckedUpdateWithoutMonitorConfigsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordingsInput = {
@@ -3433,6 +3490,7 @@ export type UserCreateWithoutRecordingsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordingsInput = {
@@ -3485,6 +3543,7 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordingsInput = {
@@ -3553,6 +3612,7 @@ export type UserUpdateWithoutRecordingsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordingsInput = {
@@ -3605,6 +3665,7 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTunnelSessionsInput = {
@@ -3657,6 +3718,7 @@ export type UserCreateWithoutTunnelSessionsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTunnelSessionsInput = {
@@ -3709,6 +3771,7 @@ export type UserUncheckedCreateWithoutTunnelSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTunnelSessionsInput = {
@@ -3777,6 +3840,7 @@ export type UserUpdateWithoutTunnelSessionsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
@@ -3829,6 +3893,7 @@ export type UserUncheckedUpdateWithoutTunnelSessionsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecoveryCodesInput = {
@@ -3881,6 +3946,7 @@ export type UserCreateWithoutRecoveryCodesInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecoveryCodesInput = {
@@ -3933,6 +3999,7 @@ export type UserUncheckedCreateWithoutRecoveryCodesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecoveryCodesInput = {
@@ -4001,6 +4068,7 @@ export type UserUpdateWithoutRecoveryCodesInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
@@ -4053,6 +4121,7 @@ export type UserUncheckedUpdateWithoutRecoveryCodesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailOTPsInput = {
@@ -4105,6 +4174,7 @@ export type UserCreateWithoutEmailOTPsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailOTPsInput = {
@@ -4157,6 +4227,7 @@ export type UserUncheckedCreateWithoutEmailOTPsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailOTPsInput = {
@@ -4225,6 +4296,7 @@ export type UserUpdateWithoutEmailOTPsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailOTPsInput = {
@@ -4277,6 +4349,7 @@ export type UserUncheckedUpdateWithoutEmailOTPsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommandSnippetsInput = {
@@ -4329,6 +4402,7 @@ export type UserCreateWithoutCommandSnippetsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommandSnippetsInput = {
@@ -4381,6 +4455,7 @@ export type UserUncheckedCreateWithoutCommandSnippetsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommandSnippetsInput = {
@@ -4449,6 +4524,7 @@ export type UserUpdateWithoutCommandSnippetsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
@@ -4501,6 +4577,7 @@ export type UserUncheckedUpdateWithoutCommandSnippetsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutKeychainCredentialsInput = {
@@ -4553,6 +4630,7 @@ export type UserCreateWithoutKeychainCredentialsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
@@ -4605,6 +4683,7 @@ export type UserUncheckedCreateWithoutKeychainCredentialsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutKeychainCredentialsInput = {
@@ -4673,6 +4752,7 @@ export type UserUpdateWithoutKeychainCredentialsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
@@ -4725,6 +4805,7 @@ export type UserUncheckedUpdateWithoutKeychainCredentialsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -4777,6 +4858,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -4829,6 +4911,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -4897,6 +4980,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -4949,6 +5033,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedSharesInput = {
@@ -5001,6 +5086,7 @@ export type UserCreateWithoutOwnedSharesInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedSharesInput = {
@@ -5053,6 +5139,7 @@ export type UserUncheckedCreateWithoutOwnedSharesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedSharesInput = {
@@ -5110,6 +5197,7 @@ export type UserCreateWithoutReceivedSharesInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedSharesInput = {
@@ -5162,6 +5250,7 @@ export type UserUncheckedCreateWithoutReceivedSharesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedSharesInput = {
@@ -5230,6 +5319,7 @@ export type UserUpdateWithoutOwnedSharesInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedSharesInput = {
@@ -5282,6 +5372,7 @@ export type UserUncheckedUpdateWithoutOwnedSharesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedSharesInput = {
@@ -5345,6 +5436,7 @@ export type UserUpdateWithoutReceivedSharesInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedSharesInput = {
@@ -5397,6 +5489,7 @@ export type UserUncheckedUpdateWithoutReceivedSharesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspacesInput = {
@@ -5449,6 +5542,7 @@ export type UserCreateWithoutWorkspacesInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesInput = {
@@ -5501,6 +5595,7 @@ export type UserUncheckedCreateWithoutWorkspacesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesInput = {
@@ -5569,6 +5664,7 @@ export type UserUpdateWithoutWorkspacesInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesInput = {
@@ -5621,6 +5717,7 @@ export type UserUncheckedUpdateWithoutWorkspacesInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeamMembershipsInput = {
@@ -5673,6 +5770,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -5725,6 +5823,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -5793,6 +5892,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -5845,6 +5945,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSshSecurityKeysInput = {
@@ -5897,6 +5998,7 @@ export type UserCreateWithoutSshSecurityKeysInput = {
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSshSecurityKeysInput = {
@@ -5949,6 +6051,7 @@ export type UserUncheckedCreateWithoutSshSecurityKeysInput = {
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSshSecurityKeysInput = {
@@ -6017,6 +6120,7 @@ export type UserUpdateWithoutSshSecurityKeysInput = {
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSshSecurityKeysInput = {
@@ -6069,6 +6173,7 @@ export type UserUncheckedUpdateWithoutSshSecurityKeysInput = {
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiSettingsInput = {
@@ -6121,6 +6226,7 @@ export type UserCreateWithoutAiSettingsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiSettingsInput = {
@@ -6173,6 +6279,7 @@ export type UserUncheckedCreateWithoutAiSettingsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiSettingsInput = {
@@ -6241,6 +6348,7 @@ export type UserUpdateWithoutAiSettingsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiSettingsInput = {
@@ -6293,6 +6401,7 @@ export type UserUncheckedUpdateWithoutAiSettingsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiConversationsInput = {
@@ -6345,6 +6454,7 @@ export type UserCreateWithoutAiConversationsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiConversationsInput = {
@@ -6397,6 +6507,7 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiConversationsInput = {
@@ -6465,6 +6576,7 @@ export type UserUpdateWithoutAiConversationsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiConversationsInput = {
@@ -6517,6 +6629,7 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiMemoriesInput = {
@@ -6569,6 +6682,7 @@ export type UserCreateWithoutAiMemoriesInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiMemoriesInput = {
@@ -6621,6 +6735,7 @@ export type UserUncheckedCreateWithoutAiMemoriesInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
   aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiMemoriesInput = {
@@ -6689,6 +6804,7 @@ export type UserUpdateWithoutAiMemoriesInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiMemoriesInput = {
@@ -6741,6 +6857,235 @@ export type UserUncheckedUpdateWithoutAiMemoriesInput = {
   sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
   aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDevicesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDevicesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  emailOtpEnabled?: boolean
+  twoFactorMethod?: $Enums.TwoFactorMethod
+  masterKeyHash?: string | null
+  masterKeySalt?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiresAt?: Date | string | null
+  isActive?: boolean
+  isVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerificationExpiresAt?: Date | string | null
+  failedLoginCount?: number
+  lockoutUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  passkeyEnabled?: boolean
+  passwordLoginDisabled?: boolean
+  lockAfterMinutes?: number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutUserInput
+  serverGroups?: Prisma.ServerGroupUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedCreateNestedManyWithoutUserInput
+  emailOTPs?: Prisma.EmailOTPUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedCreateNestedManyWithoutUserInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedCreateNestedManyWithoutInviterInput
+  ownedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutOwnerInput
+  receivedShares?: Prisma.ServerShareUncheckedCreateNestedManyWithoutSharedWithInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedCreateNestedManyWithoutUserInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutUserInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedCreateNestedManyWithoutUserInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutUserInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
+  aiMemories?: Prisma.AiMemoryUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDevicesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDevicesInput, Prisma.UserUncheckedCreateWithoutDevicesInput>
+}
+
+export type UserUpsertWithoutDevicesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDevicesInput, Prisma.UserUncheckedUpdateWithoutDevicesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDevicesInput, Prisma.UserUncheckedCreateWithoutDevicesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDevicesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDevicesInput, Prisma.UserUncheckedUpdateWithoutDevicesInput>
+}
+
+export type UserUpdateWithoutDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailOtpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorMethod?: Prisma.EnumTwoFactorMethodFieldUpdateOperationsInput | $Enums.TwoFactorMethod
+  masterKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterKeySalt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerificationExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lockoutUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordLoginDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lockAfterMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  appearance?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutUserNestedInput
+  serverGroups?: Prisma.ServerGroupUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  recoveryCodes?: Prisma.RecoveryCodeUncheckedUpdateManyWithoutUserNestedInput
+  emailOTPs?: Prisma.EmailOTPUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  monitorConfigs?: Prisma.ServerMonitorConfigUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+  persistentSessions?: Prisma.PersistentSessionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.ServerInvitationUncheckedUpdateManyWithoutInviterNestedInput
+  ownedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutOwnerNestedInput
+  receivedShares?: Prisma.ServerShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  keychainCredentials?: Prisma.KeychainCredentialUncheckedUpdateManyWithoutUserNestedInput
+  commandSnippets?: Prisma.CommandSnippetUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutUserNestedInput
+  tunnelSessions?: Prisma.TunnelSessionUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  sshSecurityKeys?: Prisma.SshSecurityKeyUncheckedUpdateManyWithoutUserNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutUserNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiMemories?: Prisma.AiMemoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -6772,6 +7117,7 @@ export type UserCountOutputType = {
   sshSecurityKeys: number
   aiConversations: number
   aiMemories: number
+  devices: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6798,6 +7144,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   sshSecurityKeys?: boolean | UserCountOutputTypeCountSshSecurityKeysArgs
   aiConversations?: boolean | UserCountOutputTypeCountAiConversationsArgs
   aiMemories?: boolean | UserCountOutputTypeCountAiMemoriesArgs
+  devices?: boolean | UserCountOutputTypeCountDevicesArgs
 }
 
 /**
@@ -6971,6 +7318,13 @@ export type UserCountOutputTypeCountAiMemoriesArgs<ExtArgs extends runtime.Types
   where?: Prisma.AiMemoryWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDevicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DeviceWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -7023,6 +7377,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   aiSettings?: boolean | Prisma.User$aiSettingsArgs<ExtArgs>
   aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
   aiMemories?: boolean | Prisma.User$aiMemoriesArgs<ExtArgs>
+  devices?: boolean | Prisma.User$devicesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -7139,6 +7494,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   aiSettings?: boolean | Prisma.User$aiSettingsArgs<ExtArgs>
   aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
   aiMemories?: boolean | Prisma.User$aiMemoriesArgs<ExtArgs>
+  devices?: boolean | Prisma.User$devicesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -7171,6 +7527,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     aiSettings: Prisma.$AiSettingsPayload<ExtArgs> | null
     aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
     aiMemories: Prisma.$AiMemoryPayload<ExtArgs>[]
+    devices: Prisma.$DevicePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -7629,6 +7986,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   aiSettings<T extends Prisma.User$aiSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiSettingsArgs<ExtArgs>>): Prisma.Prisma__AiSettingsClient<runtime.Types.Result.GetResult<Prisma.$AiSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   aiConversations<T extends Prisma.User$aiConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiMemories<T extends Prisma.User$aiMemoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiMemoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiMemoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  devices<T extends Prisma.User$devicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$devicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8645,6 +9003,30 @@ export type User$aiMemoriesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AiMemoryScalarFieldEnum | Prisma.AiMemoryScalarFieldEnum[]
+}
+
+/**
+ * User.devices
+ */
+export type User$devicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Device
+   */
+  select?: Prisma.DeviceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Device
+   */
+  omit?: Prisma.DeviceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceInclude<ExtArgs> | null
+  where?: Prisma.DeviceWhereInput
+  orderBy?: Prisma.DeviceOrderByWithRelationInput | Prisma.DeviceOrderByWithRelationInput[]
+  cursor?: Prisma.DeviceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DeviceScalarFieldEnum | Prisma.DeviceScalarFieldEnum[]
 }
 
 /**

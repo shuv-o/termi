@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, Waypoints } from 'lucide-react';
+import { KeyRound, Laptop, Waypoints } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
@@ -450,6 +450,74 @@ export function AgentForwardingCard({
                             open. Only forward to servers you trust.
                         </p>
                     </>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+const CONNECT_FROM: { value: ServerFormValues['connectFrom']; label: string }[] = [
+    { value: 'server', label: 'Termi server' },
+    { value: 'device', label: 'This computer' },
+    { value: 'auto', label: 'Automatic' },
+];
+
+const CONNECT_FROM_HINT: Record<ServerFormValues['connectFrom'], string> = {
+    server: 'Every connection goes through the Termi server, as in the browser.',
+    device: 'In the desktop app, terminals, files and port forwarding connect straight from your computer. If it can’t reach the server, the connection fails.',
+    auto: 'In the desktop app, connect from your computer first and go through the Termi server if that fails.',
+};
+
+/**
+ * Desktop app only, owner only: whether SSH, file transfer and tunnels to
+ * this server start from the user's computer (the app's own gateway) or
+ * from the Termi server. Browsers always use the Termi server.
+ */
+export function ConnectFromCard({
+    form,
+    update,
+}: {
+    form: ServerFormValues;
+    update: (patch: Partial<ServerFormValues>) => void;
+}) {
+    return (
+        <Card className={CARD_CLASS}>
+            <CardContent className="space-y-3 p-4">
+                <div className="flex items-start gap-3">
+                    <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                        <p className="text-sm font-medium">Connect from</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                            {CONNECT_FROM_HINT[form.connectFrom]}
+                        </p>
+                    </div>
+                </div>
+                <div
+                    role="radiogroup"
+                    aria-label="Connect from"
+                    className="grid grid-cols-3 gap-1 rounded-lg bg-secondary/50 p-1"
+                >
+                    {CONNECT_FROM.map((m) => (
+                        <button
+                            key={m.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={form.connectFrom === m.value}
+                            onClick={() => update({ connectFrom: m.value })}
+                            className={`rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                                form.connectFrom === m.value
+                                    ? 'bg-card text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            {m.label}
+                        </button>
+                    ))}
+                </div>
+                {form.connectFrom !== 'server' && (
+                    <p className="text-xs text-muted-foreground">
+                        Set up the desktop app first, in Settings → Devices → This computer.
+                    </p>
                 )}
             </CardContent>
         </Card>

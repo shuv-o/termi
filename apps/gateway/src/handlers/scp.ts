@@ -133,7 +133,7 @@ export class SCPHandler {
                 break;
 
             case 'upload':
-                if (message.path && message.data) {
+                if (message.path && typeof message.data === 'string') {
                     this.uploadFile(message.path, message.data, message.chunk, message.totalChunks);
                 }
                 break;

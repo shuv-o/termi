@@ -25,6 +25,27 @@ export const HOST_KEY_ALGORITHMS: ServerHostKeyAlgorithm[] = [
 
 export const HOST_KEY_MISMATCH = 'HOST_KEY_MISMATCH';
 
+/**
+ * No key recorded yet, and this gateway may record it: accept the first key
+ * the server presents and hand it to `onFirstUse`. Only the desktop app's own
+ * gateway (local/device.ts) ever builds one, for servers its user owns.
+ */
+export interface FirstUse {
+    onFirstUse: (fingerprint: string, keyType: string) => void;
+}
+
+export type HostKeyExpectation = string | null | undefined | FirstUse;
+
+/** The key type named at the start of an SSH public-key blob. */
+export function keyTypeOf(key: Buffer): string {
+    try {
+        const len = key.readUInt32BE(0);
+        return key.subarray(4, 4 + len).toString('ascii');
+    } catch {
+        return 'unknown';
+    }
+}
+
 export function fingerprintOf(key: Buffer): string {
     return 'SHA256:' + createHash('sha256').update(key).digest('base64').replace(/=+$/, '');
 }
@@ -45,7 +66,7 @@ export function hostKeyMismatchMessage(label: string, expected: string, actual: 
 export function applyHostKeyCheck(
     client: Client,
     cc: ConnectConfig,
-    expected: string | null | undefined,
+    expected: HostKeyExpectation,
     label: string,
 ): void {
     let refusal: { message: string; code?: string } | null = null;
@@ -53,6 +74,10 @@ export function applyHostKeyCheck(
     cc.algorithms = { ...cc.algorithms, serverHostKey: HOST_KEY_ALGORITHMS };
     cc.hostVerifier = (key: Buffer) => {
         const actual = fingerprintOf(key);
+        if (expected && typeof expected === 'object') {
+            expected.onFirstUse(actual, keyTypeOf(key));
+            return true;
+        }
         if (!expected) {
             refusal = {
                 message: `${label} has no recorded host key yet. Reconnect from Termi to record it.`,

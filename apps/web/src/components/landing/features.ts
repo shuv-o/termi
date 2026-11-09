@@ -421,6 +421,11 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
                 keywords: 'desktop app electron mac windows linux',
             },
             {
+                name: 'Connect from your computer',
+                body: 'In the desktop app, terminals, files and port forwards to your own servers can go straight from your computer, reaching what it can reach, with Termi as the fallback. Logins arrive sealed to a key that never leaves the app.',
+                keywords: 'desktop local direct device private network lan vpn fallback',
+            },
+            {
                 name: 'One Compose file',
                 body: 'Docker Compose starts the web app, the gateway, PostgreSQL, the remote-desktop service and a reverse proxy. Database migrations run on start.',
                 keywords: 'docker compose install self-host',

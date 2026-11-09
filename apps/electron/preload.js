@@ -61,6 +61,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
             return () => ipcRenderer.removeListener('local-terminal:exit', handler);
         },
     },
+    // Device mode: SSH, file transfer and tunnels to the user's own servers
+    // through the app's own gateway. Sockets are opened and held by the main
+    // process; the page only exchanges frames for the ids it chose.
+    localGateway: {
+        device: () => ipcRenderer.invoke('localgw:device'),
+        open: (id, query) => ipcRenderer.invoke('localgw:open', id, query),
+        send: (id, data) => ipcRenderer.send('localgw:send', id, data),
+        close: (id, code, reason) => ipcRenderer.send('localgw:close', id, code, reason),
+        onEvent: (cb) => {
+            const handler = (_e, ev) => {
+                // Binary frames arrive as Uint8Array; the page expects ArrayBuffer.
+                if (ev && ev.data instanceof Uint8Array) {
+                    const d = ev.data;
+                    ev = { ...ev, data: d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength) };
+                }
+                cb(ev);
+            };
+            ipcRenderer.on('localgw:event', handler);
+            return () => ipcRenderer.removeListener('localgw:event', handler);
+        },
+    },
     tunnel: {
         /** Forwarding modes this shell can run (absent: local only). */
         modes: ['local', 'dynamic', 'remote'],

@@ -562,6 +562,14 @@ function assertTrustedSender(event) {
     if (!isTrustedSender(event)) throw new Error('Untrusted IPC sender');
 }
 
+// Device mode: connecting to the user's own servers from this computer.
+const { registerLocalGateway, localTunnelBase, stopLocalGateway } = require('./local-gateway');
+registerLocalGateway(ipcMain, {
+    remoteUrl: REMOTE_URL,
+    guard: assertTrustedSender,
+    isTrusted: isTrustedSender,
+});
+
 // Local terminal IPC
 
 ipcMain.handle('local-terminal:create', (event, id, { cols, rows, cwd } = {}) => {
@@ -680,27 +688,43 @@ ipcMain.handle('tunnel:open', (event, opts) => {
     const id = randomUUID();
     const sender = event.sender;
 
-    return new Promise((resolve) => {
-        let ready = false;
-        const tunnel = runTunnel({
-            wsUrl: `${opts.gatewayUrl}/connect?protocol=tunnel&serverId=${encodeURIComponent(opts.serverId)}&mux=1`,
-            token: opts.token,
-            mode,
-            listenHost: '127.0.0.1',
-            listenPort: Number(opts.localPort) || 0,
-            target,
-            onReady(info) {
-                ready = true;
-                tunnels.set(id, tunnel);
-                resolve({ success: true, id, ...info });
-            },
-            onClose(reason) {
-                tunnels.delete(id);
-                if (!ready) resolve({ success: false, error: reason });
-                else if (!sender.isDestroyed()) sender.send('tunnel:closed', { id, reason });
-            },
+    const query = `protocol=tunnel&serverId=${encodeURIComponent(opts.serverId)}&mux=1`;
+    // A device token goes to this app's own gateway, never over the network.
+    const wsUrl =
+        opts.gatewayUrl === 'termi-device://local'
+            ? localTunnelBase(REMOTE_URL).then(
+                  ({ base, secret }) => `${base}/connect?${query}&lk=${secret}`,
+              )
+            : Promise.resolve(`${opts.gatewayUrl}/connect?${query}`);
+
+    return wsUrl.then(
+        (url) => openTunnel(url),
+        (err) => ({ success: false, error: err.message }),
+    );
+
+    function openTunnel(url) {
+        return new Promise((resolve) => {
+            let ready = false;
+            const tunnel = runTunnel({
+                wsUrl: url,
+                token: opts.token,
+                mode,
+                listenHost: '127.0.0.1',
+                listenPort: Number(opts.localPort) || 0,
+                target,
+                onReady(info) {
+                    ready = true;
+                    tunnels.set(id, tunnel);
+                    resolve({ success: true, id, ...info });
+                },
+                onClose(reason) {
+                    tunnels.delete(id);
+                    if (!ready) resolve({ success: false, error: reason });
+                    else if (!sender.isDestroyed()) sender.send('tunnel:closed', { id, reason });
+                },
+            });
         });
-    });
+    }
 });
 
 ipcMain.handle('tunnel:list', (event) => {
@@ -893,6 +917,7 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', () => {
+    stopLocalGateway();
     for (const [, term] of localPtys) {
         try {
             term.kill();

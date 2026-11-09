@@ -10,7 +10,7 @@
 
 import { Client, type ConnectConfig } from 'ssh2';
 import type { TokenPayload } from '../auth/token.js';
-import { applyHostKeyCheck, HOST_KEY_MISMATCH } from '../auth/host-key.js';
+import { applyHostKeyCheck, HOST_KEY_MISMATCH, type HostKeyExpectation } from '../auth/host-key.js';
 import { certifiedKey } from '../auth/ssh-cert.js';
 
 /**
@@ -70,7 +70,7 @@ export function connectSSH(
     client: Client,
     config: ConnectConfig,
     jump: TokenPayload['jump'],
-    hostKey: string | null | undefined,
+    hostKey: HostKeyExpectation,
     certificate?: string | null,
 ): void {
     applyHostKeyCheck(client, config, hostKey, config.host ?? 'the server');

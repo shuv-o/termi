@@ -158,6 +158,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - Native app for **macOS, Windows, and Linux**
 - Local terminal access via node-pty
 - Connects to your self-hosted Termi instance
+- **Connect from this computer**: SSH, files and port forwards to your own servers run through a gateway built into the app, so they reach whatever your computer can reach (per server: Termi server, This computer, or Automatic with fallback). Set up per sign-in in Settings → Devices, with a password or passkey
 - Bundled gateway for fully offline / local-stack operation (`electron:dev:full`)
 
 ### 📦 Self-Hosted & Privacy-First

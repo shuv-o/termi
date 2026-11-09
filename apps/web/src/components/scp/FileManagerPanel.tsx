@@ -11,6 +11,7 @@ import { DeleteDialog, NewFolderDialog, RenameDialog } from './FileManagerDialog
 import { FileManagerToolbar } from './FileManagerToolbar';
 import { BottomSheet, SheetAction } from './Overlays';
 import { UploadQueuePanel } from './UploadQueuePanel';
+import { useFileTransport } from './useFileTransport';
 import { useSftpDirectory } from './useSftpDirectory';
 import { useUploadQueue } from './useUploadQueue';
 import { parent, sortEntries, type FileManagerPanelProps, type RemoteEntry } from './types';
@@ -34,10 +35,13 @@ export default function FileManagerPanel({
         setSelectMode(false);
     }, []);
 
-    const dir = useSftpDirectory(serverId, clearSelection);
-    const { currentPath, entries, loading, error, loadDir, reload } = dir;
+    const files = useFileTransport(serverId);
+    const dir = useSftpDirectory(files.transport, clearSelection);
+    const { currentPath, entries, loadDir, reload } = dir;
+    const loading = dir.loading && !files.error;
+    const error = files.error ?? dir.error;
 
-    const uploads = useUploadQueue(serverId, currentPath, reload);
+    const uploads = useUploadQueue(files.transport, currentPath, reload);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Dialogs / sheets

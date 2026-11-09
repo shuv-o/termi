@@ -69,6 +69,7 @@ export type ServerMinAggregateOutputType = {
   displayHeight: number | null
   colorDepth: number | null
   rdpSecurity: string | null
+  connectFrom: string | null
   isFavorite: boolean | null
   lastUsedAt: Date | null
   useCount: number | null
@@ -103,6 +104,7 @@ export type ServerMaxAggregateOutputType = {
   displayHeight: number | null
   colorDepth: number | null
   rdpSecurity: string | null
+  connectFrom: string | null
   isFavorite: boolean | null
   lastUsedAt: Date | null
   useCount: number | null
@@ -140,6 +142,7 @@ export type ServerCountAggregateOutputType = {
   displayHeight: number
   colorDepth: number
   rdpSecurity: number
+  connectFrom: number
   isFavorite: number
   lastUsedAt: number
   useCount: number
@@ -192,6 +195,7 @@ export type ServerMinAggregateInputType = {
   displayHeight?: true
   colorDepth?: true
   rdpSecurity?: true
+  connectFrom?: true
   isFavorite?: true
   lastUsedAt?: true
   useCount?: true
@@ -226,6 +230,7 @@ export type ServerMaxAggregateInputType = {
   displayHeight?: true
   colorDepth?: true
   rdpSecurity?: true
+  connectFrom?: true
   isFavorite?: true
   lastUsedAt?: true
   useCount?: true
@@ -263,6 +268,7 @@ export type ServerCountAggregateInputType = {
   displayHeight?: true
   colorDepth?: true
   rdpSecurity?: true
+  connectFrom?: true
   isFavorite?: true
   lastUsedAt?: true
   useCount?: true
@@ -387,6 +393,7 @@ export type ServerGroupByOutputType = {
   displayHeight: number | null
   colorDepth: number | null
   rdpSecurity: string | null
+  connectFrom: string
   isFavorite: boolean
   lastUsedAt: Date | null
   useCount: number
@@ -447,6 +454,7 @@ export type ServerWhereInput = {
   displayHeight?: Prisma.IntNullableFilter<"Server"> | number | null
   colorDepth?: Prisma.IntNullableFilter<"Server"> | number | null
   rdpSecurity?: Prisma.StringNullableFilter<"Server"> | string | null
+  connectFrom?: Prisma.StringFilter<"Server"> | string
   isFavorite?: Prisma.BoolFilter<"Server"> | boolean
   lastUsedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   useCount?: Prisma.IntFilter<"Server"> | number
@@ -499,6 +507,7 @@ export type ServerOrderByWithRelationInput = {
   displayHeight?: Prisma.SortOrderInput | Prisma.SortOrder
   colorDepth?: Prisma.SortOrderInput | Prisma.SortOrder
   rdpSecurity?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectFrom?: Prisma.SortOrder
   isFavorite?: Prisma.SortOrder
   lastUsedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   useCount?: Prisma.SortOrder
@@ -554,6 +563,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   displayHeight?: Prisma.IntNullableFilter<"Server"> | number | null
   colorDepth?: Prisma.IntNullableFilter<"Server"> | number | null
   rdpSecurity?: Prisma.StringNullableFilter<"Server"> | string | null
+  connectFrom?: Prisma.StringFilter<"Server"> | string
   isFavorite?: Prisma.BoolFilter<"Server"> | boolean
   lastUsedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   useCount?: Prisma.IntFilter<"Server"> | number
@@ -606,6 +616,7 @@ export type ServerOrderByWithAggregationInput = {
   displayHeight?: Prisma.SortOrderInput | Prisma.SortOrder
   colorDepth?: Prisma.SortOrderInput | Prisma.SortOrder
   rdpSecurity?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectFrom?: Prisma.SortOrder
   isFavorite?: Prisma.SortOrder
   lastUsedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   useCount?: Prisma.SortOrder
@@ -651,6 +662,7 @@ export type ServerScalarWhereWithAggregatesInput = {
   displayHeight?: Prisma.IntNullableWithAggregatesFilter<"Server"> | number | null
   colorDepth?: Prisma.IntNullableWithAggregatesFilter<"Server"> | number | null
   rdpSecurity?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
+  connectFrom?: Prisma.StringWithAggregatesFilter<"Server"> | string
   isFavorite?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   lastUsedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Server"> | Date | string | null
   useCount?: Prisma.IntWithAggregatesFilter<"Server"> | number
@@ -684,6 +696,7 @@ export type ServerCreateInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -736,6 +749,7 @@ export type ServerUncheckedCreateInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -780,6 +794,7 @@ export type ServerUpdateInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -832,6 +847,7 @@ export type ServerUncheckedUpdateInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -880,6 +896,7 @@ export type ServerCreateManyInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -913,6 +930,7 @@ export type ServerUpdateManyMutationInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -950,6 +968,7 @@ export type ServerUncheckedUpdateManyInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1010,6 +1029,7 @@ export type ServerCountOrderByAggregateInput = {
   displayHeight?: Prisma.SortOrder
   colorDepth?: Prisma.SortOrder
   rdpSecurity?: Prisma.SortOrder
+  connectFrom?: Prisma.SortOrder
   isFavorite?: Prisma.SortOrder
   lastUsedAt?: Prisma.SortOrder
   useCount?: Prisma.SortOrder
@@ -1052,6 +1072,7 @@ export type ServerMaxOrderByAggregateInput = {
   displayHeight?: Prisma.SortOrder
   colorDepth?: Prisma.SortOrder
   rdpSecurity?: Prisma.SortOrder
+  connectFrom?: Prisma.SortOrder
   isFavorite?: Prisma.SortOrder
   lastUsedAt?: Prisma.SortOrder
   useCount?: Prisma.SortOrder
@@ -1086,6 +1107,7 @@ export type ServerMinOrderByAggregateInput = {
   displayHeight?: Prisma.SortOrder
   colorDepth?: Prisma.SortOrder
   rdpSecurity?: Prisma.SortOrder
+  connectFrom?: Prisma.SortOrder
   isFavorite?: Prisma.SortOrder
   lastUsedAt?: Prisma.SortOrder
   useCount?: Prisma.SortOrder
@@ -1482,6 +1504,7 @@ export type ServerCreateWithoutUserInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1532,6 +1555,7 @@ export type ServerUncheckedCreateWithoutUserInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1609,6 +1633,7 @@ export type ServerScalarWhereInput = {
   displayHeight?: Prisma.IntNullableFilter<"Server"> | number | null
   colorDepth?: Prisma.IntNullableFilter<"Server"> | number | null
   rdpSecurity?: Prisma.StringNullableFilter<"Server"> | string | null
+  connectFrom?: Prisma.StringFilter<"Server"> | string
   isFavorite?: Prisma.BoolFilter<"Server"> | boolean
   lastUsedAt?: Prisma.DateTimeNullableFilter<"Server"> | Date | string | null
   useCount?: Prisma.IntFilter<"Server"> | number
@@ -1642,6 +1667,7 @@ export type ServerCreateWithoutGroupInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1692,6 +1718,7 @@ export type ServerUncheckedCreateWithoutGroupInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1762,6 +1789,7 @@ export type ServerCreateWithoutJumpTargetsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1813,6 +1841,7 @@ export type ServerUncheckedCreateWithoutJumpTargetsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1861,6 +1890,7 @@ export type ServerCreateWithoutJumpServerInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1911,6 +1941,7 @@ export type ServerUncheckedCreateWithoutJumpServerInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -1976,6 +2007,7 @@ export type ServerUpdateWithoutJumpTargetsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2027,6 +2059,7 @@ export type ServerUncheckedUpdateWithoutJumpTargetsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2086,6 +2119,7 @@ export type ServerCreateWithoutConnectionsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2137,6 +2171,7 @@ export type ServerUncheckedCreateWithoutConnectionsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2196,6 +2231,7 @@ export type ServerUpdateWithoutConnectionsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2247,6 +2283,7 @@ export type ServerUncheckedUpdateWithoutConnectionsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2290,6 +2327,7 @@ export type ServerCreateWithoutMonitorConfigInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2341,6 +2379,7 @@ export type ServerUncheckedCreateWithoutMonitorConfigInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2400,6 +2439,7 @@ export type ServerUpdateWithoutMonitorConfigInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2451,6 +2491,7 @@ export type ServerUncheckedUpdateWithoutMonitorConfigInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2494,6 +2535,7 @@ export type ServerCreateWithoutHealthRecordsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2545,6 +2587,7 @@ export type ServerUncheckedCreateWithoutHealthRecordsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2604,6 +2647,7 @@ export type ServerUpdateWithoutHealthRecordsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2655,6 +2699,7 @@ export type ServerUncheckedUpdateWithoutHealthRecordsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2698,6 +2743,7 @@ export type ServerCreateWithoutBenchmarkRunsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2749,6 +2795,7 @@ export type ServerUncheckedCreateWithoutBenchmarkRunsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2808,6 +2855,7 @@ export type ServerUpdateWithoutBenchmarkRunsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2859,6 +2907,7 @@ export type ServerUncheckedUpdateWithoutBenchmarkRunsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2902,6 +2951,7 @@ export type ServerCreateWithoutRecordingsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -2953,6 +3003,7 @@ export type ServerUncheckedCreateWithoutRecordingsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3012,6 +3063,7 @@ export type ServerUpdateWithoutRecordingsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3063,6 +3115,7 @@ export type ServerUncheckedUpdateWithoutRecordingsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3106,6 +3159,7 @@ export type ServerCreateWithoutTunnelSessionsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3157,6 +3211,7 @@ export type ServerUncheckedCreateWithoutTunnelSessionsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3216,6 +3271,7 @@ export type ServerUpdateWithoutTunnelSessionsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3267,6 +3323,7 @@ export type ServerUncheckedUpdateWithoutTunnelSessionsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3310,6 +3367,7 @@ export type ServerCreateWithoutInvitationsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3361,6 +3419,7 @@ export type ServerUncheckedCreateWithoutInvitationsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3420,6 +3479,7 @@ export type ServerUpdateWithoutInvitationsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3471,6 +3531,7 @@ export type ServerUncheckedUpdateWithoutInvitationsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3514,6 +3575,7 @@ export type ServerCreateWithoutSharesInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3565,6 +3627,7 @@ export type ServerUncheckedCreateWithoutSharesInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3624,6 +3687,7 @@ export type ServerUpdateWithoutSharesInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3675,6 +3739,7 @@ export type ServerUncheckedUpdateWithoutSharesInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3718,6 +3783,7 @@ export type ServerCreateWithoutHardeningRunsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3769,6 +3835,7 @@ export type ServerUncheckedCreateWithoutHardeningRunsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3828,6 +3895,7 @@ export type ServerUpdateWithoutHardeningRunsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3879,6 +3947,7 @@ export type ServerUncheckedUpdateWithoutHardeningRunsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3922,6 +3991,7 @@ export type ServerCreateWithoutTeamsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -3973,6 +4043,7 @@ export type ServerUncheckedCreateWithoutTeamsInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4032,6 +4103,7 @@ export type ServerUpdateWithoutTeamsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4083,6 +4155,7 @@ export type ServerUncheckedUpdateWithoutTeamsInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4126,6 +4199,7 @@ export type ServerCreateWithoutSecurityKeyInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4176,6 +4250,7 @@ export type ServerUncheckedCreateWithoutSecurityKeyInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4249,6 +4324,7 @@ export type ServerCreateManyUserInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4282,6 +4358,7 @@ export type ServerUpdateWithoutUserInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4332,6 +4409,7 @@ export type ServerUncheckedUpdateWithoutUserInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4379,6 +4457,7 @@ export type ServerUncheckedUpdateManyWithoutUserInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4415,6 +4494,7 @@ export type ServerCreateManyGroupInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4448,6 +4528,7 @@ export type ServerUpdateWithoutGroupInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4498,6 +4579,7 @@ export type ServerUncheckedUpdateWithoutGroupInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4545,6 +4627,7 @@ export type ServerUncheckedUpdateManyWithoutGroupInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4581,6 +4664,7 @@ export type ServerCreateManyJumpServerInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4614,6 +4698,7 @@ export type ServerUpdateWithoutJumpServerInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4664,6 +4749,7 @@ export type ServerUncheckedUpdateWithoutJumpServerInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4711,6 +4797,7 @@ export type ServerUncheckedUpdateManyWithoutJumpServerInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4747,6 +4834,7 @@ export type ServerCreateManySecurityKeyInput = {
   displayHeight?: number | null
   colorDepth?: number | null
   rdpSecurity?: string | null
+  connectFrom?: string
   isFavorite?: boolean
   lastUsedAt?: Date | string | null
   useCount?: number
@@ -4780,6 +4868,7 @@ export type ServerUpdateWithoutSecurityKeyInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4830,6 +4919,7 @@ export type ServerUncheckedUpdateWithoutSecurityKeyInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4877,6 +4967,7 @@ export type ServerUncheckedUpdateManyWithoutSecurityKeyInput = {
   displayHeight?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   colorDepth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rdpSecurity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectFrom?: Prisma.StringFieldUpdateOperationsInput | string
   isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   useCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5026,6 +5117,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   displayHeight?: boolean
   colorDepth?: boolean
   rdpSecurity?: boolean
+  connectFrom?: boolean
   isFavorite?: boolean
   lastUsedAt?: boolean
   useCount?: boolean
@@ -5079,6 +5171,7 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   displayHeight?: boolean
   colorDepth?: boolean
   rdpSecurity?: boolean
+  connectFrom?: boolean
   isFavorite?: boolean
   lastUsedAt?: boolean
   useCount?: boolean
@@ -5120,6 +5213,7 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   displayHeight?: boolean
   colorDepth?: boolean
   rdpSecurity?: boolean
+  connectFrom?: boolean
   isFavorite?: boolean
   lastUsedAt?: boolean
   useCount?: boolean
@@ -5161,6 +5255,7 @@ export type ServerSelectScalar = {
   displayHeight?: boolean
   colorDepth?: boolean
   rdpSecurity?: boolean
+  connectFrom?: boolean
   isFavorite?: boolean
   lastUsedAt?: boolean
   useCount?: boolean
@@ -5168,7 +5263,7 @@ export type ServerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "certificate" | "agentForwarding" | "agentKeychainIds" | "securityKeyId" | "jumpServerId" | "hostKeyFingerprint" | "hostKeyType" | "hostKeyTrustedAt" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "groupId" | "name" | "description" | "tags" | "color" | "icon" | "host" | "port" | "protocol" | "username" | "password" | "privateKey" | "passphrase" | "certificate" | "agentForwarding" | "agentKeychainIds" | "securityKeyId" | "jumpServerId" | "hostKeyFingerprint" | "hostKeyType" | "hostKeyTrustedAt" | "notes" | "sshOptions" | "displayWidth" | "displayHeight" | "colorDepth" | "rdpSecurity" | "connectFrom" | "isFavorite" | "lastUsedAt" | "useCount" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   securityKey?: boolean | Prisma.Server$securityKeyArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -5249,6 +5344,12 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     displayHeight: number | null
     colorDepth: number | null
     rdpSecurity: string | null
+    /**
+     * Where SSH, file transfer and tunnels connect from in the desktop app:
+     * "server" (the Termi gateway), "device" (this computer) or "auto"
+     * (this computer, falling back to the gateway). Owner's servers only.
+     */
+    connectFrom: string
     isFavorite: boolean
     lastUsedAt: Date | null
     useCount: number
@@ -5721,6 +5822,7 @@ export interface ServerFieldRefs {
   readonly displayHeight: Prisma.FieldRef<"Server", 'Int'>
   readonly colorDepth: Prisma.FieldRef<"Server", 'Int'>
   readonly rdpSecurity: Prisma.FieldRef<"Server", 'String'>
+  readonly connectFrom: Prisma.FieldRef<"Server", 'String'>
   readonly isFavorite: Prisma.FieldRef<"Server", 'Boolean'>
   readonly lastUsedAt: Prisma.FieldRef<"Server", 'DateTime'>
   readonly useCount: Prisma.FieldRef<"Server", 'Int'>

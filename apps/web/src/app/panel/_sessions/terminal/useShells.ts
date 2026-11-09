@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '../sessions-context';
+import { requestConnection } from '@/lib/gateway/connect';
 
 export interface ShellTab {
     id: string; // React key, stable across re-renders
@@ -9,14 +10,17 @@ export interface ShellTab {
     token: string | null;
 }
 
-async function issueConnectionToken(serverId: string): Promise<string | null> {
-    const res = await fetch('/api/connection/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serverId, protocol: 'ssh' }),
-    });
-    const data = await res.json();
-    return data.data?.token ?? null;
+/** A token for another shell, on the same route (device or gateway) as its session. */
+async function issueConnectionToken(session: Session): Promise<string | null> {
+    try {
+        const grant = await requestConnection(
+            { serverId: session.serverId, protocol: 'ssh' },
+            session.via === 'device' ? 'auto' : 'gateway',
+        );
+        return grant.token;
+    } catch {
+        return null;
+    }
 }
 
 /**
@@ -76,12 +80,12 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
         setActiveShellId(shellId);
         nudgeResize();
         try {
-            const token = await issueConnectionToken(session.serverId);
+            const token = await issueConnectionToken(session);
             setShells((prev) => prev.map((s) => (s.id === shellId ? { ...s, token } : s)));
         } catch {
             // token stays null → shows "Establishing connection…" loading state
         }
-    }, [session.serverId, nudgeResize]);
+    }, [session, nudgeResize]);
 
     const closeShell = useCallback(
         (shellId: string) => {
@@ -116,14 +120,24 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
             setShells((prev) =>
                 prev.map((s) => (s.id === shellId ? { ...s, sessionId, token: null } : s)),
             );
-            issueConnectionToken(session.serverId)
+            issueConnectionToken(session)
                 .then((token) => {
                     setShells((prev) => prev.map((s) => (s.id === shellId ? { ...s, token } : s)));
                 })
                 .catch(() => {});
         },
-        [session.serverId],
+        [session],
     );
+
+    // The session moved between this computer and the Termi server (device
+    // fallback): the other shells need tokens for the new route too.
+    const routeRef = useRef(session.via);
+    useEffect(() => {
+        if (routeRef.current === session.via) return;
+        routeRef.current = session.via;
+        for (const shell of shells.slice(1)) refreshShellToken(shell.id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session.via]);
 
     const activeShellIndex = shells.findIndex((s) => s.id === activeShellId);
 

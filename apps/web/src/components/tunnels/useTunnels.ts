@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { requestConnection, type ConnectionGrant } from '@/lib/gateway/connect';
 
 export type ForwardMode = 'local' | 'dynamic' | 'remote';
 type BindAddress = '127.0.0.1' | '0.0.0.0';
@@ -191,28 +192,35 @@ export function useTunnels(serverId: string, serverName: string) {
 
         try {
             if (desktopSupports(mode)) {
-                const tokenRes = await fetch('/api/connection/token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ protocol: 'tunnel', serverId, ...fwd }),
-                });
-                const tokenData = await tokenRes.json();
-                if (!tokenData.success) {
-                    setError(tokenData.error || 'Failed to open tunnel');
+                const body = { protocol: 'tunnel', serverId, ...fwd };
+                const openBridge = (grant: ConnectionGrant) =>
+                    window.electronAPI!.tunnel!.open({
+                        gatewayUrl: grant.gatewayUrl ?? '',
+                        serverId,
+                        token: grant.token,
+                        mode,
+                        localPort: mode === 'remote' ? undefined : Number(localPort) || undefined,
+                        target:
+                            mode === 'remote'
+                                ? { host: '127.0.0.1', port: Number(localPort) }
+                                : undefined,
+                    });
+                let grant: ConnectionGrant;
+                try {
+                    grant = await requestConnection(body);
+                } catch (err) {
+                    setError((err as Error).message || 'Failed to open tunnel');
                     return;
                 }
-
-                const bridge = await window.electronAPI!.tunnel!.open({
-                    gatewayUrl: tokenData.data.gatewayUrl,
-                    serverId,
-                    token: tokenData.data.token,
-                    mode,
-                    localPort: mode === 'remote' ? undefined : Number(localPort) || undefined,
-                    target:
-                        mode === 'remote'
-                            ? { host: '127.0.0.1', port: Number(localPort) }
-                            : undefined,
-                });
+                let bridge = await openBridge(grant);
+                // An "Automatic" server this computer can't reach goes through Termi instead.
+                if (!bridge.success && grant.via === 'device' && grant.fallback) {
+                    try {
+                        bridge = await openBridge(await requestConnection(body, 'gateway'));
+                    } catch {
+                        /* keep the first error */
+                    }
+                }
                 if (!bridge.success) {
                     setError(bridge.error);
                     return;

@@ -8,6 +8,7 @@ import { useServerForm } from '@/components/servers/form/useServerForm';
 import {
     EMPTY_SERVER_FORM,
     NO_STORED_CREDENTIALS,
+    type ConnectFrom,
     type ProtocolValue,
     type RdpSecurity,
     type StoredCredentials,
@@ -63,6 +64,7 @@ export default function EditServerPage() {
                     certificate: s.certificate ?? '',
                     agentForwarding: s.agentForwarding ?? 'off',
                     agentKeychainIds: s.agentKeychainIds ?? [],
+                    connectFrom: (s.connectFrom ?? 'server') as ConnectFrom,
                 });
             })
             .catch(() => router.push('/panel'))
@@ -111,6 +113,8 @@ export default function EditServerPage() {
                 payload.agentForwarding = form.agentForwarding;
                 payload.agentKeychainIds = form.agentKeychainIds;
             }
+            payload.connectFrom =
+                form.protocol === 'SSH' || form.protocol === 'SCP' ? form.connectFrom : 'server';
             // The server fills the secrets from this entry itself.
             if (state.keychainId) payload.keychainId = state.keychainId;
             // Explicit null switches a server back to its password or key.

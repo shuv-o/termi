@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { FileTransport } from './transport';
 import type { RemoteEntry } from './types';
 
 /**
@@ -10,10 +11,10 @@ import type { RemoteEntry } from './types';
  * @param onLoadStart runs at the top of every listing fetch — the panel uses it
  *   to drop any selection, which would otherwise point at stale paths.
  */
-export function useSftpDirectory(serverId: string, onLoadStart?: () => void) {
+export function useSftpDirectory(transport: FileTransport | null, onLoadStart?: () => void) {
     const [currentPath, setCurrentPath] = useState('/');
     const [entries, setEntries] = useState<RemoteEntry[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // Kept in a ref so changing the callback doesn't re-trigger the initial load.
@@ -22,27 +23,20 @@ export function useSftpDirectory(serverId: string, onLoadStart?: () => void) {
 
     const loadDir = useCallback(
         async (path: string) => {
+            if (!transport) return;
             setLoading(true);
             setError(null);
             onLoadStartRef.current?.();
             try {
-                const res = await fetch(
-                    `/api/servers/${serverId}/sftp/list?path=${encodeURIComponent(path)}`,
-                );
-                const data = await res.json();
-                if (data.success) {
-                    setEntries(data.data.entries);
-                    setCurrentPath(path);
-                } else {
-                    setError(data.error ?? 'Cannot read directory');
-                }
-            } catch {
-                setError('Network error');
+                setEntries(await transport.list(path));
+                setCurrentPath(path);
+            } catch (err) {
+                setError((err as Error).message || 'Cannot read directory');
             } finally {
                 setLoading(false);
             }
         },
-        [serverId],
+        [transport],
     );
 
     useEffect(() => {
@@ -51,63 +45,49 @@ export function useSftpDirectory(serverId: string, onLoadStart?: () => void) {
 
     const reload = useCallback(() => loadDir(currentPath), [loadDir, currentPath]);
 
-    /** Browser-native download via a synthetic anchor click. */
     const download = useCallback(
         (entry: RemoteEntry) => {
-            const a = document.createElement('a');
-            a.href = `/api/servers/${serverId}/sftp/download?path=${encodeURIComponent(entry.path)}`;
-            a.download = entry.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            transport?.download(entry).catch((err: Error) => setError(err.message));
         },
-        [serverId],
+        [transport],
+    );
+
+    /** Run a mutation, then reload; false (with the error shown) if it failed. */
+    const mutate = useCallback(
+        async (op: (t: FileTransport) => Promise<unknown>): Promise<boolean> => {
+            if (!transport) return false;
+            try {
+                await op(transport);
+                await loadDir(currentPath);
+                return true;
+            } catch (err) {
+                setError((err as Error).message);
+                return false;
+            }
+        },
+        [transport, currentPath, loadDir],
     );
 
     const createFolder = useCallback(
-        async (name: string): Promise<boolean> => {
-            const path = currentPath.replace(/\/+$/, '') + '/' + name;
-            const res = await fetch(`/api/servers/${serverId}/sftp/mkdir`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path }),
-            });
-            const ok = (await res.json()).success;
-            if (ok) await loadDir(currentPath);
-            return ok;
-        },
-        [serverId, currentPath, loadDir],
+        (name: string) => mutate((t) => t.mkdir(currentPath.replace(/\/+$/, '') + '/' + name)),
+        [mutate, currentPath],
     );
 
     const rename = useCallback(
-        async (entry: RemoteEntry, newName: string): Promise<boolean> => {
-            const newPath = entry.path.replace(/\/[^/]+$/, '') + '/' + newName;
-            const res = await fetch(`/api/servers/${serverId}/sftp/rename`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldPath: entry.path, newPath }),
-            });
-            const ok = (await res.json()).success;
-            if (ok) await loadDir(currentPath);
-            return ok;
-        },
-        [serverId, currentPath, loadDir],
+        (entry: RemoteEntry, newName: string) =>
+            mutate((t) => t.rename(entry.path, entry.path.replace(/\/[^/]+$/, '') + '/' + newName)),
+        [mutate],
     );
 
     const remove = useCallback(
         async (targets: RemoteEntry[]) => {
-            await Promise.all(
-                targets.map((e) =>
-                    fetch(`/api/servers/${serverId}/sftp/delete`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ path: e.path, isDirectory: e.type === 'dir' }),
-                    }),
-                ),
-            );
+            if (!transport) return;
+            const failed: string[] = [];
+            for (const e of targets) await transport.remove(e).catch(() => failed.push(e.name));
             await loadDir(currentPath);
+            if (failed.length) setError(`Could not delete ${failed.join(', ')}`);
         },
-        [serverId, currentPath, loadDir],
+        [transport, currentPath, loadDir],
     );
 
     return {

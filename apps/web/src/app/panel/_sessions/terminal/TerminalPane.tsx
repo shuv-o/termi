@@ -144,7 +144,9 @@ export function TerminalPane({
     // Per-shell "read the recent output" functions, for Ask AI.
     const screenReaders = useRef(new Map<string, () => string>());
 
-    const { registerSendHandler, registerRawSender, relayInput } = useSessionsContext();
+    const { registerSendHandler, registerRawSender, relayInput, switchToGateway } =
+        useSessionsContext();
+    const fromDevice = session.via === 'device';
     // Per-shell "open find bar" functions, handed up by each terminal.
     const searchOpeners = useRef(new Map<string, () => void>());
 
@@ -306,7 +308,8 @@ export function TerminalPane({
             <TerminalPaneHeader
                 compact={inSplit}
                 onShareSession={
-                    session.type === 'remote' && session.status === 'connected'
+                    // A session on this computer can't take guests: they join on the server.
+                    session.type === 'remote' && session.status === 'connected' && !fromDevice
                         ? () => setShowShareDialog(true)
                         : undefined
                 }
@@ -434,6 +437,14 @@ export function TerminalPane({
                                             <ConnectingPlaceholder />
                                         ) : (
                                             <SSHTerminal
+                                                // Rebuilt when the session moves between this
+                                                // computer and the Termi server.
+                                                key={`${shell.id}:${session.gatewayUrl ?? ''}`}
+                                                onDeviceUnreachable={
+                                                    fromDevice && session.fallback
+                                                        ? () => void switchToGateway(session.tabId)
+                                                        : undefined
+                                                }
                                                 sessionId={shell.sessionId}
                                                 serverId={session.serverId}
                                                 connectionToken={shell.token}

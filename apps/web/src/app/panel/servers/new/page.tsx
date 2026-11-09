@@ -53,6 +53,9 @@ export default function NewServerPage() {
                               agentKeychainIds: form.agentKeychainIds,
                           }
                         : {}),
+                    ...(form.protocol === 'SSH' || form.protocol === 'SCP'
+                        ? { connectFrom: form.connectFrom }
+                        : {}),
                     // The server fills the secrets from this entry itself.
                     ...(state.keychainId ? { keychainId: state.keychainId } : {}),
                     ...(form.protocol === 'SSH' &&

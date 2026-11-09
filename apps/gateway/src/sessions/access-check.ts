@@ -83,7 +83,22 @@ export async function runAccessCheck(
 }
 
 /** The web app's internal endpoint, reached with a service token. */
-export function webAccessAsker(webUrl: string, fetchFn: typeof fetch = fetch): AccessAsker {
+/** Shown when the desktop app may no longer connect for this sign-in. */
+export const REFUSED_MESSAGE =
+    'This computer is no longer allowed to connect. Sign in again, or connect through Termi.';
+
+export function webAccessAsker(
+    webUrl: string,
+    fetchFn: typeof fetch = fetch,
+    /** The Authorization header: a gateway service token, or a device token in the desktop app. */
+    authorize: () => Promise<string> = async () =>
+        `Bearer ${await mintServiceToken('access-check')}`,
+    /**
+     * Desktop app: a refused device (its sign-in revoked, expired, or the
+     * device removed) closes every connection instead of failing open.
+     */
+    denyAllWhenRefused = false,
+): AccessAsker {
     const url = new URL('/api/internal/access-check', webUrl).toString();
     let failing = false;
     return async (grants) => {
@@ -92,11 +107,15 @@ export function webAccessAsker(webUrl: string, fetchFn: typeof fetch = fetch): A
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
-                    authorization: `Bearer ${await mintServiceToken('access-check')}`,
+                    authorization: await authorize(),
                 },
                 body: JSON.stringify({ grants }),
                 signal: AbortSignal.timeout(10_000),
             });
+            if (denyAllWhenRefused && (res.status === 401 || res.status === 403)) {
+                failing = false;
+                return grants.map((g) => ({ key: g.key, message: REFUSED_MESSAGE }));
+            }
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const body = (await res.json()) as { data?: { denied?: Denial[] } };
             if (!Array.isArray(body.data?.denied)) throw new Error('Unexpected response');

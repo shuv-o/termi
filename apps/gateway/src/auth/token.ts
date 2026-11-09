@@ -7,6 +7,8 @@
 
 import * as jose from 'jose';
 import { createHash } from 'crypto';
+import type { HostKeyExpectation } from './host-key.js';
+import { LOCAL_MODE, deviceKeys } from '../local/device.js';
 
 export interface TokenPayload {
     userId: string;
@@ -37,7 +39,14 @@ export interface TokenPayload {
         | { kind: 'dynamic' }
         | { kind: 'remote'; bindAddress: string; bindPort: number };
     /** The server's pinned SSH host key (`SHA256:…`); SSH is refused without it. */
-    hostKey?: string | null;
+    hostKey?: HostKeyExpectation;
+    /**
+     * Desktop app only: the server has no recorded key yet, so the first one
+     * seen is accepted and reported back (local/device.ts).
+     */
+    hostKeyFirstUse?: boolean;
+    /** Desktop app only: the device the token was sealed to. */
+    deviceKeyId?: string;
     /** OpenSSH user certificate for `privateKey`. */
     certificate?: string | null;
     /**
@@ -60,7 +69,8 @@ export interface TokenPayload {
         privateKey?: string | null;
         passphrase?: string | null;
         /** The bastion's pinned SSH host key. */
-        hostKey?: string | null;
+        hostKey?: HostKeyExpectation;
+        hostKeyFirstUse?: boolean;
         certificate?: string | null;
     } | null;
     /** 'ssh' only: sign in with this FIDO2 security key (signatures come from the browser). */
@@ -114,10 +124,25 @@ function getJWEKey(): Uint8Array {
  */
 export async function validateToken(token: string): Promise<TokenPayload> {
     try {
-        const key = getJWEKey();
-        const { payload } = await jose.jwtDecrypt(token, key, {
-            contentEncryptionAlgorithms: ['A256GCM'],
-        });
+        // The desktop app's own gateway opens only tokens sealed to its device.
+        const { payload } = LOCAL_MODE
+            ? await jose.jwtDecrypt(token, (await deviceKeys()).enc, {
+                  keyManagementAlgorithms: ['ECDH-ES'],
+                  contentEncryptionAlgorithms: ['A256GCM'],
+              })
+            : await jose.jwtDecrypt(token, getJWEKey(), {
+                  contentEncryptionAlgorithms: ['A256GCM'],
+              });
+        if (LOCAL_MODE) {
+            if (payload.deviceKeyId !== (await deviceKeys()).keyId) {
+                throw new Error('Token sealed to another device');
+            }
+            // Joining someone's live session only ever happens on the server.
+            if (payload.join) throw new Error('Invalid token payload');
+        } else if (payload.deviceKeyId !== undefined || payload.hostKeyFirstUse !== undefined) {
+            // A device token on the shared gateway is a mix-up, never valid here.
+            throw new Error('Invalid token payload');
+        }
 
         if (!payload.userId || !payload.serverId) {
             throw new Error('Invalid token payload');

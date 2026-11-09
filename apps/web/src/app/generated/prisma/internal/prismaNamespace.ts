@@ -429,7 +429,8 @@ export const ModelName = {
   AiSettings: 'AiSettings',
   AiConversation: 'AiConversation',
   AiMessage: 'AiMessage',
-  AiMemory: 'AiMemory'
+  AiMemory: 'AiMemory',
+  Device: 'Device'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare" | "sshSecurityKey" | "aiSettings" | "aiConversation" | "aiMessage" | "aiMemory"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare" | "sshSecurityKey" | "aiSettings" | "aiConversation" | "aiMessage" | "aiMemory" | "device"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2891,6 +2892,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Device: {
+      payload: Prisma.$DevicePayload<ExtArgs>
+      fields: Prisma.DeviceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DeviceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DeviceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        findFirst: {
+          args: Prisma.DeviceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DeviceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        findMany: {
+          args: Prisma.DeviceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>[]
+        }
+        create: {
+          args: Prisma.DeviceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        createMany: {
+          args: Prisma.DeviceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DeviceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>[]
+        }
+        delete: {
+          args: Prisma.DeviceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        update: {
+          args: Prisma.DeviceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        deleteMany: {
+          args: Prisma.DeviceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DeviceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DeviceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>[]
+        }
+        upsert: {
+          args: Prisma.DeviceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DevicePayload>
+        }
+        aggregate: {
+          args: Prisma.DeviceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDevice>
+        }
+        groupBy: {
+          args: Prisma.DeviceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DeviceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3025,6 +3100,7 @@ export const ServerScalarFieldEnum = {
   displayHeight: 'displayHeight',
   colorDepth: 'colorDepth',
   rdpSecurity: 'rdpSecurity',
+  connectFrom: 'connectFrom',
   isFavorite: 'isFavorite',
   lastUsedAt: 'lastUsedAt',
   useCount: 'useCount',
@@ -3446,6 +3522,21 @@ export const AiMemoryScalarFieldEnum = {
 } as const
 
 export type AiMemoryScalarFieldEnum = (typeof AiMemoryScalarFieldEnum)[keyof typeof AiMemoryScalarFieldEnum]
+
+
+export const DeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  keyId: 'keyId',
+  encKey: 'encKey',
+  sigKey: 'sigKey',
+  name: 'name',
+  createdAt: 'createdAt',
+  lastSeenAt: 'lastSeenAt'
+} as const
+
+export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3930,6 +4021,7 @@ export type GlobalOmitConfig = {
   aiConversation?: Prisma.AiConversationOmit
   aiMessage?: Prisma.AiMessageOmit
   aiMemory?: Prisma.AiMemoryOmit
+  device?: Prisma.DeviceOmit
 }
 
 /* Types for Logging */

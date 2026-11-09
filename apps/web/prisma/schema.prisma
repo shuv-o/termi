@@ -86,6 +86,7 @@ model User {
   aiSettings          AiSettings?
   aiConversations     AiConversation[]
   aiMemories          AiMemory[]
+  devices             Device[]
 
   @@index([email])
   @@index([passwordResetToken])
@@ -208,9 +209,13 @@ model Server {
   rdpSecurity   String? @default("any")
 
   // Favorites and usage
-  isFavorite Boolean   @default(false)
-  lastUsedAt DateTime?
-  useCount   Int       @default(0)
+  /// Where SSH, file transfer and tunnels connect from in the desktop app:
+  /// "server" (the Termi gateway), "device" (this computer) or "auto"
+  /// (this computer, falling back to the gateway). Owner's servers only.
+  connectFrom String    @default("server")
+  isFavorite  Boolean   @default(false)
+  lastUsedAt  DateTime?
+  useCount    Int       @default(0)
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -469,6 +474,7 @@ enum AuditAction {
   // A terminal, file browser or desktop was opened (History page)
   CONNECTION_OPENED
   AI_SETTINGS_UPDATED
+  DEVICE_REGISTERED
 
   // Port-forward tunnel events
   TUNNEL_OPENED
@@ -1020,4 +1026,25 @@ model AiMemory {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+/// A desktop app that can connect to its user's own servers directly.
+/// Holds public keys only; tied to the sign-in that registered it, so signing
+/// that device out ends it too.
+model Device {
+  id         String   @id @default(cuid())
+  userId     String
+  sessionId  String   @unique
+  /// JWK thumbprint of the signing key: how the device's gateway is known.
+  keyId      String   @unique
+  /// Public P-256 keys (JWK): one for sealing tokens to it, one it signs with.
+  encKey     Json
+  sigKey     Json
+  name       String
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

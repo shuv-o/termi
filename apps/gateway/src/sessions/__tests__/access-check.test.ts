@@ -5,6 +5,7 @@ import {
     grantKey,
     runAccessCheck,
     webAccessAsker,
+    REFUSED_MESSAGE,
     type Grant,
 } from '../access-check.js';
 import { mintServiceToken, validateToken } from '../../auth/token.js';
@@ -88,6 +89,29 @@ describe('webAccessAsker', () => {
             vi.fn().mockRejectedValue(new Error('ECONNREFUSED')) as never,
         );
         expect(await down([{ ...alice, key: 'k' }])).toBeNull();
+    });
+
+    it('closes everything when the desktop app is refused, and only then', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const asker = (status: number, deviceMode: boolean) =>
+            webAccessAsker(
+                'http://web',
+                vi.fn().mockResolvedValue(new Response('', { status })) as never,
+                async () => 'Device x',
+                deviceMode,
+            );
+        const grants = [
+            { ...alice, key: 'a' },
+            { ...alice, key: 'b' },
+        ];
+        expect(await asker(401, true)(grants)).toEqual([
+            { key: 'a', message: REFUSED_MESSAGE },
+            { key: 'b', message: REFUSED_MESSAGE },
+        ]);
+        expect(await asker(403, true)(grants)).toHaveLength(2);
+        // An outage still fails open, and the shared gateway never denies on its own.
+        expect(await asker(500, true)(grants)).toBeNull();
+        expect(await asker(401, false)(grants)).toBeNull();
     });
 });
 

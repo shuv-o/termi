@@ -19,7 +19,8 @@ export type SecurityEvent =
     | 'passkey_removed'
     | 'servers_exported'
     | 'host_key_mismatch'
-    | 'host_key_trusted';
+    | 'host_key_trusted'
+    | 'device_registered';
 
 const MESSAGES: Record<SecurityEvent, { subject: string; body: string }> = {
     new_device: {
@@ -57,6 +58,10 @@ const MESSAGES: Record<SecurityEvent, { subject: string; body: string }> = {
     host_key_mismatch: {
         subject: 'A server presented a different SSH host key',
         body: 'Termi refused to connect to one of your servers because its SSH host key changed. Someone may be intercepting the connection. If the server was reinstalled, review and trust the new key in its settings.',
+    },
+    device_registered: {
+        subject: 'A computer can now connect directly to your servers',
+        body: 'A Termi desktop app was just allowed to connect to your own servers directly, using their stored logins. If this was not you, sign that device out in Settings → Signed-in devices and change your password.',
     },
     host_key_trusted: {
         subject: 'A new SSH host key was trusted',

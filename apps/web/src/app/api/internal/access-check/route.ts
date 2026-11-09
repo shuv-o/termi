@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import { verifyServiceToken } from '@/lib/auth';
 import { errorResponse, successResponse, validateBody } from '@/lib/api';
-import { checkAccess } from '@/lib/services/access-check.service';
+import { verifyDeviceRequest } from '@/lib/auth/device';
+import { checkAccess, MESSAGES } from '@/lib/services/access-check.service';
 
 const id = z.string().min(1).max(200);
 const schema = z.object({
@@ -30,13 +31,28 @@ const schema = z.object({
 
 export async function POST(request: Request) {
     const auth = request.headers.get('authorization') ?? '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-    if (!token || !(await verifyServiceToken(token, 'access-check'))) {
-        return errorResponse('Unauthorized', 401);
+    // The shared gateway (service token), or a desktop app's own gateway
+    // (device-signed), which may only ask about its own user's connections.
+    let deviceUser: string | null = null;
+    if (auth.startsWith('Device ')) {
+        const device = await verifyDeviceRequest(auth, 'access-check');
+        if (!device) return errorResponse('Unauthorized', 401);
+        deviceUser = device.userId;
+    } else {
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+        if (!token || !(await verifyServiceToken(token, 'access-check'))) {
+            return errorResponse('Unauthorized', 401);
+        }
     }
 
     const validation = await validateBody(request, schema);
     if ('error' in validation) return validation.error;
+    const { grants } = validation.data;
 
-    return successResponse({ denied: await checkAccess(validation.data.grants) });
+    if (deviceUser === null) return successResponse({ denied: await checkAccess(grants) });
+    const own = grants.filter((g) => g.userId === deviceUser);
+    const foreign = grants
+        .filter((g) => g.userId !== deviceUser)
+        .map((g) => ({ key: g.key, message: MESSAGES.signedOut }));
+    return successResponse({ denied: [...foreign, ...(await checkAccess(own))] });
 }

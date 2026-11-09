@@ -27,6 +27,8 @@ files:
     - apps/electron/window-state.js
     - apps/electron/context-menu.js
     - apps/electron/tunnel-mux.js
+    - apps/electron/local-gateway.js
+    - apps/electron/gateway/index.mjs
     - apps/electron/build-config.json
     - apps/web/public/icons/icon-512x512.png
     - node_modules/node-pty/**/*

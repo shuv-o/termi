@@ -70,6 +70,16 @@ When a connection is opened, the web app issues a short-lived **JWE token** (A25
 
 Because a token is only checked when a connection opens, the gateway asks the web app every `GATEWAY_ACCESS_CHECK_SEC` (default 30 s) whether each open connection may stay, over an internal endpoint authenticated with a gateway-only service token. Connections whose sign-in was revoked or expired, or whose user lost access to the server, are closed.
 
+### Connecting from the desktop app
+
+A server's owner can let SSH, file transfer and tunnels start from their own computer, through a gateway built into the desktop app, instead of from the Termi server.
+
+- **Registering a device needs a fresh password or passkey**, is audit-logged (`DEVICE_REGISTERED`) and emailed. A device belongs to the sign-in that registered it and stops working when that sign-in is revoked, expires or signs out.
+- **Logins are sealed to the device.** The app makes two P-256 key pairs, kept encrypted with the OS keychain (`safeStorage`; the feature stays off where that isn't available). Connection tokens for it are ECDH-ES encrypted to its public key, name it, and carry the sign-in's id, so neither the browser nor anyone holding the shared gateway secret can open them, and the shared gateway refuses them.
+- **Only the user's own servers** that are set to connect from the device, and only SSH, file transfer and tunnels. Shared and team servers always go through Termi, so their logins never reach anyone else's computer.
+- **The app's gateway is local only**: it listens on 127.0.0.1, every connection needs a secret made at launch, and pages reach it only through the app's main process, which opens the socket itself. The secret and keys reach the gateway over its process message port, not the environment.
+- **Requests from the device** (the access check and first-use host keys) are signed by its own key and checked against its sign-in. The access check answers a device only about its own user's connections, and a refused device closes all of them. A reported host key is recorded only for an owned server with no key yet; afterwards it is enforced like any other.
+
 ### AI Assistant
 
 The assistant is optional: nothing is sent anywhere until the deployment (`AI_*` variables) or the user (Settings → AI assistant) configures a provider.
@@ -94,6 +104,7 @@ The assistant is optional: nothing is sent anywhere until the deployment (`AI_*`
 | Database tampering          | Each ciphertext bound (AAD) to its field and owner    |
 | Man-in-the-middle to servers | SSH host keys pinned on first use, checked every time |
 | Revoked or stolen sign-in   | Open connections closed when access ends (≤30 s)      |
+| Stolen cookie in desktop mode | Device setup needs a fresh password/passkey; tokens sealed to the device key |
 | Secrets in images           | No secret build arguments; settings read at runtime   |
 | Credential theft in transit | TLS (configured via reverse proxy)                    |
 | SSRF attacks                | `validateHost()` blocks private/loopback ranges       |

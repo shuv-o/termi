@@ -106,6 +106,34 @@ interface ElectronAPI {
     passkey?: ElectronPasskeyAPI;
     /** Local port-forward bridge (desktop shell only). */
     tunnel?: ElectronTunnelAPI;
+    /** The app's own gateway: connect to your own servers from this computer. */
+    localGateway?: ElectronLocalGatewayAPI;
+}
+
+/** A public P-256 JWK. */
+interface DevicePublicKey {
+    kty: 'EC';
+    crv: 'P-256';
+    x: string;
+    y: string;
+}
+
+type LocalGatewayEvent =
+    | { id: string; type: 'open' }
+    | { id: string; type: 'message'; data: string | ArrayBuffer }
+    | { id: string; type: 'close'; code: number; reason: string }
+    | { id: string; type: 'error' };
+
+interface ElectronLocalGatewayAPI {
+    /** This computer's public keys and name, to register it with Termi. */
+    device: () => Promise<
+        { name: string; encKey: DevicePublicKey; sigKey: DevicePublicKey } | { error: string }
+    >;
+    /** Open a connection on the app's gateway; `query` is the /connect query string. */
+    open: (id: string, query: string) => Promise<{ ok: true } | { error: string }>;
+    send: (id: string, data: string | ArrayBuffer) => void;
+    close: (id: string, code?: number, reason?: string) => void;
+    onEvent: (cb: (e: LocalGatewayEvent) => void) => () => void;
 }
 
 interface Window {

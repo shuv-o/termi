@@ -29,6 +29,11 @@ import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 import { getKeychainCredentialById } from '@/lib/services/keychain.service';
 import { recordConnection } from '@/lib/services/connection-history.service';
+import { DEVICE_GATEWAY_URL, sealToDevice } from '@/lib/auth/device';
+import { currentDevice } from '@/lib/services/device.service';
+
+/** What a desktop app may do from the user's own computer. */
+const DEVICE_PROTOCOLS = new Set(['ssh', 'scp', 'tunnel']);
 
 const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
@@ -38,10 +43,12 @@ const tokenSchema = z.discriminatedUnion('protocol', [
     z.object({
         protocol: z.enum(['ssh', 'scp', 'rdp', 'vnc', 'telnet']),
         serverId: z.string(),
+        via: z.enum(['gateway', 'device']).optional(),
     }),
     z.object({
         protocol: z.literal('tunnel'),
         serverId: z.string(),
+        via: z.enum(['gateway', 'device']).optional(),
         ...forwardFields,
     }),
 ]);
@@ -94,6 +101,66 @@ export async function POST(request: Request) {
 
         if (server.jump && protocol === 'telnet') {
             return errorResponse('Telnet connections cannot use a jump host', 400);
+        }
+
+        // Desktop app asking to connect from the user's own computer. The
+        // server decides: only the owner's servers set to connect from the
+        // device, over SSH, file transfer or tunnels, to a device this sign-in
+        // registered. Anything else gets an ordinary gateway token below.
+        if (tokenData.via === 'device' && DEVICE_PROTOCOLS.has(protocol)) {
+            const device = await currentDevice(user.id, sid);
+            const eligible =
+                device &&
+                server.ownerId === user.id &&
+                (server.connectFrom === 'device' || server.connectFrom === 'auto') &&
+                !(server.securityKey && protocol !== 'ssh');
+            if (eligible) {
+                // Dialled from the user's computer: no SSRF check or server-side
+                // key probe here. A missing pin is recorded on first use there.
+                const token = await sealToDevice(
+                    {
+                        userId: user.id,
+                        sid,
+                        serverId: server.id,
+                        protocol,
+                        host: server.host,
+                        port: server.port,
+                        username: server.username,
+                        password: server.password ?? null,
+                        privateKey: server.privateKey ?? null,
+                        passphrase: server.passphrase ?? null,
+                        hostKey: server.hostKey.fingerprint,
+                        hostKeyFirstUse: !server.hostKey.fingerprint,
+                        certificate: server.certificate,
+                        securityKey: server.securityKey,
+                        agent: protocol === 'ssh' ? await agentClaim(server, user.id) : null,
+                        jump: server.jump
+                            ? {
+                                  ...jumpClaim(server.jump)!,
+                                  hostKeyFirstUse: !server.jump.hostKey.fingerprint,
+                              }
+                            : null,
+                        ...forward,
+                    },
+                    device,
+                );
+                if (protocol !== 'tunnel') {
+                    await recordConnection({
+                        userId: user.id,
+                        serverId: server.id,
+                        serverName: server.name,
+                        protocol,
+                        ipAddress: getClientIP(request),
+                        userAgent: getDeviceInfo(request),
+                    }).catch((err) => console.error('Connection history error:', err));
+                }
+                return successResponse({
+                    token,
+                    gatewayUrl: DEVICE_GATEWAY_URL,
+                    via: 'device',
+                    fallback: server.connectFrom === 'auto',
+                });
+            }
         }
 
         // Re-validate at token issuance time (defence-in-depth against tampered
@@ -163,7 +230,7 @@ export async function POST(request: Request) {
             }).catch((err) => console.error('Connection history error:', err));
         }
 
-        return successResponse({ token, gatewayUrl: getGatewayUrl() });
+        return successResponse({ token, gatewayUrl: getGatewayUrl(), via: 'gateway' });
     } catch (error) {
         if (error instanceof Error && error.message.includes('GATEWAY_JWT_SECRET')) {
             console.error('Connection token error:', error.message);

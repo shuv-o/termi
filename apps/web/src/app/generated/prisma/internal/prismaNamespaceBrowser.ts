@@ -83,7 +83,8 @@ export const ModelName = {
   AiSettings: 'AiSettings',
   AiConversation: 'AiConversation',
   AiMessage: 'AiMessage',
-  AiMemory: 'AiMemory'
+  AiMemory: 'AiMemory',
+  Device: 'Device'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -197,6 +198,7 @@ export const ServerScalarFieldEnum = {
   displayHeight: 'displayHeight',
   colorDepth: 'colorDepth',
   rdpSecurity: 'rdpSecurity',
+  connectFrom: 'connectFrom',
   isFavorite: 'isFavorite',
   lastUsedAt: 'lastUsedAt',
   useCount: 'useCount',
@@ -618,6 +620,21 @@ export const AiMemoryScalarFieldEnum = {
 } as const
 
 export type AiMemoryScalarFieldEnum = (typeof AiMemoryScalarFieldEnum)[keyof typeof AiMemoryScalarFieldEnum]
+
+
+export const DeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  keyId: 'keyId',
+  encKey: 'encKey',
+  sigKey: 'sigKey',
+  name: 'name',
+  createdAt: 'createdAt',
+  lastSeenAt: 'lastSeenAt'
+} as const
+
+export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
 
 
 export const SortOrder = {

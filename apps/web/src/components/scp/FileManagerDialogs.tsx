@@ -40,7 +40,6 @@ export function NewFolderDialog({
                     onChange={(e) => setName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && submit()}
                     placeholder="folder-name"
-                   
                 />
                 <DialogFooter>
                     <Button variant="secondary" size="sm" onClick={onClose}>
@@ -92,7 +91,6 @@ export function RenameDialog({
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && submit()}
-                   
                 />
                 <DialogFooter>
                     <Button variant="secondary" size="sm" onClick={onClose}>

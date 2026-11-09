@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { isDeviceUrl, openGatewaySocket } from '@/lib/gateway/connect';
 import { useTerminalSearch } from './TerminalSearch';
 import { useCommandSuggestions } from './CommandSuggestions';
 
@@ -35,6 +36,12 @@ interface SSHTerminalProps {
     onInput?: (data: string) => void;
     /** Hands the parent a function that reads the recent output (Ask AI). */
     onScreenReaderReady?: (read: () => string) => void;
+    /**
+     * Connecting from this computer (desktop app) failed before the shell
+     * opened, and the session may fall back: the parent switches it to the
+     * Termi server. Absent when there is no fallback.
+     */
+    onDeviceUnreachable?: () => void;
 }
 
 export default function SSHTerminal({
@@ -54,7 +61,12 @@ export default function SSHTerminal({
     onInput,
     onSearchReady,
     onScreenReaderReady,
+    onDeviceUnreachable,
 }: SSHTerminalProps) {
+    const onDeviceUnreachableRef = useRef(onDeviceUnreachable);
+    onDeviceUnreachableRef.current = onDeviceUnreachable;
+    // Set once the shell has opened: after that, failures are ordinary drops.
+    const shellOpenedRef = useRef(false);
     const search = useTerminalSearch();
     const attachSearchRef = useRef(search.attach);
     attachSearchRef.current = search.attach;
@@ -157,8 +169,23 @@ export default function SSHTerminal({
             gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
         const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
 
-        const ws = new WebSocket(wsUrl);
+        const ws = openGatewaySocket(wsUrl);
         ws.binaryType = 'arraybuffer'; // terminal output arrives as raw binary frames
+        const fromDevice = isDeviceUrl(gatewayBase);
+        /** A device connection that never opened a shell: hand over to the gateway. */
+        const fallBack = () => {
+            if (!fromDevice || shellOpenedRef.current || !onDeviceUnreachableRef.current) {
+                return false;
+            }
+            intentionalCloseRef.current = true;
+            terminalInstance.current?.write(
+                '\r\n\x1b[33mCould not connect from this computer. Connecting through Termi…\x1b[0m\r\n',
+            );
+            const handOver = onDeviceUnreachableRef.current;
+            onDeviceUnreachableRef.current = undefined;
+            handOver();
+            return true;
+        };
         wsRef.current = ws;
         onWebSocketCreatedRef.current?.(ws);
 
@@ -203,6 +230,7 @@ export default function SSHTerminal({
                         break;
 
                     case 'shell-ready':
+                        shellOpenedRef.current = true;
                         retryCountRef.current = 0;
                         updateStatus('connected');
                         if (terminalInstance.current && fitAddon.current) {
@@ -252,6 +280,7 @@ export default function SSHTerminal({
                         break;
 
                     case 'error':
+                        if (fallBack()) break;
                         updateStatus('error');
                         terminalInstance.current?.write(
                             `\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`,
@@ -342,6 +371,7 @@ export default function SSHTerminal({
 
         ws.onclose = () => {
             if (wsRef.current !== ws) return;
+            if (!intentionalCloseRef.current && fallBack()) return;
             if (intentionalCloseRef.current) {
                 intentionalCloseRef.current = false;
                 onWebSocketCreatedRef.current?.(null);

@@ -40,12 +40,24 @@ import {
     requestJoin,
 } from './sessions/guests.js';
 import { startAccessChecks, webAccessAsker, type LiveConnection } from './sessions/access-check.js';
+import {
+    LOCAL_MODE,
+    armFirstUse,
+    deviceAuthorization,
+    localSecretOk,
+    parentPort,
+    receiveLocalConfig,
+} from './local/device.js';
 
-dotenv.config({ path: '../../.env' });
-dotenv.config();
+// The desktop app's gateway takes its settings from the app alone.
+if (!LOCAL_MODE) {
+    dotenv.config({ path: '../../.env' });
+    dotenv.config();
+}
 
 const PORT = parseInt(process.env.GATEWAY_PORT || '22081', 10);
-const HOST = process.env.GATEWAY_HOST || '0.0.0.0';
+// The desktop app's gateway is for this computer only.
+const HOST = LOCAL_MODE ? '127.0.0.1' : process.env.GATEWAY_HOST || '0.0.0.0';
 
 const ALLOWED_ORIGINS: Set<string> = new Set(
     (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080')
@@ -237,7 +249,10 @@ const WEB_INTERNAL_URL =
     process.env.WEB_INTERNAL_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080';
 const stopAccessChecks = startAccessChecks(
     liveConnections,
-    webAccessAsker(WEB_INTERNAL_URL),
+    // The desktop app's gateway proves itself with its device key.
+    LOCAL_MODE
+        ? webAccessAsker(WEB_INTERNAL_URL, fetch, () => deviceAuthorization('access-check'), true)
+        : webAccessAsker(WEB_INTERNAL_URL),
     ACCESS_CHECK_MS,
 );
 
@@ -317,6 +332,10 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     }
 
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
+    if (!localSecretOk(url)) {
+        ws.close(4401, 'Unauthorized');
+        return;
+    }
     // token is NO LONGER in the URL — it arrives in the first WS message
     const protocol = url.searchParams.get('protocol') as
         'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
@@ -333,7 +352,11 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         return;
     }
 
-    if (!['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local', 'tunnel'].includes(protocol)) {
+    // The desktop app's gateway serves SSH, file transfer and tunnels only.
+    const allowed = LOCAL_MODE
+        ? ['ssh', 'scp', 'tunnel']
+        : ['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local', 'tunnel'];
+    if (!allowed.includes(protocol)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Invalid protocol' }));
         ws.close(4000, 'Bad Request');
         return;
@@ -381,6 +404,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         let tokenPayload: TokenPayload;
         try {
             tokenPayload = await validateToken(message.token);
+            armFirstUse(tokenPayload);
         } catch {
             ws.send(JSON.stringify({ type: 'error', message: 'Invalid or expired token' }));
             ws.close(4001, 'Unauthorized');
@@ -937,9 +961,24 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     ws.once('message', onAuthMessage);
 });
 
-server.listen(PORT, HOST, () => {
-    console.log(`[gateway] Listening on ${HOST}:${PORT}`);
-});
+function listen() {
+    server.listen(PORT, HOST, () => {
+        const address = server.address();
+        const port = typeof address === 'object' && address ? address.port : PORT;
+        console.log(`[gateway] Listening on ${HOST}:${port}`);
+        // Inside the desktop app: tell the main process where to connect.
+        parentPort?.postMessage({ type: 'ready', port });
+    });
+}
+
+if (LOCAL_MODE) {
+    receiveLocalConfig().then(listen, (err) => {
+        console.error('[gateway] Device mode:', (err as Error).message);
+        process.exit(1);
+    });
+} else {
+    listen();
+}
 
 // Listen errors (e.g. EADDRINUSE) happen before the server is useful — fail fast.
 server.on('error', (err) => {

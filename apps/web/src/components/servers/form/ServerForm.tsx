@@ -10,6 +10,7 @@ import {
     IdentityCard,
     JumpHostCard,
     AgentForwardingCard,
+    ConnectFromCard,
     ProtocolSelector,
 } from './ConnectionCards';
 import { AdvancedCard, PreviewCard, TestConnectionCard } from './SidebarCards';
@@ -108,6 +109,9 @@ export function ServerForm({
                                 update={update}
                                 keychain={state.keychainEntries}
                             />
+                        )}
+                        {(form.protocol === 'SSH' || form.protocol === 'SCP') && (
+                            <ConnectFromCard form={form} update={update} />
                         )}
                         <DisplaySettingsCard form={form} update={update} />
                         {/* Lives here (not the sidebar) so the left column keeps

@@ -15,6 +15,8 @@ import { teamServerOwner } from './team.service';
  * built server-side and handed to the SSH pool or sealed inside a gateway JWE.
  */
 export type AgentForwardingMode = 'off' | 'on' | 'confirm';
+/** Desktop app: where SSH, file transfer and tunnels to this server start from. */
+export type ConnectFrom = 'server' | 'device' | 'auto';
 
 /** A server can only sign in with one of its owner's own security keys. */
 async function assertSecurityKey(userId: string, id: string): Promise<void> {
@@ -155,6 +157,7 @@ export interface CreateServerInput {
     agentForwarding?: AgentForwardingMode;
     agentKeychainIds?: string[];
     securityKeyId?: string | null;
+    connectFrom?: ConnectFrom;
 }
 
 export interface UpdateServerInput {
@@ -180,6 +183,7 @@ export interface UpdateServerInput {
     agentForwarding?: AgentForwardingMode;
     agentKeychainIds?: string[];
     securityKeyId?: string | null;
+    connectFrom?: ConnectFrom;
 }
 
 export interface ServerListItem {
@@ -394,6 +398,8 @@ export async function getServerForConnection(
           agentKeychainIds: string[];
           securityKey: { credentialId: string; publicKey: string; rpId: string } | null;
           jump: JumpConfig | null;
+          /** Desktop app: "server" | "device" | "auto" (owner's servers only). */
+          connectFrom: string;
       })
     | null
 > {
@@ -460,6 +466,7 @@ export async function getServerForConnection(
         ownerId: server.userId,
         agentForwarding: server.agentForwarding,
         agentKeychainIds: server.agentKeychainIds,
+        connectFrom: server.connectFrom,
         securityKey: server.securityKeyId
             ? await prisma.sshSecurityKey.findUnique({
                   where: { id: server.securityKeyId },
@@ -518,6 +525,7 @@ export async function updateServer(serverId: string, userId: string, input: Upda
     if (input.jumpServerId !== undefined) updateData.jumpServerId = input.jumpServerId;
     if (input.certificate !== undefined) updateData.certificate = input.certificate || null;
     if (input.agentForwarding !== undefined) updateData.agentForwarding = input.agentForwarding;
+    if (input.connectFrom !== undefined) updateData.connectFrom = input.connectFrom;
     if (input.securityKeyId !== undefined) {
         if (input.securityKeyId) await assertSecurityKey(userId, input.securityKeyId);
         updateData.securityKeyId = input.securityKeyId || null;

@@ -41,6 +41,8 @@ const updateServerSchema = z.object({
     jumpServerId: z.string().nullable().optional(),
     certificate: certificateField,
     securityKeyId: z.string().max(64).nullable().optional(),
+    /** Desktop app: connect from the Termi server, this computer, or this computer with fallback. */
+    connectFrom: z.enum(['server', 'device', 'auto']).optional(),
     ...agentFields,
     /** Use this keychain entry's credentials; resolved here, never sent to the browser. */
     keychainId: z.string().optional(),

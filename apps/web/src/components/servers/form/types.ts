@@ -78,9 +78,12 @@ export interface ServerFormValues {
     agentKeychainIds: string[];
     /** Enrolled FIDO2 security key id, used when authMethod is 'securityKey'. */
     securityKeyId: string;
+    /** Desktop app: where SSH, file transfer and tunnels start from. */
+    connectFrom: ConnectFrom;
 }
 
 export type AgentForwarding = 'off' | 'on' | 'confirm';
+export type ConnectFrom = 'server' | 'device' | 'auto';
 
 export const EMPTY_SERVER_FORM: ServerFormValues = {
     name: '',
@@ -104,6 +107,7 @@ export const EMPTY_SERVER_FORM: ServerFormValues = {
     securityKeyId: '',
     agentForwarding: 'off',
     agentKeychainIds: [],
+    connectFrom: 'server',
 };
 
 /**

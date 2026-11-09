@@ -270,3 +270,13 @@ export function aiChatRateLimit(userId: string): Promise<RateLimitResult> {
 export function aiModelsRateLimit(userId: string): Promise<RateLimitResult> {
     return rateLimit(`ai-models:${userId}`, 20, 10 * 60 * 1000);
 }
+
+/** 10 desktop-app registrations per hour per user. */
+export function deviceRegisterRateLimit(userId: string): Promise<RateLimitResult> {
+    return rateLimit(`device-register:${userId}`, 10, 60 * 60 * 1000);
+}
+
+/** 60 first-use host-key reports per hour per device. */
+export function deviceHostKeyRateLimit(deviceId: string): Promise<RateLimitResult> {
+    return rateLimit(`device-host-key:${deviceId}`, 60, 60 * 60 * 1000);
+}

@@ -222,3 +222,10 @@ export type AiMessage = Prisma.AiMessageModel
  * Lasting facts the assistant keeps about the user's setup and preferences.
  */
 export type AiMemory = Prisma.AiMemoryModel
+/**
+ * Model Device
+ * A desktop app that can connect to its user's own servers directly.
+ * Holds public keys only; tied to the sign-in that registered it, so signing
+ * that device out ends it too.
+ */
+export type Device = Prisma.DeviceModel

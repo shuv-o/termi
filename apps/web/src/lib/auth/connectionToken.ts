@@ -73,6 +73,8 @@ export interface ConnectionTokenClaims {
      * other key, and refuses SSH-family connections that carry none.
      */
     hostKey?: string | null;
+    /** Device tokens only: no key recorded yet, record the first one seen. */
+    hostKeyFirstUse?: boolean;
     /** OpenSSH user certificate for privateKey. */
     certificate?: string | null;
     /** 'ssh' only, owner only: forward an agent holding these keys. */
@@ -93,6 +95,7 @@ export interface ConnectionTokenClaims {
         passphrase?: string | null;
         /** The bastion's pinned SSH host key. */
         hostKey: string | null;
+        hostKeyFirstUse?: boolean;
         certificate?: string | null;
     } | null;
 }
