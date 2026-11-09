@@ -112,7 +112,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Multi-server broadcast** — run a command across every server in a group at once, with a per-server results view
 - **QR quick-connect** — scan a QR code from a mobile device to open a one-tap connection
 - **Import from other clients** — bring your hosts over from `~/.ssh/config`, PuTTY / KiTTY, MobaXterm or a CSV (Termius and spreadsheets), with jump hosts and folders preserved and a preview before anything is saved
-- **Session recording & playback** — record any SSH session and replay it later from Settings → Recordings, encrypted at rest
+- **Session recording & playback** — record any SSH session and replay it later from History → Recordings, encrypted at rest
 
 ### 💻 Local Terminal
 

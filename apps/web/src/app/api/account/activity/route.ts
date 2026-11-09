@@ -22,6 +22,8 @@ export async function GET(request: Request) {
     const rows = await prisma.auditLog.findMany({
         where: {
             userId: user.id,
+            // Connections have their own list on the History page.
+            action: { not: 'CONNECTION_OPENED' },
             ...(beforeDate && !isNaN(beforeDate.getTime())
                 ? { createdAt: { lt: beforeDate } }
                 : {}),

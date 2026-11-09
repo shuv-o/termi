@@ -41,11 +41,16 @@ export const CURSOR_STYLES = ['block', 'bar', 'underline'] as const;
 export const MENU_ITEMS = [
     'servers',
     'connections',
+    'workspaces',
     'local',
     'serial',
     'keys',
+    'snippets',
+    'forwarding',
+    'known-hosts',
     'groups',
     'teams',
+    'history',
     'settings',
 ] as const;
 /** The phone's bottom bar has room for this many. */
@@ -185,8 +190,8 @@ const isItem = (v: unknown): v is MenuItemId =>
     typeof v === 'string' && (MENU_ITEMS as readonly string[]).includes(v);
 
 /**
- * The order always lists every item exactly once (new pages join at the
- * end), Settings can never be hidden, and the phone bar keeps menu order.
+ * The order always lists every item exactly once (new pages join next to
+ * their default neighbour), Settings can never be hidden, and the phone bar keeps menu order.
  */
 function sanitizeMenu(input: unknown): Appearance['menu'] {
     const d = DEFAULT_APPEARANCE.menu;
@@ -195,7 +200,15 @@ function sanitizeMenu(input: unknown): Appearance['menu'] {
     const list = (v: unknown, fallback: MenuItemId[]) =>
         Array.isArray(v) ? [...new Set(v.filter(isItem))] : fallback;
     const order = list(m.order, d.order);
-    for (const id of MENU_ITEMS) if (!order.includes(id)) order.push(id);
+    // A page added since this menu was saved joins after the item it follows
+    // by default, so Settings stays last and new pages land where expected.
+    MENU_ITEMS.forEach((id, i) => {
+        if (order.includes(id)) return;
+        const before = MENU_ITEMS.slice(0, i)
+            .reverse()
+            .find((p) => order.includes(p));
+        order.splice(before ? order.indexOf(before) + 1 : 0, 0, id);
+    });
     const hidden = list(m.hidden, d.hidden).filter((id) => id !== 'settings');
     const mobileSet = new Set(list(m.mobile, d.mobile));
     const mobile = order.filter((id) => mobileSet.has(id)).slice(0, MOBILE_BAR_MAX);

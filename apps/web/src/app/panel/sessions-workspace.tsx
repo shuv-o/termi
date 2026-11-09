@@ -9,6 +9,7 @@ import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { useToast } from '@/components/ui/toast';
 import { newTabId, useSessionsContext, type Session } from './sessions-context';
 import { LayoutMenu, type SavedWorkspace } from './_sessions/LayoutMenu';
+import { OPEN_WORKSPACE_EVENT } from './_sessions/events';
 import { SplitDividers } from './_sessions/SplitDividers';
 import {
     addPane,
@@ -223,6 +224,13 @@ export default function SessionsWorkspace() {
         },
         [addSession, addLocalSession, setSplit, setActiveTabId, toast],
     );
+
+    // The Workspaces page opens a saved workspace through /panel/sessions.
+    useEffect(() => {
+        const onOpen = (e: Event) => openWorkspace((e as CustomEvent<SavedWorkspace>).detail);
+        window.addEventListener(OPEN_WORKSPACE_EVENT, onOpen);
+        return () => window.removeEventListener(OPEN_WORKSPACE_EVENT, onOpen);
+    }, [openWorkspace]);
 
     const openLocalTerminal = useCallback(() => {
         addLocalSession();

@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
@@ -20,23 +20,24 @@ import { useTwoFactor } from './_hooks/useTwoFactor';
 import { NotificationsPanel } from './_panels/NotificationsPanel';
 import { PasskeysPanel } from './_panels/PasskeysPanel';
 import { ProfilePanel } from './_panels/ProfilePanel';
-import { RecordingsPanel } from './_panels/RecordingsPanel';
 import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
-import { ActivityPanel } from './_panels/ActivityPanel';
-import { TunnelsPanel } from './_panels/TunnelsPanel';
 import { TerminalPanel } from './_panels/TerminalPanel';
 import { AppearancePanel } from './_panels/AppearancePanel';
 
-import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
-import type { TunnelSessionRow } from '../servers/[id]/_details/useTunnels';
+import { MOVED_SECTIONS, SECTION_IDS, type SectionId, type SetUser, type User } from './types';
 
 /** Applies a `?section=` deep link (e.g. from the command palette) on mount. */
 function SectionFromUrl({ onSection }: { onSection: (s: SectionId) => void }) {
     const searchParams = useSearchParams();
+    const router = useRouter();
 
     useEffect(() => {
         const section = searchParams.get('section');
+        if (section && MOVED_SECTIONS[section]) {
+            router.replace(MOVED_SECTIONS[section]);
+            return;
+        }
         if (section && SECTION_IDS.includes(section as SectionId)) {
             onSection(section as SectionId);
         }
@@ -78,9 +79,6 @@ export default function SettingsPage() {
     const twoFactor = useTwoFactor(setUser, addToast);
     const push = usePushNotifications(addToast);
     const sessions = useAuthSessions(activeSection === 'sessions', addToast);
-    const { data: tunnelsData } = useCachedFetch<{ tunnels: TunnelSessionRow[] }>(
-        '/api/tunnel-sessions',
-    );
 
     // Only the very first visit (nothing cached) shows a spinner; arriving here
     // from elsewhere in the panel reuses the already-loaded user instantly.
@@ -101,7 +99,7 @@ export default function SettingsPage() {
             <PageHeader
                 className="mb-8 max-w-4xl"
                 title="Settings"
-                description="Manage your account, security, and preferences"
+                description="Your account, how you sign in, and how Termi looks and behaves"
             />
 
             {user && !user.isVerified && (
@@ -130,7 +128,6 @@ export default function SettingsPage() {
                             onChange={setActiveSection}
                             passkeyCount={passkeys.passkeys.length}
                             sessionCount={sessions.sessions.length}
-                            tunnelCount={tunnelsData?.tunnels.length ?? 0}
                         />
                     )}
                 </aside>
@@ -164,11 +161,6 @@ export default function SettingsPage() {
                     {activeSection === 'notifications' && <NotificationsPanel push={push} />}
 
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
-                    {activeSection === 'activity' && <ActivityPanel />}
-
-                    {activeSection === 'recordings' && <RecordingsPanel />}
-
-                    {activeSection === 'tunnels' && <TunnelsPanel />}
                     {activeSection === 'terminal' && <TerminalPanel />}
                 </div>
             </div>

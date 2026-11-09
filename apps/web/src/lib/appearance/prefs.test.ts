@@ -44,10 +44,45 @@ describe('sanitizeAppearance', () => {
 });
 
 describe('menu', () => {
-    it('always lists every page exactly once, new ones at the end', () => {
+    it('always lists every page exactly once, keeping the saved order', () => {
         const a = sanitizeAppearance({ menu: { order: ['groups', 'servers', 'groups', 'bogus'] } });
-        expect(a.menu.order.slice(0, 2)).toEqual(['groups', 'servers']);
+        const kept = a.menu.order.filter((id) => id === 'groups' || id === 'servers');
+        expect(kept).toEqual(['groups', 'servers']);
         expect([...a.menu.order].sort()).toEqual([...MENU_ITEMS].sort());
+    });
+
+    it('pages added later land next to their default neighbour, not after Settings', () => {
+        // A menu saved before Snippets, Port forwarding, Known hosts,
+        // Workspaces and History existed, with Groups moved to the top.
+        const a = sanitizeAppearance({
+            menu: {
+                order: [
+                    'groups',
+                    'servers',
+                    'connections',
+                    'local',
+                    'serial',
+                    'keys',
+                    'teams',
+                    'settings',
+                ],
+            },
+        });
+        expect(a.menu.order).toEqual([
+            'groups',
+            'servers',
+            'connections',
+            'workspaces',
+            'local',
+            'serial',
+            'keys',
+            'snippets',
+            'forwarding',
+            'known-hosts',
+            'teams',
+            'history',
+            'settings',
+        ]);
     });
 
     it('Settings can never be hidden', () => {
@@ -69,7 +104,12 @@ describe('menu', () => {
 
 describe('paint cookie', () => {
     it('round-trips and survives garbage', () => {
-        const paint = { theme: 'black', accent: 'pink', density: 'compact', motion: 'reduced' } as const;
+        const paint = {
+            theme: 'black',
+            accent: 'pink',
+            density: 'compact',
+            motion: 'reduced',
+        } as const;
         expect(decodePaintCookie(encodePaintCookie(paint))).toEqual(paint);
         expect(decodePaintCookie('x.y"><script>')).toEqual({
             theme: 'night',

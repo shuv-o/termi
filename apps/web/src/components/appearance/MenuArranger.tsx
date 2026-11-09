@@ -1,17 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { MOBILE_BAR_MAX, type MenuItemId } from '@/lib/appearance/prefs';
 import { setAppearance, useAppearance } from '@/lib/appearance/store';
 import { NAV_ITEMS } from '@/app/panel/_shell/navigation';
 
-const ORDINAL = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
-
 const NEEDS_NOTE = {
-    'desktop-app': 'Only in the desktop app',
-    'web-serial': 'Needs Chrome, Edge or the desktop app',
+    'desktop-app': 'Shows in the desktop app only',
+    'web-serial': 'Shows in Chrome, Edge and the desktop app',
 } as const;
 
 /**
@@ -23,6 +21,29 @@ export function MenuArranger() {
     const { menu } = useAppearance();
     const [said, setSaid] = useState('');
     const phoneFull = menu.mobile.length >= MOBILE_BAR_MAX;
+
+    // When an item moves, the rows slide to their new places (rather than
+    // swapping in a blink), so you can see where it went.
+    const listRef = useRef<HTMLOListElement>(null);
+    const before = useRef(new Map<string, number>());
+    useLayoutEffect(() => {
+        const rows = listRef.current?.querySelectorAll<HTMLElement>('li[data-id]') ?? [];
+        const calm =
+            document.documentElement.dataset.motion === 'reduced' ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const next = new Map<string, number>();
+        rows.forEach((row) => {
+            const top = row.getBoundingClientRect().top;
+            next.set(row.dataset.id!, top);
+            const was = before.current.get(row.dataset.id!);
+            if (calm || was === undefined || was === top) return;
+            row.animate([{ transform: `translateY(${was - top}px)` }, { transform: 'none' }], {
+                duration: 260,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            });
+        });
+        before.current = next;
+    }, [menu.order]);
 
     // Arrived from "Arrange menu": bring this part into view.
     useEffect(() => {
@@ -41,7 +62,9 @@ export function MenuArranger() {
         if (to < 0 || to >= order.length) return;
         [order[from], order[to]] = [order[to], order[from]];
         setAppearance({ menu: { order } });
-        setSaid(`${NAV_ITEMS[id].name} moved ${by < 0 ? 'up' : 'down'}, now ${ORDINAL[to]}.`);
+        setSaid(
+            `${NAV_ITEMS[id].name} moved ${by < 0 ? 'up' : 'down'}, now ${to + 1} of ${order.length}.`,
+        );
     };
     const toggleShown = (id: MenuItemId, shown: boolean) =>
         setAppearance({
@@ -58,8 +81,9 @@ export function MenuArranger() {
         <div id="menu" className="scroll-mt-6">
             <h4 className="text-sm font-medium">Menu items</h4>
             <p className="mt-0.5 max-w-prose text-xs text-muted-foreground">
-                Arrange the menu, hide pages you don&apos;t use, and pick up to {MOBILE_BAR_MAX} for
-                the bar at the bottom of your phone. Hidden pages stay reachable from search (⌘K).
+                Put the pages in the order you use them and switch off the ones you don&apos;t. Pick
+                up to {MOBILE_BAR_MAX} for the bar at the bottom of your phone. Switched-off pages
+                are still one search away (⌘K).
             </p>
             <div
                 aria-hidden
@@ -68,7 +92,10 @@ export function MenuArranger() {
                 <span className="w-14 text-center">Phone bar</span>
                 <span className="w-9 text-center">Menu</span>
             </div>
-            <ol className="divide-y divide-border overflow-hidden rounded-[var(--radius-card)] border border-border">
+            <ol
+                ref={listRef}
+                className="relative divide-y divide-border overflow-hidden rounded-[var(--radius-card)] border border-border"
+            >
                 {menu.order.map((id, i) => {
                     const item = NAV_ITEMS[id];
                     const shown = !menu.hidden.includes(id);
@@ -77,7 +104,8 @@ export function MenuArranger() {
                     return (
                         <li
                             key={id}
-                            className={`flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:flex-nowrap ${shown ? '' : 'bg-muted/40'}`}
+                            data-id={id}
+                            className={`relative flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:flex-nowrap ${shown ? '' : 'bg-muted/40'}`}
                         >
                             <div className="flex shrink-0 flex-col">
                                 <button
@@ -112,9 +140,8 @@ export function MenuArranger() {
                                 <p className="text-xs text-muted-foreground">
                                     {item.description}
                                     {item.needs && (
-                                        <span className="text-muted-foreground/80">
-                                            {' '}
-                                            · {NEEDS_NOTE[item.needs]}
+                                        <span className="block text-muted-foreground/80">
+                                            {NEEDS_NOTE[item.needs]}
                                         </span>
                                     )}
                                 </p>

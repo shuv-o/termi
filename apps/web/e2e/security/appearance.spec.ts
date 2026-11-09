@@ -79,7 +79,18 @@ test('the menu can be rearranged, trimmed, moved and set up for phones', async (
     const menu = page.locator('aside[aria-label="Menu"]');
     await expect(menu).toHaveCSS('right', '0px');
     const names = await menu.locator('nav[aria-label="Main"] a').allTextContents();
-    expect(names).toEqual(['Servers', 'Connections', 'Groups', 'Keys & passwords', 'Settings']);
+    expect(names).toEqual([
+        'Servers',
+        'Connections',
+        'Workspaces',
+        'Keys & passwords',
+        'Snippets',
+        'Port forwarding',
+        'Groups',
+        'Known hosts',
+        'History',
+        'Settings',
+    ]);
     // Hidden pages are still one search away.
     await page.keyboard.press('ControlOrMeta+k');
     await page.keyboard.type('team vault');
@@ -94,7 +105,13 @@ test('the menu can be rearranged, trimmed, moved and set up for phones', async (
     await page.setViewportSize({ width: 390, height: 800 });
     await page.goto(`${BASE}/panel`);
     const bar = page.locator('nav[aria-label="Main"]').filter({ visible: true });
-    await expect(bar.getByRole('link')).toHaveText(['Servers', 'Open', 'Keys', 'Teams', 'Settings']);
+    await expect(bar.getByRole('link')).toHaveText([
+        'Servers',
+        'Open',
+        'Keys',
+        'Teams',
+        'Settings',
+    ]);
 });
 
 test('terminals follow the terminal settings live', async ({ page }) => {
@@ -128,7 +145,10 @@ test('terminals follow the terminal settings live', async ({ page }) => {
     // Go to Settings in the same tab (the terminal keeps running behind it),
     // pick another scheme, and come back: the open terminal has restyled.
     await page.locator('nav[aria-label="Main"] a', { hasText: 'Settings' }).first().click();
-    await page.getByRole('button', { name: /^Appearance/ }).first().click();
+    await page
+        .getByRole('button', { name: /^Appearance/ })
+        .first()
+        .click();
     await page.getByText('Nord', { exact: true }).click();
     await page.locator('nav[aria-label="Main"] a', { hasText: 'Connections' }).first().click();
     await expect(box).toHaveCSS('background-color', 'rgb(46, 52, 64)');
@@ -141,9 +161,9 @@ test('terminals follow the terminal settings live', async ({ page }) => {
 
 test('the save endpoint needs a session and cleans what it is sent', async () => {
     const anon = await pwRequest.newContext({ baseURL: BASE });
-    expect(
-        (await anon.put('/api/account/appearance', { data: { appearance: {} } })).status(),
-    ).toBe(401);
+    expect((await anon.put('/api/account/appearance', { data: { appearance: {} } })).status()).toBe(
+        401,
+    );
 
     const carol = await signedIn('carol');
     const res = await carol.put('/api/account/appearance', {

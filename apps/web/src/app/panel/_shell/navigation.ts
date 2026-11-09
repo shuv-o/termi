@@ -2,12 +2,17 @@ import type { Appearance, MenuItemId } from '@/lib/appearance/prefs';
 import {
     BookKey,
     Cable,
+    FileCode2,
+    Fingerprint,
     FolderOpen,
+    History,
     Laptop,
+    LayoutPanelLeft,
     Monitor,
     Server,
     Settings,
     Users,
+    Waypoints,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -59,6 +64,14 @@ export const NAV_ITEMS: Record<MenuItemId, NavItem> = {
         href: '/panel/sessions',
         icon: Monitor,
     },
+    workspaces: {
+        id: 'workspaces',
+        name: 'Workspaces',
+        short: 'Spaces',
+        description: 'Saved sets of servers and how they share the screen',
+        href: '/panel/workspaces',
+        icon: LayoutPanelLeft,
+    },
     local: {
         id: 'local',
         name: 'Local terminal',
@@ -85,6 +98,30 @@ export const NAV_ITEMS: Record<MenuItemId, NavItem> = {
         href: '/panel/keychain',
         icon: BookKey,
     },
+    snippets: {
+        id: 'snippets',
+        name: 'Snippets',
+        short: 'Snippets',
+        description: 'Commands you run often, one tap away',
+        href: '/panel/snippets',
+        icon: FileCode2,
+    },
+    forwarding: {
+        id: 'forwarding',
+        name: 'Port forwarding',
+        short: 'Ports',
+        description: 'Reach services behind your servers',
+        href: '/panel/forwarding',
+        icon: Waypoints,
+    },
+    'known-hosts': {
+        id: 'known-hosts',
+        name: 'Known hosts',
+        short: 'Hosts',
+        description: 'The host keys Termi trusts for each server',
+        href: '/panel/known-hosts',
+        icon: Fingerprint,
+    },
     groups: {
         id: 'groups',
         name: 'Groups',
@@ -100,6 +137,14 @@ export const NAV_ITEMS: Record<MenuItemId, NavItem> = {
         description: 'Servers you share with other people',
         href: '/panel/teams',
         icon: Users,
+    },
+    history: {
+        id: 'history',
+        name: 'History',
+        short: 'History',
+        description: 'Past connections, recordings and account activity',
+        href: '/panel/history',
+        icon: History,
     },
     settings: {
         id: 'settings',

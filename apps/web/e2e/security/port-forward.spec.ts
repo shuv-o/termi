@@ -212,7 +212,7 @@ test('the server page offers local, SOCKS and remote forwarding', async ({ page 
     await section.getByRole('radio', { name: 'Remote' }).click();
     await section.getByLabel('Server port').fill('9200');
     await section.getByLabel('Port on this computer').fill('3000');
-    await section.getByRole('button', { name: 'Create tunnel' }).click();
+    await section.getByRole('button', { name: 'Open forward' }).click();
     await expect(section.getByText(/so the server can reach 127\.0\.0\.1:3000/)).toBeVisible();
     await expect(section.getByText('server :9200 → 127.0.0.1:3000')).toBeVisible();
     await expect(section.getByText('SOCKS proxy', { exact: true }).last()).toBeVisible();

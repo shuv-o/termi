@@ -201,7 +201,7 @@ export function ProfilePanel({
                     <QuickAction
                         icon={Monitor}
                         iconClass="text-info"
-                        label="Active sessions"
+                        label="Signed-in devices"
                         onClick={() => onNavigate('sessions')}
                     />
                     <QuickAction

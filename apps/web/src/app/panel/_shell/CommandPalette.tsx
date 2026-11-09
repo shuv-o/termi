@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
     BookKey,
     FolderOpen,
-    History,
     Key,
     Keyboard,
     Laptop,
@@ -47,11 +46,16 @@ import type { MenuItemId } from '@/lib/appearance/prefs';
 const PAGE_SYNONYMS: Record<MenuItemId, string> = {
     servers: 'fleet dashboard hosts',
     connections: 'sessions terminals tabs open',
+    workspaces: 'layouts saved split panes sets',
     local: 'local shell this computer',
     serial: 'usb console cable router switch',
     keys: 'keychain credentials passwords ssh keys security keys',
+    snippets: 'commands scripts macros saved commands',
+    forwarding: 'tunnels port forward ssh -L socks proxy',
+    'known-hosts': 'host keys fingerprints known_hosts trust',
     groups: 'folders',
     teams: 'team vault members',
+    history: 'logs recent connections recordings activity audit',
     settings: 'account preferences',
 };
 import { useSessionsContext } from '../sessions-context';
@@ -66,9 +70,9 @@ const SETTINGS_SECTIONS = [
     { id: 'profile', label: 'Profile', icon: UserCog },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'passkeys', label: 'Passkeys', icon: Key },
-    { id: 'notifications', label: 'Alerts', icon: BookKey },
+    { id: 'notifications', label: 'Notifications', icon: BookKey },
     { id: 'sessions', label: 'Signed-in devices', icon: Monitor },
-    { id: 'activity', label: 'Account activity', icon: History },
+    { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
 ];
 
 /**

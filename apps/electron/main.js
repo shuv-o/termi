@@ -236,6 +236,17 @@ function buildAppMenu() {
                     accelerator: 'CmdOrCtrl+4',
                     click: () => navigateTo('/panel/local'),
                 },
+                {
+                    label: 'Workspaces',
+                    accelerator: 'CmdOrCtrl+5',
+                    click: () => navigateTo('/panel/workspaces'),
+                },
+                { type: 'separator' },
+                { label: 'Keys & passwords', click: () => navigateTo('/panel/keychain') },
+                { label: 'Snippets', click: () => navigateTo('/panel/snippets') },
+                { label: 'Port forwarding', click: () => navigateTo('/panel/forwarding') },
+                { label: 'Known hosts', click: () => navigateTo('/panel/known-hosts') },
+                { label: 'History', click: () => navigateTo('/panel/history') },
                 { type: 'separator' },
                 {
                     label: 'Settings',
