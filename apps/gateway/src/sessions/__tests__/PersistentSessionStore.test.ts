@@ -6,6 +6,7 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         sessionId: 'sess-1',
         userId: 'user-1',
         serverId: 'server-1',
+        sid: null,
         handler: { close: vi.fn(), isConnected: vi.fn().mockReturnValue(true) } as any,
         buffer: {
             append: vi.fn(),

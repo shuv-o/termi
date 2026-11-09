@@ -10,7 +10,12 @@
  */
 
 import { z } from 'zod';
-import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
+import {
+    getCurrentUser,
+    getCurrentSessionId,
+    mintConnectionToken,
+    getGatewayUrl,
+} from '@/lib/auth';
 import { jumpClaim } from '@/lib/auth/connectionToken';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { getServerForConnection } from '@/lib/services';
@@ -48,7 +53,8 @@ export { buildBridgeScript };
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
-    if (!user) return unauthorizedResponse();
+    const sid = await getCurrentSessionId();
+    if (!user || !sid) return unauthorizedResponse();
 
     const rateLimitResult = await tunnelCreateRateLimit(user.id);
     if (!rateLimitResult.allowed) {
@@ -96,6 +102,7 @@ export async function POST(request: Request) {
 
         const token = await mintConnectionToken({
             userId: user.id,
+            sid,
             serverId,
             protocol: 'tunnel',
             host: server.host,

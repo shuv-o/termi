@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { validateBody, successResponse, unauthorizedResponse } from '@/lib/api';
+import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 import { getSession } from '@/lib/auth/session';
 import prisma from '@/lib/db/prisma';
 
@@ -39,6 +39,16 @@ export async function POST(request: NextRequest) {
     if ('error' in validation) return validation.error;
 
     const { sessionId, serverId, serverName } = validation.data;
+
+    // Only ever your own record: an id that belongs to someone else is
+    // refused rather than updated (it is unique across all users).
+    const existing = await prisma.persistentSession.findUnique({
+        where: { sessionId },
+        select: { userId: true },
+    });
+    if (existing && existing.userId !== session.userId) {
+        return errorResponse('Session not found', 404);
+    }
 
     const record = await prisma.persistentSession.upsert({
         where: { sessionId },

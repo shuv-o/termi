@@ -86,7 +86,7 @@ export async function describeShare(code: string) {
 }
 
 /** A guest token for the shared session (no credentials in it). */
-export async function joinShare(code: string, userId: string) {
+export async function joinShare(code: string, userId: string, sid: string) {
     const share = await activeShare(code);
     if (share.ownerId === userId) throw new SessionShareError('This is your own session');
     const user = await prisma.user.findUniqueOrThrow({
@@ -96,12 +96,19 @@ export async function joinShare(code: string, userId: string) {
     const mode = share.mode === 'control' ? 'control' : 'view';
     const token = await mintConnectionToken({
         userId,
+        sid,
         serverId: share.serverId,
         protocol: 'ssh',
         host: '',
         port: 0,
         username: '',
-        join: { sessionId: share.sessionId, ownerId: share.ownerId, email: user.email, mode },
+        join: {
+            sessionId: share.sessionId,
+            ownerId: share.ownerId,
+            email: user.email,
+            mode,
+            shareId: share.id,
+        },
     });
     await prisma.auditLog.create({
         data: {

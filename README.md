@@ -379,6 +379,8 @@ npm run build:electron            # Package Electron app
 | `ALLOW_LOCAL_TERMINAL`             | `false`               | Enable local PTY terminal on the gateway host              |
 | `GATEWAY_IDLE_TTL_HOURS`           | `8`                   | Close an SSH session after this long with no output or typing, tab open or closed |
 | `GATEWAY_MAX_SESSION_DAYS`         | `7`                   | Close any SSH session after this many days, busy or not; `0` = no limit |
+| `GATEWAY_ACCESS_CHECK_SEC`         | `30`                  | How often the gateway closes connections whose access ended (sign-out, password change, share or team removal); `0` = off |
+| `WEB_INTERNAL_URL`                 | `NEXT_PUBLIC_APP_URL` | Where the gateway reaches the web app for that check (compose: `http://web:22080`) |
 | `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`                   | Concurrent sessions per user; `0` = unlimited              |
 | `GOOGLE_CLIENT_ID`                 | —                     | Google OAuth client ID                                     |
 | `GOOGLE_CLIENT_SECRET`             | —                     | Google OAuth client secret                                 |

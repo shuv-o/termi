@@ -29,6 +29,12 @@ export function getJWEKey(): Uint8Array {
 
 export interface ConnectionTokenClaims {
     userId: string;
+    /**
+     * The web sign-in (Session id) asking for the token. The gateway closes
+     * the connection once that sign-in is revoked or expires (see
+     * POST /api/internal/access-check). Required so no caller forgets it.
+     */
+    sid: string;
     serverId: string;
     protocol: 'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     host: string;
@@ -59,6 +65,8 @@ export interface ConnectionTokenClaims {
         ownerId: string;
         email: string;
         mode: 'view' | 'control';
+        /** The share link: turning it off removes the guest (gateway access check). */
+        shareId: string;
     } | null;
     /**
      * The server's pinned SSH host key (`SHA256:…`). The gateway refuses any
@@ -127,6 +135,25 @@ export async function mintConnectionToken(claims: ConnectionTokenClaims): Promis
         .setExpirationTime('5m')
         .setIssuedAt()
         .encrypt(key);
+}
+
+/**
+ * Reads a gateway service token (apps/gateway/src/auth/token.ts
+ * mintServiceToken): true only for an unexpired token made for `purpose`.
+ * Connection tokens have no `purpose`, so one handed to a browser can never
+ * call an internal endpoint.
+ */
+export async function verifyServiceToken(token: string, purpose: string): Promise<boolean> {
+    try {
+        const { payload } = await jose.jwtDecrypt(token, getJWEKey(), {
+            contentEncryptionAlgorithms: ['A256GCM'],
+            keyManagementAlgorithms: ['dir'],
+            maxTokenAge: '2m',
+        });
+        return payload.purpose === purpose;
+    } catch {
+        return false;
+    }
 }
 
 export function getGatewayUrl(): string {

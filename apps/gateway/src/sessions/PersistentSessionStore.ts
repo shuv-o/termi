@@ -9,6 +9,8 @@ export interface PersistentSession {
     sessionId: string;
     userId: string;
     serverId: string;
+    /** Web sign-in behind the newest token that opened or reattached it (see access-check.ts). */
+    sid: string | null;
     handler: SSHHandler;
     buffer: RingBuffer;
     /**
@@ -124,6 +126,10 @@ export class PersistentSessionStore {
             session.handler.close();
             this.sessions.delete(sessionId);
         }
+    }
+
+    values(): IterableIterator<PersistentSession> {
+        return this.sessions.values();
     }
 
     get size(): number {

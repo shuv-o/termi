@@ -4,6 +4,7 @@ import {
     mintConnectionToken,
     getJWEKey,
     jumpClaim,
+    verifyServiceToken,
     type ConnectionTokenClaims,
 } from './connectionToken';
 
@@ -54,9 +55,54 @@ describe('connectionToken', () => {
         });
     });
 
+    describe('verifyServiceToken', () => {
+        const service = (claims: Record<string, unknown>, age = '60s') =>
+            new jose.EncryptJWT(claims)
+                .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+                .setIssuedAt()
+                .setExpirationTime(age)
+                .encrypt(getJWEKey());
+
+        it('accepts a token made for that purpose', async () => {
+            expect(
+                await verifyServiceToken(
+                    await service({ purpose: 'access-check' }),
+                    'access-check',
+                ),
+            ).toBe(true);
+        });
+
+        it('refuses another purpose, a connection token and garbage', async () => {
+            expect(
+                await verifyServiceToken(await service({ purpose: 'other' }), 'access-check'),
+            ).toBe(false);
+            const conn = await mintConnectionToken({
+                userId: 'u',
+                sid: 's',
+                serverId: 'x',
+                protocol: 'ssh',
+                host: 'h',
+                port: 22,
+                username: 'r',
+            });
+            expect(await verifyServiceToken(conn, 'access-check')).toBe(false);
+            expect(await verifyServiceToken('not-a-token', 'access-check')).toBe(false);
+        });
+
+        it('refuses an expired token', async () => {
+            expect(
+                await verifyServiceToken(
+                    await service({ purpose: 'access-check' }, '-1s'),
+                    'access-check',
+                ),
+            ).toBe(false);
+        });
+    });
+
     describe('mintConnectionToken', () => {
         const claims: ConnectionTokenClaims = {
             userId: 'user-1',
+            sid: 'session-1',
             serverId: 'server-1',
             protocol: 'ssh',
             host: '203.0.113.5',
@@ -133,6 +179,7 @@ describe('jumpClaim', () => {
     it('survives the JWE round trip inside a connection token', async () => {
         const token = await mintConnectionToken({
             userId: 'u1',
+            sid: 'sess-1',
             serverId: 's1',
             protocol: 'ssh',
             host: '10.0.2.4',

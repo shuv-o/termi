@@ -148,6 +148,11 @@ services:
       # and any terminal after this many days. 0 days = no age limit.
       GATEWAY_IDLE_TTL_HOURS: ${GATEWAY_IDLE_TTL_HOURS:-8}
       GATEWAY_MAX_SESSION_DAYS: ${GATEWAY_MAX_SESSION_DAYS:-7}
+      # Every GATEWAY_ACCESS_CHECK_SEC the gateway asks the web app whether each open
+      # connection is still allowed, and closes those whose sign-in was revoked or
+      # whose server access was removed. 0 turns this off.
+      WEB_INTERNAL_URL: http://web:22080
+      GATEWAY_ACCESS_CHECK_SEC: ${GATEWAY_ACCESS_CHECK_SEC:-30}
       # Uncomment to allow RDP/VNC through a jump host (guacd reaches the relay here).
       # GUACD_TUNNEL_HOST: gateway
       NODE_ENV: production

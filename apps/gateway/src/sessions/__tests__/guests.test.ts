@@ -46,7 +46,13 @@ describe('shared sessions', () => {
     it('needs the owner to be connected', () => {
         const s = session(null);
         const guest = new FakeWs();
-        requestJoin(s, guest as never, { userId: 'g', email: 'g@x', mode: 'view' });
+        requestJoin(s, guest as never, {
+            userId: 'g',
+            email: 'g@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         expect(guest.json()[0].message).toMatch(/not connected/);
         expect(guest.readyState).toBe(WebSocket.CLOSED);
     });
@@ -55,7 +61,13 @@ describe('shared sessions', () => {
         const owner = new FakeWs();
         const s = session(owner);
         const guest = new FakeWs();
-        requestJoin(s, guest as never, { userId: 'g', email: 'g@x', mode: 'view' });
+        requestJoin(s, guest as never, {
+            userId: 'g',
+            email: 'g@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         expect(guest.json()).toEqual([{ type: 'waiting' }]);
         expect(owner.json()[0]).toMatchObject({ type: 'join-request', email: 'g@x', mode: 'view' });
 
@@ -77,7 +89,13 @@ describe('shared sessions', () => {
         const owner = new FakeWs();
         const s = session(owner);
         const guest = new FakeWs();
-        requestJoin(s, guest as never, { userId: 'g', email: 'g@x', mode: 'control' });
+        requestJoin(s, guest as never, {
+            userId: 'g',
+            email: 'g@x',
+            mode: 'control',
+            sid: null,
+            shareId: null,
+        });
         answerJoin(s, lastRequestId(owner), false);
         expect(guest.readyState).toBe(WebSocket.CLOSED);
         expect(s.guests.size).toBe(0);
@@ -88,7 +106,13 @@ describe('shared sessions', () => {
         const owner = new FakeWs();
         const s = session(owner);
         const guest = new FakeWs();
-        requestJoin(s, guest as never, { userId: 'g', email: 'g@x', mode: 'view' });
+        requestJoin(s, guest as never, {
+            userId: 'g',
+            email: 'g@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         vi.advanceTimersByTime(61_000);
         expect(guest.readyState).toBe(WebSocket.CLOSED);
         expect(s.joinRequests.size).toBe(0);
@@ -99,9 +123,21 @@ describe('shared sessions', () => {
         const s = session(owner);
         const viewer = new FakeWs();
         const helper = new FakeWs();
-        requestJoin(s, viewer as never, { userId: 'v', email: 'v@x', mode: 'view' });
+        requestJoin(s, viewer as never, {
+            userId: 'v',
+            email: 'v@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         answerJoin(s, lastRequestId(owner), true);
-        requestJoin(s, helper as never, { userId: 'h', email: 'h@x', mode: 'control' });
+        requestJoin(s, helper as never, {
+            userId: 'h',
+            email: 'h@x',
+            mode: 'control',
+            sid: null,
+            shareId: null,
+        });
         answerJoin(s, lastRequestId(owner), true);
 
         viewer.emit('message', Buffer.from('rm -rf /\r'), true);
@@ -115,9 +151,21 @@ describe('shared sessions', () => {
         const s = session(owner);
         const a = new FakeWs();
         const b = new FakeWs();
-        requestJoin(s, a as never, { userId: 'a', email: 'a@x', mode: 'view' });
+        requestJoin(s, a as never, {
+            userId: 'a',
+            email: 'a@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         answerJoin(s, lastRequestId(owner), true);
-        requestJoin(s, b as never, { userId: 'b', email: 'b@x', mode: 'view' });
+        requestJoin(s, b as never, {
+            userId: 'b',
+            email: 'b@x',
+            mode: 'view',
+            sid: null,
+            shareId: null,
+        });
         answerJoin(s, lastRequestId(owner), true);
 
         kickGuest(s, [...s.guests.keys()][0]);

@@ -77,7 +77,15 @@ export interface TokenPayload {
         ownerId: string;
         email: string;
         mode: 'view' | 'control';
+        /** The share link it was minted from: turning the link off removes the guest. */
+        shareId?: string;
     } | null;
+    /**
+     * The web sign-in (Session id) that minted this token. The access check
+     * (sessions/access-check.ts) closes the connection when that sign-in is
+     * revoked or expires. Absent only on tokens from an older web app.
+     */
+    sid?: string | null;
     exp: number;
 }
 
@@ -120,6 +128,11 @@ export async function validateToken(token: string): Promise<TokenPayload> {
         if (!payload.userId || !payload.serverId) {
             throw new Error('Invalid token payload');
         }
+        // A service token (gateway ↔ web, see mintServiceToken) is never a
+        // connection token.
+        if (payload.purpose !== undefined) {
+            throw new Error('Invalid token payload');
+        }
 
         const VALID_PROTOCOLS = ['ssh', 'scp', 'rdp', 'vnc', 'telnet', 'local', 'tunnel'] as const;
         if (
@@ -149,4 +162,21 @@ export async function validateToken(token: string): Promise<TokenPayload> {
         }
         throw new Error('Invalid token');
     }
+}
+
+// SERVICE TOKENS
+
+/**
+ * A short-lived token proving a request comes from this gateway, for the
+ * web app's internal endpoints (`purpose` names the one endpoint it is for).
+ * Same key as connection tokens; validateToken refuses anything with a
+ * `purpose`, and the web app refuses anything without the right one, so
+ * neither kind can stand in for the other.
+ */
+export async function mintServiceToken(purpose: string): Promise<string> {
+    return new jose.EncryptJWT({ purpose })
+        .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+        .setIssuedAt()
+        .setExpirationTime('60s')
+        .encrypt(getJWEKey());
 }

@@ -6,7 +6,12 @@
  */
 
 import { z } from 'zod';
-import { getCurrentUser, mintConnectionToken, getGatewayUrl } from '@/lib/auth';
+import {
+    getCurrentUser,
+    getCurrentSessionId,
+    mintConnectionToken,
+    getGatewayUrl,
+} from '@/lib/auth';
 import { jumpClaim } from '@/lib/auth/connectionToken';
 import { getServerForConnection } from '@/lib/services';
 import {
@@ -43,7 +48,8 @@ const tokenSchema = z.discriminatedUnion('protocol', [
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
-    if (!user) return unauthorizedResponse();
+    const sid = await getCurrentSessionId();
+    if (!user || !sid) return unauthorizedResponse();
 
     // Rate limit: 30 token requests per 5 minutes per user
     const rl = await connectionTokenRateLimit(user.id);
@@ -65,6 +71,7 @@ export async function POST(request: Request) {
 
             const token = await mintConnectionToken({
                 userId: user.id,
+                sid,
                 serverId: 'local',
                 protocol: 'local',
                 host: '',
@@ -123,6 +130,7 @@ export async function POST(request: Request) {
 
         const token = await mintConnectionToken({
             userId: user.id,
+            sid,
             serverId: server.id,
             protocol,
             host: server.host,

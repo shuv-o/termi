@@ -31,7 +31,15 @@ import {
     PersistentSessionStore,
     type PersistentSession,
 } from './sessions/PersistentSessionStore.js';
-import { announceGuests, answerJoin, fanOut, kickGuest, requestJoin } from './sessions/guests.js';
+import {
+    announceGuests,
+    answerJoin,
+    fanOut,
+    kickGuest,
+    removeGuest,
+    requestJoin,
+} from './sessions/guests.js';
+import { startAccessChecks, webAccessAsker, type LiveConnection } from './sessions/access-check.js';
 
 dotenv.config({ path: '../../.env' });
 dotenv.config();
@@ -166,6 +174,8 @@ const persistentSessions = new PersistentSessionStore();
 /** Active non-SSH WebSocket connections (for cleanup on error/close). */
 interface NonSshMeta {
     userId: string;
+    /** Web sign-in behind the token (see sessions/access-check.ts). */
+    sid: string | null;
     protocol: 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     serverId: string;
     handler?:
@@ -177,6 +187,67 @@ interface NonSshMeta {
         | TunnelMuxHandler;
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
+
+// ACCESS CHECK
+
+/** Every live connection and what it relies on — see sessions/access-check.ts. */
+function liveConnections(): LiveConnection[] {
+    const out: LiveConnection[] = [];
+    for (const s of persistentSessions.values()) {
+        if (s.isClosing) continue;
+        out.push({
+            grant: { sid: s.sid, userId: s.userId, kind: 'server', serverId: s.serverId },
+            close: (message) => persistentSessions.delete(s.sessionId, message),
+        });
+        for (const g of s.guests.values()) {
+            out.push({
+                grant: {
+                    sid: g.sid,
+                    userId: g.userId,
+                    kind: 'guest',
+                    serverId: s.serverId,
+                    ...(g.shareId ? { shareId: g.shareId } : {}),
+                },
+                close: (message) => removeGuest(s, g.id, message),
+            });
+        }
+    }
+    for (const [ws, meta] of nonSshConnections) {
+        out.push({
+            grant: {
+                sid: meta.sid,
+                userId: meta.userId,
+                kind: meta.protocol === 'local' ? 'local' : 'server',
+                ...(meta.protocol === 'local' ? {} : { serverId: meta.serverId }),
+            },
+            close: (message) => {
+                // A desktop's socket carries raw Guacamole frames by now, so it
+                // only gets the close reason.
+                if (
+                    meta.protocol !== 'rdp' &&
+                    meta.protocol !== 'vnc' &&
+                    ws.readyState === WebSocket.OPEN
+                ) {
+                    ws.send(JSON.stringify({ type: 'error', message }));
+                }
+                ws.close(4003, message.slice(0, 120));
+            },
+        });
+    }
+    return out;
+}
+
+const ACCESS_CHECK_MS = (() => {
+    const sec = parseInt(process.env.GATEWAY_ACCESS_CHECK_SEC || '', 10);
+    return Number.isFinite(sec) && sec >= 0 ? sec * 1000 : 30_000;
+})();
+const WEB_INTERNAL_URL =
+    process.env.WEB_INTERNAL_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:22080';
+const stopAccessChecks = startAccessChecks(
+    liveConnections,
+    webAccessAsker(WEB_INTERNAL_URL),
+    ACCESS_CHECK_MS,
+);
 
 /** Per-user cap on concurrent tunnel connections — see TunnelSlotLimiter. */
 const MAX_TUNNELS_PER_USER = 10;
@@ -394,6 +465,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         if (protocol === 'local') {
             const meta: NonSshMeta = {
                 userId: tokenPayload.userId,
+                sid: tokenPayload.sid ?? null,
                 protocol: 'local',
                 serverId,
             };
@@ -462,6 +534,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 userId: tokenPayload.userId,
                 email: join.email,
                 mode: join.mode,
+                sid: tokenPayload.sid ?? null,
+                shareId: join.shareId ?? null,
             });
             return;
         }
@@ -499,6 +573,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 }
 
                 existing.attachedWs = ws;
+                // The access check now follows the sign-in that reattached it.
+                existing.sid = tokenPayload.sid ?? null;
                 // The owner's new tab learns who's watching.
                 if (existing.guests.size) setTimeout(() => announceGuests(existing), 0);
 
@@ -529,6 +605,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     sessionId: resolvedSessionId,
                     userId: tokenPayload.userId,
                     serverId,
+                    sid: tokenPayload.sid ?? null,
                     // Placeholder: the real handler is assigned on the next lines,
                     // once `sink` (which needs `session`) has been created.
                     handler: null as unknown as PersistentSession['handler'],
@@ -690,6 +767,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
         const meta: NonSshMeta = {
             userId: tokenPayload.userId,
+            sid: tokenPayload.sid ?? null,
             protocol: protocol as 'scp' | 'rdp' | 'vnc' | 'telnet' | 'tunnel',
             serverId,
         };
@@ -891,6 +969,7 @@ function shutdown(signal: string): void {
     if (isShuttingDown) return;
     isShuttingDown = true;
     console.log(`[gateway] Received ${signal} — shutting down gracefully`);
+    stopAccessChecks();
     persistentSessions.destroy();
     // Close all active WebSocket connections
     wss.clients.forEach((client) => {

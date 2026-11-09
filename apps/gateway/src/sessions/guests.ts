@@ -22,6 +22,10 @@ export interface Guest {
     userId: string;
     email: string;
     mode: GuestMode;
+    /** Web sign-in behind the guest's token (see access-check.ts). */
+    sid: string | null;
+    /** The share link the guest came in through. */
+    shareId: string | null;
 }
 
 export const MAX_GUESTS = 10;
@@ -70,9 +74,14 @@ export function answerJoin(session: PersistentSession, id: unknown, allow: unkno
 /** The owner removes a guest. */
 export function kickGuest(session: PersistentSession, id: unknown): void {
     if (typeof id !== 'string') return;
+    removeGuest(session, id, 'The owner removed you from this session');
+}
+
+/** Disconnect one guest, telling them why. */
+export function removeGuest(session: PersistentSession, id: string, message: string): void {
     const g = session.guests.get(id);
     if (!g) return;
-    send(g.ws, { type: 'session-ended', message: 'The owner removed you from this session' });
+    send(g.ws, { type: 'session-ended', message });
     g.ws.close(1000, 'Removed');
     session.guests.delete(id);
     announceGuests(session);
@@ -85,7 +94,13 @@ export function kickGuest(session: PersistentSession, id: unknown): void {
 export function requestJoin(
     session: PersistentSession,
     ws: WebSocket,
-    guest: { userId: string; email: string; mode: GuestMode },
+    guest: {
+        userId: string;
+        email: string;
+        mode: GuestMode;
+        sid: string | null;
+        shareId: string | null;
+    },
 ): void {
     const fail = (message: string) => {
         send(ws, { type: 'error', message });

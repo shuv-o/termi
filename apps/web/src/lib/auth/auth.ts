@@ -516,6 +516,18 @@ export async function getCurrentUser() {
 }
 
 /**
+ * The id of the current sign-in (its Session row), or null when signed out or
+ * locked. Connection tokens carry it so the gateway can close a connection
+ * when the sign-in behind it is revoked.
+ */
+export async function getCurrentSessionId(): Promise<string | null> {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.sessionToken) return null;
+    const valid = await validateSession(session.sessionToken);
+    return valid && !valid.lockedAt ? valid.sessionId : null;
+}
+
+/**
  * The signed-in user of a *locked* session (for the lock screen and the
  * unlock route), or null when the session isn't locked or isn't valid.
  */
