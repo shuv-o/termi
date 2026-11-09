@@ -17,11 +17,7 @@ import { AiMessageView } from './AiReply';
  * suggested command is pasted into the terminal without running it.
  */
 
-const QUICK = [
-    'Explain this output',
-    'Why did the last command fail?',
-    'How do I fix this?',
-];
+const QUICK = ['Explain this output', 'Why did the last command fail?', 'How do I fix this?'];
 
 export default function AskAiPanel({
     serverId,
@@ -56,7 +52,9 @@ export default function AskAiPanel({
         <div className="flex h-full min-h-0 flex-col bg-card">
             <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <p className="min-w-0 flex-1 truncate text-sm font-medium">Ask AI about {serverName}</p>
+                <p className="min-w-0 flex-1 truncate text-sm font-medium">
+                    Ask AI about {serverName}
+                </p>
                 {conversationId && (
                     <IconButton
                         size="sm"
@@ -85,8 +83,8 @@ export default function AskAiPanel({
                         {messages.length === 0 && (
                             <div className="space-y-3">
                                 <p className="text-sm text-muted-foreground">
-                                    Ask about what&apos;s on screen, or describe what you want to do and
-                                    get the command for it.
+                                    Ask about what&apos;s on screen, or describe what you want to do
+                                    and get the command for it.
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {QUICK.map((q) => (

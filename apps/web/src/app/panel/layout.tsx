@@ -25,7 +25,15 @@ const FirstRunSetup = dynamic(
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
     const shell = usePanelShell();
-    const { user, pathname, collapsed, isSessionsPage, isLocalPage, isConnectPage } = shell;
+    const {
+        user,
+        pathname,
+        collapsed,
+        isSessionsPage,
+        isLocalPage,
+        isConnectPage,
+        isAssistantPage,
+    } = shell;
     const fading = useRouteFade(pathname);
 
     // Only block on the very first load, when nothing is cached yet. On every
@@ -120,7 +128,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     <SessionsWorkspace />
                 </div>
 
-                {isSessionsPage || isConnectPage ? (
+                {isSessionsPage || isConnectPage || isAssistantPage ? (
                     /* Both render full-bleed, with no page chrome around them.
                        The sessions page in particular draws nothing itself —
                        the workspace above is the UI — but its component must
@@ -148,7 +156,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 dedicated local terminal) — the terminal is the whole point of
                 those screens, so it gets the full viewport with no nav bar
                 reserving margin underneath it. */}
-            {!isConnectPage && !isSessionsPage && !isLocalPage && (
+            {!isConnectPage && !isSessionsPage && !isLocalPage && !isAssistantPage && (
                 <MobileBottomNav
                     items={shell.phoneItems}
                     pathname={pathname}

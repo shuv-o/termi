@@ -10,6 +10,8 @@ import { TerminalPaneHeader } from './TerminalPaneHeader';
 import type { SessionServerMeta } from './ServerMeta';
 import { TunnelDialog } from './TunnelDialog';
 import { ShareSessionDialog } from './ShareSessionDialog';
+import AskAiPanel from '@/components/ai/AskAiPanel';
+import { pasteSafe } from '@/lib/ai/paste';
 import { useShells } from './useShells';
 import { useSessionsContext, type Session, type SessionStatus } from '../sessions-context';
 import type { PaneRect } from '../split';
@@ -138,6 +140,9 @@ export function TerminalPane({
     // this is the session you are looking at — a background tab holding an SSH
     // channel open every couple of seconds is pure waste.
     const [showMetrics, setShowMetrics] = useState(false);
+    const [showAi, setShowAi] = useState(false);
+    // Per-shell "read the recent output" functions, for Ask AI.
+    const screenReaders = useRef(new Map<string, () => string>());
 
     const { registerSendHandler, registerRawSender, relayInput } = useSessionsContext();
     // Per-shell "open find bar" functions, handed up by each terminal.
@@ -261,6 +266,21 @@ export function TerminalPane({
     const connectionFailed =
         session.status === 'error' || (!session.token && session.status !== 'connecting');
 
+    const askAi = showAi ? (
+        <AskAiPanel
+            serverId={session.serverId}
+            serverName={session.serverName}
+            readScreen={() => screenReaders.current.get(activeShellId)?.() ?? ''}
+            // Pasted, never run: the user reads it and presses Enter.
+            // One line, control characters removed: pasted, never run.
+            onInsert={(code) => keyHandlers.current.get(activeShellId)?.(pasteSafe(code))}
+            onClose={() => {
+                setShowAi(false);
+                nudgeResize();
+            }}
+        />
+    ) : null;
+
     return (
         <div
             className={`absolute flex flex-col ${inSplit ? 'border border-border/60' : ''}`}
@@ -307,19 +327,36 @@ export function TerminalPane({
                 }
                 onCopyPassword={onCopyPassword}
                 onToggleFiles={() => {
-                    // The two side panels share one slot; opening either closes
-                    // the other rather than squeezing the terminal to nothing.
-                    if (!session.showFiles) setShowMetrics(false);
+                    // The side panels share one slot; opening one closes the
+                    // others rather than squeezing the terminal to nothing.
+                    if (!session.showFiles) {
+                        setShowMetrics(false);
+                        setShowAi(false);
+                    }
                     toggleFiles(session.tabId);
                 }}
                 showMetrics={showMetrics}
                 onToggleMetrics={() => {
                     setShowMetrics((m) => {
                         if (!m && session.showFiles) toggleFiles(session.tabId);
+                        if (!m) setShowAi(false);
                         return !m;
                     });
                     nudgeResize();
                 }}
+                showAi={showAi}
+                onToggleAi={
+                    session.type === 'remote'
+                        ? () => {
+                              setShowAi((a) => {
+                                  if (!a && session.showFiles) toggleFiles(session.tabId);
+                                  if (!a) setShowMetrics(false);
+                                  return !a;
+                              });
+                              nudgeResize();
+                          }
+                        : undefined
+                }
                 showToolbar={showToolbar}
                 onToggleToolbar={() => {
                     setShowToolbar((t) => !t);
@@ -405,6 +442,9 @@ export function TerminalPane({
                                                 onSearchReady={(fn) =>
                                                     searchOpeners.current.set(shell.id, fn)
                                                 }
+                                                onScreenReaderReady={(fn) =>
+                                                    screenReaders.current.set(shell.id, fn)
+                                                }
                                                 onDisconnect={() => {
                                                     if (isFirst)
                                                         updateSessionStatus(
@@ -473,6 +513,17 @@ export function TerminalPane({
                                 serverId={session.serverId}
                                 onClose={() => toggleFiles(session.tabId)}
                             />
+                        </div>
+                    </>
+                )}
+
+                {showAi && session.type === 'remote' && (
+                    <>
+                        <div className="hidden md:flex w-80 lg:w-96 shrink-0 flex-col border-l border-border overflow-hidden">
+                            {askAi}
+                        </div>
+                        <div className="absolute inset-0 z-20 overflow-hidden border-t border-border md:hidden">
+                            {askAi}
                         </div>
                     </>
                 )}

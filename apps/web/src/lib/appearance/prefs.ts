@@ -46,6 +46,7 @@ export const MENU_ITEMS = [
     'serial',
     'keys',
     'snippets',
+    'assistant',
     'forwarding',
     'known-hosts',
     'groups',

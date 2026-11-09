@@ -52,8 +52,8 @@ describe('menu', () => {
     });
 
     it('pages added later land next to their default neighbour, not after Settings', () => {
-        // A menu saved before Snippets, Port forwarding, Known hosts,
-        // Workspaces and History existed, with Groups moved to the top.
+        // A menu saved before Snippets, Assistant, Port forwarding, Known
+        // hosts, Workspaces and History existed, with Groups moved to the top.
         const a = sanitizeAppearance({
             menu: {
                 order: [
@@ -77,6 +77,7 @@ describe('menu', () => {
             'serial',
             'keys',
             'snippets',
+            'assistant',
             'forwarding',
             'known-hosts',
             'teams',

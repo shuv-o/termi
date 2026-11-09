@@ -85,6 +85,7 @@ test('the menu can be rearranged, trimmed, moved and set up for phones', async (
         'Workspaces',
         'Keys & passwords',
         'Snippets',
+        'Assistant',
         'Port forwarding',
         'Groups',
         'Known hosts',

@@ -159,6 +159,40 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
         ],
     },
     {
+        id: 'ai',
+        name: 'AI assistant',
+        summary: 'Help with servers, errors and commands, without your secrets ever leaving.',
+        bar: 'bg-proto-rdp',
+        features: [
+            {
+                name: 'Ask AI in any terminal',
+                body: 'Explain what is on screen, find out why a command failed, or describe what you want and get the command for it. A suggested command is pasted into the terminal, never run.',
+                keywords: 'ai assistant chatgpt claude llm explain error command',
+            },
+            {
+                name: 'Assistant',
+                body: 'A full conversation page that knows your servers by name, never their addresses or passwords.',
+                keywords: 'ai chat assistant conversation',
+            },
+            {
+                name: 'Your provider, your model',
+                body: 'Anthropic or OpenAI, or your own OpenAI-compatible server such as vLLM, Ollama or LM Studio. The deployment can offer one to everyone, and each user can bring their own key.',
+                details: ['Any model name', 'Your key is stored encrypted and never shown again'],
+                keywords: 'anthropic claude openai gpt vllm ollama lm studio local model api key',
+            },
+            {
+                name: 'Secrets never leave',
+                body: 'Every password, key and passphrase Termi holds for you, and anything that looks like a secret, is removed before a message is sent or saved.',
+                keywords: 'privacy redaction secrets password',
+            },
+            {
+                name: 'Memory',
+                body: 'Conversations are kept, and the assistant remembers lasting facts about your setup. See, delete or turn off what it remembers.',
+                keywords: 'memory history remember',
+            },
+        ],
+    },
+    {
         id: 'server-security',
         name: 'Server security',
         summary: 'Connections you can trust, and servers that are harder to break into.',

@@ -24,6 +24,7 @@ import { SecurityPanel } from './_panels/SecurityPanel';
 import { SessionsPanel } from './_panels/SessionsPanel';
 import { TerminalPanel } from './_panels/TerminalPanel';
 import { AppearancePanel } from './_panels/AppearancePanel';
+import { AiPanel } from './_panels/AiPanel';
 
 import { MOVED_SECTIONS, SECTION_IDS, type SectionId, type SetUser, type User } from './types';
 
@@ -163,6 +164,7 @@ export default function SettingsPage() {
 
                     {activeSection === 'sessions' && <SessionsPanel sessions={sessions} />}
                     {activeSection === 'terminal' && <TerminalPanel />}
+                    {activeSection === 'ai' && <AiPanel />}
                 </div>
             </div>
         </div>

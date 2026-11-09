@@ -13,6 +13,7 @@ import {
     Plus,
     Server,
     Shield,
+    Sparkles,
     SquareTerminal,
     UserCog,
     Lock,
@@ -51,6 +52,7 @@ const PAGE_SYNONYMS: Record<MenuItemId, string> = {
     serial: 'usb console cable router switch',
     keys: 'keychain credentials passwords ssh keys security keys',
     snippets: 'commands scripts macros saved commands',
+    assistant: 'ai chat ask help explain claude gpt llm',
     forwarding: 'tunnels port forward ssh -L socks proxy',
     'known-hosts': 'host keys fingerprints known_hosts trust',
     groups: 'folders',
@@ -87,6 +89,7 @@ export function CommandPalette() {
     const router = useRouter();
     const { activeTabId, sendToSession, sessions } = useSessionsContext();
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
     const isElectron = typeof window !== 'undefined' && !!window.electronAPI?.isElectron;
     const [showNewSnippet, setShowNewSnippet] = useState(false);
     const [showRunOn, setShowRunOn] = useState(false);
@@ -153,6 +156,10 @@ export function CommandPalette() {
     const entries = keychainData?.entries ?? [];
     const snippets = snippetsData?.snippets ?? [];
 
+    useEffect(() => {
+        if (!open) setQuery('');
+    }, [open]);
+
     const go = useCallback(
         (href: string) => {
             setOpen(false);
@@ -182,8 +189,28 @@ export function CommandPalette() {
             {snippetRunner.dialog}
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <DialogTitle className="sr-only">Command palette</DialogTitle>
-                <CommandInput placeholder="Connect to a server, or search anything…" />
+                <CommandInput
+                    placeholder="Connect to a server, or search anything…"
+                    value={query}
+                    onValueChange={setQuery}
+                />
                 <CommandList>
+                    {query.trim().length > 2 && (
+                        <CommandGroup heading="Assistant">
+                            <CommandItem
+                                forceMount
+                                value={`ask assistant ai ${query}`}
+                                onSelect={() =>
+                                    go(`/panel/assistant?q=${encodeURIComponent(query.trim())}`)
+                                }
+                            >
+                                <Sparkles />
+                                <span className="truncate">
+                                    Ask the assistant: &ldquo;{query.trim()}&rdquo;
+                                </span>
+                            </CommandItem>
+                        </CommandGroup>
+                    )}
                     <CommandEmpty>No results found.</CommandEmpty>
 
                     {servers.length > 0 && (

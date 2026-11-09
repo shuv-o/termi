@@ -70,6 +70,18 @@ When a connection is opened, the web app issues a short-lived **JWE token** (A25
 
 Because a token is only checked when a connection opens, the gateway asks the web app every `GATEWAY_ACCESS_CHECK_SEC` (default 30 s) whether each open connection may stay, over an internal endpoint authenticated with a gateway-only service token. Connections whose sign-in was revoked or expired, or whose user lost access to the server, are closed.
 
+### AI Assistant
+
+The assistant is optional: nothing is sent anywhere until the deployment (`AI_*` variables) or the user (Settings → AI assistant) configures a provider.
+
+- **Secrets are removed on the server before anything is sent or stored.** Every password, private key and passphrase Termi holds for the user (servers and saved logins), their AI key and this server's own secrets are removed wherever they appear; pattern rules also remove private-key blocks, credentials in URLs, `password=…`-style values, password flags on common commands, bearer tokens, shadow hashes and well-known token formats. The redacted text is what the provider receives and what history keeps.
+- **Server context is names only:** name, protocol, group and tags. Never addresses, usernames, notes or credentials.
+- **Terminal output is marked as data**, and the instructions tell the model to treat it as such, so text on screen can't instruct the assistant.
+- **Read-only:** suggested commands are pasted into the terminal as a single line with control characters removed, never with Enter; multi-line scripts can only be copied.
+- **Keys:** a user's API key is stored encrypted (bound to its owner) and never returned to the browser; the deployment key never leaves the server.
+- **Custom endpoints** go through the same host check as servers (private networks only with `ALLOW_PRIVATE_NETWORKS`, cloud metadata never), are re-checked before each request, and redirects are not followed.
+- **History and memory** are encrypted per user, readable only by their owner, and can be deleted from Settings. A remembered "fact" that contained a secret is dropped.
+
 ---
 
 ## Threat Model

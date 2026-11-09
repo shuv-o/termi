@@ -12,7 +12,7 @@ export const SITE_NAME = 'Termi';
 export const SITE_TITLE = 'Termi: self-hosted SSH, RDP and VNC in your browser';
 
 export const SITE_DESCRIPTION =
-    'Open-source, self-hosted remote access: SSH terminals, SFTP files, RDP and VNC desktops, Telnet and serial consoles from your browser, phone or desktop app. Encrypted credentials, host key pinning, teams and single sign-on.';
+    'Open-source, self-hosted remote access: SSH terminals, SFTP files, RDP and VNC desktops, Telnet and serial consoles from your browser, phone or desktop app. Encrypted credentials, host key pinning, teams, single sign-on and an AI assistant that never sees your secrets.';
 
 export const SITE_KEYWORDS = [
     'self-hosted SSH client',
@@ -38,6 +38,8 @@ export const SITE_KEYWORDS = [
     'Docker',
     'homelab',
     'DevOps tools',
+    'AI terminal assistant',
+    'AI SSH assistant',
 ];
 
 export const AUTHOR = {

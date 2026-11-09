@@ -8,6 +8,7 @@ import {
     Palette,
     Shield,
     User as UserIcon,
+    Sparkles,
     SquareTerminal,
 } from 'lucide-react';
 import type { SectionId, User } from '../types';
@@ -43,6 +44,7 @@ function SidebarNav({
             badge: sessionCount || undefined,
         },
         { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
+        { id: 'ai', label: 'AI assistant', icon: Sparkles },
     ];
 
     return (

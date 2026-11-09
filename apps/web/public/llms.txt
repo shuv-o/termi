@@ -12,6 +12,7 @@ Termi runs as a Next.js web app plus a WebSocket gateway, deployed with Docker C
 - Your data: credentials encrypted with AES-256-GCM and bound to their field and owner, key rotation, secrets never sent to the browser to connect, and open connections closed when access is removed.
 - Sign-in: passkeys, TOTP or email two-factor, Google sign-in, single sign-on with any OpenID Connect provider, app lock, signed-in device management, security emails.
 - Teams: team vaults with owner, admin and member roles; sharing a server; shared live terminals where the owner lets each guest in.
+- AI assistant: Ask AI beside any terminal and a full Assistant page; Anthropic, OpenAI or any OpenAI-compatible server (vLLM, Ollama), from the deployment or the user's own key; every secret Termi knows and anything that looks like one is removed before sending; conversations and lasting facts are remembered per user; suggested commands are never run automatically.
 - Monitoring: live CPU, memory and disk over SSH, alerts by email, push or webhook (Slack, Discord), health history, benchmarks.
 
 ## Links

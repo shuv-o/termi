@@ -21,6 +21,7 @@ import {
     UsersRound,
     Waypoints,
     Wrench,
+    Sparkles,
     X,
 } from 'lucide-react';
 import { IconButton, IconButtonDivider } from '@/components/ui/icon-button';
@@ -131,6 +132,8 @@ export function TerminalPaneHeader({
     onSplit,
     onUnsplit,
     onShareSession,
+    showAi,
+    onToggleAi,
 }: {
     session: Session;
     /** Host/username/port for the copy actions; `null` for local terminals. */
@@ -163,6 +166,9 @@ export function TerminalPaneHeader({
     onUnsplit?: () => void;
     /** Invite someone into this live session (remote sessions only). */
     onShareSession?: () => void;
+    showAi?: boolean;
+    /** Ask AI about this terminal (remote sessions only). */
+    onToggleAi?: () => void;
 }) {
     const copy = useCopyToClipboard();
     const isRemote = session.type !== 'local';
@@ -198,6 +204,15 @@ export function TerminalPaneHeader({
                 </>
             )}
 
+            {onToggleAi && (
+                <IconButton
+                    size="sm"
+                    label={showAi ? 'Hide Ask AI' : 'Ask AI'}
+                    icon={Sparkles}
+                    active={showAi}
+                    onClick={onToggleAi}
+                />
+            )}
             <IconButton
                 size="sm"
                 label="Find in output"

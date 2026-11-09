@@ -54,7 +54,9 @@ export function visibleText(raw: string): string {
 /** The user's message as it was stored: the attached screen is shown as a note. */
 export function displayUserText(content: string): { text: string; hadScreen: boolean } {
     const i = content.indexOf('\n\n<terminal_output>');
-    return i >= 0 ? { text: content.slice(0, i), hadScreen: true } : { text: content, hadScreen: false };
+    return i >= 0
+        ? { text: content.slice(0, i), hadScreen: true }
+        : { text: content, hadScreen: false };
 }
 
 export function useAssistant(initialId: string | null = null) {
@@ -134,13 +136,20 @@ export function useAssistant(initialId: string | null = null) {
                             setRedacted(e.redacted);
                         } else if (e.type === 'delta') {
                             setMessages((m) =>
-                                m.map((x) => (x.id === replyId ? { ...x, content: x.content + e.text } : x)),
+                                m.map((x) =>
+                                    x.id === replyId ? { ...x, content: x.content + e.text } : x,
+                                ),
                             );
                         } else if (e.type === 'done') {
                             setMessages((m) =>
                                 m.map((x) =>
                                     x.id === replyId
-                                        ? { id: e.messageId, role: 'assistant', content: e.text, remembered: e.remembered }
+                                        ? {
+                                              id: e.messageId,
+                                              role: 'assistant',
+                                              content: e.text,
+                                              remembered: e.remembered,
+                                          }
                                         : x,
                                 ),
                             );

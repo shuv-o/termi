@@ -24,7 +24,10 @@ function inline(text: string, key: string) {
         if (m.index! > last) out.push(text.slice(last, m.index));
         out.push(
             m[1] !== undefined ? (
-                <code key={`${key}-${i++}`} className="data rounded bg-secondary px-1 py-0.5 text-[0.92em]">
+                <code
+                    key={`${key}-${i++}`}
+                    className="data rounded bg-secondary px-1 py-0.5 text-[0.92em]"
+                >
                     {m[1]}
                 </code>
             ) : (
@@ -46,7 +49,9 @@ function prose(text: string, key: string) {
             if (lines.every((l) => /^\s*(?:[-*]|\d+\.)\s+/.test(l))) {
                 const ordered = /^\s*\d+\./.test(lines[0]);
                 const items = lines.map((l, j) => (
-                    <li key={j}>{inline(l.replace(/^\s*(?:[-*]|\d+\.)\s+/, ''), `${key}-${b}-${j}`)}</li>
+                    <li key={j}>
+                        {inline(l.replace(/^\s*(?:[-*]|\d+\.)\s+/, ''), `${key}-${b}-${j}`)}
+                    </li>
                 ));
                 return ordered ? (
                     <ol key={b} className="ml-5 list-decimal space-y-1">
@@ -74,20 +79,32 @@ function prose(text: string, key: string) {
         });
 }
 
-export function AiReplyText({ text, onInsert }: { text: string; onInsert?: (code: string) => void }) {
+export function AiReplyText({
+    text,
+    onInsert,
+}: {
+    text: string;
+    onInsert?: (code: string) => void;
+}) {
     const parts: React.ReactNode[] = [];
     let last = 0;
     let n = 0;
     for (const m of text.matchAll(FENCE)) {
-        if (m.index! > last) parts.push(<Fragment key={`p${n}`}>{prose(text.slice(last, m.index), `p${n}`)}</Fragment>);
+        if (m.index! > last)
+            parts.push(
+                <Fragment key={`p${n}`}>{prose(text.slice(last, m.index), `p${n}`)}</Fragment>,
+            );
         const lang = m[1] || 'text';
         const code = m[2].replace(/\n$/, '');
         parts.push(
-            <div key={`c${n}`} className="overflow-hidden rounded-lg border border-border bg-[var(--terminal-bg)]">
+            <div
+                key={`c${n}`}
+                className="overflow-hidden rounded-lg border border-border bg-[var(--terminal-bg)]"
+            >
                 <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1">
                     <span className="data text-[11px] text-muted-foreground">{lang}</span>
                     <div className="flex items-center gap-1">
-                        {onInsert && (
+                        {onInsert && !code.includes('\n') && (
                             <Button
                                 type="button"
                                 size="sm"
@@ -108,7 +125,8 @@ export function AiReplyText({ text, onInsert }: { text: string; onInsert?: (code
         last = m.index! + m[0].length;
         n++;
     }
-    if (last < text.length) parts.push(<Fragment key="tail">{prose(text.slice(last), 'tail')}</Fragment>);
+    if (last < text.length)
+        parts.push(<Fragment key="tail">{prose(text.slice(last), 'tail')}</Fragment>);
     return <div className="space-y-3 text-sm leading-relaxed">{parts}</div>;
 }
 

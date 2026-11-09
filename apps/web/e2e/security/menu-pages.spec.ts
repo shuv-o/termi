@@ -172,6 +172,7 @@ test('a menu saved before these pages existed gets them, before Settings', async
     expect(names).toEqual(
         expect.arrayContaining([
             'Snippets',
+            'Assistant',
             'Port forwarding',
             'Known hosts',
             'History',

@@ -121,6 +121,11 @@ services:
       # Search engines: SEARCH_INDEXING=off keeps a private instance out of search
       # results; the verification tokens prove ownership in Google / Bing consoles.
       SEARCH_INDEXING: ${SEARCH_INDEXING:-}
+      # AI assistant for everyone (optional); users can also add their own key.
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_BASE_URL: ${AI_BASE_URL:-}
       GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
       BING_SITE_VERIFICATION: ${BING_SITE_VERIFICATION:-}
       SMTP_HOST: ${SMTP_HOST:-}

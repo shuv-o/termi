@@ -2,7 +2,7 @@
 
 # 🖥️ Termi
 
-**Self-hosted server access — SSH, SFTP, RDP, VNC, Telnet and serial from your browser, phone or desktop**
+**Self-hosted server access — SSH, SFTP, RDP, VNC, Telnet and serial from your browser, phone or desktop, with an AI assistant that never sees your secrets**
 
 _Termi runs in production at **[termi.run](https://termi.run)** — try it there, or follow [Quick Start](#-quick-start) to self-host your own instance._
 
@@ -118,6 +118,13 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 - **Session recording & playback** — record any SSH session and replay it later from History → Recordings, encrypted at rest
 - **Connection history** — every terminal, file browser and desktop you opened, with time, device and IP, visible only to you
 - **Your layout, your look** — Night, Black, Day or system themes, accent colours, compact density; the menu as a sidebar, icon rail or top bar on either side, in your own order, with your own phone bar; terminal colour schemes and fonts, synced to your account
+
+### ✨ AI Assistant
+
+- **Ask about your servers, errors and commands** in the Assistant page, or with **Ask AI** beside any terminal: explain what's on screen, find out why a command failed, or turn a request into a command. Suggested commands are pasted into the terminal, never run
+- **Anthropic, OpenAI, or your own model**: the deployment can offer one to everyone (`AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_BASE_URL`), and each user can bring their own key, model and endpoint, including OpenAI-compatible servers such as vLLM, Ollama or LM Studio
+- **Secrets never leave**: every password, private key and passphrase Termi holds for you, plus anything that looks like a secret (keys in URLs, `password=…`, tokens), is removed before a message is sent or saved. The assistant knows your servers by name only, never their addresses or credentials
+- **Memory**: conversations are kept (encrypted), and the assistant remembers lasting facts about your setup; you can see, delete or turn off what it remembers
 
 ### 💻 Local Terminal
 
@@ -360,6 +367,10 @@ npm run build:electron            # Package Electron app
 | `GUACD_HOST`                       | `localhost`           | guacd host for RDP/VNC                                     |
 | `GUACD_PORT`                       | `4822`                | guacd port                                                 |
 | `GUACD_TUNNEL_HOST`                | —                     | Gateway address guacd dials for RDP/VNC behind a jump host |
+| `AI_PROVIDER`                      | —                     | AI assistant for everyone: `anthropic` or `openai` (OpenAI or any OpenAI-compatible server) |
+| `AI_API_KEY`                       | —                     | The provider's API key (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` also work) |
+| `AI_MODEL`                         | `claude-opus-5-5` for Anthropic | Any model name; required for OpenAI-compatible servers |
+| `AI_BASE_URL`                      | —                     | Custom endpoint, e.g. `http://vllm:8000/v1` |
 | `SEARCH_INDEXING`                  | `on`                  | `off` keeps this instance out of search results (robots.txt, meta tags, X-Robots-Tag); the signed-in app is never indexed |
 | `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` | — | Ownership tokens for Google Search Console / Bing Webmaster Tools |
 | `HSTS_PRELOAD`                     | `false`               | Send `includeSubDomains; preload` with HSTS (only for a domain you put on the preload list) |
@@ -454,17 +465,15 @@ See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability repor
 
 ## 🧭 Roadmap
 
-### Next up: AI assistant (LLM integration)
+The AI assistant planned here has shipped: bring-your-own provider (Anthropic, OpenAI or any OpenAI-compatible server, including local models), grounded in your terminal and servers, and read-only — it suggests commands and never runs them.
 
-Planned for the next update — scope and details are still open to change:
+Ideas for what comes next, open to discussion:
 
-- **Bring-your-own-provider, not a hosted default.** An API key field for a provider you already have (OpenAI, Anthropic, or a local/self-hosted model via an OpenAI-compatible endpoint), consistent with Termi's no-telemetry, self-hosted-first design. Prompts/responses go only to the provider you configure — never through a termi-operated relay.
-- **Terminal-grounded, not a generic chatbot.** Explain a confusing command's output, translate a plain-English request into the right shell command for review before running it, or summarize a long session recording instead of scrubbing through the replay.
-- **Monitoring-aware.** Answer questions like "why is this server flagged high-load" using real metrics/health-history/benchmark-trend data already collected, instead of the user cross-referencing charts manually.
-- **Read-only first.** The first iteration explains and suggests; it does not execute anything on its own. Any command it proposes goes through the same explicit-confirm step a human typing it would — no silent execution, matching the project's existing "ask before anything destructive" posture.
-- **Later, not v1:** webhook alert message drafting, anomaly explanations for monitoring alerts.
+- **Monitoring-aware answers**: explain why a server is flagged, using its metrics, health history and benchmark trend.
+- **Recording summaries**: summarise a long session recording instead of scrubbing through the replay.
+- **Alert explanations**: a short explanation of what a monitoring alert most likely means.
 
-This is a draft plan, not a committed spec — [open a discussion](https://github.com/shuv-o/termi/discussions) if you have thoughts on scope or provider support before it's built.
+[Open a discussion](https://github.com/shuv-o/termi/discussions) if you have thoughts on what should come first.
 
 ---
 

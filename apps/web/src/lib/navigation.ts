@@ -11,6 +11,7 @@ import {
     Monitor,
     Server,
     Settings,
+    Sparkles,
     Users,
     Waypoints,
     type LucideIcon,
@@ -105,6 +106,14 @@ export const NAV_ITEMS: Record<MenuItemId, NavItem> = {
         description: 'Commands you run often, one tap away',
         href: '/panel/snippets',
         icon: FileCode2,
+    },
+    assistant: {
+        id: 'assistant',
+        name: 'Assistant',
+        short: 'AI',
+        description: 'Ask about your servers, errors and commands',
+        href: '/panel/assistant',
+        icon: Sparkles,
     },
     forwarding: {
         id: 'forwarding',

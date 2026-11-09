@@ -65,6 +65,8 @@ export function usePanelShell() {
     const isSessionsPage = pathname === '/panel/sessions';
     const isLocalPage = pathname === '/panel/local';
     const isConnectPage = pathname.startsWith('/panel/connect/');
+    // A chat fills the screen like a terminal: no page padding, no phone bar.
+    const isAssistantPage = pathname === '/panel/assistant';
 
     // Remember the last-visited panel page so a signed-in user who closes the
     // browser and later opens termi.run lands back where they left off,
@@ -209,6 +211,7 @@ export function usePanelShell() {
         isSessionsPage,
         isLocalPage,
         isConnectPage,
+        isAssistantPage,
         isRootPage,
         openLocalTerminal,
         goBack,
