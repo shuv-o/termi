@@ -122,7 +122,9 @@ export const UserScalarFieldEnum = {
   lastLoginAt: 'lastLoginAt',
   passkeyEnabled: 'passkeyEnabled',
   passwordLoginDisabled: 'passwordLoginDisabled',
-  lockAfterMinutes: 'lockAfterMinutes'
+  lockAfterMinutes: 'lockAfterMinutes',
+  appearance: 'appearance',
+  onboardedAt: 'onboardedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -597,14 +599,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -612,4 +606,12 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

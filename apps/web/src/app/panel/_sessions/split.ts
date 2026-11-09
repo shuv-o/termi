@@ -37,7 +37,10 @@ export const clampRatio = (v: number) =>
     Math.min(1 - MIN_RATIO, Math.max(MIN_RATIO, Number.isFinite(v) ? v : 0.5));
 
 /** Where each pane goes, as fractions (0–1) of the workspace. */
-export function paneRects(split: Pick<SplitState, 'layout' | 'x' | 'y'>, count: number): PaneRect[] {
+export function paneRects(
+    split: Pick<SplitState, 'layout' | 'x' | 'y'>,
+    count: number,
+): PaneRect[] {
     const x = clampRatio(split.x);
     const y = clampRatio(split.y);
     const n = Math.max(1, Math.min(count, MAX_PANES[split.layout]));
@@ -159,5 +162,27 @@ export function withLayout(
         MAX_PANES[layout],
     );
     if (panes.length < MIN_PANES[layout]) return split;
+    return { layout, panes, x: split?.x ?? 0.5, y: split?.y ?? 0.5 };
+}
+
+/**
+ * "Open beside it": a new connection joins the screen next to what's open,
+ * in the user's preferred split shape. A grid needs three panes, so the
+ * second pane goes side by side first. Returns null when the screen is full
+ * (the connection then just opens as a tab).
+ */
+export function openBeside(
+    split: SplitState | null,
+    focused: string,
+    tabId: string,
+    shape: SplitLayout,
+): SplitState | null {
+    const panes = split ? [...split.panes] : [focused];
+    if (panes.includes(tabId)) return null;
+    panes.push(tabId);
+    if (panes.length > MAX_PANES.grid) return null;
+    let layout: SplitLayout = shape;
+    if (panes.length > MAX_PANES[layout]) layout = 'grid';
+    if (layout === 'grid' && panes.length < MIN_PANES.grid) layout = 'columns';
     return { layout, panes, x: split?.x ?? 0.5, y: split?.y ?? 0.5 };
 }

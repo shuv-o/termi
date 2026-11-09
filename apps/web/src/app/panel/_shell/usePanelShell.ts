@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearCache, useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { navigation, type PanelUser } from './navigation';
+import { adoptAccountAppearance, setAppearance, useAppearance } from '@/lib/appearance/store';
+import { NAV_ITEMS, menuItems, mobileBarItems, type PanelUser } from './navigation';
 
 /** Visual-viewport shrink beyond this many px means the OSK is up. */
 const KEYBOARD_THRESHOLD_PX = 150;
@@ -25,11 +26,33 @@ export function usePanelShell() {
     const { data: serversData } = useCachedFetch<{ servers: unknown[] }>('/api/servers');
     const serverCount = serversData?.servers.length ?? 0;
 
-    const [collapsed, setCollapsed] = useState<boolean>(() => {
-        if (typeof window === 'undefined') return false;
-        return localStorage.getItem('sidebar-collapsed') === 'true';
-    });
+    const appearance = useAppearance();
+    const collapsed = appearance.nav === 'rail';
     const [isElectron, setIsElectron] = useState(false);
+
+    // The account's saved look wins over this device's copy (a change made
+    // on another device, or the first sign-in here).
+    useEffect(() => {
+        adoptAccountAppearance(user?.appearance);
+    }, [user?.appearance]);
+
+    // "Start on: Sessions" — once per visit, landing on the server list
+    // takes you to your open connections instead.
+    const startDoneRef = useRef(false);
+    useEffect(() => {
+        if (!user || startDoneRef.current) return;
+        startDoneRef.current = true;
+        const key = 'termi-start-page-applied';
+        try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+        } catch {
+            /* no session storage: still fine to apply once per mount */
+        }
+        if (appearance.startPage === 'sessions' && pathname === '/panel') {
+            router.replace('/panel/sessions');
+        }
+    }, [user, appearance.startPage, pathname, router]);
 
     // True while the on-screen keyboard is open (mobile/PWA). A fixed
     // bottom-0 element stays pinned to the layout viewport, which the keyboard
@@ -58,7 +81,7 @@ export function usePanelShell() {
     // but both hide the bottom nav to give the terminal the full viewport —
     // so unlike the other nav items they still need the back button rather
     // than just the home-logo link.
-    const isRootPage = navigation.some((n) => n.href === pathname) && !isSessionsPage;
+    const isRootPage = Object.values(NAV_ITEMS).some((n) => n.href === pathname) && !isSessionsPage;
 
     const openLocalTerminal = useCallback(() => {
         router.push('/panel/local');
@@ -76,14 +99,19 @@ export function usePanelShell() {
         else router.push('/panel');
     }, [router]);
 
+    // Terminals re-fit when the menu changes width or moves.
+    useEffect(() => {
+        const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
+        return () => clearTimeout(t);
+    }, [appearance.nav, appearance.navSide]);
+
     const toggleCollapsed = useCallback(() => {
-        setCollapsed((prev) => {
-            const next = !prev;
-            localStorage.setItem('sidebar-collapsed', String(next));
-            setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
-            return next;
-        });
-    }, []);
+        setAppearance({ nav: collapsed ? 'sidebar' : 'rail' });
+    }, [collapsed]);
+
+    const env = { isElectron };
+    const desktopItems = menuItems(appearance.menu, env);
+    const phoneItems = mobileBarItems(appearance.menu, env);
 
     //  Electron: auto-open the local terminal once per app launch
     const autoOpenDoneRef = useRef(false);
@@ -172,6 +200,10 @@ export function usePanelShell() {
         pathname,
         collapsed,
         toggleCollapsed,
+        navStyle: appearance.nav,
+        navSide: appearance.navSide,
+        desktopItems,
+        phoneItems,
         isElectron,
         keyboardOpen,
         isSessionsPage,

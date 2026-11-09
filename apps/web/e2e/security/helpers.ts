@@ -7,6 +7,7 @@ import { STATE_FILE } from './global-setup';
 export interface SeedState {
     aliceId: string;
     bobId: string;
+    carolId: string;
     sshServerId: string;
     vncServerId: string;
 }

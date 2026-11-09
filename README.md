@@ -116,6 +116,7 @@ _Termi runs in production at **[termi.run](https://termi.run)** — try it there
 
 ### 💻 Local Terminal
 
+- **Your layout, your look** — Night, Black, Day or system themes, accent colours, compact density; the menu as a sidebar, icon rail or top bar on either side, in your own order, with your own phone bar; terminal colour schemes and fonts, synced to your account
 - **FIDO2 security keys** — YubiKey and other FIDO2 keys as SSH keys: the private key stays on the device, each login is a touch
 - **Serial console** — USB console cables for network gear and boards, straight from Chrome, Edge or the desktop app (Web Serial)
 

@@ -20,6 +20,8 @@ async function main() {
                 name: key,
                 passwordHash: await hashPassword(u.password),
                 isVerified: true,
+                // Alice and Bob are long-time users; Carol has just signed up.
+                onboardedAt: key === 'carol' ? null : new Date(),
             },
         });
         out[`${key}Id`] = user.id;

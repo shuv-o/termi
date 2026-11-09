@@ -146,7 +146,7 @@ export function AuthCard({
                                 ) : (
                                     <KeyRound className="w-3 h-3" />
                                 )}
-                                {src === 'keychain' ? 'Keychain' : 'New'}
+                                {src === 'keychain' ? 'Saved login' : 'New'}
                             </button>
                         ))}
                     </div>
@@ -156,15 +156,15 @@ export function AuthCard({
                     <div className="space-y-2">
                         {keychainEntries.length === 0 ? (
                             <p className="py-2 text-center text-xs text-muted-foreground">
-                                No keychain entries yet.{' '}
+                                No saved logins yet.{' '}
                                 <Link href="/panel/keychain" className="text-primary underline">
-                                    Create one
+                                    Save one
                                 </Link>{' '}
                                 first.
                             </p>
                         ) : (
                             <div className="space-y-1.5">
-                                <Label className="text-xs">Select keychain entry</Label>
+                                <Label className="text-xs">Saved login</Label>
                                 <Select
                                     value={selectedKeychainId || 'none'}
                                     onValueChange={(v) => {
@@ -174,10 +174,10 @@ export function AuthCard({
                                     }}
                                 >
                                     <SelectTrigger className="h-9 text-sm">
-                                        <SelectValue placeholder="Choose a keychain entry…" />
+                                        <SelectValue placeholder="Choose a saved login…" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-card border-border">
-                                        <SelectItem value="none">— Choose an entry —</SelectItem>
+                                        <SelectItem value="none">— Choose a login —</SelectItem>
                                         {keychainEntries.map((kc) => (
                                             <SelectItem key={kc.id} value={kc.id}>
                                                 <span className="font-medium">{kc.label}</span>
@@ -194,7 +194,7 @@ export function AuthCard({
                                 {selectedKeychainId && (
                                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                                         <CheckCircle2 className="w-3 h-3 text-success" />
-                                        Credentials loaded from keychain
+                                        Using this saved login
                                     </p>
                                 )}
                             </div>
@@ -328,7 +328,7 @@ export function AuthCard({
                                             href="/panel/keychain"
                                             className="text-primary underline"
                                         >
-                                            Add one on the Keychain page
+                                            Add one in Keys &amp; passwords
                                         </Link>
                                         .
                                     </p>
@@ -382,7 +382,7 @@ export function AuthCard({
                                         className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
                                     >
                                         <Save className="w-3 h-3" />
-                                        Save these credentials to Keychain
+                                        Also save as a login in Keys &amp; passwords
                                     </label>
                                 </div>
                                 {saveToKeychain && (

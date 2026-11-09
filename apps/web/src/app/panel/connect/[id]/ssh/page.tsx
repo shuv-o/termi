@@ -26,7 +26,7 @@ export default function SSHConnectRedirect() {
     }, [id, router]);
 
     return (
-        <div className="flex h-dvh items-center justify-center gap-3 text-muted-foreground lg:h-screen">
+        <div className="flex h-dvh items-center justify-center gap-3 text-muted-foreground lg:h-[calc(100vh-var(--shell-top,0px))]">
             <Loader2 className="h-5 w-5 animate-spin" />
             <span className="text-sm">Opening session…</span>
         </div>

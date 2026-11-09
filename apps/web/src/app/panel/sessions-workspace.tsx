@@ -1,5 +1,6 @@
 'use client';
 
+import { setAppearance, useAppearance } from '@/lib/appearance/store';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Radio } from 'lucide-react';
@@ -69,7 +70,9 @@ export default function SessionsWorkspace() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
-    const [layoutMode, setLayoutMode] = useState<LayoutMode>('tabbar');
+    // Tabs across the top or a list down the side: the user's Appearance choice.
+    const { sessionList } = useAppearance();
+    const layoutMode: LayoutMode = sessionList === 'side' ? 'sidebar' : 'tabbar';
     const [revealTarget, setRevealTarget] = useState<{
         serverId: string;
         serverName: string;
@@ -88,18 +91,11 @@ export default function SessionsWorkspace() {
     useEffect(() => {
         // Default sidebar open only on desktop
         setSidebarOpen(window.innerWidth >= 1024);
-        // Restore saved layout preference
-        const saved = localStorage.getItem('sessions-layout');
-        if (saved === 'sidebar' || saved === 'tabbar') setLayoutMode(saved);
     }, []);
 
     const toggleLayoutMode = useCallback(() => {
-        setLayoutMode((m) => {
-            const next = m === 'sidebar' ? 'tabbar' : 'sidebar';
-            localStorage.setItem('sessions-layout', next);
-            return next;
-        });
-    }, []);
+        setAppearance({ sessionList: sessionList === 'side' ? 'tabs' : 'side' });
+    }, [sessionList]);
 
     // Same cached list as the picker/dashboard — one shared fetch, not three.
     const { data: allServersData } = useCachedFetch<{ servers: ServerItem[] }>('/api/servers');
@@ -250,7 +246,7 @@ export default function SessionsWorkspace() {
     // Desktop (lg+): full viewport height; parent container has no extra padding
     const containerHeight = isFullscreen
         ? 'h-screen fixed inset-0 z-[100] bg-background'
-        : 'h-[calc(100vh-7.5rem)] lg:h-screen';
+        : 'h-[calc(100vh-7.5rem)] lg:h-[calc(100vh-var(--shell-top,0px))]';
 
     return (
         <div className={`flex flex-col ${containerHeight}`}>

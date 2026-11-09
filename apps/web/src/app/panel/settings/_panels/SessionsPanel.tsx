@@ -13,7 +13,7 @@ export function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useAut
     return (
         <Card className="border-border p-6 transition-all duration-200 hover:border-border/80">
             <SettingsSection
-                title="Active sessions"
+                title="Signed-in devices"
                 description="Devices and browsers that are currently signed in to your account."
                 icon={Monitor}
                 iconBg="bg-info/15 text-info"
@@ -25,7 +25,7 @@ export function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useAut
                     </div>
                 ) : sessions.sessions.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
-                        No sessions found
+                        No other devices are signed in
                     </p>
                 ) : (
                     <div className="space-y-2">

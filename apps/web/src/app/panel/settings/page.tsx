@@ -26,6 +26,7 @@ import { SessionsPanel } from './_panels/SessionsPanel';
 import { ActivityPanel } from './_panels/ActivityPanel';
 import { TunnelsPanel } from './_panels/TunnelsPanel';
 import { TerminalPanel } from './_panels/TerminalPanel';
+import { AppearancePanel } from './_panels/AppearancePanel';
 
 import { SECTION_IDS, type SectionId, type SetUser, type User } from './types';
 import type { TunnelSessionRow } from '../servers/[id]/_details/useTunnels';
@@ -145,6 +146,8 @@ export default function SettingsPage() {
                             onNavigate={setActiveSection}
                         />
                     )}
+
+                    {activeSection === 'appearance' && <AppearancePanel />}
 
                     {activeSection === 'security' && (
                         <SecurityPanel

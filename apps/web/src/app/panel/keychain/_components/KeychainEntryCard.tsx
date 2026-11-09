@@ -80,9 +80,7 @@ export function KeychainEntryCard({
 
             {confirming ? (
                 <div className="flex shrink-0 items-center gap-2">
-                    <span className="hidden sm:inline text-xs text-danger">
-                        Delete this entry?
-                    </span>
+                    <span className="hidden sm:inline text-xs text-danger">Delete this login?</span>
                     <button
                         onClick={() => setConfirming(false)}
                         className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-sm"

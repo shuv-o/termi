@@ -506,6 +506,8 @@ export async function getCurrentUser() {
             createdAt: true,
             passwordHash: true,
             lockAfterMinutes: true,
+            appearance: true,
+            onboardedAt: true,
         },
     });
 

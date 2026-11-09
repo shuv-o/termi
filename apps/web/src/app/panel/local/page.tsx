@@ -151,7 +151,7 @@ export default function LocalTerminalPage() {
     const activeStatus: Status = activeTab?.status ?? 'connecting';
 
     return (
-        <div className="flex flex-col h-[calc(100vh-7.5rem)] lg:h-screen -m-4 lg:-m-8 bg-background">
+        <div className="flex flex-col h-[calc(100vh-7.5rem)] lg:h-[calc(100vh-var(--shell-top,0px))] -m-4 lg:-m-8 bg-background">
             {/* Header */}
             <div className="shrink-0 flex items-center gap-2.5 px-3 sm:px-4 py-2.5 border-b border-border bg-card/40">
                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-local/10 border border-local/20 shrink-0">
@@ -298,7 +298,9 @@ export default function LocalTerminalPage() {
                                         gatewayUrl={tab.gatewayUrl ?? undefined}
                                         onReady={() => setTabStatus(tab.id, 'connected')}
                                         onExit={() => setTabStatus(tab.id, 'disconnected')}
-                                        onSearchReady={(fn) => searchOpeners.current.set(tab.id, fn)}
+                                        onSearchReady={(fn) =>
+                                            searchOpeners.current.set(tab.id, fn)
+                                        }
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center h-full text-muted-foreground gap-3">

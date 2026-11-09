@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
     addPane,
+    openBeside,
     clampRatio,
     draggableDividers,
     paneRects,
@@ -83,5 +84,34 @@ describe('split editing', () => {
         expect(draggableDividers('columns', 2)).toEqual({ x: true, y: false });
         expect(draggableDividers('columns', 3)).toEqual({ x: false, y: false });
         expect(draggableDividers('grid', 4)).toEqual({ x: true, y: true });
+    });
+});
+
+describe('openBeside', () => {
+    it('starts a split in the chosen shape', () => {
+        expect(openBeside(null, 'a', 'b', 'rows')).toMatchObject({
+            layout: 'rows',
+            panes: ['a', 'b'],
+        });
+    });
+    it('a grid starts side by side and becomes a grid at three panes', () => {
+        const two = openBeside(null, 'a', 'b', 'grid')!;
+        expect(two.layout).toBe('columns');
+        expect(openBeside(two, 'b', 'c', 'grid')).toMatchObject({
+            layout: 'grid',
+            panes: ['a', 'b', 'c'],
+        });
+    });
+    it('a fourth pane turns columns into a grid; a fifth opens as a tab', () => {
+        let s = openBeside(null, 'a', 'b', 'columns')!;
+        s = openBeside(s, 'b', 'c', 'columns')!;
+        expect(s.layout).toBe('columns');
+        s = openBeside(s, 'c', 'd', 'columns')!;
+        expect(s).toMatchObject({ layout: 'grid', panes: ['a', 'b', 'c', 'd'] });
+        expect(openBeside(s, 'd', 'e', 'columns')).toBeNull();
+    });
+    it('keeps divider positions', () => {
+        const s = { layout: 'columns' as const, panes: ['a', 'b'], x: 0.3, y: 0.5 };
+        expect(openBeside(s, 'b', 'c', 'grid')).toMatchObject({ x: 0.3 });
     });
 });

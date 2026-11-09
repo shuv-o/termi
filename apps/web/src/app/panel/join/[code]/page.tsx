@@ -66,7 +66,7 @@ export default function JoinSessionPage({ params }: { params: Promise<{ code: st
     }
 
     return (
-        <div className="flex h-[calc(100vh-7.5rem)] flex-col gap-2 p-3 lg:h-screen">
+        <div className="flex h-[calc(100vh-7.5rem)] flex-col gap-2 p-3 lg:h-[calc(100vh-var(--shell-top,0px))]">
             <p className="text-sm text-muted-foreground" role="status">
                 {status.s === 'connecting' && 'Connecting…'}
                 {status.s === 'waiting' && `Waiting for ${info.ownerEmail} to let you in…`}

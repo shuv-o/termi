@@ -13,13 +13,13 @@ import {
     Play,
     Plus,
     Server,
-    Users,
-    Settings as SettingsIcon,
     Shield,
     SquareTerminal,
     UserCog,
     Lock,
     Cable,
+    LayoutPanelLeft,
+    Palette,
 } from 'lucide-react';
 import {
     CommandDialog,
@@ -40,6 +40,20 @@ import { NewSnippetDialog } from './NewSnippetDialog';
 import { useSnippetRunner } from '@/components/terminal/SnippetRunner';
 import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
 import { LOCK_NOW_EVENT } from './AppLock';
+import { NAV_ITEMS, itemAvailable } from './navigation';
+import type { MenuItemId } from '@/lib/appearance/prefs';
+
+/** Older and everyday words that should still find each page. */
+const PAGE_SYNONYMS: Record<MenuItemId, string> = {
+    servers: 'fleet dashboard hosts',
+    connections: 'sessions terminals tabs open',
+    local: 'local shell this computer',
+    serial: 'usb console cable router switch',
+    keys: 'keychain credentials passwords ssh keys security keys',
+    groups: 'folders',
+    teams: 'team vault members',
+    settings: 'account preferences',
+};
 import { useSessionsContext } from '../sessions-context';
 import type { ServerItem } from '../_dashboard/types';
 import type { Group } from '../groups/_components/types';
@@ -53,7 +67,7 @@ const SETTINGS_SECTIONS = [
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'passkeys', label: 'Passkeys', icon: Key },
     { id: 'notifications', label: 'Alerts', icon: BookKey },
-    { id: 'sessions', label: 'Active sessions', icon: Monitor },
+    { id: 'sessions', label: 'Signed-in devices', icon: Monitor },
     { id: 'activity', label: 'Account activity', icon: History },
 ];
 
@@ -69,6 +83,7 @@ export function CommandPalette() {
     const router = useRouter();
     const { activeTabId, sendToSession, sessions } = useSessionsContext();
     const [open, setOpen] = useState(false);
+    const isElectron = typeof window !== 'undefined' && !!window.electronAPI?.isElectron;
     const [showNewSnippet, setShowNewSnippet] = useState(false);
     const [showRunOn, setShowRunOn] = useState(false);
     // cmdk's onSelect carries no event, so the modifier is tracked here:
@@ -218,11 +233,11 @@ export function CommandPalette() {
                             Create group
                         </CommandItem>
                         <CommandItem
-                            value="new keychain entry credential"
+                            value="new saved login keychain entry credential password"
                             onSelect={() => go('/panel/keychain?new=1')}
                         >
                             <BookKey />
-                            New keychain entry
+                            New saved login
                         </CommandItem>
                         <CommandItem
                             value="open local terminal"
@@ -263,30 +278,32 @@ export function CommandPalette() {
                     <CommandSeparator />
 
                     <CommandGroup heading="Pages">
-                        <CommandItem value="servers fleet dashboard" onSelect={() => go('/panel')}>
-                            <Server />
-                            Servers
+                        {/* Every page, hidden from the menu or not; old names still match. */}
+                        {Object.values(NAV_ITEMS)
+                            .filter((item) => itemAvailable(item, { isElectron }))
+                            .map((item) => (
+                                <CommandItem
+                                    key={item.id}
+                                    value={`${item.name} ${PAGE_SYNONYMS[item.id]}`}
+                                    onSelect={() => go(item.href)}
+                                >
+                                    <item.icon />
+                                    {item.name}
+                                </CommandItem>
+                            ))}
+                        <CommandItem
+                            value="appearance theme dark light colours layout"
+                            onSelect={() => go('/panel/settings?section=appearance')}
+                        >
+                            <Palette />
+                            Appearance
                         </CommandItem>
                         <CommandItem
-                            value="sessions terminal"
-                            onSelect={() => go('/panel/sessions')}
+                            value="arrange menu sidebar customize navigation reorder hide"
+                            onSelect={() => go('/panel/settings?section=appearance#menu')}
                         >
-                            <Monitor />
-                            Sessions
-                        </CommandItem>
-                        <CommandItem
-                            value="keychain credentials"
-                            onSelect={() => go('/panel/keychain')}
-                        >
-                            <BookKey />
-                            Keychain
-                        </CommandItem>
-                        <CommandItem
-                            value="teams team vault members"
-                            onSelect={() => go('/panel/teams')}
-                        >
-                            <Users />
-                            Teams
+                            <LayoutPanelLeft />
+                            Arrange menu
                         </CommandItem>
                         <CommandItem
                             value="lock termi now screen"
@@ -297,17 +314,6 @@ export function CommandPalette() {
                         >
                             <Lock />
                             Lock Termi now
-                        </CommandItem>
-                        <CommandItem value="groups" onSelect={() => go('/panel/groups')}>
-                            <FolderOpen />
-                            Groups
-                        </CommandItem>
-                        <CommandItem
-                            value="settings account"
-                            onSelect={() => go('/panel/settings')}
-                        >
-                            <SettingsIcon />
-                            Settings
                         </CommandItem>
                     </CommandGroup>
 
@@ -336,7 +342,7 @@ export function CommandPalette() {
                     {entries.length > 0 && (
                         <>
                             <CommandSeparator />
-                            <CommandGroup heading="Keychain">
+                            <CommandGroup heading="Saved logins">
                                 {entries.map((entry) => (
                                     <CommandItem
                                         key={entry.id}

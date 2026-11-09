@@ -56,6 +56,10 @@ model User {
   passwordLoginDisabled Boolean @default(false)
   /// Lock the app after this many idle minutes (null = never).
   lockAfterMinutes      Int?
+  /// Look and layout choices (lib/appearance/prefs.ts); null = defaults.
+  appearance            Json?
+  /// When the user finished (or skipped) the first-run setup; null = show it.
+  onboardedAt           DateTime?
 
   // Relations
   sessions            Session[]

@@ -36,6 +36,7 @@ export interface AuthSession {
 /** Which settings panel is on screen. */
 export type SectionId =
     | 'profile'
+    | 'appearance'
     | 'security'
     | 'passkeys'
     | 'notifications'
@@ -47,6 +48,7 @@ export type SectionId =
 
 export const SECTION_IDS: SectionId[] = [
     'profile',
+    'appearance',
     'security',
     'passkeys',
     'notifications',
@@ -60,10 +62,11 @@ export const SECTION_IDS: SectionId[] = [
 /** Short labels used by the mobile section picker. */
 export const SECTION_SHORT_LABELS: Record<SectionId, string> = {
     profile: 'Profile',
+    appearance: 'Appearance',
     security: 'Security',
     passkeys: 'Passkeys',
     notifications: 'Alerts',
-    sessions: 'Sessions',
+    sessions: 'Devices',
     activity: 'Activity',
     recordings: 'Recordings',
     tunnels: 'Tunnels',

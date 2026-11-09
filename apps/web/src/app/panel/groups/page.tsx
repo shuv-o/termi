@@ -73,7 +73,7 @@ export default function GroupsPage() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-[calc(100vh-0rem)] -m-4 lg:-m-8">
+        <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-[calc(100vh-var(--shell-top,0px))] -m-4 lg:-m-8">
             <Suspense fallback={null}>
                 <ParamsFromUrl
                     onGroupParam={() => setMobileShowDetail(true)}

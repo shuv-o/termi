@@ -26,7 +26,7 @@ export default function SCPPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-dvh lg:h-screen">
+            <div className="flex items-center justify-center h-dvh lg:h-[calc(100vh-var(--shell-top,0px))]">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
@@ -34,7 +34,7 @@ export default function SCPPage() {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center h-dvh lg:h-screen gap-4">
+            <div className="flex flex-col items-center justify-center h-dvh lg:h-[calc(100vh-var(--shell-top,0px))] gap-4">
                 <AlertCircle className="w-10 h-10 text-danger" />
                 <p className="text-danger">{error}</p>
                 <Button asChild>
