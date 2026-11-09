@@ -241,20 +241,13 @@ Termi uses SemVer tags and GitHub Releases.
 5. Two workflows fire on the tag:
     - `release.yml` publishes the release, using the matching changelog section as release notes.
     - `electron-build.yml` builds the desktop app on macOS, Windows and Linux, and uploads the installers plus the `latest*.yml` auto-update metadata.
-6. **Build and upload the macOS arm64 DMG by hand.** It is not built in CI — electron-builder passes `--timestamp` to `codesign --sign -`, and ad-hoc signatures cannot be timestamped, so the arm64 target times out against Apple's timestamp server on GitHub runners. It builds fine on an Apple Silicon machine:
-    ```bash
-    npx electron-builder --mac --arm64
-    gh release upload v1.0.5 \
-        dist/termi-1.0.5-arm64.dmg dist/termi-1.0.5-arm64.dmg.blockmap \
-        dist/termi-1.0.5-arm64-mac.zip dist/termi-1.0.5-arm64-mac.zip.blockmap
-    ```
-    Skipping this ships a release with no native Apple Silicon build; CI will not warn you.
+6. Check the release has the six installers — macOS x64 and arm64 (`.dmg`), Linux x64 and arm64 (`.AppImage`), and one Windows installer (`.exe`) covering x64 and arm64 — plus `latest.yml`, `latest-linux.yml` and `latest-linux-arm64.yml`. To see what a release would get without publishing, run **Build Desktop Apps** by hand (Actions → Run workflow).
 
 ### Release notes
 
-- Do not delete the `latest*.yml` assets. Windows and Linux read them to detect updates — removing them silently disables auto-update. The `.blockmap` files enable delta downloads.
+- Do not delete the `latest*.yml` assets. Windows and Linux read them to detect and download updates — removing them silently disables auto-update.
 - GitHub always attaches "Source code (zip/tar.gz)". These are generated from the tag and cannot be removed.
-- macOS builds are ad-hoc signed but not notarized, so they cannot self-update. Windows and Linux self-update normally. An Apple Developer ID would resolve notarization, macOS auto-update and the arm64 CI build together.
+- macOS builds are ad-hoc signed but not notarized, so they cannot self-update: the app checks GitHub's API for a newer release and opens the download page. An Apple Developer ID would allow notarization and real macOS auto-update.
 
 ---
 

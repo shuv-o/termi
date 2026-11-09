@@ -77,6 +77,7 @@ async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
  * electron-builder omits the arch suffix for the default x64 build
  * (`Termi-1.0.4.dmg`) and appends it otherwise (`Termi-1.0.4-arm64.dmg`), so
  * x64 is matched by the *absence* of an arm marker rather than its presence.
+ * The Windows installer has no suffix because it installs either build.
  */
 function findAsset(assets: GitHubAsset[], os: OS, arch: Arch): GitHubAsset | null {
     const ext = EXTENSION[os];
@@ -89,8 +90,11 @@ function findAsset(assets: GitHubAsset[], os: OS, arch: Arch): GitHubAsset | nul
         const isArm = /arm64|aarch64/.test(name);
         return arch === 'arm64' ? isArm : !isArm;
     });
+    if (candidates[0]) return candidates[0];
 
-    return candidates[0] ?? null;
+    // The Windows installer covers x64 and arm64 in one file (no arch suffix).
+    if (os === 'windows' && arch === 'arm64') return findAsset(assets, 'windows', 'x64');
+    return null;
 }
 
 function parseParam<T extends string>(value: string | null, allowed: readonly T[]): T | null {

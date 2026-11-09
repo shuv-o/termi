@@ -6,8 +6,8 @@
 // app update — auto-update exists for everything that ships inside the binary.
 //
 // Flow: on launch (and every few hours) the app asks GitHub for the latest
-// release's metadata (latest.yml / latest-mac.yml / latest-linux.yml). If a
-// newer version exists it downloads the installer in the background, then
+// release's metadata (latest.yml / latest-linux.yml / latest-linux-arm64.yml).
+// If a newer version exists it downloads the installer in the background, then
 // prompts the user to restart and apply it.
 //
 // Platform notes:
@@ -18,8 +18,10 @@
 //     error and no dialog. So on macOS we do NOT auto-download or offer
 //     "Restart to install" (that button would appear to do nothing). Instead,
 //     when a newer version exists we point the user at the download page to
-//     install the new .dmg by hand. See docs/PASSKEYS.md for the
-//     signing setup that would let us restore true self-update here.
+//     install the new .dmg by hand. The check asks GitHub's API for the latest
+//     release, so releases carry no macOS update files (latest-mac.yml, zips,
+//     blockmaps). See docs/PASSKEYS.md for the signing setup that would let us
+//     restore true self-update here.
 
 const { app, dialog, ipcMain, shell, BrowserWindow } = require('electron');
 
@@ -28,6 +30,7 @@ const IS_MAC = process.platform === 'darwin';
 
 // Where to send macOS users to download a build by hand.
 const RELEASES_URL = 'https://github.com/shuv-o/termi/releases/latest';
+const LATEST_RELEASE_API = 'https://api.github.com/repos/shuv-o/termi/releases/latest';
 
 // How often to re-check while the app stays open.
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -90,6 +93,51 @@ function promptManualDownload(info) {
     });
 }
 
+/** True when version `a` (x.y.z) is newer than `b`. */
+function isNewer(a, b) {
+    const pa = String(a)
+        .split('.')
+        .map((n) => parseInt(n, 10) || 0);
+    const pb = String(b)
+        .split('.')
+        .map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
+    }
+    return false;
+}
+
+/** macOS: the latest release's version, from GitHub's API. */
+async function latestMacVersion() {
+    const { net } = require('electron');
+    const res = await net.fetch(LATEST_RELEASE_API, {
+        headers: {
+            accept: 'application/vnd.github+json',
+            'user-agent': `Termi/${app.getVersion()}`,
+        },
+    });
+    if (!res.ok) throw new Error(`GitHub answered ${res.status}`);
+    const { tag_name: tag } = await res.json();
+    if (!tag) throw new Error('No release found');
+    return String(tag).replace(/^v/, '');
+}
+
+/** macOS check: prompt the manual download when a newer version exists. */
+async function checkMac() {
+    emit('updater:status', { state: 'checking' });
+    const version = await latestMacVersion();
+    if (isNewer(version, app.getVersion())) {
+        log('update available:', version);
+        emit('updater:status', { state: 'available', version });
+        promptManualDownload({ version });
+    } else {
+        emit('updater:status', { state: 'none' });
+    }
+    return version;
+}
+
+let macReady = false;
+
 /**
  * Wire up electron-updater. No-op in dev / unpackaged builds (there is no
  * app-update.yml and no signed artifact to compare against).
@@ -103,6 +151,16 @@ function initAutoUpdater({ isDev } = {}) {
         return;
     }
 
+    if (IS_MAC) {
+        macReady = true;
+        registerIpc();
+        const check = () => checkMac().catch((e) => log('check failed:', e.message));
+        check();
+        checkTimer = setInterval(check, CHECK_INTERVAL_MS);
+        if (checkTimer.unref) checkTimer.unref();
+        return;
+    }
+
     try {
         ({ autoUpdater } = require('electron-updater'));
     } catch (e) {
@@ -111,10 +169,8 @@ function initAutoUpdater({ isDev } = {}) {
         return;
     }
 
-    // macOS can't apply unsigned updates, so don't download one it can't use —
-    // just detect the new version and send the user to the download page.
-    autoUpdater.autoDownload = !IS_MAC;
-    autoUpdater.autoInstallOnAppQuit = !IS_MAC;
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
     // We prompt the user ourselves, so don't let electron-updater relaunch on its own.
     autoUpdater.logger = { info: log, warn: log, error: log, debug: () => {} };
 
@@ -122,9 +178,6 @@ function initAutoUpdater({ isDev } = {}) {
     autoUpdater.on('update-available', (info) => {
         log('update available:', info.version);
         emit('updater:status', { state: 'available', version: info.version });
-        // On macOS this is the end of the line for the automated flow: prompt the
-        // manual download here, since no 'update-downloaded' will follow.
-        if (IS_MAC) promptManualDownload(info);
     });
     autoUpdater.on('update-not-available', () => emit('updater:status', { state: 'none' }));
     autoUpdater.on('download-progress', (p) =>
@@ -163,6 +216,13 @@ function registerIpc() {
 
     // Manual "Check for updates" trigger from the app menu or renderer.
     ipcMain.handle('updater:check', async () => {
+        if (macReady) {
+            try {
+                return { success: true, version: await checkMac() };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
         if (!autoUpdater) return { success: false, error: 'Auto-update not available' };
         try {
             const r = await autoUpdater.checkForUpdates();
@@ -194,7 +254,7 @@ function registerIpc() {
  * tells the user when they're already up to date.
  */
 async function checkForUpdatesInteractive() {
-    if (!autoUpdater) {
+    if (!autoUpdater && !macReady) {
         const w = mainWindow();
         const opts = {
             type: 'info',
@@ -207,11 +267,12 @@ async function checkForUpdatesInteractive() {
         return w ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts);
     }
     try {
-        const r = await autoUpdater.checkForUpdates();
-        const latest = r?.updateInfo?.version;
-        // If an update was found, the 'update-available'/'update-downloaded'
-        // handlers drive the UX. Only announce the "already current" case here.
-        if (latest && latest === app.getVersion()) {
+        const latest = macReady
+            ? await checkMac()
+            : (await autoUpdater.checkForUpdates())?.updateInfo?.version;
+        // If an update was found, the update handlers drive the UX. Only
+        // announce the "already current" case here.
+        if (latest && !isNewer(latest, app.getVersion())) {
             const w = mainWindow();
             const opts = {
                 type: 'info',

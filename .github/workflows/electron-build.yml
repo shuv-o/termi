@@ -15,6 +15,9 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  # Dry run: builds every installer without publishing, and lists what a
+  # release would get.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -41,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Build & publish desktop app
-        run: npm run publish:electron
+        run: npm run ${{ github.event_name == 'push' && 'publish:electron' || 'build:electron -- --publish never' }}
         env:
           # electron-builder uploads artifacts to the GitHub Release via this token.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,3 +63,8 @@ jobs:
           # notarize: true (plus APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD /
           # APPLE_TEAM_ID) — both are required before mac apps can self-update.
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: List release files
+        if: always()
+        shell: bash
+        run: ls -la dist | grep -vE '^d|builder-' || true
