@@ -1,47 +1,89 @@
-# Built from the REPOSITORY ROOT (docker build -f apps/web/Dockerfile .) so the
-# root package-lock.json pins every dependency, transitive ones included:
-# `npm ci` installs exactly what the lockfile says or fails.
-FROM node:26.12.1-slim AS deps
+FROM node:24.22.1-slim AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# The lockfile covers every workspace, so npm ci needs all their manifests.
-COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/
-COPY apps/gateway/package.json ./apps/gateway/
-COPY apps/mobile/package.json ./apps/mobile/
+# Copy ALL workspace package.json files so npm can resolve the full workspace graph
+COPY package.json ./
 
-RUN npm ci --workspace=apps/web --no-audit --no-fund
+RUN npm install && \
+    LCSS_VER=$(node -p "require('./node_modules/lightningcss/package.json').version") && \
+    OXIDE_VER=$(node -p "require('./node_modules/@tailwindcss/oxide/package.json').version") && \
+    ARCH=$(node -p "process.arch === 'arm64' ? 'arm64' : 'x64'") && \
+    npm install --no-save \
+      "lightningcss-linux-${ARCH}-gnu@${LCSS_VER}" \
+      "@tailwindcss/oxide-linux-${ARCH}-gnu@${OXIDE_VER}"
 
 # Stage 2: Builder
-FROM node:26.12.1-slim AS builder
+FROM node:24.22.1-slim AS builder
 WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y openssl
 
-# Dependencies (root node_modules plus any workspace-local ones), then source
-COPY --from=deps /app ./
-COPY apps/web ./apps/web
-WORKDIR /app/apps/web
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-# Only NEXT_PUBLIC_* values are needed to build: Next.js writes them into
-# the browser bundle. Secrets and other settings are read when the
-# container starts (docker run -e / compose environment), so they never
-# go into build arguments, the build cache or image history.
+ARG DB_HOST
+ARG DB_PORT
+ARG DB_USER
+ARG DB_NAME
+ARG DB_PASSWORD
+ARG SESSION_SECRET
+ARG ENCRYPTION_KEY
+ARG GATEWAY_JWT_SECRET
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_GATEWAY_URL
+ARG GOOGLE_CLIENT_ID
+ARG GOOGLE_CLIENT_SECRET
+ARG GOOGLE_REDIRECT_URI
+ARG SMTP_HOST
+ARG SMTP_PORT
+ARG SMTP_SECURE
+ARG SMTP_USER
+ARG SMTP_PASS
+ARG SMTP_FROM
+ARG VAPID_PUBLIC_KEY
+ARG VAPID_PRIVATE_KEY
+ARG VAPID_SUBJECT
+ARG ALLOW_PRIVATE_NETWORKS
+ARG TRUSTED_PROXY
+
+ENV DB_HOST=${DB_HOST}
+ENV DB_PORT=${DB_PORT}
+ENV DB_USER=${DB_USER}
+ENV DB_NAME=${DB_NAME}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV SESSION_SECRET=${SESSION_SECRET}
+ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
+ENV GATEWAY_JWT_SECRET=${GATEWAY_JWT_SECRET}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL}
+ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+ENV GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+ENV SMTP_HOST=${SMTP_HOST}
+ENV SMTP_PORT=${SMTP_PORT}
+ENV SMTP_SECURE=${SMTP_SECURE}
+ENV SMTP_USER=${SMTP_USER}
+ENV SMTP_PASS=${SMTP_PASS}
+ENV SMTP_FROM=${SMTP_FROM}
+ENV VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+ENV VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+ENV VAPID_SUBJECT=${VAPID_SUBJECT}
+ENV ALLOW_PRIVATE_NETWORKS=${ALLOW_PRIVATE_NETWORKS}
+ENV TRUSTED_PROXY=${TRUSTED_PROXY}
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:26.12.1-alpine AS runner
+FROM node:24.22.1-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -51,13 +93,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files. The standalone output mirrors the monorepo: the server
-# is apps/web/server.js and its traced dependencies sit in /app/node_modules.
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY --from=builder /app/apps/web/prisma ./apps/web/prisma
-COPY --from=builder /app/apps/web/prisma.config.ts ./apps/web/prisma.config.ts
+# Copy necessary files
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 
 # Bake the Prisma CLI into the image at build time. The standalone output
@@ -66,14 +107,8 @@ COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 # from the registry inside the entrypoint on every fresh container's first
 # start, adding ~3 minutes to startup. Pinned to the exact @prisma/client
 # version already baked in above to avoid drift.
-# Installed in its own directory (an npm install inside the workspace layout
-# would act on the workspace) and linked where prisma.config.ts's
-# `import 'prisma/config'` resolves; its own dependencies resolve from there.
 RUN PRISMA_VERSION=$(node -p "require('@prisma/client/package.json').version") && \
-    mkdir -p /opt/prisma-cli && cd /opt/prisma-cli && echo '{"private":true}' > package.json && \
-    npm install --no-audit --no-fund "prisma@$PRISMA_VERSION" && \
-    ln -s /opt/prisma-cli/node_modules/prisma /app/node_modules/prisma && \
-    ln -s /opt/prisma-cli/node_modules/.bin/prisma /usr/local/bin/prisma
+    npm install --no-save --no-audit --no-fund "prisma@$PRISMA_VERSION"
 
 # Set permissions
 RUN chown -R nextjs:nodejs /app
@@ -94,14 +129,17 @@ COPY --chmod=755 <<'EOF' /usr/local/bin/docker-entrypoint.sh
 #!/bin/sh
 set -e
 
-cd /app/apps/web
+FLAG_FILE="/app/.migrations_done"
 
-# Idempotent and fast (the CLI is baked in), so it runs on every start. No
-# "already migrated" flag file: the container can then run with a read-only
-# filesystem, and an image upgrade always applies its new migrations.
-echo "Applying database migrations..."
-prisma migrate deploy
-exec node server.js
+if [ ! -f "$FLAG_FILE" ]; then
+    echo "First run detected - Running migrations..."
+    npx prisma migrate deploy
+    echo "Migrations completed!"
+    touch "$FLAG_FILE"
+else
+    echo "Migrations already run, skipping..."
+fi
+node server.js
 EOF
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
