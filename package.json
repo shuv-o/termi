@@ -1,6 +1,6 @@
 {
     "name": "termi",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
@@ -29,11 +29,11 @@
         "db:seed": "npm run db:seed --workspace=apps/web",
         "db:studio": "npm run db:studio --workspace=apps/web",
         "setup:electron": "electron-rebuild -f -w node-pty",
-        "electron:dev": "ELECTRON_DEV=1 electron .",
-        "electron:dev:full": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
+        "electron:dev": "npm run build:electron:gateway && ELECTRON_DEV=1 electron .",
+        "electron:dev:full": "npm run build:electron:gateway && concurrently --kill-others-on-fail \"npm run dev\" \"npm run dev:gateway\" \"ELECTRON_DEV=1 TERMI_REMOTE_URL=http://localhost:22080 electron .\"",
         "build:electron:config": "node -e \"require('fs').writeFileSync('apps/electron/build-config.json', JSON.stringify({ remoteUrl: process.env.TERMI_REMOTE_URL || 'https://termi.run' }, null, 2) + '\\n')\"",
-        "build:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder",
-        "publish:electron": "npm run build:electron:config && npm run generate-icons --workspace=apps/web && electron-builder --publish always",
+        "build:electron": "npm run build:electron:config && npm run build:electron:gateway && npm run generate-icons --workspace=apps/web && electron-builder",
+        "publish:electron": "npm run build:electron:config && npm run build:electron:gateway && npm run generate-icons --workspace=apps/web && electron-builder --publish always",
         "mobile:config": "npm run config --workspace=apps/mobile",
         "mobile:sync": "npm run sync --workspace=apps/mobile",
         "mobile:add:ios": "npm run add:ios --workspace=apps/mobile",
@@ -41,7 +41,8 @@
         "mobile:open:ios": "npm run open:ios --workspace=apps/mobile",
         "mobile:open:android": "npm run open:android --workspace=apps/mobile",
         "db:reseal": "npm run db:reseal --workspace=apps/web --",
-        "sync:tunnel-runtime": "node scripts/sync-tunnel-runtime.mjs"
+        "sync:tunnel-runtime": "node scripts/sync-tunnel-runtime.mjs",
+        "build:electron:gateway": "node scripts/build-desktop-gateway.mjs"
     },
     "dependencies": {
         "electron-updater": "^6.8.11",

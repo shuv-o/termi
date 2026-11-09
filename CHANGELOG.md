@@ -8,9 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+---
+
+## [1.2.1] — 2026-11-10
+
+An AI assistant that never sees your secrets, SSH and file transfer straight from the desktop app, a new landing page, and leaner desktop releases.
+
+**Upgrading:** the web image applies the new database migrations on start (AI conversations, desktop devices, a server's "Connect from" setting); nothing to configure. The AI assistant stays off until `AI_*` is set or a user adds their own key. Connecting from the computer needs desktop app 1.2.1 (Windows and Linux update themselves; macOS users download it).
+
 ### Added
 
 - **AI assistant.** An Assistant page and **Ask AI** beside every terminal: explain what's on screen, find out why a command failed, or turn a request into a command, which is pasted into the terminal, never run. Works with Anthropic or OpenAI, or any OpenAI-compatible server (vLLM, Ollama, LM Studio): the deployment can offer one to everyone (`AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_BASE_URL`), and each user can bring their own key, model and endpoint in Settings → AI assistant. Every password, private key and passphrase Termi holds for the user, and anything that looks like a secret, is removed on the server before a message is sent or saved; the assistant knows servers by name only. Conversations are kept and lasting facts remembered (both encrypted), and users can see and delete them. Also in search (⌘K): "Ask the assistant".
+
+- **Connect from this computer (desktop app).** SSH terminals, the file browser and port forwards to your own servers can run from your computer instead of the Termi server, through a gateway built into the app. Each SSH server has a **Connect from** setting: Termi server (as before), This computer, or Automatic (this computer first, then Termi if it can't reach the server). Turn it on for a sign-in in Settings → Devices → This computer, which asks for your password or passkey, is emailed to you and logged. Logins are sent to the app sealed to a key that never leaves it (encrypted at rest with the OS keychain), only for servers you own, and stop working when that sign-in ends; shared and team servers always go through Termi. The app's gateway listens on this computer only and needs a secret made at launch, and pages reach it only through the app. Host keys are checked the same way as on the server: recorded on first use, then strictly verified.
 
 - **A new landing page.** A hero you can try (terminal, files, remote desktop and split panes), the path a password takes through Termi, how a connection is made, team access, and a searchable explorer with every feature in detail, plus answers to common questions.
 - **Easier to find.** Every public page has its own title, description, canonical link and link-preview image; the home page describes Termi to search engines (app details, all features, screenshots, and its questions as an FAQ); the web manifest has screenshots for richer install prompts; and `/llms.txt` summarises Termi for AI assistants. Search Console and Bing verification tokens can be set with `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION`.
@@ -24,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Fixed
 
 - Live network rates under 1 KB/s showed long unrounded numbers (`649.616368286445 B/s`).
+- Uploading an empty file through the gateway's file transfer never finished.
 - Every page declared the home page as its canonical URL, the sitemap listed pages marked "noindex", and the security page said passwords use Argon2id (they use scrypt).
 
 ---
@@ -435,6 +446,8 @@ First release to actually ship desktop installers. v1.0.2 built them but uploade
 - Patched transitive dependencies (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
 - Password-reset URLs (single-use tokens) are no longer written to server logs in production
 
-[Unreleased]: https://github.com/shuv-o/termi/compare/v1.0.10...HEAD
+[Unreleased]: https://github.com/shuv-o/termi/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/shuv-o/termi/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/shuv-o/termi/compare/v1.0.10...v1.2.0
 [1.0.10]: https://github.com/shuv-o/termi/compare/v1.0.8...v1.0.10
 [1.0.0]: https://github.com/shuv-o/termi/releases/tag/v1.0.0
