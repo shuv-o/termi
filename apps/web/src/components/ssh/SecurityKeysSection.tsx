@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Check, Copy, KeySquare, Loader2, Plus, Trash2 } from 'lucide-react';
+import { KeySquare, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CopyTextButton } from '@/components/common/CopyButton';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { mutateCache, revalidate, useCachedFetch } from '@/lib/hooks/useCachedFetch';
@@ -11,28 +12,6 @@ import { mutateCache, revalidate, useCachedFetch } from '@/lib/hooks/useCachedFe
 interface KeysData {
     sshdConfigLine: string;
     keys: { id: string; label: string; authorizedKey: string; lastUsedAt: string | null }[];
-}
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-    const [done, setDone] = useState(false);
-    return (
-        <Button
-            size="sm"
-            variant="secondary"
-            aria-label={label}
-            onClick={() =>
-                navigator.clipboard
-                    .writeText(text)
-                    .then(() => {
-                        setDone(true);
-                        setTimeout(() => setDone(false), 1500);
-                    })
-                    .catch(() => {})
-            }
-        >
-            {done ? <Check /> : <Copy />}
-        </Button>
-    );
 }
 
 /**
@@ -97,14 +76,19 @@ export function SecurityKeysSection() {
                     <code className="min-w-0 flex-1 truncate rounded-md bg-secondary px-2 py-1.5 font-mono text-xs">
                         {data.sshdConfigLine}
                     </code>
-                    <CopyButton text={data.sshdConfigLine} label="Copy sshd_config line" />
+                    <CopyTextButton
+                        iconOnly
+                        text={data.sshdConfigLine}
+                        label="Copy sshd_config line"
+                    />
                 </div>
             )}
             {(data?.keys ?? []).map((k) => (
                 <div key={k.id} className="space-y-1 rounded-lg border border-border p-2">
                     <div className="flex items-center gap-2">
                         <span className="flex-1 text-sm font-medium">{k.label}</span>
-                        <CopyButton
+                        <CopyTextButton
+                            iconOnly
                             text={k.authorizedKey}
                             label={`Copy public key of ${k.label}`}
                         />

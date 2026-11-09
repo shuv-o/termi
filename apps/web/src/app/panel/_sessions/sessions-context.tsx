@@ -11,7 +11,7 @@ import {
     type ReactNode,
 } from 'react';
 
-import { openBeside, prunePanes, type SplitState } from './_sessions/split';
+import { openBeside, prunePanes, type SplitState } from './split';
 import { getAppearance } from '@/lib/appearance/store';
 
 // TYPES

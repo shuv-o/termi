@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 
-import { toneText, type Tone } from '@/lib/status-style';
+import { toneText, type Tone } from '@/lib/style/status';
 import { cn } from '@/lib/utils';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -139,7 +139,9 @@ function Toaster({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: numbe
                         className="animate-toast-in pointer-events-auto flex items-start gap-3 rounded-xl border border-border bg-popover px-3.5 py-3 text-sm shadow-xl"
                     >
                         <Icon className={cn('mt-px h-4 w-4 shrink-0', toneText[tone])} />
-                        <span className="flex-1 break-words leading-snug text-foreground">{t.message}</span>
+                        <span className="flex-1 break-words leading-snug text-foreground">
+                            {t.message}
+                        </span>
                         <button
                             type="button"
                             onClick={() => onDismiss(t.id)}

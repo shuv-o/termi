@@ -5,8 +5,6 @@ import {
     AlertTriangle,
     ArrowDownLeft,
     ArrowUpRight,
-    Check,
-    Copy,
     ExternalLink,
     Globe,
     Laptop,
@@ -17,6 +15,7 @@ import {
     X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CopyTextButton } from '@/components/common/CopyButton';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { formatRelativeTime } from '@/lib/format';
@@ -27,33 +26,9 @@ import {
     type TunnelResult,
     type TunnelSessionRow,
     type useTunnels,
-} from './useTunnels';
+} from '@/components/tunnels/useTunnels';
 
 type Tunnels = ReturnType<typeof useTunnels>;
-
-function CopyTextButton({ text, label = 'Copy' }: { text: string; label?: string }) {
-    const [copied, setCopied] = useState(false);
-    return (
-        <Button
-            variant="secondary"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => {
-                navigator.clipboard.writeText(text).then(() => {
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 1500);
-                });
-            }}
-        >
-            {copied ? (
-                <Check className="w-3.5 h-3.5 text-success" />
-            ) : (
-                <Copy className="w-3.5 h-3.5" />
-            )}
-            {copied ? 'Copied' : label}
-        </Button>
-    );
-}
 
 function downloadScript(content: string) {
     const blob = new Blob([content], { type: 'text/javascript' });

@@ -11,7 +11,7 @@ import type { SessionServerMeta } from './ServerMeta';
 import { TunnelDialog } from './TunnelDialog';
 import { ShareSessionDialog } from './ShareSessionDialog';
 import { useShells } from './useShells';
-import { useSessionsContext, type Session, type SessionStatus } from '../../sessions-context';
+import { useSessionsContext, type Session, type SessionStatus } from '../sessions-context';
 import type { PaneRect } from '../split';
 
 const TEXT_ENCODER = new TextEncoder();

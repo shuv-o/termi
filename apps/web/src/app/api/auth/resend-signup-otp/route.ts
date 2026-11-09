@@ -7,7 +7,7 @@
 import { z } from 'zod';
 import { sendEmailOTP } from '@/lib/auth/email-otp';
 import { validateBody, successResponse, errorResponse, getClientIP } from '@/lib/api';
-import { registerRateLimit } from '@/lib/rate-limit';
+import { registerRateLimit } from '@/lib/security/rate-limit';
 import { prisma } from '@/lib/db';
 
 const schema = z.object({

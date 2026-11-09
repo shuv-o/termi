@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
-import { recordingCreateRateLimit } from '@/lib/rate-limit';
+import { recordingCreateRateLimit } from '@/lib/security/rate-limit';
 import { prisma } from '@/lib/db';
 import { sealField } from '@/lib/crypto/credentials';
 import {

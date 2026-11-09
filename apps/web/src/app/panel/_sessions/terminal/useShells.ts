@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Session } from '../../sessions-context';
+import type { Session } from '../sessions-context';
 
 export interface ShellTab {
     id: string; // React key, stable across re-renders

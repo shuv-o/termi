@@ -1,6 +1,6 @@
 import { FolderOpen, Monitor, Terminal, Tv } from 'lucide-react';
 
-import { protocolColors, protocolRings } from '@/lib/protocol-style';
+import { protocolColors, protocolRings } from '@/lib/style/protocol';
 
 export interface Group {
     id: string;

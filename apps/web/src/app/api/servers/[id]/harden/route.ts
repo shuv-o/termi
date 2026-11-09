@@ -19,7 +19,7 @@ import {
     unauthorizedResponse,
     validateBody,
 } from '@/lib/api';
-import { serverHardenRateLimit } from '@/lib/rate-limit';
+import { serverHardenRateLimit } from '@/lib/security/rate-limit';
 import { hardenServer, type HardenEvent } from '@/lib/services/hardening/harden.service';
 import {
     commitCredentials,

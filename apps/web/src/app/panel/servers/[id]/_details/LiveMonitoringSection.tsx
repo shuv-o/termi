@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { LiveMetricsBody } from '@/components/monitoring/live/LiveMetrics';
 import { useLiveMetrics } from '@/components/monitoring/live/useLiveMetrics';
 import { formatBytes } from '@/lib/format';
-import { toneText, usageTone } from '@/lib/status-style';
+import { toneText, usageTone } from '@/lib/style/status';
 
 function Reading({
     label,
@@ -23,9 +23,7 @@ function Reading({
 }) {
     return (
         <div className="flex min-w-0 flex-col gap-0.5 rounded-lg border border-border/50 bg-secondary/60 px-3 py-2">
-            <span className="text-[11px] text-muted-foreground">
-                {label}
-            </span>
+            <span className="text-[11px] text-muted-foreground">{label}</span>
             <span className={`text-lg font-bold tabular-nums ${tone ?? 'text-foreground'}`}>
                 {value}
             </span>
@@ -140,12 +138,7 @@ export function LiveMonitoringSection({ serverId }: { serverId: string }) {
                 </div>
             )}
 
-            <LiveMetricsBody
-                history={history}
-                latest={latest}
-                error={error}
-                idle={!enabled}
-            />
+            <LiveMetricsBody history={history} latest={latest} error={error} idle={!enabled} />
 
             <p className="mt-4 border-t border-border/50 pt-3 text-[11px] text-muted-foreground">
                 Sampled over SSH roughly every few seconds while this tab is open. The charts above

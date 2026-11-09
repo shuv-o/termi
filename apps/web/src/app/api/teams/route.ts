@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { successResponse, validateBody } from '@/lib/api';
 import { createTeam, listTeams } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 const createSchema = z.object({ name: z.string().trim().min(1, 'Name the team').max(60) });
 

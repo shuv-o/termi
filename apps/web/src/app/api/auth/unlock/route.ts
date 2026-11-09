@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { getLockedSessionUser } from '@/lib/auth';
 import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
 import { getSession, revokeSession, setSessionLocked } from '@/lib/auth/session';
-import { countEvent, resetCounter } from '@/lib/rate-limit';
+import { countEvent, resetCounter } from '@/lib/security/rate-limit';
 import { errorResponse, successResponse, unauthorizedResponse, validateBody } from '@/lib/api';
 
 const MAX_FAILURES = 5;

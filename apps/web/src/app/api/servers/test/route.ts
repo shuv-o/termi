@@ -16,7 +16,7 @@ import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
 import { assertValidJumpHost, JumpHostError, loadJump } from '@/lib/services/server.service';
 import { connectSSH, type SSHJumpConfig } from '@/lib/services/ssh-jump';
 import { checkReachabilityVia } from '@/lib/services/metrics.service';
-import { connectionTestRateLimit } from '@/lib/rate-limit';
+import { connectionTestRateLimit } from '@/lib/security/rate-limit';
 
 const schema = z.object({
     host: z.string().min(1),

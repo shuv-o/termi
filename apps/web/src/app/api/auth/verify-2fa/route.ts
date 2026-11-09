@@ -12,7 +12,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { verify2FARateLimit } from '@/lib/rate-limit';
+import { verify2FARateLimit } from '@/lib/security/rate-limit';
 
 const verifySchema = z.object({
     // Allow 6-digit OTP or XXXX-XXXX recovery code

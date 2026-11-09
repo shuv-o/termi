@@ -23,12 +23,12 @@ import { MotionRow, useListMotion } from '@/components/ui/list-motion';
 import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Snippet } from '@/components/terminal/TerminalToolbar';
-import { useSnippetRunner } from '@/components/terminal/SnippetRunner';
+import type { Snippet } from '@/lib/snippets/types';
+import { useSnippetRunner } from '@/components/snippets/SnippetRunner';
 import { mutateCache, useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { commandParts } from '@/lib/snippets/variables';
-import { NewSnippetDialog } from '../_shell/NewSnippetDialog';
-import { useSessionsContext } from '../sessions-context';
+import { NewSnippetDialog } from '@/components/snippets/NewSnippetDialog';
+import { useSessionsContext } from '@/app/panel/_sessions/sessions-context';
 
 const KEY = '/api/snippets';
 type Data = { snippets: Snippet[] };

@@ -1,5 +1,5 @@
-export { protocolIcons, protocolColors } from '@/lib/protocol-style';
-import { toneDot, tonePill, toneText, type Tone } from '@/lib/status-style';
+export { protocolIcons, protocolColors } from '@/lib/style/protocol';
+import { toneDot, tonePill, toneText, type Tone } from '@/lib/style/status';
 
 export interface ServerInfo {
     id: string;

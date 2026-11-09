@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { successResponse, validateBody } from '@/lib/api';
 import { addServerToTeam } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 const schema = z.object({ serverId: z.string().min(1).max(64) });
 

@@ -15,7 +15,7 @@ import { jumpClaim } from '@/lib/auth/connectionToken';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { getServerForConnection } from '@/lib/services';
 import { probeTunnelTarget } from '@/lib/services/tunnel.service';
-import { tunnelCreateRateLimit } from '@/lib/rate-limit';
+import { tunnelCreateRateLimit } from '@/lib/security/rate-limit';
 import { buildBridgeScript } from '@/lib/tunnel/bridge';
 import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 import { prisma } from '@/lib/db';

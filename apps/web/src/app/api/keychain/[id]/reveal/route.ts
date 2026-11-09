@@ -23,7 +23,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { keychainReadRateLimit } from '@/lib/rate-limit';
+import { keychainReadRateLimit } from '@/lib/security/rate-limit';
 import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
 import { getKeychainCredentialById } from '@/lib/services/keychain.service';
 

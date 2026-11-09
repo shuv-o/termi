@@ -1,6 +1,6 @@
 'use client';
 
-import { toneDot, tonePill, type Tone } from '@/lib/status-style';
+import { toneDot, tonePill, type Tone } from '@/lib/style/status';
 
 export type ServerStatus = 'online' | 'offline' | 'unknown';
 
@@ -37,9 +37,7 @@ export function ServerStatusPill({
         <span
             className={`inline-flex shrink-0 items-center rounded-full border font-medium tabular-nums ${tonePill[tone]} ${sizeClass}`}
         >
-            <span
-                className={`shrink-0 rounded-full ${toneDot[tone]} ${dotSizeClass}`}
-            />
+            <span className={`shrink-0 rounded-full ${toneDot[tone]} ${dotSizeClass}`} />
             {label}
         </span>
     );

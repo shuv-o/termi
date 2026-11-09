@@ -8,7 +8,7 @@ import { AlertTriangle, ArrowUpDown, ChevronDown, Download, Plus, Upload } from 
 import { Button } from '@/components/ui/button';
 import { PageHeader, PAGE_CONTENT_WIDTH } from '@/components/ui/page-header';
 import { useToast } from '@/components/ui/toast';
-import { connectHref } from '@/lib/connect-route';
+import { connectHref } from '@/lib/servers/connect-route';
 import { Card } from '@/components/ui/card';
 import {
     AlertDialog,
@@ -30,7 +30,7 @@ import {
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import type { RevealField } from '@/components/auth/PasskeyRevealModal';
 
-import { useSessionsContext } from './sessions-context';
+import { useSessionsContext } from '@/app/panel/_sessions/sessions-context';
 import { DashboardEmptyState, DashboardSkeleton } from './_dashboard/DashboardPlaceholders';
 import { DashboardToolbar } from './_dashboard/DashboardToolbar';
 import { FleetAlerts } from './_dashboard/FleetAlerts';
@@ -248,7 +248,9 @@ export default function DashboardPage() {
                                             className="sm:w-auto sm:px-4"
                                         >
                                             <ArrowUpDown className="w-4 h-4" />
-                                            <span className="hidden sm:inline">Import / export</span>
+                                            <span className="hidden sm:inline">
+                                                Import / export
+                                            </span>
                                             <ChevronDown className="hidden w-3.5 h-3.5 opacity-60 sm:block" />
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -374,9 +376,7 @@ export default function DashboardPage() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleting}>
-                            Cancel
-                        </AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={deleting}

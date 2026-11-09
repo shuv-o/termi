@@ -44,7 +44,8 @@ const MODE_OF: Record<ForwardMode, TunnelMode> = {
     remote: 'REMOTE',
 };
 
-function buildProxyUrl(serverId: string, remotePort: number, remoteHost: string): string {
+/** The same-origin link that opens an HTTP service through Termi's tunnel proxy. */
+export function buildProxyUrl(serverId: string, remotePort: number, remoteHost: string): string {
     const hostParam = remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(remoteHost)}` : '';
     return `${window.location.origin}/tunnel/${serverId}/${remotePort}${hostParam}`;
 }

@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import TerminalLogo from '@/components/common/Logo';
 import { useActiveRect } from '@/lib/hooks/useActiveRect';
 import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
-import { isNavItemActive, type NavItem, type PanelUser } from './navigation';
+import { isNavItemActive, type NavItem, type PanelUser } from '@/lib/navigation';
 
 function openCommandPalette() {
     window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT));

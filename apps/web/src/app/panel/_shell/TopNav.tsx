@@ -8,7 +8,7 @@ import TerminalLogo from '@/components/common/Logo';
 import { useActiveRect } from '@/lib/hooks/useActiveRect';
 import { openSearch } from './DesktopSidebar';
 import { UserMenu } from './MobileChrome';
-import { isNavItemActive, type NavItem, type PanelUser } from './navigation';
+import { isNavItemActive, type NavItem, type PanelUser } from '@/lib/navigation';
 
 /** Height of the top bar; the page and the sessions workspace sit below it. */
 export const TOP_NAV_H = 'lg:pt-12';

@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { MOBILE_BAR_MAX, type MenuItemId } from '@/lib/appearance/prefs';
 import { setAppearance, useAppearance } from '@/lib/appearance/store';
-import { NAV_ITEMS } from '@/app/panel/_shell/navigation';
+import { NAV_ITEMS } from '@/lib/navigation';
 
 const NEEDS_NOTE = {
     'desktop-app': 'Shows in the desktop app only',

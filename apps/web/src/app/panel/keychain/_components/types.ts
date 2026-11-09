@@ -1,11 +1,4 @@
-export interface KeychainEntry {
-    id: string;
-    label: string;
-    username: string;
-    hasPassword: boolean;
-    hasPrivateKey: boolean;
-    createdAt: string;
-}
+export type { KeychainEntry } from '@/lib/keychain/types';
 
 export interface EntryForm {
     label: string;

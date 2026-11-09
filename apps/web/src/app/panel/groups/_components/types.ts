@@ -1,5 +1,5 @@
 import { FolderOpen, Globe, Layers, Lock, Monitor, Server, Tag, Terminal } from 'lucide-react';
-export { protocolIcons, protocolColors } from '@/lib/protocol-style';
+export { protocolIcons, protocolColors } from '@/lib/style/protocol';
 
 export interface ServerInGroup {
     id: string;
@@ -12,16 +12,8 @@ export interface ServerInGroup {
     lastUsedAt: string | null;
 }
 
-export interface Group {
-    id: string;
-    name: string;
-    description: string | null;
-    color: string | null;
-    icon: string | null;
-    sortOrder: number;
-    createdAt: string;
-    _count: { servers: number };
-}
+export type { Group } from '@/lib/groups/types';
+import type { Group } from '@/lib/groups/types';
 
 export interface GroupDetail extends Group {
     servers: ServerInGroup[];

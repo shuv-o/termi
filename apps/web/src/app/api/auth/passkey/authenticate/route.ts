@@ -12,7 +12,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { passkeyAuthRateLimit } from '@/lib/rate-limit';
+import { passkeyAuthRateLimit } from '@/lib/security/rate-limit';
 
 const authenticateSchema = z.object({
     response: z.any(), // AuthenticationResponseJSON — validated by simplewebauthn

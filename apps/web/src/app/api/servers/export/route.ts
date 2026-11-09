@@ -32,7 +32,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { serverExportRateLimit } from '@/lib/rate-limit';
+import { serverExportRateLimit } from '@/lib/security/rate-limit';
 import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
 import {
     buildPayload,

@@ -32,14 +32,14 @@ import {
 } from '@/components/ui/command';
 import { DialogTitle } from '@/components/ui/dialog';
 import { mutateCache, useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { protocolIcons } from '@/lib/protocol-style';
-import { connectHref } from '@/lib/connect-route';
-import type { Snippet } from '@/components/terminal/TerminalToolbar';
-import { NewSnippetDialog } from './NewSnippetDialog';
-import { useSnippetRunner } from '@/components/terminal/SnippetRunner';
+import { protocolIcons } from '@/lib/style/protocol';
+import { connectHref } from '@/lib/servers/connect-route';
+import type { Snippet } from '@/lib/snippets/types';
+import { NewSnippetDialog } from '@/components/snippets/NewSnippetDialog';
+import { useSnippetRunner } from '@/components/snippets/SnippetRunner';
 import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
 import { LOCK_NOW_EVENT } from './AppLock';
-import { NAV_ITEMS, itemAvailable } from './navigation';
+import { NAV_ITEMS, itemAvailable } from '@/lib/navigation';
 import type { MenuItemId } from '@/lib/appearance/prefs';
 
 /** Older and everyday words that should still find each page. */
@@ -58,10 +58,10 @@ const PAGE_SYNONYMS: Record<MenuItemId, string> = {
     history: 'logs recent connections recordings activity audit',
     settings: 'account preferences',
 };
-import { useSessionsContext } from '../sessions-context';
-import type { ServerItem } from '../_dashboard/types';
-import type { Group } from '../groups/_components/types';
-import type { KeychainEntry } from '../keychain/_components/types';
+import { useSessionsContext } from '@/app/panel/_sessions/sessions-context';
+import type { ServerItem } from '@/lib/servers/types';
+import type { Group } from '@/lib/groups/types';
+import type { KeychainEntry } from '@/lib/keychain/types';
 
 /** Fired by any button (e.g. the sidebar search field) that wants to open the palette. */
 export const OPEN_COMMAND_PALETTE_EVENT = 'termi:open-command-palette';

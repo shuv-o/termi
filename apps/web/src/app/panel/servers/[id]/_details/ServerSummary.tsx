@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { formatRelativeTime } from '@/lib/format';
-import { connectHref } from '@/lib/connect-route';
+import { connectHref } from '@/lib/servers/connect-route';
 import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
 import { QRConnectDialog } from './QRConnectDialog';
 import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } from './types';
@@ -15,9 +15,7 @@ import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } fr
 function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
         <div className="flex min-w-[96px] flex-col gap-0.5 rounded-md border border-border bg-background/50 px-3 py-2">
-            <span className="text-[11px] text-muted-foreground">
-                {label}
-            </span>
+            <span className="text-[11px] text-muted-foreground">{label}</span>
             <span className="text-sm font-semibold tabular-nums text-foreground">{value}</span>
             {sub && <span className="text-[11px] text-muted-foreground">{sub}</span>}
         </div>

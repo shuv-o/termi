@@ -5,7 +5,7 @@ import type { Appearance } from '@/lib/appearance/prefs';
 import { useResolvedTheme } from '@/lib/appearance/store';
 import { useXtermLook } from '@/lib/appearance/useTerminalLook';
 import type { TerminalPalette } from '@/lib/appearance/terminal-themes';
-import { NAV_ITEMS, itemAvailable } from '@/app/panel/_shell/navigation';
+import { NAV_ITEMS, itemAvailable } from '@/lib/navigation';
 
 /** One terminal pane, drawn with the chosen scheme, font and cursor. */
 function PreviewPane({

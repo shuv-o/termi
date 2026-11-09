@@ -17,7 +17,7 @@ import {
 import { createSession, getSession, validateSession } from './session';
 import { verifyTOTP, generateRecoveryCodes, normalizeRecoveryCode } from './totp';
 import { sendEmailOTP, verifyEmailOTP } from './email-otp';
-import { verify2FAAccountRateLimit } from '@/lib/rate-limit';
+import { verify2FAAccountRateLimit } from '@/lib/security/rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 
 // TYPES

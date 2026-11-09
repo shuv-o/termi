@@ -6,7 +6,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/auth/email-verification';
 import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
-import { sendVerificationRateLimit } from '@/lib/rate-limit';
+import { sendVerificationRateLimit } from '@/lib/security/rate-limit';
 
 export async function POST() {
     const user = await getCurrentUser();

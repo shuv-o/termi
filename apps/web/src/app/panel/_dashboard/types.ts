@@ -1,36 +1,7 @@
-export { protocolIcons, protocolColors as protocolVariants } from '@/lib/protocol-style';
+export { protocolIcons, protocolColors as protocolVariants } from '@/lib/style/protocol';
 
-export interface ServerItem {
-    id: string;
-    name: string;
-    description?: string;
-    protocol: 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';
-    tags: string[];
-    isFavorite: boolean;
-    hasPassword: boolean;
-    lastUsedAt: string | null;
-    host: string;
-    username: string;
-    port: number;
-    /** Set when this server is reached through another one (a bastion). */
-    jumpServerId?: string | null;
-    group: {
-        id: string;
-        name: string;
-        color: string | null;
-    } | null;
-}
-
-export interface ServerMetrics {
-    reachable: boolean;
-    latencyMs?: number;
-    cpu?: number;
-    cpuModel?: string;
-    ram?: { usedBytes: number; totalBytes: number; percent: number; speedMhz?: number };
-    disk?: { usedBytes: number; totalBytes: number; percent: number };
-    network?: { rxBytes: number; txBytes: number };
-    error?: string;
-}
+export type { ServerItem, ServerMetrics } from '@/lib/servers/types';
+import type { ServerItem, ServerMetrics } from '@/lib/servers/types';
 
 export type ViewMode = 'grid' | 'list';
 export type ProtocolFilter = 'all' | 'SSH' | 'SCP' | 'RDP' | 'VNC' | 'TELNET';

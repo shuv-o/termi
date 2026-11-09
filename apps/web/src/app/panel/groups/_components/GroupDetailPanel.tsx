@@ -13,7 +13,7 @@ import {
     Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { connectHref } from '@/lib/connect-route';
+import { connectHref } from '@/lib/servers/connect-route';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatRelativeTime } from '@/lib/format';
 import {

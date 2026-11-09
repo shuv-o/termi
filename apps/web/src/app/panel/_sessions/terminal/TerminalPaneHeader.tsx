@@ -27,7 +27,7 @@ import { IconButton, IconButtonDivider } from '@/components/ui/icon-button';
 import { FIND_SHORTCUT_LABEL } from '@/components/terminal/TerminalSearch';
 import { StatusDot, statusColor, statusLabel } from '../status';
 import { HostChip, sshCommand, useCopyToClipboard, type SessionServerMeta } from './ServerMeta';
-import type { Session } from '../../sessions-context';
+import type { Session } from '../sessions-context';
 import type { ShellTab } from './useShells';
 
 function ShellTabs({

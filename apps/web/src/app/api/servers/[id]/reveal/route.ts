@@ -17,7 +17,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { credentialRevealRateLimit } from '@/lib/rate-limit';
+import { credentialRevealRateLimit } from '@/lib/security/rate-limit';
 import { decryptCredentials } from '@/lib/crypto/credentials';
 import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
 

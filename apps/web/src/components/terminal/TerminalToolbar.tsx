@@ -33,21 +33,14 @@ import {
     Play,
     Keyboard as KeyboardIcon,
 } from 'lucide-react';
-import { useSnippetRunner } from './SnippetRunner';
+import { useSnippetRunner } from '@/components/snippets/SnippetRunner';
 import { RunOnServersDialog } from '@/components/servers/RunOnServersDialog';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-
-export interface Snippet {
-    id: string;
-    label: string;
-    command: string;
-    icon?: string | null;
-    runImmediately: boolean;
-}
+import type { Snippet } from '@/lib/snippets/types';
 
 interface BuiltinTool {
     key: string;

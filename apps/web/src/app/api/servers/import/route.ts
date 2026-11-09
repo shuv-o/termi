@@ -33,7 +33,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { serverImportPreviewRateLimit, serverImportRateLimit } from '@/lib/rate-limit';
+import { serverImportPreviewRateLimit, serverImportRateLimit } from '@/lib/security/rate-limit';
 import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
 import { createServer, createServerGroup, JumpHostError } from '@/lib/services';
 import { Protocol } from '@/app/generated/prisma/client';
