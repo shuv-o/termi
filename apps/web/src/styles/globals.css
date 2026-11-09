@@ -601,6 +601,16 @@ html {
     animation: termi-cursor-blink 1s steps(1, end) 2;
 }
 
+/* Landing hero: the pane cross-fades when the visitor switches view. */
+.hero-pane {
+    animation: hero-pane-in 180ms ease-out;
+}
+@keyframes hero-pane-in {
+    from {
+        opacity: 0;
+    }
+}
+
 /* Loading state: the cursor simply keeps blinking until there is something to show. */
 .cursor-block.cursor-waiting {
     margin-left: 0;
@@ -702,7 +712,8 @@ html {
     .animate-fade-in,
     .animate-toast-in,
     .route-loader,
-    .termi-row-new {
+    .termi-row-new,
+    .hero-pane {
         animation: none;
     }
     .termi-fold,
