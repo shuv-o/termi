@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, request as pwRequest } from '@playwright/test';
 import { BASE } from './env';
 import { signInPage, signedIn, sql, state } from './helpers';
 
@@ -42,6 +42,21 @@ test('opening a server is logged once per stretch of work, for that user only', 
     const bobs = (await (await bob.get('/api/account/connections')).json()).data.entries;
     expect(bobs.some((e: { serverId: string }) => e.serverId === sshServerId)).toBe(false);
     expect(recentConnections(bobId, sshServerId)).toBe(0);
+});
+
+test('connection history needs a session, and old Settings links only match real sections', async ({
+    page,
+}) => {
+    const anon = await pwRequest.newContext({ baseURL: BASE });
+    expect((await anon.get('/api/account/connections')).status()).toBe(401);
+
+    await signInPage(page, 'alice');
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(`${BASE}/panel/settings?section=constructor`);
+    await expect(page).toHaveURL(/\/panel\/settings\?section=constructor/);
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+    expect(errors).toEqual([]);
 });
 
 test('History lists connections and opens them again', async ({ page }) => {

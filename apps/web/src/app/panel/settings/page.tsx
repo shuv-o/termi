@@ -34,7 +34,8 @@ function SectionFromUrl({ onSection }: { onSection: (s: SectionId) => void }) {
 
     useEffect(() => {
         const section = searchParams.get('section');
-        if (section && MOVED_SECTIONS[section]) {
+        // Own keys only: `?section=constructor` must not match Object's built-ins.
+        if (section && Object.hasOwn(MOVED_SECTIONS, section)) {
             router.replace(MOVED_SECTIONS[section]);
             return;
         }
