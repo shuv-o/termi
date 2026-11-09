@@ -27,7 +27,7 @@ import {
 } from '@/lib/api';
 import { getServerById } from '@/lib/services';
 import { probeHostKey, trustHostKey } from '@/lib/services/host-key.service';
-import { connectionTestRateLimit } from '@/lib/rate-limit';
+import { connectionTestRateLimit } from '@/lib/security/rate-limit';
 import { notifySecurityEvent } from '@/lib/services/security-alerts.service';
 
 const STEP_UP_GRACE_MS = 5 * 60 * 1000;

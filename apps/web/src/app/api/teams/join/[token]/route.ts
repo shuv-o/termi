@@ -5,7 +5,7 @@
 
 import { notFoundResponse, successResponse } from '@/lib/api';
 import { acceptInvitation, describeInvitation } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 interface P {
     params: Promise<{ token: string }>;

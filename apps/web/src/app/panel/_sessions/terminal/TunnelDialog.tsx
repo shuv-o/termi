@@ -1,8 +1,8 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ForwardForm, TunnelSessionRowCard } from '../../servers/[id]/_details/TunnelSection';
-import { useTunnels } from '../../servers/[id]/_details/useTunnels';
+import { ForwardForm, TunnelSessionRowCard } from '@/components/tunnels/TunnelSection';
+import { useTunnels } from '@/components/tunnels/useTunnels';
 
 /**
  * Same port-forwarding flow as the server detail page's Port Forwarding

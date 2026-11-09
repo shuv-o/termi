@@ -7,7 +7,7 @@ import { CopyButton } from '@/components/common/CopyButton';
 import { formatBytes, formatRelativeTime } from '@/lib/format';
 import { ServerActionsMenu } from './ServerActionsMenu';
 import { ServerStatusPill } from './StatusIndicator';
-import { toneDot, toneText, usageTone } from '@/lib/status-style';
+import { toneDot, toneText, usageTone } from '@/lib/style/status';
 import { protocolIcons, protocolVariants, type ServerCardProps } from './types';
 
 /** A single usage bar (CPU / RAM / Disk) inside the card's metrics strip. */
@@ -134,12 +134,13 @@ export function ServerGridCard({
                         <ServerStatusPill status="offline" label="Offline" />
                     ) : null}
                     {server.group && (
-                        <span
-                            className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-px text-[11px] font-medium text-foreground/80"
-                        >
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-px text-[11px] font-medium text-foreground/80">
                             <span
                                 className="h-1.5 w-1.5 rounded-full"
-                                style={{ backgroundColor: server.group.color || 'var(--muted-foreground)' }}
+                                style={{
+                                    backgroundColor:
+                                        server.group.color || 'var(--muted-foreground)',
+                                }}
                             />
                             {server.group.name}
                         </span>

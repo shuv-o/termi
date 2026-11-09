@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
-import { connectHref } from '@/lib/connect-route';
+import { connectHref } from '@/lib/servers/connect-route';
 import {
     AlertDialog,
     AlertDialogAction,

@@ -8,7 +8,7 @@
 import { randomInt, scryptSync, timingSafeEqual, randomBytes } from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/db';
-import { countEvent, resetCounter } from '@/lib/rate-limit';
+import { countEvent, resetCounter } from '@/lib/security/rate-limit';
 
 // CONSTANTS
 

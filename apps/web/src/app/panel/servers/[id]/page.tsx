@@ -10,12 +10,12 @@ import { HealthHistorySection } from './_details/HealthHistorySection';
 import { LiveMonitoringSection } from './_details/LiveMonitoringSection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
 import { SecurityScanSection } from './_details/SecurityScanSection';
-import { HostKeySection } from './_details/HostKeySection';
+import { HostKeySection } from '@/components/servers/HostKeySection';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
-import { TunnelSection } from './_details/TunnelSection';
+import { TunnelSection } from '@/components/tunnels/TunnelSection';
 import { useBenchmark } from './_details/useBenchmark';
 import { useServerMonitoring } from './_details/useServerMonitoring';
-import { useTunnels } from './_details/useTunnels';
+import { useTunnels } from '@/components/tunnels/useTunnels';
 import type { ServerInfo } from './_details/types';
 
 export default function ServerDetailsPage() {

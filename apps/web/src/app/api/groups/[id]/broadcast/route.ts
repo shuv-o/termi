@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { getBroadcastableServers, runBroadcast } from '@/lib/services';
-import { broadcastCommandRateLimit } from '@/lib/rate-limit';
+import { broadcastCommandRateLimit } from '@/lib/security/rate-limit';
 import { prisma } from '@/lib/db';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 

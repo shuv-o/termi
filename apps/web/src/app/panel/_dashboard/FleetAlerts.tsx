@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, ChevronDown, WifiOff } from 'lucide-react';
-import { USAGE_CRIT_PCT } from '@/lib/status-style';
+import { USAGE_CRIT_PCT } from '@/lib/style/status';
 import type { ServerItem, ServerMetrics } from './types';
 
 /** Collapsible banner listing offline and high-load servers. */

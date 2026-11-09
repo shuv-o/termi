@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
-import { broadcastCommandRateLimit } from '@/lib/rate-limit';
+import { broadcastCommandRateLimit } from '@/lib/security/rate-limit';
 import { getRunnableServers, MAX_RUN_SERVERS, runBroadcast } from '@/lib/services';
 
 const schema = z.object({

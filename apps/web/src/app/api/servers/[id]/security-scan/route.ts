@@ -11,7 +11,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getServerById } from '@/lib/services';
 import { scanServer, ScanFailedError } from '@/lib/services/hardening/scan.service';
 import { errorResponse, notFoundResponse, successResponse, unauthorizedResponse } from '@/lib/api';
-import { securityScanRateLimit } from '@/lib/rate-limit';
+import { securityScanRateLimit } from '@/lib/security/rate-limit';
 
 interface RouteParams {
     params: Promise<{ id: string }>;

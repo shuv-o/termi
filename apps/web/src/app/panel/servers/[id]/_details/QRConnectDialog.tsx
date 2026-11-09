@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import { Loader2, Smartphone } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getSiteUrl } from '@/lib/site';
-import { connectHref } from '@/lib/connect-route';
+import { connectHref } from '@/lib/servers/connect-route';
 
 /**
  * Scan-to-connect: renders a QR code for this server's connect URL. The

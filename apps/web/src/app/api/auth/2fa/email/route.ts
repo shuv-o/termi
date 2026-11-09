@@ -7,7 +7,7 @@ import { getCurrentUser, enableEmailOTP } from '@/lib/auth';
 import { sendEmailOTP } from '@/lib/auth/email-otp';
 import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 import { getClientIP } from '@/lib/api';
-import { emailOtpRateLimit } from '@/lib/rate-limit';
+import { emailOtpRateLimit } from '@/lib/security/rate-limit';
 import { getSession } from '@/lib/auth/session';
 
 // POST - Enable email OTP as 2FA method

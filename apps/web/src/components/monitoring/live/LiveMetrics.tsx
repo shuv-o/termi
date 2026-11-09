@@ -4,11 +4,11 @@ import { Activity, ArrowDown, ArrowUp, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { formatBytes } from '@/lib/format';
-import { toneText, usageTone } from '@/lib/status-style';
+import { toneText, usageTone } from '@/lib/style/status';
 import { cn } from '@/lib/utils';
 import { LiveSparkline } from './LiveSparkline';
 import { useLiveMetrics, type MetricPoint } from './useLiveMetrics';
-import type { ServerMetrics } from '@/app/panel/_dashboard/types';
+import type { ServerMetrics } from '@/lib/servers/types';
 
 // Canvas/SVG strokes need literal colours, so these mirror --success / --info
 // from globals.css (the same pair the dashboard CPU/RAM gauges use).

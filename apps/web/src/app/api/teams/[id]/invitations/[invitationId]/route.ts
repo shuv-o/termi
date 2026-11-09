@@ -2,7 +2,7 @@
 
 import { successResponse } from '@/lib/api';
 import { revokeInvitation } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 export async function DELETE(
     _r: Request,

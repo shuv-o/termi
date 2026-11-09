@@ -10,7 +10,7 @@
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { createTunnelSession, listActiveTunnelSessions } from '@/lib/services';
-import { tunnelCreateRateLimit } from '@/lib/rate-limit';
+import { tunnelCreateRateLimit } from '@/lib/security/rate-limit';
 import { validateBody, successResponse, errorResponse, unauthorizedResponse } from '@/lib/api';
 
 const createSchema = z.object({

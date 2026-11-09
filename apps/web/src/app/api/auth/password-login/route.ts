@@ -21,7 +21,7 @@ import {
     getDeviceInfo,
 } from '@/lib/api';
 import { reauthFields, hasReauthProof, verifyReauth } from '@/lib/auth/reauth';
-import { credentialRevealRateLimit } from '@/lib/rate-limit';
+import { credentialRevealRateLimit } from '@/lib/security/rate-limit';
 
 const schema = z.object({
     disabled: z.boolean(),

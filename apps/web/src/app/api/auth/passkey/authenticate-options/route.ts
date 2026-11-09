@@ -7,7 +7,7 @@
 import { z } from 'zod';
 import { generatePasskeyAuthenticationOptions } from '@/lib/auth';
 import { validateBody, successResponse, errorResponse } from '@/lib/api';
-import { passkeyAuthRateLimit } from '@/lib/rate-limit';
+import { passkeyAuthRateLimit } from '@/lib/security/rate-limit';
 import { getClientIP } from '@/lib/api';
 
 const optionsSchema = z.object({

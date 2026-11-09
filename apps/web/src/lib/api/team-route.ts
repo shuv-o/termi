@@ -2,7 +2,7 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { errorResponse, unauthorizedResponse } from '@/lib/api';
-import { TeamError } from './team.service';
+import { TeamError } from '@/lib/services/team.service';
 
 /** Run `fn` for the signed-in user; TeamErrors become their status code. */
 export async function teamRoute(fn: (userId: string) => Promise<Response>): Promise<Response> {

@@ -2,9 +2,9 @@
 
 import { z } from 'zod';
 import { errorResponse, successResponse, validateBody } from '@/lib/api';
-import { teamInviteRateLimit } from '@/lib/rate-limit';
+import { teamInviteRateLimit } from '@/lib/security/rate-limit';
 import { inviteToTeam } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 const schema = z.object({
     email: z.string().trim().email().max(254),

@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { successResponse, validateBody } from '@/lib/api';
 import { deleteTeam, getTeam, renameTeam } from '@/lib/services/team.service';
-import { teamRoute } from '@/lib/services/team-route';
+import { teamRoute } from '@/lib/api/team-route';
 
 interface P {
     params: Promise<{ id: string }>;

@@ -12,7 +12,7 @@ import {
     getClientIP,
     getDeviceInfo,
 } from '@/lib/api';
-import { loginRateLimit } from '@/lib/rate-limit';
+import { loginRateLimit } from '@/lib/security/rate-limit';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),

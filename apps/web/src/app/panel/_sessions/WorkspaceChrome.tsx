@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { StatusDot, statusColor, statusLabel } from './status';
-import type { Session } from '../sessions-context';
+import type { Session } from './sessions-context';
 import type { LayoutMode, WorkspaceMode } from './types';
 
 /** Layout toggles, session counts, terminal/transfer switch and fullscreen. */

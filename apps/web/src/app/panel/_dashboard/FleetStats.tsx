@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { latencyTone, toneText, USAGE_WARN_PCT } from '@/lib/status-style';
+import { latencyTone, toneText, USAGE_WARN_PCT } from '@/lib/style/status';
 import type { ServerItem, ServerMetrics } from './types';
 
 /** Fleet summary strip across the top of the dashboard. */

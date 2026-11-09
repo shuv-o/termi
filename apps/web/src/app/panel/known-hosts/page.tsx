@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { formatRelativeTime } from '@/lib/format';
-import { HostKeySection } from '../servers/[id]/_details/HostKeySection';
+import { HostKeySection } from '@/components/servers/HostKeySection';
 
 interface ServerRow {
     id: string;

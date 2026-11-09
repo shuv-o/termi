@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { OPEN_COMMAND_PALETTE_EVENT } from './CommandPalette';
-import { activeNavName, isNavItemActive, type NavItem, type PanelUser } from './navigation';
+import { activeNavName, isNavItemActive, type NavItem, type PanelUser } from '@/lib/navigation';
 
 /** Prompt to verify the account email; sits above the mobile header. */
 export function VerifyEmailBanner({

@@ -8,7 +8,7 @@ import { registerUser } from '@/lib/auth';
 import { randomBytes } from 'crypto';
 import { sendEmailOTP, sendAccountExistsNotice } from '@/lib/auth/email-otp';
 import { validateBody, successResponse, errorResponse, getClientIP } from '@/lib/api';
-import { registerRateLimit } from '@/lib/rate-limit';
+import { registerRateLimit } from '@/lib/security/rate-limit';
 
 const registerSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100, 'Name too long'),

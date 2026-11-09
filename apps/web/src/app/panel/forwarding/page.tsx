@@ -16,8 +16,13 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
-import { ForwardForm, TunnelSessionRowCard } from '../servers/[id]/_details/TunnelSection';
-import { rowRequest, useTunnels, type TunnelSessionRow } from '../servers/[id]/_details/useTunnels';
+import { ForwardForm, TunnelSessionRowCard } from '@/components/tunnels/TunnelSection';
+import {
+    buildProxyUrl,
+    rowRequest,
+    useTunnels,
+    type TunnelSessionRow,
+} from '@/components/tunnels/useTunnels';
 
 interface ServerOption {
     id: string;
@@ -28,10 +33,7 @@ interface ServerOption {
 const LAST_SERVER = 'termi-forward-server';
 
 function proxyUrl(row: TunnelSessionRow): string | null {
-    if (!row.serverId) return null;
-    const host =
-        row.remoteHost !== '127.0.0.1' ? `?host=${encodeURIComponent(row.remoteHost)}` : '';
-    return `${window.location.origin}/tunnel/${row.serverId}/${row.remotePort}${host}`;
+    return row.serverId ? buildProxyUrl(row.serverId, row.remotePort, row.remoteHost) : null;
 }
 
 /** The forward form for one server; tells the page when its list changed. */

@@ -1,8 +1,9 @@
 'use client';
 
-import { SessionsProvider } from './sessions-context';
+import dynamic from 'next/dynamic';
+import { SessionsProvider } from './_sessions/sessions-context';
+import SessionsWorkspace from './_sessions/SessionsWorkspace';
 import { AppLock } from './_shell/AppLock';
-import SessionsWorkspace from './sessions-workspace';
 import StarNudge from '@/components/common/StarNudge';
 import { ToastProvider } from '@/components/ui/toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -10,12 +11,17 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { CommandPalette } from './_shell/CommandPalette';
 import { DesktopSidebar } from './_shell/DesktopSidebar';
 import { TopNav } from './_shell/TopNav';
-import { FirstRunSetup } from '@/components/appearance/FirstRunSetup';
 import { mutateCache } from '@/lib/hooks/useCachedFetch';
-import type { PanelUser } from './_shell/navigation';
+import type { PanelUser } from '@/lib/navigation';
 import { MobileBottomNav, MobileTopBar, VerifyEmailBanner } from './_shell/MobileChrome';
 import { usePanelShell } from './_shell/usePanelShell';
 import { useRouteFade } from './_shell/useRouteFade';
+
+// Only new accounts ever see it, so it isn't part of every panel page's bundle.
+const FirstRunSetup = dynamic(
+    () => import('@/components/appearance/FirstRunSetup').then((m) => m.FirstRunSetup),
+    { ssr: false },
+);
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
     const shell = usePanelShell();

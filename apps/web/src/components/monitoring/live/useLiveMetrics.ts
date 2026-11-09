@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { ServerMetrics } from '@/app/panel/_dashboard/types';
+import type { ServerMetrics } from '@/lib/servers/types';
 
 export interface MetricPoint {
     t: number;

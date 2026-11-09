@@ -15,7 +15,7 @@ import {
     getDeviceInfo,
 } from '@/lib/api';
 import { prisma } from '@/lib/db';
-import { verifySignupRateLimit } from '@/lib/rate-limit';
+import { verifySignupRateLimit } from '@/lib/security/rate-limit';
 
 const schema = z.object({
     userId: z.string().min(1),

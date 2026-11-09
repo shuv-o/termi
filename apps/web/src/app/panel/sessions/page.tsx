@@ -13,7 +13,7 @@
 
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSessionsContext } from '../sessions-context';
+import { useSessionsContext } from '@/app/panel/_sessions/sessions-context';
 import { OPEN_WORKSPACE_EVENT } from '../_sessions/events';
 
 function AutoConnect() {

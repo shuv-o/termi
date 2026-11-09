@@ -22,7 +22,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { protocolChipActive, protocolChipIdle } from '@/lib/protocol-style';
+import { protocolChipActive, protocolChipIdle } from '@/lib/style/protocol';
 import {
     PROTOCOL_FILTERS,
     SORT_OPTIONS,

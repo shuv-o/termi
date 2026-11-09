@@ -5,7 +5,7 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { errorResponse, successResponse, unauthorizedResponse } from '@/lib/api';
-import { connectionTokenRateLimit } from '@/lib/rate-limit';
+import { connectionTokenRateLimit } from '@/lib/security/rate-limit';
 import { describeShare, joinShare, SessionShareError } from '@/lib/services/session-share.service';
 
 interface P {

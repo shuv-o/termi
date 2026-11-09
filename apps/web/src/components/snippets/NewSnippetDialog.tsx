@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { Snippet } from '@/components/terminal/TerminalToolbar';
+import type { Snippet } from '@/lib/snippets/types';
 
 /**
  * Standalone "create a snippet" dialog reachable from the command palette —

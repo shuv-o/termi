@@ -19,7 +19,7 @@ import {
     getDeviceInfo,
 } from '@/lib/api';
 import { validateHost } from '@/lib/security/ssrf';
-import { connectionTokenRateLimit } from '@/lib/rate-limit';
+import { connectionTokenRateLimit } from '@/lib/security/rate-limit';
 import { ensureHostKeysPinned } from '@/lib/services/host-key.service';
 import { forwardClaims, forwardFields } from '@/lib/tunnel/forward';
 import { getKeychainCredentialById } from '@/lib/services/keychain.service';

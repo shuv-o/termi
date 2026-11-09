@@ -78,12 +78,16 @@ npm run dev:all
 ### Useful Dev Commands
 
 ```bash
+npm run check            # lint + type-check + unit tests: run this before a PR
+npm run lint             # ESLint across all workspaces
+npm run typecheck        # tsc --noEmit for web and gateway
+npm test                 # Unit tests (Vitest, single run)
+npm run test:watch --workspace=apps/web   # Unit tests in watch mode
+npm run test:security    # Security end-to-end suite (needs Docker)
+npm run format:check     # Prettier, without writing
 npm run db:studio        # Prisma Studio — browse the database
 npm run db:generate      # Re-generate Prisma client after schema changes
 npm run db:migrate       # Create and apply a new migration
-npm run lint             # ESLint across all workspaces
-npm test                 # Unit tests (Vitest)
-npm run test:e2e         # End-to-end tests (Playwright)
 ```
 
 ### RDP / VNC Testing
@@ -102,18 +106,42 @@ Then add an RDP or VNC server in the dashboard.
 ```
 termi/
 ├── apps/web/src/
-│   ├── app/api/         # REST API routes (Next.js App Router)
-│   ├── app/panel/       # Dashboard UI pages
-│   ├── components/      # React components
-│   └── lib/             # Auth, crypto, security, services
-│       ├── crypto/      # AES-256-GCM, key derivation
-│       ├── auth/        # Session, TOTP, passkey, OAuth
-│       └── security/    # SSRF validation, rate limiting
+│   ├── app/                    # Next.js App Router: routes only
+│   │   ├── api/<resource>/     # REST endpoints (route.ts), thin: validate, call a service, respond
+│   │   └── panel/<page>/       # Signed-in pages
+│   │       ├── page.tsx
+│   │       └── _components/    # Pieces used by this page only (underscore = not a route)
+│   │   (panel/_shell = the menu and chrome, panel/_sessions = terminals and splits,
+│   │    panel/_dashboard = the Servers page)
+│   ├── components/
+│   │   ├── ui/                 # Design-system primitives (button, dialog, list-motion…)
+│   │   ├── common/             # Small shared widgets (CopyButton, Logo)
+│   │   └── <feature>/          # UI used by more than one page: terminal, tunnels,
+│   │                           # snippets, servers, appearance, scp, monitoring…
+│   └── lib/                    # No React pages; mostly framework-free
+│       ├── services/           # Business logic and Prisma access (*.service.ts)
+│       ├── api/                # Route helpers (validateBody, responses, teamRoute)
+│       ├── auth/ crypto/ security/   # Sessions, encryption, SSRF, rate limits
+│       ├── <domain>/           # Domain helpers and types: servers, snippets, tunnel,
+│       │                       # appearance, terminal, transfer, ssh, serial…
+│       ├── hooks/              # Shared React hooks (useCachedFetch, useActiveRect)
+│       ├── style/              # Shared style maps (protocol icons and colours, status tones)
+│       └── navigation.ts       # The menu: every page, its name and icon
 ├── apps/gateway/src/
-│   ├── handlers/        # SSH, SCP, Guacamole, Local PTY
-│   └── auth/            # JWE token validation
-└── apps/electron/       # Electron main process & preload
+│   ├── handlers/               # SSH, SCP, Guacamole, Telnet, local PTY, tunnels
+│   ├── sessions/               # Persistent sessions, recording, limits
+│   └── auth/                   # JWE token validation, host keys
+└── apps/electron/              # Electron main process & preload
 ```
+
+Where new code goes:
+
+- **Used by one page?** Next to it, in that route's `_components/`.
+- **Used by two or more pages?** `components/<feature>/` for UI, `lib/<domain>/` for logic and types. A page never imports from another page's folder, and `components/` and `lib/` never import from `app/`.
+- **Types** live with the code that owns the data (`lib/servers/types.ts`, `lib/snippets/types.ts`), not in a component.
+- **Imports:** relative (`./x`) inside one folder, `@/…` across folders.
+- **Tests** sit next to the file they test (`split.ts` → `split.test.ts`); end-to-end tests are in `apps/web/e2e/`.
+- **Heavy UI** (xterm, Guacamole, rarely shown dialogs) is loaded with `next/dynamic`, so it isn't in every page's bundle.
 
 Key conventions:
 

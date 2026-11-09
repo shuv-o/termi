@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { certificateField } from '@/lib/security/certificate-field';
-import { keychainReadRateLimit } from '@/lib/rate-limit';
+import { keychainReadRateLimit } from '@/lib/security/rate-limit';
 import { getCurrentUser } from '@/lib/auth';
 import {
     getKeychainCredentialById,

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearCache, useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { adoptAccountAppearance, setAppearance, useAppearance } from '@/lib/appearance/store';
-import { NAV_ITEMS, menuItems, mobileBarItems, type PanelUser } from './navigation';
+import { NAV_ITEMS, menuItems, mobileBarItems, type PanelUser } from '@/lib/navigation';
 
 /** Visual-viewport shrink beyond this many px means the OSK is up. */
 const KEYBOARD_THRESHOLD_PX = 150;

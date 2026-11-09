@@ -8,9 +8,9 @@ import { Radio } from 'lucide-react';
 import { useCachedFetch } from '@/lib/hooks/useCachedFetch';
 import { useToast } from '@/components/ui/toast';
 import { newTabId, useSessionsContext, type Session } from './sessions-context';
-import { LayoutMenu, type SavedWorkspace } from './_sessions/LayoutMenu';
-import { OPEN_WORKSPACE_EVENT } from './_sessions/events';
-import { SplitDividers } from './_sessions/SplitDividers';
+import { LayoutMenu, type SavedWorkspace } from './LayoutMenu';
+import { OPEN_WORKSPACE_EVENT } from './events';
+import { SplitDividers } from './SplitDividers';
 import {
     addPane,
     MAX_PANES,
@@ -19,18 +19,13 @@ import {
     replacePane,
     withLayout,
     type SplitLayout,
-} from './_sessions/split';
+} from './split';
 
-import { InlineSessionPicker } from './_sessions/InlineSessionPicker';
-import {
-    NoSessionsState,
-    SessionSidebar,
-    SessionTabBar,
-    WorkspaceTopBar,
-} from './_sessions/WorkspaceChrome';
-import { TerminalPane } from './_sessions/terminal/TerminalPane';
-import { TransferMode } from './_sessions/transfer/TransferMode';
-import type { LayoutMode, ServerItem, WorkspaceMode } from './_sessions/types';
+import { InlineSessionPicker } from './InlineSessionPicker';
+import { NoSessionsState, SessionSidebar, SessionTabBar, WorkspaceTopBar } from './WorkspaceChrome';
+import { TerminalPane } from './terminal/TerminalPane';
+import { TransferMode } from './transfer/TransferMode';
+import type { LayoutMode, ServerItem, WorkspaceMode } from './types';
 
 const PasskeyRevealModal = dynamic(() => import('@/components/auth/PasskeyRevealModal'), {
     ssr: false,

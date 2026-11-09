@@ -1,7 +1,7 @@
 'use client';
 
-import { toneDot, toneText, type Tone } from '@/lib/status-style';
-import type { SessionStatus } from '../sessions-context';
+import { toneDot, toneText, type Tone } from '@/lib/style/status';
+import type { SessionStatus } from './sessions-context';
 
 /**
  * Session lifecycle mapped onto the shared tone scale. Previously "connecting"

@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { forgotPassword } from '@/lib/auth';
 import { validateBody, successResponse, getClientIP } from '@/lib/api';
-import { forgotPasswordRateLimit } from '@/lib/rate-limit';
+import { forgotPasswordRateLimit } from '@/lib/security/rate-limit';
 
 const schema = z.object({
     email: z.string().email(),

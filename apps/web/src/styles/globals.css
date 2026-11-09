@@ -634,8 +634,7 @@ html {
 .termi-overlay[data-state='open'] {
     animation: termi-fade 160ms ease-out;
 }
-.termi-dialog[data-state='open'],
-.termi-sheet[data-state='open'] {
+.termi-dialog[data-state='open'] {
     animation: termi-rise 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .termi-pop[data-state='open'] {
@@ -698,7 +697,6 @@ html {
 @media (prefers-reduced-motion: reduce) {
     .termi-overlay,
     .termi-dialog,
-    .termi-sheet,
     .termi-pop,
     .cursor-block,
     .animate-fade-in,
