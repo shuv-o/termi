@@ -1,4 +1,4 @@
-import type { WebSocket } from 'ws';
+import { WebSocket } from 'ws';
 import type { SSHHandler } from '../handlers/ssh.js';
 import type { AsciicastRecorder } from './AsciicastRecorder.js';
 import type { RingBuffer } from './RingBuffer.js';
@@ -11,16 +11,14 @@ export interface PersistentSession {
     serverId: string;
     handler: SSHHandler;
     buffer: RingBuffer;
+    /**
+     * Last time anything happened in the shell: output from the server, or
+     * input from the owner or a guest. Whether a browser is attached doesn't
+     * matter — a closed tab keeps a busy shell alive.
+     */
     lastActivityAt: number;
     createdAt: number;
     attachedWs: WebSocket | null;
-    /**
-     * Timestamp (ms) at which the session became detached (no attached WS),
-     * or null while a browser is attached. The detached-grace eviction clock
-     * runs from this moment — independent of SSH output activity, so a noisy
-     * detached session (e.g. `tail -f`) is still reclaimed on schedule.
-     */
-    detachedAt: number | null;
     isClosing: boolean;
     /** Set while a recording is active. Lives on the session (not the WS) so it
      *  survives tab reattachment, same as the ring buffer. */
@@ -36,10 +34,10 @@ export interface PersistentSession {
  * unlimited — users open as many terminals as they like.
  *
  * This is a resource backstop, not an entitlement: every session holds an open
- * SSH connection to the remote host plus a 256 KB RingBuffer. Detached sessions
- * are still reclaimed after the grace period (GATEWAY_DETACHED_TTL_MIN)
- * whatever this is set to, so unlimited does not mean sessions accumulate
- * forever. Set GATEWAY_MAX_CONNECTIONS_PER_USER to a positive integer to
+ * SSH connection to the remote host plus a 256 KB RingBuffer. Idle and
+ * over-age sessions are still closed (GATEWAY_IDLE_TTL_HOURS,
+ * GATEWAY_MAX_SESSION_DAYS) whatever this is set to, so unlimited does not
+ * mean sessions accumulate forever. Set GATEWAY_MAX_CONNECTIONS_PER_USER to a positive integer to
  * re-impose a cap.
  */
 const DEFAULT_MAX_CONNECTIONS_PER_USER = (() => {
@@ -47,16 +45,25 @@ const DEFAULT_MAX_CONNECTIONS_PER_USER = (() => {
     return Number.isFinite(n) && n > 0 ? n : 0;
 })();
 
+function envNumber(name: string, fallback: number): number {
+    const n = parseFloat(process.env[name] || '');
+    return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
 /**
- * How long a detached SSH session is kept alive (with its remote shell open)
- * waiting for the browser to reattach. Lower = less pressure on remote servers
- * from orphaned sessions; higher = longer reconnect window. Default 30 min,
- * overridable via GATEWAY_DETACHED_TTL_MIN.
+ * A shell with no output and no input for this long is closed, whether or not
+ * a browser is attached. Output counts as activity, so a running build or
+ * `tail -f` keeps its session after the tab is closed. Default 8 hours,
+ * overridable via GATEWAY_IDLE_TTL_HOURS.
  */
-const DEFAULT_DETACHED_TTL_MS = (() => {
-    const min = parseInt(process.env.GATEWAY_DETACHED_TTL_MIN || '', 10);
-    return Number.isFinite(min) && min > 0 ? min * 60_000 : 30 * 60_000;
-})();
+const DEFAULT_IDLE_TTL_MS = (envNumber('GATEWAY_IDLE_TTL_HOURS', 8) || 8) * 3_600_000;
+
+/**
+ * Hard limit on a session's age, busy or not, so a shell that streams output
+ * forever can't hold an SSH connection forever. Default 7 days,
+ * GATEWAY_MAX_SESSION_DAYS overrides it; 0 turns the limit off.
+ */
+const DEFAULT_MAX_AGE_MS = envNumber('GATEWAY_MAX_SESSION_DAYS', 7) * 86_400_000;
 
 export class PersistentSessionStore {
     private readonly sessions = new Map<string, PersistentSession>();
@@ -64,13 +71,17 @@ export class PersistentSessionStore {
     private readonly idleTimeoutMs: number;
     /** 0 = unlimited. See DEFAULT_MAX_CONNECTIONS_PER_USER. */
     private readonly maxConnectionsPerUser: number;
+    /** 0 = no age limit. See DEFAULT_MAX_AGE_MS. */
+    private readonly maxAgeMs: number;
 
     constructor(
-        idleTimeoutMs = DEFAULT_DETACHED_TTL_MS,
+        idleTimeoutMs = DEFAULT_IDLE_TTL_MS,
         maxConnectionsPerUser = DEFAULT_MAX_CONNECTIONS_PER_USER,
+        maxAgeMs = DEFAULT_MAX_AGE_MS,
     ) {
         this.idleTimeoutMs = idleTimeoutMs;
         this.maxConnectionsPerUser = maxConnectionsPerUser;
+        this.maxAgeMs = maxAgeMs;
         this.idleCheckInterval = setInterval(() => this.evictIdleSessions(), 60_000);
     }
 
@@ -93,10 +104,21 @@ export class PersistentSessionStore {
         return this.sessions.get(sessionId);
     }
 
-    /** Closes the SSH handler and removes the session. */
-    delete(sessionId: string): void {
+    /**
+     * Closes the SSH handler and removes the session. With a `reason`, an
+     * attached browser is told why (and gets any recording in progress), since
+     * the shell's own close message is suppressed once `isClosing` is set.
+     */
+    delete(sessionId: string, reason?: string): void {
         const session = this.sessions.get(sessionId);
         if (session) {
+            if (reason && session.attachedWs?.readyState === WebSocket.OPEN) {
+                const recording = session.recording?.serialize();
+                session.recording = null;
+                session.attachedWs.send(
+                    JSON.stringify({ type: 'closed', message: reason, ...recording }),
+                );
+            }
             session.isClosing = true;
             closeGuests(session, 'The shared session has ended');
             session.handler.close();
@@ -139,17 +161,25 @@ export class PersistentSessionStore {
         return this.countByUser(userId) >= this.maxConnectionsPerUser;
     }
 
+    /** Shell output or input: keeps the session from being closed as idle. */
+    touch(session: PersistentSession): void {
+        session.lastActivityAt = Date.now();
+    }
+
     private evictIdleSessions(): void {
         const now = Date.now();
         for (const [id, session] of this.sessions) {
-            // Evict on detached-grace expiry. The clock is the moment of
-            // detachment (detachedAt), NOT last output — so a detached session
-            // streaming output is still reclaimed once the grace window passes.
-            if (session.detachedAt !== null && now - session.detachedAt > this.idleTimeoutMs) {
+            let reason: string | null = null;
+            if (now - session.lastActivityAt > this.idleTimeoutMs) {
+                reason = `Closed after ${formatDuration(this.idleTimeoutMs)} without activity.`;
+            } else if (this.maxAgeMs > 0 && now - session.createdAt > this.maxAgeMs) {
+                reason = `Closed: sessions last at most ${formatDuration(this.maxAgeMs)}.`;
+            }
+            if (reason) {
                 console.log(
-                    `[PersistentSessionStore] Evicting detached session ${id} (user ${session.userId}) after grace period`,
+                    `[PersistentSessionStore] Closing session ${id} (user ${session.userId}): ${reason}`,
                 );
-                this.delete(id);
+                this.delete(id, reason);
             }
         }
     }
@@ -161,4 +191,12 @@ export class PersistentSessionStore {
             this.delete(id);
         }
     }
+}
+
+function formatDuration(ms: number): string {
+    const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+    if (ms >= 86_400_000 && ms % 86_400_000 === 0) return plural(ms / 86_400_000, 'day');
+    if (ms >= 3_600_000 && ms % 3_600_000 === 0) return plural(ms / 3_600_000, 'hour');
+    if (ms >= 60_000) return plural(Math.round(ms / 60_000), 'minute');
+    return plural(Math.round(ms / 1000), 'second');
 }

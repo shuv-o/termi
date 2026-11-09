@@ -122,7 +122,10 @@ export function requestJoin(
         const g = session.guests.get(id);
         if (!g) return; // not admitted (yet)
         if (isBinary) {
-            if (g.mode === 'control' && !session.isClosing) session.handler.write(data);
+            if (g.mode === 'control' && !session.isClosing) {
+                session.lastActivityAt = Date.now();
+                session.handler.write(data);
+            }
             return;
         }
         // Guests send nothing else: their window size never changes the shell's.

@@ -3,8 +3,9 @@
  *
  * Handles WebSocket connections and proxies them to SSH.
  * SSH sessions outlive their WebSocket connections — they are keyed by a
- * stable sessionId UUID and stay alive until explicitly closed or idle for
- * 6 hours (detached only).
+ * stable sessionId UUID and stay alive until explicitly closed, idle (no
+ * output or input) for GATEWAY_IDLE_TTL_HOURS, or older than
+ * GATEWAY_MAX_SESSION_DAYS — see PersistentSessionStore.
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
@@ -192,6 +193,7 @@ function createSink(session: PersistentSession): SSHOutputSink {
     return {
         onData(data: Buffer) {
             if (session.isClosing) return;
+            persistentSessions.touch(session);
             session.buffer.append(data);
             session.recording?.append(data);
             // Terminal output is sent as a raw binary frame — no base64/JSON
@@ -497,7 +499,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 }
 
                 existing.attachedWs = ws;
-                existing.detachedAt = null; // reattached — stop the detached-grace clock
                 // The owner's new tab learns who's watching.
                 if (existing.guests.size) setTimeout(() => announceGuests(existing), 0);
 
@@ -535,7 +536,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                     lastActivityAt: Date.now(),
                     createdAt: Date.now(),
                     attachedWs: ws,
-                    detachedAt: null,
                     isClosing: false,
                     recording: null,
                     guests: new Map(),
@@ -594,7 +594,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
                 // Binary frame == raw terminal input (keystrokes / pastes).
                 if (isBinary) {
-                    session.lastActivityAt = Date.now();
+                    persistentSessions.touch(session);
                     session.handler.write(data);
                     return;
                 }
@@ -606,7 +606,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                         case 'data':
                             // Legacy base64 input path (pre-binary clients).
                             if (message.data) {
-                                session.lastActivityAt = Date.now();
+                                persistentSessions.touch(session);
                                 session.handler.write(Buffer.from(message.data, 'base64'));
                             }
                             break;
@@ -672,8 +672,9 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
                 stopHeartbeat();
                 const session = persistentSessions.get(resolvedSessionId);
                 if (session && session.attachedWs === ws) {
+                    // Detach only: the shell keeps running and is closed by
+                    // the store once idle or too old.
                     session.attachedWs = null;
-                    session.detachedAt = Date.now(); // start the detached-grace clock
                 }
             });
 

@@ -377,7 +377,8 @@ npm run build:electron            # Package Electron app
 | `TRUSTED_PROXY`                    | —                     | Proxy that sets the client IP: `cloudflare`, `x-real-ip` or `x-forwarded-for` |
 | `ALLOWED_ORIGINS`                  | `NEXT_PUBLIC_APP_URL` | CORS origins for the gateway                               |
 | `ALLOW_LOCAL_TERMINAL`             | `false`               | Enable local PTY terminal on the gateway host              |
-| `GATEWAY_DETACHED_TTL_MIN`         | `30`                  | Minutes a detached SSH session is kept alive for reconnect |
+| `GATEWAY_IDLE_TTL_HOURS`           | `8`                   | Close an SSH session after this long with no output or typing, tab open or closed |
+| `GATEWAY_MAX_SESSION_DAYS`         | `7`                   | Close any SSH session after this many days, busy or not; `0` = no limit |
 | `GATEWAY_MAX_CONNECTIONS_PER_USER` | `0`                   | Concurrent sessions per user; `0` = unlimited              |
 | `GOOGLE_CLIENT_ID`                 | —                     | Google OAuth client ID                                     |
 | `GOOGLE_CLIENT_SECRET`             | —                     | Google OAuth client secret                                 |

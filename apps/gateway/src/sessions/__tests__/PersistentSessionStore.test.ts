@@ -15,7 +15,6 @@ function makeSession(overrides: Partial<PersistentSession> = {}): PersistentSess
         lastActivityAt: Date.now(),
         createdAt: Date.now(),
         attachedWs: null,
-        detachedAt: null,
         isClosing: false,
         recording: null,
         guests: new Map(),
@@ -115,33 +114,90 @@ describe('PersistentSessionStore', () => {
         expect(store.get('a')).toBeDefined();
     });
 
-    it('idle check evicts detached sessions past the grace period', () => {
-        const session = makeSession({ detachedAt: Date.now() - 2000, attachedWs: null });
-        store.tryAdd(session);
-        vi.advanceTimersByTime(60_000); // trigger idle check
-        expect(store.get('sess-1')).toBeUndefined();
-        expect(session.handler.close).toHaveBeenCalledOnce();
-    });
+    describe('idle and age limits', () => {
+        const HOUR = 3_600_000;
+        let limited: PersistentSessionStore;
+        const openWs = () => ({ readyState: 1, send: vi.fn() }) as any;
 
-    it('idle check does not evict attached sessions', () => {
-        const ws = {} as any;
-        const session = makeSession({ detachedAt: null, attachedWs: ws });
-        store.tryAdd(session);
-        vi.advanceTimersByTime(60_000);
-        expect(store.get('sess-1')).toBeDefined();
-    });
+        beforeEach(() => {
+            limited = new PersistentSessionStore(8 * HOUR, 0, 7 * 24 * HOUR);
+        });
+        afterEach(() => limited.destroy());
 
-    it('idle check does not evict a session still within its grace window', () => {
-        // Grace window of 5 minutes; only 60s elapses before the check runs.
-        const graceStore = new PersistentSessionStore(5 * 60_000);
-        try {
-            const session = makeSession({ detachedAt: Date.now(), attachedWs: null });
-            graceStore.tryAdd(session);
-            vi.advanceTimersByTime(60_000);
-            expect(graceStore.get('sess-1')).toBeDefined();
-        } finally {
-            graceStore.destroy();
-        }
+        it('keeps a detached session that is still producing output', () => {
+            const session = makeSession({ attachedWs: null });
+            limited.tryAdd(session);
+            // 10 hours with output every hour: never idle for 8.
+            for (let h = 0; h < 10; h++) {
+                vi.advanceTimersByTime(HOUR);
+                limited.touch(session);
+            }
+            expect(limited.get('sess-1')).toBe(session);
+            expect(session.handler.close).not.toHaveBeenCalled();
+        });
+
+        it('keeps a quiet detached session until the idle limit', () => {
+            limited.tryAdd(makeSession({ attachedWs: null }));
+            vi.advanceTimersByTime(7 * HOUR);
+            expect(limited.get('sess-1')).toBeDefined();
+        });
+
+        it('closes a session with no activity for the idle limit, detached', () => {
+            const session = makeSession({ attachedWs: null });
+            limited.tryAdd(session);
+            vi.advanceTimersByTime(8 * HOUR + 60_000);
+            expect(limited.get('sess-1')).toBeUndefined();
+            expect(session.handler.close).toHaveBeenCalledOnce();
+        });
+
+        it('closes an idle attached session and tells the browser why', () => {
+            const ws = openWs();
+            const session = makeSession({ attachedWs: ws });
+            limited.tryAdd(session);
+            vi.advanceTimersByTime(8 * HOUR + 60_000);
+            expect(limited.get('sess-1')).toBeUndefined();
+            const sent = JSON.parse(ws.send.mock.calls[0][0]);
+            expect(sent).toMatchObject({
+                type: 'closed',
+                message: 'Closed after 8 hours without activity.',
+            });
+        });
+
+        it('hands a recording in progress to the browser when closing', () => {
+            const ws = openWs();
+            const session = makeSession({
+                attachedWs: ws,
+                recording: { serialize: () => ({ cast: 'c', durationSec: 1, sizeBytes: 1 }) } as any,
+            });
+            limited.tryAdd(session);
+            vi.advanceTimersByTime(8 * HOUR + 60_000);
+            expect(JSON.parse(ws.send.mock.calls[0][0])).toMatchObject({ cast: 'c' });
+        });
+
+        it('closes a busy session once it reaches the age limit', () => {
+            const session = makeSession({ attachedWs: null });
+            limited.tryAdd(session);
+            for (let h = 0; h < 7 * 24 + 1; h++) {
+                vi.advanceTimersByTime(HOUR);
+                if (limited.get('sess-1')) limited.touch(session);
+            }
+            expect(limited.get('sess-1')).toBeUndefined();
+        });
+
+        it('has no age limit when it is 0', () => {
+            const unlimited = new PersistentSessionStore(8 * HOUR, 0, 0);
+            try {
+                const session = makeSession({ attachedWs: null });
+                unlimited.tryAdd(session);
+                for (let h = 0; h < 10 * 24; h++) {
+                    vi.advanceTimersByTime(HOUR);
+                    unlimited.touch(session);
+                }
+                expect(unlimited.get('sess-1')).toBeDefined();
+            } finally {
+                unlimited.destroy();
+            }
+        });
     });
 
     describe('tryAdd', () => {

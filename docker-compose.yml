@@ -154,6 +154,10 @@ services:
       GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET:?GATEWAY_JWT_SECRET must be set (openssl rand -base64 32)}
       GUACD_HOST: guacd
       GUACD_PORT: 4822
+      # Close a terminal after this long with no output or typing (tab open or not),
+      # and any terminal after this many days. 0 days = no age limit.
+      GATEWAY_IDLE_TTL_HOURS: ${GATEWAY_IDLE_TTL_HOURS:-8}
+      GATEWAY_MAX_SESSION_DAYS: ${GATEWAY_MAX_SESSION_DAYS:-7}
       # Uncomment to allow RDP/VNC through a jump host (guacd reaches the relay here).
       # GUACD_TUNNEL_HOST: gateway
       NODE_ENV: production

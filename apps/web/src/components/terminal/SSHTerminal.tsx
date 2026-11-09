@@ -231,8 +231,13 @@ export default function SSHTerminal({
                     case 'disconnected':
                         intentionalCloseRef.current = true;
                         updateStatus('disconnected');
+                        // The gateway explains closes it decides on (idle, too old).
                         terminalInstance.current?.write(
-                            '\r\n\x1b[33mConnection closed.\x1b[0m\r\n',
+                            `\r\n\x1b[33m${
+                                typeof message.message === 'string'
+                                    ? message.message.replace(/[\x00-\x1f\x7f]/g, '')
+                                    : 'Connection closed.'
+                            }\x1b[0m\r\n`,
                         );
                         isRecordingRef.current = false;
                         onRecordingChangeRef.current?.(false);
