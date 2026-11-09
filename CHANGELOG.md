@@ -8,7 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
-Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the unused "master key".
+---
+
+## [1.2.0] — 2026-11-09
+
+A large security release (host key pinning, field-bound encryption, closing connections when access ends) and the features that make Termi a full Termius alternative: teams, single sign-on, split panes, shared sessions, FIDO2 keys, a serial console, and an interface you can make your own.
 
 ### Security
 
@@ -16,7 +20,8 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 - **Encrypted values are bound to their field and owner.** Every stored secret (server credentials, keychain entries, TOTP secrets, webhook URLs, recordings) is now authenticated (AES-GCM AAD) against the field it belongs to and the user who owns it. Someone with write access to the database can no longer move a private key into a notes field — or into their own account — to read it. Existing values stay readable and are upgraded the next time they are saved.
 - **Keychain secrets no longer reach the browser without re-authentication.** Picking a keychain entry in the server form sends only its id; the server fills in the secret itself. Copying a secret on the Keychain page asks for your password or passkey (once per 5 minutes) and is audit-logged. Editing an entry no longer loads its secret — blank fields keep the stored value.
 - **Client IP headers are only trusted when configured.** `TRUSTED_PROXY` now names the proxy that sets the client IP: `cloudflare`, `x-real-ip` or `x-forwarded-for` (`true` keeps its old meaning). Previously `CF-Connecting-IP` and `X-Real-IP` were trusted from anyone, so rate limits could be dodged by sending a fake header.
-- **Docker images install exactly the locked dependency versions.** The published images now build from the repository root with `npm ci` against `package-lock.json`, instead of resolving the newest matching versions at build time.
+- **Removing access closes open connections.** Signing a device out, changing or resetting a password, deactivating an account, removing a share, removing someone from a team, deleting a server, turning off a session-share link or disabling the local terminal now also closes every terminal, file browser, remote desktop and port forward that relied on it, within 30 seconds — including terminals whose tab was closed. Before, a connection opened once kept running. Each connection token now records the sign-in that asked for it, so signing out a stolen device ends only that device's connections. The gateway asks the web app at `GATEWAY_ACCESS_CHECK_SEC` intervals over an internal, gateway-only endpoint.
+- **No secrets in Docker images.** The web Dockerfiles take only `NEXT_PUBLIC_APP_URL` and `NEXT_PUBLIC_GATEWAY_URL` at build time; database, session, encryption, Google, SMTP and VAPID settings are read when the container starts, so they never land in build arguments, the build cache or image history. `.dockerignore` keeps every `.env*` file (except the examples) and private-key files out of the build.
 - **Stronger password hashing, off the event loop.** scrypt now runs asynchronously at N=2^15, r=8, p=3 (OWASP's equal-cost alternative to N=2^17 that needs ~32 MiB instead of ~128 MiB per hash). Existing passwords are upgraded automatically at the next sign-in.
 - **No more account enumeration.** Registering an email that already has an account answers exactly like a new sign-up (the real owner gets an email about it); signup verification and code resends answer the same for unknown accounts; passkey sign-in options look the same whether or not an email has passkeys.
 - HSTS no longer forces `includeSubDomains; preload` on every self-hosted domain; set `HSTS_PRELOAD=true` to opt in.
@@ -32,7 +37,7 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 - **Desktop app fuses.** The packaged app can no longer be run as plain Node (`ELECTRON_RUN_AS_NODE`, `NODE_OPTIONS`, `--inspect`), only loads its integrity-checked `app.asar`, and encrypts its cookies at rest.
 - **Content Security Policy:** adds `frame-ancestors 'none'` and Trusted Types in report-only mode.
 - **Database:** `DB_SSLMODE` enables TLS to Postgres; database credentials with special characters now work. `SECURITY.md` documents a least-privilege database role.
-- **Supply chain:** GitHub Actions are pinned to commit SHAs; Dependabot covers npm, actions and Docker; CodeQL runs on every push; CI fails on unreviewed high/critical advisories in production dependencies; release images carry an SBOM and SLSA provenance and are signed with Sigstore (see `SECURITY.md` to verify).
+- **Supply chain:** GitHub Actions are pinned to commit SHAs; Dependabot covers npm, actions and Docker; CodeQL (extended query suite) scans every push; CI fails on unreviewed high/critical advisories in production dependencies; release images carry an SBOM and SLSA provenance and are signed with Sigstore (see `SECURITY.md` to verify).
 - **Security regression suite.** `npm run test:security` (and the "Security E2E" CI job) proves the tunnel isolation, guacd handshake filtering, keychain step-up, field binding, enumeration resistance and related protections against a real web app, gateway, database, SSH host, guacd and VNC server.
 
 ### Added
@@ -65,6 +70,8 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 - **Tunnels no longer stop accepting connections after 5 minutes, and are much faster.** A tunnel is now one WebSocket and one SSH connection carrying every TCP connection (with per-connection flow control and proper half-close), instead of a new SSH handshake per connection with a 5-minute token that ran out. The sign-in token only has to be valid when the tunnel starts. Older desktop apps and bridge scripts keep working for local forwarding.
 - **Import from other SSH clients.** The import dialog now reads an OpenSSH `~/.ssh/config` (with `Host` patterns, first-match defaults and `ProxyJump` turned into jump hosts), PuTTY / KiTTY sessions exported with `reg export`, and MobaXterm session files (SSH, SFTP, RDP and VNC, with folders as groups and SSH gateways as jump hosts). CSV import also recognises other tools' column names (Label, Hostname, Address, User, Groups, …), so a Termius or spreadsheet export works too. The dialog previews exactly what will be imported, explains what can't be (key files on your computer, ProxyCommand, multi-hop jumps, unsupported session types), and can apply a keychain login to every server the file has no credentials for.
 
+- **Terminals outlive their tab, and close when idle.** A terminal keeps running after you close its tab and is closed after 8 hours with no output and no typing (`GATEWAY_IDLE_TTL_HOURS`), tab open or not. Output counts as activity, so a long build or `tail -f` keeps going. Any terminal is closed after 7 days (`GATEWAY_MAX_SESSION_DAYS`, `0` for no limit). When Termi closes a terminal, it says why.
+
 ### Removed
 
 - **The optional "master key".** It was presented as a second encryption layer but never encrypted anything, while Google sign-in users had to create and unlock a passphrase on every login. The setup and unlock steps, the Settings → Encryption section and Danger zone (whose only action deleted all servers) are gone; old links redirect to the panel. Sign-in no longer derives a key from the password (600,000 PBKDF2 iterations per login).
@@ -72,15 +79,22 @@ Planned as 1.2.0. Security hardening follow-ups to 1.1.2, and the removal of the
 ### Changed
 
 - **Resetting a forgotten password keeps your servers.** It used to delete every stored server, on the grounds that the credentials became unreadable — which they never did. All existing sessions are still signed out.
+- **Detached terminals no longer close after 30 minutes.** They follow the idle and age limits above; `GATEWAY_DETACHED_TTL_MIN` is no longer read.
+
+### Fixed
+
+- The published web image ran migrations only on its first start (a flag file), which also stopped it starting with the read-only filesystem the compose files use. Migrations now run on every start.
+- Old Settings links can no longer be pointed at JavaScript built-ins (`?section=constructor`).
 
 ### Upgrade notes
 
+- **Deploy the web app and the gateway together.** The web app now issues connection tokens that name the sign-in behind them, and the gateway checks them.
+- **The gateway must reach the web app** for the access check: compose sets `WEB_INTERNAL_URL=http://web:22080`; otherwise it uses `NEXT_PUBLIC_APP_URL`. If the web app can't be reached, connections stay open and the gateway logs a warning.
+- **Docker builds:** `apps/web/Dockerfile` and `apps/gateway/Dockerfile` use their app folder as build context (`docker build apps/web`). Pass only `NEXT_PUBLIC_APP_URL` and `NEXT_PUBLIC_GATEWAY_URL` as build arguments; give every secret to the container at runtime. Images built earlier with secrets as build arguments keep them in their history: rotate those secrets if such an image left your machine (`ENCRYPTION_KEY` via `ENCRYPTION_KEY_PREVIOUS` and `npm run db:reseal`).
 - Behind Cloudflare, set `TRUSTED_PROXY=cloudflare` (and make sure the origin only accepts Cloudflare traffic); behind nginx/Traefik/Caddy, set `x-real-ip` or `x-forwarded-for`. Without it, per-IP rate limits are shared by all clients (per-account limits still apply), and the app logs a warning.
-- One new migration (`add_keychain_revealed_audit`) applies automatically on start.
-- If you build the Docker images yourself with `apps/web/Dockerfile` or `apps/gateway/Dockerfile`, the build context is now the repository root: `docker build -f apps/web/Dockerfile .`
-- Two more migrations apply automatically on start (`add_keychain_revealed_audit`, `add_password_login_disabled`). The published web image now runs `prisma migrate deploy` on every start.
+- Fourteen migrations apply automatically on start (`add_keychain_revealed_audit` through `connection_history`); the web image now runs `prisma migrate deploy` on every start.
 - To bind all existing secrets right away instead of on their next save, run `npm run db:reseal` once (`-- --dry-run` first to preview).
-- Optional new settings: `TUNNEL_ORIGIN_TEMPLATE`, `REDIS_URL`, `DB_SSLMODE`, `ENCRYPTION_KEY_FILE`, `ENCRYPTION_KEY_PREVIOUS` (see `.env.example`).
+- New optional settings: `GATEWAY_IDLE_TTL_HOURS`, `GATEWAY_MAX_SESSION_DAYS`, `GATEWAY_ACCESS_CHECK_SEC`, `WEB_INTERNAL_URL`, `OIDC_*`, `TUNNEL_ORIGIN_TEMPLATE`, `REDIS_URL`, `DB_SSLMODE`, `HSTS_PRELOAD`, `ENCRYPTION_KEY_FILE`, `ENCRYPTION_KEY_PREVIOUS` (see `.env.example`). `GATEWAY_DETACHED_TTL_MIN` is no longer read.
 - If you deploy with the bundled compose files, their networks changed (`edge`, `data`, `remote`): recreate the stack with `docker compose up -d`.
 
 ---

@@ -1,6 +1,6 @@
 {
     "name": "termi",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "private": true,
     "description": "Secure server management PWA - SSH, SCP, RDP, VNC from your browser",
     "license": "MIT",
