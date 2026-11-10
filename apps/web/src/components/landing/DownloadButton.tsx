@@ -207,11 +207,11 @@ export default function DownloadDesktopButton({ compact = false }: { compact?: b
             <a
                 href={downloadUrl(os, arch)}
                 download
-                title={`${label} (${archLabel[arch]})${release ? `, ${release.version}` : ''}`}
+                title={`Termi for ${label} (${archLabel[arch]})${release ? `, ${release.version}` : ''}`}
                 className={buttonVariants({ variant: 'outline', size: 'lg' })}
             >
                 <Icon />
-                Download for {label}
+                Download app
             </a>
         );
     }
