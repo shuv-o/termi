@@ -13,7 +13,13 @@ import '@xterm/xterm/css/xterm.css';
 
 const TEXT_ENCODER = new TextEncoder();
 
-const MAX_AUTO_RETRIES = 5;
+/**
+ * Wait before reconnect attempt `attempt`. A dropped connection never gives up
+ * on its own: the gateway keeps the shell for hours (GATEWAY_IDLE_TTL_HOURS),
+ * and a laptop waking from sleep can take far longer than a few seconds to
+ * get its network back. Only the gateway saying the session is gone starts a
+ * new one.
+ */
 const getBackoffMs = (attempt: number) => Math.min(Math.pow(1.5, attempt) * 1000, 30_000);
 
 interface SSHTerminalProps {
@@ -136,6 +142,8 @@ export default function SSHTerminal({
 
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    /** Reconnecting, but paused until the browser is online again. */
+    const waitingForNetworkRef = useRef(false);
     const intentionalCloseRef = useRef(false);
     const isRecordingRef = useRef(false);
 
@@ -201,6 +209,8 @@ export default function SSHTerminal({
                 }
             } catch (err) {
                 console.error('[SSHTerminal] Failed to renew token:', err);
+                // Signed out or no longer allowed: retrying won't help.
+                intentionalCloseRef.current = true;
                 ws.close(1008, 'Token renewal failed');
                 onErrorRef.current?.('Failed to renew connection token. Please reconnect.');
                 return;
@@ -281,6 +291,9 @@ export default function SSHTerminal({
 
                     case 'error':
                         if (fallBack()) break;
+                        // The gateway refused (login, host key, access): retrying
+                        // would only repeat it. Reconnect stays available.
+                        intentionalCloseRef.current = true;
                         updateStatus('error');
                         terminalInstance.current?.write(
                             `\r\n\x1b[31mError: ${message.message}\x1b[0m\r\n`,
@@ -379,39 +392,47 @@ export default function SSHTerminal({
                 return; // don't retry intentional closes
             }
             onWebSocketCreatedRef.current?.(null);
-            if (retryCountRef.current < MAX_AUTO_RETRIES) {
-                const attempt = retryCountRef.current;
-                retryCountRef.current += 1;
-                const delayMs = getBackoffMs(attempt);
-                const delaySec = Math.round(delayMs / 1000);
-                updateStatus('connecting');
-                terminalInstance.current?.writeln(
-                    `\r\n\x1b[33mConnection lost. Reconnecting in ${delaySec}s (attempt ${attempt + 1}/${MAX_AUTO_RETRIES})…\x1b[0m`,
-                );
-                retryTimerRef.current = setTimeout(() => {
-                    connect().catch((err) => console.error('[SSHTerminal] reconnect error:', err));
-                }, delayMs);
-            } else {
-                updateStatus('disconnected');
-                terminalInstance.current?.writeln(
-                    `\r\n\x1b[31mCould not reconnect after ${MAX_AUTO_RETRIES} attempts.\x1b[0m`,
-                );
-                onSessionNotFoundRef.current?.();
-            }
+            scheduleReconnectRef.current();
         };
 
         ws.onerror = () => {
             if (wsRef.current !== ws) return;
-            updateStatus('error');
-            if (retryCountRef.current >= MAX_AUTO_RETRIES) {
-                onErrorRef.current?.('WebSocket connection failed');
-            }
+            updateStatus('connecting');
         };
     }, [serverId, sessionId, gatewayUrl, updateStatus, saveRecording]);
+
+    /**
+     * After a dropped connection: try again with backoff, forever. While the
+     * browser is offline, wait for it to come back instead of burning attempts.
+     */
+    const scheduleReconnectRef = useRef<() => void>(() => {});
+    scheduleReconnectRef.current = () => {
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        const attempt = retryCountRef.current;
+        retryCountRef.current += 1;
+        updateStatus('connecting');
+        if (attempt === 0) {
+            terminalInstance.current?.writeln('\r\n\x1b[33mConnection lost. Reconnecting…\x1b[0m');
+        }
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            retryTimerRef.current = null;
+            waitingForNetworkRef.current = true;
+            return;
+        }
+        retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            connect().catch((err) => console.error('[SSHTerminal] reconnect error:', err));
+        }, getBackoffMs(attempt));
+    };
 
     const reconnect = useCallback(() => {
         intentionalCloseRef.current = false;
         retryCountRef.current = 0;
+        waitingForNetworkRef.current = false;
+        if (retryTimerRef.current) {
+            clearTimeout(retryTimerRef.current);
+            retryTimerRef.current = null;
+        }
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.close();
         } else {
@@ -423,11 +444,32 @@ export default function SSHTerminal({
         onReconnectReadyRef.current?.(reconnect);
     }, [reconnect]);
 
+    // Back online, or back to this tab after sleep: retry now rather than
+    // waiting out the backoff.
+    useEffect(() => {
+        const retryNow = () => {
+            if (document.visibilityState === 'hidden') return;
+            if (!retryTimerRef.current && !waitingForNetworkRef.current) return;
+            if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+            retryTimerRef.current = null;
+            waitingForNetworkRef.current = false;
+            retryCountRef.current = 1; // keep the "lost" notice from repeating
+            connect().catch((err) => console.error('[SSHTerminal] reconnect error:', err));
+        };
+        window.addEventListener('online', retryNow);
+        document.addEventListener('visibilitychange', retryNow);
+        return () => {
+            window.removeEventListener('online', retryNow);
+            document.removeEventListener('visibilitychange', retryNow);
+        };
+    }, [connect]);
+
     // App lock: close the connection (the gateway keeps the session running)
     // and stay closed — reconnecting needs a fresh token, which a locked
     // session can't get. Unlocking reattaches.
     useEffect(() => {
         const onLock = () => {
+            waitingForNetworkRef.current = false;
             if (retryTimerRef.current) {
                 clearTimeout(retryTimerRef.current);
                 retryTimerRef.current = null;

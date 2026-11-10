@@ -358,7 +358,7 @@ export default async function HomePage() {
                     <p>
                         Termi is MIT licensed. Built by{' '}
                         <Link
-                            href="https://github.com/shuv-o"
+                            href="https://shuvoo.com"
                             className="text-foreground underline-offset-4 hover:underline"
                             rel="noopener noreferrer"
                             target="_blank"
