@@ -1,0 +1,27 @@
+[
+  {
+    "date": "2026-11-10",
+    "docker": {
+      "shuvoo/termi-web": 873,
+      "shuvoo/termi-gateway": 894
+    },
+    "desktop": {
+      "installers": {
+        "total": 147,
+        "macX64": 21,
+        "macArm64": 49,
+        "windows": 33,
+        "linuxX64": 32,
+        "linuxArm64": 12
+      },
+      "updateChecks": 256,
+      "latestRelease": "v1.2.1"
+    },
+    "github": {
+      "stars": 9,
+      "forks": 1,
+      "watchers": 0,
+      "openIssues": 0
+    }
+  }
+]
