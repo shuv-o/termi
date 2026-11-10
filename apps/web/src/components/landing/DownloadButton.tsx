@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Download, Copy, Check } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
 
 type OS = 'mac' | 'windows' | 'linux';
 type Arch = 'arm64' | 'x64';
@@ -148,7 +149,11 @@ async function detectArch(os: OS): Promise<Arch> {
     return 'x64';
 }
 
-export default function DownloadDesktopButton() {
+/**
+ * `compact`: just the OS-aware download, sized like the hero's buttons; the
+ * full version (all builds, first-launch steps) lives further down the page.
+ */
+export default function DownloadDesktopButton({ compact = false }: { compact?: boolean }) {
     // Deterministic first render, then refine on mount once we can read the
     // navigator / WebGL context.
     const [os, setOs] = useState<OS>('mac');
@@ -197,6 +202,20 @@ export default function DownloadDesktopButton() {
 
     const { label, Icon, archLabel } = PLATFORMS[os];
 
+    if (compact) {
+        return (
+            <a
+                href={downloadUrl(os, arch)}
+                download
+                title={`${label} (${archLabel[arch]})${release ? `, ${release.version}` : ''}`}
+                className={buttonVariants({ variant: 'outline', size: 'lg' })}
+            >
+                <Icon />
+                Download for {label}
+            </a>
+        );
+    }
+
     return (
         <div className="flex flex-col items-start gap-3">
             {/* Primary, OS + architecture aware download */}
@@ -243,8 +262,8 @@ export default function DownloadDesktopButton() {
                     </p>
                     <p>
                         If macOS says the app is{' '}
-                        <span className="text-muted-foreground">&ldquo;damaged&rdquo;</span>, run this in
-                        Terminal after moving it to Applications:
+                        <span className="text-muted-foreground">&ldquo;damaged&rdquo;</span>, run
+                        this in Terminal after moving it to Applications:
                     </p>
                     <button
                         type="button"

@@ -71,6 +71,7 @@ export default async function HomePage() {
                             ['Features', '#features'],
                             ['Security', '#security'],
                             ['How it works', '#how-it-works'],
+                            ['Download', '#download'],
                             ['Self-host', '#self-host'],
                             ['Questions', '#questions'],
                         ].map(([label, href]) => (
@@ -109,10 +110,11 @@ export default async function HomePage() {
                             laptop, a phone or the desktop app. Your passwords and keys stay
                             encrypted on your own server.
                         </p>
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                             <Button size="lg" asChild>
                                 <Link href="/register">Create account</Link>
                             </Button>
+                            <DownloadDesktopButton compact />
                             <Button variant="outline" size="lg" asChild>
                                 <Link href="#self-host">
                                     <Github />
@@ -250,7 +252,10 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            <section className="border-t border-border bg-card px-4 py-20 sm:px-6 lg:py-24">
+            <section
+                id="download"
+                className="scroll-mt-14 border-t border-border bg-card px-4 py-20 sm:px-6 lg:py-24"
+            >
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-[30px] font-semibold leading-tight tracking-[-0.02em] sm:text-[38px]">
                         On whatever is in your hand
