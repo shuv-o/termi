@@ -64,6 +64,19 @@ jobs:
           # APPLE_TEAM_ID) — both are required before mac apps can self-update.
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
+      # Desktop apps up to 1.2.0 check for latest-mac.yml on macOS; without it
+      # their update check fails (see scripts/write-mac-update-info.mjs).
+      - name: Publish macOS update info
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          node scripts/write-mac-update-info.mjs
+          if [[ "${{ github.event_name }}" == 'push' ]]; then
+            gh release upload "$GITHUB_REF_NAME" dist/latest-mac.yml --clobber
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: List release files
         if: always()
         shell: bash

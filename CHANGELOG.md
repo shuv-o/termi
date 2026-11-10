@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Fixed
+
+- The macOS app 1.2.0 failed its update check ("Cannot find latest-mac.yml"). Releases publish that file again, so older Macs are told about new versions; 1.2.1 and later ask GitHub directly.
+
 ---
 
 ## [1.2.1] — 2026-11-10
@@ -28,7 +32,7 @@ An AI assistant that never sees your secrets, SSH and file transfer straight fro
 
 ### Changed
 
-- **Six desktop installers per release.** macOS (Intel and Apple Silicon), Linux (x64 and arm64) and one Windows installer for both x64 and arm64 — all built in CI, including Apple Silicon. Releases no longer carry macOS zips, `latest-mac.yml` or `.blockmap` files; the macOS app checks GitHub for a newer version directly, and Windows and Linux updates download the full installer.
+- **Six desktop installers per release.** macOS (Intel and Apple Silicon), Linux (x64 and arm64) and one Windows installer for both x64 and arm64 — all built in CI, including Apple Silicon. Releases no longer carry macOS zips or `.blockmap` files; the macOS app checks GitHub for a newer version directly, and Windows and Linux updates download the full installer.
 - README screenshots show the current app.
 
 ### Fixed

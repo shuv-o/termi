@@ -57,8 +57,9 @@ asarUnpack:
 mac:
     # DMGs only. macOS builds are ad-hoc signed, not notarized, so they can't
     # self-update: the app checks GitHub's API for a newer release and sends
-    # the user to the download page (apps/electron/updater.js). No zip,
-    # latest-mac.yml or blockmaps are needed.
+    # the user to the download page (apps/electron/updater.js). No zip or
+    # blockmaps; CI writes a latest-mac.yml separately for apps up to 1.2.0,
+    # which still look for it (scripts/write-mac-update-info.mjs).
     target:
         - target: dmg
           arch: [x64, arm64]
