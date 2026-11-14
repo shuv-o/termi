@@ -66,11 +66,11 @@
     "devDependencies": {
         "@electron/rebuild": "^4.2.1",
         "concurrently": "^10.0.6",
-        "electron": "^45.2.3",
+        "electron": "^45.3.0",
         "electron-builder": "^26.18.0",
         "esbuild": "^0.28.1",
         "eslint-config-prettier": "^10.1.8",
-        "prettier": "^3.9.10",
+        "prettier": "^3.10.0",
         "typescript": "^6.0.3"
     },
     "engines": {
