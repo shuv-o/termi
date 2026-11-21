@@ -1,7 +1,7 @@
 # Termi Gateway image (build context: apps/gateway)
 
 # Stage 1: Build
-FROM node:25-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 WORKDIR /app
 
 # node-pty requires native build tools
@@ -25,7 +25,7 @@ RUN npm run build
 
 # Stage 2: Production
 # Same Node version as the builder: node-pty is a native module compiled there.
-FROM node:25-bookworm-slim AS runner
+FROM node:26-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
