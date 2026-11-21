@@ -1,4 +1,4 @@
-FROM node:25-slim AS deps
+FROM node:26-slim AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends openssl openssh-client python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN npm install && \
       "@tailwindcss/oxide-linux-${ARCH}-gnu@${OXIDE_VER}"
 
 # Stage 2: Builder
-FROM node:25-slim AS builder
+FROM node:26-slim AS builder
 WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y openssl
@@ -46,7 +46,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build --workspace=apps/web
 
 # Stage 3: Runner
-FROM node:25-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
