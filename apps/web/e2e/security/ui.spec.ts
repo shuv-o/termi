@@ -12,8 +12,17 @@ test.describe('security settings UI', () => {
             'aria-selected',
             'true',
         );
-        await expect(page.getByText('Keychain secret revealed').first()).toBeVisible();
         await expect(page.getByText(/Signed in|Failed sign-in attempt/).first()).toBeVisible();
+        // The reveal happened in accounts.spec; how many events other specs
+        // add after it varies (a retried spec signs in again), so page back.
+        const revealed = page.getByText('Keychain secret revealed').first();
+        const older = page.getByRole('button', { name: 'Show older' });
+        for (let i = 0; i < 10 && !(await revealed.isVisible()); i++) {
+            if (!(await older.isVisible())) break;
+            await older.click();
+            await expect(older.locator('svg.animate-spin')).toHaveCount(0);
+        }
+        await expect(revealed).toBeVisible();
     });
 
     test('"Passkey only" can only be turned on once a passkey exists', async ({ page }) => {

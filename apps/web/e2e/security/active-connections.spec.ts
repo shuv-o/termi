@@ -110,12 +110,13 @@ test('a shell whose tab is gone is listed, and closing it ends it', async () => 
     await waitFor(alice, (l) => l.find((c) => c.sessionId === term.sessionId && !c.attached));
 
     // Reattach, then close it from the list: the tab is told why.
-    const again = new WebSocket(term.ws.url + '&resume=1');
+    // Token first: the socket must have its handlers before it can open.
     const tok = await (
         await alice.post('/api/connection/token', {
             data: { serverId: sshServerId, protocol: 'ssh' },
         })
     ).json();
+    const again = new WebSocket(term.ws.url + '&resume=1');
     const message = new Promise<string>((resolve) => {
         again.onopen = () => again.send(JSON.stringify({ type: 'auth', token: tok.data.token }));
         again.onmessage = (e) => {

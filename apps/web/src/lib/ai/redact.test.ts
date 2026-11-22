@@ -52,7 +52,8 @@ describe('redact: patterns', () => {
         ['Anthropic key', 'sk-ant-api03-aaaaaaaaaaaaaaaaaaaaaaaa', 'sk-ant-api03'],
         ['OpenAI key', 'sk-proj-aaaaaaaaaaaaaaaaaaaaaaaa', 'sk-proj-aaaa'],
         ['Stripe key', 'sk_live_aaaaaaaaaaaaaaaaaaaa', 'sk_live_aaaa'],
-        ['Google API key', 'AIAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'AIzaSy'],
+        // A fake key, assembled so secret scrubbers don't rewrite the fixture.
+        ['Google API key', 'AIza' + 'Sy' + 'A'.repeat(33), 'AIzaSy'],
         ['JWT', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.c2lnbmF0dXJlLXZhbHVl', 'c2lnbmF0dXJl'],
     ];
     it.each(cases)('%s', (_name, input, secret) => {

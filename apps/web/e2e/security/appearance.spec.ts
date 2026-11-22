@@ -82,6 +82,7 @@ test('the menu can be rearranged, trimmed, moved and set up for phones', async (
     expect(names).toEqual([
         'Servers',
         'Connections',
+        'Active connections',
         'Workspaces',
         'Keys & passwords',
         'Snippets',
@@ -151,7 +152,10 @@ test('terminals follow the terminal settings live', async ({ page }) => {
         .first()
         .click();
     await page.getByText('Nord', { exact: true }).click();
-    await page.locator('nav[aria-label="Main"] a', { hasText: 'Connections' }).first().click();
+    await page
+        .locator('nav[aria-label="Main"] a', { hasText: /^Connections$/ })
+        .first()
+        .click();
     await expect(box).toHaveCSS('background-color', 'rgb(46, 52, 64)');
 
     // …and the terminal still works.

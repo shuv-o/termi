@@ -86,6 +86,16 @@ export interface HostCheck {
     address?: string;
 }
 
+/**
+ * Which checked address to dial. Only one can be pinned, so without Node's
+ * IPv4/IPv6 fallback an IPv6 answer this server can't route (`localhost` →
+ * `::1` first, dual-stack names on IPv4-only hosts) would fail where the name
+ * used to work. IPv4 first when there is one; every candidate was checked.
+ */
+function preferredAddress(addrs: { address: string }[]): string | undefined {
+    return (addrs.find((a) => isIP(a.address) === 4) ?? addrs[0])?.address;
+}
+
 const stripBrackets = (h: string) => h.replace(/^\[|\]$/g, '');
 
 export async function validateHost(host: string, allowPrivateNetworks = false): Promise<HostCheck> {
@@ -98,7 +108,7 @@ export async function validateHost(host: string, allowPrivateNetworks = false): 
         try {
             const addrs = await dns.lookup(host.trim().toLowerCase(), { all: true });
             if (addrs.some((a) => isAlwaysBlockedAddress(a.address))) return metadataError;
-            return { valid: true, address: addrs[0]?.address };
+            return { valid: true, address: preferredAddress(addrs) };
         } catch {
             // Labs without DNS: unresolvable names stay allowed in this mode,
             // dialed by name (no address to pin).
@@ -163,7 +173,7 @@ export async function validateHost(host: string, allowPrivateNetworks = false): 
             error: 'Unable to resolve hostname — check that the address is correct and reachable',
         };
     }
-    return { valid: true, address: addresses[0].address };
+    return { valid: true, address: preferredAddress(addresses) };
 }
 
 /**

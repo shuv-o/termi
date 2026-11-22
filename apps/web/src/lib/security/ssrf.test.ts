@@ -169,3 +169,22 @@ describe('the address to dial (DNS rebinding)', () => {
         expect(refused.ok).toBe(false);
     });
 });
+
+describe('which checked address is dialed', () => {
+    beforeEach(() => {
+        lookupMock.mockReset();
+    });
+
+    it('prefers IPv4 when a name has both', async () => {
+        lookupMock.mockResolvedValueOnce([
+            { address: '2606:4700::6810:84e5', family: 6 },
+            { address: '104.16.132.229', family: 4 },
+        ]);
+        expect((await validateHost('dual.example')).address).toBe('104.16.132.229');
+    });
+
+    it('uses IPv6 when that is all there is', async () => {
+        lookupMock.mockResolvedValueOnce([{ address: '2606:4700::6810:84e5', family: 6 }]);
+        expect((await validateHost('v6.example')).address).toBe('2606:4700::6810:84e5');
+    });
+});
