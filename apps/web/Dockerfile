@@ -68,7 +68,7 @@ COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 # package.json), linked where prisma.config.ts's `import 'prisma/config'`
 # resolves.
 RUN PRISMA_VERSION=$(node -p "require('@prisma/client/package.json').version") && \
-    mkdir -p /opt/prisma-cli && cd /opt/prisma-cli && echo '{"private":true}' > package.json && \
+    mkdir -p /opt/prisma-cli && cd /opt/prisma-cli && echo '{"private":true,"overrides":{"effect":"^3.22.1"}}' > package.json && \
     npm install --no-audit --no-fund "prisma@$PRISMA_VERSION" && \
     ln -s /opt/prisma-cli/node_modules/prisma /app/node_modules/prisma && \
     ln -s /opt/prisma-cli/node_modules/.bin/prisma /usr/local/bin/prisma
