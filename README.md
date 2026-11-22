@@ -1,12 +1,12 @@
 # Termi usage statistics
 
-Updated 2026-11-21 from public download counts. Termi itself sends no data anywhere.
+Updated 2026-11-22 from public download counts. Termi itself sends no data anywhere.
 Latest release: v1.2.1
 
 | | Total | Last 7 days | Last 30 days |
 | --- | --- | --- | --- |
 | Docker pulls, web | 962 | +69 | — |
-| Docker pulls, gateway | 1,068 | +87 | — |
+| Docker pulls, gateway | 1,068 | +81 | — |
 | Desktop installers downloaded | 157 | +6 | — |
 | …macOS Intel | 21 | +0 | — |
 | …macOS Apple Silicon | 57 | +4 | — |
@@ -21,8 +21,8 @@ Latest release: v1.2.1
 
 | | Last 7 days | Last 30 days |
 | --- | --- | --- |
-| Page views | 1 (1) | 92 (28) |
-| Clones | 58 (40) | 1,729 (301) |
+| Page views | 4 (3) | 95 (30) |
+| Clones | 81 (48) | 1,756 (313) |
 
 In brackets: unique visitors (or cloners) per day, added up.
 
