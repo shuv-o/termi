@@ -1,15 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Pencil, QrCode, Waypoints } from 'lucide-react';
+import { ArrowLeft, Pencil, Waypoints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { formatRelativeTime } from '@/lib/format';
-import { connectHref } from '@/lib/servers/connect-route';
 import { ServerStatusPill } from '@/app/panel/_dashboard/StatusIndicator';
-import { QRConnectDialog } from './QRConnectDialog';
 import { protocolColors, protocolIcons, type MonitorConfig, type ServerInfo } from './types';
 
 function StatPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -64,7 +61,7 @@ export function ServerHeader({
     );
 }
 
-/** Protocol/host chips, at-a-glance stat pills and the connect button. */
+/** Protocol/host chips and at-a-glance stat pills. */
 export function ServerInfoCard({
     server,
     monitorConfig,
@@ -80,7 +77,6 @@ export function ServerInfoCard({
 }) {
     const ProtoIcon = protocolIcons[server.protocol];
     const protoColor = protocolColors[server.protocol];
-    const [showQR, setShowQR] = useState(false);
 
     return (
         <Card className="p-4">
@@ -147,32 +143,6 @@ export function ServerInfoCard({
                     />
                 )}
             </div>
-
-            <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
-                <Button size="sm" asChild className="gap-1.5">
-                    <Link href={connectHref(server.id, server.protocol)}>
-                        <ProtoIcon className="w-3.5 h-3.5" />
-                        Connect via {server.protocol}
-                    </Link>
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setShowQR(true)}
-                >
-                    <QrCode className="w-3.5 h-3.5" />
-                    QR
-                </Button>
-            </div>
-
-            <QRConnectDialog
-                open={showQR}
-                onClose={() => setShowQR(false)}
-                serverId={server.id}
-                serverName={server.name}
-                protocol={server.protocol}
-            />
         </Card>
     );
 }

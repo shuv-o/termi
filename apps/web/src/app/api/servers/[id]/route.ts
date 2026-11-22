@@ -73,12 +73,18 @@ export async function GET(request: Request, { params }: RouteParams) {
         // `jump` holds the bastion's *decrypted* credentials — strip it too and
         // expose only which server it is.
         const { password, privateKey, passphrase, jump, ...safeFields } = server;
-        const jumpServer = jump
+        // Name for the link, and the address/user the page's copied `ssh -J`
+        // command needs (the owner's own bastion; no secrets).
+        const jumpRow = jump
             ? await prisma.server.findUnique({
                   where: { id: jump.serverId },
                   select: { id: true, name: true },
               })
             : null;
+        const jumpServer =
+            jump && jumpRow
+                ? { ...jumpRow, host: jump.host, port: jump.port, username: jump.username }
+                : null;
         return successResponse({
             server: {
                 ...safeFields,

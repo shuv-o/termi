@@ -37,9 +37,12 @@ const MAX_SERVERS = 50;
  */
 export function RunOnServersDialog({
     initialCommand = '',
+    initialServerIds = [],
     onClose,
 }: {
     initialCommand?: string;
+    /** Servers ticked when it opens (a server's own page). */
+    initialServerIds?: string[];
     onClose: () => void;
 }) {
     const { data } = useCachedFetch<{ servers: ServerRow[] }>('/api/servers');
@@ -59,7 +62,7 @@ export function RunOnServersDialog({
     }, [servers]);
 
     const [command, setCommand] = useState(initialCommand);
-    const [selected, setSelected] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string[]>(initialServerIds);
     const [filter, setFilter] = useState('');
     const [running, setRunning] = useState(false);
     const [error, setError] = useState('');

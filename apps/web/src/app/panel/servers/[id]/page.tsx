@@ -11,6 +11,10 @@ import { LiveMonitoringSection } from './_details/LiveMonitoringSection';
 import { MonitorSettingsSection } from './_details/MonitorSettingsSection';
 import { SecurityScanSection } from './_details/SecurityScanSection';
 import { HostKeySection } from '@/components/servers/HostKeySection';
+import { OpenConnections } from './_details/OpenConnections';
+import { QuickActions } from './_details/QuickActions';
+import { RecentConnections } from './_details/RecentConnections';
+import { ServerFacts } from './_details/ServerFacts';
 import { ServerHeader, ServerInfoCard } from './_details/ServerSummary';
 import { TunnelSection } from '@/components/tunnels/TunnelSection';
 import { useBenchmark } from './_details/useBenchmark';
@@ -61,6 +65,24 @@ export default function ServerDetailsPage() {
                 latencyMs={lastRecord?.latencyMs}
             />
 
+            {/* Doing things with the server comes first: open it, copy how to
+                reach it, see and manage what is open on it right now. */}
+            <QuickActions server={server} />
+
+            <OpenConnections serverId={id} />
+
+            <div className="grid gap-5 lg:grid-cols-2">
+                <ServerFacts server={server} />
+                <RecentConnections serverId={id} />
+            </div>
+
+            {/* Port forwarding needs a shell channel, so it's SSH-only. */}
+            {isSSH && (
+                <div id="forwarding" className="scroll-mt-20">
+                    <TunnelSection tunnels={tunnels} />
+                </div>
+            )}
+
             {/* Live first: when you open a server page it is usually because
                 something is happening now, not last Tuesday. Metrics are read
                 over SSH, so this is SSH-only. */}
@@ -100,9 +122,6 @@ export default function ServerDetailsPage() {
                     onRun={benchmark.run}
                 />
             )}
-
-            {/* Port forwarding needs a shell channel, so it's SSH-only too. */}
-            {isSSH && <TunnelSection tunnels={tunnels} />}
         </div>
     );
 }

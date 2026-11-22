@@ -60,7 +60,7 @@ const ImportServersDialog = dynamic(() => import('@/components/servers/ImportSer
     ssr: false,
 });
 
-const ShareModal = dynamic(() => import('./_dashboard/ShareModal'), { ssr: false });
+const ShareModal = dynamic(() => import('@/components/servers/ShareModal'), { ssr: false });
 
 export default function DashboardPage() {
     const router = useRouter();

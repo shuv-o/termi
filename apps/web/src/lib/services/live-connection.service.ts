@@ -193,11 +193,17 @@ function uniq(xs: (string | null | undefined)[]): string[] {
 export async function listLiveConnections(
     userId: string,
     currentSid: string | null,
+    /** Only connections to this server (the server details page). */
+    serverId?: string,
 ): Promise<{ connections: LiveConnectionView[]; tracking: boolean }> {
     const now = new Date();
     const [rows, reporting] = await Promise.all([
         prisma.liveConnection.findMany({
-            where: { userId, gateway: { expiresAt: { gt: now } } },
+            where: {
+                userId,
+                gateway: { expiresAt: { gt: now } },
+                ...(serverId ? { serverId, kind: { not: 'guest' } } : {}),
+            },
             include: { gateway: { select: { deviceId: true } } },
             orderBy: { startedAt: 'desc' },
             take: 500,

@@ -12,8 +12,25 @@ export interface ServerInfo {
     isFavorite: boolean;
     lastUsedAt: string | null;
     group: { id: string; name: string; color: string | null } | null;
-    /** The bastion this server is reached through, if any. */
-    jumpServer?: { id: string; name: string } | null;
+    /** The bastion this server is reached through, if any (address for copied commands). */
+    jumpServer?: {
+        id: string;
+        name: string;
+        host: string;
+        port: number;
+        username: string | null;
+    } | null;
+    username?: string | null;
+    /** Which secrets are stored; their values never come to the browser. */
+    hasPassword?: boolean;
+    hasPrivateKey?: boolean;
+    hasPassphrase?: boolean;
+    certificate?: string | null;
+    securityKeyId?: string | null;
+    agentForwarding?: string;
+    connectFrom?: 'server' | 'device' | 'auto';
+    notes?: string | null;
+    createdAt?: string;
 }
 
 export type WebhookPlatform = 'SLACK' | 'DISCORD' | 'GENERIC';

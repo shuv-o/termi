@@ -60,15 +60,19 @@ export interface ConnectionEntry {
 export async function listConnections(
     userId: string,
     before: Date | null,
+    /** Only this server's entries, at most `limit` of them. */
+    filter: { serverId?: string; limit?: number } = {},
 ): Promise<{ entries: ConnectionEntry[]; nextBefore: string | null }> {
+    const take = Math.min(Math.max(filter.limit ?? PAGE, 1), PAGE);
     const rows = await prisma.auditLog.findMany({
         where: {
             userId,
             action: 'CONNECTION_OPENED',
+            ...(filter.serverId ? { resource: `server:${filter.serverId}` } : {}),
             ...(before ? { createdAt: { lt: before } } : {}),
         },
         orderBy: { createdAt: 'desc' },
-        take: PAGE,
+        take,
         select: {
             id: true,
             resource: true,
@@ -92,6 +96,6 @@ export async function listConnections(
     });
     return {
         entries,
-        nextBefore: rows.length === PAGE ? rows[rows.length - 1].createdAt.toISOString() : null,
+        nextBefore: rows.length === take ? rows[rows.length - 1].createdAt.toISOString() : null,
     };
 }

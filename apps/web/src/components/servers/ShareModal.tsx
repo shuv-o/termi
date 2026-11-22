@@ -4,14 +4,20 @@ import { useEffect, useState } from 'react';
 import { Loader2, Mail, Share2, Shield, Unlink, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { ServerItem } from './types';
+import type { ServerItem } from '@/lib/servers/types';
 
 interface ShareData {
     shares: { id: string; permissions: string; sharedWith: { id: string; email: string } }[];
     pending: { id: string; inviteeEmail: string; permissions: string; expiresAt: string }[];
 }
 
-export function ShareModal({ server, onClose }: { server: ServerItem; onClose: () => void }) {
+export function ShareModal({
+    server,
+    onClose,
+}: {
+    server: Pick<ServerItem, 'id' | 'name'>;
+    onClose: () => void;
+}) {
     const [email, setEmail] = useState('');
     const [permissions, setPermissions] = useState<'connect' | 'manage'>('connect');
     const [sending, setSending] = useState(false);
