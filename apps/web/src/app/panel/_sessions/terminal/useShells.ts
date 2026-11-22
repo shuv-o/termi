@@ -48,13 +48,26 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
         setActiveShellId(shellId);
     }, [session.token, session.sessionId, session.type]);
 
-    // Keep shell[0] token in sync with context (reconnect / renew updates it)
+    // Keep shell[0] in sync with context: reconnect updates its token, renew
+    // (the gateway lost the shell) gives it a new session id as well.
     useEffect(() => {
         setShells((prev) => {
             if (!prev[0]) return prev;
-            return prev.map((s, i) => (i === 0 ? { ...s, token: session.token } : s));
+            return prev.map((s, i) =>
+                i === 0 ? { ...s, sessionId: session.sessionId, token: session.token } : s,
+            );
         });
-    }, [session.token]);
+    }, [session.token, session.sessionId]);
+
+    // Each mounted terminal's own reconnect (reattaches the same shell).
+    const reconnectors = useRef(new Map<string, () => void>());
+
+    /** A fresh token for a terminal that reconnects on its own (tokens live 5 minutes). */
+    const renewToken = useCallback(async () => {
+        const token = await issueConnectionToken(session);
+        if (!token) throw new Error('Could not get a connection token');
+        return token;
+    }, [session]);
 
     /**
      * xterm needs a resize nudge once a hidden pane becomes visible. Memoized
@@ -96,6 +109,7 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
             }
             wsRefs.current.delete(shellId);
             keyHandlers.current.delete(shellId);
+            reconnectors.current.delete(shellId);
 
             setShells((prev) => {
                 const remaining = prev.filter((s) => s.id !== shellId);
@@ -113,12 +127,23 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
         [removeSession, session.tabId],
     );
 
-    /** Re-issues a token for a non-first shell, resetting its gateway session. */
+    /**
+     * Re-issues a token for a non-first shell. `newSession` also gives it a new
+     * gateway session (the old one is gone); otherwise it reattaches the same
+     * shell.
+     */
     const refreshShellToken = useCallback(
-        (shellId: string) => {
-            const sessionId = crypto.randomUUID();
+        (shellId: string, newSession = true) => {
             setShells((prev) =>
-                prev.map((s) => (s.id === shellId ? { ...s, sessionId, token: null } : s)),
+                prev.map((s) =>
+                    s.id === shellId
+                        ? {
+                              ...s,
+                              sessionId: newSession ? crypto.randomUUID() : s.sessionId,
+                              token: null,
+                          }
+                        : s,
+                ),
             );
             issueConnectionToken(session)
                 .then((token) => {
@@ -150,6 +175,8 @@ export function useShells(session: Session, removeSession: (tabId: string) => vo
         addShell,
         closeShell,
         refreshShellToken,
+        reconnectors,
+        renewToken,
         keyHandlers,
         wsRefs,
         nudgeResize,

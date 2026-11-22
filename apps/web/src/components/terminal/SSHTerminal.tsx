@@ -26,6 +26,11 @@ interface SSHTerminalProps {
     /** Hands the parent a function that opens the find-in-output bar. */
     onSearchReady?: (open: () => void) => void;
     sessionId: string;
+    /**
+     * The shell already exists on the gateway (a restored session): reattach
+     * only, never open a new shell under this id.
+     */
+    resume?: boolean;
     serverId: string;
     connectionToken: string;
     renewToken?: () => Promise<string>;
@@ -52,6 +57,7 @@ interface SSHTerminalProps {
 
 export default function SSHTerminal({
     sessionId,
+    resume,
     serverId,
     connectionToken,
     renewToken,
@@ -139,6 +145,8 @@ export default function SSHTerminal({
     const renewTokenRef = useRef(renewToken);
     renewTokenRef.current = renewToken;
     const hasConnectedOnceRef = useRef(false);
+    /** The session id whose shell is known to exist on the gateway. */
+    const liveSessionIdRef = useRef<string | null>(resume ? sessionId : null);
 
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -175,7 +183,11 @@ export default function SSHTerminal({
     const connect = useCallback(async () => {
         const gatewayBase =
             gatewayUrl || process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:22080/gateway';
-        const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}`;
+        // Once a shell has been opened under this id, every later connection is a
+        // reattach: the gateway answers session-not-found instead of quietly
+        // starting a new shell when it no longer has it.
+        const resuming = liveSessionIdRef.current === sessionId;
+        const wsUrl = `${gatewayBase}/connect?protocol=ssh&serverId=${encodeURIComponent(serverId)}&sessionId=${encodeURIComponent(sessionId)}${resuming ? '&resume=1' : ''}`;
 
         const ws = openGatewaySocket(wsUrl);
         ws.binaryType = 'arraybuffer'; // terminal output arrives as raw binary frames
@@ -241,6 +253,7 @@ export default function SSHTerminal({
 
                     case 'shell-ready':
                         shellOpenedRef.current = true;
+                        liveSessionIdRef.current = sessionId;
                         retryCountRef.current = 0;
                         updateStatus('connected');
                         if (terminalInstance.current && fitAddon.current) {
@@ -254,6 +267,10 @@ export default function SSHTerminal({
                         // Gateway lost the session (restart/expiry) — trigger new session creation
                         intentionalCloseRef.current = true;
                         retryCountRef.current = 0; // reset for future manual reconnects
+                        liveSessionIdRef.current = null;
+                        terminalInstance.current?.write(
+                            '\r\n\x1b[33mThe previous shell has ended. Starting a new one…\x1b[0m\r\n',
+                        );
                         onSessionNotFoundRef.current?.();
                         break;
 

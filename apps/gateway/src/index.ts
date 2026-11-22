@@ -341,6 +341,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         'ssh' | 'scp' | 'rdp' | 'vnc' | 'telnet' | 'local' | 'tunnel';
     const serverId = url.searchParams.get('serverId');
     const sessionId = url.searchParams.get('sessionId');
+    /** The client is reattaching an existing shell, never asking for a new one. */
+    const resume = url.searchParams.get('resume') === '1';
     // Bounded: guacd/FreeRDP allocate a framebuffer of this size.
     const clampDim = (v: string | null) => Math.min(Math.max(parseInt(v || '0', 10) || 0, 0), 8192);
     const browserWidth = clampDim(url.searchParams.get('width'));
@@ -598,6 +600,13 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
                 // Signal ready (shell already open)
                 ws.send(JSON.stringify({ type: 'shell-ready' }));
+            } else if (resume) {
+                // The browser asked to reattach a shell this gateway no longer has
+                // (SSH dropped, idle timeout, restart). Say so rather than quietly
+                // opening a new shell under the old id: the client then starts a
+                // new session knowingly and tells the user.
+                ws.send(JSON.stringify({ type: 'session-not-found' }));
+                ws.close(1000, 'Session not found');
             } else {
                 //   New session
                 if (persistentSessions.isAtLimit(tokenPayload.userId)) {

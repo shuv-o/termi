@@ -32,6 +32,11 @@ export interface Session {
     via?: 'gateway' | 'device';
     /** A device connection that fails may move to the gateway. */
     fallback?: boolean;
+    /**
+     * Restored after a page load: its shell should already be running on the
+     * gateway, so the terminal reattaches instead of opening a new one.
+     */
+    restored?: boolean;
 }
 
 interface SessionsContextValue {
@@ -359,7 +364,13 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         setSessions((prev) =>
             prev.map((s) =>
                 s.tabId === tabId
-                    ? { ...s, sessionId: newSessionId, token: null, status: 'connecting' }
+                    ? {
+                          ...s,
+                          sessionId: newSessionId,
+                          token: null,
+                          status: 'connecting',
+                          restored: false,
+                      }
                     : s,
             ),
         );
@@ -536,6 +547,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                     gatewayUrl: null,
                     status: 'detached' as const,
                     showFiles: false,
+                    restored: true,
                 }));
 
                 if (restoredSessions.length > 0) {

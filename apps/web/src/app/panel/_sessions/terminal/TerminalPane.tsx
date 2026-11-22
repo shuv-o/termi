@@ -159,6 +159,8 @@ export function TerminalPane({
         addShell,
         closeShell,
         refreshShellToken,
+        reconnectors,
+        renewToken,
         keyHandlers,
         wsRefs,
         nudgeResize,
@@ -197,10 +199,18 @@ export function TerminalPane({
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    /** Shell 0 is owned by the session context; others manage their own token. */
+    /**
+     * Reattach the same shell. A mounted terminal reconnects in place (keeping
+     * its scrollback, fetching a fresh token); without one, fetch a token for
+     * the same session id. Shell 0 is owned by the session context.
+     */
     const reconnectShell = (shellId: string, isFirst: boolean) => {
-        if (isFirst) reconnectSession(session.tabId, session.serverId);
-        else refreshShellToken(shellId);
+        // No token means the placeholder is showing: its terminal is unmounted.
+        const mounted = shells.some((s) => s.id === shellId && s.token);
+        const reconnect = mounted ? reconnectors.current.get(shellId) : undefined;
+        if (reconnect) reconnect();
+        else if (isFirst) reconnectSession(session.tabId, session.serverId);
+        else refreshShellToken(shellId, false);
     };
 
     const renewShell = (shellId: string, isFirst: boolean) => {
@@ -446,8 +456,13 @@ export function TerminalPane({
                                                         : undefined
                                                 }
                                                 sessionId={shell.sessionId}
+                                                resume={isFirst && session.restored}
                                                 serverId={session.serverId}
                                                 connectionToken={shell.token}
+                                                renewToken={renewToken}
+                                                onReconnectReady={(fn) =>
+                                                    reconnectors.current.set(shell.id, fn)
+                                                }
                                                 gatewayUrl={session.gatewayUrl ?? undefined}
                                                 disableNativeKeyboard={isMobile}
                                                 onSearchReady={(fn) =>
