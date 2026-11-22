@@ -8,13 +8,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+---
+
+## [1.2.2] — 2026-11-22
+
+See everything you have open and close what you forgot, a server page that does more than monitor, terminals that come back on their own, and a DNS-rebinding fix.
+
+**Upgrading:** update the web app **and** the gateway together. The web image applies one new database migration on start (the open-connection list), and the gateway starts reporting what it has open every `GATEWAY_REPORT_SEC` (default 10 s) to `WEB_INTERNAL_URL`, the same address the access check already uses. Nothing to configure; until the gateway is updated, Active connections says it isn't reporting. Desktop apps update themselves on Windows and Linux; on a Mac, download the new DMG (Apple silicon or Intel).
+
 ### Added
 
-- **Active connections.** A new page lists everything you have open on any gateway, wherever you opened it: terminals still running after their tab closed (or after the browser or network died), remote desktops, file browsers, port forwards from the desktop app, and seats in someone's shared terminal, with which sign-in opened each, when, and when it was last used. Open a background shell again, take over one from another device, or close one, the background ones, or all of them. Closing is logged. The gateway reports what it has open every `GATEWAY_REPORT_SEC` (default 10 s) and closes what you closed on its next report; a gateway that stops reporting drops off the list. Also in search (⌘K).
+- **Active connections.** A new page lists everything you have open on any gateway, wherever you opened it: terminals still running after their tab closed (or after the browser or network died), remote desktops, file browsers, port forwards from the desktop app, and seats in someone's shared terminal, with which sign-in opened each, when, and when it was last used. Open a background shell again, take over one from another device, or close one, the background ones, or all of them. Closing is logged. A gateway that stops reporting drops off the list instead of leaving stale entries. Also in search (⌘K).
+- **A more useful server page.** One-click tools at the top: open a terminal or the file browser, run a command, forward a port; copy the `ssh` or `sftp` command (with `-J` for a jump host), an `~/.ssh/config` entry, `user@host` or the address; copy the password, key passphrase or private key (after confirming it's you, and logged); share or show a QR code. Below them: what you have open on that server right now (with Open and Close), its details (address, user, how Termi signs in, jump host, where it connects from, notes), and your recent connections to it. Port forwarding moved up next to these.
+- **Desktop app downloads on the home page**, with a compact download button that picks the installer for your system.
+
+### Changed
+
+- **Terminals reconnect on their own.** A dropped connection is retried with backoff for as long as it takes, waits while the browser is offline, and tries again the moment you're back online or return to the tab. It reattaches to the same shell (every shell tab, not only the first) and says so when that shell has ended, instead of quietly opening a new one. It stops retrying when retrying can't help: signed out, access removed, or a login or host-key refusal.
 
 ### Fixed
 
 - The macOS app 1.2.0 failed its update check ("Cannot find latest-mac.yml"). Releases publish that file again, so older Macs are told about new versions; 1.2.1 and later ask GitHub directly.
+
+### Security
+
+- **DNS rebinding.** The web app checked a server's address against the private/metadata blocklist, then looked the name up again to connect, so a name that answered differently the second time could reach an internal address. Every connection the web app makes itself (connection tests, SSH for metrics, files, hardening and monitoring, jump hosts, reachability probes) now dials the exact address that was checked. A name that also resolves to IPv6 is dialed over IPv4 when it has an IPv4 address.
+- Patched transitive dependencies: `effect` 3.22.5 (GHSA-7589-6fvf-x4pw, via the Prisma CLI) and `minimatch` 11.0.5 (GHSA-g3hv-75wg-m249, dev tools only).
 
 ---
 
@@ -454,7 +473,8 @@ First release to actually ship desktop installers. v1.0.2 built them but uploade
 - Patched transitive dependencies (`ws`, `defu`, `fast-uri`, `tmp`, `vite`) — clears all high-severity advisories in the runtime path
 - Password-reset URLs (single-use tokens) are no longer written to server logs in production
 
-[Unreleased]: https://github.com/shuv-o/termi/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/shuv-o/termi/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/shuv-o/termi/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/shuv-o/termi/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/shuv-o/termi/compare/v1.0.10...v1.2.0
 [1.0.10]: https://github.com/shuv-o/termi/compare/v1.0.8...v1.0.10
