@@ -16,6 +16,7 @@ import {
 } from '@/lib/security/host-key';
 import { pinFirstHostKey, recordHostKeyMismatch } from './host-key.service';
 import { certifiedKey } from '@/lib/security/ssh-cert';
+import { checkedDialAddress } from '@/lib/security/ssrf';
 
 /**
  * Log in with an OpenSSH user certificate: replaces the plain key with a
@@ -100,7 +101,18 @@ export function connectSSH(
     else cc.algorithms = { ...cc.algorithms, serverHostKey: HOST_KEY_ALGORITHMS };
 
     if (!jump) {
-        client.connect(cc);
+        // Dial the address that passed the SSRF check, not the name again.
+        void checkedDialAddress(cc.host ?? '').then((dial) => {
+            if (!dial.ok) {
+                client.emit('error', new Error(dial.error));
+                return;
+            }
+            try {
+                client.connect({ ...cc, host: dial.address });
+            } catch (err) {
+                client.emit('error', err);
+            }
+        });
         return;
     }
 
@@ -142,11 +154,25 @@ export function connectSSH(
     });
     client.once('close', () => bastion.end());
 
+    let bcc: ConnectConfig;
     try {
-        const bcc = bastionConfig(jump, cc.readyTimeout);
+        bcc = bastionConfig(jump, cc.readyTimeout);
         checkHostKey(bastion, bcc, jump.hostKey, `jump host ${jump.host}`);
-        bastion.connect(bcc);
     } catch (err) {
         fail(`Jump host ${jump.host}: ${(err as Error).message}`);
+        return;
     }
+    // This server dials the bastion, so it is the bastion's address that must
+    // be the checked one (the target behind it is dialed by the bastion).
+    void checkedDialAddress(jump.host).then((dial) => {
+        if (!dial.ok) {
+            fail(`Jump host ${jump.host}: ${dial.error}`);
+            return;
+        }
+        try {
+            bastion.connect({ ...bcc, host: dial.address });
+        } catch (err) {
+            fail(`Jump host ${jump.host}: ${(err as Error).message}`);
+        }
+    });
 }

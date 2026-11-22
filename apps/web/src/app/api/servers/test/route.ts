@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { certificateField } from '@/lib/security/certificate-field';
 import { withKeychainCredentials } from '@/lib/services/keychain.service';
 import { getCurrentUser } from '@/lib/auth';
-import { validateHost, validateJumpTargetHost } from '@/lib/security/ssrf';
+import { validateHost, validateJumpTargetHost, type HostCheck } from '@/lib/security/ssrf';
 import { assertValidJumpHost, JumpHostError, loadJump } from '@/lib/services/server.service';
 import { connectSSH, type SSHJumpConfig } from '@/lib/services/ssh-jump';
 import { checkReachabilityVia } from '@/lib/services/metrics.service';
@@ -228,7 +228,7 @@ export async function POST(request: Request) {
     }
 
     // SSRF protection: block connections to private/reserved addresses
-    const ssrfCheck = jump
+    const ssrfCheck: HostCheck = jump
         ? validateJumpTargetHost(host)
         : await validateHost(host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
     if (!ssrfCheck.valid) {
@@ -237,6 +237,8 @@ export async function POST(request: Request) {
             { status: 400 },
         );
     }
+    // What this server dials when there is no jump host: the checked address.
+    const dialAddress = ssrfCheck.address ?? host;
 
     const isSSH = protocol === 'SSH' || protocol === 'SCP';
     // TELNET uses TCP check only (no SSH auth)
@@ -279,8 +281,9 @@ export async function POST(request: Request) {
         });
     }
 
-    // RDP / VNC — TCP check only
-    const result = await tcpCheck(host, port);
+    // RDP / VNC — TCP check only, to the address that passed the check above
+    // (not the name again: a second lookup could answer differently).
+    const result = await tcpCheck(dialAddress, port);
     return Response.json({
         success: result.ok,
         latency: result.latencyMs,

@@ -21,6 +21,15 @@ const { FakeClient } = vi.hoisted(() => {
 vi.mock('ssh2', () => ({ Client: FakeClient }));
 // Reaches into the real ssh2's protocol internals; not needed for routing.
 vi.mock('@/lib/security/ssh-cert', () => ({ certifiedKey: vi.fn() }));
+// The SSRF check: names resolve to a fixed address; "evil" names are refused.
+const { checkedDialAddress } = vi.hoisted(() => ({
+    checkedDialAddress: vi.fn(async (host: string) =>
+        host.startsWith('evil')
+            ? { ok: false as const, error: 'Hostname resolves to a private/reserved address' }
+            : { ok: true as const, address: host === 'bastion.example.com' ? '203.0.113.7' : host },
+    ),
+}));
+vi.mock('@/lib/security/ssrf', () => ({ checkedDialAddress }));
 
 import { connectSSH } from './ssh-jump';
 import type { Client } from 'ssh2';
@@ -36,25 +45,65 @@ const target = { host: '10.0.2.4', port: 22, username: 'deploy', readyTimeout: 5
 
 beforeEach(() => {
     FakeClient.instances = [];
+    checkedDialAddress.mockClear();
 });
 
 describe('connectSSH', () => {
-    it('connects directly when there is no jump host', () => {
+    it('connects directly when there is no jump host', async () => {
         const client = new FakeClient();
         connectSSH(client as unknown as Client, target, null, null);
-        expect(client.connect).toHaveBeenCalledWith(target);
+        await vi.waitFor(() => expect(client.connect).toHaveBeenCalledWith(target));
+        expect(checkedDialAddress).toHaveBeenCalledWith('10.0.2.4');
         expect(FakeClient.instances).toHaveLength(1);
     });
 
-    it('dials the bastion, forwards to the target, and handshakes over that channel', () => {
+    it('dials the checked address, not the name again (DNS rebinding)', async () => {
+        const client = new FakeClient();
+        connectSSH(
+            client as unknown as Client,
+            { ...target, host: 'bastion.example.com' },
+            null,
+            null,
+        );
+        await vi.waitFor(() =>
+            expect(client.connect).toHaveBeenCalledWith(
+                expect.objectContaining({ host: '203.0.113.7' }),
+            ),
+        );
+    });
+
+    it('never dials a host the SSRF check refuses', async () => {
+        const client = new FakeClient();
+        const onError = vi.fn();
+        client.on('error', onError);
+        connectSSH(client as unknown as Client, { ...target, host: 'evil.example' }, null, null);
+        await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
+        expect(onError.mock.calls[0][0].message).toMatch(/private\/reserved/);
+        expect(client.connect).not.toHaveBeenCalled();
+    });
+
+    it('never dials a bastion the SSRF check refuses', async () => {
+        const client = new FakeClient();
+        const onError = vi.fn();
+        client.on('error', onError);
+        connectSSH(client as unknown as Client, target, { ...jump, host: 'evil.example' }, null);
+        await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
+        expect(FakeClient.instances[1].connect).not.toHaveBeenCalled();
+    });
+
+    it('dials the bastion, forwards to the target, and handshakes over that channel', async () => {
         const client = new FakeClient();
         connectSSH(client as unknown as Client, target, jump, null);
 
         const bastion = FakeClient.instances[1];
         expect(client.connect).not.toHaveBeenCalled();
-        expect(bastion.connect).toHaveBeenCalledWith(
-            expect.objectContaining({ host: 'bastion.example.com', port: 2222, username: 'jump' }),
+        // The bastion's checked address is dialed; the target only by the bastion.
+        await vi.waitFor(() =>
+            expect(bastion.connect).toHaveBeenCalledWith(
+                expect.objectContaining({ host: '203.0.113.7', port: 2222, username: 'jump' }),
+            ),
         );
+        expect(checkedDialAddress).not.toHaveBeenCalledWith('10.0.2.4');
 
         bastion.emit('ready');
         expect(bastion.forwardOut).toHaveBeenCalledWith(

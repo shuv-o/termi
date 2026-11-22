@@ -75,23 +75,35 @@ export function isAlwaysBlockedAddress(address: string): boolean {
     return false;
 }
 
-export async function validateHost(
-    host: string,
-    allowPrivateNetworks = false,
-): Promise<{ valid: boolean; error?: string }> {
+export interface HostCheck {
+    valid: boolean;
+    error?: string;
+    /**
+     * The address that was checked, to dial instead of the name: looking the
+     * name up again at connect time could return another address (DNS
+     * rebinding) and reach a private or metadata address after all.
+     */
+    address?: string;
+}
+
+const stripBrackets = (h: string) => h.replace(/^\[|\]$/g, '');
+
+export async function validateHost(host: string, allowPrivateNetworks = false): Promise<HostCheck> {
     const metadataError = { valid: false, error: 'Cloud metadata addresses are not allowed' };
     if (isAlwaysBlockedAddress(host)) return metadataError;
     if (allowPrivateNetworks) {
+        const literal = stripBrackets(host.trim());
+        if (isIP(literal)) return { valid: true, address: literal };
         // Private ranges are allowed, but a hostname may still point at metadata.
-        if (isIP(host.trim().replace(/^\[|\]$/g, '')) === 0) {
-            try {
-                const addrs = await dns.lookup(host.trim().toLowerCase(), { all: true });
-                if (addrs.some((a) => isAlwaysBlockedAddress(a.address))) return metadataError;
-            } catch {
-                // Labs without DNS: unresolvable names stay allowed in this mode.
-            }
+        try {
+            const addrs = await dns.lookup(host.trim().toLowerCase(), { all: true });
+            if (addrs.some((a) => isAlwaysBlockedAddress(a.address))) return metadataError;
+            return { valid: true, address: addrs[0]?.address };
+        } catch {
+            // Labs without DNS: unresolvable names stay allowed in this mode,
+            // dialed by name (no address to pin).
+            return { valid: true };
         }
-        return { valid: true };
     }
 
     const trimmed = host.trim().toLowerCase();
@@ -102,38 +114,31 @@ export async function validateHost(
     }
 
     // If it's a raw IP, check immediately
-    const ipVersion = isIP(trimmed);
+    const literal = stripBrackets(trimmed);
+    const ipVersion = isIP(literal);
     if (ipVersion === 4) {
-        if (isBlockedIPv4(trimmed)) {
+        if (isBlockedIPv4(literal)) {
             return {
                 valid: false,
                 error: 'Connections to private/reserved IP addresses are not allowed',
             };
         }
-        return { valid: true };
+        return { valid: true, address: literal };
     }
     if (ipVersion === 6) {
-        if (isBlockedIPv6(trimmed)) {
+        if (isBlockedIPv6(literal)) {
             return {
                 valid: false,
                 error: 'Connections to private/reserved IP addresses are not allowed',
             };
         }
-        return { valid: true };
+        return { valid: true, address: literal };
     }
 
     // Hostname — resolve and check each returned IP
+    let addresses: { address: string }[];
     try {
-        const addresses = await dns.lookup(trimmed, { all: true });
-        for (const addr of addresses) {
-            const version = isIP(addr.address);
-            if (version === 4 && isBlockedIPv4(addr.address)) {
-                return { valid: false, error: 'Hostname resolves to a private/reserved address' };
-            }
-            if (version === 6 && isBlockedIPv6(addr.address)) {
-                return { valid: false, error: 'Hostname resolves to a private/reserved address' };
-            }
-        }
+        addresses = await dns.lookup(trimmed, { all: true });
     } catch {
         // DNS resolution failed — block to prevent SSRF via unresolvable hostnames.
         // Users on private networks without DNS can set ALLOW_PRIVATE_NETWORKS=true.
@@ -142,8 +147,36 @@ export async function validateHost(
             error: 'Unable to resolve hostname — check that the address is correct and reachable',
         };
     }
+    for (const addr of addresses) {
+        const version = isIP(addr.address);
+        if (
+            (version === 4 && isBlockedIPv4(addr.address)) ||
+            (version === 6 && isBlockedIPv6(addr.address)) ||
+            isAlwaysBlockedAddress(addr.address)
+        ) {
+            return { valid: false, error: 'Hostname resolves to a private/reserved address' };
+        }
+    }
+    if (!addresses.length) {
+        return {
+            valid: false,
+            error: 'Unable to resolve hostname — check that the address is correct and reachable',
+        };
+    }
+    return { valid: true, address: addresses[0].address };
+}
 
-    return { valid: true };
+/**
+ * Checks a host this server is about to dial itself and returns what to dial:
+ * the checked address, so the connection can't land somewhere the check
+ * didn't see. Uses ALLOW_PRIVATE_NETWORKS like every other check.
+ */
+export async function checkedDialAddress(
+    host: string,
+): Promise<{ ok: true; address: string } | { ok: false; error: string }> {
+    const check = await validateHost(host, process.env.ALLOW_PRIVATE_NETWORKS === 'true');
+    if (!check.valid) return { ok: false, error: check.error || 'Invalid host' };
+    return { ok: true, address: check.address ?? host };
 }
 
 /**

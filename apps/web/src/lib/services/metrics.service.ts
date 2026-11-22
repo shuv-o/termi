@@ -7,6 +7,7 @@
 
 import * as net from 'net';
 import { sshPool, SSHPoolConfig } from './ssh-pool';
+import { checkedDialAddress } from '@/lib/security/ssrf';
 import type { SSHJumpConfig } from './ssh-jump';
 
 export interface ServerMetrics {
@@ -32,10 +33,25 @@ export interface ServerMetrics {
     error?: string;
 }
 
-export function checkReachability(
+/**
+ * TCP probe from this server. The host is checked against the SSRF rules again
+ * and the checked address is dialed: a saved name may resolve somewhere else
+ * now than when the server was saved.
+ */
+export async function checkReachability(
     host: string,
     port: number,
     timeoutMs = 5000,
+): Promise<{ reachable: boolean; latencyMs?: number }> {
+    const dial = await checkedDialAddress(host);
+    if (!dial.ok) return { reachable: false };
+    return probe(dial.address, port, timeoutMs);
+}
+
+function probe(
+    address: string,
+    port: number,
+    timeoutMs: number,
 ): Promise<{ reachable: boolean; latencyMs?: number }> {
     return new Promise((resolve) => {
         const start = Date.now();
@@ -52,7 +68,7 @@ export function checkReachability(
 
         socket.setTimeout(timeoutMs);
 
-        socket.connect(port, host, () => {
+        socket.connect(port, address, () => {
             done({ reachable: true, latencyMs: Date.now() - start });
         });
 

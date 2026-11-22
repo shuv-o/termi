@@ -125,3 +125,47 @@ describe('cloud metadata is always blocked', () => {
         }
     });
 });
+
+describe('the address to dial (DNS rebinding)', () => {
+    beforeEach(() => {
+        lookupMock.mockReset();
+    });
+
+    it('returns the address it checked for a name', async () => {
+        lookupMock.mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }]);
+        expect(await validateHost('example.com')).toEqual({
+            valid: true,
+            address: '93.184.216.34',
+        });
+    });
+
+    it('returns a literal IP as is, without brackets', async () => {
+        expect((await validateHost('8.8.8.8')).address).toBe('8.8.8.8');
+        expect((await validateHost('[2001:4860:4860::8888]')).address).toBe('2001:4860:4860::8888');
+    });
+
+    it('refuses a name that resolves to nothing', async () => {
+        lookupMock.mockResolvedValueOnce([]);
+        expect((await validateHost('empty.example')).valid).toBe(false);
+    });
+
+    it('with private networks allowed, still pins the checked address', async () => {
+        lookupMock.mockResolvedValueOnce([{ address: '10.0.0.5', family: 4 }]);
+        expect(await validateHost('db.internal', true)).toEqual({
+            valid: true,
+            address: '10.0.0.5',
+        });
+    });
+
+    it('checkedDialAddress dials the checked address and refuses what fails', async () => {
+        const { checkedDialAddress } = await import('./ssrf');
+        lookupMock.mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }]);
+        expect(await checkedDialAddress('example.com')).toEqual({
+            ok: true,
+            address: '93.184.216.34',
+        });
+        lookupMock.mockResolvedValueOnce([{ address: '10.0.0.5', family: 4 }]);
+        const refused = await checkedDialAddress('rebind.example');
+        expect(refused.ok).toBe(false);
+    });
+});
