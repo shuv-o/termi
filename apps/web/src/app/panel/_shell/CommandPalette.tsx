@@ -47,6 +47,7 @@ import type { MenuItemId } from '@/lib/appearance/prefs';
 const PAGE_SYNONYMS: Record<MenuItemId, string> = {
     servers: 'fleet dashboard hosts',
     connections: 'sessions terminals tabs open',
+    active: 'live running background detached lost orphaned disconnect kill close sessions',
     workspaces: 'layouts saved split panes sets',
     local: 'local shell this computer',
     serial: 'usb console cable router switch',

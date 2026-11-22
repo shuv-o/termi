@@ -26,6 +26,8 @@ export interface Guest {
     sid: string | null;
     /** The share link the guest came in through. */
     shareId: string | null;
+    /** When the owner let the guest in. */
+    joinedAt?: number;
 }
 
 export const MAX_GUESTS = 10;
@@ -124,7 +126,7 @@ export function requestJoin(
         if (!allow || ws.readyState !== WebSocket.OPEN) {
             return fail('The person sharing this session did not let you in');
         }
-        session.guests.set(id, { id, ws, ...guest });
+        session.guests.set(id, { id, ws, ...guest, joinedAt: Date.now() });
         send(ws, { type: 'joined', mode: guest.mode });
         const buffered = session.buffer.snapshot();
         if (buffered.length > 0) ws.send(buffered, { binary: true });

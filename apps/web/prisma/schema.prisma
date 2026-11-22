@@ -293,6 +293,54 @@ model PersistentSession {
   @@index([userId])
 }
 
+// LIVE CONNECTIONS (what each gateway reports as open right now)
+
+/// One gateway process (or a desktop app's own gateway). Its connections
+/// count only until `expiresAt`: a gateway that stops reporting (restart,
+/// crash, scaled down) drops out instead of leaving stale rows.
+/// See lib/services/live-connection.service.ts.
+model GatewayInstance {
+  id           String    @id
+  /// Set for a desktop app's gateway (its Device id).
+  deviceId     String?
+  lastReportAt DateTime  @default(now())
+  expiresAt    DateTime
+
+  connections LiveConnection[]
+
+  @@index([expiresAt])
+}
+
+/// A connection a gateway reported as open. No foreign keys to User/Server:
+/// the gateway's report is a snapshot and may name rows deleted meanwhile.
+model LiveConnection {
+  id        String  @id @default(cuid())
+  gatewayId String
+  /// The gateway's own id for it, unique per gateway.
+  connId    String
+  userId    String
+  /// Web sign-in (Session id) behind its token.
+  sid       String?
+  /// session (persistent SSH shell), guest (seat in someone's shell), socket (anything else)
+  kind      String
+  protocol  String
+  serverId  String?
+  /// 'session' only: the shell id, so its owner can reattach.
+  sessionId String?
+  attached  Boolean
+  guests    Int      @default(0)
+  detail    Json?
+  startedAt      DateTime
+  lastActivityAt DateTime
+  /// The owner asked to close it; told to the gateway on its next report.
+  closeRequestedAt DateTime?
+
+  gateway GatewayInstance @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+
+  @@unique([gatewayId, connId])
+  @@index([userId])
+}
+
 // AUDIT LOGGING
 
 model AuditLog {
@@ -491,6 +539,9 @@ enum AuditAction {
   // SSH host key pinning
   SERVER_HOST_KEY_TRUSTED
   SERVER_HOST_KEY_MISMATCH
+
+  // Closed from the Active connections page
+  CONNECTION_CLOSED_BY_USER
 }
 
 // PUSH NOTIFICATIONS

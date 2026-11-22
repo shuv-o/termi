@@ -72,6 +72,20 @@ export type Connection = Prisma.ConnectionModel
  */
 export type PersistentSession = Prisma.PersistentSessionModel
 /**
+ * Model GatewayInstance
+ * One gateway process (or a desktop app's own gateway). Its connections
+ * count only until `expiresAt`: a gateway that stops reporting (restart,
+ * crash, scaled down) drops out instead of leaving stale rows.
+ * See lib/services/live-connection.service.ts.
+ */
+export type GatewayInstance = Prisma.GatewayInstanceModel
+/**
+ * Model LiveConnection
+ * A connection a gateway reported as open. No foreign keys to User/Server:
+ * the gateway's report is a snapshot and may name rows deleted meanwhile.
+ */
+export type LiveConnection = Prisma.LiveConnectionModel
+/**
  * Model AuditLog
  * 
  */

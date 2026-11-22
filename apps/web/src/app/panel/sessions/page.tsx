@@ -44,6 +44,27 @@ function AutoConnect() {
     return null;
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** `?attach=<sessionId>&server=<serverId>` (from Active connections) shows a running shell. */
+function AttachSession() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { attachSession, sessionsRestored } = useSessionsContext();
+    const sessionId = searchParams.get('attach');
+    const serverId = searchParams.get('server');
+
+    useEffect(() => {
+        // After the page's own restore, which replaces the tab list (and may
+        // already bring this shell back).
+        if (!sessionId || !serverId || !sessionsRestored) return;
+        router.replace('/panel/sessions');
+        if (UUID.test(sessionId)) void attachSession(sessionId, serverId);
+    }, [sessionId, serverId, sessionsRestored, attachSession, router]);
+
+    return null;
+}
+
 /** `?workspace=<id>` (from the Workspaces page) opens that saved workspace. */
 function OpenWorkspace() {
     const router = useRouter();
@@ -70,6 +91,7 @@ export default function SessionsPage() {
     return (
         <Suspense fallback={null}>
             <AutoConnect />
+            <AttachSession />
             <OpenWorkspace />
         </Suspense>
     );

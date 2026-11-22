@@ -70,6 +70,8 @@ export function appEnv(): Record<string, string> {
         // The gateway asks the web app often, so revocation tests finish quickly.
         WEB_INTERNAL_URL: BASE,
         GATEWAY_ACCESS_CHECK_SEC: '2',
+        // …and reports its open connections often (Active connections page).
+        GATEWAY_REPORT_SEC: '2',
         // The suite signs in and connects far more than a person would.
         E2E_RATE_LIMIT_MULTIPLIER: '10',
     };

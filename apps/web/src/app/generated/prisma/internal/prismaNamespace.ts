@@ -403,6 +403,8 @@ export const ModelName = {
   Server: 'Server',
   Connection: 'Connection',
   PersistentSession: 'PersistentSession',
+  GatewayInstance: 'GatewayInstance',
+  LiveConnection: 'LiveConnection',
   AuditLog: 'AuditLog',
   OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
@@ -446,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare" | "sshSecurityKey" | "aiSettings" | "aiConversation" | "aiMessage" | "aiMemory" | "device"
+    modelProps: "user" | "session" | "serverGroup" | "server" | "connection" | "persistentSession" | "gatewayInstance" | "liveConnection" | "auditLog" | "oAuthAccount" | "passkey" | "pushSubscription" | "serverMonitorConfig" | "serverHealthRecord" | "benchmarkRun" | "recording" | "tunnelSession" | "recoveryCode" | "emailOTP" | "commandSnippet" | "keychainCredential" | "serverInvitation" | "serverShare" | "serverHardeningRun" | "workspace" | "team" | "teamMember" | "teamServer" | "teamInvitation" | "sessionShare" | "sshSecurityKey" | "aiSettings" | "aiConversation" | "aiMessage" | "aiMemory" | "device"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -891,6 +893,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PersistentSessionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PersistentSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    GatewayInstance: {
+      payload: Prisma.$GatewayInstancePayload<ExtArgs>
+      fields: Prisma.GatewayInstanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GatewayInstanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GatewayInstanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        findFirst: {
+          args: Prisma.GatewayInstanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GatewayInstanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        findMany: {
+          args: Prisma.GatewayInstanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>[]
+        }
+        create: {
+          args: Prisma.GatewayInstanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        createMany: {
+          args: Prisma.GatewayInstanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GatewayInstanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>[]
+        }
+        delete: {
+          args: Prisma.GatewayInstanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        update: {
+          args: Prisma.GatewayInstanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        deleteMany: {
+          args: Prisma.GatewayInstanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GatewayInstanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GatewayInstanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>[]
+        }
+        upsert: {
+          args: Prisma.GatewayInstanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayInstancePayload>
+        }
+        aggregate: {
+          args: Prisma.GatewayInstanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGatewayInstance>
+        }
+        groupBy: {
+          args: Prisma.GatewayInstanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GatewayInstanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GatewayInstanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GatewayInstanceCountAggregateOutputType> | number
+        }
+      }
+    }
+    LiveConnection: {
+      payload: Prisma.$LiveConnectionPayload<ExtArgs>
+      fields: Prisma.LiveConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LiveConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LiveConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.LiveConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LiveConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.LiveConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.LiveConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.LiveConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LiveConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.LiveConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        update: {
+          args: Prisma.LiveConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.LiveConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LiveConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LiveConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.LiveConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.LiveConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLiveConnection>
+        }
+        groupBy: {
+          args: Prisma.LiveConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LiveConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LiveConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LiveConnectionCountAggregateOutputType> | number
         }
       }
     }
@@ -3140,6 +3290,37 @@ export const PersistentSessionScalarFieldEnum = {
 export type PersistentSessionScalarFieldEnum = (typeof PersistentSessionScalarFieldEnum)[keyof typeof PersistentSessionScalarFieldEnum]
 
 
+export const GatewayInstanceScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  lastReportAt: 'lastReportAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type GatewayInstanceScalarFieldEnum = (typeof GatewayInstanceScalarFieldEnum)[keyof typeof GatewayInstanceScalarFieldEnum]
+
+
+export const LiveConnectionScalarFieldEnum = {
+  id: 'id',
+  gatewayId: 'gatewayId',
+  connId: 'connId',
+  userId: 'userId',
+  sid: 'sid',
+  kind: 'kind',
+  protocol: 'protocol',
+  serverId: 'serverId',
+  sessionId: 'sessionId',
+  attached: 'attached',
+  guests: 'guests',
+  detail: 'detail',
+  startedAt: 'startedAt',
+  lastActivityAt: 'lastActivityAt',
+  closeRequestedAt: 'closeRequestedAt'
+} as const
+
+export type LiveConnectionScalarFieldEnum = (typeof LiveConnectionScalarFieldEnum)[keyof typeof LiveConnectionScalarFieldEnum]
+
+
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -3994,6 +4175,8 @@ export type GlobalOmitConfig = {
   server?: Prisma.ServerOmit
   connection?: Prisma.ConnectionOmit
   persistentSession?: Prisma.PersistentSessionOmit
+  gatewayInstance?: Prisma.GatewayInstanceOmit
+  liveConnection?: Prisma.LiveConnectionOmit
   auditLog?: Prisma.AuditLogOmit
   oAuthAccount?: Prisma.OAuthAccountOmit
   passkey?: Prisma.PasskeyOmit

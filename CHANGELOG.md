@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Added
+
+- **Active connections.** A new page lists everything you have open on any gateway, wherever you opened it: terminals still running after their tab closed (or after the browser or network died), remote desktops, file browsers, port forwards from the desktop app, and seats in someone's shared terminal, with which sign-in opened each, when, and when it was last used. Open a background shell again, take over one from another device, or close one, the background ones, or all of them. Closing is logged. The gateway reports what it has open every `GATEWAY_REPORT_SEC` (default 10 s) and closes what you closed on its next report; a gateway that stops reporting drops off the list. Also in search (⌘K).
+
 ### Fixed
 
 - The macOS app 1.2.0 failed its update check ("Cannot find latest-mac.yml"). Releases publish that file again, so older Macs are told about new versions; 1.2.1 and later ask GitHub directly.

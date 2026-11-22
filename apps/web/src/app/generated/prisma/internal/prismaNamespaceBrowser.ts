@@ -57,6 +57,8 @@ export const ModelName = {
   Server: 'Server',
   Connection: 'Connection',
   PersistentSession: 'PersistentSession',
+  GatewayInstance: 'GatewayInstance',
+  LiveConnection: 'LiveConnection',
   AuditLog: 'AuditLog',
   OAuthAccount: 'OAuthAccount',
   Passkey: 'Passkey',
@@ -236,6 +238,37 @@ export const PersistentSessionScalarFieldEnum = {
 } as const
 
 export type PersistentSessionScalarFieldEnum = (typeof PersistentSessionScalarFieldEnum)[keyof typeof PersistentSessionScalarFieldEnum]
+
+
+export const GatewayInstanceScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  lastReportAt: 'lastReportAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type GatewayInstanceScalarFieldEnum = (typeof GatewayInstanceScalarFieldEnum)[keyof typeof GatewayInstanceScalarFieldEnum]
+
+
+export const LiveConnectionScalarFieldEnum = {
+  id: 'id',
+  gatewayId: 'gatewayId',
+  connId: 'connId',
+  userId: 'userId',
+  sid: 'sid',
+  kind: 'kind',
+  protocol: 'protocol',
+  serverId: 'serverId',
+  sessionId: 'sessionId',
+  attached: 'attached',
+  guests: 'guests',
+  detail: 'detail',
+  startedAt: 'startedAt',
+  lastActivityAt: 'lastActivityAt',
+  closeRequestedAt: 'closeRequestedAt'
+} as const
+
+export type LiveConnectionScalarFieldEnum = (typeof LiveConnectionScalarFieldEnum)[keyof typeof LiveConnectionScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

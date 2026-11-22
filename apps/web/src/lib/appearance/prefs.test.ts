@@ -72,6 +72,7 @@ describe('menu', () => {
             'groups',
             'servers',
             'connections',
+            'active',
             'workspaces',
             'local',
             'serial',

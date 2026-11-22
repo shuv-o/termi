@@ -39,7 +39,13 @@ import {
     removeGuest,
     requestJoin,
 } from './sessions/guests.js';
-import { startAccessChecks, webAccessAsker, type LiveConnection } from './sessions/access-check.js';
+import { startAccessChecks, webAccessAsker } from './sessions/access-check.js';
+import {
+    startConnectionReports,
+    webConnectionReporter,
+    type ConnectionInfo,
+    type ListedConnection,
+} from './sessions/connection-report.js';
 import {
     LOCAL_MODE,
     armFirstUse,
@@ -179,6 +185,12 @@ const persistentSessions = new PersistentSessionStore();
 
 /** Active non-SSH WebSocket connections (for cleanup on error/close). */
 interface NonSshMeta {
+    /** Reported to the web app (sessions/connection-report.ts). */
+    id: string;
+    startedAt: number;
+    /** Last message from the browser. */
+    lastActivityAt: number;
+    detail?: ConnectionInfo['detail'];
     userId: string;
     /** Web sign-in behind the token (see sessions/access-check.ts). */
     sid: string | null;
@@ -194,13 +206,29 @@ interface NonSshMeta {
 }
 const nonSshConnections = new Map<WebSocket, NonSshMeta>();
 
-/** Every live connection and what it relies on — see sessions/access-check.ts. */
-function liveConnections(): LiveConnection[] {
-    const out: LiveConnection[] = [];
+/**
+ * Every live connection: what it relies on (sessions/access-check.ts) and
+ * what its owner sees on the Active connections page (sessions/connection-report.ts).
+ */
+function liveConnections(): ListedConnection[] {
+    const out: ListedConnection[] = [];
     for (const s of persistentSessions.values()) {
         if (s.isClosing) continue;
         out.push({
             grant: { sid: s.sid, userId: s.userId, kind: 'server', serverId: s.serverId },
+            info: {
+                id: `ssh:${s.sessionId}`,
+                userId: s.userId,
+                sid: s.sid,
+                kind: 'session',
+                protocol: 'ssh',
+                serverId: s.serverId,
+                sessionId: s.sessionId,
+                attached: s.attachedWs?.readyState === WebSocket.OPEN,
+                guests: s.guests.size,
+                startedAt: s.createdAt,
+                lastActivityAt: s.lastActivityAt,
+            },
             close: (message) => persistentSessions.delete(s.sessionId, message),
         });
         for (const g of s.guests.values()) {
@@ -211,6 +239,19 @@ function liveConnections(): LiveConnection[] {
                     kind: 'guest',
                     serverId: s.serverId,
                     ...(g.shareId ? { shareId: g.shareId } : {}),
+                },
+                info: {
+                    id: `guest:${s.sessionId}:${g.id}`,
+                    userId: g.userId,
+                    sid: g.sid,
+                    kind: 'guest',
+                    protocol: 'ssh',
+                    serverId: s.serverId,
+                    attached: g.ws.readyState === WebSocket.OPEN,
+                    guests: 0,
+                    startedAt: g.joinedAt ?? s.createdAt,
+                    lastActivityAt: s.lastActivityAt,
+                    detail: { guestMode: g.mode },
                 },
                 close: (message) => removeGuest(s, g.id, message),
             });
@@ -223,6 +264,19 @@ function liveConnections(): LiveConnection[] {
                 userId: meta.userId,
                 kind: meta.protocol === 'local' ? 'local' : 'server',
                 ...(meta.protocol === 'local' ? {} : { serverId: meta.serverId }),
+            },
+            info: {
+                id: meta.id,
+                userId: meta.userId,
+                sid: meta.sid,
+                kind: 'socket',
+                protocol: meta.protocol,
+                ...(meta.protocol === 'local' ? {} : { serverId: meta.serverId }),
+                attached: ws.readyState === WebSocket.OPEN,
+                guests: 0,
+                startedAt: meta.startedAt,
+                lastActivityAt: meta.lastActivityAt,
+                ...(meta.detail ? { detail: meta.detail } : {}),
             },
             close: (message) => {
                 // A desktop's socket carries raw Guacamole frames by now, so it
@@ -254,6 +308,25 @@ const stopAccessChecks = startAccessChecks(
         ? webAccessAsker(WEB_INTERNAL_URL, fetch, () => deviceAuthorization('access-check'), true)
         : webAccessAsker(WEB_INTERNAL_URL),
     ACCESS_CHECK_MS,
+);
+
+/**
+ * Each gateway process reports under its own id, so several gateways behind
+ * one load balancer (or a restart) never overwrite each other's lists.
+ */
+const GATEWAY_ID = (process.env.GATEWAY_ID || randomUUID()).slice(0, 100);
+const REPORT_MS = (() => {
+    const sec = parseInt(process.env.GATEWAY_REPORT_SEC || '', 10);
+    return Number.isFinite(sec) && sec >= 0 ? sec * 1000 : 10_000;
+})();
+const stopConnectionReports = startConnectionReports(
+    liveConnections,
+    LOCAL_MODE
+        ? webConnectionReporter(WEB_INTERNAL_URL, GATEWAY_ID, fetch, () =>
+              deviceAuthorization('connections'),
+          )
+        : webConnectionReporter(WEB_INTERNAL_URL, GATEWAY_ID),
+    REPORT_MS,
 );
 
 /** Per-user cap on concurrent tunnel connections — see TunnelSlotLimiter. */
@@ -476,12 +549,16 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         //   Local terminal: PTY on this machine              ─
         if (protocol === 'local') {
             const meta: NonSshMeta = {
+                id: randomUUID(),
+                startedAt: Date.now(),
+                lastActivityAt: Date.now(),
                 userId: tokenPayload.userId,
                 sid: tokenPayload.sid ?? null,
                 protocol: 'local',
                 serverId,
             };
             nonSshConnections.set(ws, meta);
+            ws.on('message', () => (meta.lastActivityAt = Date.now()));
 
             meta.handler = new LocalHandler(ws, tokenPayload.userId);
 
@@ -784,12 +861,29 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
         //   Non-SSH: SCP / RDP / VNC / Telnet                      ─
 
         const meta: NonSshMeta = {
+            id: randomUUID(),
+            startedAt: Date.now(),
+            lastActivityAt: Date.now(),
             userId: tokenPayload.userId,
             sid: tokenPayload.sid ?? null,
             protocol: protocol as 'scp' | 'rdp' | 'vnc' | 'telnet' | 'tunnel',
             serverId,
+            ...(protocol === 'tunnel'
+                ? {
+                      detail: {
+                          forward: tokenPayload.forward?.kind ?? 'local',
+                          ...(tokenPayload.remotePort
+                              ? { remotePort: tokenPayload.remotePort }
+                              : {}),
+                          ...(tokenPayload.forward?.kind === 'remote'
+                              ? { bindPort: tokenPayload.forward.bindPort }
+                              : {}),
+                      },
+                  }
+                : {}),
         };
         nonSshConnections.set(ws, meta);
+        ws.on('message', () => (meta.lastActivityAt = Date.now()));
 
         // Idle timeout for non-persistent connections
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -1001,6 +1095,7 @@ function shutdown(signal: string): void {
     isShuttingDown = true;
     console.log(`[gateway] Received ${signal} — shutting down gracefully`);
     stopAccessChecks();
+    stopConnectionReports();
     persistentSessions.destroy();
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {

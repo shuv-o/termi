@@ -1,5 +1,6 @@
 import type { Appearance, MenuItemId } from '@/lib/appearance/prefs';
 import {
+    Activity,
     BookKey,
     Cable,
     FileCode2,
@@ -64,6 +65,14 @@ export const NAV_ITEMS: Record<MenuItemId, NavItem> = {
         description: 'Your open terminals and desktops',
         href: '/panel/sessions',
         icon: Monitor,
+    },
+    active: {
+        id: 'active',
+        name: 'Active connections',
+        short: 'Active',
+        description: 'Everything you have open, including shells left running',
+        href: '/panel/active',
+        icon: Activity,
     },
     workspaces: {
         id: 'workspaces',

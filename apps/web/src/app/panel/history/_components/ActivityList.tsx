@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { History, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { describeUserAgent as device } from '@/lib/user-agent';
 
 interface Entry {
     id: string;
@@ -54,33 +55,7 @@ const ALERT_ACTIONS = new Set([
 const humanise = (action: string) =>
     action.charAt(0) + action.slice(1).toLowerCase().replace(/_/g, ' ');
 
-/** "Chrome on macOS"-style summary of a user agent. */
-export function device(ua: string | null): string {
-    if (!ua) return '';
-    const browser = /TermiDesktop/.test(ua)
-        ? 'Termi desktop app'
-        : /Edg\//.test(ua)
-          ? 'Edge'
-          : /Chrome\//.test(ua)
-            ? 'Chrome'
-            : /Firefox\//.test(ua)
-              ? 'Firefox'
-              : /Safari\//.test(ua)
-                ? 'Safari'
-                : 'Browser';
-    const os = /Windows/.test(ua)
-        ? 'Windows'
-        : /iPhone|iPad/.test(ua)
-          ? 'iOS'
-          : /Mac OS X/.test(ua)
-            ? 'macOS'
-            : /Android/.test(ua)
-              ? 'Android'
-              : /Linux/.test(ua)
-                ? 'Linux'
-                : '';
-    return os ? `${browser} on ${os}` : browser;
-}
+export { device };
 
 export function ActivityList() {
     const [entries, setEntries] = useState<Entry[]>([]);

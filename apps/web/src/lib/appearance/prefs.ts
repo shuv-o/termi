@@ -41,6 +41,7 @@ export const CURSOR_STYLES = ['block', 'bar', 'underline'] as const;
 export const MENU_ITEMS = [
     'servers',
     'connections',
+    'active',
     'workspaces',
     'local',
     'serial',

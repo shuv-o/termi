@@ -54,6 +54,12 @@ interface SessionsContextValue {
         opts?: AddSessionOptions,
     ) => Promise<string>;
     addLocalSession: (opts?: AddSessionOptions) => string;
+    /**
+     * Shows a shell that is already running on the gateway (Active connections
+     * → Open): focuses its tab if this browser has one, else reattaches in a
+     * new tab. Resolves to the tab id.
+     */
+    attachSession: (sessionId: string, serverId: string, serverName?: string) => Promise<string>;
     removeSession: (tabId: string) => void;
     reconnectSession: (tabId: string, serverId: string) => Promise<void>;
     renewSession: (tabId: string, serverId: string) => Promise<void>;
@@ -340,6 +346,59 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         [uid],
     );
 
+    const attachSession = useCallback(
+        async (sessionId: string, serverId: string, serverName?: string) => {
+            const open = sessionsRef.current.find((s) => s.sessionId === sessionId);
+            if (open) {
+                setActiveTabId(open.tabId);
+                return open.tabId;
+            }
+            const tabId = `${uid}-attach-${Date.now()}`;
+            let name = serverName ?? '';
+            if (!name) {
+                try {
+                    const res = await fetch(`/api/servers/${serverId}`);
+                    const data = await res.json();
+                    if (data.success) name = data.data.server.name;
+                } catch {
+                    /* falls back to the id below */
+                }
+            }
+            setSessions((prev) => [
+                ...prev,
+                {
+                    tabId,
+                    sessionId,
+                    type: 'remote',
+                    serverId,
+                    serverName: name || serverId,
+                    token: null,
+                    gatewayUrl: null,
+                    status: 'detached',
+                    showFiles: false,
+                    // Reattach only: if the shell ended meanwhile the terminal
+                    // says so instead of quietly opening a new one.
+                    restored: true,
+                },
+            ]);
+            setActiveTabId(tabId);
+            await dbRegisterSession(sessionId, serverId, name || serverId);
+            // The shell lives on the Termi server's gateway, never on this computer.
+            const result = await fetchToken(serverId, 'gateway');
+            setSessions((prev) =>
+                prev.map((s) =>
+                    s.tabId !== tabId
+                        ? s
+                        : result
+                          ? { ...s, ...grantFields(result), status: 'connecting' }
+                          : { ...s, status: 'error' },
+                ),
+            );
+            return tabId;
+        },
+        [uid],
+    );
+
     /** Reconnect an existing session, reusing its sessionId (for reattach to persistent gateway session). */
     const reconnectSession = useCallback(async (tabId: string, serverId: string) => {
         setSessions((prev) =>
@@ -576,6 +635,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
                 setActiveTabId,
                 sessionsRestored,
                 addSession,
+                attachSession,
                 addLocalSession,
                 removeSession,
                 reconnectSession,
