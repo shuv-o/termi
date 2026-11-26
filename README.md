@@ -1,19 +1,19 @@
 # Termi usage statistics
 
-Updated 2026-11-25 from public download counts. Termi itself sends no data anywhere.
+Updated 2026-11-26 from public download counts. Termi itself sends no data anywhere.
 Latest release: v1.2.2
 
 | | Total | Last 7 days | Last 30 days |
 | --- | --- | --- | --- |
-| Docker pulls, web | 1,110 | +153 | — |
-| Docker pulls, gateway | 1,205 | +140 | — |
-| Desktop installers downloaded | 172 | +17 | — |
+| Docker pulls, web | 1,112 | +152 | — |
+| Docker pulls, gateway | 1,205 | +137 | — |
+| Desktop installers downloaded | 177 | +21 | — |
 | …macOS Intel | 22 | +1 | — |
 | …macOS Apple Silicon | 61 | +5 | — |
-| …Windows | 36 | +3 | — |
-| …Linux x64 | 40 | +7 | — |
+| …Windows | 41 | +8 | — |
+| …Linux x64 | 40 | +6 | — |
 | …Linux arm64 | 13 | +1 | — |
-| Desktop update checks | 270 | +13 | — |
+| Desktop update checks | 270 | +11 | — |
 | GitHub stars | 9 | +0 | — |
 | GitHub forks | 1 | +0 | — |
 
@@ -21,8 +21,8 @@ Latest release: v1.2.2
 
 | | Last 7 days | Last 30 days |
 | --- | --- | --- |
-| Page views | 56 (12) | 148 (40) |
-| Clones | 287 (77) | 1,997 (367) |
+| Page views | 58 (14) | 149 (41) |
+| Clones | 279 (76) | 2,004 (373) |
 
 In brackets: unique visitors (or cloners) per day, added up.
 
